@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kleep - {{ title }}</title>
+    <link rel="icon" href="{% static 'kleep/images/favicon.png' %}" type="image/x-icon"/>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.4/js/all.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'kleep/style.css' %}"/>
+    <script src="{% static 'kleep/script.js' %}"></script>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+<div id="wrapper">
+    <nav id="top_nav">
+        <a href="{% url 'index' %}"><img id="logo" src="{% static 'kleep/images/title.png' %}"/></a>
+        <ul>
+            <li><a href="javascript:showStudentSubmenu();"><span>Estudante</span></a></li>
+            <li><a href="javascript:showUniversitySubmenu();"><span>Faculdade</span></a></li>
+            <li><a href="javascript:showCommunitySubmenu();"><span>Comunidade</span></a></li>
+        </ul>
+        <div id="auth">
+            {% if user is not None %}
+                <a href="{% url 'profile' %}"><span>{{ user }}</span></a>
+                <a href="{% url 'logout' %}"><span id="logout_btn">Sair</span></a>
+            {% endif %}
+            {% if auth_form is not None %}
+                <a href="javascript:authShowPrompt();"><span id="auth_btn">Autenticar</span></a>
+            {% endif %}
+        </div>
+    </nav>
+    <nav id="nav_stage"></nav>
+    {% if sub_nav is not None %}
+        <nav id="sub_nav">
+            <div class="breadcrumb">
+                {% for element in sub_nav %}
+                    <a href="{{ element.url }}">{{ element.name }}</a>
+                {% endfor %}
+            </div>
+        </nav>
+    {% endif %}
+    <div id="middle">
+        {% block content_wrapper %}
+        {% endblock %}
+        <span class="clearfix"></span>
+    </div>
+    <footer>
+        <ul>
+            <li><a href="{% url 'beg' %}">Para passar a AM...</a></li>
+            <li><a href="{% url 'privacy' %}">Privacidade</a></li>
+            <li><a href="{% url 'about' %}">Sobre</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li>
+                <a href="#">Servidor ({{ people }} pessoas) </a>
+                {% if cpu == 0 %}
+                    <span id="status" class="status_low"></span>
+                {% elif cpu == 1 %}
+                    <span id="status" class="status_medium"></span>
+                {% elif cpu == 2 %}
+                    <span id="status" class="status_high"></span>
+                {% endif %}
+            </li>
+            <li>
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                    <img alt="Licença Creative Commons" style="border-width:0"
+                         src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png"/>
+                </a>
+            </li>
+        </ul>
+    </footer>
+</div>
+<div id="overlay">
+    <div id="overlay_prompt">
+        <a id="overlay_close_button" href="javascript:overlayClose();">X</a>
+        {% if auth_form is not None %}
+            <h2>Autenticação</h2>
+            <form method="post" action="{% url 'login' next=request.get_full_path %}">
+                {% csrf_token %}
+                {{ auth_form.username.label }} {{ auth_form.username.errors }}<br>
+                {{ auth_form.username }}
+                {{ auth_form.password.label }} {{ auth_form.password.errors }}<br>
+                {{ auth_form.password }}
+                <div style="float:right">{{ auth_form.remember.label }}{{ auth_form.remember }}<br>
+                </div>
+                <input type="submit" value="Entrar"><br><br>
+            </form>
+        {% endif %}
+        <a href="{% url 'create_account' %}">Criar conta</a>
+    </div>
+</div>
+</body>
+</html>

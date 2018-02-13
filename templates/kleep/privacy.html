@@ -1,0 +1,52 @@
+{% extends 'kleep/content_only.html' %}
+
+{% block content %}
+    <h1>Política de privacidade</h1>
+    Os tipos de dados armazenados por parte deste serviço são:<br>
+    <ul>
+        <li>De natureza publica (ex, informações relativas à faculdade, noticias, etc...)</li>
+        <li>Restritos a membros da FCT (ex, informação publica perante credenciais do CLIP)</li>
+        <li>Informação submetida por membros, publica. (ex, artigos, material de apoio)</li>
+        <li>Informação submetida entre membros, privada. (ex, mensagens privada)</li>
+        <li>Informação privada obtida em nome de um membro (ex, análise a conteúdos privados do CLIP)</li>
+    </ul>
+
+    <p>Todos os dados são utilizados apenas para a prestação do serviço, não servindo propósito comercial.</p>
+
+    <p>Conforme dita o senso comum dados de natureza privada não deixarão de o ser até que o desejo para que tal
+        aconteça seja explicitamente instruído pelo responsável.<br>
+        Visto que "senso comum" é subjetivo, este paragrafo será eventualmente reconstruido de forma a detalhar
+        minuciosamente quem é que tem acesso a quê.<br>
+        Caso acredite que consegue aceder indevidamente a informação, por favor indique-o a algum dos responsaveis por
+        este serviço (consulte <a href="{% url 'about' %}">aqui</a>).
+    </p>
+    <p>
+        Caso venha a ser implementada alguma funcionalidade que requira a utilização de credenciais do CLIP
+        (por exemplo, para que se obtenham estatísticas pessoais), as mesmas <b>NUNCA</b> serão guardadas, sendo
+        apagadas da memória <b>volátil</b> instantes após a utilização.<br>
+        (Tentará ser implementado algum mecanismo que vise à auditoria da veracidade do afirmado)<br>
+        Poderão (mediante autorização por parte dos estudantes) ser recolhidos meta-dados
+        (informações tais como a segurança) sobre credenciais utilizadas (mais uma vez sob escrutínio externo), para
+        finalidade estatística e potenciais avisos à comunidade.
+    </p>
+    <p>Poderão vir a ser recolhidos dados dos visitantes tais como a localização aproximada (margem de erro de dezenas
+        de quilometros), duração da visita, browser, sistema operativo e linguagem, para a finalidade de estudo
+        demográfico.<br>
+        Se tais dados vierem a ser recolhidos, os mesmos serão disponibilizados (anonimizados) para consulta publica
+        como demonstração da informação obtida.<br>
+        Será honrado o cabeçalho "Do Not Track", isto é, uma preferência que pode definir no seu navegador para que o
+        mesmo indique que não deseja que estes dados sejam obtidos.<br>
+        (instruções para <a href="https://www.mozilla.org/dnt">Firefox</a>,
+        <a href="https://support.google.com/chrome/?p=settings_do_not_track">Chrome</a>,
+        <a href="http://help.opera.com/opera/Linux/2393/en/private.html#doNotTrack">Opera</a>,
+        <a href="https://help.gnome.org/users/epiphany/stable/pref-do-not-track.html">Epiphany</a>)
+    </p>
+    <p>A atualização da informação presente nesta página carece de um avíso com pelo menos uma semana de antecedência a
+        ser publicada em local visivel a todos os membros.<br>
+        <b>Esta alínea não é valida até que este serviço se encontre em produção, leia-se, fora de fase de teste.<br>
+            Esta informação a negrito será removida assim que o serviço se encontre em produção.</b>
+    </p>
+
+
+
+{% endblock %}

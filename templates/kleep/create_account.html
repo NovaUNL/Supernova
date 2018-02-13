@@ -1,0 +1,84 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        #content_form {
+            width: 660px;
+            margin: auto;
+        }
+        #content_form>div {
+            width: 300px;
+            {#margin-right: 20px;#}
+        }
+
+        #content_form > form input[type=text], #content input[type=password] {
+            height: 30px;
+            width: 300px;
+            margin-bottom: 10px;
+
+        }
+
+        #content_form > form input[type=submit] {
+            height: 35px;
+            width: 100%;
+        }
+    </style>
+    <div id="content_form">
+        <form method="post" action="{{ request.get_full_path }}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div style="float: left; margin-right: 20px;">
+                {{ form.clip.label }}<br>
+                {{ form.clip }}<br>
+
+            </div>
+
+            <div>
+                {{ form.nickname.label }}<br>
+                {{ form.nickname }}<br>
+            </div>
+
+
+            <div  style="float: left; margin-right: 20px;">
+                {{ form.password.label }}<br>
+                {{ form.password }}<br>
+
+            </div>
+            <div>
+                {{ form.password_confirmation.label }}<br>
+                {{ form.password_confirmation }}<br>
+            </div>
+
+            <div>
+                {{ form.captcha.label }}<br>
+                {{ form.captcha }}<br>
+            </div>
+            <input type="submit" value="Vender a alma">
+        </form>
+    </div>
+{% endblock %}
+
+
+
+{% block navigation %}
+    <a class="menu_entry" href="{% url 'login' %}">Autenticação</a>
+    <a class="menu_entry selected">Criar conta</a>
+{% endblock %}
+
+
+{% block side_extra %}
+    <div id="side_extra">
+        <span class="menu_entry selected">Com uma conta passas a poder:</span>
+        <ul>
+            <li>Aceder à tua informação de estudante</li>
+            <li>Tornar a tua informação publica (podes partilhar o hórario)</li>
+            <li>Participar ativamente na comunidade</li>
+            <li>Receber notificações para eventos relevantes (tu defines o que é relevante)</li>
+        </ul>
+    </div>
+{% endblock %}

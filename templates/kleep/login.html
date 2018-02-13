@@ -1,0 +1,76 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        #content_form {
+            width: 320px;
+            margin: auto;
+        }
+
+        #content_form > div {
+            width: 300px;
+        }
+
+        #content_form > form input[type=text], #content input[type=password] {
+            height: 30px;
+            width: 300px;
+            margin-bottom: 10px;
+
+        }
+
+        #content_form > form input[type=submit] {
+            height: 35px;
+            width: 100%;
+        }
+
+        #login_remember {
+            width: 100%;
+            float: right;
+            text-align: right;
+        }
+    </style>
+
+    <div id="content_form">
+        <form method="post" action="{{ request.get_full_path }}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                {{ form.username.label }} {{ form.username.errors }}<br>
+                {{ form.username }}
+            </div>
+            <div>
+                {{ form.password.label }} {{ form.password.errors }}<br>
+                {{ form.password }}
+            </div>
+            <div id="login_remember">
+                {{ form.remember.label }}{{ form.remember }}
+            </div>
+            <input type="submit" value="Entrar">
+        </form>
+    </div>
+{% endblock %}
+
+
+
+{% block navigation %}
+    <a class="menu_entry selected">Autenticação</a>
+    <a class="menu_entry" href="{% url 'create_account' %}">Criar conta</a>
+{% endblock %}
+
+
+{% block side_extra %}
+    <div id="side_extra">
+        <span class="menu_entry selected">Com uma conta passas a poder:</span>
+        <ul>
+            <li>Aceder à tua informação de estudante</li>
+            <li>Tornar a tua informação publica (podes partilhar o hórario)</li>
+            <li>Participar ativamente na comunidade</li>
+            <li>Receber notificações para eventos relevantes (tu defines o que é relevante)</li>
+        </ul>
+    </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+{% block content %}
+    <h1>Sobre</h1>
+    <h2>Contribuir</h2>
+    <p>
+        Apoios à manutenção do Kleep são muito bem vindos.<br>
+        <img src="{% static 'kleep/images/merchant.png' %}" width="150px"/><br>
+        O código do Kleep encontra-se <a href="https://gitlab.com/claudiop/Kleep">aqui</a>.
+        Sente-te à vontade para contribuir código.<br>
+        Também se aceitam contribuições em outros formatos (ex: uma imagem, uma correção).<br>
+        Tudo o que vem à rede é peixe!
+    </p>
+    <p>
+        O Kleep é baseado em Django (um framework em Python), os dados são extraídos do CLIP através desta <a
+            href="https://gitlab.com/claudiop/CLIPy">biblioteca</a>.
+    </p>
+    <p>
+        Eventualmente, quem sabe faz-se uma aplicação desktop (leia-se, nativa).<br>
+        Tecnologia por decidir, podes ter um voto na matéria se ajudares!<br>
+        Temos um canal de desenvolvimento no Discord de MiEI. Se fores de outro curso entra em contacto connosco.
+    </p>
+    <h2>Contacto</h2>
+    <p>
+        Olá! Sou o Cláudio Pereira, um aluno de MiEI.<br>
+        Caso haja chatisse à minha espera sou este tipo aqui:<br>
+        <img src="{% static 'kleep/images/cluedo.jpg' %}" width="150px" style="float: left; margin-right: 10px"/>
+        Sim, um bocado feio e tal, mas é o que há!<br>
+        Se tiverem urgência em vez de Cláudio refiram-se a mim por "clone", "imitação barata" ou "Cluedo" que passo a
+        responder mais rapido.<br>
+        Agora que penso... com ou sem urgência usem sempre esses termos!
+        <span class="clearfix"></span><br>
+
+
+        Se apenas estiveres curioso e não me fores massar o juízo então passo a ser este jeitoso aqui:<br>
+        <img src="{% static 'kleep/images/claudio.jpg' %}" width="200px" style="float: left;  margin-right: 10px"/>
+        Para me contactares, a forma mais simples é por Discord (claudiop#5443), mas o mail do campus também serve (CLIP
+        ID: cad.pereira).<br>
+        Fui eu quem fez o Kleep (ou pelo menos comecei...), todo o crédito é para mim, toda a critica é para o tipo ali
+        em cima!<br><br>
+    </p>
+    <span class="clearfix"></span><br>
+    <h2>Amigos do Kleep</h2>
+    <p>
+        Quem faça uma contribuição significativa ao projeto passa a constar como "Amigo do Kleep".<br>
+        Consta na lista o nome e opcionalmente um link para uma página pessoal (🎉 publicidade gratuita 🎉)
+    <ul>
+        <li><a href="https://claudiop.com">Cláudio Pereira (cad.pereira, MIEI)</a></li>
+    </ul>
+    </p>
+    <h2>Créditos:</h2>
+    <p>
+        Os seguintes sofwares, derivados ou serviços foram utilizados:<br>
+    <ul>
+        <li><a href="https://fontawesome.com">Font Awesome</a></li>
+        <li><a href="https://openstreetmap.org/">Open Street Map</a></li>
+        <li><a href="https://inkscape.org/">Inkscape</a></li>
+        <li><a href="https://github.com/ariutta/svg-pan-zoom">SVG-Pan-Zoom</a></li>
+    </ul>
+    </p>
+{% endblock %}
