@@ -5,6 +5,8 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from kleep.forms import LoginForm
+from kleep.models import Service, Building
+
 
 def index(request):
     form = LoginForm()
@@ -41,10 +43,14 @@ def privacy(request):
 
 
 def campus(request):
+    buildings = Building.objects.all()
+    services = Service.objects.all()
     return render(request, 'kleep/campus.html', {
         'title': "Mapa do Campus",
-        'cpu': cpu_load(),
         'sub_nav': [{'name': 'Campus', 'url': '/campus/'}],
+        'buildings': buildings,
+        'services': services,
+        'cpu': cpu_load(),
         'people': 0  # TODO
     })
 

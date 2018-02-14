@@ -1,0 +1,71 @@
+{% extends 'kleep/content_navigation.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'kleep/map.css' %}"/>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.3/dist/svg-pan-zoom.min.js"></script>
+    <script src="{% static 'kleep/map.js' %}"></script>
+{% endblock %}
+{% block content %}
+    <div id="layers">
+        <label for="background">Fundo</label>
+        <input id="background" type="checkbox" onclick="toggleVisibility('background');">
+        <label for="roads">Estradas</label>
+        <input id="roads" type="checkbox" onclick="toggleVisibility('roads');">
+        <label for="parking">Estacionamentos</label>
+        <input id="parking" type="checkbox" onclick="toggleVisibility('parking');">
+        <label for="paths">Caminhos</label>
+        <input id="paths" type="checkbox" onclick="toggleVisibility('paths');">
+        <label for="labels">Etiquetas</label>
+        <input id="labels" type="checkbox" onclick="toggleVisibility('labels');">
+        <input id="background" type="button" value="Reiniciar" onclick="resetLayers()" style="margin-right: 0">
+        <div>Arraste e clique para interagir com o mapa</div>
+    </div>
+    <object id="map" type="image/svg+xml" data="{% static 'kleep/campus.svg' %}" onload="mapInit()">
+        O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
+        Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
+    </object>
+{% endblock %}
+{% block navigation %}
+    <a class="menu_entry selected">Mapa</a>
+    <a class="menu_entry" href="#">Transportes</a>
+{% endblock %}
+{% block side_extra %}
+    <div id="side_extra">
+        <span class="menu_entry selected">Legenda:</span><br>
+        <ul>
+            <li><span style="background-color: lawngreen" class="place">
+            </span> Entrada <span style="background-color: lawngreen; border-style: dotted;"
+                                  class="place dashed"></span> Pedonal
+            </li>
+            <li><span style="background-color: blue" class="place"></span> Serviço</li>
+            <li><span style="background-color: yellow" class="place"></span> Espaço de refeição</li>
+            <li><span style="background-color: red" class="place"></span> Transportes</li>
+            <li><span style="background-color: orange" class="place"></span> Multibanco</li>
+            <li><span style="background-color: #d42aff" class="place"></span> A.Estudantes</li>
+        </ul>
+        {% for building in buildings %}
+            <div id="{{ building.map_tag }}" class="mapEntry">
+                <span class="menu_entry">{{ building.name }}</span><br>
+                <ul>
+                    {% for building_usage in building.buildingusage_set.all %}
+                        {% if building_usage.relevant %}
+                            {% if building_usage.url is None %}
+                                <li>{{ building_usage.usage }}</li>
+                            {% else %}
+                                <li><a href="{{ building_usage.url }}">{{ building_usage.usage }}</a></li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+        {% for service in services %}
+            <div id="{{ service.map_tag }}" class="mapEntry">
+                <span class="menu_entry">{{ service.name }}</span><br>
+                <ul>
+                    <li>{{ building_usage.usage }}</li>
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

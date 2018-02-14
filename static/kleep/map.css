@@ -1,0 +1,45 @@
+#layers {
+    background: rgb(255, 255, 255);
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px 10px;
+    position: relative;
+    z-index: 1;
+    top: 10px;
+    float: left;
+    line-height: 15px;
+    display: none;
+}
+
+#layers input {
+    margin-right: 30px;
+}
+
+#map {
+    width: calc(100% + 40px);
+    height: 70vh;
+    position: relative;
+    left: -20px;
+    top: -20px;
+}
+
+.place {
+    display: inline-block;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid black;
+}
+
+#side_extra ul {
+    padding: 0;
+}
+
+#side_extra li {
+    list-style: none;
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+
+.mapEntry {
+    display: none;
+}

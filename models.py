@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User as SysUser
 from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTimeField, ManyToManyField, DateField, \
-    BooleanField
+    BooleanField, OneToOneField, TimeField
 
 CLIPY_TABLE_PREFIX = 'clip_'
 KLEEP_TABLE_PREFIX = 'kleep_'
@@ -302,7 +302,8 @@ class User(Model):
 
 
 class Student(Model):
-    user = ForeignKey(User, on_delete=models.CASCADE)
+    # A student can exist without having an account
+    user = OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
     crawled_students = ManyToManyField(ClipStudent, through='StudentClipStudent')
 
     class Meta:
@@ -350,31 +351,47 @@ class Building(Model):
 
 
 class BuildingUsage(Model):
-    usage = TextField(max_length=50)
+    usage = TextField(max_length=100)
     building = ForeignKey(Building, on_delete=models.CASCADE)
-    url = TextField(max_length=100)
+    url = TextField(max_length=100, null=True, blank=True)
+    relevant = BooleanField(default=False)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'building_usages'
 
+    def __str__(self):
+        return "{} ({})".format(self.usage, self.building)
+
 
 class Service(Model):
-    name = TextField(max_length=30)
-    building = ForeignKey(Building, null=True, on_delete=models.CASCADE)
+    name = TextField(max_length=50)
+    building = ForeignKey(Building, null=True, blank=True, on_delete=models.SET_NULL)
     map_tag = TextField(max_length=15)
+    opening = TimeField(null=True, blank=True)
+    lunch_start = TimeField(null=True, blank=True)  # For a bar this is the meal time, for other places this is a break
+    lunch_end = TimeField(null=True, blank=True)
+    closing = TimeField(null=True, blank=True)
+    open_saturday = BooleanField(default=False)
+    open_sunday = BooleanField(default=False)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'services'
 
+    def __str__(self):
+        return "{} ({})".format(self.name, self.building)
+
 
 class Bar(Model):
-    service = ForeignKey(Service, on_delete=models.CASCADE)
+    service = OneToOneField(Service, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'bars'
+
+    def __str__(self):
+        return str(self.service)
 
 
 class Synopsis(Model):
