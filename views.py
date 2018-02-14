@@ -1,4 +1,5 @@
 import psutil
+from django.contrib.auth import logout, login
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -9,50 +10,36 @@ from kleep.models import Service, Building
 
 
 def index(request):
-    form = LoginForm()
-    return render(request, 'kleep/index.html', {
-        'title': "KLEEarly not a riPoff",  # TODO, change me to something less cringy
-        'cpu': cpu_load(),
-        'people': 0,  # TODO,
-        'form': form
-    })
+    context = __base_context__(request)
+    context['title'] = "KLEEarly not a riPoff"  # TODO, change me to something less cringy
+    return render(request, 'kleep/index.html', context)
 
 
 def about(request):
-    return render(request, 'kleep/about.html', {
-        'title': "Sobre",
-        'cpu': cpu_load(),
-        'people': 0  # TODO
-    })
+    context = __base_context__(request)
+    context['title'] = "Sobre"
+    return render(request, 'kleep/about.html', context)
 
 
 def beg(request):
-    return render(request, 'kleep/beg.html', {
-        'title': "Ajudas",
-        'cpu': cpu_load(),
-        'people': 0  # TODO
-    })
+    context = __base_context__(request)
+    context['title'] = "Ajudas"
+    return render(request, 'kleep/beg.html', context)
 
 
 def privacy(request):
-    return render(request, 'kleep/privacy.html', {
-        'title': "Politica de privacidade",
-        'cpu': cpu_load(),
-        'people': 0  # TODO
-    })
+    context = __base_context__(request)
+    context['title'] = "Politica de privacidade"
+    return render(request, 'kleep/privacy.html', context)
 
 
 def campus(request):
-    buildings = Building.objects.all()
-    services = Service.objects.all()
-    return render(request, 'kleep/campus.html', {
-        'title': "Mapa do Campus",
-        'sub_nav': [{'name': 'Campus', 'url': '/campus/'}],
-        'buildings': buildings,
-        'services': services,
-        'cpu': cpu_load(),
-        'people': 0  # TODO
-    })
+    context = __base_context__(request)
+    context['title'] = "Mapa do Campus"
+    context['buildings'] = Building.objects.all()
+    context['services'] = Service.objects.all()
+    context['sub_nav'] = [{'name': 'Campus', 'url': '/campus/'}]
+    return render(request, 'kleep/campus.html', context)
 
 
 def building(request, building_id):
@@ -63,11 +50,26 @@ def profile(request):
     pass  # WIP
 
 
-def login(request):
-    pass  # WIP
+def login_view(request):
+    context = __base_context__(request)
+    context['title'] = "Autenticação"
+    context['disable_auth'] = True  # Disable auth overlay
+
+    if request.user.is_authenticated:
+        HttpResponseRedirect(reverse('index'))
+
+    if request.method == 'POST':
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            context['login_form'] = form
+
+    return render(request, 'kleep/login.html', context)
 
 
-def logout(request):
+def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
 
@@ -76,7 +78,16 @@ def create_account(request):
     pass  # WIP
 
 
-def cpu_load():
+def __base_context__(request):
+    result = {'cpu': __cpu_load__(),
+              'people': 0  # TODO
+              }
+    if not request.user.is_authenticated:
+        result['login_form'] = LoginForm()
+    return result
+
+
+def __cpu_load__():
     cpu_load_val = cache.get('cpu_load')
     if cpu_load_val is None:
         cpu_load_val = psutil.cpu_percent(interval=0.10)  # cache instead of calculating for every request

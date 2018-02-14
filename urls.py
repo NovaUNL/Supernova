@@ -16,8 +16,8 @@ urlpatterns = [
     # path('campus/transportation/', views.campus, name='transportation'),
     # path('campus/building/<str:building_id>/', views.building, name='building'),
     # path('campus/service/<str:service_id>/', views.building, name='service'),
-    path('login/', views.login, name='login'),
-    path('logout/', views.logout, name='logout'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile, name='profile'),
     path('create/', views.create_account, name='create_account'),
     url(r'^captcha/', include('captcha.urls'))

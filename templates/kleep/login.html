@@ -1,11 +1,6 @@
 {% extends 'kleep/content_navigation.html' %}
-
 {% load static %}
 {% block head %}
-{% endblock %}
-
-{% block content %}
-
     <style>
         #content_form {
             width: 320px;
@@ -34,34 +29,33 @@
             text-align: right;
         }
     </style>
+{% endblock %}
 
+{% block content %}
     <div id="content_form">
+        <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
         <form method="post" action="{{ request.get_full_path }}">
             {% csrf_token %}
-            {{ form.non_field_errors }}
             <div>
-                {{ form.username.label }} {{ form.username.errors }}<br>
-                {{ form.username }}
+                {{ login_form.username.label }} {{ login_form.username.errors }}<br>
+                {{ login_form.username }}
             </div>
             <div>
-                {{ form.password.label }} {{ form.password.errors }}<br>
-                {{ form.password }}
+                {{ login_form.password.label }} {{ login_form.password.errors }}<br>
+                {{ login_form.password }}
             </div>
             <div id="login_remember">
-                {{ form.remember.label }}{{ form.remember }}
+                {{ login_form.remember.label }}{{ login_form.remember }}
             </div>
             <input type="submit" value="Entrar">
         </form>
     </div>
 {% endblock %}
 
-
-
 {% block navigation %}
     <a class="menu_entry selected">Autenticação</a>
     <a class="menu_entry" href="{% url 'create_account' %}">Criar conta</a>
 {% endblock %}
-
 
 {% block side_extra %}
     <div id="side_extra">
