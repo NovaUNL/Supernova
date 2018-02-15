@@ -5,17 +5,13 @@
     <h1>Sobre</h1>
     <h2>Contribuir</h2>
     <p>
-        <img src="{% static 'kleep/images/merchant.png' %}" width="150px" style="float: right;"/><br>
         Apoios à manutenção do Kleep são muito bem vindos.<br>
         O código do Kleep encontra-se <a href="https://gitlab.com/claudiop/Kleep">aqui</a>.
         Sente-te à vontade para contribuir código.<br>
         Também se aceitam contribuições em outros formatos (ex: uma imagem, uma correção).<br>
         Tudo o que vem à rede é peixe!
     </p>
-    <p>
-        O Kleep é baseado em Django (um framework em Python), os dados são extraídos do CLIP através desta <a
-            href="https://gitlab.com/claudiop/CLIPy">biblioteca</a>.
-    </p>
+    <img src="{% static 'kleep/images/merchant.png' %}" width="150px"/><br>
     <p>
         Eventualmente, quem sabe faz-se uma aplicação desktop (leia-se, nativa).<br>
         Tecnologia por decidir, podes ter um voto na matéria se ajudares!<br>
@@ -52,10 +48,14 @@
     <p>
         Os seguintes sofwares, derivados ou serviços foram utilizados:<br>
     <ul>
-        <li><a href="https://fontawesome.com">Font Awesome</a></li>
-        <li><a href="https://openstreetmap.org/">Open Street Map</a></li>
-        <li><a href="https://inkscape.org/">Inkscape</a></li>
-        <li><a href="https://github.com/ariutta/svg-pan-zoom">SVG-Pan-Zoom</a></li>
+        <li><a href="https://gitlab.com/claudiop/CLIPy/">CLIPy</a> - Extracção dos dados do CLIP</li>
+        <li><a href="https://www.djangoproject.com/">Django</a> - Framework</li>
+        <li><a href="https://www.postgresql.org/">PostgreSQL</a> - Base de Dados</li>
+        <li><a href="https://design.ubuntu.com/font/">Ubuntu Font</a> - Fonte tipográfica da página</li>
+        <li><a href="https://fontawesome.com">Font Awesome</a> - Fonte de ícones da página</li>
+        <li><a href="https://openstreetmap.org/">Open Street Map</a> - Dados geográficos</li>
+        <li><a href="https://inkscape.org/">Inkscape</a> - Vectorizações</li>
+        <li><a href="https://github.com/ariutta/svg-pan-zoom">SVG-Pan-Zoom</a> - Visualizador de vectorizações</li>
     </ul>
     </p>
 {% endblock %}

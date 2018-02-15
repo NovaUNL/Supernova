@@ -1,3 +1,36 @@
+/*Ubuntu Font, https://www.ubuntu.com/legal/terms-and-policies/font-licence*/
+@font-face {
+    font-family: 'Ubuntu';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Ubuntu Regular'), local('Ubuntu-Regular'), url("regular.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Ubuntu';
+    font-style: italic;
+    font-weight: 400;
+    src: local('Ubuntu Italic'), local('Ubuntu-Italic'), url("italic.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Ubuntu';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Ubuntu Bold'), local('Ubuntu-Bold'), url("bold.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Ubuntu';
+    font-style: italic;
+    font-weight: 700;
+    src: local('Ubuntu Bold Italic'), local('Ubuntu-BoldItalic'), url("bolditalic.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 html {
     height: 100%;
 }
@@ -7,9 +40,10 @@ body {
     height: 100%;
     border: 0;
     margin: 0;
-    font-family: sans-serif;
+    font-family: 'Ubuntu', sans-serif;
     background: url("images/background.jpg") bottom;
     background-size: cover;
+    background-attachment: fixed !important;
 }
 
 a { /*Disable link effects globally*/
@@ -124,7 +158,6 @@ footer {
     background-color: red;
     position: absolute;
     bottom: 0;
-    height: 50px;
     width: 84%;
     padding: 0 8%;
     border-top: 2px solid forestgreen;
@@ -133,7 +166,7 @@ footer {
 footer > ul {
     text-align: right;
     list-style-type: none;
-    margin: 10px 0;
+    margin: 8px 0;
 }
 
 footer > ul > li {
@@ -141,6 +174,10 @@ footer > ul > li {
     color: white;
     font-weight: bold;
     display: inline;
+}
+
+footer img {
+    vertical-align: middle;
 }
 
 #status {
