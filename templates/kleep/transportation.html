@@ -1,0 +1,38 @@
+{% extends 'kleep/content_navigation.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'kleep/map.css' %}"/>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.3/dist/svg-pan-zoom.min.js"></script>
+    <script src="{% static 'kleep/map.js' %}"></script>
+{% endblock %}
+{% block content %}
+    <object class="map" type="image/svg+xml" data="{% static 'kleep/transportation.svg' %}" onload="initTransportationMap(this)">
+        O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
+        Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
+    </object>
+{% endblock %}
+{% block navigation %}
+    <a class="menu_entry" href="{% url 'campus' %}">Mapa</a>
+    <a class="menu_entry selected">Transportes</a>
+{% endblock %}
+{% block side_extra %}
+    <div id="side_extra">
+        <span class="menu_entry selected">Operadora:</span><br>
+        <ul>
+            <li><span class="MTS"></span> Metro Sul do Tejo</li>
+            <li><span class="FER"></span> Fertagus</li>
+            <li><span class="TST"></span> Transportes Sul do Tejo</li>
+            <li><span class="TT"></span> Transtejo / Soflusa</li>
+            <li><span class="ML"></span> Metro de Lisboa</li>
+            <li><span class="SFT"></span> SulFertagus</li>
+            <li><span class="CP"></span> Comboios de Portugal</li>
+            <li><span class="TCB"></span> T.C. Barreiro</li>
+        </ul>
+        <span class="menu_entry selected">Tempo de viagem:</span>
+        <ul>
+            <li><span style="background-color: #30cf30" class="place"></span> Até 45 minutos</li>
+            <li><span style="background-color: #ffe62a" class="place"></span> Até hora e meia</li>
+            <li><span style="background-color: #ff882a" class="place"></span> Até duas horas</li>
+        </ul>
+    </div>
+{% endblock %}

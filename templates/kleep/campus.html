@@ -4,30 +4,33 @@
     <link rel="stylesheet" type="text/css" href="{% static 'kleep/map.css' %}"/>
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.3/dist/svg-pan-zoom.min.js"></script>
     <script src="{% static 'kleep/map.js' %}"></script>
+    <script>
+    </script>
 {% endblock %}
 {% block content %}
-    <div id="layers">
+    <div id="layers" style="display: inline-block;">
         <label for="background">Fundo</label>
-        <input id="background" type="checkbox" onclick="toggleVisibility('background');">
+        <input id="background" type="checkbox" onclick="map.toggleLayerVisibility(this);">
         <label for="roads">Estradas</label>
-        <input id="roads" type="checkbox" onclick="toggleVisibility('roads');">
+        <input id="roads" type="checkbox" onclick="map.toggleLayerVisibility(this);">
         <label for="parking">Estacionamentos</label>
-        <input id="parking" type="checkbox" onclick="toggleVisibility('parking');">
+        <input id="parking" type="checkbox" onclick="map.toggleLayerVisibility(this);">
         <label for="paths">Caminhos</label>
-        <input id="paths" type="checkbox" onclick="toggleVisibility('paths');">
+        <input id="paths" type="checkbox" onclick="map.toggleLayerVisibility(this);">
         <label for="labels">Etiquetas</label>
-        <input id="labels" type="checkbox" onclick="toggleVisibility('labels');">
-        <input id="background" type="button" value="Reiniciar" onclick="resetLayers()" style="margin-right: 0">
+        <input id="labels" type="checkbox" onclick="map.toggleLayerVisibility(this);">
+        <input id="background" type="button" value="Reiniciar" onclick="map.resetLayers()" style="margin-right: 0">
         <div>Arraste e clique para interagir com o mapa</div>
     </div>
-    <object id="map" type="image/svg+xml" data="{% static 'kleep/campus.svg' %}" onload="mapInit()">
+    <object class="map" type="image/svg+xml" data="{% static 'kleep/campus.svg' %}" onload="initCampusMap(this)"
+            style="top: -20px;">
         O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
         Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
     </object>
 {% endblock %}
 {% block navigation %}
     <a class="menu_entry selected">Mapa</a>
-    <a class="menu_entry" href="#">Transportes</a>
+    <a class="menu_entry" href="{% url 'transportation' %}">Transportes</a>
 {% endblock %}
 {% block side_extra %}
     <div id="side_extra">

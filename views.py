@@ -35,11 +35,20 @@ def privacy(request):
 
 def campus(request):
     context = __base_context__(request)
-    context['title'] = "Mapa do Campus"
+    context['title'] = "Mapa do campus"
     context['buildings'] = Building.objects.all()
     context['services'] = Service.objects.all()
-    context['sub_nav'] = [{'name': 'Campus', 'url': '/campus/'}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': '/campus/'}]
     return render(request, 'kleep/campus.html', context)
+
+
+def campus_transportation(request):
+    context = __base_context__(request)
+    context['title'] = "Transportes para o campus"
+    context['sub_nav'] = [
+        {'name': 'Campus', 'url': reverse('campus')},
+        {'name': 'Transportes', 'url': reverse('transportation')}]
+    return render(request, 'kleep/transportation.html', context)
 
 
 def building(request, building_id):
@@ -64,6 +73,7 @@ def login_view(request):
             login(request, form.get_user())
             return HttpResponseRedirect(reverse('index'))
         else:
+            print("Invalid")
             context['login_form'] = form
 
     return render(request, 'kleep/login.html', context)
