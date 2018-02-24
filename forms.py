@@ -59,7 +59,7 @@ class AccountCreationForm(forms.Form):
     captcha = CaptchaField(label='Ser bot ou não ser, eis a questão...', error_messages=default_errors)
 
     def clean_password(self):
-        password = self.cleaned_data['password']
+        password = self.cleaned_data["new_password"]
         if len(password) < 7:
             raise forms.ValidationError("A palava-chave tem que ter no mínimo 7 carateres.")
 
@@ -69,6 +69,78 @@ class AccountCreationForm(forms.Form):
         return password
 
     def clean_password_confirmation(self):
-        if self.cleaned_data['password'] != self.cleaned_data['password_confirmation']:
+        if self.cleaned_data["new_password"] != self.cleaned_data["new_password_confirmation"]:
             raise forms.ValidationError("As palavas-chave não coincidem.")
-        return self.cleaned_data['password_confirmation']
+        return self.cleaned_data["new_password_confirmation"]
+
+
+class AccountSettingsForm(forms.Form):
+    nickname = forms.CharField(label='Alcunha:', max_length=100, required=False,
+                               widget=forms.TextInput(attrs={'placeholder': 'Alcunha'}), error_messages=default_errors)
+
+    CHOICES = [('male', 'Homem'),
+               ('female', 'Mulher'),
+               ('genderless', 'É complicado')]
+    gender = forms.ChoiceField(label='Genero', choices=CHOICES, widget=forms.RadioSelect())
+
+    residency = forms.CharField(label='Residência:', max_length=100, required=False,
+                                widget=forms.TextInput(attrs={'placeholder': 'Concelho ou freguesia'}),
+                                error_messages=default_errors)
+
+    public_to_users = forms.BooleanField(label='Visível para utilizadores', widget=forms.CheckboxInput(),
+                                         required=False, error_messages=default_errors)
+    public_to_outsiders = forms.BooleanField(label='Visível para todos', widget=forms.CheckboxInput(), required=False,
+                                             error_messages=default_errors)
+
+    gitlab = forms.CharField(label='GitLab:', max_length=100, required=False,
+                             widget=forms.TextInput(attrs={'placeholder': 'nickname'}),
+                             error_messages=default_errors)
+    github = forms.CharField(label='GitHub:', max_length=100, required=False,
+                             widget=forms.TextInput(attrs={'placeholder': 'nickname'}),
+                             error_messages=default_errors)
+    reddit = forms.CharField(label='Reddit:', max_length=100, required=False,
+                             widget=forms.TextInput(attrs={'placeholder': '/u/nickname'}),
+                             error_messages=default_errors)
+    discord = forms.CharField(label='Discord:', max_length=100, required=False,
+                              widget=forms.TextInput(attrs={'placeholder': 'nickname#1234'}),
+                              error_messages=default_errors)
+    linkedin = forms.CharField(label='LinkedIn:', max_length=100, required=False,
+                               widget=forms.TextInput(attrs={'placeholder': 'nickname'}),
+                               error_messages=default_errors)
+    twitter = forms.CharField(label='Twitter:', max_length=100, required=False,
+                              widget=forms.TextInput(attrs={'placeholder': '@nickname'}),
+                              error_messages=default_errors)
+    google_plus = forms.CharField(label='Google+:', max_length=100, required=False,
+                                  widget=forms.TextInput(attrs={'placeholder': '+nickname'}),
+                                  error_messages=default_errors)
+    facebook = forms.CharField(label='Facebook:', max_length=100, required=False,
+                               widget=forms.TextInput(attrs={'placeholder': 'facebook.com/xxxyyyzzz'}),
+                               error_messages=default_errors)
+    vimeo = forms.CharField(label='Vimeo:', max_length=100, required=False,
+                            widget=forms.TextInput(attrs={'placeholder': 'channel'}),
+                            error_messages=default_errors)
+    youtube = forms.CharField(label='Youtube:', max_length=100, required=False,
+                              widget=forms.TextInput(attrs={'placeholder': 'youtube.com/channel/xxxyyyzzz'}),
+                              error_messages=default_errors)
+    deviantart = forms.CharField(label='DeviantArt:', max_length=100, required=False,
+                                 widget=forms.TextInput(attrs={'placeholder': 'nickname.deviantart.com'}),
+                                 error_messages=default_errors)
+    instagram = forms.CharField(label='Instagram:', max_length=100, required=False,
+                                widget=forms.TextInput(attrs={'placeholder': 'nickname'}),
+                                error_messages=default_errors)
+    flickr = forms.CharField(label='Flickr:', max_length=100, required=False,
+                             widget=forms.TextInput(attrs={'placeholder': 'flickr.com/photos/xxxyyyzzz/'}),
+                             error_messages=default_errors)
+
+    new_password = forms.CharField(label='Nova palavra passe', widget=forms.PasswordInput(), required=False,
+                                   error_messages=default_errors)
+    new_password_confirmation = forms.CharField(label='Confirmação', widget=forms.PasswordInput(), required=False,
+                                                error_messages=default_errors)
+
+    password = forms.CharField(label='Palavra passe atual', widget=forms.PasswordInput(), required=True,
+                               error_messages=default_errors)
+
+    def clean_password_confirmation(self):
+        if self.cleaned_data["new_password"] != self.cleaned_data["new_password_confirmation"]:
+            raise forms.ValidationError("As palavas-chave não coincidem.")
+        return self.cleaned_data["new_password_confirmation"]

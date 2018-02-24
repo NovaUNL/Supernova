@@ -98,7 +98,7 @@
             font-size: 1.5em !important;
         }
     </style>
-    <h1>{{ user.name }}</h1>
+    <h1>{{ rich_user.name }}</h1>
     <div class="flex-wrapper">
         <div class="flex-box">
             <h2>Sobre</h2>
@@ -199,7 +199,7 @@
 
 {% block side_extra %}
     <div id="side_extra">
-        <a class="menu_entry" href="#">Definições conta</a>
+        <a class="menu_entry" href="{% url 'profile_settings' user %}">Definições conta</a>
         <a class="menu_entry" href="#">Agregar CLIP</a>
         <a class="menu_entry" href="#">Tema</a>
     </div>

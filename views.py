@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from kleep.forms import LoginForm
+from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm
 from kleep.models import Service, Building, User
 
 
@@ -55,14 +55,36 @@ def building(request):
     pass  # WIP
 
 
-def profile(request):
+def profile(request, nickname):
     context = __base_context__(request)
     user = User.objects.get(id=request.user.id)
     page_name = "Perfil de " + user.name
     context['title'] = page_name
-    context['sub_nav'] = [{'name': page_name, 'url': reverse('profile')}]
-    context['user'] = user
+    context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
+    context['rich_user'] = user
     return render(request, 'kleep/profile.html', context)
+
+
+def profile_settings(request, nickname):
+    if not request.user.is_authenticated:
+        HttpResponseRedirect(reverse('index'))
+    context = __base_context__(request)
+    user = User.objects.get(id=request.user.id)
+    context['title'] = "Definições da conta"
+    context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
+                          {'name': "Definições", 'url': reverse('profile_settings', args=[nickname])}]
+    context['rich_user'] = user
+    if request.method == 'POST':
+        form = AccountSettingsForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            context['settings_form'] = form
+    else:
+        context['settings_form'] = AccountSettingsForm()
+
+    return render(request, 'kleep/profile-settings.html', context)
 
 
 def login_view(request):
