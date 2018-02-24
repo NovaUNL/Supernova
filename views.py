@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from kleep.forms import LoginForm
-from kleep.models import Service, Building
+from kleep.models import Service, Building, User
 
 
 def index(request):
@@ -51,12 +51,18 @@ def campus_transportation(request):
     return render(request, 'kleep/transportation.html', context)
 
 
-def building(request, building_id):
+def building(request):
     pass  # WIP
 
 
 def profile(request):
-    pass  # WIP
+    context = __base_context__(request)
+    user = User.objects.get(id=request.user.id)
+    page_name = "Perfil de " + user.name
+    context['title'] = page_name
+    context['sub_nav'] = [{'name': page_name, 'url': reverse('profile')}]
+    context['user'] = user
+    return render(request, 'kleep/profile.html', context)
 
 
 def login_view(request):

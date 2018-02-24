@@ -1,4 +1,14 @@
 {% extends 'kleep/content_only.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        body {
+            background: url({% static 'kleep/images/background.jpg' %}) bottom;
+            background-size: cover;
+            background-attachment: fixed !important;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
     <h1>Bem vindo ao Kleep</h1>

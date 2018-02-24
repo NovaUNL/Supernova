@@ -41,9 +41,6 @@ body {
     border: 0;
     margin: 0;
     font-family: 'Ubuntu', sans-serif;
-    background: url("images/background.jpg") bottom;
-    background-size: cover;
-    background-attachment: fixed !important;
 }
 
 a { /*Disable link effects globally*/
@@ -52,6 +49,10 @@ a { /*Disable link effects globally*/
 
 h1 {
     margin: 10px 0;
+}
+
+h2 {
+    margin: 6px 0;
 }
 
 .clearfix::after {

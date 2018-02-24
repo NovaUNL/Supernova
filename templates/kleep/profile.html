@@ -1,0 +1,206 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .flex-box {
+            background-color: white;
+            box-shadow: 0 0 5px #3d3d3d;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+
+        .archievement {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 5px;
+            color: white;
+            text-shadow: 0 0 2px black;
+            border: 1px solid #333;
+            font-weight: bold;
+        }
+
+        .archievement.gold {
+            background-color: #FFD700;
+        }
+
+        .archievement.silver {
+            background-color: #bcbcbc;
+        }
+
+        .archievement.bronze {
+            background-color: #CD7F32;
+        }
+
+        .archievement.limited {
+            background: linear-gradient(to bottom, #f2f6f8 0%, #d8e1e7 50%, #b5c6d0 51%, #e0eff9 100%);
+        }
+
+        .group {
+            display: block;
+            width: 300px;
+            height: 50px;
+            line-height: 50px;
+            vertical-align: center;
+            text-align: center;
+            background-color: red;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-size: 1.2em;
+            text-shadow: 0 0 2px black;
+        }
+
+        .like {
+            color: #2fa40c;
+        }
+
+        .dislike {
+            color: red;
+        }
+
+        .favorite {
+            color: deeppink;
+        }
+
+        .likebar {
+            display: inline-block;
+            width: 100px;
+            height: 3px;
+            background-color: red;
+        }
+
+        #record > table {
+            font-size: 1.2em;
+        }
+
+        .wall-item td:first-child {
+            font-weight: bold;
+        }
+
+        #social > span {
+            font-size: 1.2em;
+        }
+
+        #social .svg-inline--fa {
+            font-size: 1.5em !important;
+        }
+    </style>
+    <h1>{{ user.name }}</h1>
+    <div class="flex-wrapper">
+        <div class="flex-box">
+            <h2>Sobre</h2>
+            <b>CLIP ID: </b>cad.pereira<br>
+            <b>Curso: </b>Informática<br>
+            <b>Ultima atividade:</b> 5 horas atrás<br>
+            <b>Residência:</b> Quinta do Conde<br>
+            <b>Página:</b> <a href="https://claudiop.com">https://claudiop.com</a><br>
+        </div>
+        <div id="social" class="flex-box">
+            <h2>Social</h2>
+            <span><i class="fab fa-discord"></i> @claudiop#5443<br></span>
+            <span><i class="fab fa-reddit-square"></i> <a href="https://www.reddit.com/user/claudio-at-reddit/">/u/claudio-at-reddit</a></span>
+        </div>
+        <div class="flex-box">
+            <h2>Conquistas (placeholder)</h2>
+            <span class="archievement limited">Pioneiro</span>
+            <span class="archievement bronze">Jornalista</span>
+            <span class="archievement silver">Análise</span>
+            <span class="archievement gold">Finalista</span>
+        </div>
+        <div id="record" class="flex-box">
+            <h2>Cadastro (placeholder)</h2>
+            <table>
+                <tr>
+                    <td>Resumos</td>
+                    <td class="like">15 <i class="far fa-thumbs-up"></i></td>
+                    <td><span class="likebar"
+                              style="background: linear-gradient(to right, #2fa40c 88%,#ff0000 88%);"></span></td>
+                    <td class="dislike">2 <i class="far fa-thumbs-down"></i></td>
+                    <td class="favorite">5 <i class="far fa-heart"></i></td>
+                </tr>
+                <tr>
+                    <td>Artigos</td>
+                    <td class="like">3 <i class="far fa-thumbs-up"></i></td>
+                    <td><span class="likebar"
+                              style="background: linear-gradient(to right, #2fa40c 75%,#ff0000 75%);"></span></td>
+                    <td class="dislike">1 <i class="far fa-thumbs-down"></i></td>
+                    <td class="favorite">2 <i class="far fa-heart"></i></td>
+                </tr>
+                <tr>
+                    <td>Noticias</td>
+                    <td class="like">5 <i class="far fa-thumbs-up"></i></td>
+                    <td><span class="likebar"
+                              style="background: linear-gradient(to right, #2fa40c 50%,#ff0000 50%);"></span></td>
+                    <td class="dislike">5 <i class="far fa-thumbs-down"></i></td>
+                    <td class="favorite">1 <i class="far fa-heart"></i></td>
+                </tr>
+                <tr>
+                    <td>Vendedor</td>
+                    <td class="like">1 <i class="far fa-thumbs-up"></i></td>
+                    <td><span class="likebar"
+                              style="background: linear-gradient(to right, #2fa40c 100%,#ff0000 100%);"></span></td>
+                    <td class="dislike">0 <i class="far fa-thumbs-down"></i></td>
+                </tr>
+            </table>
+        </div>
+        <div class="flex-box">
+            <h2>Muro da fama (placeholder)</h2>
+            <table>
+                <tr class="wall-item">
+                    <td class="news">Noticia</td>
+                    <td><a href="#">Estudantes recuperam 35€</a></td>
+                    <td>
+                        <span class="like">3 <i class="far fa-thumbs-up"></i></span>
+                        <span class="dislike">1 <i class="far fa-thumbs-down"></i></span>
+                        <span class="favorite">2 <i class="far fa-heart"></i></span>
+                    </td>
+                </tr>
+                <tr class="wall-item">
+                    <td class="article">Artigo</td>
+                    <td><a href="#">Professores chocados. Clique para descubrir o que ...</a></td>
+                    <td>
+                        <span class="like">2 <i class="far fa-thumbs-up"></i></span>
+                        <span class="dislike">4 <i class="far fa-thumbs-down"></i></span>
+                        <span class="favorite">1 <i class="far fa-heart"></i></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="flex-box">
+            <h2>Grupos (placeholder)</h2>
+            <span class="group"
+                  style="background-image: url({% static 'kleep/images/groups/kleep-devs-banner.png' %})">
+                    Kleep Devs</span>
+            <span class="group"
+                  style="background-image: url({% static 'kleep/images/groups/tiro-com-arco-banner.png' %})">
+                    Núcleo Tiro com Arco</span>
+        </div>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry selected">Perfil</a>
+    <a class="menu_entry" href="#">Horário</a>
+    <a class="menu_entry" href="#">Atividade</a>
+{% endblock %}
+
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry" href="#">Definições conta</a>
+        <a class="menu_entry" href="#">Agregar CLIP</a>
+        <a class="menu_entry" href="#">Tema</a>
+    </div>
+{% endblock %}
