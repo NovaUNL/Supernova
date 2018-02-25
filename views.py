@@ -149,6 +149,19 @@ def building(request, building_id):
     return render(request, 'kleep/building.html', context)
 
 
+def service(request, building_id, service_id):
+    building = get_object_or_404(Building, id=building_id)
+    service = get_object_or_404(Service, id=service_id)
+    context = __base_context__(request)
+    context['title'] = service.name
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+                          {'name': building.name, 'url': reverse('building', args=[building_id])},
+                          {'name': service.name, 'url': reverse('service', args=[building_id, service_id])}]
+    context['building'] = building
+    context['service'] = service
+    return render(request, 'kleep/service.html', context)
+
+
 def __base_context__(request):
     result = {'cpu': __cpu_load__(),
               'people': 0  # TODO

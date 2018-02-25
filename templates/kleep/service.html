@@ -1,0 +1,54 @@
+{% extends 'kleep/content_only.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+            flex-basis: 475px;
+        }
+
+        .flex-wrapper .svg-inline--fa {
+            font-size: 2em;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>{% if service.bar %}<i class="fas fa-utensils"></i>{% else %}
+        <i class="fas fa-shopping-bag"></i>{% endif %} {{ service.name }}</h1>
+    <h2 style="margin-left: 10px"><i class="fas fa-map-marker"></i> {{ building.name }}</h2>
+    <div class="flex-wrapper">
+        <div><h2>Localização</h2><br><img src="#" width="450px" height="400px"></div>
+        {% if service.bar %}
+            <div>
+                <h2>Ementa:</h2>
+                <ul>
+                    <li>TODO</li>
+                </ul>
+            </div>
+        {% endif %}
+        <div>
+            {% if service.opening %}
+                <h2>Funcionamento:</h2>
+                {% if service.bar %}
+                    {{ service.opening }} - {{ service.closing }}
+                    Hora de almoço: {{ service.lunch_start }} - {{ service.closing }}
+                {% else %}
+                    {{ service.opening }} -
+                    {% if service.lunch_start %}
+                        {{ service.lunch_start }}<br>
+                        {{ service.lunch_end }} - {{ service.closing }}
+                    {% else %}
+                        {{ service.closing }}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

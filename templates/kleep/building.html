@@ -2,12 +2,6 @@
 {% load static %}
 {% block head %}
     <style>
-        body {
-            background: url({% static 'kleep/images/background.jpg' %}) bottom;
-            background-size: cover;
-            background-attachment: fixed !important;
-        }
-
         .flex-wrapper {
             display: flex;
             flex-wrap: wrap;
@@ -21,16 +15,6 @@
 
         .flex-wrapper .svg-inline--fa {
             font-size: 2em;
-        }
-
-        input[type=submit] {
-            height: 50px;
-            background-color: #4dcc70;
-            border: solid 1px #999;
-            box-shadow: 0 0 3px #777;
-            font-weight: bold;
-            color: white;
-            float: right;
         }
     </style>
 {% endblock %}
@@ -59,7 +43,7 @@
                 <h2>Serviços:</h2>
                 <ul>
                     {% for service in building.service_set.all %}
-                        <li><a href="#">{{ service.name }}</a></li>
+                        <li><a href="{% url 'service' building.id service.id %}">{{ service.name }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
