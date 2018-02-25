@@ -2,7 +2,7 @@ import psutil
 from django.contrib.auth import logout, login
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
@@ -38,7 +38,7 @@ def campus(request):
     context['title'] = "Mapa do campus"
     context['buildings'] = Building.objects.all()
     context['services'] = Service.objects.all()
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': '/campus/'}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': reverse('campus')}]
     return render(request, 'kleep/campus.html', context)
 
 
@@ -51,13 +51,9 @@ def campus_transportation(request):
     return render(request, 'kleep/transportation.html', context)
 
 
-def building(request):
-    pass  # WIP
-
-
 def profile(request, nickname):
+    user = get_object_or_404(User, nickname=nickname)
     context = __base_context__(request)
-    user = User.objects.get(id=request.user.id)
     page_name = "Perfil de " + user.name
     context['title'] = page_name
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
@@ -86,9 +82,10 @@ def profile_settings(request, nickname):
 
     return render(request, 'kleep/profile_settings.html', context)
 
+
 def profile_crawler(request, nickname):
     if not request.user.is_authenticated:
-        HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
     user = User.objects.get(id=request.user.id)
     context['title'] = "Definições da conta"
@@ -129,7 +126,27 @@ def logout_view(request):
 
 
 def create_account(request):
-    pass  # WIP
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('profile', args=[request.user]))
+
+    context = __base_context__(request)
+    context['title'] = "Criação de conta"
+    if request.method == 'POST':
+        pass
+
+    else:
+        context['creation_form'] = AccountCreationForm()
+    return render(request, 'kleep/create_account.html', context)
+
+
+def building(request, building_id):
+    building = get_object_or_404(Building, id=building_id)
+    context = __base_context__(request)
+    context['title'] = building.name
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+                          {'name': building.name, 'url': reverse('building', args=[building_id])}]
+    context['building'] = building
+    return render(request, 'kleep/building.html', context)
 
 
 def __base_context__(request):

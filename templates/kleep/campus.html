@@ -48,7 +48,7 @@
         </ul>
         {% for building in buildings %}
             <div id="{{ building.map_tag }}" class="mapEntry">
-                <span class="menu_entry">{{ building.name }}</span><br>
+                <a href="{% url 'building' building.id %}"><span class="menu_entry">{{ building.name }}</span></a><br>
                 <ul>
                     {% for building_usage in building.buildingusage_set.all %}
                         {% if building_usage.relevant %}

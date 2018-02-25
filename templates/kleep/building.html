@@ -1,0 +1,80 @@
+{% extends 'kleep/content_only.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        body {
+            background: url({% static 'kleep/images/background.jpg' %}) bottom;
+            background-size: cover;
+            background-attachment: fixed !important;
+        }
+
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+            flex-basis: 475px;
+        }
+
+        .flex-wrapper .svg-inline--fa {
+            font-size: 2em;
+        }
+
+        input[type=submit] {
+            height: 50px;
+            background-color: #4dcc70;
+            border: solid 1px #999;
+            box-shadow: 0 0 3px #777;
+            font-weight: bold;
+            color: white;
+            float: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-map-marker"></i> {{ building.name }}</h1>
+    <div class="flex-wrapper">
+        <div><h2>Localização</h2><br><img src="#" width="450px" height="400px"></div>
+        <div><h2>Planta</h2><br><img src="#" width="450px" height="400px"></div>
+        {% if building.buildingusage_set.exists %}
+            <div>
+                <h2>Funções:</h2>
+                <ul>
+                    {% for usage in building.buildingusage_set.all|dictsortreversed:"relevant" %}
+                        {% if usage.url %}
+                            <li><a href="{{ usage.url }}">{{ usage.usage }}</a></li>
+                        {% else %}
+                            <li>{{ usage.usage }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% if building.service_set.exists %}
+            <div>
+                <h2>Serviços:</h2>
+                <ul>
+                    {% for service in building.service_set.all %}
+                        <li><a href="#">{{ service.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <div>
+            <h2>Salas de Aula:</h2>
+            <ul>
+                <li>TODO</li>
+            </ul>
+        </div>
+        <div>
+            <h2>Núcleos:</h2>
+            <ul>
+                <li>TODO</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
