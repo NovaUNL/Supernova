@@ -1,0 +1,91 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-link"></i> Agregar CLIP de {{ user }}</h1>
+    <div id="disclaimer">
+        <p>
+            Algumas informações no CLIP são difíceis de digerir por parte do software que alimenta os dados do Kleep, e
+            podem ser calculadas indevidamente.<br>
+            Caso queiras que o Kleep te complete os teus dados, obtenha as tuas classificações finais, numero de
+            créditos
+            e confirme a tua informação tal como as cadeiras que estás a fazer e os turnos em que estás inscrito então
+            podes
+            deixar que o Kleep te aceda à conta do CLIP.
+        </p>
+        <p>
+            O acesso e armazenamento dos teus dados é feito de acordo com a <a href="{% url 'privacy' %}">politica de
+            privacidade</a>, mas é importante salientar que o Kleep é um programa <b>falivel</b> e enquanto que as tuas
+            credênciais não serão armazenadas é possível a um atacante apanha-las em transito, ou mesmo invadir o
+            servidor
+            durante o processo de agregaçao.
+            <br>
+            Se estiveres consciente disso e aceitares o risco, então no mínimo verifica se tens uma ligação segura a
+            esta
+            página.<br><img src="{% static 'kleep/images/https.png' %}">
+        </p>
+        O processo de agregação passa por:
+        <ul>
+            <li>Autenticação com as credenciais fornecidas.</li>
+            <li>Acesso à <a href="https://clip.unl.pt/utente/eu/dados_pessoais/Identidade">página de identidade</a> para
+                validação da conta e extração da data de nascimento e localidade.
+            </li>
+            <li>
+                Acesso à <a href="https://clip.unl.pt/utente/eu/aluno/situa%E7%E3o/resumo?institui%E7%E3o=97747">página
+                de
+                resumo académico</a> para obtenção de créditos e calculo de progresso.
+            </li>
+            <li>
+                Acesso à
+                <a href="https://clip.unl.pt/utente/eu/aluno/ano_lectivo/resultados?ano_lectivo=2018&institui%E7%E3o=97747">
+                    página de resultados </a> para saber as tuas notas e quais os testes a que tens de ir.
+            </li>
+            <li>
+                Acesso à
+                <a href="https://clip.unl.pt/utente/eu/aluno/acto_administrativo/estatuto_do_aluno?institui%E7%E3o=97747">página
+                    de estatutos especiais</a> para saber quais as excepções a que tens direito.
+            </li>
+            <li>Acesso ao teu horario para confirmar as inscrições nos turnos.</li>
+            <li>Desligamento de sessão do CLIP.</li>
+        </ul>
+        Caso queiras manter informações como o teu nascimento ou localidade privados terás de posteriormente ir ás
+        <a href="{% url 'profile_settings' user %}">definições da tua conta</a> e alterar a
+        visibilidade ou apagar o valor do campo.<br>Eventualmente será adicionada a opção de ser efetuada uma agregação
+        parcial
+        ignorando o que não for solicitado.
+        <input type="button" value="Sim sim, li, aceito, responsabilizo-me, não me chateies!"
+               style="float: right; height: 50px"
+               onclick="document.getElementById('clip-auth').style.display = 'block'; document.getElementById('disclaimer').style.display = 'none';">
+    </div>
+    <div id="clip-auth" style="display: none;">
+        <p>
+            O processo deverá de ser rápido, em principio levando menos de 10 segundos, mas para tal é preciso que não
+            hajam
+            bloqueios no acesso à tua conta (ex: não podes ter inqueritos por preencher) e que as coisas estejam nos
+            sitios convencionais.
+            <br>
+            Os novos dados deverão de aparecer no Kleep a partir do momento em que tenham sido obtidos.
+        </p>
+        <form action="./">
+            {{ clip_login_form }}
+            <input type="button" value="Agregar">
+        </form>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry" href="{% url 'profile' user %}">Perfil</a>
+    <a class="menu_entry" href="#">Horário</a>
+    <a class="menu_entry" href="#">Atividade</a>
+{% endblock %}
+
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry" href="{% url 'profile_settings' user %}">Definições conta</a>
+        <a class="menu_entry selected">Agregar CLIP</a>
+        <a class="menu_entry" href="#">Tema</a>
+    </div>
+{% endblock %}

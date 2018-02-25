@@ -94,14 +94,14 @@
             font-size: 1.2em;
         }
 
-        #social .svg-inline--fa {
+        #social > span .svg-inline--fa {
             font-size: 1.5em !important;
         }
     </style>
-    <h1>{{ rich_user.name }}</h1>
+    <h1><i class="fas fa-user-circle"></i> {{ rich_user.name }}</h1>
     <div class="flex-wrapper">
         <div class="flex-box">
-            <h2>Sobre</h2>
+            <h2><i class="fas fa-id-card"></i> Sobre</h2>
             <b>CLIP ID: </b>cad.pereira<br>
             <b>Curso: </b>Informática<br>
             <b>Ultima atividade:</b> 5 horas atrás<br>
@@ -109,19 +109,19 @@
             <b>Página:</b> <a href="https://claudiop.com">https://claudiop.com</a><br>
         </div>
         <div id="social" class="flex-box">
-            <h2>Social</h2>
+            <h2><i class="fas fa-globe"></i> Social</h2>
             <span><i class="fab fa-discord"></i> @claudiop#5443<br></span>
             <span><i class="fab fa-reddit-square"></i> <a href="https://www.reddit.com/user/claudio-at-reddit/">/u/claudio-at-reddit</a></span>
         </div>
         <div class="flex-box">
-            <h2>Conquistas (placeholder)</h2>
+            <h2><i class="fas fa-trophy"></i> Conquistas (placeholder)</h2>
             <span class="archievement limited">Pioneiro</span>
             <span class="archievement bronze">Jornalista</span>
             <span class="archievement silver">Análise</span>
             <span class="archievement gold">Finalista</span>
         </div>
         <div id="record" class="flex-box">
-            <h2>Cadastro (placeholder)</h2>
+            <h2><i class="fas fa-comment-alt"></i> Cadastro (placeholder)</h2>
             <table>
                 <tr>
                     <td>Resumos</td>
@@ -157,7 +157,7 @@
             </table>
         </div>
         <div class="flex-box">
-            <h2>Muro da fama (placeholder)</h2>
+            <h2><i class="fas fa-fire"></i> Muro da fama (placeholder)</h2>
             <table>
                 <tr class="wall-item">
                     <td class="news">Noticia</td>
@@ -180,7 +180,7 @@
             </table>
         </div>
         <div class="flex-box">
-            <h2>Grupos (placeholder)</h2>
+            <h2><i class="fas fa-users"></i> Grupos (placeholder)</h2>
             <span class="group"
                   style="background-image: url({% static 'kleep/images/groups/kleep-devs-banner.png' %})">
                     Kleep Devs</span>

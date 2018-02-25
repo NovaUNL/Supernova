@@ -32,6 +32,7 @@
 {% endblock %}
 
 {% block content %}
+    <h1><i class="fas fa-key"></i> Autenticação</h1>
     <div id="content_form">
         <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
         <form method="post" action="{{ request.get_full_path }}">

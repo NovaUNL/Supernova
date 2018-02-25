@@ -144,3 +144,21 @@ class AccountSettingsForm(forms.Form):
         if self.cleaned_data["new_password"] != self.cleaned_data["new_password_confirmation"]:
             raise forms.ValidationError("As palavas-chave não coincidem.")
         return self.cleaned_data["new_password_confirmation"]
+
+
+class ClipLogin(forms.Form):
+    username = forms.CharField(label='CLIP ID', max_length=100, required=True)
+    password = forms.CharField(label='Palavra passe', widget=forms.PasswordInput(), required=True)
+
+    error_messages = {'invalid_login': "Combinação inválida!"}
+
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        self.user_cache = None
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        # TODO
+        return self.cleaned_data

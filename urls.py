@@ -19,7 +19,8 @@ urlpatterns = [
     path('entrar/', views.login_view, name='login'),
     path('sair/', views.logout_view, name='logout'),
     path('perfil/<str:nickname>/', views.profile, name='profile'),
-    path('perfil/<str:nickname>/settings', views.profile_settings, name='profile_settings'),
+    path('perfil/<str:nickname>/agregar', views.profile_crawler, name='profile_crawler'),
+    path('perfil/<str:nickname>/definições', views.profile_settings, name='profile_settings'),
     path('criar/', views.create_account, name='create_account'),
     url(r'^captcha/', include('captcha.urls'))
 ]

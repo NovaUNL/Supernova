@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm
+from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User
 
 
@@ -84,7 +84,22 @@ def profile_settings(request, nickname):
     else:
         context['settings_form'] = AccountSettingsForm()
 
-    return render(request, 'kleep/profile-settings.html', context)
+    return render(request, 'kleep/profile_settings.html', context)
+
+def profile_crawler(request, nickname):
+    if not request.user.is_authenticated:
+        HttpResponseRedirect(reverse('index'))
+    context = __base_context__(request)
+    user = User.objects.get(id=request.user.id)
+    context['title'] = "Definições da conta"
+    context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
+                          {'name': "Agregar CLIP", 'url': reverse('profile_crawler', args=[nickname])}]
+    context['rich_user'] = user
+    if request.method == 'POST':
+        pass
+    context['clip_login_form'] = ClipLogin()
+
+    return render(request, 'kleep/profile_crawler.html', context)
 
 
 def login_view(request):
@@ -93,7 +108,7 @@ def login_view(request):
     context['disable_auth'] = True  # Disable auth overlay
 
     if request.user.is_authenticated:
-        HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('profile', args=[request.user]))
 
     if request.method == 'POST':
         form = LoginForm(data=request.POST)
@@ -103,7 +118,8 @@ def login_view(request):
         else:
             print("Invalid")
             context['login_form'] = form
-
+    else:
+        context['login_form'] = LoginForm()
     return render(request, 'kleep/login.html', context)
 
 
