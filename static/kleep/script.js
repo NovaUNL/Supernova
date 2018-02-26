@@ -25,8 +25,8 @@ universityItems = [
 communityItems = [
     {'name': 'Resumos', 'url': '/#1', 'auth_required': false, 'icon': 'fa-book'},
     {'name': 'Artigos', 'url': '/#2', 'auth_required': false, 'icon': 'fa-pencil-alt'},
-    {'name': 'Grupos', 'url': '/#3', 'auth_required': false, 'icon': 'fa-users'},
-    {'name': 'Classificados', 'url': '/#3', 'auth_required': false, 'icon': 'fa-trash'},
+    {'name': 'Grupos', 'url': '/grupos', 'auth_required': false, 'icon': 'fa-users'},
+    {'name': 'Classificados', '/#': '/#3', 'auth_required': false, 'icon': 'fa-trash'},
     {'name': 'Opiniões', 'url': '/#3', 'auth_required': false, 'icon': 'fa-comments'},
     {'name': 'Loja', 'url': '/#3', 'auth_required': false, 'icon': 'fa-euro-sign'}
 ];

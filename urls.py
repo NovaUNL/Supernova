@@ -16,6 +16,7 @@ urlpatterns = [
     path('campus/transportes/', views.campus_transportation, name='transportation'),
     path('campus/edifício/<str:building_id>/', views.building, name='building'),
     path('campus/edifício/<str:building_id>/serviço/<str:service_id>/', views.service, name='service'),
+    path('grupos/', views.groups, name='groups'),
     path('entrar/', views.login_view, name='login'),
     path('sair/', views.logout_view, name='logout'),
     path('perfil/<str:nickname>/', views.profile, name='profile'),

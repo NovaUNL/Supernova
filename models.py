@@ -358,6 +358,7 @@ class BuildingUsage(Model):
 
     class Meta:
         managed = True
+        ordering = ['relevant']
         db_table = KLEEP_TABLE_PREFIX + 'building_usages'
 
     def __str__(self):
@@ -614,6 +615,9 @@ class GroupType(Model):
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'group_types'
 
+    def __str__(self):
+        return self.type
+
 
 class Group(Model):
     name = TextField(max_length=50)
@@ -626,6 +630,9 @@ class Group(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'groups'
+
+    def __str__(self):
+        return self.name
 
 
 class GroupUsers(Model):
