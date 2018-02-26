@@ -1,0 +1,77 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        #record > table {
+            font-size: 1.2em;
+        }
+
+        .wall-item td:first-child {
+            font-weight: bold;
+        }
+
+        #social > span {
+            font-size: 1.2em;
+        }
+
+        #social > span .svg-inline--fa {
+            font-size: 1.5em !important;
+        }
+    </style>
+    <h1 style="display: inline-block"><i class="fas fa-users"></i> {{ group.name }}</h1>
+    <div style="float: right;">
+        {% if group.invite_only %}
+            <i class="fas fa-lock"></i> Admissão por convite
+        {% else %}
+            <i class="fas fa-lock-open"></i> <input type="button" value="Solicitar admissão">
+        {% endif %}
+        <input type="button" value="Subscrever">
+    </div>
+    <div class="flex-wrapper">
+        <div style="width: 100%">
+
+            {{ group.description }}
+        </div>
+        <div style="margin-right: 50px">
+            <h2>Localização:</h2>
+            <img src="#" width="450px" height="400px">
+        </div>
+        <div style="min-width: 300px">
+            <h2>Informação:</h2>
+            <h3></h3>
+            <h3>Localização:</h3>
+            TODO
+            <h3>Membros:</h3>
+            TODO
+        </div>
+        <div style="width:100%;">
+            <h2>Atividade recente</h2>
+            TODO
+        </div>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry" href="#">Página inícial</a>
+    <a class="menu_entry" href="#">Anúncios</a>
+    <a class="menu_entry" href="#">Horário</a>
+    <a class="menu_entry" href="#">Calendário</a>
+    <a class="menu_entry" href="#">Membros</a>
+    <a class="menu_entry" href="#">Contactos</a>
+{% endblock %}
+
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry" href="#">Definições</a>
+    </div>
+{% endblock %}

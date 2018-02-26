@@ -61,7 +61,7 @@
     <div class="flex-wrapper">
         {% for group in groups %}
             {% if not type_filter or group.type.type == type_filter %}
-                <a href="">
+                <a href="{% url 'group' group.id %}">
                     <div class="group" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
                         <div class="group-top">
                             <span>{{ group.name }}</span>

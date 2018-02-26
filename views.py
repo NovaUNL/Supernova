@@ -173,6 +173,16 @@ def groups(request):
     return render(request, 'kleep/groups.html', context)
 
 
+def group(request, group_id):
+    context = __base_context__(request)
+    group = get_object_or_404(Group, id=group_id)
+    context['title'] = group.name
+    context['group'] = group
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
+                          {'name': group.name, 'url': reverse('group', args=[group_id])}]
+    return render(request, 'kleep/group.html', context)
+
+
 def __base_context__(request):
     result = {'cpu': __cpu_load__(),
               'people': 0  # TODO
