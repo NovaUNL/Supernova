@@ -162,16 +162,15 @@ class ClipCourse(TemporalEntity, Model):
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
     institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
-    degree = ForeignKey(Degree, on_delete=models.PROTECT, db_column='degree_id')
+    degree = ForeignKey(Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True)
 
     class Meta:
         managed = False
         db_table = CLIPY_TABLE_PREFIX + 'courses'
 
     def __str__(self):
-        return ("{}(ID:{} Abbreviation:{}, Degree:{} Institution:{})".format(
-            self.name, self.internal_id, self.abbreviation, self.degree, self.institution)
-                + super().__str__())
+        return "{}(ID:{} Abbreviation:{}, Degree:{})".format(self.name, self.internal_id, self.abbreviation,
+                                                             self.degree)
 
 
 class ClipStudent(Model):
@@ -264,7 +263,7 @@ class ClipTurnInstance(Model):
 
     class Meta:
         managed = False
-        db_table = CLIPY_TABLE_PREFIX + 'turn_students'
+        db_table = CLIPY_TABLE_PREFIX + 'turn_instances'
 
 
 class ClipTurnTeacher(Model):
@@ -322,20 +321,55 @@ class StudentClipStudent(Model):  # Oh boy, naming conventions going strong with
 
 
 class Course(Model):
-    courses = ManyToManyField(ClipCourse, through='CourseClipCourse')
+    name = TextField(max_length=200)
+    description = TextField(max_length=4096, null=True, blank=True)
+    variants = ManyToManyField('CourseVariant', through='CourseCourseVariant')
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'courses'
 
+    def __str__(self):
+        return self.name
 
-class CourseClipCourse(Model):
-    clip_course = ForeignKey(ClipCourse, on_delete=models.PROTECT)
-    course = ForeignKey(Course, on_delete=models.CASCADE)
+
+class CourseVariant(Model):
+    name = TextField(max_length=200)
+    description = TextField(max_length=4096, null=True, blank=True)
+    degree = ForeignKey(Degree, on_delete=models.PROTECT)
+    abbreviation = TextField(max_length=100, null=True, blank=True)
+    active = BooleanField(default=True)
+    clip_course = ForeignKey(ClipCourse, on_delete=models.PROTECT, related_name='crawled_course')
+    main_course = ForeignKey(Course, on_delete=models.PROTECT, related_name='main_course', null=True, blank=True)
+    courses = ManyToManyField(Course, through='CourseCourseVariant')
+    url = TextField(max_length=256, null=True, blank=True)
 
     class Meta:
         managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'course_clip_courses'
+        db_table = KLEEP_TABLE_PREFIX + 'course_variants'
+
+    def __str__(self):
+        return self.name
+
+
+class CourseCourseVariant(Model):
+    course = ForeignKey(Course, on_delete=models.PROTECT)
+    course_variant = ForeignKey(CourseVariant, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'course_course_variants'
+
+
+class Classroom(Model):
+    name = TextField(max_length=100, unique=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'classrooms'
+
+    def __str__(self):
+        return self.name
 
 
 class Building(Model):
@@ -363,6 +397,133 @@ class BuildingUsage(Model):
 
     def __str__(self):
         return "{} ({})".format(self.usage, self.building)
+
+
+class Class(Model):
+    name = TextField(max_length=30)
+    description = TextField(max_length=1024, null=True, blank=True)
+    synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
+    clip_class = ForeignKey(ClipClass, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'classes'
+
+
+class ClassInstance(Model):
+    parent = ForeignKey(Class, on_delete=models.PROTECT)
+    period = ForeignKey(Period, on_delete=models.PROTECT)
+    year = IntegerField()
+    clip_class_instance = OneToOneField(ClipClassInstance, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'class_instances'
+
+
+class Turn(Model):
+    turn_type = OneToOneField(TurnType, on_delete=models.PROTECT)  # Eg: Theoretical
+    number = IntegerField()  # 1
+    clip_turn = OneToOneField(ClipTurn, on_delete=models.PROTECT)
+    required = BooleanField(default=True)  # Optional attendance
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'turns'
+
+
+class TurnInstance(Model):
+    turn = ForeignKey(Turn, on_delete=models.PROTECT)  # Eg: Theoretical 1
+    # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
+    clip_turn_instance = OneToOneField(ClipTurnInstance, on_delete=models.PROTECT)
+    recurring = BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
+    # Whether this is a recurring turn
+    weekday = IntegerField(null=True, blank=True)  # 1 - Monday
+    start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
+    duration = IntegerField(null=True, blank=True)  # 60 minutes
+    # --------------
+    classroom = ForeignKey(Classroom, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'turn_instances'
+
+
+class Event(Model):
+    name = TextField(max_length=100)
+    start_datetime = DateTimeField()
+    end_datetime = DateTimeField()
+    users = ManyToManyField(User, through="EventUsers")
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'events'
+
+
+class EventUsers(Model):
+    event = ForeignKey(Event, on_delete=models.CASCADE)
+    user = ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'event_users'
+
+
+class TurnEvent(Model):
+    event = OneToOneField(Event, on_delete=models.PROTECT)
+    turn_instance = ForeignKey(TurnInstance, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'turn_events'
+
+
+class Workshop(Model):
+    name = TextField(max_length=100)
+    description = TextField(max_length=4096, null=True, blank=True)
+    capacity = IntegerField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'workshops'
+
+
+class WorkshopEvent(Model):
+    event = OneToOneField(Event, on_delete=models.PROTECT)
+    workshop = ForeignKey(Workshop, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'workshop_events'
+
+
+class Party(Model):
+    name = TextField(max_length=100)
+    description = TextField(max_length=4096, null=True, blank=True)
+    capacity = IntegerField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'parties'
+
+
+class PartyEvent(Model):
+    event = OneToOneField(Event, on_delete=models.PROTECT)
+    party = ForeignKey(Party, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'party_events'
+
+
+class GenericEvent(Model):
+    event = OneToOneField(Event, on_delete=models.PROTECT)
+    name = TextField(max_length=100)
+    description = TextField(max_length=4096, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'generic_events'
 
 
 class Service(Model):
@@ -424,15 +585,6 @@ class SynopsisChapterPart(Model):
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_chapter_parts'
 
 
-class Class(Model):
-    name = TextField(max_length=30)
-    synopsis = ForeignKey(Synopsis, null=True, on_delete=models.SET_NULL)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'classes'
-
-
 class Tag(Model):
     name = TextField()
 
@@ -479,58 +631,6 @@ class ArticleTags(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'article_tags'
-
-
-class EventType(Model):
-    type = TextField(max_length=30)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'event_types'
-
-
-class Event(Model):
-    name = TextField()
-    description = TextField()
-    start_datetime = DateTimeField()
-    end_datetime = DateTimeField()
-    users = ManyToManyField(User, through="EventUsers")
-    types = ManyToManyField(EventType, through="EventTypes")
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'events'
-
-
-class EventTypes(Model):
-    event = ForeignKey(Event, on_delete=models.CASCADE)
-    type = ForeignKey(EventType, on_delete=models.PROTECT)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'event_event_types'
-
-
-class EventRelationship(Model):  # "Going", "Not Going", "Don't Know", something else?
-    relationship = TextField(max_length=15)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'event_relationships'
-
-    def __str__(self):
-        return self.relationship
-
-
-class EventUsers(Model):
-    event = ForeignKey(Event, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.CASCADE)
-    relationship = ForeignKey(EventRelationship, on_delete=models.PROTECT)
-    changed = DateTimeField()
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'event_users'
 
 
 class StoreItem(Model):
