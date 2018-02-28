@@ -35,7 +35,7 @@ class Period(Model):
     id = IntegerField(primary_key=True)
     part = IntegerField()
     parts = IntegerField()
-    type_letter = TextField()
+    letter = TextField()
     start_month = IntegerField(null=True)
     end_month = IntegerField(null=True)
 
@@ -44,7 +44,7 @@ class Period(Model):
         db_table = CLIPY_TABLE_PREFIX + 'periods'
 
     def __str__(self):
-        return "{} out of {}({})".format(self.part, self.parts, self.type_letter)
+        return "{} out of {} ({})".format(self.part, self.parts, self.letter)
 
 
 class TurnType(Model):
@@ -98,7 +98,7 @@ class ClipDepartment(Model, TemporalEntity):
         db_table = CLIPY_TABLE_PREFIX + 'departments'
 
     def __str__(self):
-        return "{}({}, {})".format(self.name, self.internal_id, self.institution.abbreviation) + super().__str__()
+        return "{}({})".format(self.name, self.internal_id)
 
 
 class ClipClass(Model):
@@ -112,7 +112,7 @@ class ClipClass(Model):
         db_table = CLIPY_TABLE_PREFIX + 'classes'
 
     def __str__(self):
-        return "{}(id:{}, dept:{})".format(self.name, self.internal_id, self.department)
+        return "{}({})".format(self.name, self.internal_id)
 
 
 class ClipClassroom(Model):
@@ -146,14 +146,14 @@ class ClipClassInstance(Model):
     parent = ForeignKey(ClipClass, on_delete=models.PROTECT, db_column='class_id')
     period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id')
     year = IntegerField()
-    regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
+    # regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
 
     class Meta:
         managed = False
         db_table = CLIPY_TABLE_PREFIX + 'class_instances'
 
     def __str__(self):
-        return "{} on period {} of {}".format(self.parent, self.period, self.year)
+        return "{} ({} of {})".format(self.parent, self.period, self.year)
 
 
 class ClipCourse(TemporalEntity, Model):
@@ -248,9 +248,7 @@ class ClipTurn(Model):
         db_table = CLIPY_TABLE_PREFIX + 'turns'
 
     def __str__(self):
-        return "turn {}.{} of {} {}/{} students, {} hours, {} routes, state={}, teachers={}".format(
-            self.type, self.number, self.class_instance, self.enrolled, self.capacity,
-            self.minutes / 60, self.routes, self.state, len(self.teachers))
+        return "{}{} of {}".format(self.type.abbreviation.upper(), self.number, self.class_instance)
 
 
 class ClipTurnInstance(Model):
@@ -361,20 +359,10 @@ class CourseCourseVariant(Model):
         db_table = KLEEP_TABLE_PREFIX + 'course_course_variants'
 
 
-class Classroom(Model):
-    name = TextField(max_length=100, unique=True)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'classrooms'
-
-    def __str__(self):
-        return self.name
-
-
 class Building(Model):
     name = TextField(max_length=30, unique=True)
     map_tag = TextField(max_length=20)
+    clip_building = OneToOneField(ClipBuilding, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         managed = True
@@ -382,6 +370,20 @@ class Building(Model):
 
     def __str__(self):
         return self.name
+
+
+class Classroom(Model):
+    name = TextField(max_length=100)
+    building = ForeignKey(Building, on_delete=models.CASCADE)
+    clip_classroom = OneToOneField(ClipClassroom, null=True, blank=True, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'classrooms'
+        ordering = ('building', 'name',)
+
+    def __str__(self):
+        return f"{self.building} {self.name}"
 
 
 class BuildingUsage(Model):
@@ -403,11 +405,14 @@ class Class(Model):
     name = TextField(max_length=30)
     description = TextField(max_length=1024, null=True, blank=True)
     synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
-    clip_class = ForeignKey(ClipClass, on_delete=models.PROTECT)
+    clip_class = OneToOneField(ClipClass, on_delete=models.PROTECT, related_name='related_class')
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'classes'
+
+    def __str__(self):
+        return self.name
 
 
 class ClassInstance(Model):
@@ -420,9 +425,13 @@ class ClassInstance(Model):
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'class_instances'
 
+    def __str__(self):
+        return f"{self.parent.name}, {self.period}, {self.year}"
+
 
 class Turn(Model):
-    turn_type = OneToOneField(TurnType, on_delete=models.PROTECT)  # Eg: Theoretical
+    class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE)  # Eg: Analysis
+    turn_type = ForeignKey(TurnType, on_delete=models.PROTECT)  # Theoretical
     number = IntegerField()  # 1
     clip_turn = OneToOneField(ClipTurn, on_delete=models.PROTECT)
     required = BooleanField(default=True)  # Optional attendance
@@ -430,6 +439,9 @@ class Turn(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'turns'
+
+    def __str__(self):
+        return f"{self.class_instance} {self.turn_type.abbreviation.upper()}{self.number}"
 
 
 class TurnInstance(Model):
@@ -442,11 +454,14 @@ class TurnInstance(Model):
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
-    classroom = ForeignKey(Classroom, on_delete=models.PROTECT)
+    classroom = ForeignKey(Classroom, on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'turn_instances'
+
+    def __str__(self):
+        return f"Instance of {self.turn}, @{self.weekday}th day of the week"
 
 
 class Event(Model):
