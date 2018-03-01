@@ -146,6 +146,7 @@ class ClipClassInstance(Model):
     parent = ForeignKey(ClipClass, on_delete=models.PROTECT, db_column='class_id')
     period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id')
     year = IntegerField()
+
     # regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
 
     class Meta:
@@ -401,11 +402,26 @@ class BuildingUsage(Model):
         return "{} ({})".format(self.usage, self.building)
 
 
+class Department(Model):
+    name = TextField(max_length=100)
+    description = TextField(max_length=1024, null=True, blank=True)
+    clip_department = OneToOneField(ClipDepartment, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'departments'
+
+    def __str__(self):
+        return self.name
+
+
 class Class(Model):
     name = TextField(max_length=30)
     description = TextField(max_length=1024, null=True, blank=True)
     synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
+    department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
     clip_class = OneToOneField(ClipClass, on_delete=models.PROTECT, related_name='related_class')
+
 
     class Meta:
         managed = True
