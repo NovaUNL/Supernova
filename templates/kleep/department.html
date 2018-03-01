@@ -1,0 +1,34 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+    </style>
+    <h1 style="display: inline-block">Departamento de {{ department.name }}</h1>
+    <div class="flex-wrapper">
+        <div style="margin-right: 50px">
+            <h2>Cadeiras:</h2>
+            <ul>
+                {% for class in department.class_set.all|dictsort:'name' %}
+                    <li><a href="">{{ class.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div style="min-width: 500px">
+            <h2>Informação:</h2>
+            <h3>Localização:</h3>
+            <a href="{% url 'building' department.building %}">{{ department.building }}</a>
+            <h3>Descrição:</h3>
+            {{ department.description }}
+        </div>
+    </div>
+{% endblock %}

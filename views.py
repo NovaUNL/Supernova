@@ -191,6 +191,16 @@ def departments(request):
     return render(request, 'kleep/departments.html', context)
 
 
+def department(request, department_id):
+    context = __base_context__(request)
+    department = get_object_or_404(Department, id=department_id)
+    context['title'] = f'Departamento de {department.name}'
+    context['department'] = department
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
+                          {'name': department.name, 'url': reverse('department', args=[department_id])}]
+    return render(request, 'kleep/department.html', context)
+
+
 def __base_context__(request):
     result = {'cpu': __cpu_load__(),
               'people': 0  # TODO
