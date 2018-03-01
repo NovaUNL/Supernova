@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
-from kleep.models import Service, Building, User, Group, GroupType, Course, Degree, Department
+from kleep.models import Service, Building, User, Group, GroupType, Course, Degree, Department, Class
 
 
 def index(request):
@@ -199,6 +199,19 @@ def department(request, department_id):
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
                           {'name': department.name, 'url': reverse('department', args=[department_id])}]
     return render(request, 'kleep/department.html', context)
+
+
+def class_view(request, department_id, class_id):
+    context = __base_context__(request)
+    department = get_object_or_404(Department, id=department_id)
+    class_ = get_object_or_404(Class, id=class_id)
+    context['title'] = class_.name
+    context['department'] = department
+    context['class_obj'] = class_
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
+                          {'name': department.name, 'url': reverse('department', args=[department_id])},
+                          {'name': class_.name, 'url': reverse('class', args=[department_id, class_id])}]
+    return render(request, 'kleep/class.html', context)
 
 
 def __base_context__(request):

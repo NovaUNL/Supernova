@@ -405,6 +405,7 @@ class BuildingUsage(Model):
 class Department(Model):
     name = TextField(max_length=100)
     description = TextField(max_length=1024, null=True, blank=True)
+    building = ForeignKey(Building, on_delete=models.PROTECT, null=True, blank=True)
     clip_department = OneToOneField(ClipDepartment, on_delete=models.PROTECT)
 
     class Meta:
@@ -421,7 +422,6 @@ class Class(Model):
     synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
     department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
     clip_class = OneToOneField(ClipClass, on_delete=models.PROTECT, related_name='related_class')
-
 
     class Meta:
         managed = True

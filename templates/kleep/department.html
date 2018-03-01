@@ -13,13 +13,13 @@
             justify-content: space-between;
         }
     </style>
-    <h1 style="display: inline-block">Departamento de {{ department.name }}</h1>
+    <h1>Departamento de {{ department.name }}</h1>
     <div class="flex-wrapper">
         <div style="margin-right: 50px">
             <h2>Cadeiras:</h2>
             <ul>
                 {% for class in department.class_set.all|dictsort:'name' %}
-                    <li><a href="">{{ class.name }}</a></li>
+                    <li><a href="{% url 'class' department.id class.id %}">{{ class.name }}</a></li>
                 {% endfor %}
             </ul>
         </div>

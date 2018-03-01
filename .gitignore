@@ -1,3 +1,6 @@
+__pycache__
 settings.py
 migrations/
 static/kleep/images/
+*.svg
+*.woff2

@@ -39,7 +39,7 @@
     <h1></i> Departamentos</h1>
     <div class="flex-wrapper">
         {% for department in departments %}
-            <a href="#">
+            <a href="{% url 'department' department.id %}">
                 <div class="group" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
                     <div class="group-top">
                         <span>{{ department.name }}</span>

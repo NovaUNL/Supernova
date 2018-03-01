@@ -20,6 +20,7 @@ urlpatterns = [
     path('grupos/<str:group_id>/', views.group, name='group'),
     path('departamentos/', views.departments, name='departments'),
     path('departamento/<str:department_id>/', views.department, name='department'),
+    path('departamento/<str:department_id>/cadeira/<str:class_id>/', views.class_view, name='class'),
     path('entrar/', views.login_view, name='login'),
     path('sair/', views.logout_view, name='logout'),
     path('perfil/<str:nickname>/', views.profile, name='profile'),

@@ -1,0 +1,24 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <h1>{{ class_obj.name }}</h1>
+    <h3>Departamento de {{ department.name }}</h3>
+    <h2>Descrição:</h2>
+    <p>{{ class_obj.description }}</p>
+    <h2>Programa curricular actual:</h2>
+    <p>TODO</p>
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry" href="./">Resumo</a>
+    <br><br>
+    <span style="font-size: 1.2em; font-weight: bold;">Instâncias:</span>
+    {% for instance in class_obj.classinstance_set.all %}
+        <a class="menu_entry" href="./">
+            {{ instance.year }}, {{ instance.period.part }}º {{ instance.period.letter }}</a>
+    {% endfor %}
+{% endblock %}
