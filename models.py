@@ -44,7 +44,7 @@ class Period(Model):
         db_table = CLIPY_TABLE_PREFIX + 'periods'
 
     def __str__(self):
-        return "{} out of {} ({})".format(self.part, self.parts, self.letter)
+        return "{}/{}({})".format(self.part, self.parts, self.letter)
 
 
 class TurnType(Model):
@@ -57,7 +57,7 @@ class TurnType(Model):
         db_table = CLIPY_TABLE_PREFIX + 'turn_types'
 
     def __str__(self):
-        return self.name
+        return self.abbreviation
 
 
 class ClipInstitution(TemporalEntity, Model):
@@ -362,6 +362,7 @@ class CourseCourseVariant(Model):
 
 class Building(Model):
     name = TextField(max_length=30, unique=True)
+    abbreviation = TextField(max_length=10, unique=True, null=True)
     map_tag = TextField(max_length=20)
     clip_building = OneToOneField(ClipBuilding, null=True, blank=True, on_delete=models.PROTECT)
 
@@ -385,6 +386,9 @@ class Classroom(Model):
 
     def __str__(self):
         return f"{self.building} {self.name}"
+
+    def short_str(self):
+        return f"{self.name}\n{self.building.abbreviation}"
 
 
 class BuildingUsage(Model):
@@ -418,6 +422,7 @@ class Department(Model):
 
 class Class(Model):
     name = TextField(max_length=30)
+    abbreviation = TextField(max_length=10, default='HELP')
     description = TextField(max_length=1024, null=True, blank=True)
     synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
     department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
@@ -442,7 +447,16 @@ class ClassInstance(Model):
         db_table = KLEEP_TABLE_PREFIX + 'class_instances'
 
     def __str__(self):
-        return f"{self.parent.name}, {self.period}, {self.year}"
+        return f"{self.parent.abbreviation}, {self.period}, {self.year}"
+
+    def occasion(self) -> str:
+        period = self.period
+        if period.id == 1:
+            return f' Ano ({self.year})'
+        elif period.id <= 3:
+            return f'{self.period.part}º Semestre {self.year}'
+        else:
+            return f'{self.period.part}º Trimestre {self.year}'
 
 
 class Turn(Model):
@@ -477,7 +491,17 @@ class TurnInstance(Model):
         db_table = KLEEP_TABLE_PREFIX + 'turn_instances'
 
     def __str__(self):
-        return f"Instance of {self.turn}, @{self.weekday}th day of the week"
+        return f"{self.turn}, d{self.weekday}, {self.minutes_to_str(self.start)}"
+
+    def intersects(self, turn_instance):
+        # Same weekday AND A starts before B ends and B starts before A ends
+        return self.weekday == turn_instance.weekday and \
+               self.start < turn_instance.start + turn_instance.duration and \
+               turn_instance.start < self.start + self.duration
+
+    @staticmethod
+    def minutes_to_str(minutes):
+        return f"{int(minutes/60)}:{minutes%60}"
 
 
 class Event(Model):
