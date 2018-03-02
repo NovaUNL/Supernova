@@ -1,0 +1,61 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .flex-box {
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+
+        .flex-line-break {
+            display: inline-block;
+            flex-basis: 100% !important;
+        }
+    </style>
+{% endblock %}
+
+{% block navigation %}
+    {% if page == 'profile' %}
+        <a class="menu_entry selected">Perfil</a>
+    {% else %}
+        <a class="menu_entry" href="{% url 'profile' user %}">Perfil</a>
+    {% endif %}
+    {% if page == 'profile_schedule' %}
+        <a class="menu_entry selected">Horário</a>
+    {% else %}
+        <a class="menu_entry" href="{% url 'profile_schedule' user %}">Horário</a>
+    {% endif %}
+    {% if page == 'profile_activity' %}
+        <a class="menu_entry selected">Atividade</a>
+    {% else %}
+        <a class="menu_entry" href="#">Atividade</a>
+    {% endif %}
+{% endblock %}
+
+{% block side_extra %}
+    <div id="side_extra">
+        {% if page == 'profile_settings' %}
+            <a class="menu_entry selected">Definições da conta</a>
+        {% else %}
+            <a class="menu_entry" href="{% url 'profile_settings' user %}">Definições da conta</a>
+        {% endif %}
+        {% if page == 'profile_crawler' %}
+            <a class="menu_entry selected">Agregar CLIP</a>
+        {% else %}
+            <a class="menu_entry" href="{% url 'profile_crawler' user %}">Agregar CLIP</a>
+        {% endif %}
+        {% if page == 'profile_theme' %}
+            <a class="menu_entry selected">Tema</a>
+        {% else %}
+            <a class="menu_entry" href="#">Tema</a>
+        {% endif %}
+    </div>
+{% endblock %}

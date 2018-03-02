@@ -1,0 +1,10 @@
+{% extends 'kleep/profile_base.html' %}
+
+{% load static %}
+{% block head %}
+    {{ super.block }}
+{% endblock %}
+
+{% block content %}
+    <h1><i class="far fa-clock"></i> Horário de {{ rich_user.name }}</h1>
+{% endblock %}

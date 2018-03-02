@@ -57,10 +57,24 @@ def profile(request, nickname):
     user = get_object_or_404(User, nickname=nickname)
     context = __base_context__(request)
     page_name = "Perfil de " + user.name
+    context['page'] = 'profile'
     context['title'] = page_name
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
     context['rich_user'] = user
     return render(request, 'kleep/profile.html', context)
+
+
+def profile_schedule(request, nickname):
+    if not request.user.is_authenticated:
+        HttpResponseRedirect(reverse('index'))
+    context = __base_context__(request)
+    user = User.objects.get(id=request.user.id)
+    context['page'] = 'profile_schedule'
+    context['title'] = "Horário de " + nickname
+    context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
+                          {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
+    context['rich_user'] = user
+    return render(request, 'kleep/profile_schedule.html', context)
 
 
 def profile_settings(request, nickname):
@@ -68,6 +82,7 @@ def profile_settings(request, nickname):
         HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
     user = User.objects.get(id=request.user.id)
+    context['page'] = 'profile_settings'
     context['title'] = "Definições da conta"
     context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
                           {'name': "Definições", 'url': reverse('profile_settings', args=[nickname])}]
@@ -90,6 +105,7 @@ def profile_crawler(request, nickname):
         return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
     user = User.objects.get(id=request.user.id)
+    context['page'] = 'profile_crawler'
     context['title'] = "Definições da conta"
     context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
                           {'name': "Agregar CLIP", 'url': reverse('profile_crawler', args=[nickname])}]

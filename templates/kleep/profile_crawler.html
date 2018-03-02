@@ -1,8 +1,6 @@
-{% extends 'kleep/content_navigation.html' %}
+{% extends 'kleep/profile_base.html' %}
 
 {% load static %}
-{% block head %}
-{% endblock %}
 
 {% block content %}
     <h1><i class="fas fa-link"></i> Agregar CLIP de {{ user }}</h1>
@@ -73,19 +71,5 @@
             {{ clip_login_form }}
             <input type="button" value="Agregar">
         </form>
-    </div>
-{% endblock %}
-
-{% block navigation %}
-    <a class="menu_entry" href="{% url 'profile' user %}">Perfil</a>
-    <a class="menu_entry" href="#">Horário</a>
-    <a class="menu_entry" href="#">Atividade</a>
-{% endblock %}
-
-{% block side_extra %}
-    <div id="side_extra">
-        <a class="menu_entry" href="{% url 'profile_settings' user %}">Definições conta</a>
-        <a class="menu_entry selected">Agregar CLIP</a>
-        <a class="menu_entry" href="#">Tema</a>
     </div>
 {% endblock %}
