@@ -30,33 +30,33 @@
     <div id="content_form">
         <form method="post" action="{{ request.get_full_path }}">
             {% csrf_token %}
-            {{ form.non_field_errors }}
+            {{ creation_form.non_field_errors }}
 
             <div style="float: left; margin-right: 20px;">
-                {{ form.clip.label }}<br>
-                {{ form.clip }}<br>
+                {{ creation_form.clip.label }}<br>
+                {{ creation_form.clip }}<br>
 
             </div>
 
             <div>
-                {{ form.nickname.label }}<br>
-                {{ form.nickname }}<br>
+                {{ creation_form.nickname.label }}<br>
+                {{ creation_form.nickname }}<br>
             </div>
 
 
             <div  style="float: left; margin-right: 20px;">
-                {{ form.password.label }}<br>
-                {{ form.password }}<br>
+                {{ creation_form.password.label }}<br>
+                {{ creation_form.password }}<br>
 
             </div>
             <div>
-                {{ form.password_confirmation.label }}<br>
-                {{ form.password_confirmation }}<br>
+                {{ creation_form.password_confirmation.label }}<br>
+                {{ creation_form.password_confirmation }}<br>
             </div>
 
             <div>
-                {{ form.captcha.label }}<br>
-                {{ form.captcha }}<br>
+                {{ creation_form.captcha.label }}<br>
+                {{ creation_form.captcha }}<br>
             </div>
             <input type="submit" value="Vender a alma">
         </form>

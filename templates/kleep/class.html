@@ -20,6 +20,6 @@
     {% for instance in class_obj.classinstance_set.all %}
         <a class="menu_entry"
            href="{% url 'class_instance' department.id class_obj.id instance.year instance.period.id %}">
-            {{ instance.year|add:"-1" }}/{{ instance.year }}, {{ instance.period.part }}º {{ instance.period.letter }}</a>
+            {{ instance.occasion }}</a>
     {% endfor %}
 {% endblock %}

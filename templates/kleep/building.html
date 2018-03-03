@@ -50,8 +50,10 @@
         {% endif %}
         <div>
             <h2>Salas de Aula:</h2>
-            <ul>
-                <li>TODO</li>
+            <ul style="list-style: none">
+                {% for classroom in building.classroom_set.all %}
+                    <li>{{ classroom.name }}</li>
+                {% endfor %}
             </ul>
         </div>
         <div>

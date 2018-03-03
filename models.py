@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User as SysUser
 from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTimeField, ManyToManyField, DateField, \
-    BooleanField, OneToOneField, TimeField
+    BooleanField, OneToOneField, TimeField, CharField, FloatField
 
 CLIPY_TABLE_PREFIX = 'clip_'
 KLEEP_TABLE_PREFIX = 'kleep_'
@@ -44,7 +44,12 @@ class Period(Model):
         db_table = CLIPY_TABLE_PREFIX + 'periods'
 
     def __str__(self):
-        return "{}/{}({})".format(self.part, self.parts, self.letter)
+        if self.id == 1:
+            return f' Ano'
+        elif self.id <= 3:
+            return f'{self.part}º Semestre'
+        else:
+            return f'{self.part}º Trimestre'
 
 
 class TurnType(Model):
@@ -187,7 +192,7 @@ class ClipStudent(Model):
         db_table = CLIPY_TABLE_PREFIX + 'students'
 
     def __str__(self):
-        return "{} ({}, {})".format(self.name, self.internal_id, self.abbreviation)
+        return "{}, {}".format(self.name, self.internal_id, self.abbreviation)
 
 
 class ClipAdmission(Model):
@@ -280,7 +285,7 @@ class ClipTurnStudent(Model):
 
     class Meta:
         managed = False
-        db_table = 'ClipTurnStudents'
+        db_table = CLIPY_TABLE_PREFIX + 'turn_students'
 
 
 # MANAGED MODELS
@@ -301,16 +306,21 @@ class User(Model):
 
 class Student(Model):
     # A student can exist without having an account
-    user = OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    user = OneToOneField(User, on_delete=models.CASCADE)
     crawled_students = ManyToManyField(ClipStudent, through='StudentClipStudent')
+    turns = ManyToManyField('Turn', through='TurnStudents')
+    class_instances = ManyToManyField('ClassInstance', through='Enrollment')
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'students'
 
+    def __str__(self):
+        return str(self.user)
+
 
 class StudentClipStudent(Model):  # Oh boy, naming conventions going strong with this one...
-    clip_student = ForeignKey(ClipStudent, on_delete=models.PROTECT, )
+    clip_student = ForeignKey(ClipStudent, on_delete=models.PROTECT)
     student = ForeignKey(Student, on_delete=models.CASCADE)
     confirmed = BooleanField(default=False)
 
@@ -441,22 +451,30 @@ class ClassInstance(Model):
     period = ForeignKey(Period, on_delete=models.PROTECT)
     year = IntegerField()
     clip_class_instance = OneToOneField(ClipClassInstance, on_delete=models.PROTECT)
+    students = ManyToManyField(Student, through='Enrollment')
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'class_instances'
 
     def __str__(self):
-        return f"{self.parent.abbreviation}, {self.period}, {self.year}"
+        return f"{self.parent.abbreviation}, {self.period} de {self.year}"
 
-    def occasion(self) -> str:
-        period = self.period
-        if period.id == 1:
-            return f' Ano ({self.year})'
-        elif period.id <= 3:
-            return f'{self.period.part}º Semestre {self.year}'
-        else:
-            return f'{self.period.part}º Trimestre {self.year}'
+    def occasion(self):
+        return f'{self.period}, {self.year-1}/{self.year}'
+
+
+class Enrollment(Model):
+    student = ForeignKey(Student, on_delete=models.CASCADE)
+    class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE)
+    # u => unknown, r => reproved, n => approved@normal, e => approved@exam, s => approved@special
+    result = CharField(default='u', max_length=1)
+    grade = FloatField(null=True, blank=True)
+    clip_enrollment = ForeignKey(ClipEnrollment, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'enrollments'
 
 
 class Turn(Model):
@@ -465,6 +483,7 @@ class Turn(Model):
     number = IntegerField()  # 1
     clip_turn = OneToOneField(ClipTurn, on_delete=models.PROTECT)
     required = BooleanField(default=True)  # Optional attendance
+    students = ManyToManyField(Student, through='TurnStudents')
 
     class Meta:
         managed = True
@@ -472,6 +491,18 @@ class Turn(Model):
 
     def __str__(self):
         return f"{self.class_instance} {self.turn_type.abbreviation.upper()}{self.number}"
+
+
+class TurnStudents(Model):
+    turn = ForeignKey(Turn, on_delete=models.CASCADE)
+    student = ForeignKey(Student, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'turn_students'
+
+    def __str__(self):
+        return f'{self.student} enrolled to turn {self.turn}'
 
 
 class TurnInstance(Model):
