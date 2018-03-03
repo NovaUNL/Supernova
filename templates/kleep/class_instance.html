@@ -1,8 +1,4 @@
-{% extends 'kleep/content_navigation.html' %}
-
-{% load static %}
-{% block head %}
-{% endblock %}
+{% extends 'kleep/class_instance_base.html' %}
 
 {% block content %}
     <h1>{{ parent_class.name }}</h1>
@@ -13,21 +9,4 @@
     <p>TODO</p>
     <h2>Programa curricular:</h2>
     <p>TODO</p>
-{% endblock %}
-
-{% block navigation %}
-    <a class="menu_entry" href="./">Resumo</a>
-    <a class="menu_entry" href="./">Turnos</a>
-    <a class="menu_entry" href="./">Inscritos</a>
-    <a class="menu_entry" href="./horário">Horário</a>
-    <a class="menu_entry" href="./">Sumários</a>
-    <a class="menu_entry" href="./">Notas</a>
-{% endblock %}
-
-{% block side_extra %}
-    <div id="side_extra">
-        <a class="menu_entry" href="./">Adicionar informação</a>
-        <a class="menu_entry" href="./">Sugerir nova descrição para a esta instância</a>
-        <a class="menu_entry" href="./">Reportar incorreção</a>
-    </div>
 {% endblock %}

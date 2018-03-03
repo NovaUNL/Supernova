@@ -1,7 +1,8 @@
-{% extends 'kleep/content_navigation.html' %}
+{% extends 'kleep/class_instance_base.html' %}
 
 {% load static %}
 {% block head %}
+    {{ block.super }}
     <style>
         table {
             height: 100%;
@@ -44,11 +45,11 @@
         }
 
         .turn {
-        {#display: flex;#} justify-content: center;
+            justify-content: center;
             flex-direction: column;
             border: 1px solid #b0b0b0;
             background-color: #53cc4c;
-        {#height: 100% !important;#} text-align: center;
+            text-align: center;
         }
 
         .turn > a {
@@ -60,18 +61,18 @@
             font-size: 0.7em;
         }
 
-        .theoretical-turn {
+        .turn-theoretical {
             background-color: #97d5ff;
         }
 
-        .practical-turn {
-            background-color: #c2ffa4;
+        .turn-practical {
+            background-color: #acff70;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1>{{ parent_class.name }}</h1>
+    <h1>Horário de {{ parent_class.name }}</h1>
     <h3>Departamento de {{ department.name }}, {{ occasion }}</h3>
     <div style="overflow-x: scroll;">
         <table cellpadding="0" cellspacing="0">
@@ -89,7 +90,7 @@
                     {% for element in row.1 %}
 
                         {% if element %}
-                            <td class='turn {{ element.turn.turn.turn_type.name|lower }}-turn'
+                            <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
                                 rowspan="{{ element.rowspan }}">
                                 <a href="">{{ element.turn.turn.class_instance.parent.abbreviation }}<br>
                                     {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
@@ -103,20 +104,5 @@
                 </tr>
             {% endfor %}
         </table>
-    </div>
-{% endblock %}
-
-{% block navigation %}
-    <a class="menu_entry" href="./">Resumo</a>
-    <a class="menu_entry" href="./">Turnos</a>
-    <a class="menu_entry" href="./">Inscritos</a>
-    <a class="menu_entry selected" href="./horário">Horário</a>
-    <a class="menu_entry" href="./">Sumários</a>
-    <a class="menu_entry" href="./">Notas</a>
-{% endblock %}
-
-{% block side_extra %}
-    <div id="side_extra">
-        <a class="menu_entry" href="./">Reportar incorreção</a>
     </div>
 {% endblock %}

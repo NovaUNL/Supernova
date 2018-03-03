@@ -1,0 +1,64 @@
+{% extends 'kleep/class_instance_base.html' %}
+
+{% load static %}
+
+{% block head %}
+    {{ super.block }}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: start;
+        }
+
+        .flex-box {
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+
+        .flex-line-break {
+            display: inline-block;
+            flex-basis: 100% !important;
+        }
+
+        .turn{
+            margin: 10px;
+            padding: 5px 5px;
+            border-radius: 5px;
+            vertical-align: top;
+            flex-basis: 320px;
+            box-shadow: 0 0 5px #777;
+        }
+
+        .turn>span{
+            vertical-align: top;
+        }
+
+        .turn-theoretical {
+            background-color: #97d5ff;
+        }
+
+        .turn-practical {
+            background-color: #acff70;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>Turnos de {{ parent_class.name }}</h1>
+    <h3>Departamento de {{ department.name }}, {{ occasion }}</h3>
+    <div class="flex-wrapper">
+        {% for turn in turns %}
+            <div class="turn turn-{{ turn.turn_type.name|lower }}">
+                <span style="font-weight: bold; font-size: 3em;margin-right: 20px">{{ turn.turn_type.abbreviation|upper }}{{ turn.number }}</span>
+                <div style="display: inline-block;">
+                    {% for instance in turn.turninstance_set.all %}
+                        <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
+                        <span style="border-bottom: 1px solid black">{{ instance.classroom }}</span><br>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

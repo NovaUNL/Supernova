@@ -19,7 +19,7 @@
     <span style="font-size: 1.2em; font-weight: bold;">Instâncias:</span>
     {% for instance in class_obj.classinstance_set.all %}
         <a class="menu_entry"
-           href="{% url 'class_instance' department.id class_obj.id instance.year instance.period.id %}">
+           href="{% url 'class_instance' instance.id %}">
             {{ instance.occasion }}</a>
     {% endfor %}
 {% endblock %}

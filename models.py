@@ -530,9 +530,31 @@ class TurnInstance(Model):
                self.start < turn_instance.start + turn_instance.duration and \
                turn_instance.start < self.start + self.duration
 
+    def weekday_pt(self):
+        if self.weekday == 0:
+            return 'Segunda-feira'
+        elif self.weekday == 1:
+            return 'Terça-feira'
+        elif self.weekday == 2:
+            return 'Quarta-feira'
+        elif self.weekday == 3:
+            return 'Quinta-feira'
+        elif self.weekday == 4:
+            return 'Sexta-feira'
+        elif self.weekday == 5:
+            return 'Sábado'
+        elif self.weekday == 6:
+            return 'Domingo'
+
+    def start_str(self):
+        return self.minutes_to_str(self.start)
+
+    def end_str(self):
+        return self.minutes_to_str(self.start + self.duration)
+
     @staticmethod
     def minutes_to_str(minutes):
-        return f"{int(minutes/60)}:{minutes%60}"
+        return "%02d:%02d" % (minutes // 60, minutes % 60)
 
 
 class Event(Model):

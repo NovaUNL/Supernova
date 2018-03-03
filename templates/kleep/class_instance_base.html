@@ -1,0 +1,40 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+
+{% block navigation %}
+    <a class="menu_entry" href="./">Resumo</a>
+    {% if page == 'instance_turns' %}
+        <a class="menu_entry selected">Turnos</a>
+    {% else %}
+        <a class="menu_entry" href="{% url 'class_instance_turns' instance.id %}">Turnos</a>
+    {% endif %}
+    {% if page == 'instance_enrolled' %}
+        <a class="menu_entry selected">Inscritos</a>
+    {% else %}
+        <a class="menu_entry" href="">Inscritos</a>
+    {% endif %}
+    {% if page == 'instance_schedule' %}
+        <a class="menu_entry selected">Horário</a>
+    {% else %}
+        <a class="menu_entry" href="{% url 'class_instance_schedule' instance.id %}">Horário</a>
+    {% endif %}
+    {% if page == 'instance_summary' %}
+        <a class="menu_entry selected">Sumários</a>
+    {% else %}
+        <a class="menu_entry" href="">Sumários</a>
+    {% endif %}
+    {% if page == 'instance_grades' %}
+        <a class="menu_entry selected">Notas</a>
+    {% else %}
+        <a class="menu_entry" href="">Notas</a>
+    {% endif %}
+{% endblock %}
+
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry" href="./">Adicionar informação</a>
+        <a class="menu_entry" href="./">Sugerir nova descrição para esta instância</a>
+        <a class="menu_entry" href="./">Reportar incorreção</a>
+    </div>
+{% endblock %}

@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Course, Degree, Department, Class, ClassInstance, \
-    TurnInstance
+    TurnInstance, Classroom
 from kleep.schedules import build_turns_schedule
 
 
@@ -224,24 +224,25 @@ def department(request, department_id):
     return render(request, 'kleep/department.html', context)
 
 
-def class_view(request, department_id, class_id):
+def class_view(request, class_id):
     context = __base_context__(request)
-    department = get_object_or_404(Department, id=department_id)
     class_ = get_object_or_404(Class, id=class_id)
+    department = class_.department
     context['title'] = class_.name
     context['department'] = department
     context['class_obj'] = class_
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department.name, 'url': reverse('department', args=[department_id])},
-                          {'name': class_.name, 'url': reverse('class', args=[department_id, class_id])}]
+                          {'name': department.name, 'url': reverse('department', args=[department.id])},
+                          {'name': class_.name, 'url': reverse('class', args=[class_id])}]
     return render(request, 'kleep/class.html', context)
 
 
-def class_instance_view(request, department_id, class_id, year, period_id):
+def class_instance_view(request, instance_id):
     context = __base_context__(request)
-    department = get_object_or_404(Department, id=department_id)
-    parent_class = get_object_or_404(Class, id=class_id)
-    instance = get_object_or_404(ClassInstance, parent=class_id, year=year, period_id=period_id)
+    instance = get_object_or_404(ClassInstance, id=instance_id)
+    parent_class = instance.parent
+    department = parent_class.department
+    context['page'] = 'instance_index'
     context['title'] = str(instance)
     context['department'] = department
     context['parent_class'] = parent_class
@@ -251,18 +252,19 @@ def class_instance_view(request, department_id, class_id, year, period_id):
 
     context['sub_nav'] = [
         {'name': 'Departamentos', 'url': reverse('departments')},
-        {'name': department.name, 'url': reverse('department', args=[department_id])},
-        {'name': parent_class.name, 'url': reverse('class', args=[department_id, class_id])},
-        {'name': occasion, 'url': reverse('class_instance', args=[department_id, class_id, year, period_id])}
+        {'name': department.name, 'url': reverse('department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('class_instance', args=[instance_id])}
     ]
     return render(request, 'kleep/class_instance.html', context)
 
 
-def class_instance_schedule_view(request, department_id, class_id, year, period_id):
+def class_instance_schedule_view(request, instance_id):
     context = __base_context__(request)
-    department = get_object_or_404(Department, id=department_id)
-    parent_class = get_object_or_404(Class, id=class_id)
-    instance = get_object_or_404(ClassInstance, parent=class_id, year=year, period_id=period_id)
+    instance = get_object_or_404(ClassInstance, id=instance_id)
+    parent_class = instance.parent
+    department = parent_class.department
+    context['page'] = 'instance_schedule'
     context['title'] = str(instance)
     context['department'] = department
     context['parent_class'] = parent_class
@@ -274,12 +276,36 @@ def class_instance_schedule_view(request, department_id, class_id, year, period_
 
     context['sub_nav'] = [
         {'name': 'Departamentos', 'url': reverse('departments')},
-        {'name': department.name, 'url': reverse('department', args=[department_id])},
-        {'name': parent_class.name, 'url': reverse('class', args=[department_id, class_id])},
-        {'name': occasion, 'url': reverse('class_instance', args=[department_id, class_id, year, period_id])},
+        {'name': department.name, 'url': reverse('department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('class_instance', args=[instance_id])},
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'kleep/class_instance_schedule.html', context)
+
+
+def class_instance_turns_view(request, instance_id):
+    context = __base_context__(request)
+    instance = get_object_or_404(ClassInstance, id=instance_id)
+    parent_class = instance.parent
+    department = parent_class.department
+    context['page'] = 'instance_turns'
+    context['title'] = str(instance)
+    context['department'] = department
+    context['parent_class'] = parent_class
+    context['instance'] = instance
+    occasion = instance.occasion()
+    context['occasion'] = occasion
+    context['turns'] = instance.turn_set.order_by('turn_type', 'number')
+
+    context['sub_nav'] = [
+        {'name': 'Departamentos', 'url': reverse('departments')},
+        {'name': department.name, 'url': reverse('department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('class_instance', args=[instance_id])},
+        {'name': 'Horário', 'url': request.get_raw_uri()}
+    ]
+    return render(request, 'kleep/class_instance_turns.html', context)
 
 
 def __base_context__(request):
