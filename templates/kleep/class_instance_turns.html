@@ -22,7 +22,7 @@
             flex-basis: 100% !important;
         }
 
-        .turn{
+        .turn {
             margin: 10px;
             padding: 5px 5px;
             border-radius: 5px;
@@ -31,8 +31,9 @@
             box-shadow: 0 0 5px #777;
         }
 
-        .turn>span{
+        .turn a {
             vertical-align: top;
+            color: #333;
         }
 
         .turn-theoretical {
@@ -50,12 +51,16 @@
     <h3>Departamento de {{ department.name }}, {{ occasion }}</h3>
     <div class="flex-wrapper">
         {% for turn in turns %}
-            <div class="turn turn-{{ turn.turn_type.name|lower }}">
-                <span style="font-weight: bold; font-size: 3em;margin-right: 20px">{{ turn.turn_type.abbreviation|upper }}{{ turn.number }}</span>
+            <div class="turn turn-{{ turn.turn_type.name|lower }}" href="#">
+                <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
+                    {{ turn.turn_type.abbreviation|upper }}{{ turn.number }}
+                </a>
                 <div style="display: inline-block;">
                     {% for instance in turn.turninstance_set.all %}
                         <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
-                        <span style="border-bottom: 1px solid black">{{ instance.classroom }}</span><br>
+                        <a style="border-bottom: 1px solid black" href="{% url 'classroom' instance.classroom.id %}">
+                            {{ instance.classroom }}
+                        </a><br>
                     {% endfor %}
                 </div>
             </div>

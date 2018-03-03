@@ -88,14 +88,13 @@
                 <tr>
                     <td>{{ row.0|safe }}</td>
                     {% for element in row.1 %}
-
                         {% if element %}
                             <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
                                 rowspan="{{ element.rowspan }}">
-                                <a href="">{{ element.turn.turn.class_instance.parent.abbreviation }}<br>
-                                    {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
-                                    {{ element.turn.classroom.short_str }}
-                                </a>
+                                {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
+                                {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
+                                <a href="{% url 'classroom' element.turn.classroom.id %}">
+                                    {{ element.turn.classroom.short_str }}</a>
                             </td>
                         {% else %}
                             <td></td>

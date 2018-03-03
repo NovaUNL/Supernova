@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User as SysUser
 from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTimeField, ManyToManyField, DateField, \
-    BooleanField, OneToOneField, TimeField, CharField, FloatField
+    BooleanField, OneToOneField, TimeField, CharField, FloatField, NullBooleanField
 
 CLIPY_TABLE_PREFIX = 'clip_'
 KLEEP_TABLE_PREFIX = 'kleep_'
@@ -388,6 +388,9 @@ class Classroom(Model):
     name = TextField(max_length=100)
     building = ForeignKey(Building, on_delete=models.CASCADE)
     clip_classroom = OneToOneField(ClipClassroom, null=True, blank=True, on_delete=models.PROTECT)
+    unlocked = NullBooleanField(null=True, default=None)
+    is_laboratory = BooleanField(default=False)  # TODO make type a separate entity
+    is_auditorium = BooleanField(default=False)
 
     class Meta:
         managed = True

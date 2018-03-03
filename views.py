@@ -8,7 +8,7 @@ from django.urls import reverse
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Course, Degree, Department, Class, ClassInstance, \
     TurnInstance, Classroom
-from kleep.schedules import build_turns_schedule
+from kleep.schedules import build_turns_schedule, build_schedule
 
 
 def index(request):
@@ -170,6 +170,22 @@ def building(request, building_id):
                           {'name': building.name, 'url': reverse('building', args=[building_id])}]
     context['building'] = building
     return render(request, 'kleep/building.html', context)
+
+
+def classroom_view(request, classroom_id):
+    classroom = get_object_or_404(Classroom, id=classroom_id)
+    building = classroom.building
+    context = __base_context__(request)
+    context['title'] = str(classroom)
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+                          {'name': building.name, 'url': reverse('building', args=[building.id])},
+                          {'name': classroom.name, 'url': reverse('classroom', args=[classroom_id])}]
+    context['building'] = building
+    context['classroom'] = classroom
+    turn_instances = classroom.turninstance_set.filter(  # TODO create function to return current school year/period
+        turn__class_instance__year=2018, turn__class_instance__period=2).all()
+    context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
+    return render(request, 'kleep/classroom.html', context)
 
 
 def service(request, building_id, service_id):

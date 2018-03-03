@@ -99,7 +99,7 @@ def build_schedule(turn_instances: [TurnInstance]):
     initial_time = 8 * 6 + empty_rows_start * 3  # Initial schedule time (in tens of minutes)
     result = []
     # For every relevant row (ignore empty rows at the start/end)
-    for row in rows[empty_rows_start:(-empty_rows_end if empty_rows_end < 0 else None)]:
+    for row in rows[empty_rows_start:(-empty_rows_end if empty_rows_end > 0 else None)]:
         # TODO take that HTML out of here. Does not belong here
         result.append((f'{initial_time//6}:{initial_time%6}0 '
                        f'<span class="end-time">{(initial_time+3)//6}:{(initial_time+3)%6}0</span>', row))
