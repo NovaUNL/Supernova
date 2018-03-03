@@ -8,7 +8,7 @@ from django.urls import reverse
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Course, Degree, Department, Class, ClassInstance, \
     TurnInstance
-from kleep.schedules import build_class_instance_schedule
+from kleep.schedules import build_turns_schedule
 
 
 def index(request):
@@ -66,20 +66,25 @@ def profile(request, nickname):
 
 def profile_schedule(request, nickname):
     if not request.user.is_authenticated:
-        HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
-    user = User.objects.get(id=request.user.id)
+    user = get_object_or_404(User, id=request.user.id)
+    if hasattr(user, 'student'):
+        student = user.student
+    else:
+        return HttpResponseRedirect(reverse('profile', args=[nickname]))
     context['page'] = 'profile_schedule'
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
                           {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
+    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(student.turn_set.all())
     context['rich_user'] = user
     return render(request, 'kleep/profile_schedule.html', context)
 
 
 def profile_settings(request, nickname):
     if not request.user.is_authenticated:
-        HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
     user = User.objects.get(id=request.user.id)
     context['page'] = 'profile_settings'
@@ -265,11 +270,7 @@ def class_instance_schedule_view(request, department_id, class_id, year, period_
     occasion = instance.occasion()
     context['occasion'] = occasion
 
-    context['instances'] = instance.turn_set.all()
-
-    context['weekday_spans'] = build_class_instance_schedule(instance)[0]
-    context['schedule'] = build_class_instance_schedule(instance)[1]
-    context['unsortable'] = build_class_instance_schedule(instance)[2]
+    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(instance.turn_set.all())
 
     context['sub_nav'] = [
         {'name': 'Departamentos', 'url': reverse('departments')},

@@ -1,4 +1,4 @@
-from kleep.models import ClassInstance, TurnInstance
+from kleep.models import ClassInstance, TurnInstance, Student, Turn
 
 
 def build_schedule(turn_instances: [TurnInstance]):
@@ -29,6 +29,7 @@ def build_schedule(turn_instances: [TurnInstance]):
                     allocated_turn: TurnInstance = allocated_turn
                     turn_instance: TurnInstance = turn_instance
                     # If one of them intersect this one, then this column is no good, skip it
+                    # TODO check only against the last added turn, if one intersects, that would be the one
                     if turn_instance.intersects(allocated_turn):
                         has_space = False
                         break
@@ -81,7 +82,7 @@ def build_schedule(turn_instances: [TurnInstance]):
                     skips[column_index] = event['rowspan'] - 1  # Tag it in the skips, for the next column to be skipped
             column_offset += weekday_colspans[day_index]  # Add this day to the offsets
 
-    removed_rows_start = 0
+    empty_rows_start = 0
     for row in rows[:]:  # For every row which only has None elements
         empty = True
         for column in row:
@@ -89,15 +90,16 @@ def build_schedule(turn_instances: [TurnInstance]):
                 empty = False
                 break
         if empty:
-            removed_rows_start += 1
+            empty_rows_start += 1
         else:
             break
 
     empty_rows_end = (20 * 60 - end) // 30  # Rows to ignore at the end when adding to the result. Read last TODO
 
-    initial_time = 8 * 6 + removed_rows_start * 3  # Initial schedule time (in tens of minutes)
+    initial_time = 8 * 6 + empty_rows_start * 3  # Initial schedule time (in tens of minutes)
     result = []
-    for row in rows[removed_rows_start:-empty_rows_end]:  # For every relevant row (ignore empty rows at the start/end)
+    # For every relevant row (ignore empty rows at the start/end)
+    for row in rows[empty_rows_start:(-empty_rows_end if empty_rows_end < 0 else None)]:
         # TODO take that HTML out of here. Does not belong here
         result.append((f'{initial_time//6}:{initial_time%6}0 '
                        f'<span class="end-time">{(initial_time+3)//6}:{(initial_time+3)%6}0</span>', row))
@@ -105,9 +107,9 @@ def build_schedule(turn_instances: [TurnInstance]):
     return weekday_colspans, result, unsortable
 
 
-def build_class_instance_schedule(class_instance: ClassInstance):
+def build_turns_schedule(turns: [Turn]):
     turn_instances = []
-    for turn in class_instance.turn_set.all():  # Fetch every turn of this class instance
+    for turn in turns:  # Fetch every turn of this class instance
         for turn_instance in turn.turninstance_set.all():  # Fetch every instance of this turn
             turn_instances.append(turn_instance)
 
