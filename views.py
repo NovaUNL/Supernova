@@ -7,8 +7,9 @@ from django.urls import reverse
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Classroom, \
-    NewsItem
+    NewsItem, Area
 from kleep.schedules import build_turns_schedule, build_schedule
+from kleep.settings import VERSION
 
 
 def index(request):
@@ -21,6 +22,8 @@ def index(request):
 def about(request):
     context = __base_context__(request)
     context['title'] = "Sobre"
+    context['version'] = VERSION
+    print(VERSION)
     return render(request, 'kleep/about.html', context)
 
 
@@ -323,6 +326,14 @@ def class_instance_turns_view(request, instance_id):
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'kleep/class_instance_turns.html', context)
+
+
+def areas(request):
+    context = __base_context__(request)
+    context['title'] = 'Areas'
+    context['areas'] = Area.objects.order_by('name').all()
+    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')}]
+    return render(request, 'kleep/areas.html', context)
 
 
 def news(request):

@@ -1,0 +1,52 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .group {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: white;
+            background-size: cover;
+            box-shadow: 0 0 5px #3d3d3d;
+            border-radius: 5px;
+            margin: 10px;
+            width: 220px;
+            height: 150px;
+            vertical-align: center;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            border: 2px solid #666;
+            font-size: 1.2em;
+        }
+
+        .group-top {
+            background-color: rgba(170, 170, 170, 0.5);
+            text-shadow: 0 0 2px black;
+        }
+
+    </style>
+    <h1><i class="fas fa-graduation-cap"></i> Areas de estudo</h1>
+    <div class="flex-wrapper">
+        {% for area in areas %}
+            <a href="#">
+                <div class="group" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
+                    <div class="group-top">
+                        <span>{{ area.name }}</span>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% endblock %}

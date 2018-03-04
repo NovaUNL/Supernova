@@ -329,10 +329,29 @@ class StudentClipStudent(Model):  # Oh boy, naming conventions going strong with
         db_table = KLEEP_TABLE_PREFIX + 'student_clip_students'
 
 
+class Area(Model):
+    name = TextField(max_length=200)
+    description = TextField(max_length=4096, null=True, blank=True)
+    variants = ManyToManyField('Course', through='CourseArea')
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'areas'
+
+    def __str__(self):
+        return self.name
+
+
 class Course(Model):
     name = TextField(max_length=200)
     description = TextField(max_length=4096, null=True, blank=True)
-    variants = ManyToManyField('CourseVariant', through='CourseCourseVariant')
+    degree = ForeignKey(Degree, on_delete=models.PROTECT)
+    abbreviation = TextField(max_length=100, null=True, blank=True)
+    active = BooleanField(default=True)
+    clip_course = ForeignKey(ClipCourse, on_delete=models.PROTECT, related_name='crawled_course')
+    main_course = ForeignKey(Area, on_delete=models.PROTECT, related_name='main_course', null=True, blank=True)
+    courses = ManyToManyField(Area, through='CourseArea')
+    url = TextField(max_length=256, null=True, blank=True)
 
     class Meta:
         managed = True
@@ -342,32 +361,13 @@ class Course(Model):
         return self.name
 
 
-class CourseVariant(Model):
-    name = TextField(max_length=200)
-    description = TextField(max_length=4096, null=True, blank=True)
-    degree = ForeignKey(Degree, on_delete=models.PROTECT)
-    abbreviation = TextField(max_length=100, null=True, blank=True)
-    active = BooleanField(default=True)
-    clip_course = ForeignKey(ClipCourse, on_delete=models.PROTECT, related_name='crawled_course')
-    main_course = ForeignKey(Course, on_delete=models.PROTECT, related_name='main_course', null=True, blank=True)
-    courses = ManyToManyField(Course, through='CourseCourseVariant')
-    url = TextField(max_length=256, null=True, blank=True)
+class CourseArea(Model):
+    course = ForeignKey(Area, on_delete=models.PROTECT)
+    course_variant = ForeignKey(Course, on_delete=models.PROTECT)
 
     class Meta:
         managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'course_variants'
-
-    def __str__(self):
-        return self.name
-
-
-class CourseCourseVariant(Model):
-    course = ForeignKey(Course, on_delete=models.PROTECT)
-    course_variant = ForeignKey(CourseVariant, on_delete=models.PROTECT)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'course_course_variants'
+        db_table = KLEEP_TABLE_PREFIX + 'course_areas'
 
 
 class Building(Model):

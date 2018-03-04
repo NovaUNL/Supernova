@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -72,7 +73,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-pt'
 
 TIME_ZONE = 'UTC'
 
@@ -88,3 +89,13 @@ STATIC_URL = '/static/'
 # Captcha plugin
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
+
+CLIP_USERNAME = 'nope'
+CLIP_PASSWORD = 'NOPE'
+
+VERSION = subprocess.check_output([
+    "git",
+    f"--git-dir={os.path.dirname(os.path.realpath(__file__))}/.git/",
+    "rev-parse",
+    "HEAD"
+]).decode('ascii')
