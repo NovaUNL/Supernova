@@ -1,0 +1,68 @@
+{% extends 'kleep/content_navigation.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+
+        }
+
+        .degree {
+            margin-top: 10px;
+        }
+
+        .course {
+            margin-left: 5px;
+        }
+
+        #info-div > h3 {
+            margin-left: 10px;
+        }
+
+        #info-div {
+            text-align: right;
+        }
+
+        .info-entry {
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-graduation-cap"></i> {{ course }}</h1>
+    <h3 style="margin-left: 20px">Departamento de {{ course.department }}</h3>
+    <div class="flex-wrapper">
+        <div style="flex-basis: 60%;">
+            <h2>Descrição</h2>
+            <p>{{ course.description }}</p>
+        </div>
+        <div id="info-div" style="flex-basis: 250px;">
+            <h2 style="text-align: left;">Informação</h2>
+            <h3>Concelho pedagógico:</h3>
+            <span class="info-entry">TODO</span>
+            <h3>Núcleo de estudantes:</h3>
+            <span class="info-entry">TODO</span>
+            <h3>Comissão de Praxe:</h3>
+            <span class="info-entry">TODO</span>
+            <h3>Caloiros:</h3>
+            <span class="info-entry">TODO</span>
+            <h3>Alunos inscritos:</h3>
+            <span class="info-entry">TODO</span>
+            <h3>Média dos alunos:</h3>
+            <span class="info-entry">TODO</span>
+        </div>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry">Plano curricular</a>
+    <a class="menu_entry">Alunos</a>
+{% endblock %}

@@ -16,15 +16,26 @@
     <h1>Departamento de {{ department.name }}</h1>
     <div class="flex-wrapper">
         <div style="margin-right: 50px">
-            <h2>Cadeiras:</h2>
+            <h2>Cadeiras</h2>
             <ul>
                 {% for class in department.class_set.all|dictsort:'name' %}
                     <li><a href="{% url 'class' class.id %}">{{ class.name }}</a></li>
                 {% endfor %}
             </ul>
         </div>
+        <div>
+            <h2>Cursos</h2>
+            {% for degree in degrees %}
+                <h3 class="degree">{{ degree.name }}</h3>
+                {% for course in courses %}
+                    {% if course.degree == degree %}
+                        <a class="course" href="{% url 'course' course.id %}">{{ course }}</a>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
         <div style="min-width: 500px">
-            <h2>Informação:</h2>
+            <h2>Informação</h2>
             <h3>Localização:</h3>
             <a href="{% url 'building' department.building %}">{{ department.building }}</a>
             <h3>Descrição:</h3>

@@ -1,0 +1,47 @@
+{% extends 'kleep/content_only.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+
+        }
+
+        .flex-wrapper .svg-inline--fa {
+            font-size: 2em;
+        }
+
+        .degree {
+            margin-top: 10px;
+        }
+
+        .course {
+            margin-left: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-graduation-cap"></i> Area de {{ area.name }}</h1>
+    <div class="flex-wrapper">
+        <div>
+            <h2>Cursos relevantes</h2>
+            {% for degree in degrees %}
+                <h3 class="degree">{{ degree.name }}</h3>
+                {% for course in courses %}
+                    {% if course.degree == degree %}
+                        <a class="course" href="{% url 'course' course.id %}">{{ course }}</a>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div style="flex-basis: 60%;"><h2>Descrição</h2>
+            <p>{{ area.description }}</p></div>
+    </div>
+{% endblock %}
