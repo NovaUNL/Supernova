@@ -26,19 +26,19 @@ def about(request):
     context['title'] = "Sobre"
     context['version'] = VERSION
     print(VERSION)
-    return render(request, 'kleep/about.html', context)
+    return render(request, 'kleep/standalone/about.html', context)
 
 
 def beg(request):
     context = __base_context__(request)
     context['title'] = "Ajudas"
-    return render(request, 'kleep/beg.html', context)
+    return render(request, 'kleep/standalone/beg.html', context)
 
 
 def privacy(request):
     context = __base_context__(request)
     context['title'] = "Politica de privacidade"
-    return render(request, 'kleep/privacy.html', context)
+    return render(request, 'kleep/standalone/privacy.html', context)
 
 
 def campus(request):
@@ -47,7 +47,7 @@ def campus(request):
     context['buildings'] = Building.objects.all()
     context['services'] = Service.objects.all()
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': reverse('campus')}]
-    return render(request, 'kleep/campus.html', context)
+    return render(request, 'kleep/campus/campus.html', context)
 
 
 def campus_transportation(request):
@@ -56,7 +56,7 @@ def campus_transportation(request):
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('campus')},
         {'name': 'Transportes', 'url': reverse('transportation')}]
-    return render(request, 'kleep/transportation.html', context)
+    return render(request, 'kleep/standalone/templates/kleep/campus/transportation.html', context)
 
 
 def profile(request, nickname):
@@ -67,7 +67,7 @@ def profile(request, nickname):
     context['title'] = page_name
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
     context['rich_user'] = user
-    return render(request, 'kleep/profile.html', context)
+    return render(request, 'kleep/profile/profile.html', context)
 
 
 def profile_schedule(request, nickname):
@@ -85,7 +85,7 @@ def profile_schedule(request, nickname):
                           {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(student.turn_set.all())
     context['rich_user'] = user
-    return render(request, 'kleep/profile_schedule.html', context)
+    return render(request, 'kleep/profile/profile_schedule.html', context)
 
 
 def profile_settings(request, nickname):
@@ -108,7 +108,7 @@ def profile_settings(request, nickname):
     else:
         context['settings_form'] = AccountSettingsForm()
 
-    return render(request, 'kleep/profile_settings.html', context)
+    return render(request, 'kleep/profile/profile_settings.html', context)
 
 
 def profile_crawler(request, nickname):
@@ -125,7 +125,7 @@ def profile_crawler(request, nickname):
         pass
     context['clip_login_form'] = ClipLogin()
 
-    return render(request, 'kleep/profile_crawler.html', context)
+    return render(request, 'kleep/profile/profile_crawler.html', context)
 
 
 def login_view(request):
@@ -146,7 +146,7 @@ def login_view(request):
             context['login_form'] = form
     else:
         context['login_form'] = LoginForm()
-    return render(request, 'kleep/login.html', context)
+    return render(request, 'kleep/profile/login.html', context)
 
 
 def logout_view(request):
@@ -165,7 +165,7 @@ def create_account(request):
 
     else:
         context['creation_form'] = AccountCreationForm()
-    return render(request, 'kleep/create_account.html', context)
+    return render(request, 'kleep/academic/templates/kleep/create_account.html', context)
 
 
 def building(request, building_id):
@@ -175,7 +175,7 @@ def building(request, building_id):
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building_id])}]
     context['building'] = building
-    return render(request, 'kleep/building.html', context)
+    return render(request, 'kleep/campus/building.html', context)
 
 
 def classroom_view(request, classroom_id):
@@ -191,7 +191,7 @@ def classroom_view(request, classroom_id):
     turn_instances = classroom.turninstance_set.filter(  # TODO create function to return current school year/period
         turn__class_instance__year=2018, turn__class_instance__period=2).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
-    return render(request, 'kleep/classroom.html', context)
+    return render(request, 'kleep/standalone/templates/kleep/campus/classroom.html', context)
 
 
 def service(request, building_id, service_id):
@@ -204,7 +204,7 @@ def service(request, building_id, service_id):
                           {'name': service.name, 'url': reverse('service', args=[building_id, service_id])}]
     context['building'] = building
     context['service'] = service
-    return render(request, 'kleep/service.html', context)
+    return render(request, 'kleep/standalone/templates/kleep/campus/service.html', context)
 
 
 def groups(request):
@@ -215,7 +215,7 @@ def groups(request):
     context['groups'] = Group.objects.all()
     context['group_types'] = GroupType.objects.all()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')}]
-    return render(request, 'kleep/groups.html', context)
+    return render(request, 'kleep/group/groups.html', context)
 
 
 def group(request, group_id):
@@ -225,7 +225,7 @@ def group(request, group_id):
     context['group'] = group
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])}]
-    return render(request, 'kleep/group.html', context)
+    return render(request, 'kleep/group/group.html', context)
 
 
 def departments(request):
@@ -233,7 +233,7 @@ def departments(request):
     context['title'] = "Departamentos"
     context['departments'] = Department.objects.order_by('name').all()
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')}]
-    return render(request, 'kleep/departments.html', context)
+    return render(request, 'kleep/academic/departments.html', context)
 
 
 def department(request, department_id):
@@ -245,7 +245,7 @@ def department(request, department_id):
     context['courses'] = Course.objects.filter(department=department).all()
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
                           {'name': department.name, 'url': reverse('department', args=[department_id])}]
-    return render(request, 'kleep/department.html', context)
+    return render(request, 'kleep/academic/department.html', context)
 
 
 def class_view(request, class_id):
@@ -258,7 +258,7 @@ def class_view(request, class_id):
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
                           {'name': department.name, 'url': reverse('department', args=[department.id])},
                           {'name': class_.name, 'url': reverse('class', args=[class_id])}]
-    return render(request, 'kleep/class.html', context)
+    return render(request, 'kleep/academic/class.html', context)
 
 
 def class_instance_view(request, instance_id):
@@ -280,7 +280,7 @@ def class_instance_view(request, instance_id):
         {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
         {'name': occasion, 'url': reverse('class_instance', args=[instance_id])}
     ]
-    return render(request, 'kleep/class_instance.html', context)
+    return render(request, 'kleep/academic/class_instance.html', context)
 
 
 def class_instance_schedule_view(request, instance_id):
@@ -305,7 +305,7 @@ def class_instance_schedule_view(request, instance_id):
         {'name': occasion, 'url': reverse('class_instance', args=[instance_id])},
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
-    return render(request, 'kleep/class_instance_schedule.html', context)
+    return render(request, 'kleep/academic/class_instance_schedule.html', context)
 
 
 def class_instance_turns_view(request, instance_id):
@@ -329,7 +329,7 @@ def class_instance_turns_view(request, instance_id):
         {'name': occasion, 'url': reverse('class_instance', args=[instance_id])},
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
-    return render(request, 'kleep/class_instance_turns.html', context)
+    return render(request, 'kleep/academic/class_instance_turns.html', context)
 
 
 def areas(request):
@@ -337,7 +337,7 @@ def areas(request):
     context['title'] = 'Areas de estudo'
     context['areas'] = Area.objects.order_by('name').all()
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')}]
-    return render(request, 'kleep/areas.html', context)
+    return render(request, 'kleep/academic/areas.html', context)
 
 
 def area(request, area_id):
@@ -349,7 +349,7 @@ def area(request, area_id):
     context['degrees'] = Degree.objects.filter(course__area=area).all()
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')},
                           {'name': area.name, 'url': reverse('area', args=[area_id])}]
-    return render(request, 'kleep/area.html', context)
+    return render(request, 'kleep/academic/area.html', context)
 
 
 def course(request, course_id):
@@ -362,7 +362,7 @@ def course(request, course_id):
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
                           {'name': department, 'url': reverse('department', args=[department.id])},
                           {'name': course, 'url': reverse('course', args=[course_id])}]
-    return render(request, 'kleep/course.html', context)
+    return render(request, 'kleep/academic/course.html', context)
 
 
 def course_students(request, course_id):
@@ -379,7 +379,7 @@ def course_students(request, course_id):
                           {'name': department, 'url': reverse('department', args=[department.id])},
                           {'name': course, 'url': reverse('course', args=[course_id])},
                           {'name': 'Alunos', 'url': reverse('course_students', args=[course_id])}]
-    return render(request, 'kleep/course_students.html', context)
+    return render(request, 'kleep/academic/course_students.html', context)
 
 
 def course_curriculum(request, course_id):
@@ -396,7 +396,7 @@ def course_curriculum(request, course_id):
                           {'name': department, 'url': reverse('department', args=[department.id])},
                           {'name': course, 'url': reverse('course', args=[course_id])},
                           {'name': 'Programa curricular', 'url': reverse('course_curriculum', args=[course_id])}]
-    return render(request, 'kleep/course_curriculum.html', context)
+    return render(request, 'kleep/academic/course_curriculum.html', context)
 
 
 def news(request):
@@ -405,7 +405,7 @@ def news(request):
     context['title'] = 'Notícias'
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:10]
     context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')}]
-    return render(request, 'kleep/news.html', context)
+    return render(request, 'kleep/news/news.html', context)
 
 
 def news_item(request, news_item_id):
@@ -416,7 +416,7 @@ def news_item(request, news_item_id):
     context['news_item'] = news_item
     context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')},
                           {'name': news_item.title, 'url': reverse('news_item', args=[news_item_id])}]
-    return render(request, 'kleep/news_item.html', context)
+    return render(request, 'kleep/news/news_item.html', context)
 
 
 def __base_context__(request):
