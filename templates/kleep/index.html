@@ -13,32 +13,58 @@
             flex-wrap: wrap;
             align-items: baseline;
         }
+
+        .flex-wrapper.vertical {
+            flex-basis: 800px;
+            display: flex;
+            flex-wrap: wrap;
+            flex-flow: column;
+            align-items: baseline;
+        }
+
+        .flex-wrapper.vertical > div {
+            margin-bottom: 20px;
+        }
+
+        #content_large {
+            background-color: rgba(255, 255, 255, 0.85);
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1>Bem vindo ao Kleep (Edição: Tudo por fazer)</h1>
-    <h3>[Inserir slogan super cativador]</h3>
+    <h1>Bem vindo ao Kleep</h1>
+    <h3>[Inserir slogan super cativador]</h3><br>
     <div class="flex-wrapper">
-        <div style="flex-basis: 60%; min-width:500px;">
-            <h2>Últimas notícias</h2>
-            <h3>Encontrados 35€</h3>
-            <p>Foi num dia de chuva intensa que Tomas Turbando, na sua ida para casa após uma intensa sessão de
-                <s>jogo</s> estudo no DI parou para atar os atacadores e não queria acreditar no que encontrara.<br>
-                A chuva parou, veio de lá um raio de luz, e em frente de Tomas a lendária nota de 35€.<br>
-                Grato o mesmo digiriu-se à divisão académica, nem senha tirou e proferiu as sábias palavras "pró ano!"
-            </p>
-            <p>30 Fevereiro 2018, 12:34</p>
+        <div class="flex-wrapper vertical">
+            <div>
 
-            <h3>Jardineiro passou a Análise I</h3>
-            <p>
-                É neste momento de triunfo e muita alegria que o campus celebra.<br>
-                Henrique Cimento, jardineiro a part-time do relvado da dona Teresa, conseguiu finalmente passar a
-                Análise, e fontes dizem
-                que não foi copianço.<br>
-                As noticias já alcançaram o presidente da republica, o tio Marcelo admite hipótese de medalha.
-            </p>
-            <p>2 Março 2018, 21:43</p>
+                <a href="{% url 'news' %}"><h2>Últimas notícias</h2></a>
+                {% for news_item in news %}
+                    <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
+                    <p>{{ news_item.summary }}</p>
+                    <p>Por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a>,
+                        {{ news_item.datetime }}</p>
+                {% endfor %}
+            </div>
+            <div style="flex-basis: 50%; min-width:500px;">
+                <h2>Próximos eventos</h2>
+                <h3>Competição de plágio</h3>
+                <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>
+                <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>
+                <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>
+                <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>
+                <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>
+            </div>
+            <div style="flex-basis: 50%; min-width:200px;">
+                <h2>Ementas</h2>
+                <h3>Bar Teresa Gato</h3>
+                <p>"Especiarias" com hipotese de ovo-algo-estrelado.</p>
+                <h3>Bar My Spot</h3>
+                <p>Aquela salada com tudo por 3,10€ #MyShekels</p>
+                <h3>Minimercado MiniNova</h3>
+                <p>Pão de alho</p>
+            </div>
         </div>
         <div style="flex-basis: 40%; min-width:200px;">
             <h2>Changelog</h2>
@@ -54,24 +80,6 @@
                 Sente que o resto do mundo tem que ver a sua cara?<br>
                 Força nisso, mas só ali na sua caixinha de areia!
             </p>
-        </div>
-        <div style="flex-basis: 50%; min-width:500px;">
-            <h2>Próximos eventos:</h2>
-            <h3>Competição de plágio</h3>
-            <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>
-            <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>
-            <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>
-            <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>
-            <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>
-        </div>
-        <div style="flex-basis: 50%; min-width:200px;">
-            <h2>Ementas:</h2>
-            <h3>Bar Teresa Gato</h3>
-            <p>"Especiarias" com hipotese de ovo-algo-estrelado.</p>
-            <h3>Bar My Spot</h3>
-            <p>Aquela salada com tudo por 3,10€ #MyShekels</p>
-            <h3>Minimercado MiniNova</h3>
-            <p>Pão de alho</p>
         </div>
     </div>
 {% endblock %}

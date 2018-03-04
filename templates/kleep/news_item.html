@@ -1,0 +1,72 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+
+{% block head %}
+    <style>
+        #rection_buttons {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .reaction_button {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1em;
+            background-color: #bcbcbc;
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-right: 20px;
+            color: white;
+            font-weight: bold;
+            border: solid 2px #777;
+        }
+
+        .reaction_button > .svg-inline--fa {
+            margin-left: 10px;
+        }
+
+        .like {
+            background-color: #2fa40c;
+        }
+
+        .dislike {
+            background-color: red;
+        }
+
+        .favorite {
+            background-color: deeppink;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="far fa-newspaper"></i> {{ news_item.title }}</h1>
+    <h3>{{ news_item.summary }}</h3>
+    <p>{{ news_item.content|safe }}</p>
+    <br>
+    <div id="rection_buttons">
+        <a href="#"><span class="reaction_button like">Boa notícia <i class="far fa-thumbs-up"></i></span></a>
+        <a href="#"><span class="reaction_button dislike">Má notícia <i class="far fa-thumbs-down"></i></span></a>
+        <a href="#"><span class="reaction_button favorite">Excelente trabalho <i class="far fa-heart"></i></span></a>
+    </div>
+    <br>
+    <h3>Fontes:</h3>
+    <ul>
+        <li>Por fazer</li>
+    </ul>
+    <span>Submetida por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a>
+    em {{ news_item.datetime }}
+    </span><br>
+    {% if news_item.edited %}
+        <span>Última edição por
+            <a href="{% url 'profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a>
+            em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})
+        </span>
+    {% endif %}
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry" href="#">Sugerir edição</a>
+    <a class="menu_entry" href="#">Reportar</a>
+{% endblock %}

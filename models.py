@@ -761,11 +761,20 @@ class NewsItem(Model):
     title = TextField(max_length=100)
     summary = TextField(max_length=300)
     content = TextField()
+    datetime = DateTimeField(auto_now_add=True)
+    edited = BooleanField(default=False)
+    edit_note = TextField(null=True, blank=True, default=None)
+    edit_datetime = DateTimeField(null=True, blank=True, default=None)
+    author = ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='author')
+    edit_author = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='edit_author')
     tags = ManyToManyField(Tag, through="NewsTags")
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'news_items'
+
+    def __str__(self):
+        return self.title
 
 
 class NewsTags(Model):

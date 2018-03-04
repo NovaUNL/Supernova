@@ -6,14 +6,15 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
-from kleep.models import Service, Building, User, Group, GroupType, Course, Degree, Department, Class, ClassInstance, \
-    TurnInstance, Classroom
+from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Classroom, \
+    NewsItem
 from kleep.schedules import build_turns_schedule, build_schedule
 
 
 def index(request):
     context = __base_context__(request)
     context['title'] = "KLEEarly not a riPoff"  # TODO, change me to something less cringy
+    context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
     return render(request, 'kleep/index.html', context)
 
 
@@ -322,6 +323,26 @@ def class_instance_turns_view(request, instance_id):
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'kleep/class_instance_turns.html', context)
+
+
+def news(request):
+    context = __base_context__(request)
+    context['page'] = 'instance_turns'
+    context['title'] = 'Notícias'
+    context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:10]
+    context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')}]
+    return render(request, 'kleep/news.html', context)
+
+
+def news_item(request, news_item_id):
+    context = __base_context__(request)
+    news_item = get_object_or_404(NewsItem, id=news_item_id)
+    context['page'] = 'instance_turns'
+    context['title'] = 'Notícia:' + news_item.title
+    context['news_item'] = news_item
+    context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')},
+                          {'name': news_item.title, 'url': reverse('news_item', args=[news_item_id])}]
+    return render(request, 'kleep/news_item.html', context)
 
 
 def __base_context__(request):

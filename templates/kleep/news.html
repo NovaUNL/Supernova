@@ -1,0 +1,28 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+
+{% block content %}
+    <h1><i class="far fa-newspaper"></i> Notícias</h1>
+    {% for news_item in news %}
+        <div>
+            <a href="{% url 'news_item' news_item.id %}"><h2>{{ news_item.title }}</h2></a>
+            <span>{{ news_item.summary }}</span>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry selected">Todas</a>
+    <a class="menu_entry" href="#">Campus</a>
+    <a class="menu_entry" href="#">Minhas cadeiras</a>
+    <a class="menu_entry" href="#">Subscrições</a>
+    <a class="menu_entry" href="#">Generalistas</a>
+{% endblock %}
+
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry" href="#">Gerir feed</a>
+        <a class="menu_entry" href="#">Gerir subscrições</a>
+    </div>
+{% endblock %}

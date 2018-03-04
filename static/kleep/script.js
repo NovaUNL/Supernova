@@ -14,11 +14,12 @@ studentMenuItems = [
 ];
 
 universityItems = [
-    {'name': 'Cursos', 'url': '/#4', 'auth_required': false, 'icon': 'fa-graduation-cap'},
     {'name': 'Campus', 'url': '/campus/', 'auth_required': false, 'icon': 'fa-map'},
-    {'name': 'Noticias', 'url': '/#2', 'auth_required': false, 'icon': 'fa-newspaper'},
+    {'name': 'Departamentos', 'url': '/departamentos/', 'auth_required': false, 'icon': 'fa-puzzle-piece'},
+    {'name': 'Cursos', 'url': '/cursos/', 'auth_required': false, 'icon': 'fa-graduation-cap'},
+    {'name': 'Noticias', 'url': '/noticias/', 'auth_required': false, 'icon': 'fa-newspaper'},
     {'name': 'Eventos', 'url': '/#2', 'auth_required': false, 'icon': 'fa-bullhorn'},
-    {'name': 'Grupos', 'url': '/#3', 'auth_required': false, 'icon': 'fa-users'},
+    {'name': 'Grupos', 'url': '/grupos/', 'auth_required': false, 'icon': 'fa-users'},
     {'name': 'Menus', 'url': '/#2', 'auth_required': false, 'icon': 'fa-utensils'}
 ];
 
@@ -26,7 +27,7 @@ communityItems = [
     {'name': 'Resumos', 'url': '/#1', 'auth_required': false, 'icon': 'fa-book'},
     {'name': 'Artigos', 'url': '/#2', 'auth_required': false, 'icon': 'fa-pencil-alt'},
     {'name': 'Grupos', 'url': '/grupos', 'auth_required': false, 'icon': 'fa-users'},
-    {'name': 'Classificados', '/#': '/#3', 'auth_required': false, 'icon': 'fa-trash'},
+    {'name': 'Classificados', 'url': '/#3', 'auth_required': false, 'icon': 'fa-trash'},
     {'name': 'Opiniões', 'url': '/#3', 'auth_required': false, 'icon': 'fa-comments'},
     {'name': 'Loja', 'url': '/#3', 'auth_required': false, 'icon': 'fa-euro-sign'}
 ];
