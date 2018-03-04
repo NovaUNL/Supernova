@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import psutil
 from django.contrib.auth import logout, login
 from django.core.cache import cache
@@ -7,7 +9,7 @@ from django.urls import reverse
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Classroom, \
-    NewsItem, Area, Course, Degree
+    NewsItem, Area, Course, Degree, ClipStudent, Curriculum
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -217,8 +219,8 @@ def groups(request):
 
 
 def group(request, group_id):
-    context = __base_context__(request)
     group = get_object_or_404(Group, id=group_id)
+    context = __base_context__(request)
     context['title'] = group.name
     context['group'] = group
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
@@ -235,8 +237,8 @@ def departments(request):
 
 
 def department(request, department_id):
-    context = __base_context__(request)
     department = get_object_or_404(Department, id=department_id)
+    context = __base_context__(request)
     context['title'] = f'Departamento de {department.name}'
     context['department'] = department
     context['degrees'] = Degree.objects.filter(course__department=department).all()
@@ -247,8 +249,8 @@ def department(request, department_id):
 
 
 def class_view(request, class_id):
-    context = __base_context__(request)
     class_ = get_object_or_404(Class, id=class_id)
+    context = __base_context__(request)
     department = class_.department
     context['title'] = class_.name
     context['department'] = department
@@ -260,8 +262,8 @@ def class_view(request, class_id):
 
 
 def class_instance_view(request, instance_id):
-    context = __base_context__(request)
     instance = get_object_or_404(ClassInstance, id=instance_id)
+    context = __base_context__(request)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_index'
@@ -282,8 +284,8 @@ def class_instance_view(request, instance_id):
 
 
 def class_instance_schedule_view(request, instance_id):
-    context = __base_context__(request)
     instance = get_object_or_404(ClassInstance, id=instance_id)
+    context = __base_context__(request)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_schedule'
@@ -339,8 +341,8 @@ def areas(request):
 
 
 def area(request, area_id):
-    context = __base_context__(request)
     area = get_object_or_404(Area, id=area_id)
+    context = __base_context__(request)
     context['title'] = 'Area de ' + area.name
     context['area'] = area
     context['courses'] = Course.objects.filter(area=area).order_by('degree_id').all()
@@ -351,16 +353,50 @@ def area(request, area_id):
 
 
 def course(request, course_id):
-    context = __base_context__(request)
     course = get_object_or_404(Course, id=course_id)
+    context = __base_context__(request)
     department = course.department
     context['title'] = str(course)
 
     context['course'] = course
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': course.department, 'url': reverse('department', args=[department.id])},
+                          {'name': department, 'url': reverse('department', args=[department.id])},
                           {'name': course, 'url': reverse('course', args=[course_id])}]
     return render(request, 'kleep/course.html', context)
+
+
+def course_students(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    context = __base_context__(request)
+    department = course.department
+    context['title'] = 'Alunos de %s' % course
+
+    context['course'] = course
+    context['students'] = course.students.order_by('studentcourse__last_year', 'number').all()
+    context['unregistered_students'] = ClipStudent.objects.filter(
+        course=course.clip_course, student=None).order_by('internal_id')
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
+                          {'name': department, 'url': reverse('department', args=[department.id])},
+                          {'name': course, 'url': reverse('course', args=[course_id])},
+                          {'name': 'Alunos', 'url': reverse('course_students', args=[course_id])}]
+    return render(request, 'kleep/course_students.html', context)
+
+
+def course_curriculum(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    context = __base_context__(request)
+    department = course.department
+    curriculum = Curriculum.objects.filter(course=course).order_by('year', 'period', 'period_type').all()
+
+    context['title'] = 'Programa curricular de %s' % course
+
+    context['course'] = course
+    context['curriculum'] = curriculum
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
+                          {'name': department, 'url': reverse('department', args=[department.id])},
+                          {'name': course, 'url': reverse('course', args=[course_id])},
+                          {'name': 'Programa curricular', 'url': reverse('course_curriculum', args=[course_id])}]
+    return render(request, 'kleep/course_curriculum.html', context)
 
 
 def news(request):

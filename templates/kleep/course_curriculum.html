@@ -1,0 +1,64 @@
+{% extends 'kleep/content_navigation.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+        }
+
+        tr:nth-of-type(odd) {
+            background-color: #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-graduation-cap"></i> Programa curricular de {{ course }}</h1>
+    <h3 style="margin-left: 20px">Departamento de {{ course.department }}</h3>
+    <table>
+        <tr>
+            <th>Ano</th>
+            <th>Período</th>
+            <th>Cadeira</th>
+            <th>ECTS</th>
+        </tr>
+        {% for class in curriculum %}
+            <tr>
+                <td>{{ class.year }}</td>
+                <td>
+                    {% if class.period_type == 'a' %}
+                        Anual
+                    {% elif class.period_type == 's' %}
+                        {{ class.period }}º Semestre
+                    {% elif class.period_type == 't' %}
+                        {{ class.period }}º Trimestre
+                    {% else %}
+                        ?
+                    {% endif %}
+                </td>
+                <td><a href="{% url 'class' class.corresponding_class.id %}">{{ class.corresponding_class.name }}</a>
+                </td>
+                <td>
+                    {% if class.corresponding_class.credits %}
+                        {{ class.corresponding_class.credits }}
+                    {% else %}
+                        ?
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry selected">Programa curricular</a>
+    <a class="menu_entry" href="{% url 'course_students' course.id %}">Alunos</a>
+{% endblock %}

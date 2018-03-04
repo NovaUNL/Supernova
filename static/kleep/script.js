@@ -15,8 +15,7 @@ studentMenuItems = [
 
 universityItems = [
     {'name': 'Campus', 'url': '/campus/', 'auth_required': false, 'icon': 'fa-map'},
-    {'name': 'Departamentos', 'url': '/departamentos/', 'auth_required': false, 'icon': 'fa-puzzle-piece'},
-    {'name': 'Cursos', 'url': '/areas/', 'auth_required': false, 'icon': 'fa-graduation-cap'},
+    {'name': 'Departamentos', 'url': '/departamentos/', 'auth_required': false, 'icon': 'fa-graduation-cap'},
     {'name': 'Noticias', 'url': '/noticias/', 'auth_required': false, 'icon': 'fa-newspaper'},
     {'name': 'Eventos', 'url': '/#2', 'auth_required': false, 'icon': 'fa-bullhorn'},
     {'name': 'Grupos', 'url': '/grupos/', 'auth_required': false, 'icon': 'fa-users'},

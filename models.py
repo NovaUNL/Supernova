@@ -310,6 +310,10 @@ class Student(Model):
     crawled_students = ManyToManyField(ClipStudent, through='StudentClipStudent')
     turns = ManyToManyField('Turn', through='TurnStudents')
     class_instances = ManyToManyField('ClassInstance', through='Enrollment')
+    courses = ManyToManyField('Course', through='StudentCourse')
+    single_clip_student = BooleanField(default=True)
+    number = IntegerField(null=True, blank=True)  # These can be null if this student maps to various clip students
+    abbreviation = TextField(null=True, blank=True)
 
     class Meta:
         managed = True
@@ -319,7 +323,7 @@ class Student(Model):
         return str(self.user)
 
 
-class StudentClipStudent(Model):  # Oh boy, naming conventions going strong with this one...
+class StudentClipStudent(Model):
     clip_student = ForeignKey(ClipStudent, on_delete=models.PROTECT)
     student = ForeignKey(Student, on_delete=models.CASCADE)
     confirmed = BooleanField(default=False)
@@ -415,6 +419,8 @@ class Course(Model):
     department = ForeignKey('Department', on_delete=models.PROTECT)
     areas = ManyToManyField(Area, through='CourseArea')
     url = TextField(max_length=256, null=True, blank=True)
+    students = ManyToManyField(Student, through='StudentCourse')
+    curriculum = ManyToManyField('Class', through='Curriculum')
 
     class Meta:
         managed = True
@@ -422,6 +428,20 @@ class Course(Model):
 
     def __str__(self):
         return f'{self.degree.name} em {self.name}'
+
+
+class StudentCourse(Model):
+    student = ForeignKey(Student, on_delete=models.CASCADE)
+    course = ForeignKey(Course, on_delete=models.PROTECT)
+    first_year = IntegerField()
+    last_year = IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'student_courses'
+
+    def __str__(self):
+        return f'{self.student}@{self.course} {self.first_year}-{self.last_year}'
 
 
 class CourseArea(Model):
@@ -441,8 +461,10 @@ class Class(Model):
     abbreviation = TextField(max_length=10, default='HELP')
     description = TextField(max_length=1024, null=True, blank=True)
     synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
+    credits = IntegerField(null=True, blank=True)
     department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
     clip_class = OneToOneField(ClipClass, on_delete=models.PROTECT, related_name='related_class')
+    courses = ManyToManyField(Course, through='Curriculum')
 
     class Meta:
         managed = True
@@ -450,6 +472,19 @@ class Class(Model):
 
     def __str__(self):
         return self.name
+
+
+class Curriculum(Model):
+    course = ForeignKey(Course, on_delete=models.CASCADE, related_name='course')
+    corresponding_class = ForeignKey(Class, on_delete=models.PROTECT)  # Guess I can't simply call it 'class'
+    period_type = CharField(max_length=1, null=True, blank=True)  # 's' => semester, 't' => trimester, 'a' => anual
+    period = IntegerField(null=True, blank=True)
+    year = IntegerField()
+    required = BooleanField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'curriculum'
 
 
 class ClassInstance(Model):

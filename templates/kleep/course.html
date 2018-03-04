@@ -63,6 +63,6 @@
 {% endblock %}
 
 {% block navigation %}
-    <a class="menu_entry">Plano curricular</a>
-    <a class="menu_entry">Alunos</a>
+    <a class="menu_entry" href="{% url 'course_curriculum' course.id %}">Programa curricular</a>
+    <a class="menu_entry" href="{% url 'course_students' course.id %}">Alunos</a>
 {% endblock %}
