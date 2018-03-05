@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User as SysUser
@@ -360,17 +362,15 @@ class Building(Model):
         return self.name
 
 
-class Classroom(Model):
+class Place(Model):
     name = TextField(max_length=100)
     building = ForeignKey(Building, on_delete=models.CASCADE)
     clip_classroom = OneToOneField(ClipClassroom, null=True, blank=True, on_delete=models.PROTECT)
     unlocked = NullBooleanField(null=True, default=None)
-    is_laboratory = BooleanField(default=False)  # TODO make type a separate entity
-    is_auditorium = BooleanField(default=False)
 
     class Meta:
         managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'classrooms'
+        db_table = KLEEP_TABLE_PREFIX + 'places'
         ordering = ('building', 'name',)
 
     def __str__(self):
@@ -378,6 +378,31 @@ class Classroom(Model):
 
     def short_str(self):
         return f"{self.name}\n{self.building.abbreviation}"
+
+
+class Classroom(Place):
+    capacity = IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'classrooms'
+
+
+class Auditorium(Place):
+    capacity = IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'auditoriums'
+
+
+class Laboratory(Place):
+    description = TextField(max_length=2048)
+    equipment = TextField(max_length=2048)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'laboratories'
 
 
 class BuildingUsage(Model):
@@ -556,7 +581,7 @@ class TurnInstance(Model):
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
-    classroom = ForeignKey(Classroom, on_delete=models.PROTECT, null=True, blank=True)
+    classroom = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
         managed = True
@@ -599,14 +624,34 @@ class TurnInstance(Model):
 
 
 class Event(Model):
-    name = TextField(max_length=100)
     start_datetime = DateTimeField()
     end_datetime = DateTimeField()
-    users = ManyToManyField(User, through="EventUsers")
+    announce_date = DateField(default=date.today)
+    classroom = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
+    users = ManyToManyField(User, through='EventUsers')
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'events'
+
+    def __str__(self):
+        return f'from {self.datetime_to_eventtime(self.start_datetime)} ' \
+               f'to {self.datetime_to_eventtime(self.end_datetime)}'
+
+    def interval(self):
+        if self.start_datetime.day == self.end_datetime.day:
+            return '%02d-%02d %02d:%02d - %02d:%02d' % (self.start_datetime.day, self.start_datetime.month,
+                                                        self.start_datetime.hour, self.start_datetime.minute,
+                                                        self.end_datetime.hour, self.end_datetime.minute)
+
+        return '%02d-%02d %02d:%02d - %02d-%02d %02d:%02d' % (self.start_datetime.day, self.start_datetime.month,
+                                                              self.start_datetime.hour, self.start_datetime.minute,
+                                                              self.end_datetime.day, self.end_datetime.month,
+                                                              self.end_datetime.hour, self.end_datetime.minute)
+
+    @staticmethod
+    def datetime_to_eventtime(datetime):  # TODO move me somewhere else
+        return '%02d-%02d, %02d:%02d' % (datetime.day, datetime.month, datetime.hour, datetime.minute)
 
 
 class EventUsers(Model):
@@ -618,8 +663,7 @@ class EventUsers(Model):
         db_table = KLEEP_TABLE_PREFIX + 'event_users'
 
 
-class TurnEvent(Model):
-    event = OneToOneField(Event, on_delete=models.PROTECT)
+class TurnEvent(Event):
     turn_instance = ForeignKey(TurnInstance, on_delete=models.CASCADE)
 
     class Meta:
@@ -631,14 +675,17 @@ class Workshop(Model):
     name = TextField(max_length=100)
     description = TextField(max_length=4096, null=True, blank=True)
     capacity = IntegerField(null=True, blank=True)
+    creator = ForeignKey('Group', null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'workshops'
 
+    def __str__(self):
+        return self.name
 
-class WorkshopEvent(Model):
-    event = OneToOneField(Event, on_delete=models.PROTECT)
+
+class WorkshopEvent(Event):
     workshop = ForeignKey(Workshop, on_delete=models.CASCADE)
 
     class Meta:
@@ -655,24 +702,16 @@ class Party(Model):
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'parties'
 
+    def __str__(self):
+        return self.name
 
-class PartyEvent(Model):
-    event = OneToOneField(Event, on_delete=models.PROTECT)
+
+class PartyEvent(Event):
     party = ForeignKey(Party, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'party_events'
-
-
-class GenericEvent(Model):
-    event = OneToOneField(Event, on_delete=models.PROTECT)
-    name = TextField(max_length=100)
-    description = TextField(max_length=4096, null=True, blank=True)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'generic_events'
 
 
 class Service(Model):

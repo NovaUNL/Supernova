@@ -6,10 +6,11 @@ from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
+from django.utils.timezone import now
 
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
-from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Classroom, \
-    NewsItem, Area, Course, Degree, ClipStudent, Curriculum
+from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
+    NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, Workshop, Party, PartyEvent, WorkshopEvent
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -179,7 +180,7 @@ def building(request, building_id):
 
 
 def classroom_view(request, classroom_id):
-    classroom = get_object_or_404(Classroom, id=classroom_id)
+    classroom = get_object_or_404(Place, id=classroom_id)
     building = classroom.building
     context = __base_context__(request)
     context['title'] = str(classroom)
@@ -401,7 +402,6 @@ def course_curriculum(request, course_id):
 
 def news(request):
     context = __base_context__(request)
-    context['page'] = 'instance_turns'
     context['title'] = 'Notícias'
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:10]
     context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')}]
@@ -417,6 +417,28 @@ def news_item(request, news_item_id):
     context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')},
                           {'name': news_item.title, 'url': reverse('news_item', args=[news_item_id])}]
     return render(request, 'kleep/news/news_item.html', context)
+
+
+def events(request):
+    context = __base_context__(request)
+    context['page'] = 'instance_turns'
+    context['title'] = 'Eventos'
+    context['events'] = Event.objects.filter(  # Only events starting from now, and excluding turn events
+        start_datetime__gt=now(), turnevent__isnull=True).order_by('announce_date').reverse()[0:10]
+    context['next_workshops'] = WorkshopEvent.objects.order_by('start_datetime')[0:10]
+    context['next_parties'] = PartyEvent.objects.order_by('start_datetime')[0:10]
+    context['sub_nav'] = [{'name': 'Eventos', 'url': reverse('events')}]
+    return render(request, 'kleep/events/events.html', context)
+
+
+def event(request, event_id):
+    context = __base_context__(request)
+    context['page'] = 'instance_turns'
+    event = get_object_or_404(Event, id=event_id)
+    if hasattr(event, 'workshop'):
+        return HttpResponseRedirect()#TODO
+    else:
+        pass
 
 
 def __base_context__(request):

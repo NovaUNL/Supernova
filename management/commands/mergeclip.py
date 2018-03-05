@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from kleep.models import Period, ClipClassInstance, ClassInstance, Class, Turn, TurnInstance, ClipClassroom, Classroom, \
+from kleep.models import Period, ClipClassInstance, ClassInstance, Class, Turn, TurnInstance, ClipClassroom, Place, \
     ClipDepartment, ClipInstitution, Department
 
 
@@ -21,7 +21,7 @@ class Command(BaseCommand):
             except Exception:
                 raise CommandError('Please *MANUALLY* link buildings to CLIP buildings before running this.')
             if not hasattr(clip_classroom, 'classroom'):
-                corresponding_classroom = Classroom(
+                corresponding_classroom = Place(
                     name=clip_classroom.name, building=building, clip_classroom=clip_classroom)
                 corresponding_classroom.save()
                 print(f'Created classroom {corresponding_classroom}')
