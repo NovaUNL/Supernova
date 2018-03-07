@@ -770,7 +770,7 @@ class SynopsisSubarea(Model):
 
 class SynopsisTopic(Model):
     name = TextField()
-    number = IntegerField()
+    index = IntegerField()
     sub_area = ForeignKey(SynopsisSubarea, on_delete=models.PROTECT)
     sections = ManyToManyField('SynopsisSection', through='SynopsisSectionTopic')
 

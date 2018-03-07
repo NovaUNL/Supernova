@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin, RichEditor
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, Workshop, Party, PartyEvent, WorkshopEvent, \
-    SynopsisArea, SynopsisSubarea
+    SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -58,7 +58,7 @@ def campus_transportation(request):
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('campus')},
         {'name': 'Transportes', 'url': reverse('transportation')}]
-    return render(request, 'kleep/standalone/templates/kleep/campus/transportation.html', context)
+    return render(request, 'kleep/campus/transportation.html', context)
 
 
 def profile(request, nickname):
@@ -167,7 +167,7 @@ def create_account(request):
 
     else:
         context['creation_form'] = AccountCreationForm()
-    return render(request, 'kleep/academic/templates/kleep/create_account.html', context)
+    return render(request, 'kleep/profile/create_account.html', context)
 
 
 def building(request, building_id):
@@ -193,7 +193,7 @@ def classroom_view(request, classroom_id):
     turn_instances = classroom.turninstance_set.filter(  # TODO create function to return current school year/period
         turn__class_instance__year=2018, turn__class_instance__period=2).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
-    return render(request, 'kleep/standalone/templates/kleep/campus/classroom.html', context)
+    return render(request, 'kleep/campus/classroom.html', context)
 
 
 def service(request, building_id, service_id):
@@ -206,7 +206,7 @@ def service(request, building_id, service_id):
                           {'name': service.name, 'url': reverse('service', args=[building_id, service_id])}]
     context['building'] = building
     context['service'] = service
-    return render(request, 'kleep/standalone/templates/kleep/campus/service.html', context)
+    return render(request, 'kleep/campus/service.html', context)
 
 
 def groups(request):
@@ -449,6 +449,50 @@ def synopses_areas(request):
     context['areas'] = SynopsisArea.objects.all()
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')}]
     return render(request, 'kleep/synopses/synopses.html', context)
+
+
+def synopsis_topic(request, topic_id):
+    context = __base_context__(request)
+    topic = get_object_or_404(SynopsisTopic, id=topic_id)
+    subarea = topic.sub_area
+    area = subarea.area
+    context['title'] = topic.name
+    context['area'] = area
+    context['subarea'] = subarea
+    context['topic'] = topic
+    context['sections'] = topic.sections.order_by('synopsissectiontopic__index').all()
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')},
+                          {'name': area.name, 'url': '#'},
+                          {'name': subarea.name, 'url': '#'},
+                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])}]
+    return render(request, 'kleep/synopses/topic.html', context)
+
+
+def synopsis_section(request, topic_id, section_id):
+    context = __base_context__(request)
+    topic = get_object_or_404(SynopsisTopic, id=topic_id)
+    section = get_object_or_404(SynopsisSection, id=section_id)
+    if section not in topic.sections.all():
+        return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
+    subarea = topic.sub_area
+    area = subarea.area
+    context['title'] = topic.name
+    context['area'] = area
+    context['subarea'] = subarea
+    context['topic'] = topic
+    context['section'] = section
+    section_topic_relation = SynopsisSectionTopic.objects.filter(topic=topic, section=section).first()
+    context['previous_section'] = SynopsisSectionTopic.objects. \
+        filter(topic=topic, index__lt=section_topic_relation.index).last().section
+    context['next_section'] = SynopsisSectionTopic.objects. \
+        filter(topic=topic, index__gt=section_topic_relation.index).first().section
+    context['authors'] = section.synopsissectionlog_set.distinct('author')
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')},
+                          {'name': area.name, 'url': '#'},
+                          {'name': subarea.name, 'url': '#'},
+                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
+                          {'name': section.name, 'url': reverse('synopsis_section', args=[topic_id, section_id])}]
+    return render(request, 'kleep/synopses/section.html', context)
 
 
 def __base_context__(request):

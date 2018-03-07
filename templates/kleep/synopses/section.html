@@ -1,0 +1,25 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+
+{% block head %}
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-book"></i> {{ section.name }}</h1>
+    <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
+    {{ section.content|safe }}
+
+    <span>Por:</span><br>
+    {% for author in authors %}
+        <a href="{% url 'profile' author.author.nickname %}">{{ author.author.name }}</a>
+    {% endfor %}
+    {% if previous_section %}
+        <a href="{% url 'synopsis_section' topic.id previous_section.id %}">{{ previous_section.name }}</a>
+    {% endif %}
+    {% if next_section %}
+        <a href="{% url 'synopsis_section' topic.id next_section.id %}">{{ next_section }}</a>
+    {% endif %}
+{% endblock %}

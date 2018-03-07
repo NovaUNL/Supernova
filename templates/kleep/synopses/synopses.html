@@ -10,7 +10,7 @@
             <div>
                 <h3>{{ subarea.name }}</h3>
                 {% for topic in subarea.synopsistopic_set.all %}
-                    <div>{{ topic.name }}</div>
+                    <div><a href="{% url 'synopsis_topic' topic.id %}">{{ topic.name }}</a></div>
                 {% endfor %}
             </div>
         {% endfor %}

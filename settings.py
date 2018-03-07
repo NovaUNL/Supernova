@@ -13,7 +13,7 @@ with open(BASE_DIR + '/settings.json') as json_data:
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -89,12 +89,12 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR + '/static/'
+STATIC_ROOT = '/srv/http/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR + '/media/'
+MEDIA_ROOT = '/srv/http/media/'
 
 # CKEditor plugin
-CKEDITOR_BASEPATH = '/static/ckeditor/'
+CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_ALLOW_NONIMAGE_FILES = False
 CKEDITOR_IMAGE_BACKEND = 'pillow'
