@@ -8,9 +8,10 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.timezone import now
 
-from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
+from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin, RichEditor
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
-    NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, Workshop, Party, PartyEvent, WorkshopEvent
+    NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, Workshop, Party, PartyEvent, WorkshopEvent, \
+    SynopsisArea, SynopsisSubarea
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -433,12 +434,21 @@ def events(request):
 
 def event(request, event_id):
     context = __base_context__(request)
+    context['title'] = 'Evento '  # TODO
     context['page'] = 'instance_turns'
     event = get_object_or_404(Event, id=event_id)
     if hasattr(event, 'workshop'):
-        return HttpResponseRedirect()#TODO
+        return HttpResponseRedirect()  # TODO
     else:
         pass
+
+
+def synopses_areas(request):
+    context = __base_context__(request)
+    context['title'] = 'Resumos'
+    context['areas'] = SynopsisArea.objects.all()
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')}]
+    return render(request, 'kleep/synopses/synopses.html', context)
 
 
 def __base_context__(request):

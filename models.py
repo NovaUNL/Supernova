@@ -1,5 +1,6 @@
 from datetime import date
 
+from ckeditor.fields import RichTextField
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User as SysUser
@@ -485,7 +486,6 @@ class Class(Model):
     name = TextField(max_length=30)
     abbreviation = TextField(max_length=10, default='HELP')
     description = TextField(max_length=1024, null=True, blank=True)
-    synopsis = ForeignKey("Synopsis", null=True, on_delete=models.SET_NULL)
     credits = IntegerField(null=True, blank=True)
     department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
     clip_class = OneToOneField(ClipClass, on_delete=models.PROTECT, related_name='related_class')
@@ -744,33 +744,104 @@ class Bar(Model):
         return str(self.service)
 
 
-class Synopsis(Model):
-    completeness = IntegerField(default=0)
-    note = TextField()
+class SynopsisArea(Model):
+    name = TextField(max_length=50)
 
     class Meta:
         managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'synopses'
+        db_table = KLEEP_TABLE_PREFIX + 'synopsis_area'
+
+    def __str__(self):
+        return self.name
 
 
-class SynopsisChapter(Model):
+class SynopsisSubarea(Model):
+    name = TextField(max_length=50)
+    description = TextField(max_length=1024)
+    area = ForeignKey(SynopsisArea, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'synopsis_subarea'
+
+    def __str__(self):
+        return self.name
+
+
+class SynopsisTopic(Model):
     name = TextField()
     number = IntegerField()
-    synopsis = ForeignKey(Synopsis, on_delete=models.CASCADE)
+    sub_area = ForeignKey(SynopsisSubarea, on_delete=models.PROTECT)
+    sections = ManyToManyField('SynopsisSection', through='SynopsisSectionTopic')
 
     class Meta:
         managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'synopsis_chapters'
+        db_table = KLEEP_TABLE_PREFIX + 'synopsis_topics'
+
+    def __str__(self):
+        return self.name
 
 
-class SynopsisChapterPart(Model):
+class SynopsisSection(Model):
     name = TextField()
-    content = TextField()
-    contentType = TextField()
+    content = RichTextField()
+    topics = ManyToManyField(SynopsisTopic, through='SynopsisSectionTopic')
 
     class Meta:
         managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'synopsis_chapter_parts'
+        db_table = KLEEP_TABLE_PREFIX + 'synopsis_sections'
+
+    def __str__(self):
+        return self.name
+
+
+class ClassSynopses(Model):
+    corresponding_class = ForeignKey(Class, on_delete=models.CASCADE)
+    description = TextField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'class_synopses'
+
+    def __str__(self):
+        return f'{self.corresponding_class}'
+
+
+class ClassSynopsesSections(Model):
+    section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
+    class_synopsis = ForeignKey(ClassSynopses, on_delete=models.PROTECT)
+    index = IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'class_synopsis_sections'
+
+    def __str__(self):
+        return f'{self.section} annexed to {self.class_synopsis}.'
+
+
+class SynopsisSectionTopic(Model):
+    section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
+    topic = ForeignKey(SynopsisTopic, on_delete=models.PROTECT)
+    index = IntegerField(default=1024)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'synopsis_section_topics'
+
+    def __str__(self):
+        return f'{self.section} linked to {self.topic}.'
+
+
+class SynopsisSectionLog(Model):
+    author = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
+    timestamp = DateTimeField(auto_now_add=True)
+
+    # delta = TextField() # TODO store diffs
+
+    def __str__(self):
+        return f'{self.author} edited {self.section} @ {self.timestamp}.'
 
 
 class Tag(Model):

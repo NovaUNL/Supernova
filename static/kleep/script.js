@@ -23,7 +23,7 @@ universityItems = [
 ];
 
 communityItems = [
-    {'name': 'Resumos', 'url': '/#1', 'auth_required': false, 'icon': 'fa-book'},
+    {'name': 'Resumos', 'url': '/resumos/', 'auth_required': false, 'icon': 'fa-book'},
     {'name': 'Artigos', 'url': '/#2', 'auth_required': false, 'icon': 'fa-pencil-alt'},
     {'name': 'Grupos', 'url': '/grupos', 'auth_required': false, 'icon': 'fa-users'},
     {'name': 'Classificados', 'url': '/#3', 'auth_required': false, 'icon': 'fa-trash'},

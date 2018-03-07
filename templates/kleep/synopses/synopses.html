@@ -1,0 +1,18 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+
+{% block content %}
+    <h1><i class="fas fa-book"></i> Resumos</h1>
+    {% for area in areas %}
+        <h2>{{ area.name }}</h2>
+        {% for subarea in area.synopsissubarea_set.all %}
+            <div>
+                <h3>{{ subarea.name }}</h3>
+                {% for topic in subarea.synopsistopic_set.all %}
+                    <div>{{ topic.name }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endblock %}

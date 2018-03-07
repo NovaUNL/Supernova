@@ -37,6 +37,7 @@ urlpatterns = [
     path('noticia/<str:news_item_id>/', views.news_item, name='news_item'),
     path('eventos/', views.events, name='events'),
     path('evento/<str:event_id>/', views.event, name='event'),
+    path('resumos/', views.synopses_areas, name='synopses'),
     path('criar/', views.create_account, name='create_account'),
     path('entrar/', views.login_view, name='login'),
     path('sair/', views.logout_view, name='logout'),
