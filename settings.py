@@ -1,9 +1,16 @@
+import json
 import os
 import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = "It's secret, they said..."
+with open(BASE_DIR + '/settings.json') as json_data:
+    settings = json.load(json_data)
+    SECRET_KEY = settings['SECRET_KEY']
+    CLIP_USERNAME = settings['CLIP_USERNAME']
+    CLIP_PASSWORD = settings['CLIP_PASSWORD']
+    DATABASES = settings['DATABASES']
+
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -18,7 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'kleep.apps.KleepConfig',
     'captcha',
-    'ckeditor'
+    'ckeditor',
+    'ckeditor_uploader'
 ]
 
 MIDDLEWARE = [
@@ -52,11 +60,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'kleep.wsgi.application'
 
-# Database
-DATABASES = {
-    # FILL ME
-}
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -86,12 +89,15 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.dirname(os.path.realpath(__file__)) + '/static/kleep/'
+STATIC_ROOT = BASE_DIR + '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR + '/media/'
 
-#CKEditor plugin
-CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor'
-CKEDITOR_UPLOAD_PATH = '/uploads/'
+# CKEditor plugin
+CKEDITOR_BASEPATH = '/static/ckeditor/'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_IMAGE_BACKEND = 'pillow'
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar_ToolbarConfig': [
@@ -113,7 +119,7 @@ CKEDITOR_CONFIGS = {
         'mathJaxLib': '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/MathJax.js?config=TeX-AMS_HTML',
         'tabSpaces': 4,
         'extraPlugins': ','.join([
-            # 'uploadimage',
+            'uploadimage',
             'mathjax',
             'codesnippet',
             'div',
@@ -134,9 +140,6 @@ CKEDITOR_CONFIGS = {
 # Captcha plugin
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
-
-CLIP_USERNAME = 'nope'
-CLIP_PASSWORD = 'NOPE'
 
 VERSION = subprocess.check_output([
     "git",

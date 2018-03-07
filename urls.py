@@ -1,7 +1,9 @@
 from django.conf.urls import url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from kleep import settings
 from . import views
 
 app_name = 'kleep'
@@ -41,5 +43,10 @@ urlpatterns = [
     path('sobre/', views.about, name='about'),
     path('pedinchar/', views.beg, name='beg'),
     path('privacidade/', views.privacy, name='privacy'),
-    url(r'^captcha/', include('captcha.urls'))
+    url(r'^captcha/', include('captcha.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls'))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
