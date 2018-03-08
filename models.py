@@ -892,19 +892,6 @@ class ArticleTags(Model):
         db_table = KLEEP_TABLE_PREFIX + 'article_tags'
 
 
-class StoreItem(Model):
-    name = TextField(max_length=30)
-    description = TextField()
-    price = IntegerField(default=0, null=True)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'store_items'
-
-    def __str__(self):
-        return '%s (%d.%02d€)' % (self.name, int(self.price / 100), self.price % 100)
-
-
 class NewsItem(Model):
     title = TextField(max_length=100)
     summary = TextField(max_length=300)
@@ -1037,3 +1024,18 @@ class UserBadges(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'user_badges'
+
+
+class StoreItem(Model):
+    name = TextField(max_length=30)
+    description = TextField()
+    price = IntegerField(default=None, null=True, blank=True)
+    stock = IntegerField(default=-1)
+    seller = ForeignKey(Group, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'store_items'
+
+    def __str__(self):
+        return '%s (%d.%02d€)' % (self.name, int(self.price / 100), self.price % 100)

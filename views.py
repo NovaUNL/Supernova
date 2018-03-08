@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin, RichEditor
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, Workshop, Party, PartyEvent, WorkshopEvent, \
-    SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic
+    SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -482,10 +482,12 @@ def synopsis_section(request, topic_id, section_id):
     context['topic'] = topic
     context['section'] = section
     section_topic_relation = SynopsisSectionTopic.objects.filter(topic=topic, section=section).first()
-    context['previous_section'] = SynopsisSectionTopic.objects. \
-        filter(topic=topic, index__lt=section_topic_relation.index).last().section
-    context['next_section'] = SynopsisSectionTopic.objects. \
-        filter(topic=topic, index__gt=section_topic_relation.index).first().section
+    prev_section = SynopsisSectionTopic.objects.filter(topic=topic, index__lt=section_topic_relation.index).last()
+    next_section = SynopsisSectionTopic.objects.filter(topic=topic, index__gt=section_topic_relation.index).first()
+    if prev_section:
+        context['previous_section'] = prev_section.section
+    if next_section:
+        context['next_section'] = next_section.section
     context['authors'] = section.synopsissectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')},
                           {'name': area.name, 'url': '#'},
@@ -493,6 +495,85 @@ def synopsis_section(request, topic_id, section_id):
                           {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
                           {'name': section.name, 'url': reverse('synopsis_section', args=[topic_id, section_id])}]
     return render(request, 'kleep/synopses/section.html', context)
+
+
+def articles(request):
+    context = __base_context__(request)
+    context['title'] = 'Artigos'
+    context['articles'] = Article.objects.order_by('datetime').reverse()[0:10]
+    context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('articles')}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def article_item(request, article_id):
+    context = __base_context__(request)
+    article = get_object_or_404(Article, id=article_id)
+    context['title'] = article.name
+    context['articles'] = Article.objects.order_by('datetime').reverse()[0:10]
+    context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('articles')},
+                          {'name': article.name, 'url': reverse('article_item', args=[article_id])}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def lunch(request):
+    context = __base_context__(request)
+    context['title'] = 'Menus'
+    context['sub_nav'] = [{'name': 'Menus', 'url': reverse('lunch')}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def store(request):
+    context = __base_context__(request)
+    context['title'] = 'Loja'
+    context['items'] = StoreItem.objects.all()[0:50]
+    context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('store')}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def store_item(request, item_id):
+    context = __base_context__(request)
+    item = get_object_or_404(StoreItem, id=item_id)
+    context['title'] = item.name
+    context['item'] = item
+    context['sub_nav'] = [{'name': 'Loja', 'url': reverse('store')},
+                          {'name': item.name, 'url': reverse('store_item', args=[item_id])}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def classified_items(request):
+    context = __base_context__(request)
+    context['title'] = 'Classificados'
+    context['items'] = None  # TODO
+    context['sub_nav'] = [{'name': 'Classificados', 'url': reverse('classified_items')}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def classified_item(request, item_id):
+    context = __base_context__(request)
+    item = None  # TODO
+    context['title'] = item.name
+    context['item'] = item
+    context['sub_nav'] = [{'name': 'Classificados', 'url': reverse('classified_items')},
+                          {'name': item.name, 'url': reverse('classified_item', args=[item_id])}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def feedback(request):
+    context = __base_context__(request)
+    context['title'] = 'Opiniões'
+    context['items'] = None  # TODO
+    context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')}]
+    return render(request, 'kleep/TODO.html', context)
+
+
+def feedback_idea(request, idea_id):
+    context = __base_context__(request)
+    idea = None  # TODO
+    context['title'] = idea.title
+    context['item'] = idea
+    context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')},
+                          {'name': idea.title, 'url': reverse('feedback_idea', args=[idea_id])}]
+    return render(request, 'kleep/TODO.html', context)
 
 
 def __base_context__(request):
