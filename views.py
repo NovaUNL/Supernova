@@ -1,3 +1,4 @@
+import random
 from collections import OrderedDict
 
 import psutil
@@ -11,7 +12,8 @@ from django.utils.timezone import now
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, PartyEvent, WorkshopEvent, \
-    SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog
+    SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarPrice, \
+    BarDailyMenu, Catchphrase
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -21,6 +23,7 @@ def index(request):
     context['title'] = "KLEEarly not a riPoff"  # TODO, change me to something less cringy
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
     context['changelog'] = ChangeLog.objects.order_by('date').reverse()[0:3]
+    context['catchphrase'] = random.choice(Catchphrase.objects.all())
     return render(request, 'kleep/index.html', context)
 
 
@@ -202,11 +205,27 @@ def service(request, building_id, service_id):
     service = get_object_or_404(Service, id=service_id)
     context = __base_context__(request)
     context['title'] = service.name
+    is_bar = hasattr(service, 'bar')
+    context['is_bar'] = is_bar
+    if is_bar:
+        prices = []
+        for item in BarPrice.objects.filter(bar=service.bar).order_by('item').all():
+            prices.append((item.item, '%.2f' % (item.price / 100)))
+        context['product_prices'] = prices
+        menu = []
+        # TODO today filter
+        for menu_item in BarDailyMenu.objects.filter(bar=service.bar).order_by('date').all():
+            price = menu_item.price
+            if price > 0:
+                menu.append((menu_item.item, '%.2f' % (menu_item.price / 100)))
+            else:
+                menu.append((menu_item.item, None))
+        context['menu'] = menu
+    context['building'] = building
+    context['service'] = service
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building_id])},
                           {'name': service.name, 'url': reverse('service', args=[building_id, service_id])}]
-    context['building'] = building
-    context['service'] = service
     return render(request, 'kleep/campus/service.html', context)
 
 

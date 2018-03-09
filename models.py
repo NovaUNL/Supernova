@@ -754,6 +754,9 @@ class BarDailyMenu(Model):
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'bar_daily_menus'
 
+    def __str__(self):
+        return f'{self.item}, {self.bar} ({self.date})'
+
 
 class BarPrice(Model):
     bar = ForeignKey(Bar, on_delete=models.CASCADE)
@@ -1123,3 +1126,14 @@ class ChangeLog(Model):
 
     def __str__(self):
         return self.title
+
+
+class Catchphrase(Model):
+    phrase = TextField(max_length=100)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'catchphrases'
+
+    def __str__(self):
+        return self.phrase

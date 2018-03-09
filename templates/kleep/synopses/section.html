@@ -3,23 +3,38 @@
 {% load static %}
 
 {% block head %}
-    <script type="text/javascript" async
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+        <script type="text/javascript" async
+                src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <style>
+        #section-navigation a {
+            line-height: 20px;
+            background-color: #d3d3d3;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
+    <div style="float: right;"><input type="button" value="editar"></div>
     <h1><i class="fas fa-book"></i> {{ section.name }}</h1>
     <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
     {{ section.content|safe }}
 
-    <span>Por:</span><br>
-    {% for author in authors %}
-        <a href="{% url 'profile' author.author.nickname %}">{{ author.author.name }}</a>
-    {% endfor %}
-    {% if previous_section %}
-        <a href="{% url 'synopsis_section' topic.id previous_section.id %}">{{ previous_section.name }}</a>
-    {% endif %}
-    {% if next_section %}
-        <a href="{% url 'synopsis_section' topic.id next_section.id %}">{{ next_section }}</a>
-    {% endif %}
+    <span>Autores:</span><br>
+    <ul>
+        {% for author in authors %}
+            <li><a href="{% url 'profile' author.author.nickname %}">{{ author.author.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+        {% if previous_section %}
+            <a class="left-arrow"
+               href="{% url 'synopsis_section' topic.id previous_section.id %}">Anterior: {{ previous_section.name }}</a>
+        {% endif %}
+        <a style="padding: 0;"></a>
+        {% if next_section %}
+            <a class="right-arrow" href="{% url 'synopsis_section' topic.id next_section.id %}">Seguinte: {{ next_section }}</a>
+        {% endif %}
+    </nav>
 {% endblock %}

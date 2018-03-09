@@ -28,9 +28,34 @@
         {% if service.bar %}
             <div>
                 <h2>Ementa:</h2>
-                <ul>
-                    <li>TODO</li>
-                </ul>
+                <table>
+                    {% for menu_item in menu %}
+                        <tr>
+                            <td>{{ menu_item.0 }}</td>
+                            {% if menu_item.1 %}
+                                <td>{{ menu_item.1 }}€</td>
+                            {% else %}
+                                <td>Tabelado</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div>
+                <h2>Preçário:</h2>
+                <table>
+                    <tr style="text-align: left">
+                        <th>Produto:</th>
+                        <th>Preço:</th>
+                    </tr>
+                    {% for product in product_prices %}
+                        <tr>
+                            <td>{{ product.0 }}</td>
+                            <td>{{ product.1 }}€</td>
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
         {% endif %}
         <div>
