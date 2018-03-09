@@ -744,7 +744,14 @@ class Bar(Model):
         return str(self.service)
 
 
-class BarDailyMenu(Model):
+class Sellable:
+    price = IntegerField()
+
+    def price_str(self):
+        return '%0.2f' % (self.price / 100)
+
+
+class BarDailyMenu(Sellable, Model):
     bar = ForeignKey(Bar, on_delete=models.CASCADE)
     date = DateField(auto_now_add=True)
     item = TextField(max_length=100)
@@ -758,7 +765,7 @@ class BarDailyMenu(Model):
         return f'{self.item}, {self.bar} ({self.date})'
 
 
-class BarPrice(Model):
+class BarPrice(Sellable, Model):
     bar = ForeignKey(Bar, on_delete=models.CASCADE)
     item = TextField(max_length=100)
     price = IntegerField()
@@ -1053,10 +1060,10 @@ class UserBadges(Model):
         db_table = KLEEP_TABLE_PREFIX + 'user_badges'
 
 
-class StoreItem(Model):
+class StoreItem(Sellable, Model):
     name = TextField(max_length=100)
     description = TextField()
-    price = IntegerField(default=None, null=True, blank=True)
+    price = IntegerField()
     stock = IntegerField(default=-1)
     seller = ForeignKey(Group, on_delete=models.CASCADE)
 
@@ -1068,7 +1075,7 @@ class StoreItem(Model):
         return '%s (%d.%02d€)' % (self.name, int(self.price / 100), self.price % 100)
 
 
-class ClassifiedItem(Model):
+class ClassifiedItem(Sellable, Model):
     name = TextField(max_length=100)
     description = TextField()
     price = IntegerField()

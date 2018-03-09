@@ -1,6 +1,4 @@
 import random
-from collections import OrderedDict
-
 import psutil
 from django.contrib.auth import logout, login
 from django.core.cache import cache
@@ -208,16 +206,12 @@ def service(request, building_id, service_id):
     is_bar = hasattr(service, 'bar')
     context['is_bar'] = is_bar
     if is_bar:
-        prices = []
-        for item in BarPrice.objects.filter(bar=service.bar).order_by('item').all():
-            prices.append((item.item, '%.2f' % (item.price / 100)))
-        context['product_prices'] = prices
         menu = []
         # TODO today filter
         for menu_item in BarDailyMenu.objects.filter(bar=service.bar).order_by('date').all():
             price = menu_item.price
             if price > 0:
-                menu.append((menu_item.item, '%.2f' % (menu_item.price / 100)))
+                menu.append((menu_item.item, menu_item.price_str()))
             else:
                 menu.append((menu_item.item, None))
         context['menu'] = menu
@@ -547,7 +541,7 @@ def store(request):
     context['title'] = 'Loja'
     context['items'] = StoreItem.objects.all()[0:50]
     context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('store')}]
-    return render(request, 'kleep/TODO.html', context)
+    return render(request, 'kleep/store/items.html', context)
 
 
 def store_item(request, item_id):
@@ -557,7 +551,7 @@ def store_item(request, item_id):
     context['item'] = item
     context['sub_nav'] = [{'name': 'Loja', 'url': reverse('store')},
                           {'name': item.name, 'url': reverse('store_item', args=[item_id])}]
-    return render(request, 'kleep/TODO.html', context)
+    return render(request, 'kleep/store/item.html', context)
 
 
 def classified_items(request):

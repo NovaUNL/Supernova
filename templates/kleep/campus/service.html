@@ -41,7 +41,6 @@
                     {% endfor %}
                 </table>
             </div>
-
             <div>
                 <h2>Preçário:</h2>
                 <table>
@@ -49,10 +48,10 @@
                         <th>Produto:</th>
                         <th>Preço:</th>
                     </tr>
-                    {% for product in product_prices %}
+                    {% for product in service.bar.barprice_set.all %}
                         <tr>
-                            <td>{{ product.0 }}</td>
-                            <td>{{ product.1 }}€</td>
+                            <td>{{ product.item }}</td>
+                            <td>{{ product.price_str }}€</td>
                         </tr>
                     {% endfor %}
                 </table>

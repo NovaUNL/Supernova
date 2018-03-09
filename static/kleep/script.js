@@ -19,14 +19,14 @@ universityItems = [
     {'name': 'Noticias', 'url': '/noticias/', 'auth_required': false, 'icon': 'fa-newspaper'},
     {'name': 'Eventos', 'url': '/eventos/', 'auth_required': false, 'icon': 'fa-bullhorn'},
     {'name': 'Grupos', 'url': '/grupos/', 'auth_required': false, 'icon': 'fa-users'},
-    {'name': 'Menus', 'url': '/piteu/', 'auth_required': false, 'icon': 'fa-utensils'}
+    {'name': 'Menus', 'url': '/ementas/', 'auth_required': false, 'icon': 'fa-utensils'}
 ];
 
 communityItems = [
     {'name': 'Resumos', 'url': '/resumos/', 'auth_required': false, 'icon': 'fa-book'},
     {'name': 'Artigos', 'url': '/artigos/', 'auth_required': false, 'icon': 'fa-pencil-alt'},
     {'name': 'Grupos', 'url': '/grupos', 'auth_required': false, 'icon': 'fa-users'},
-    {'name': 'Classificados', 'url': '/tralha/', 'auth_required': false, 'icon': 'fa-trash'},
+    {'name': 'Classificados', 'url': '/classificados/', 'auth_required': false, 'icon': 'fa-trash'},
     {'name': 'Opiniões', 'url': '/feedback/', 'auth_required': false, 'icon': 'fa-comments'},
     {'name': 'Loja', 'url': '/loja/', 'auth_required': false, 'icon': 'fa-euro-sign'}
 ];
