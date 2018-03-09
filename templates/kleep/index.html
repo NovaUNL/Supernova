@@ -67,19 +67,11 @@
             </div>
         </div>
         <div style="flex-basis: 40%; min-width:200px;">
-            <h2>Changelog</h2>
-            <h3 style="display: inline-block;">Novos feitos</h3> <span>1 Março 2018</span>
-            <ul style="padding: 0 15px;">
-                <li><b>Produtividade</b> - Fazer 40 ECTS num só semestre</li>
-                <li><b>Intelecto</b> - Tirar um 20 a uma cadeira com >=6 ECTS</li>
-                <li><b>Sorte</b> - Na 3º inscrição a uma cadeira apanhar o mesmo professor.</li>
-                <li><b>Planeado</b> - Tirar <= 10 a todos os testes da cadeira.</li>
-            </ul>
-            <h3 style="display: inline-block;">Foto de perfil</h3> <span>2 Março 2018</span>
-            <p>
-                Sente que o resto do mundo tem que ver a sua cara?<br>
-                Força nisso, mas só ali na sua caixinha de areia!
-            </p>
+            <h2>Alterações</h2>
+            {% for change in changelog %}
+                <h3 style="display: inline-block;">{{ change.title }}</h3> <span>{{ change.date }}</span>
+                {{ change.content|safe }}
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

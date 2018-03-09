@@ -744,6 +744,30 @@ class Bar(Model):
         return str(self.service)
 
 
+class BarDailyMenu(Model):
+    bar = ForeignKey(Bar, on_delete=models.CASCADE)
+    date = DateField(auto_now_add=True)
+    item = TextField(max_length=100)
+    price = IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'bar_daily_menus'
+
+
+class BarPrice(Model):
+    bar = ForeignKey(Bar, on_delete=models.CASCADE)
+    item = TextField(max_length=100)
+    price = IntegerField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'bar_prices'
+
+    def __str__(self):
+        return '%s, %0.2f€ (%s)' % (self.item, self.price / 100, self.bar.service.name)
+
+
 class SynopsisArea(Model):
     name = TextField(max_length=50)
 
@@ -1027,7 +1051,7 @@ class UserBadges(Model):
 
 
 class StoreItem(Model):
-    name = TextField(max_length=30)
+    name = TextField(max_length=100)
     description = TextField()
     price = IntegerField(default=None, null=True, blank=True)
     stock = IntegerField(default=-1)
@@ -1039,3 +1063,63 @@ class StoreItem(Model):
 
     def __str__(self):
         return '%s (%d.%02d€)' % (self.name, int(self.price / 100), self.price % 100)
+
+
+class ClassifiedItem(Model):
+    name = TextField(max_length=100)
+    description = TextField()
+    price = IntegerField()
+    seller = ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'classified_items'
+
+    def __str__(self):
+        return self.name
+
+
+class Comment(Model):
+    author = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    content = TextField(max_length=1024)
+    datetime = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'comments'
+
+
+class FeedbackEntry(Model):
+    title = TextField(max_length=100)
+    description = TextField()
+    author = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    comments = ManyToManyField(Comment, through='FeedbackEntryComment')
+    closed = BooleanField()
+    reason = TextField(max_length=100)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'feedback_entries'
+
+
+class FeedbackEntryComment(Model):
+    comment = ForeignKey(Comment, on_delete=models.CASCADE)
+    entry = ForeignKey(FeedbackEntry, on_delete=models.CASCADE)
+    positive = BooleanField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'feedback_entry_comments'
+
+
+class ChangeLog(Model):
+    title = TextField(max_length=100)
+    content = RichTextField()
+    date = DateField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'changelogs'
+
+    def __str__(self):
+        return self.title

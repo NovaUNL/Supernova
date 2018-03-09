@@ -8,10 +8,10 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.timezone import now
 
-from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin, RichEditor
+from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
-    NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, Workshop, Party, PartyEvent, WorkshopEvent, \
-    SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem
+    NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, PartyEvent, WorkshopEvent, \
+    SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -20,6 +20,7 @@ def index(request):
     context = __base_context__(request)
     context['title'] = "KLEEarly not a riPoff"  # TODO, change me to something less cringy
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
+    context['changelog'] = ChangeLog.objects.order_by('date').reverse()[0:3]
     return render(request, 'kleep/index.html', context)
 
 
