@@ -1,0 +1,17 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+{% block content %}
+    <div style="font-family: Arial, Helvetica, sans-serif;">
+        {{ document.content|safe }}
+    </div>
+    <hr>
+    <div>
+        Criado em {{ document.creation }} {% if document.author_user %}por
+        <a href="{% url 'user' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
+        {% if document.author_group %}em nome do grupo
+            <a href="{% url 'group' document.author_group.id %}">{{ document.author_group }}</a>{% endif %}
+        {% if document.last_edition %}<br>Última edição em {{ document.last_edition }} por
+            {{ document.last_editor }}{% endif %}
+    </div>
+{% endblock %}

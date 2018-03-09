@@ -11,7 +11,7 @@ from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, Cli
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, PartyEvent, WorkshopEvent, \
     SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarPrice, \
-    BarDailyMenu, Catchphrase
+    BarDailyMenu, Catchphrase, Document
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -588,6 +588,17 @@ def feedback_idea(request, idea_id):
     context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')},
                           {'name': idea.title, 'url': reverse('feedback_idea', args=[idea_id])}]
     return render(request, 'kleep/TODO.html', context)
+
+
+def document(request, document_id):
+    context = __base_context__(request)
+    document = get_object_or_404(Document, id=document_id)
+    title = document.title
+    context['title'] = title
+    context['document'] = document
+    context['sub_nav'] = [{'name': 'Documentos', 'url': '#'},
+                          {'name': title, 'url': '#'}]
+    return render(request, 'kleep/standalone/document.html', context)
 
 
 def __base_context__(request):

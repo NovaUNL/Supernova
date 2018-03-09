@@ -55,6 +55,7 @@ urlpatterns = [
     path('sobre/', views.about, name='about'),
     path('pedinchar/', views.beg, name='beg'),
     path('privacidade/', views.privacy, name='privacy'),
+    path('documento/<int:document_id>/', views.document, name='document'),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls'))
 ]
