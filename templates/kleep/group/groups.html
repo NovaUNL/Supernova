@@ -64,7 +64,11 @@
                 <a href="{% url 'group' group.id %}">
                     <div class="group" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
                         <div class="group-top">
-                            <span>{{ group.name }}</span>
+                            {% if group.abbreviation %}
+                                <span>{{ group.abbreviation }}</span>
+                            {% else %}
+                                <span>{{ group.name }}</span>
+                            {% endif %}
                         </div>
                         <div class="group-bottom">
                             {% if group.invite_only %}

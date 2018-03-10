@@ -38,6 +38,7 @@ urlpatterns = [
     path('evento/<str:event_id>/', views.event, name='event'),
     path('grupos/', views.groups, name='groups'),
     path('grupos/<str:group_id>/', views.group, name='group'),
+    path('grupos/<str:group_id>/documentos/', views.group_documents, name='group_docs'),
     path('noticias/', views.news, name='news'),
     path('noticia/<str:news_item_id>/', views.news_item, name='news_item'),
     path('resumos/', views.synopses_areas, name='synopses'),

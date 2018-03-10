@@ -1009,6 +1009,7 @@ class GroupType(Model):
 
 
 class Group(Model):
+    abbreviation = TextField(max_length=30, null=True, blank=True)
     name = TextField(max_length=50)
     description = TextField()
     invite_only = BooleanField(default=True)

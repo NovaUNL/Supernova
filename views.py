@@ -239,9 +239,34 @@ def group(request, group_id):
     context = __base_context__(request)
     context['title'] = group.name
     context['group'] = group
+    context['page'] = 'group'
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])}]
     return render(request, 'kleep/group/group.html', context)
+
+
+def group_documents(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    context = __base_context__(request)
+    context['title'] = group.name
+    context['group'] = group
+    context['page'] = 'group_documents'
+    context['documents'] = Document.objects.filter(author_group=group).all()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
+                          {'name': group.name, 'url': reverse('group', args=[group_id])},
+                          {'name': 'Documentos', 'url': reverse('group_docs', args=[group_id])}]
+    return render(request, 'kleep/group/documents.html', context)
+
+
+def document(request, document_id):
+    context = __base_context__(request)
+    document = get_object_or_404(Document, id=document_id)
+    title = document.title
+    context['title'] = title
+    context['document'] = document
+    context['sub_nav'] = [{'name': 'Documentos', 'url': '#'},
+                          {'name': title, 'url': '#'}]
+    return render(request, 'kleep/standalone/document.html', context)
 
 
 def departments(request):
@@ -588,17 +613,6 @@ def feedback_idea(request, idea_id):
     context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')},
                           {'name': idea.title, 'url': reverse('feedback_idea', args=[idea_id])}]
     return render(request, 'kleep/TODO.html', context)
-
-
-def document(request, document_id):
-    context = __base_context__(request)
-    document = get_object_or_404(Document, id=document_id)
-    title = document.title
-    context['title'] = title
-    context['document'] = document
-    context['sub_nav'] = [{'name': 'Documentos', 'url': '#'},
-                          {'name': title, 'url': '#'}]
-    return render(request, 'kleep/standalone/document.html', context)
 
 
 def __base_context__(request):
