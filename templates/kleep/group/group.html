@@ -1,4 +1,4 @@
-{% extends 'kleep/group/base.html' %}
+{% extends 'kleep/content_navigation.html' %}
 
 {% load static %}
 
@@ -10,18 +10,10 @@
             align-items: baseline;
         }
     </style>
-    <h1 style="display: inline-block"><i class="fas fa-users"></i> {{ group.name }}</h1>
-    <div style="float: right;">
-        {% if group.invite_only %}
-            <i class="fas fa-lock"></i> Admissão por convite
-        {% else %}
-            <i class="fas fa-lock-open"></i> <input type="button" value="Solicitar admissão">
-        {% endif %}
-        <input type="button" value="Subscrever">
-    </div>
+    {% include 'kleep/group/header.html' %}
     <div class="flex-wrapper">
         <div style="width: 100%">
-            Também conhecido por <b>{{ group.abbreviation }}</b>
+            {% if group.abbreviation %}Também conhecido por <b>{{ group.abbreviation }}</b>{% endif %}
         </div>
         <div style="margin-right: 50px">
             <h2>Localização:</h2>
@@ -36,7 +28,19 @@
         </div>
         <div style="width:100%;">
             <h2>Atividade recente</h2>
-            TODO
+            {% for announcement in announcements %}
+                <a href="{% url 'group_announcement' announcement.id %}">{{ announcement.title }}</a> em
+                {{ announcement.datetime }}
+            {% endfor %}
         </div>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    {% include 'kleep/group/navigation.html' %}
+{% endblock %}
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry">Gestão</a>
     </div>
 {% endblock %}

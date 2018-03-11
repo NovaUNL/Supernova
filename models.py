@@ -1013,9 +1013,10 @@ class Group(Model):
     name = TextField(max_length=50)
     description = TextField()
     invite_only = BooleanField(default=True)
-    type = ForeignKey(GroupType, on_delete=models.PROTECT)
-    users = ManyToManyField(User, through="GroupUsers")
-    roles = ManyToManyField(Role, through="GroupRoles")
+    type = ForeignKey(GroupType, on_delete=models.PROTECT, null=True, blank=True)
+    public_members = BooleanField(default=False)
+    members = ManyToManyField(User, through='GroupMembers')
+    roles = ManyToManyField(Role, through='GroupRoles')
 
     class Meta:
         managed = True
@@ -1025,9 +1026,9 @@ class Group(Model):
         return self.name
 
 
-class GroupUsers(Model):
+class GroupMembers(Model):
     group = ForeignKey(Group, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.CASCADE)
+    member = ForeignKey(User, on_delete=models.CASCADE)
     role = ForeignKey(Role, on_delete=models.PROTECT)
 
     class Meta:
@@ -1042,6 +1043,70 @@ class GroupRoles(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'group_roles'
+
+
+class GroupAnnouncement(Model):
+    group = ForeignKey(Group, on_delete=models.CASCADE)
+    title = TextField(max_length=256)
+    announcement = TextField()
+    announcer = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
+    datetime = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'group_announcement'
+
+    def __str__(self):
+        return self.title
+
+
+class Conversation(Model):
+    creator = ForeignKey(User, on_delete=models.PROTECT, related_name='creator')
+    date = DateField(auto_now_add=True)
+    users = ManyToManyField(User, through='ConversationUser')
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'conversations'
+
+
+class Message(Model):
+    author = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
+    datetime = DateTimeField(auto_now_add=True)
+    content = TextField()
+    conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'messages'
+
+
+# A user relation to a conversation
+class ConversationUser(Model):
+    conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
+    user = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
+    last_read_message = ForeignKey(Message, null=True, blank=True, on_delete=models.PROTECT)
+
+
+# A conversation from an outsider to a group
+class GroupExternalConversation(Conversation):
+    group = ForeignKey(Group, on_delete=models.PROTECT)
+    user_ack = BooleanField()
+    group_ack = BooleanField()
+    closed = BooleanField()
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'group_external_conversations'
+
+
+# A conversation within a group
+class GroupInternalConversation(Conversation):
+    group = ForeignKey(Group, on_delete=models.PROTECT)
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'group_internal_conversations'
 
 
 class Badge(Model):

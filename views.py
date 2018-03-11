@@ -11,7 +11,7 @@ from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, Cli
 from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, PartyEvent, WorkshopEvent, \
     SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarPrice, \
-    BarDailyMenu, Catchphrase, Document
+    BarDailyMenu, Catchphrase, Document, GroupExternalConversation, GroupAnnouncement
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -240,22 +240,66 @@ def group(request, group_id):
     context['title'] = group.name
     context['group'] = group
     context['page'] = 'group'
+    context['announcements'] = GroupAnnouncement.objects.filter(group=group).order_by('datetime').reverse()[0:5]
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])}]
     return render(request, 'kleep/group/group.html', context)
 
 
+def group_announcements(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    context = __base_context__(request)
+    context['title'] = f'Anúncios de {group.name}'
+    context['group'] = group
+    context['page'] = 'group_anouncements'
+    context['announcements'] = GroupAnnouncement.objects.filter(group=group).order_by('datetime').reverse()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
+                          {'name': group.name, 'url': reverse('group', args=[group_id])},
+                          {'name': 'Anúncios', 'url': reverse('group_announcement', args=[group_id])}]
+    return render(request, 'kleep/group/announcements.html', context)
+
+
+def group_announcement(request, announcement_id):
+    announcement = get_object_or_404(GroupAnnouncement, id=announcement_id)
+    group = announcement.group
+    context = __base_context__(request)
+    context['title'] = announcement.title
+    context['group'] = group
+    context['announcement'] = announcement
+    context['page'] = 'group_anouncement'
+    context['announcements'] = GroupAnnouncement.objects.filter(group=group).order_by('datetime').reverse()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
+                          {'name': group.name, 'url': reverse('group', args=[group.id])},
+                          {'name': 'Anúncios', 'url': reverse('group_announcements', args=[group.id])},
+                          {'name': announcement.title, 'url': reverse('group_announcements', args=[group.id])}]
+    return render(request, 'kleep/group/announcement.html', context)
+
+
 def group_documents(request, group_id):
     group = get_object_or_404(Group, id=group_id)
     context = __base_context__(request)
-    context['title'] = group.name
+    context['title'] = f'Documentos de {group.name}'
     context['group'] = group
     context['page'] = 'group_documents'
     context['documents'] = Document.objects.filter(author_group=group).all()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])},
-                          {'name': 'Documentos', 'url': reverse('group_docs', args=[group_id])}]
+                          {'name': 'Documentos', 'url': reverse('group_documents', args=[group_id])}]
     return render(request, 'kleep/group/documents.html', context)
+
+
+def group_contact(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    context = __base_context__(request)
+    context['title'] = f'Contactar {group.name}'
+    context['group'] = group
+    context['page'] = 'group_contact'
+    context['conversations'] = GroupExternalConversation.objects.filter(
+        group=group, creator=context['current_user']).order_by('date').reverse()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
+                          {'name': group.name, 'url': reverse('group', args=[group_id])},
+                          {'name': 'Contactar', 'url': reverse('group_contact', args=[group_id])}]
+    return render(request, 'kleep/group/conversations.html', context)
 
 
 def document(request, document_id):
@@ -621,6 +665,8 @@ def __base_context__(request):
               }
     if not request.user.is_authenticated:
         result['login_form'] = LoginForm()
+
+    result['current_user'] = request.user.user_set.first()
     return result
 
 
