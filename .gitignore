@@ -1,6 +1,7 @@
 __pycache__
-settings.py
-migrations/
-static/kleep/images/
+*/migrations/
+kleep/static/kleep/images/
 *.svg
 *.woff2
+/venv/
+manage.py

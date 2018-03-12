@@ -666,7 +666,11 @@ def __base_context__(request):
     if not request.user.is_authenticated:
         result['login_form'] = LoginForm()
 
-    result['current_user'] = request.user.user_set.first()
+    # FIXME, this is awful
+    user_set = request.user.user_set
+
+    if user_set.count() > 0:
+        result['current_user'] = user_set.first()
     return result
 
 

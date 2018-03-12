@@ -26,7 +26,9 @@ INSTALLED_APPS = [
     'kleep.apps.KleepConfig',
     'captcha',
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader',
+    'rest_framework',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [

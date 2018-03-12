@@ -3,10 +3,31 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+import api.urls
 from kleep import settings
 from . import views
 
 app_name = 'kleep'
+
+# class BuildingSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+#         model = Building
+#         fields = ('id', 'name')
+#
+#
+# # ViewSets define the view behavior.
+# class UserViewSet(viewsets.ModelViewSet):
+#     queryset = Building.objects.all()
+#     serializer_class = BuildingSerializer
+#
+#
+# # Routers provide an easy way of automatically determining the URL conf.
+# router = routers.DefaultRouter()
+# router.register(r'buildings', UserViewSet)
+
+# router = routers.DefaultRouter()
+# router.register(r'users', api_views.UserViewSet)
+# router.register(r'groups', api_views.GroupViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -61,7 +82,9 @@ urlpatterns = [
     path('privacidade/', views.privacy, name='privacy'),
     path('documento/<int:document_id>/', views.document, name='document'),
     url(r'^captcha/', include('captcha.urls')),
-    url(r'^ckeditor/', include('ckeditor_uploader.urls'))
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+    url(r'^api/', include(api.urls)),
+    url(r'^api-auth/', include('rest_framework.urls')),
 ]
 
 if settings.DEBUG:
