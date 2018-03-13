@@ -77,6 +77,28 @@ class ClassSerializer(serializers.Serializer):
     department = DepartmentMinimalSerializer()
 
 
+class UserSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    nickname = serializers.CharField()
+
+
+class NewsMinimalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    summary = serializers.CharField()
+    datetime = serializers.DateTimeField()
+
+
+class NewsSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    summary = serializers.CharField()
+    content = serializers.CharField()
+    datetime = serializers.DateTimeField()
+    author = UserSerializer()
+
+
 class SynopsisTopicSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()

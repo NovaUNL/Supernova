@@ -667,10 +667,8 @@ def __base_context__(request):
         result['login_form'] = LoginForm()
 
     # FIXME, this is awful
-    user_set = request.user.user_set
-
-    if user_set.count() > 0:
-        result['current_user'] = user_set.first()
+    if hasattr(request.user, 'user_set'):
+        result['current_user'] = request.user.user_set.first()
     return result
 
 

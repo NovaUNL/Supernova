@@ -20,8 +20,8 @@ from rest_framework.views import APIView
 
 from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer, BuildingWithServicesSerializer, \
     BuildingMinimalSerializer, DepartmentMinimalSerializer, CourseSerializer, SynopsisAreaSerializer, \
-    SynopsisTopicSectionsSerializer
-from kleep.models import Bar, Service, Building, Department, Course, Class, SynopsisArea, SynopsisTopic
+    SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer
+from kleep.models import Bar, Service, Building, Department, Course, Class, SynopsisArea, SynopsisTopic, NewsItem
 
 
 # class GroupViewSet(viewsets.ModelViewSet):
@@ -77,6 +77,24 @@ class CourseDetailed(APIView):
 class ClassDetailed(APIView):
     def get(self, request, pk, format=None):
         serializer = CourseSerializer(Class.objects.get(id=pk))
+        return Response(serializer.data)
+
+
+class NewsList(APIView):
+    def get(self, request, format=None):
+        serializer = NewsMinimalSerializer(NewsItem.objects.all(), many=True)
+        return Response(serializer.data)
+
+
+class News(APIView):
+    def get(self, request, pk, format=None):
+        serializer = NewsSerializer(NewsItem.objects.get(id=pk))
+        return Response(serializer.data)
+
+
+class Groups(APIView):
+    def get(self, request, pk, format=None):
+        serializer = GroupListSerializer(Group.objects.all())
         return Response(serializer.data)
 
 

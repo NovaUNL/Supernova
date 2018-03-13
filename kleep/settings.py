@@ -145,7 +145,7 @@ CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
 
 VERSION = subprocess.check_output([
     "git",
-    f"--git-dir={os.path.dirname(os.path.realpath(__file__))}/.git/",
+    f"--git-dir={BASE_DIR}/.git/",
     "rev-parse",
     "HEAD"
 ]).decode('ascii')
