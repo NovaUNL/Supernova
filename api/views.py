@@ -1,32 +1,12 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-
-# class UserViewSet(viewsets.ModelViewSet):
-#     """
-#     API endpoint that allows users to be viewed or edited.
-#     """
-#     queryset = User.objects.all().order_by('-date_joined')
-#     serializer_class = UserSerializer
-#
-#
-# class GroupViewSet(viewsets.ModelViewSet):
-#     """
-#     API endpoint that allows groups to be viewed or edited.
-#     """
-#     queryset = Group.objects.all()
-#     serializer_class = GroupSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer, BuildingWithServicesSerializer, \
     BuildingMinimalSerializer, DepartmentMinimalSerializer, CourseSerializer, SynopsisAreaSerializer, \
-    SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer
-from kleep.models import Bar, Service, Building, Department, Course, Class, SynopsisArea, SynopsisTopic, NewsItem
-
-
-# class GroupViewSet(viewsets.ModelViewSet):
-#     queryset = Bar.objects.all()
-#     serializer_class = BarSerializer
+    SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupMinimalSerializer, GroupTypeSerializer, \
+    StoreItemSerializer, BarListMenusSerializer
+from kleep.models import Bar, Service, Building, Department, Course, Class, SynopsisArea, SynopsisTopic, NewsItem, \
+    Group, GroupType, StoreItem, BarDailyMenu
 
 
 class BuildingList(APIView):
@@ -35,11 +15,22 @@ class BuildingList(APIView):
         return Response(serializer.data)
 
 
+class BuildingDetailed(APIView):
+    def get(self, request, pk, format=None):
+        serializer = BuildingWithServicesSerializer(Building.objects.get(pk=pk))
+        return Response(serializer.data)
+
+
 class CampusMap(APIView):
     def get(self, request, format=None):
         serializer = BuildingMinimalSerializer(Building.objects.all(), many=True)
         return Response({'map_url': 'https://gitlab.com/claudiop/KleepAssets/raw/master/Campus.svg',
                          'buildings': serializer.data})
+
+
+class TransportationMap(APIView):
+    def get(self, request, format=None):
+        return Response('https://gitlab.com/claudiop/KleepAssets/raw/master/Transportation.minimal.svg')
 
 
 class ServiceList(APIView):
@@ -80,6 +71,18 @@ class ClassDetailed(APIView):
         return Response(serializer.data)
 
 
+class GroupList(APIView):
+    def get(self, request, format=None):
+        serializer = GroupTypeSerializer(GroupType.objects.all(), many=True)
+        return Response(serializer.data)
+
+
+class Store(APIView):
+    def get(self, request, format=None):
+        serializer = StoreItemSerializer(StoreItem.objects.all(), many=True)
+        return Response(serializer.data)
+
+
 class NewsList(APIView):
     def get(self, request, format=None):
         serializer = NewsMinimalSerializer(NewsItem.objects.all(), many=True)
@@ -92,12 +95,6 @@ class News(APIView):
         return Response(serializer.data)
 
 
-class Groups(APIView):
-    def get(self, request, pk, format=None):
-        serializer = GroupListSerializer(Group.objects.all())
-        return Response(serializer.data)
-
-
 class SyopsesAreas(APIView):
     def get(self, request, format=None):
         serializer = SynopsisAreaSerializer(SynopsisArea.objects.all(), many=True)
@@ -107,4 +104,10 @@ class SyopsesAreas(APIView):
 class SyopsesTopicSections(APIView):
     def get(self, request, pk, format=None):
         serializer = SynopsisTopicSectionsSerializer(SynopsisTopic.objects.get(id=pk))
+        return Response(serializer.data)
+
+
+class Menus(APIView):
+    def get(self, request, format=None):
+        serializer = BarListMenusSerializer(Bar.objects.all(), many=True)
         return Response(serializer.data)
