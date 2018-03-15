@@ -3,10 +3,10 @@ from rest_framework.views import APIView
 
 from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer, BuildingWithServicesSerializer, \
     BuildingMinimalSerializer, DepartmentMinimalSerializer, CourseSerializer, SynopsisAreaSerializer, \
-    SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupMinimalSerializer, GroupTypeSerializer, \
-    StoreItemSerializer, BarListMenusSerializer
+    SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupTypeSerializer, \
+    StoreItemSerializer, BarListMenusSerializer, ProfileMinimalSerializer, ProfileDetailedSerializer
 from kleep.models import Bar, Service, Building, Department, Course, Class, SynopsisArea, SynopsisTopic, NewsItem, \
-    Group, GroupType, StoreItem, BarDailyMenu
+    GroupType, StoreItem, Profile
 
 
 class BuildingList(APIView):
@@ -110,4 +110,11 @@ class SyopsesTopicSections(APIView):
 class Menus(APIView):
     def get(self, request, format=None):
         serializer = BarListMenusSerializer(Bar.objects.all(), many=True)
+        return Response(serializer.data)
+
+
+class ProfileDetailed(APIView):
+    def get(self, request, nickname, format=None):  # TODO authentication
+        user = Profile.objects.get(nickname=nickname)
+        serializer = ProfileDetailedSerializer(user)
         return Response(serializer.data)

@@ -5,6 +5,11 @@ from rest_framework import serializers
 from kleep.models import Class, Course, BarDailyMenu
 
 
+class DegreeSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
 class BuildingMinimalSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
@@ -50,10 +55,11 @@ class ClassMinimalSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
-class CourseMinimalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Course
-        fields = ('id', 'name', 'abbreviation')
+class CourseMinimalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    abbreviation = serializers.CharField()
+    degree = DegreeSerializer()
 
 
 class DepartmentMinimalSerializer(serializers.Serializer):
@@ -67,6 +73,8 @@ class CourseSerializer(serializers.Serializer):
     abbreviation = serializers.CharField()
     description = serializers.CharField()
     department = DepartmentMinimalSerializer()
+    degree = DegreeSerializer()
+    url = serializers.CharField()
 
 
 class DepartmentSerializer(serializers.Serializer):
@@ -84,12 +92,6 @@ class ClassSerializer(serializers.Serializer):
     abbreviation = serializers.CharField()
     credits = serializers.IntegerField()
     department = DepartmentMinimalSerializer()
-
-
-class UserSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    nickname = serializers.CharField()
 
 
 class GroupMinimalSerializer(serializers.Serializer):
@@ -111,22 +113,6 @@ class StoreItemSerializer(serializers.Serializer):
     price = serializers.IntegerField()
     stock = serializers.IntegerField()
     seller = GroupMinimalSerializer()
-
-
-class NewsMinimalSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField()
-    summary = serializers.CharField()
-    datetime = serializers.DateTimeField()
-
-
-class NewsSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField()
-    summary = serializers.CharField()
-    content = serializers.CharField()
-    datetime = serializers.DateTimeField()
-    author = UserSerializer()
 
 
 class SynopsisTopicSerializer(serializers.Serializer):
@@ -181,4 +167,37 @@ class BarListMenusSerializer(serializers.Serializer):
     name = serializers.CharField(source='service.name')
     prices = BarPriceSerializer(many=True, source='barprice_set')
     menu = TodaysBarMenuSerializer(source='bardailymenu_set', many=True)
-    # serializers.
+
+
+class StudentSerializer(serializers.Serializer):
+    abbreviation = serializers.CharField()
+    number = serializers.IntegerField()
+    course = CourseMinimalSerializer()
+
+
+class ProfileMinimalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    nickname = serializers.CharField()
+
+
+class ProfileDetailedSerializer(serializers.Serializer):
+    nickname = serializers.CharField()
+    name = serializers.CharField()
+    student_set = StudentSerializer(many=True)
+
+
+class NewsMinimalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    summary = serializers.CharField()
+    datetime = serializers.DateTimeField()
+
+
+class NewsSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    summary = serializers.CharField()
+    content = serializers.CharField()
+    datetime = serializers.DateTimeField()
+    author = ProfileMinimalSerializer()
