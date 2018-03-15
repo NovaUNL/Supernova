@@ -3,16 +3,15 @@ from datetime import date
 from ckeditor.fields import RichTextField
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth.models import User as SysUser
+from django.contrib.auth.models import User
 from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTimeField, ManyToManyField, DateField, \
     BooleanField, OneToOneField, TimeField, CharField, FloatField, NullBooleanField
 
-CLIPY_TABLE_PREFIX = 'clip_'
 KLEEP_TABLE_PREFIX = 'kleep_'
+CLIPY_TABLE_PREFIX = 'clip_'
 
 
-# CLIPy Models (Unmanaged)
-# TODO CLIPy unique constraints
+#
 class TemporalEntity:
     first_year = IntegerField(blank=True, null=True)
     last_year = IntegerField(blank=True, null=True)
@@ -85,7 +84,7 @@ class ClipInstitution(TemporalEntity, Model):
 class ClipBuilding(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=30)
-    institution = ForeignKey('ClipInstitution', on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
 
     class Meta:
         managed = False
@@ -126,7 +125,7 @@ class ClipClass(Model):
 class ClipClassroom(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=70)
-    building = ForeignKey('ClipBuilding', on_delete=models.PROTECT, db_column='building_id')
+    building = ForeignKey(ClipBuilding, on_delete=models.PROTECT, db_column='building_id')
 
     class Meta:
         managed = False
@@ -152,7 +151,7 @@ class ClipTeacher(Model):
 class ClipClassInstance(Model):
     id = IntegerField(primary_key=True)
     parent = ForeignKey(ClipClass, on_delete=models.PROTECT, db_column='class_id')
-    period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id')
+    period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id', related_name='clip_class_instances')
     year = IntegerField()
 
     # regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
@@ -171,7 +170,8 @@ class ClipCourse(TemporalEntity, Model):
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
     institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
-    degree = ForeignKey(Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True)
+    degree = ForeignKey(Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True,
+                        related_name='clip_courses')
 
     class Meta:
         managed = False
@@ -241,7 +241,7 @@ class ClipEnrollment(Model):
 class ClipTurn(Model):
     id = IntegerField(primary_key=True)
     number = IntegerField()
-    type = ForeignKey(TurnType, on_delete=models.PROTECT, db_column='type_id')
+    type = ForeignKey(TurnType, on_delete=models.PROTECT, related_name='clip_turns')
     class_instance = ForeignKey(ClipClassInstance, on_delete=models.PROTECT, db_column='class_instance_id')
     minutes = IntegerField(null=True)
     enrolled = IntegerField(null=True)
@@ -291,49 +291,40 @@ class ClipTurnStudent(Model):
         db_table = CLIPY_TABLE_PREFIX + 'turn_students'
 
 
-# MANAGED MODELS
-
-class User(Model):
+# MANAGED
+class Profile(Model):
     name = TextField()
     nickname = TextField()
     birth_date = DateField()
-    sys_user = ForeignKey(SysUser, null=True, on_delete=models.SET_NULL)
-
-    def __str__(self):
-        return "{} ({})".format(self.nickname, self.name)
+    user = OneToOneField(User, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'users'
 
+    def __str__(self):
+        return "{} ({})".format(self.nickname, self.name)
+
 
 class Student(Model):
     # A student can exist without having an account
-    user = OneToOneField(User, on_delete=models.CASCADE)
-    crawled_students = ManyToManyField(ClipStudent, through='StudentClipStudent')
+    profile = ForeignKey(Profile, null=True, on_delete=models.CASCADE)
+    number = IntegerField(null=True, blank=True)
+    abbreviation = TextField(null=True, blank=True)
+    course = ForeignKey('Course', on_delete=models.PROTECT)
     turns = ManyToManyField('Turn', through='TurnStudents')
     class_instances = ManyToManyField('ClassInstance', through='Enrollment')
-    courses = ManyToManyField('Course', through='StudentCourse')
-    single_clip_student = BooleanField(default=True)
-    number = IntegerField(null=True, blank=True)  # These can be null if this student maps to various clip students
-    abbreviation = TextField(null=True, blank=True)
+    first_year = IntegerField(null=True, blank=True)
+    last_year = IntegerField(null=True, blank=True)
+    confirmed = BooleanField(default=False)
+    clip_student = ForeignKey(ClipStudent, on_delete=models.PROTECT)
 
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'students'
 
     def __str__(self):
-        return str(self.user)
-
-
-class StudentClipStudent(Model):
-    clip_student = ForeignKey(ClipStudent, on_delete=models.PROTECT)
-    student = ForeignKey(Student, on_delete=models.CASCADE)
-    confirmed = BooleanField(default=False)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'student_clip_students'
+        return str(self.profile)
 
 
 class Area(Model):
@@ -445,7 +436,6 @@ class Course(Model):
     department = ForeignKey('Department', on_delete=models.PROTECT)
     areas = ManyToManyField(Area, through='CourseArea')
     url = TextField(max_length=256, null=True, blank=True)
-    students = ManyToManyField(Student, through='StudentCourse')
     curriculum = ManyToManyField('Class', through='Curriculum')
 
     class Meta:
@@ -454,20 +444,6 @@ class Course(Model):
 
     def __str__(self):
         return f'{self.degree.name} em {self.name}'
-
-
-class StudentCourse(Model):
-    student = ForeignKey(Student, on_delete=models.CASCADE)
-    course = ForeignKey(Course, on_delete=models.PROTECT)
-    first_year = IntegerField()
-    last_year = IntegerField()
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'student_courses'
-
-    def __str__(self):
-        return f'{self.student}@{self.course} {self.first_year}-{self.last_year}'
 
 
 class CourseArea(Model):
@@ -628,7 +604,7 @@ class Event(Model):
     end_datetime = DateTimeField()
     announce_date = DateField(default=date.today)
     classroom = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
-    users = ManyToManyField(User, through='EventUsers')
+    users = ManyToManyField(Profile, through='EventUsers')
 
     class Meta:
         managed = True
@@ -656,7 +632,7 @@ class Event(Model):
 
 class EventUsers(Model):
     event = ForeignKey(Event, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.CASCADE)
+    user = ForeignKey(Profile, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
@@ -868,7 +844,7 @@ class SynopsisSectionTopic(Model):
 
 
 class SynopsisSectionLog(Model):
-    author = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    author = ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL)
     section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
     timestamp = DateTimeField(auto_now_add=True)
 
@@ -890,7 +866,7 @@ class Article(Model):
     name = TextField(max_length=100)
     content = TextField()
     datetime = DateTimeField(default=timezone.now)
-    authors = ManyToManyField(User, through='ArticleAuthors')
+    authors = ManyToManyField(Profile, through='ArticleAuthors')
     tags = ManyToManyField(Tag, through='ArticleTags')
 
     class Meta:
@@ -900,7 +876,7 @@ class Article(Model):
 
 class ArticleAuthors(Model):
     article = ForeignKey(Article, on_delete=models.CASCADE)
-    author = ForeignKey(User, on_delete=models.CASCADE)
+    author = ForeignKey(Profile, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
@@ -934,8 +910,8 @@ class NewsItem(Model):
     edited = BooleanField(default=False)
     edit_note = TextField(null=True, blank=True, default=None)
     edit_datetime = DateTimeField(null=True, blank=True, default=None)
-    author = ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='author')
-    edit_author = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='edit_author')
+    author = ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name='author')
+    edit_author = ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL, related_name='edit_author')
     tags = ManyToManyField(Tag, through="NewsTags")
 
     class Meta:
@@ -969,7 +945,7 @@ class VoteType(Model):
 class NewsVote(Model):
     news_item = ForeignKey(NewsItem, on_delete=models.CASCADE)
     vote_type = ForeignKey(VoteType, on_delete=models.PROTECT)
-    user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    user = ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         managed = True
@@ -979,7 +955,7 @@ class NewsVote(Model):
 class ArticleVote(Model):
     article = ForeignKey(Article, on_delete=models.CASCADE)
     vote_type = ForeignKey(VoteType, on_delete=models.PROTECT)
-    user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    user = ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         managed = True
@@ -1015,7 +991,7 @@ class Group(Model):
     invite_only = BooleanField(default=True)
     type = ForeignKey(GroupType, on_delete=models.PROTECT, null=True, blank=True)
     public_members = BooleanField(default=False)
-    members = ManyToManyField(User, through='GroupMembers')
+    members = ManyToManyField(Profile, through='GroupMembers')
     roles = ManyToManyField(Role, through='GroupRoles')
 
     class Meta:
@@ -1028,7 +1004,7 @@ class Group(Model):
 
 class GroupMembers(Model):
     group = ForeignKey(Group, on_delete=models.CASCADE)
-    member = ForeignKey(User, on_delete=models.CASCADE)
+    member = ForeignKey(Profile, on_delete=models.CASCADE)
     role = ForeignKey(Role, on_delete=models.PROTECT)
 
     class Meta:
@@ -1049,7 +1025,7 @@ class GroupAnnouncement(Model):
     group = ForeignKey(Group, on_delete=models.CASCADE)
     title = TextField(max_length=256)
     announcement = TextField()
-    announcer = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
+    announcer = ForeignKey(Profile, on_delete=models.PROTECT)  # TODO consider user deletion
     datetime = DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1061,9 +1037,9 @@ class GroupAnnouncement(Model):
 
 
 class Conversation(Model):
-    creator = ForeignKey(User, on_delete=models.PROTECT, related_name='creator')
+    creator = ForeignKey(Profile, on_delete=models.PROTECT, related_name='creator')
     date = DateField(auto_now_add=True)
-    users = ManyToManyField(User, through='ConversationUser')
+    users = ManyToManyField(Profile, through='ConversationUser')
 
     class Meta:
         managed = True
@@ -1071,7 +1047,7 @@ class Conversation(Model):
 
 
 class Message(Model):
-    author = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
+    author = ForeignKey(Profile, on_delete=models.PROTECT)  # TODO consider user deletion
     datetime = DateTimeField(auto_now_add=True)
     content = TextField()
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
@@ -1084,7 +1060,7 @@ class Message(Model):
 # A user relation to a conversation
 class ConversationUser(Model):
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
+    user = ForeignKey(Profile, on_delete=models.PROTECT)  # TODO consider user deletion
     last_read_message = ForeignKey(Message, null=True, blank=True, on_delete=models.PROTECT)
 
 
@@ -1118,7 +1094,7 @@ class Badge(Model):
 
 
 class UserBadges(Model):
-    user = ForeignKey(User, on_delete=models.CASCADE)
+    user = ForeignKey(Profile, on_delete=models.CASCADE)
     badge = ForeignKey(Badge, on_delete=models.PROTECT)
 
     class Meta:
@@ -1145,7 +1121,7 @@ class ClassifiedItem(Sellable, Model):
     name = TextField(max_length=100)
     description = TextField()
     price = IntegerField()
-    seller = ForeignKey(User, on_delete=models.CASCADE)
+    seller = ForeignKey(Profile, on_delete=models.CASCADE)
 
     class Meta:
         managed = True
@@ -1156,7 +1132,7 @@ class ClassifiedItem(Sellable, Model):
 
 
 class Comment(Model):
-    author = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    author = ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
     content = TextField(max_length=1024)
     datetime = DateTimeField(auto_now_add=True)
 
@@ -1168,7 +1144,7 @@ class Comment(Model):
 class FeedbackEntry(Model):
     title = TextField(max_length=100)
     description = TextField()
-    author = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    author = ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
     comments = ManyToManyField(Comment, through='FeedbackEntryComment')
     closed = BooleanField()
     reason = TextField(max_length=100)
@@ -1213,14 +1189,14 @@ class Catchphrase(Model):
 
 
 class Document(Model):
-    author_user = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='document_author')
+    author_user = ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL, related_name='document_author')
     author_group = ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL)
     title = TextField(max_length=300)
     content = RichTextField()
     creation = DateField(auto_now_add=True)
     public = BooleanField(default=False)
     last_edition = DateTimeField(null=True, blank=True, default=None)
-    last_editor = ForeignKey(User, null=True, blank=True, default=None, on_delete=models.SET_NULL,
+    last_editor = ForeignKey(Profile, null=True, blank=True, default=None, on_delete=models.SET_NULL,
                              related_name='document_editor')
 
     class Meta:
@@ -1233,7 +1209,7 @@ class Document(Model):
 
 class DocumentUserPermission(Model):
     document = ForeignKey(Document, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.CASCADE)
+    user = ForeignKey(Profile, on_delete=models.CASCADE)
 
     class Meta:
         managed = True

@@ -22,7 +22,7 @@
         </ul>
         <div id="auth">
             {% if user.is_authenticated %}
-                <a href="{% url 'profile' user %}"><span>{{ user }}</span></a>
+                <a href="{% url 'profile' user.profile.nickname %}"><span>{{ user.profile.nickname }}</span></a>
                 <a href="{% url 'logout' %}"><span id="logout_btn">Sair</span></a>
             {% endif %}
             {% if login_form is not None and disable_auth != True %}

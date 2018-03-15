@@ -1,17 +1,19 @@
 import random
 import psutil
 from django.contrib.auth import logout, login
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.timezone import now
 
+from clip.models import Student as ClipStudent
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
-from kleep.models import Service, Building, User, Group, GroupType, Department, Class, ClassInstance, Place, \
-    NewsItem, Area, Course, Degree, ClipStudent, Curriculum, Event, PartyEvent, WorkshopEvent, \
-    SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarPrice, \
-    BarDailyMenu, Catchphrase, Document, GroupExternalConversation, GroupAnnouncement
+from kleep.models import Service, Building, Profile, Group, GroupType, Department, Class, ClassInstance, Place, \
+    NewsItem, Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, \
+    SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarDailyMenu, \
+    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -64,13 +66,13 @@ def campus_transportation(request):
 
 
 def profile(request, nickname):
-    user = get_object_or_404(User, nickname=nickname)
+    profile = get_object_or_404(Profile, nickname=nickname)
     context = __base_context__(request)
-    page_name = "Perfil de " + user.name
+    page_name = "Perfil de " + profile.name
     context['page'] = 'profile'
     context['title'] = page_name
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
-    context['rich_user'] = user
+    context['rich_user'] = profile
     return render(request, 'kleep/profile/profile.html', context)
 
 
@@ -78,7 +80,7 @@ def profile_schedule(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
-    user = get_object_or_404(User, id=request.user.id)
+    user = get_object_or_404(Profile, id=request.user.id)
     if hasattr(user, 'student'):
         student = user.student
     else:
@@ -96,7 +98,7 @@ def profile_settings(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
-    user = User.objects.get(id=request.user.id)
+    user = Profile.objects.get(id=request.user.id)
     context['page'] = 'profile_settings'
     context['title'] = "Definições da conta"
     context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
@@ -119,12 +121,12 @@ def profile_crawler(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
-    user = User.objects.get(id=request.user.id)
+    profile = request.user.profile
     context['page'] = 'profile_crawler'
     context['title'] = "Definições da conta"
-    context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
+    context['sub_nav'] = [{'name': "Perfil de " + profile.name, 'url': reverse('profile', args=[nickname])},
                           {'name': "Agregar CLIP", 'url': reverse('profile_crawler', args=[nickname])}]
-    context['rich_user'] = user
+    context['profile'] = profile
     if request.method == 'POST':
         pass
     context['clip_login_form'] = ClipLogin()
@@ -289,13 +291,15 @@ def group_documents(request, group_id):
 
 
 def group_contact(request, group_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
     group = get_object_or_404(Group, id=group_id)
     context = __base_context__(request)
     context['title'] = f'Contactar {group.name}'
     context['group'] = group
     context['page'] = 'group_contact'
     context['conversations'] = GroupExternalConversation.objects.filter(
-        group=group, creator=context['current_user']).order_by('date').reverse()
+        group=group, creator=request.user.profile).order_by('date').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])},
                           {'name': 'Contactar', 'url': reverse('group_contact', args=[group_id])}]
@@ -665,10 +669,6 @@ def __base_context__(request):
               }
     if not request.user.is_authenticated:
         result['login_form'] = LoginForm()
-
-    # FIXME, this is awful
-    if hasattr(request.user, 'user_set'):
-        result['current_user'] = request.user.user_set.first()
     return result
 
 
