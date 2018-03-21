@@ -1,19 +1,17 @@
 import random
 import psutil
 from django.contrib.auth import logout, login
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.timezone import now
 
-from clip.models import Student as ClipStudent
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
 from kleep.models import Service, Building, Profile, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, \
     SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarDailyMenu, \
-    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree
+    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -81,8 +79,9 @@ def profile_schedule(request, nickname):
         return HttpResponseRedirect(reverse('index'))
     context = __base_context__(request)
     user = get_object_or_404(Profile, id=request.user.id)
-    if hasattr(user, 'student'):
-        student = user.student
+
+    if user.student_set.exists():
+        student = user.student_set.first()  # FIXME
     else:
         return HttpResponseRedirect(reverse('profile', args=[nickname]))
     context['page'] = 'profile_schedule'
@@ -461,7 +460,7 @@ def course_students(request, course_id):
     context['title'] = 'Alunos de %s' % course
 
     context['course'] = course
-    context['students'] = course.students.order_by('studentcourse__last_year', 'number').all()
+    context['students'] = course.student_set.order_by('studentcourse__last_year', 'number').all()
     context['unregistered_students'] = ClipStudent.objects.filter(
         course=course.clip_course, student=None).order_by('internal_id')
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
@@ -525,7 +524,7 @@ def event(request, event_id):
     context['page'] = 'instance_turns'
     event = get_object_or_404(Event, id=event_id)
     if hasattr(event, 'workshop'):
-        return HttpResponseRedirect()  # TODO
+        return HttpResponseRedirect('index')  # TODO
     else:
         pass
 

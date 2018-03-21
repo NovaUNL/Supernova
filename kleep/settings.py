@@ -12,8 +12,10 @@ with open(BASE_DIR + '/settings.json') as json_data:
     DATABASES = settings['DATABASES']
 
 DEBUG = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['beta.kleep.claudiop.com', 'kleep.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -91,9 +93,9 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-STATIC_ROOT = '/srv/http/static/'
+STATIC_ROOT = '/srv/http/kleep/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/srv/http/media/'
+MEDIA_ROOT = '/srv/http/kleep/media/'
 
 # CKEditor plugin
 CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'

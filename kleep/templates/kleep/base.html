@@ -16,7 +16,11 @@
     <nav id="top_nav">
         <a href="{% url 'index' %}"><img id="logo" src="{% static 'kleep/images/title.png' %}"/></a>
         <ul>
-            <li><a href="javascript:showStudentSubmenu();"><span>Estudante</span></a></li>
+            {% if user.is_authenticated %}
+                <li><a href="javascript:showStudentSubmenu();"><span>Estudante</span></a></li>
+            {% else %}
+                <li><a href="javascript:authShowPrompt();"><span>Estudante</span></a></li>
+            {% endif %}
             <li><a href="javascript:showUniversitySubmenu();"><span>Faculdade</span></a></li>
             <li><a href="javascript:showCommunitySubmenu();"><span>Comunidade</span></a></li>
         </ul>
@@ -30,7 +34,32 @@
             {% endif %}
         </div>
     </nav>
-    <nav id="nav_stage"></nav>
+    <nav id="nav_stage">
+        <a id="nav_stage_close_button" href="javascript:closeSubmenu();"><i class="fas fa-angle-double-up"></i></a>
+        {% if user.is_authenticated %}
+            <div id="student_nav_stage">
+                <a href="{% url 'profile_schedule' user.profile.nickname %}"><i class="fas fa-clock"></i><br>Horario</a>
+                <a class="disabled"><i class="fas fa-calendar"></i><br>Calendario</a>
+                <a class="disabled"><i class="fas fa-star"></i><br>Avaliações</a>
+                <a class="disabled"><i class="fas fa-graduation-cap"></i><br>Curso</a>
+            </div>
+        {% endif %}
+        <div id="university_nav_stage">
+            <a href="{% url 'campus' %}"><i class="fas fa-map"></i><br>Campus</a>
+            <a href="{% url 'departments' %}"><i class="fas fa-graduation-cap"></i><br>Departamentos</a>
+            <a href="{% url 'news' %}"><i class="fas fa-newspaper"></i><br>Noticias</a>
+            <a class="disabled" href="{% url 'events' %}"><i class="fas fa-bullhorn"></i><br>Eventos</a>
+            <a href="{% url 'groups' %}"><i class="fas fa-users"></i><br>Grupos</a>
+            <a class="disabled"><i class="fas fa-utensils"></i><br>Menus</a>
+        </div>
+        <div id="community_nav_stage">
+            <a href="{% url 'synopses' %}"><i class="fas fa-book"></i><br>Resumos</a>
+            <a class="disabled"><i class="fas fa-pencil-alt"></i><br>Artigos</a>
+            <a class="disabled"><i class="fas fa-trash"></i><br>Classificados</a>
+            <a class="disabled"><i class="fas fa-comments"></i><br>Opiniões</a>
+            <a href="{% url 'store' %}"><i class="fas fa-euro-sign"></i><br>Loja</a>
+        </div>
+    </nav>
     {% if sub_nav is not None %}
         <nav id="sub_nav">
             <div class="breadcrumb">
