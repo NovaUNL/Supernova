@@ -2,11 +2,21 @@
 
 {% load static %}
 
+{% block head %}
+    <style>
+        #topic-list {
+            list-style: none;
+            font-weight: bold;
+            font-size: 1.5em;
+            line-height: 2em;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ topic.name }}</h1>
     <h3>{{ subarea.name }}, {{ area.name }}</h3>
-    <h2>Secções</h2>
-    <ul>
+    <ul id="topic-list">
         {% for section in sections %}
             <li><a href="{% url 'synopsis_section' topic.id section.id %}">{{ section.name }}</a></li>
         {% endfor %}

@@ -11,14 +11,14 @@ from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, Cli
 from kleep.models import Service, Building, Profile, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, \
     SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarDailyMenu, \
-    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent
+    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent, SynopsisSubarea
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
 
 def index(request):
     context = __base_context__(request)
-    context['title'] = "KLEEarly not a riPoff"  # TODO, change me to something less cringy
+    context['title'] = "O sistema que não deixa folhas soltas"
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
     context['changelog'] = ChangeLog.objects.order_by('date').reverse()[0:3]
     context['catchphrase'] = random.choice(Catchphrase.objects.all())
@@ -230,7 +230,9 @@ def groups(request):
         context['type_filter'] = request.GET['filtro']
     context['title'] = "Grupos"
     context['groups'] = Group.objects.all()
-    context['group_types'] = GroupType.objects.all()
+    context['group_types'] = None
+    # a = GroupType.objects.all()
+    # a[0].type
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')}]
     return render(request, 'kleep/group/groups.html', context)
 
@@ -529,12 +531,35 @@ def event(request, event_id):
         pass
 
 
-def synopses_areas(request):
+def synopsis_areas(request):
     context = __base_context__(request)
-    context['title'] = 'Resumos'
+    context['title'] = 'Resumos - Areas de estudo'
     context['areas'] = SynopsisArea.objects.all()
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')}]
-    return render(request, 'kleep/synopses/synopses.html', context)
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')}]
+    return render(request, 'kleep/synopses/areas.html', context)
+
+
+def synopsis_area(request, area_id):
+    area = get_object_or_404(SynopsisArea, id=area_id)
+    context = __base_context__(request)
+    context['title'] = 'Resumos - Categorias de %s' % area.name
+    context['area'] = area
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
+                          {'name': area.name, 'url': reverse('synopsis_area', args=[area_id])}]
+    return render(request, 'kleep/synopses/area.html', context)
+
+
+def synopsis_subarea(request, subarea_id):
+    subarea = get_object_or_404(SynopsisSubarea, id=subarea_id)
+    area = subarea.area
+    context = __base_context__(request)
+    context['title'] = 'Resumos - %s (%s)' % (subarea.name, area.name)
+    context['subarea'] = subarea
+    context['area'] = area
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
+                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea_id])}]
+    return render(request, 'kleep/synopses/subarea.html', context)
 
 
 def synopsis_topic(request, topic_id):
@@ -547,9 +572,9 @@ def synopsis_topic(request, topic_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['sections'] = topic.sections.order_by('synopsissectiontopic__index').all()
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')},
-                          {'name': area.name, 'url': '#'},
-                          {'name': subarea.name, 'url': '#'},
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
+                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])}]
     return render(request, 'kleep/synopses/topic.html', context)
 
@@ -575,9 +600,9 @@ def synopsis_section(request, topic_id, section_id):
     if next_section:
         context['next_section'] = next_section.section
     context['authors'] = section.synopsissectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses')},
-                          {'name': area.name, 'url': '#'},
-                          {'name': subarea.name, 'url': '#'},
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
+                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
                           {'name': section.name, 'url': reverse('synopsis_section', args=[topic_id, section_id])}]
     return render(request, 'kleep/synopses/section.html', context)

@@ -756,6 +756,7 @@ class BarPrice(Sellable, Model):
 
 class SynopsisArea(Model):
     name = TextField(max_length=50)
+    img_url = TextField(null=True, blank=True)
 
     class Meta:
         managed = True
@@ -769,6 +770,7 @@ class SynopsisSubarea(Model):
     name = TextField(max_length=50)
     description = TextField(max_length=1024)
     area = ForeignKey(SynopsisArea, on_delete=models.PROTECT)
+    img_url = TextField(null=True, blank=True)
 
     class Meta:
         managed = True
