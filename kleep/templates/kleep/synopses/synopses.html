@@ -3,16 +3,12 @@
 {% load static %}
 
 {% block content %}
-    <h1><i class="fas fa-book"></i> Resumos</h1>
-    {% for area in areas %}
-        <h2>{{ area.name }}</h2>
-        {% for subarea in area.synopsissubarea_set.all %}
-            <div>
-                <h3>{{ subarea.name }}</h3>
-                {% for topic in subarea.synopsistopic_set.all %}
-                    <div><a href="{% url 'synopsis_topic' topic.id %}">{{ topic.name }}</a></div>
-                {% endfor %}
+    <h1><i class="fas fa-book"></i>Area de estudo</h1>
+    <div class="flex-wrapper">
+        {% for area in areas %}
+            <div class="flex-grid-item">
+                <span class="flex-grid-item-top">{{ area.name }}</span>
             </div>
         {% endfor %}
-    {% endfor %}
+    </div>
 {% endblock %}

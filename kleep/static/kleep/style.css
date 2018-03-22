@@ -487,6 +487,41 @@ footer img {
 
 }
 
-.disabled{
+.disabled {
     color: #565656 !important;
+}
+
+.flex-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.flex-grid-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: white;
+    background-size: cover;
+    box-shadow: 0 0 5px #3d3d3d;
+    border-radius: 5px;
+    margin: 10px;
+    width: 220px;
+    height: 150px;
+    vertical-align: center;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    border: 2px solid #666;
+    font-size: 1.2em;
+}
+
+.flex-grid-item-top {
+    background-color: rgba(170, 170, 170, 0.5);
+    text-shadow: 0 0 2px black;
+}
+
+.flex-grid-item-bottom {
+    background-color: rgba(170, 170, 170, 0.5);
+    width: 100%;
 }

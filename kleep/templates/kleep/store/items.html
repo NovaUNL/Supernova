@@ -2,68 +2,16 @@
 
 {% load static %}
 {% block content %}
-    <style>
-        .flex-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-        }
-
-        .group {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background-color: white;
-            background-size: cover;
-            box-shadow: 0 0 5px #3d3d3d;
-            border-radius: 5px;
-            margin: 10px;
-            width: 220px;
-            height: 150px;
-            vertical-align: center;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-            border: 2px solid #666;
-            font-size: 1.2em;
-        }
-
-        .group-top {
-            background-color: rgba(170, 170, 170, 0.5);
-            text-shadow: 0 0 2px black;
-        }
-
-        .group-bottom {
-            background-color: rgba(170, 170, 170, 0.5);
-            width: 100%;
-        }
-
-        #record > table {
-            font-size: 1.2em;
-        }
-
-        .wall-item td:first-child {
-            font-weight: bold;
-        }
-
-        #social > span {
-            font-size: 1.2em;
-        }
-
-        #social > span .svg-inline--fa {
-            font-size: 1.5em !important;
-        }
-    </style>
     <h1><i class="fas fa-shopping-cart"></i> Loja</h1>
     <div class="flex-wrapper">
         {% for item in items %}
             <a href="{% url 'store_item' item.id %}">
-                <div class="group" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
-                    <div class="group-top">
+                <div class="flex-grid-item" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
+                    <div class="flex-grid-item-top">
                         <span>{{ item.name }}</span><br>
                         por {{ item.seller }}
                     </div>
-                    <div class="group-bottom">
+                    <div class="flex-grid-item-bottom">
                         {{ item.price_str }}€
                     </div>
                 </div>
