@@ -7,11 +7,12 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.timezone import now
 
-from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLogin
+from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLoginForm, CreateSynopsisSectionForm
 from kleep.models import Service, Building, Profile, Group, GroupType, Department, Class, ClassInstance, Place, \
     NewsItem, Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, \
     SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarDailyMenu, \
-    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent, SynopsisSubarea
+    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent, SynopsisSubarea, \
+    SynopsisSectionLog
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION
 
@@ -128,7 +129,7 @@ def profile_crawler(request, nickname):
     context['profile'] = profile
     if request.method == 'POST':
         pass
-    context['clip_login_form'] = ClipLogin()
+    context['clip_login_form'] = ClipLoginForm()
 
     return render(request, 'kleep/profile/profile_crawler.html', context)
 
@@ -593,8 +594,10 @@ def synopsis_section(request, topic_id, section_id):
     context['topic'] = topic
     context['section'] = section
     section_topic_relation = SynopsisSectionTopic.objects.filter(topic=topic, section=section).first()
-    prev_section = SynopsisSectionTopic.objects.filter(topic=topic, index__lt=section_topic_relation.index).last()
-    next_section = SynopsisSectionTopic.objects.filter(topic=topic, index__gt=section_topic_relation.index).first()
+    prev_section = SynopsisSectionTopic.objects.filter(
+        topic=topic, index__lt=section_topic_relation.index).order_by('index').last()
+    next_section = SynopsisSectionTopic.objects.filter(
+        topic=topic, index__gt=section_topic_relation.index).order_by('index').first()
     if prev_section:
         context['previous_section'] = prev_section.section
     if next_section:
@@ -606,6 +609,57 @@ def synopsis_section(request, topic_id, section_id):
                           {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
                           {'name': section.name, 'url': reverse('synopsis_section', args=[topic_id, section_id])}]
     return render(request, 'kleep/synopses/section.html', context)
+
+
+def synopsis_create_section(request, topic_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+    topic = get_object_or_404(SynopsisTopic, id=topic_id)
+    context = __base_context__(request)
+    choices = [('0', 'Início')] \
+              + list(map(lambda section: (section.id, section.name),
+                         SynopsisSection.objects.filter(synopsistopic=topic_id)
+                         .order_by('synopsissectiontopic__index').all()))
+    if request.method == 'POST':
+        form = CreateSynopsisSectionForm(data=request.POST)
+        form.fields['after'].choices = choices
+        if form.is_valid():
+            if form.fields['after'] == 0:
+                index = 1
+            else:
+                index = SynopsisSectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index
+
+            for entry in SynopsisSectionTopic.objects.filter(topic=topic, index__gte=index).all():
+                entry.index += 1
+                entry.save()
+
+            section = SynopsisSection(name=form.cleaned_data['name'], content=form.cleaned_data['content'])
+            section.save()
+            section_topic_rel = SynopsisSectionTopic(topic=topic, section=section, index=index)
+            section_topic_rel.save()
+            section_log = SynopsisSectionLog(author=request.user, section=section)
+            section_log.save()
+            return HttpResponseRedirect(reverse('synopsis_section', args=[topic_id, section.id]))
+    else:
+        form = CreateSynopsisSectionForm()
+        form.fields['after'].choices = choices
+        form.fields['id'].initial = topic_id
+
+    subarea = topic.sub_area
+    area = subarea.area
+    context['title'] = 'Criar nova entrada'
+    context['form_title'] = 'Criar nova entrada em %s' % topic.name
+    context['area'] = area
+    context['subarea'] = subarea
+    context['topic'] = topic
+    context['form'] = form
+
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
+                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
+                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
+                          {'name': 'Criar entrada', 'url': reverse('synopsis_create_section', args=[topic_id])}]
+    return render(request, 'kleep/synopses/generic_form.html', context)
 
 
 def articles(request):

@@ -845,13 +845,14 @@ class SynopsisSectionTopic(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_section_topics'
+        ordering = ('section', 'topic', 'index',)
 
     def __str__(self):
         return f'{self.section} linked to {self.topic} ({self.index}).'
 
 
 class SynopsisSectionLog(Model):
-    author = ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL)
+    author = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
     timestamp = DateTimeField(auto_now_add=True)
     previous_content = TextField(blank=True, null=True)  # TODO Change to diff

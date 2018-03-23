@@ -9,26 +9,6 @@ from . import views
 
 app_name = 'kleep'
 
-# class BuildingSerializer(serializers.HyperlinkedModelSerializer):
-#     class Meta:
-#         model = Building
-#         fields = ('id', 'name')
-#
-#
-# # ViewSets define the view behavior.
-# class UserViewSet(viewsets.ModelViewSet):
-#     queryset = Building.objects.all()
-#     serializer_class = BuildingSerializer
-#
-#
-# # Routers provide an easy way of automatically determining the URL conf.
-# router = routers.DefaultRouter()
-# router.register(r'buildings', UserViewSet)
-
-# router = routers.DefaultRouter()
-# router.register(r'users', api_views.UserViewSet)
-# router.register(r'groups', api_views.GroupViewSet)
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
@@ -70,6 +50,7 @@ urlpatterns = [
     path('resumo/subarea/<int:subarea_id>/', views.synopsis_subarea, name='synopsis_subarea'),
     path('resumo/topico/<int:topic_id>/', views.synopsis_topic, name='synopsis_topic'),
     path('resumo/topico/<int:topic_id>/<int:section_id>/', views.synopsis_section, name='synopsis_section'),
+    path('resumo/topico/<int:topic_id>/nova_entrada/', views.synopsis_create_section, name='synopsis_create_section'),
     path('artigos/', views.articles, name='articles'),
     path('artigo/<int:article_id>', views.article_item, name='article_item'),
     path('ementas/', views.lunch, name='lunch'),

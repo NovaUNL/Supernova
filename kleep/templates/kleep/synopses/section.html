@@ -32,19 +32,22 @@
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
         {% if previous_section %}
             <a class="generic-button"
-               href="{% url 'synopsis_section' topic.id previous_section.id %}">Anterior: {{ previous_section.name }}</a>
+               href="{% url 'synopsis_section' topic.id previous_section.id %}">
+                <i class="fas fa-angle-double-left"></i>
+                Anterior: {{ previous_section.name }}</a>
         {% endif %}
         <a style="padding: 0;"></a>
         {% if next_section %}
             <a class="generic-button"
-               href="{% url 'synopsis_section' topic.id next_section.id %}">Seguinte: {{ next_section }}</a>
+               href="{% url 'synopsis_section' topic.id next_section.id %}">Seguinte: {{ next_section }}
+                <i class="fas fa-angle-double-right"></i></a>
         {% endif %}
     </nav>
     <hr>
     <h3>Autores:</h3>
     <ul style="padding: 0; margin: 0; list-style: none;">
-        {% for author in authors %}
-            <li><a href="{% url 'profile' author.author.nickname %}">{{ author.author.name }}</a>,</li>
+        {% for log in author_log %}
+            <li><a href="{% url 'profile' log.author.profile.nickname %}">{{ log.author.get_full_name }}</a>,</li>
         {% endfor %}
     </ul>
     <h3>Contribuir:</h3>

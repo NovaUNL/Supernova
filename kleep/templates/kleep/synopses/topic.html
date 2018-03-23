@@ -33,8 +33,8 @@
     <h2>Contribuir:</h2>
     {% if user.is_authenticated %}
         <div id="contribute">
-            <a class="disabled generic-button">Criar entrada</a>
-            <a class="disabled generic-button">Ligar entrada (existente) a este tópico</a>
+            <a class="generic-button" href="{% url 'synopsis_create_section' topic.id %}">Criar entrada</a>
+            <a class="disabled generic-button">Ligar entrada a este tópico</a>
             <a class="disabled generic-button">Remover entrada deste tópico</a>
         </div>
     {% else %}
