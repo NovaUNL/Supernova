@@ -9,11 +9,13 @@
         {% for area in areas %}
             <a href="{% url 'synopsis_area' area.id %}">
                 {% if area.img_url %}
-                    <div class="flex-grid-item" style="background-image: url({{ area.img_url }}); background-size: cover">
+                    <div class="flex-grid-item"
+                         style="background-image: url({{ area.img_url }}); background-size: cover">
                 {% else %}
                     <div class="flex-grid-item">
                 {% endif %}
                 <span class="flex-grid-item-top">{{ area.name }}</span>
+                <span class="flex-grid-item-bottom">{{ area.synopsissubarea_set.count }} categoria(s)</span>
                 </div>
             </a>
         {% endfor %}

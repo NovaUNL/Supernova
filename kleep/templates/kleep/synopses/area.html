@@ -9,13 +9,24 @@
         {% for subarea in area.synopsissubarea_set.all %}
             <a href="{% url 'synopsis_subarea' subarea.id %}">
                 {% if subarea.img_url %}
-                    <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }}); background-size: cover; background-position: center">
+                    <div class="flex-grid-item"
+                         style="background-image: url({{ subarea.img_url }}); background-size: cover; background-position: center">
                 {% else %}
                     <div class="flex-grid-item">
                 {% endif %}
-                    <span class="flex-grid-item-top">{{ subarea.name }}</span>
+                <span class="flex-grid-item-top">{{ subarea.name }}</span>
+                <span class="flex-grid-item-bottom">{{ subarea.synopsistopic_set.count }} tópico(s)</span>
                 </div>
             </a>
         {% endfor %}
     </div>
+    <h2>Contribuir:</h2>
+    {% if user.is_authenticated %}
+        <div id="contribute">
+            <a class="generic-button">Propor nova categoria</a>
+            <a class="generic-button">Propor remoção da secção</a>
+        </div>
+    {% else %}
+        <b>Autentique-se para poder efetuar alterações.</b>
+    {% endif %}
 {% endblock %}

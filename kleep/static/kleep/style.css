@@ -69,6 +69,10 @@ p {
     margin: 4px 0;
 }
 
+ul {
+    margin: 10px 0;
+}
+
 .clearfix::after {
     content: "";
     clear: both;
@@ -524,4 +528,13 @@ footer img {
 .flex-grid-item-bottom {
     background-color: rgba(170, 170, 170, 0.5);
     width: 100%;
+}
+
+.generic-button {
+    display: inline-block;
+    background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
+    border: 2px solid #dddddd;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-weight: bold;
 }

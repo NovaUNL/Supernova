@@ -10,6 +10,15 @@
             font-size: 1.5em;
             line-height: 2em;
         }
+
+        #contribute {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #contribute > a {
+            margin: 0 10px;
+        }
     </style>
 {% endblock %}
 
@@ -21,4 +30,14 @@
             <li><a href="{% url 'synopsis_section' topic.id section.id %}">{{ section.name }}</a></li>
         {% endfor %}
     </ul>
+    <h2>Contribuir:</h2>
+    {% if user.is_authenticated %}
+        <div id="contribute">
+            <a class="disabled generic-button">Criar entrada</a>
+            <a class="disabled generic-button">Ligar entrada (existente) a este tópico</a>
+            <a class="disabled generic-button">Remover entrada deste tópico</a>
+        </div>
+    {% else %}
+        <b>Autentique-se para poder efetuar alterações.</b>
+    {% endif %}
 {% endblock %}

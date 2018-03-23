@@ -9,23 +9,41 @@
             font-weight: bold;
             font-size: 1.5em;
             line-height: 2em;
+            margin-top: 0;
+            padding-left: 10px;
+        }
+
+        #contribute {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #contribute > a {
+            margin: 0 10px;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-book"></i> Tópicos de {{ subarea.name }}</h1>
-    <style>
-        #topic-list {
-            list-style: none;
-            font-weight: bold;
-            font-size: 1.5em;
-            line-height: 2em;
-        }
-    </style>
+    <h1><i class="fas fa-book"></i> {{ subarea.name }}</h1>
+    <h2>Descrição:</h2>
+    <p>{{ subarea.description }}</p>
+    <h2>Tópicos:</h2>
     <ul id="topic-list">
         {% for topic in subarea.synopsistopic_set.all %}
-            <li><a href="{% url 'synopsis_topic' topic.id %}">{{ topic.name }}</a></li>
+            <li><a href="{% url 'synopsis_topic' topic.id %}">{{ topic.name }}</a>
+                ({{ topic.synopsissection_set.count }} secções)
+            </li>
         {% endfor %}
     </ul>
+    <h2>Contribuir:</h2>
+    {% if user.is_authenticated %}
+        <div id="contribute">
+            <a class="disabled generic-button">Criar novo tópico</a>
+            <a class="disabled generic-button">Editar descrição</a>
+            <a class="disabled generic-button">Propor remoção da secção</a>
+        </div>
+    {% else %}
+        <b>Autentique-se para poder efetuar alterações.</b>
+    {% endif %}
 {% endblock %}

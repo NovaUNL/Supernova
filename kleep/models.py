@@ -363,7 +363,7 @@ class Place(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'places'
-        ordering = ('building', 'name',)
+        ordering = ('building', 'name')
 
     def __str__(self):
         return f"{self.building} {self.name}"
@@ -417,6 +417,7 @@ class Department(Model):
     description = TextField(max_length=1024, null=True, blank=True)
     building = ForeignKey(Building, on_delete=models.PROTECT, null=True, blank=True)
     clip_department = OneToOneField(ClipDepartment, on_delete=models.PROTECT)
+    img_url = TextField(null=True, blank=True)
 
     class Meta:
         managed = True
@@ -761,6 +762,7 @@ class SynopsisArea(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_area'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -775,6 +777,7 @@ class SynopsisSubarea(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_subarea'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -789,6 +792,7 @@ class SynopsisTopic(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_topics'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -802,6 +806,7 @@ class SynopsisSection(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_sections'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -842,15 +847,14 @@ class SynopsisSectionTopic(Model):
         db_table = KLEEP_TABLE_PREFIX + 'synopsis_section_topics'
 
     def __str__(self):
-        return f'{self.section} linked to {self.topic}.'
+        return f'{self.section} linked to {self.topic} ({self.index}).'
 
 
 class SynopsisSectionLog(Model):
     author = ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL)
     section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
     timestamp = DateTimeField(auto_now_add=True)
-
-    # delta = TextField() # TODO store diffs
+    previous_content = TextField(blank=True, null=True)  # TODO Change to diff
 
     def __str__(self):
         return f'{self.author} edited {self.section} @ {self.timestamp}.'
@@ -995,6 +999,7 @@ class Group(Model):
     public_members = BooleanField(default=False)
     members = ManyToManyField(Profile, through='GroupMembers')
     roles = ManyToManyField(Role, through='GroupRoles')
+    img_url = TextField(null=True, blank=True)
 
     class Meta:
         managed = True
@@ -1110,6 +1115,7 @@ class StoreItem(Sellable, Model):
     price = IntegerField()
     stock = IntegerField(default=-1)
     seller = ForeignKey(Group, on_delete=models.CASCADE)
+    img_url = TextField(null=True, blank=True)
 
     class Meta:
         managed = True
