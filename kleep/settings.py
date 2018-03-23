@@ -10,12 +10,14 @@ with open(BASE_DIR + '/settings.json') as json_data:
     CLIP_USERNAME = settings['CLIP_USERNAME']
     CLIP_PASSWORD = settings['CLIP_PASSWORD']
     DATABASES = settings['DATABASES']
+    PIWIK_DOMAIN_PATH = settings['PIWIK_DOMAIN_PATH']
+    PIWIK_SITE_ID = settings['PIWIK_SITE_ID']
 
 DEBUG = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = ['beta.kleep.claudiop.com', 'kleep.com']
+ALLOWED_HOSTS = ['kleep.claudiop.com', 'beta.kleep.claudiop.com', 'kleep.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'rest_framework',
     'api.apps.ApiConfig',
+    'analytical',
 ]
 
 MIDDLEWARE = [

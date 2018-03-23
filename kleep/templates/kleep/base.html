@@ -1,7 +1,9 @@
 {% load static %}
+{% load analytical %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% analytical_head_top %}
     <meta charset="UTF-8">
     <title>Kleep - {{ title }}</title>
     <link rel="icon" href="{% static 'kleep/images/favicon.png' %}" type="image/x-icon"/>
@@ -10,8 +12,11 @@
     <script src="{% static 'kleep/script.js' %}"></script>
     {% block head %}
     {% endblock %}
+    {% analytical_head_bottom %}
 </head>
 <body>
+
+{% analytical_body_top %}
 <div id="wrapper">
     <nav id="top_nav">
         <a href="{% url 'index' %}"><img id="logo" src="{% static 'kleep/images/title.png' %}"/></a>
@@ -121,5 +126,6 @@
         <a href="{% url 'create_account' %}">Criar</a>
     </div>
 </div>
+{% analytical_body_bottom %}
 </body>
 </html>
