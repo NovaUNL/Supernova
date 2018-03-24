@@ -1,0 +1,43 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+
+{% block head %}
+    <style>
+        #topic-list {
+            list-style: none;
+            font-weight: bold;
+            font-size: 1.5em;
+            line-height: 2em;
+        }
+
+        #contribute {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #contribute > a {
+            margin: 0 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-book"></i> {{ title }}</h1>
+    <ul id="topic-list">
+        {% for class_synopsis_section in sections %}
+            <li>
+                <a href="{% url 'class_synopsis_section' class_obj.id class_synopsis_section.section.id %}">{{ class_synopsis_section.section.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <h2>Contribuir:</h2>
+    {% if user.is_authenticated %}
+        <div id="contribute">
+            <a class="disabled generic-button">Ligar entrada a esta cadeira</a>
+            <a class="disabled generic-button">Remover entrada desta cadeira</a>
+        </div>
+    {% else %}
+        <b>Autentique-se para poder efetuar alterações.</b>
+    {% endif %}
+{% endblock %}

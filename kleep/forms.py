@@ -166,7 +166,6 @@ class ClipLoginForm(forms.Form):
 
 
 class CreateSynopsisSectionForm(forms.Form):
-    id = forms.IntegerField(widget=forms.HiddenInput())
     name = forms.CharField(label='Título', max_length=100, required=True)
     content = forms.CharField(label='Conteudo:', widget=CKEditorUploadingWidget())
     after = forms.ChoiceField(label='Após:')
