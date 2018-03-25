@@ -602,7 +602,7 @@ def synopsis_section(request, topic_id, section_id):
         context['previous_section'] = prev_section.section
     if next_section:
         context['next_section'] = next_section.section
-    context['authors'] = section.synopsissectionlog_set.distinct('author')
+    context['author_log'] = section.synopsissectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
                           {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},

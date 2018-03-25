@@ -3,8 +3,11 @@
 {% load static %}
 
 {% block head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'kleep/prism.css' %}">
+    <script src="{% static 'kleep/prism.js' %}"></script>
     <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
     <style>
         #section-navigation a {
             line-height: 20px;
@@ -27,8 +30,7 @@
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ section.name }}</h1>
     <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
-    {{ section.content|safe }}
-
+    <div class="clearfix">{{ ksection.content|safe }}</div>
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
         {% if previous_section %}
             <a class="generic-button"
@@ -43,21 +45,31 @@
         {% endif %}
     </nav>
     <hr>
-    <h3>Autores:</h3>
-    <ul style="padding: 0; margin: 0; list-style: none;">
-        {% for log in author_log %}
-            <li><a href="{% url 'profile' log.author.profile.nickname %}">{{ log.author.get_full_name }}</a>,</li>
-        {% endfor %}
-    </ul>
-    <h3>Fontes:</h3>
-    TODO
-    <h3>Contribuir:</h3>
-    {% if user.is_authenticated %}
-        <div id="contribute">
-            <a class="generic-button" href="{% url 'synopsis_edit_section' topic.id section.id %}">Editar conteudo</a>
-            <a class="disabled generic-button">Editar relações</a>
+    <div class="flex-wrapper">
+        <div style="min-width: 300px">
+            <h3>Autores:</h3>
+            <ul style="padding: 0; margin: 0; list-style: none;">
+                {% for log in author_log %}
+                    <li><a href="{% url 'profile'  log.author.profile.nickname %}">{{ log.author.get_full_name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
-    {% else %}
-        <b>Autentique-se para poder efetuar alterações.</b>
-    {% endif %}
+        <div style="flex-basis: 500px">
+            <h3>Fontes/recursos:</h3>
+            TODO
+        </div>
+        <div>
+            <h3>Contribuir:</h3>
+            {% if user.is_authenticated %}
+                <div id="contribute">
+                    <a class="generic-button" href="{% url 'synopsis_edit_section' topic.id section.id %}">Editar
+                        conteudo</a>
+                    <a class="disabled generic-button">Editar relações</a>
+                </div>
+            {% else %}
+                <b>Autentique-se para poder efetuar alterações.</b>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

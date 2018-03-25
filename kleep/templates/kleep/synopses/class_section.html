@@ -3,6 +3,8 @@
 {% load static %}
 
 {% block head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'kleep/prism.css' %}">
+    <script src="{% static 'kleep/prism.js' %}"></script>
     <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     <style>
@@ -26,8 +28,7 @@
 
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ section.name }}</h1>
-{#    <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>#}
-    {{ section.content|safe }}
+    <div class="clearfix">{{ ksection.content|safe }}</div>
 
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
         {% if previous_section.section %}
