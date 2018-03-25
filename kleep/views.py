@@ -623,7 +623,7 @@ def synopsis_create_section(request, topic_id):
         form = CreateSynopsisSectionForm(data=request.POST)
         form.fields['after'].choices = choices
         if form.is_valid():
-            if form.fields['after'] == 0:
+            if form.cleaned_data['after'] == '0':
                 index = 1
             else:
                 # TODO validate
@@ -680,7 +680,7 @@ def synopsis_edit_section(request, topic_id, section_id):
         form = CreateSynopsisSectionForm(data=request.POST)
         form.fields['after'].choices = choices
         if form.is_valid():
-            if form.fields['after'] == 0:
+            if form.cleaned_data['after'] == '0':
                 index = 1
             else:
                 index = SynopsisSectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
