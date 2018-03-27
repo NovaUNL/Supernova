@@ -154,3 +154,5 @@ VERSION = subprocess.check_output([
     "rev-parse",
     "HEAD"
 ]).decode('ascii')
+
+REGISTRATIONS_ENABLED = False

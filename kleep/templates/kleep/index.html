@@ -8,6 +8,10 @@
             background-attachment: fixed !important;
         }
 
+        h2 {
+
+        }
+
         .flex-wrapper {
             display: flex;
             flex-wrap: wrap;
@@ -29,16 +33,23 @@
         #content_large {
             background-color: rgba(255, 255, 255, 0.85);
         }
+
+        .flex-wrapper h2 {
+            margin: 8px 0;
+        }
+
+        .flex-wrapper h3 {
+            margin: 5px 0;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     <h1>Bem vindo ao Kleep</h1>
-    <h3>{{ catchphrase }}</h3><br>
+    <span>{{ catchphrase }}</span><br>
     <div class="flex-wrapper">
         <div class="flex-wrapper vertical">
             <div>
-
                 <a href="{% url 'news' %}"><h2>Últimas notícias</h2></a>
                 {% for news_item in news %}
                     <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>

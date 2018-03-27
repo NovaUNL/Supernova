@@ -10,7 +10,8 @@
             width: 660px;
             margin: auto;
         }
-        #content_form>div {
+
+        #content_form > div {
             width: 300px;
         }
 
@@ -28,6 +29,9 @@
     </style>
     <h1><i class="fas fa-user-plus"></i> Criar conta</h1>
     <div id="content_form">
+        {% if not enabled %}
+            <span style="font-weight: bold; font-size: 1.5em; color: red;">Os registos encontram-se desactivados!</span>
+        {% endif %}
         <form method="post" action="{{ request.get_full_path }}">
             {% csrf_token %}
             {{ creation_form.non_field_errors }}
@@ -44,7 +48,7 @@
             </div>
 
 
-            <div  style="float: left; margin-right: 20px;">
+            <div style="float: left; margin-right: 20px;">
                 {{ creation_form.password.label }}<br>
                 {{ creation_form.password }}<br>
 
@@ -58,7 +62,7 @@
                 {{ creation_form.captcha.label }}<br>
                 {{ creation_form.captcha }}<br>
             </div>
-            <input type="submit" value="Vender a alma">
+            <input type="submit" value="Registar" {% if not enabled %}disabled{% endif %}>
         </form>
     </div>
 {% endblock %}

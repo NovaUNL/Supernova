@@ -14,7 +14,7 @@ from kleep.models import Service, Building, Profile, Group, GroupType, Departmen
     Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent, SynopsisSubarea, \
     SynopsisSectionLog, ClassSynopses, ClassSynopsesSections
 from kleep.schedules import build_turns_schedule, build_schedule
-from kleep.settings import VERSION
+from kleep.settings import VERSION, REGISTRATIONS_ENABLED
 
 
 def index(request):
@@ -166,6 +166,7 @@ def create_account(request):
 
     context = __base_context__(request)
     context['title'] = "Criação de conta"
+    context['enabled'] = REGISTRATIONS_ENABLED
     if request.method == 'POST':
         pass
 
