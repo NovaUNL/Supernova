@@ -785,7 +785,7 @@ class SynopsisSubarea(Model):
 
 class SynopsisTopic(Model):
     name = TextField()
-    index = IntegerField()
+    index = IntegerField(unique=True)
     sub_area = ForeignKey(SynopsisSubarea, on_delete=models.PROTECT)
     sections = ManyToManyField('SynopsisSection', through='SynopsisSectionTopic')
 
@@ -827,7 +827,7 @@ class ClassSynopses(Model):
 class ClassSynopsesSections(Model):
     section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
     class_synopsis = ForeignKey(ClassSynopses, on_delete=models.PROTECT)
-    index = IntegerField()
+    index = IntegerField(unique=True)
 
     class Meta:
         managed = True
@@ -840,7 +840,7 @@ class ClassSynopsesSections(Model):
 class SynopsisSectionTopic(Model):
     section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
     topic = ForeignKey(SynopsisTopic, on_delete=models.PROTECT)
-    index = IntegerField(default=1024)
+    index = IntegerField(unique=True)
 
     class Meta:
         managed = True
@@ -856,6 +856,10 @@ class SynopsisSectionLog(Model):
     section = ForeignKey(SynopsisSection, on_delete=models.CASCADE)
     timestamp = DateTimeField(auto_now_add=True)
     previous_content = TextField(blank=True, null=True)  # TODO Change to diff
+
+    class Meta:
+        managed = True
+        db_table = KLEEP_TABLE_PREFIX + 'synopsis_section_log'
 
     def __str__(self):
         return f'{self.author} edited {self.section} @ {self.timestamp}.'

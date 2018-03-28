@@ -28,7 +28,7 @@
 
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ section.name }}</h1>
-    <div class="clearfix">{{ ksection.content|safe }}</div>
+    <div class="clearfix">{{ section.content|safe }}</div>
 
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
         {% if previous_section.section %}
