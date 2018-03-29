@@ -34,13 +34,13 @@
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
         {% if previous_section %}
             <a class="generic-button"
-               href="{% url 'synopsis_section' topic.id previous_section.id %}">
+               href="{% url 'synopses:section' topic.id previous_section.id %}">
                 <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}</a>
         {% endif %}
         <a style="padding: 0;"></a>
         {% if next_section %}
             <a class="generic-button"
-               href="{% url 'synopsis_section' topic.id next_section.id %}">Seguinte: {{ next_section.name }}
+               href="{% url 'synopses:section' topic.id next_section.id %}">Seguinte: {{ next_section.name }}
                 <i class="fas fa-angle-double-right"></i></a>
         {% endif %}
     </nav>
@@ -63,7 +63,7 @@
             <h3>Contribuir:</h3>
             {% if user.is_authenticated %}
                 <div id="contribute">
-                    <a class="generic-button" href="{% url 'synopsis_edit_section' topic.id section.id %}">Editar
+                    <a class="generic-button" href="{% url 'synopses:edit_section' topic.id section.id %}">Editar
                         conteudo</a>
                     <a class="disabled generic-button">Editar relações</a>
                 </div>

@@ -7,18 +7,18 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils.timezone import now
 
-from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLoginForm, CreateSynopsisSectionForm
-from kleep.models import Service, Building, Profile, Group, GroupType, Department, Class, ClassInstance, Place, \
-    NewsItem, Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, \
-    SynopsisArea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, Article, StoreItem, ChangeLog, BarDailyMenu, \
-    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Degree, ClipStudent, SynopsisSubarea, \
-    SynopsisSectionLog, ClassSynopses, ClassSynopsesSections
+from clip.models import Degree, Student
+from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLoginForm
+from kleep.models import Service, Building, Profile, Group, Department, Class, ClassInstance, Place, \
+    Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, ChangeLog, BarDailyMenu, \
+    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION, REGISTRATIONS_ENABLED
+from news.models import NewsItem
 
 
 def index(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "O sistema que não deixa folhas soltas"
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
     context['changelog'] = ChangeLog.objects.order_by('date').reverse()[0:3]
@@ -27,7 +27,7 @@ def index(request):
 
 
 def about(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Sobre"
     context['version'] = VERSION
     print(VERSION)
@@ -35,19 +35,19 @@ def about(request):
 
 
 def beg(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Ajudas"
     return render(request, 'kleep/standalone/beg.html', context)
 
 
 def privacy(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Politica de privacidade"
     return render(request, 'kleep/standalone/privacy.html', context)
 
 
 def campus(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Mapa do campus"
     context['buildings'] = Building.objects.all()
     context['services'] = Service.objects.all()
@@ -56,7 +56,7 @@ def campus(request):
 
 
 def campus_transportation(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Transportes para o campus"
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('campus')},
@@ -66,7 +66,7 @@ def campus_transportation(request):
 
 def profile(request, nickname):
     profile = get_object_or_404(Profile, nickname=nickname)
-    context = __base_context__(request)
+    context = build_base_context(request)
     page_name = "Perfil de " + profile.name
     context['page'] = 'profile'
     context['title'] = page_name
@@ -78,7 +78,7 @@ def profile(request, nickname):
 def profile_schedule(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
-    context = __base_context__(request)
+    context = build_base_context(request)
     user = get_object_or_404(Profile, id=request.user.id)
 
     if user.student_set.exists():
@@ -97,7 +97,7 @@ def profile_schedule(request, nickname):
 def profile_settings(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
-    context = __base_context__(request)
+    context = build_base_context(request)
     user = Profile.objects.get(id=request.user.id)
     context['page'] = 'profile_settings'
     context['title'] = "Definições da conta"
@@ -120,7 +120,7 @@ def profile_settings(request, nickname):
 def profile_crawler(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
-    context = __base_context__(request)
+    context = build_base_context(request)
     profile = request.user.profile
     context['page'] = 'profile_crawler'
     context['title'] = "Definições da conta"
@@ -135,7 +135,7 @@ def profile_crawler(request, nickname):
 
 
 def login_view(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Autenticação"
     context['disable_auth'] = True  # Disable auth overlay
 
@@ -164,7 +164,7 @@ def create_account(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('profile', args=[request.user]))
 
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Criação de conta"
     context['enabled'] = REGISTRATIONS_ENABLED
     if request.method == 'POST':
@@ -177,7 +177,7 @@ def create_account(request):
 
 def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = building.name
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building_id])}]
@@ -188,7 +188,7 @@ def building(request, building_id):
 def classroom_view(request, classroom_id):
     classroom = get_object_or_404(Place, id=classroom_id)
     building = classroom.building
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = str(classroom)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building.id])},
@@ -204,7 +204,7 @@ def classroom_view(request, classroom_id):
 def service(request, building_id, service_id):
     building = get_object_or_404(Building, id=building_id)
     service = get_object_or_404(Service, id=service_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = service.name
     is_bar = hasattr(service, 'bar')
     context['is_bar'] = is_bar
@@ -227,7 +227,7 @@ def service(request, building_id, service_id):
 
 
 def groups(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     if 'filtro' in request.GET:
         context['type_filter'] = request.GET['filtro']
     context['title'] = "Grupos"
@@ -241,7 +241,7 @@ def groups(request):
 
 def group(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = group.name
     context['group'] = group
     context['page'] = 'group'
@@ -253,7 +253,7 @@ def group(request, group_id):
 
 def group_announcements(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = f'Anúncios de {group.name}'
     context['group'] = group
     context['page'] = 'group_anouncements'
@@ -267,7 +267,7 @@ def group_announcements(request, group_id):
 def group_announcement(request, announcement_id):
     announcement = get_object_or_404(GroupAnnouncement, id=announcement_id)
     group = announcement.group
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = announcement.title
     context['group'] = group
     context['announcement'] = announcement
@@ -282,7 +282,7 @@ def group_announcement(request, announcement_id):
 
 def group_documents(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = f'Documentos de {group.name}'
     context['group'] = group
     context['page'] = 'group_documents'
@@ -297,7 +297,7 @@ def group_contact(request, group_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
     group = get_object_or_404(Group, id=group_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = f'Contactar {group.name}'
     context['group'] = group
     context['page'] = 'group_contact'
@@ -310,7 +310,7 @@ def group_contact(request, group_id):
 
 
 def document(request, document_id):
-    context = __base_context__(request)
+    context = build_base_context(request)
     document = get_object_or_404(Document, id=document_id)
     title = document.title
     context['title'] = title
@@ -321,7 +321,7 @@ def document(request, document_id):
 
 
 def departments(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = "Departamentos"
     context['departments'] = Department.objects.order_by('name').all()
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')}]
@@ -330,7 +330,7 @@ def departments(request):
 
 def department(request, department_id):
     department = get_object_or_404(Department, id=department_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = f'Departamento de {department.name}'
     context['department'] = department
     context['degrees'] = Degree.objects.filter(course__department=department).all()
@@ -342,7 +342,7 @@ def department(request, department_id):
 
 def class_view(request, class_id):
     class_ = get_object_or_404(Class, id=class_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     department = class_.department
     context['title'] = class_.name
     context['department'] = department
@@ -355,7 +355,7 @@ def class_view(request, class_id):
 
 def class_instance_view(request, instance_id):
     instance = get_object_or_404(ClassInstance, id=instance_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_index'
@@ -377,7 +377,7 @@ def class_instance_view(request, instance_id):
 
 def class_instance_schedule_view(request, instance_id):
     instance = get_object_or_404(ClassInstance, id=instance_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_schedule'
@@ -401,7 +401,7 @@ def class_instance_schedule_view(request, instance_id):
 
 
 def class_instance_turns_view(request, instance_id):
-    context = __base_context__(request)
+    context = build_base_context(request)
     instance = get_object_or_404(ClassInstance, id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
@@ -425,7 +425,7 @@ def class_instance_turns_view(request, instance_id):
 
 
 def areas(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = 'Areas de estudo'
     context['areas'] = Area.objects.order_by('name').all()
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')}]
@@ -434,7 +434,7 @@ def areas(request):
 
 def area(request, area_id):
     area = get_object_or_404(Area, id=area_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = 'Area de ' + area.name
     context['area'] = area
     context['courses'] = Course.objects.filter(area=area).order_by('degree_id').all()
@@ -446,7 +446,7 @@ def area(request, area_id):
 
 def course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     department = course.department
     context['title'] = str(course)
 
@@ -459,13 +459,13 @@ def course(request, course_id):
 
 def course_students(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     department = course.department
     context['title'] = 'Alunos de %s' % course
 
     context['course'] = course
     context['students'] = course.student_set.order_by('studentcourse__last_year', 'number').all()
-    context['unregistered_students'] = ClipStudent.objects.filter(
+    context['unregistered_students'] = Student.objects.filter(
         course=course.clip_course, student=None).order_by('internal_id')
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
                           {'name': department, 'url': reverse('department', args=[department.id])},
@@ -476,7 +476,7 @@ def course_students(request, course_id):
 
 def course_curriculum(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    context = __base_context__(request)
+    context = build_base_context(request)
     department = course.department
     curriculum = Curriculum.objects.filter(course=course).order_by('year', 'period', 'period_type').all()
 
@@ -491,27 +491,8 @@ def course_curriculum(request, course_id):
     return render(request, 'kleep/academic/course_curriculum.html', context)
 
 
-def news(request):
-    context = __base_context__(request)
-    context['title'] = 'Notícias'
-    context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:10]
-    context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')}]
-    return render(request, 'kleep/news/news.html', context)
-
-
-def news_item(request, news_item_id):
-    context = __base_context__(request)
-    news_item = get_object_or_404(NewsItem, id=news_item_id)
-    context['page'] = 'instance_turns'
-    context['title'] = 'Notícia:' + news_item.title
-    context['news_item'] = news_item
-    context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news')},
-                          {'name': news_item.title, 'url': reverse('news_item', args=[news_item_id])}]
-    return render(request, 'kleep/news/news_item.html', context)
-
-
 def events(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['page'] = 'instance_turns'
     context['title'] = 'Eventos'
     context['events'] = Event.objects.filter(  # Only events starting from now, and excluding turn events
@@ -523,7 +504,7 @@ def events(request):
 
 
 def event(request, event_id):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = 'Evento '  # TODO
     context['page'] = 'instance_turns'
     event = get_object_or_404(Event, id=event_id)
@@ -533,311 +514,15 @@ def event(request, event_id):
         pass
 
 
-def synopsis_areas(request):
-    context = __base_context__(request)
-    context['title'] = 'Resumos - Areas de estudo'
-    context['areas'] = SynopsisArea.objects.all()
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')}]
-    return render(request, 'kleep/synopses/areas.html', context)
-
-
-def synopsis_area(request, area_id):
-    area = get_object_or_404(SynopsisArea, id=area_id)
-    context = __base_context__(request)
-    context['title'] = 'Resumos - Categorias de %s' % area.name
-    context['area'] = area
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
-                          {'name': area.name, 'url': reverse('synopsis_area', args=[area_id])}]
-    return render(request, 'kleep/synopses/area.html', context)
-
-
-def synopsis_subarea(request, subarea_id):
-    subarea = get_object_or_404(SynopsisSubarea, id=subarea_id)
-    area = subarea.area
-    context = __base_context__(request)
-    context['title'] = 'Resumos - %s (%s)' % (subarea.name, area.name)
-    context['subarea'] = subarea
-    context['area'] = area
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
-                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea_id])}]
-    return render(request, 'kleep/synopses/subarea.html', context)
-
-
-def synopsis_topic(request, topic_id):
-    context = __base_context__(request)
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
-    subarea = topic.sub_area
-    area = subarea.area
-    context['title'] = topic.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
-    context['sections'] = topic.sections.order_by('synopsissectiontopic__index').all()
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
-                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])}]
-    return render(request, 'kleep/synopses/topic.html', context)
-
-
-def synopsis_section(request, topic_id, section_id):
-    context = __base_context__(request)
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
-    section = get_object_or_404(SynopsisSection, id=section_id)
-    if section not in topic.sections.all():
-        return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
-    subarea = topic.sub_area
-    area = subarea.area
-    context['title'] = topic.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
-    context['section'] = section
-    section_topic_relation = SynopsisSectionTopic.objects.filter(topic=topic, section=section).first()
-    prev_section = SynopsisSectionTopic.objects.filter(
-        topic=topic, index__lt=section_topic_relation.index).order_by('index').last()
-    next_section = SynopsisSectionTopic.objects.filter(
-        topic=topic, index__gt=section_topic_relation.index).order_by('index').first()
-    if prev_section:
-        context['previous_section'] = prev_section.section
-    if next_section:
-        context['next_section'] = next_section.section
-    context['author_log'] = section.synopsissectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
-                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
-                          {'name': section.name, 'url': reverse('synopsis_section', args=[topic_id, section_id])}]
-    return render(request, 'kleep/synopses/section.html', context)
-
-
-def synopsis_create_section(request, topic_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
-    context = __base_context__(request)
-    choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.name),
-                                         SynopsisSection.objects.filter(synopsistopic=topic_id)
-                                         .order_by('synopsissectiontopic__index').all()))
-    if request.method == 'POST':
-        form = CreateSynopsisSectionForm(data=request.POST)
-        form.fields['after'].choices = choices
-        if form.is_valid():
-            if form.cleaned_data['after'] == '0':
-                index = 1
-            else:
-                # TODO validate
-                index = SynopsisSectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
-
-            for entry in SynopsisSectionTopic.objects.filter(topic=topic, index__gte=index).all():
-                entry.index += 1
-                entry.save()
-
-            section = SynopsisSection(name=form.cleaned_data['name'], content=form.cleaned_data['content'])
-            section.save()
-            section_topic_rel = SynopsisSectionTopic(topic=topic, section=section, index=index)
-            section_topic_rel.save()
-            section_log = SynopsisSectionLog(author=request.user, section=section)
-            section_log.save()
-            return HttpResponseRedirect(reverse('synopsis_section', args=[topic_id, section.id]))
-    else:
-        form = CreateSynopsisSectionForm()
-        form.fields['after'].choices = choices
-
-    subarea = topic.sub_area
-    area = subarea.area
-    context['title'] = 'Criar nova entrada em %s' % topic.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
-    context['form'] = form
-
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
-                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
-                          {'name': 'Criar entrada', 'url': reverse('synopsis_create_section', args=[topic_id])}]
-    return render(request, 'kleep/synopses/generic_form.html', context)
-
-
-def synopsis_edit_section(request, topic_id, section_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
-    section = get_object_or_404(SynopsisSection, id=section_id)
-    if not SynopsisSectionTopic.objects.filter(section=section, topic=topic).exists():
-        return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
-    section_topic_rel = SynopsisSectionTopic.objects.get(section=section, topic=topic)
-    context = __base_context__(request)
-    choices = [(0, 'Início')]
-    for other_section in SynopsisSection.objects.filter(synopsistopic=topic).order_by(
-            'synopsissectiontopic__index').all():
-        if other_section == section:
-            continue
-        choices += ((other_section.id, other_section.name),)
-
-    if request.method == 'POST':
-        form = CreateSynopsisSectionForm(data=request.POST)
-        form.fields['after'].choices = choices
-        if form.is_valid():
-            if form.cleaned_data['after'] == '0':
-                index = 1
-            else:
-                index = SynopsisSectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
-
-            if SynopsisSectionTopic.objects.filter(topic=topic, index=index).exclude(section=section).exists():
-                for entry in SynopsisSectionTopic.objects.filter(topic=topic, index__gte=index).all():
-                    entry.index += 1
-                    entry.save()
-
-            section.name = form.cleaned_data['name']
-            if section.content != form.cleaned_data['content']:
-                log = SynopsisSectionLog(author=request.user, section=section, previous_content=section.content)
-                section.content = form.cleaned_data['content']
-                log.save()
-            section.save()
-
-            section_topic_rel.index = index
-            section_topic_rel.save()
-            return HttpResponseRedirect(reverse('synopsis_section', args=[topic_id, section.id]))
-    else:
-        prev_topic_section = SynopsisSectionTopic.objects.filter(
-            topic=topic, index__lt=section_topic_rel.index).order_by('index').last()
-        if prev_topic_section:
-            prev_section_id = prev_topic_section.section.id
-        else:
-            prev_section_id = 0
-        form = CreateSynopsisSectionForm(
-            initial={'name': section.name, 'content': section.content, 'after': prev_section_id})
-        form.fields['after'].choices = choices
-
-    subarea = topic.sub_area
-    area = subarea.area
-    context['title'] = 'Editar %s' % section.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
-    context['form'] = form
-
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopsis_areas')},
-                          {'name': area.name, 'url': reverse('synopsis_area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopsis_subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopsis_topic', args=[topic_id])},
-                          {'name': section.name, 'url': reverse('synopsis_section', args=[topic_id, section_id])},
-                          {'name': 'Editar', 'url': reverse('synopsis_edit_section', args=[topic_id, section_id])}]
-    return render(request, 'kleep/synopses/generic_form.html', context)
-
-
-def class_synopsis(request, class_id):
-    class_ = get_object_or_404(Class, id=class_id)
-    count = ClassSynopses.objects.filter(corresponding_class=class_).count()
-    synopsis = ClassSynopses.objects.get(corresponding_class=class_) if count == 1 else None
-    sections = ClassSynopsesSections.objects.order_by('index').filter(class_synopsis=synopsis).all()
-    context = __base_context__(request)
-    department = class_.department
-    context['title'] = 'Resumo de %s' % class_.name
-    context['department'] = department
-    context['class_obj'] = class_
-    context['synopsis'] = synopsis
-    context['msg'] = sections.count()
-    context['sections'] = sections
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department.name, 'url': reverse('department', args=[department.id])},
-                          {'name': class_.name, 'url': reverse('class', args=[class_id])},
-                          {'name': 'Resumo', 'url': reverse('class_synopsis', args=[class_id])}]
-    return render(request, 'kleep/synopses/class.html', context)
-
-
-def class_synopsis_section(request, class_id, section_id):
-    class_ = get_object_or_404(Class, id=class_id)
-    section = get_object_or_404(SynopsisSection, id=section_id)
-
-    class_synopsis_section = ClassSynopsesSections.objects.get(section=section,
-                                                               class_synopsis__corresponding_class=class_)
-    related_sections = ClassSynopsesSections.objects \
-        .filter(class_synopsis__corresponding_class=class_).order_by('index')
-    previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
-    next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
-
-    context = __base_context__(request)
-    department = class_.department
-    context['title'] = '%s (%s)' % (class_synopsis_section.section.name, class_.name)
-    context['department'] = department
-    context['class_obj'] = class_
-    context['section'] = class_synopsis_section.section
-    context['previous_section'] = previous_section
-    context['next_section'] = next_section
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department.name, 'url': reverse('department', args=[department.id])},
-                          {'name': class_.name, 'url': reverse('class', args=[class_id])},
-                          {'name': 'Resumo', 'url': reverse('class_synopsis', args=[class_id])}]
-    return render(request, 'kleep/synopses/class_section.html', context)
-
-
-def articles(request):
-    context = __base_context__(request)
-    context['title'] = 'Artigos'
-    context['articles'] = Article.objects.order_by('datetime').reverse()[0:10]
-    context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('articles')}]
-    return render(request, 'kleep/TODO.html', context)
-
-
-def article_item(request, article_id):
-    context = __base_context__(request)
-    article = get_object_or_404(Article, id=article_id)
-    context['title'] = article.name
-    context['articles'] = Article.objects.order_by('datetime').reverse()[0:10]
-    context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('articles')},
-                          {'name': article.name, 'url': reverse('article_item', args=[article_id])}]
-    return render(request, 'kleep/TODO.html', context)
-
-
 def lunch(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = 'Menus'
     context['sub_nav'] = [{'name': 'Menus', 'url': reverse('lunch')}]
     return render(request, 'kleep/TODO.html', context)
 
 
-def store(request):
-    context = __base_context__(request)
-    context['title'] = 'Loja'
-    context['items'] = StoreItem.objects.all()[0:50]
-    context['sub_nav'] = [{'name': 'Artigos', 'url': reverse('store')}]
-    return render(request, 'kleep/store/items.html', context)
-
-
-def store_item(request, item_id):
-    context = __base_context__(request)
-    item = get_object_or_404(StoreItem, id=item_id)
-    context['title'] = item.name
-    context['item'] = item
-    context['sub_nav'] = [{'name': 'Loja', 'url': reverse('store')},
-                          {'name': item.name, 'url': reverse('store_item', args=[item_id])}]
-    return render(request, 'kleep/store/item.html', context)
-
-
-def classified_items(request):
-    context = __base_context__(request)
-    context['title'] = 'Classificados'
-    context['items'] = None  # TODO
-    context['sub_nav'] = [{'name': 'Classificados', 'url': reverse('classified_items')}]
-    return render(request, 'kleep/TODO.html', context)
-
-
-def classified_item(request, item_id):
-    context = __base_context__(request)
-    item = None  # TODO
-    context['title'] = item.name
-    context['item'] = item
-    context['sub_nav'] = [{'name': 'Classificados', 'url': reverse('classified_items')},
-                          {'name': item.name, 'url': reverse('classified_item', args=[item_id])}]
-    return render(request, 'kleep/TODO.html', context)
-
-
 def feedback(request):
-    context = __base_context__(request)
+    context = build_base_context(request)
     context['title'] = 'Opiniões'
     context['items'] = None  # TODO
     context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')}]
@@ -845,7 +530,7 @@ def feedback(request):
 
 
 def feedback_idea(request, idea_id):
-    context = __base_context__(request)
+    context = build_base_context(request)
     idea = None  # TODO
     context['title'] = idea.title
     context['item'] = idea
@@ -854,7 +539,7 @@ def feedback_idea(request, idea_id):
     return render(request, 'kleep/TODO.html', context)
 
 
-def __base_context__(request):
+def build_base_context(request):
     result = {'cpu': __cpu_load__(),
               'people': 0  # TODO
               }

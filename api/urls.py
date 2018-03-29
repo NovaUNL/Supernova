@@ -3,7 +3,6 @@ from django.conf.urls import url
 from api import views
 
 urlpatterns = [
-    # url(r'^', include(router.urls)),
     url(r'^profile/(?P<nickname>\w+)/$', views.ProfileDetailed.as_view()),
     url(r'^buildings/$', views.BuildingList.as_view()),
     url(r'^building/(?P<pk>[0-9]+)/$', views.BuildingDetailed.as_view()),

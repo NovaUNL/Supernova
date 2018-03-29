@@ -2,9 +2,8 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-
-import api.urls
 from kleep import settings
+import api.urls
 from . import views
 
 app_name = 'kleep'
@@ -15,9 +14,8 @@ urlpatterns = [
     path('departamentos/', views.departments, name='departments'),
     path('departamento/<str:department_id>/', views.department, name='department'),
     path('cadeira/<str:class_id>/', views.class_view, name='class'),
-    path('cadeira/<int:class_id>/resumo/', views.class_synopsis, name='class_synopsis'),
-    path('cadeira/<int:class_id>/resumo/<int:section_id>/', views.class_synopsis_section,
-         name='class_synopsis_section'),
+    path('cadeira/<int:class_id>/resumo/', views.index, name='class_synopsis'),
+    path('cadeira/<int:class_id>/resumo/<int:section_id>/', views.index, name='class_synopsis_section'),
     path('cadeira/i/<int:instance_id>/', views.class_instance_view, name='class_instance'),
     path('cadeira/i/<int:instance_id>/horario', views.class_instance_schedule_view, name='class_instance_schedule'),
     path('cadeira/i/<int:instance_id>/turnos', views.class_instance_turns_view, name='class_instance_turns'),
@@ -46,29 +44,16 @@ urlpatterns = [
     path('grupo/<str:group_id>/anuncios/', views.group_announcements, name='group_announcements'),
     path('grupo/anuncio/<str:announcement_id>/', views.group_announcement, name='group_announcement'),
     path('grupo/<str:group_id>/contactar/', views.group_contact, name='group_contact'),
-    path('noticias/', views.news, name='news'),
-    path('noticia/<str:news_item_id>/', views.news_item, name='news_item'),
-    path('resumos/', views.synopsis_areas, name='synopsis_areas'),
-    path('resumo/area/<int:area_id>/', views.synopsis_area, name='synopsis_area'),
-    path('resumo/subarea/<int:subarea_id>/', views.synopsis_subarea, name='synopsis_subarea'),
-    path('resumo/topico/<int:topic_id>/', views.synopsis_topic, name='synopsis_topic'),
-    path('resumo/topico/<int:topic_id>/<int:section_id>/', views.synopsis_section, name='synopsis_section'),
-    path('resumo/topico/<int:topic_id>/nova_entrada/', views.synopsis_create_section, name='synopsis_create_section'),
-    path('resumo/topico/<int:topic_id>/<int:section_id>/editar/', views.synopsis_edit_section,
-         name='synopsis_edit_section'),
-    path('artigos/', views.articles, name='articles'),
-    path('artigo/<int:article_id>', views.article_item, name='article_item'),
     path('ementas/', views.lunch, name='lunch'),
-    path('loja/', views.store, name='store'),
-    path('loja/artigo/<int:item_id>', views.store_item, name='store_item'),
-    path('classificados/', views.classified_items, name='classified'),
-    path('classificados/<int:item_id>', views.classified_item, name='classified_item'),
     path('feedback/', views.feedback, name='feedback'),
     path('feedback/<int:idea_id>/', views.feedback_idea, name='feedback_idea'),
     path('sobre/', views.about, name='about'),
     path('pedinchar/', views.beg, name='beg'),
     path('privacidade/', views.privacy, name='privacy'),
     path('documento/<int:document_id>/', views.document, name='document'),
+    url(r'^noticias/', include('news.urls')),
+    url(r'^resumos/', include('synopses.urls')),
+    url(r'^loja/', include('store.urls')),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     url(r'^api/', include(api.urls)),

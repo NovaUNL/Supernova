@@ -5,8 +5,11 @@ from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer,
     BuildingMinimalSerializer, DepartmentMinimalSerializer, CourseSerializer, SynopsisAreaSerializer, \
     SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupTypeSerializer, \
     StoreItemSerializer, BarListMenusSerializer, ProfileMinimalSerializer, ProfileDetailedSerializer
-from kleep.models import Bar, Service, Building, Department, Course, Class, SynopsisArea, SynopsisTopic, NewsItem, \
-    GroupType, StoreItem, Profile
+from kleep.models import Bar, Service, Building, Department, Course, Class, \
+    GroupType, Profile
+from news.models import NewsItem
+from store.models import StoreItem
+from synopses.models import SynopsisArea, SynopsisTopic
 
 
 class BuildingList(APIView):

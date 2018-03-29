@@ -5,7 +5,7 @@
 {% block content %}
 
     <h1><i class="fas fa-book"></i> {{ title }}</h1>
-    <form method="post" action="./">
+    <form method="post" action="../../../kleep/templates/kleep/synopses">
         {% csrf_token %}
         {{ form.media }}
         {{ form.as_p }}

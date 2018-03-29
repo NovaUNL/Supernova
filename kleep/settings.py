@@ -13,7 +13,7 @@ with open(BASE_DIR + '/settings.json') as json_data:
     PIWIK_DOMAIN_PATH = settings['PIWIK_DOMAIN_PATH']
     PIWIK_SITE_ID = settings['PIWIK_SITE_ID']
 
-DEBUG = True
+DEBUG = False
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
@@ -32,8 +32,13 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework',
-    'api.apps.ApiConfig',
     'analytical',
+    'clip',
+    'articles',
+    'news',
+    'synopses',
+    'store',
+    'api',
 ]
 
 MIDDLEWARE = [

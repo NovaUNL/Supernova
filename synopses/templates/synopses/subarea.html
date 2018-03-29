@@ -31,7 +31,7 @@
     <h2>Tópicos:</h2>
     <ul id="topic-list">
         {% for topic in subarea.synopsistopic_set.all %}
-            <li><a href="{% url 'synopsis_topic' topic.id %}">{{ topic.name }}</a>
+            <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
                 ({{ topic.synopsissection_set.count }} secções)
             </li>
         {% endfor %}

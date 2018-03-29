@@ -7,7 +7,7 @@
 
     <div class="flex-wrapper">
         {% for subarea in area.synopsissubarea_set.all %}
-            <a href="{% url 'synopsis_subarea' subarea.id %}">
+            <a href="{% url 'synopses:subarea' subarea.id %}">
                 {% if subarea.img_url %}
                     <div class="flex-grid-item"
                          style="background-image: url({{ subarea.img_url }}); background-size: cover; background-position: center">

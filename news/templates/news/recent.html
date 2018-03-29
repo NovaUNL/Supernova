@@ -6,7 +6,7 @@
     <h1><i class="far fa-newspaper"></i> Notícias</h1>
     {% for news_item in news %}
         <div>
-            <a href="{% url 'news_item' news_item.id %}"><h2>{{ news_item.title }}</h2></a>
+            <a href="{% url 'news:news_item' news_item.id %}"><h2>{{ news_item.title }}</h2></a>
             <span>{{ news_item.summary }}</span>
         </div>
     {% endfor %}
