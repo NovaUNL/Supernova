@@ -11,7 +11,7 @@ from clip.models import Degree, Student
 from kleep.forms import LoginForm, AccountCreationForm, AccountSettingsForm, ClipLoginForm
 from kleep.models import Service, Building, Profile, Group, Department, Class, ClassInstance, Place, \
     Area, Course, Curriculum, Event, PartyEvent, WorkshopEvent, ChangeLog, BarDailyMenu, \
-    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement
+    Catchphrase, Document, GroupExternalConversation, GroupAnnouncement, Laboratory, Classroom, Auditorium
 from kleep.schedules import build_turns_schedule, build_schedule
 from kleep.settings import VERSION, REGISTRATIONS_ENABLED
 from news.models import NewsItem
@@ -179,6 +179,9 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
+    context['classrooms'] = Classroom.objects.filter(building=building)
+    context['laboratories'] = Laboratory.objects.filter(building=building)
+    context['auditoriums'] = Auditorium.objects.filter(building=building)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building_id])}]
     context['building'] = building

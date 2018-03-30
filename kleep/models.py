@@ -84,6 +84,7 @@ class Building(Model):
 class Place(Model):
     name = TextField(max_length=100)
     building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT)
+    floor = IntegerField(default=0)
     unlocked = NullBooleanField(null=True, default=None)
     clip_classroom = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT)
 

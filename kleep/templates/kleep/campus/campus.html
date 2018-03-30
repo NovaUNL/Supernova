@@ -49,17 +49,17 @@
         {% for building in buildings %}
             <div id="{{ building.map_tag }}" class="mapEntry">
                 <a href="{% url 'building' building.id %}"><span class="menu_entry">{{ building.name }}</span></a><br>
-                <ul>
-                    {% for building_usage in building.buildingusage_set.all %}
-                        {% if building_usage.relevant %}
-                            {% if building_usage.url is None %}
-                                <li>{{ building_usage.usage }}</li>
-                            {% else %}
-                                <li><a href="{{ building_usage.url }}">{{ building_usage.usage }}</a></li>
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
+                <div style="margin-left: 10px;">
+                    <ul>
+                        <span>Departamentos:</span>
+                        {% for department in building.department_set.all %}
+                            <li>
+                                <a href="{% url 'department' department.id %}">{{ department.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <b><a href="{% url 'building' building.id %}">Página do edíficio</a></b>
+                </div>
             </div>
         {% endfor %}
         {% for service in services %}
