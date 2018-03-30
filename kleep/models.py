@@ -71,7 +71,7 @@ class Building(Model):
     name = TextField(max_length=30, unique=True)
     abbreviation = TextField(max_length=10, unique=True, null=True)
     map_tag = TextField(max_length=20)
-    clip_building = OneToOneField(clip.ClipBuilding, null=True, blank=True, on_delete=models.PROTECT)
+    clip_building = OneToOneField(clip.Building, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         managed = True
@@ -83,9 +83,9 @@ class Building(Model):
 
 class Place(Model):
     name = TextField(max_length=100)
-    building = ForeignKey(Building, on_delete=models.CASCADE)
-    clip_classroom = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT)
+    building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT)
     unlocked = NullBooleanField(null=True, default=None)
+    clip_classroom = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         managed = True

@@ -54,9 +54,8 @@ class VoteType(Model):
 class NewsVote(Model):
     news_item = ForeignKey(NewsItem, on_delete=models.CASCADE)
     user = ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
-    vote_type = ForeignKey(VoteType, on_delete=models.PROTECT)
-
-    # vote_type = IntegerField(choices=VOTE_TYPE_CHOICES)
+    # vote_type = ForeignKey(VoteType, on_delete=models.PROTECT)
+    vote_type = IntegerField(choices=VOTE_TYPE_CHOICES)
 
     class Meta:
         managed = True

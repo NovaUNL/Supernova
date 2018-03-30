@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from kleep.models import Period, ClipClassInstance, ClassInstance, Class, Turn, TurnInstance, ClipClassroom, Place, \
-    ClipDepartment, ClipInstitution, Department
+from kleep.models import ClassInstance, Class, Turn, TurnInstance, Place, Department
+from clip import clip as clip
 
 
 class Command(BaseCommand):
@@ -12,9 +12,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         year = options['year'][0]
-        period = Period.objects.get(id=options['period'][0])
+        period = clip.Period.objects.get(id=options['period'][0])
 
-        for clip_classroom in ClipClassroom.objects.all():
+        for clip_classroom in clip.Classroom.objects.all():
             clip_building = clip_classroom.building
             try:
                 building = clip_building.building
@@ -26,14 +26,14 @@ class Command(BaseCommand):
                 corresponding_classroom.save()
                 print(f'Created classroom {corresponding_classroom}')
 
-        institution = ClipInstitution.objects.get(abbreviation='FCT')
-        for clip_department in ClipDepartment.objects.filter(institution=institution):
+        institution = clip.Institution.objects.get(abbreviation='FCT')
+        for clip_department in clip.Department.objects.filter(institution=institution):
             if not hasattr(clip_department, 'department'):
                 corresponding_department = Department(name=clip_department.name, clip_department=clip_department)
                 corresponding_department.save()
                 print(f'Created department {corresponding_department}')
 
-        for clip_class_instance in ClipClassInstance.objects.filter(year=year, period=period):
+        for clip_class_instance in clip.ClassInstance.objects.filter(year=year, period=period):
             clip_class = clip_class_instance.parent
             # Create class in case it doesn't exist
             if hasattr(clip_class, 'related_class'):

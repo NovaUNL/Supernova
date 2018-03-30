@@ -4,12 +4,14 @@ from django.forms import DateTimeField
 
 CLIPY_TABLE_PREFIX = 'clip_'
 
+
 class TemporalEntity:
     first_year = IntegerField(blank=True, null=True)
     last_year = IntegerField(blank=True, null=True)
 
     def has_time_range(self):
         return not (self.first_year is None or self.last_year is None)
+
 
 class Degree(Model):
     id = IntegerField(primary_key=True)
@@ -58,7 +60,7 @@ class TurnType(Model):
         return self.abbreviation
 
 
-class ClipInstitution(TemporalEntity, Model):
+class Institution(TemporalEntity, Model):
     id = IntegerField(primary_key=True)
     internal_id = IntegerField()
     abbreviation = TextField(max_length=10)
@@ -72,10 +74,10 @@ class ClipInstitution(TemporalEntity, Model):
         return self.abbreviation
 
 
-class ClipBuilding(Model):
+class Building(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=30)
-    institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
 
     class Meta:
         managed = False
@@ -89,7 +91,7 @@ class Department(Model, TemporalEntity):
     id = IntegerField(primary_key=True)
     internal_id = TextField()
     name = TextField(max_length=50)
-    institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
 
     class Meta:
         managed = False
@@ -116,7 +118,7 @@ class Class(Model):
 class Classroom(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=70)
-    building = ForeignKey(ClipBuilding, on_delete=models.PROTECT, db_column='building_id')
+    building = ForeignKey(Building, on_delete=models.PROTECT, db_column='building_id')
 
     class Meta:
         managed = False
@@ -160,7 +162,7 @@ class Course(TemporalEntity, Model):
     internal_id = IntegerField()
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
-    institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
     degree = ForeignKey(Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True,
                         related_name='clip_courses')
 
@@ -179,7 +181,7 @@ class Student(Model):
     internal_id = IntegerField()
     abbreviation = TextField(null=True, max_length=30)
     course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id')
-    institution = ForeignKey(ClipInstitution, on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
 
     class Meta:
         managed = False

@@ -1,5 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
-from kleep.models import Period, Student, StudentClipStudent, TurnStudents, Enrollment, ClipEnrollment
+from django.core.management.base import BaseCommand
+from kleep.models import Student, TurnStudents, Enrollment
+from clip import clip as clip
 
 
 class Command(BaseCommand):
@@ -13,15 +14,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         student = Student.objects.get(id=options['student_id'][0])
         year = options['year'][0]  # TODO apply filter
-        period = Period.objects.get(id=options['period'][0])  # TODO apply filter
+        period = clip.Period.objects.get(id=options['period'][0])  # TODO apply filter
 
         for clip_student in student.crawled_students.all():
             for clip_turn in clip_student.clipturn_set.all():  # TODO filter
                 if hasattr(clip_turn, 'turn') and \
                         not TurnStudents.objects.filter(student=student, turn=clip_turn.turn).exists():
                     class_instance = clip_turn.turn.class_instance
-                    clip_enrollment = ClipEnrollment.objects.get(student=clip_student,
-                                                                 class_instance=class_instance.clip_class_instance)
+                    clip_enrollment = clip.Enrollment.objects.get(student=clip_student,
+                                                                  class_instance=class_instance.clip_class_instance)
                     if not Enrollment.objects.filter(student=student, class_instance=class_instance,
                                                      clip_enrollment=clip_enrollment).exists():
                         Enrollment(student=student, class_instance=class_instance,

@@ -27,14 +27,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'kleep.apps.KleepConfig',
     'captcha',
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework',
     'analytical',
     'clip',
-    'articles',
+    'kleep.apps.KleepConfig',
     'news',
     'synopses',
     'store',
@@ -56,8 +55,7 @@ ROOT_URLCONF = 'kleep.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
