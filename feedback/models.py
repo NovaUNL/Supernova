@@ -25,6 +25,7 @@ class FeedbackEntry(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'feedback_entries'
+        verbose_name_plural = 'entries'
 
 
 class FeedbackEntryComment(Model):

@@ -98,6 +98,7 @@ class Laboratory(Place):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'laboratories'
+        verbose_name_plural = 'Laboratories'
 
 
 class BuildingUsage(Model):
@@ -174,6 +175,8 @@ class Class(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'classes'
+        verbose_name_plural = 'Classes'
+
 
     def __str__(self):
         return self.name
@@ -246,6 +249,7 @@ class TurnStudents(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'turn_students'
+        verbose_name_plural = 'Turn Students'
 
     def __str__(self):
         return f'{self.student} enrolled to turn {self.turn}'

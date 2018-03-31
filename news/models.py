@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models import Model, TextField, DateTimeField, BooleanField, ForeignKey, ManyToManyField, IntegerField
 
-from kleep.models import KLEEP_TABLE_PREFIX, Profile
+from kleep.models import KLEEP_TABLE_PREFIX
+from users.models import Profile
 
 
 class NewsTag(Model):

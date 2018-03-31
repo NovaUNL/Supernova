@@ -2,9 +2,6 @@ from django.contrib.auth.models import User, Group
 from django.db.models import Model, TextField, DateField
 from ckeditor.fields import RichTextField
 
-from college.models import Place, TurnInstance, Building
-from users.models import Profile
-
 KLEEP_TABLE_PREFIX = 'kleep_'
 
 

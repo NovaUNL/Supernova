@@ -4,7 +4,8 @@ from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTim
 
 from college.models import Place, TurnInstance
 from groups.models import Group
-from kleep.models import KLEEP_TABLE_PREFIX, Profile
+from kleep.models import KLEEP_TABLE_PREFIX
+from users.models import Profile
 
 
 class Event(Model):
@@ -85,6 +86,7 @@ class Party(Model):
     class Meta:
         managed = True
         db_table = KLEEP_TABLE_PREFIX + 'parties'
+        verbose_name_plural = 'parties'
 
     def __str__(self):
         return self.name
