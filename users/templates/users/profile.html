@@ -1,4 +1,4 @@
-{% extends 'kleep/profile/profile_base.html' %}
+{% extends 'users/profile_base.html' %}
 
 {% load static %}
 {% block head %}
@@ -85,7 +85,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-user-circle"></i> {{ rich_user.name }}</h1>
+    <h1><i class="fas fa-user-circle"></i> {{ user.get_full_name }}</h1>
     <div class="flex-wrapper">
         <div class="flex-box">
             <h2><i class="fas fa-id-card"></i> Sobre</h2>

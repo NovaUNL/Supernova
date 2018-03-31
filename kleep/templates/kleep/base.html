@@ -31,7 +31,7 @@
         </ul>
         <div id="auth">
             {% if user.is_authenticated %}
-                <a href="{% url 'profile' user.profile.nickname %}"><span>{{ user.profile.nickname }}</span></a>
+                <a href="{% url 'profile' user.nickname %}"><span>{{ user.nickname }}</span></a>
                 <a href="{% url 'logout' %}"><span id="logout_btn">Sair</span></a>
             {% endif %}
             {% if login_form is not None and disable_auth != True %}
@@ -43,7 +43,7 @@
         <a id="nav_stage_close_button" href="javascript:closeSubmenu();"><i class="fas fa-angle-double-up"></i></a>
         {% if user.is_authenticated %}
             <div id="student_nav_stage">
-                <a href="{% url 'profile_schedule' user.profile.nickname %}"><i class="fas fa-clock"></i><br>Horario</a>
+                <a href="{% url 'profile_schedule' user.nickname %}"><i class="fas fa-clock"></i><br>Horario</a>
                 <a class="disabled"><i class="fas fa-calendar"></i><br>Calendario</a>
                 <a class="disabled"><i class="fas fa-star"></i><br>Avaliações</a>
                 <a class="disabled"><i class="fas fa-graduation-cap"></i><br>Curso</a>

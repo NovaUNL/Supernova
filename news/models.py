@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Model, TextField, DateTimeField, BooleanField, ForeignKey, ManyToManyField, IntegerField
 
-from users.models import Profile
+from users.models import User
 
 
 class NewsTag(Model):
@@ -16,8 +16,8 @@ class NewsItem(Model):
     edited = BooleanField(default=False)
     edit_note = TextField(null=True, blank=True, default=None)
     edit_datetime = DateTimeField(null=True, blank=True, default=None)
-    author = ForeignKey(Profile, null=True, on_delete=models.SET_NULL, related_name='author')
-    edit_author = ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL, related_name='edit_author')
+    author = ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='author')
+    edit_author = ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='edit_author')
     tags = ManyToManyField(NewsTag)
 
     def __str__(self):
@@ -34,5 +34,5 @@ VOTE_TYPE_CHOICES = (
 
 class NewsVote(Model):
     news_item = ForeignKey(NewsItem, on_delete=models.CASCADE)
-    user = ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
+    user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
     vote_type = IntegerField(choices=VOTE_TYPE_CHOICES)

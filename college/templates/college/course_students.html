@@ -34,11 +34,11 @@
             </tr>
             {% for student in students %}
                 <tr>
-{#                    <td>{{ student.number }}</td>#}
-{#                    <td>{{ student.user.name }}</td>#}
-{#                    <td>TODO</td>#}
-{#                    <td>TODO</td>#}
-{#                    <td><a href="{% url 'profile' student.user.nickname %}">Perfil</a></td>#}
+                    <td>{{ student.number }}</td>
+                    <td>{{ student.user.get_full_name }}</td>
+                    <td>TODO</td>
+                    <td>TODO</td>
+                    <td><a href="{% url 'profile' student.user.nickname %}">Perfil</a></td>
                 </tr>
             {% endfor %}
         </table>

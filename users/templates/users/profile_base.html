@@ -26,12 +26,12 @@
     {% if page == 'profile' %}
         <a class="menu_entry selected">Perfil</a>
     {% else %}
-        <a class="menu_entry" href="{% url 'profile' user %}">Perfil</a>
+        <a class="menu_entry" href="{% url 'profile' user.nickname %}">Perfil</a>
     {% endif %}
     {% if page == 'profile_schedule' %}
         <a class="menu_entry selected">Horário</a>
     {% else %}
-        <a class="menu_entry" href="{% url 'profile_schedule' user %}">Horário</a>
+        <a class="menu_entry" href="{% url 'profile_schedule' user.nickname %}">Horário</a>
     {% endif %}
     {% if page == 'profile_activity' %}
         <a class="menu_entry selected">Atividade</a>
@@ -45,12 +45,12 @@
         {% if page == 'profile_settings' %}
             <a class="menu_entry selected">Definições da conta</a>
         {% else %}
-            <a class="menu_entry" href="{% url 'profile_settings' user %}">Definições da conta</a>
+            <a class="menu_entry" href="{% url 'profile_settings' user.nickname %}">Definições da conta</a>
         {% endif %}
         {% if page == 'profile_crawler' %}
             <a class="menu_entry selected">Agregar CLIP</a>
         {% else %}
-            <a class="menu_entry" href="{% url 'profile_crawler' user %}">Agregar CLIP</a>
+            <a class="menu_entry" href="{% url 'profile_crawler' user.nickname %}">Agregar CLIP</a>
         {% endif %}
         {% if page == 'profile_theme' %}
             <a class="menu_entry selected">Tema</a>

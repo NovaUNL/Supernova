@@ -7,7 +7,7 @@ from kleep.forms import AccountSettingsForm, ClipLoginForm, LoginForm, AccountCr
 from kleep.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED
 from kleep.views import build_base_context
-from users.models import Profile
+from users.models import User
 
 
 def login_view(request):
@@ -38,7 +38,7 @@ def logout_view(request):
 
 def account_creation_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('profile', args=[request.user]))
+        return HttpResponseRedirect(reverse('profile', args=[request.user.nickname]))
 
     context = build_base_context(request)
     context['title'] = "Criação de conta"
@@ -52,13 +52,12 @@ def account_creation_view(request):
 
 
 def profile_view(request, nickname):
-    profile = get_object_or_404(Profile, nickname=nickname)
+    user = get_object_or_404(User, nickname=nickname)
     context = build_base_context(request)
-    page_name = "Perfil de " + profile.name
+    page_name = f"Perfil de {user.get_full_name()}"
     context['page'] = 'profile'
     context['title'] = page_name
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
-    context['rich_user'] = profile
     return render(request, 'users/profile.html', context)
 
 
@@ -66,7 +65,7 @@ def user_schedule_view(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
     context = build_base_context(request)
-    user = get_object_or_404(Profile, id=request.user.id)
+    user = get_object_or_404(User, id=request.user.id)
 
     if user.student_set.exists():
         student = user.student_set.first()  # FIXME
@@ -74,10 +73,9 @@ def user_schedule_view(request, nickname):
         return HttpResponseRedirect(reverse('profile', args=[nickname]))
     context['page'] = 'profile_schedule'
     context['title'] = "Horário de " + nickname
-    context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(student.turn_set.all())
-    context['rich_user'] = user
     return render(request, 'users/profile_schedule.html', context)
 
 
@@ -85,12 +83,11 @@ def user_profile_settings_view(request, nickname):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
     context = build_base_context(request)
-    user = Profile.objects.get(id=request.user.id)
+    user = User.objects.get(id=request.user.id)
     context['page'] = 'profile_settings'
     context['title'] = "Definições da conta"
-    context['sub_nav'] = [{'name': "Perfil de " + user.name, 'url': reverse('profile', args=[nickname])},
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Definições", 'url': reverse('profile_settings', args=[nickname])}]
-    context['rich_user'] = user
     if request.method == 'POST':
         form = AccountSettingsForm(data=request.POST)
         if form.is_valid():

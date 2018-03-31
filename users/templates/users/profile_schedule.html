@@ -1,4 +1,4 @@
-{% extends 'kleep/profile/profile_base.html' %}
+{% extends 'users/profile_base.html' %}
 
 {% load static %}
 {% block head %}
@@ -72,7 +72,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1><i class="far fa-clock"></i> Horário de {{ rich_user.name }}</h1>
+    <h1><i class="far fa-clock"></i> Horário de {{ user.get_full_name }}</h1>
     <div style="overflow-x: scroll;">
         <table cellpadding="0" cellspacing="0" width="100%">
             <tr>

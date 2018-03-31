@@ -168,3 +168,5 @@ VERSION = subprocess.check_output([
 ]).decode('ascii')
 
 REGISTRATIONS_ENABLED = False
+
+AUTH_USER_MODEL = 'users.User'

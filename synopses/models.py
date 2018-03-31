@@ -1,9 +1,9 @@
 from ckeditor.fields import RichTextField
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField
 
 from clip.models import Class
+from users.models import User
 
 
 class Area(Model):

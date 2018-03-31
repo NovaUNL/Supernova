@@ -4,7 +4,7 @@ from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTim
 
 from college.models import Place, TurnInstance
 from groups.models import Group
-from users.models import Profile
+from users.models import User
 
 
 class Event(Model):
@@ -12,7 +12,7 @@ class Event(Model):
     end_datetime = DateTimeField()
     announce_date = DateField(default=date.today)
     place = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
-    users = ManyToManyField(Profile, through='EventUser')
+    users = ManyToManyField(User, through='EventUser')
 
     def __str__(self):
         return f'from {self.datetime_to_eventtime(self.start_datetime)} ' \
@@ -36,7 +36,7 @@ class Event(Model):
 
 class EventUser(Model):
     event = ForeignKey(Event, on_delete=models.CASCADE)
-    user = ForeignKey(Profile, on_delete=models.CASCADE)
+    user = ForeignKey(User, on_delete=models.CASCADE)
 
 
 class TurnEvent(Event):

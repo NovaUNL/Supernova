@@ -2,17 +2,17 @@ from django.db import models
 from django.db.models import Model, TextField, ForeignKey, DateTimeField, DateField, BooleanField, ManyToManyField
 
 from groups.models import Group
-from users.models import Profile
+from users.models import User
 
 
 class Conversation(Model):
-    creator = ForeignKey(Profile, on_delete=models.PROTECT, related_name='creator')
+    creator = ForeignKey(User, on_delete=models.PROTECT, related_name='creator')
     date = DateField(auto_now_add=True)
-    users = ManyToManyField(Profile, through='ConversationUser')
+    users = ManyToManyField(User, through='ConversationUser')
 
 
 class Message(Model):
-    author = ForeignKey(Profile, on_delete=models.PROTECT)  # TODO consider user deletion
+    author = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
     datetime = DateTimeField(auto_now_add=True)
     content = TextField()
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
@@ -24,7 +24,7 @@ class Message(Model):
 # A user relation to a conversation
 class ConversationUser(Model):
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
-    user = ForeignKey(Profile, on_delete=models.PROTECT)  # TODO consider user deletion
+    user = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
     last_read_message = ForeignKey(Message, null=True, blank=True, on_delete=models.PROTECT)
 
 

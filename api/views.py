@@ -11,7 +11,7 @@ from news.models import NewsItem
 from services.models import Service, Bar
 from store.models import Item
 from synopses import models as synopses
-from users.models import Profile
+from users.models import User
 
 
 class BuildingList(APIView):
@@ -120,6 +120,6 @@ class Menus(APIView):
 
 class ProfileDetailed(APIView):
     def get(self, request, nickname, format=None):  # TODO authentication
-        user = Profile.objects.get(nickname=nickname)
+        user = User.objects.get(nickname=nickname)
         serializer = ProfileDetailedSerializer(user)
         return Response(serializer.data)

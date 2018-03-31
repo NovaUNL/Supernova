@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Model, IntegerField, TextField, ForeignKey
 
 from groups.models import Group
-from users.models import Profile
+from users.models import User
 
 
 class Sellable:
@@ -31,7 +31,7 @@ class ClassifiedItem(Sellable, Model):
     name = TextField(max_length=100)
     description = TextField()
     price = IntegerField()
-    seller = ForeignKey(Profile, on_delete=models.CASCADE)
+    seller = ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ['name', 'seller']

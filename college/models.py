@@ -3,11 +3,11 @@ from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToM
     CharField, FloatField, NullBooleanField
 
 from clip import models as clip
-from users.models import Profile
+from users.models import User
 
 
 class Student(Model):
-    profile = ForeignKey(Profile, null=True, on_delete=models.CASCADE)
+    user = ForeignKey(User, null=True, on_delete=models.CASCADE)
     number = IntegerField(null=True, blank=True)
     abbreviation = TextField(null=True, blank=True)
     course = ForeignKey('Course', on_delete=models.PROTECT)
@@ -20,10 +20,10 @@ class Student(Model):
 
     class Meta:
         ordering = ['number']
-        unique_together = ('clip_student', 'profile')
+        unique_together = ('user', 'clip_student')
 
     def __str__(self):
-        return str(self.profile)
+        return str(self.user)
 
 
 class Area(Model):

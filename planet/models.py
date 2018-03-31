@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Model, TextField, DateTimeField, ManyToManyField, ForeignKey, IntegerField
 from django.utils import timezone
 
 from college.models import Area
+from users.models import User
 
 
 class Post(Model):
@@ -19,7 +19,7 @@ class Post(Model):
 
 class Comment(Model):
     post = ForeignKey(Post, on_delete=models.CASCADE)
-    author = ForeignKey(User, on_delete=models.CASCADE)
+    author = ForeignKey(User, on_delete=models.CASCADE, related_name='planet_comments')
     content = TextField()
     timestamp = DateTimeField(default=timezone.now)
 

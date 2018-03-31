@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Model, TextField, ForeignKey, DateTimeField, ManyToManyField, BooleanField
 
-from users.models import Profile
+from users.models import User
 
 
 class GroupType(Model):
@@ -25,7 +25,7 @@ class Group(Model):
     invite_only = BooleanField(default=True)
     type = ForeignKey(GroupType, on_delete=models.PROTECT, null=True, blank=True)
     public_members = BooleanField(default=False)
-    members = ManyToManyField(Profile, through='GroupMember')
+    members = ManyToManyField(User, through='GroupMember')
     roles = ManyToManyField(Role, through='GroupRole')
     img_url = TextField(null=True, blank=True)
 
@@ -35,7 +35,7 @@ class Group(Model):
 
 class GroupMember(Model):
     group = ForeignKey(Group, on_delete=models.CASCADE)
-    member = ForeignKey(Profile, on_delete=models.CASCADE)
+    member = ForeignKey(User, on_delete=models.CASCADE)
     role = ForeignKey(Role, on_delete=models.PROTECT)
 
 
@@ -48,7 +48,7 @@ class Announcement(Model):
     group = ForeignKey(Group, on_delete=models.CASCADE)
     title = TextField(max_length=256)
     announcement = TextField()
-    announcer = ForeignKey(Profile, on_delete=models.PROTECT)  # TODO consider user deletion
+    announcer = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
     datetime = DateTimeField(auto_now_add=True)
 
     def __str__(self):
