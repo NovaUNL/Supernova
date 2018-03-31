@@ -1,0 +1,46 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+
+{% block content %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+    </style>
+    {% include 'groups/header.html' %}
+    <div class="flex-wrapper">
+        <div style="width: 100%">
+            {% if group.abbreviation %}Também conhecido por <b>{{ group.abbreviation }}</b>{% endif %}
+        </div>
+        <div style="margin-right: 50px">
+            <h2>Localização:</h2>
+            <img src="#" width="450px" height="400px">
+        </div>
+        <div style="flex-basis: 300px">
+            <h2>Informação:</h2>
+            <h3>Descrição:</h3>
+            {{ group.description }}
+            <h3>Localização:</h3>
+            TODO
+        </div>
+        <div style="width:100%;">
+            <h2>Atividade recente</h2>
+            {% for announcement in announcements %}
+                <a href="{% url 'group_announcement' announcement.id %}">{{ announcement.title }}</a> em
+                {{ announcement.datetime }}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    {% include 'groups/navigation.html' %}
+{% endblock %}
+{% block side_extra %}
+    <div id="side_extra">
+        <a class="menu_entry">Gestão</a>
+    </div>
+{% endblock %}

@@ -1,7 +1,14 @@
 from django.db import models
 from django.db.models import Model, IntegerField, TextField, ForeignKey
 
-from kleep.models import KLEEP_TABLE_PREFIX, Profile, Group, Sellable
+from kleep.models import KLEEP_TABLE_PREFIX, Profile, Group
+
+
+class Sellable:
+    price = IntegerField()
+
+    def price_str(self):
+        return '%0.2f' % (self.price / 100)
 
 
 class StoreItem(Sellable, Model):

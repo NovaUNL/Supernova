@@ -1,8 +1,7 @@
-import datetime
-
 from rest_framework import serializers
 
-from kleep.models import Class, Course, BarDailyMenu
+from college.models import Class
+from services.models import BarDailyMenu
 
 
 class DegreeSerializer(serializers.Serializer):

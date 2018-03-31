@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from kleep.models import ClassInstance, Class, Turn, TurnInstance, Place, Department
-from clip import clip as clip
+
+from college.models import Department, ClassInstance, Turn, Class
+from kleep.models import TurnInstance, Place
+from clip import models as clip
 
 
 class Command(BaseCommand):

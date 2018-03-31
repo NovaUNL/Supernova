@@ -1,0 +1,90 @@
+{% extends 'kleep/content_only.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+            flex-basis: 475px;
+        }
+
+        .flex-wrapper .svg-inline--fa {
+            font-size: 2em;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-map-marker"></i> {{ building.name }}</h1>
+    <div class="flex-wrapper">
+        <div>
+            <h2>Localização</h2>
+            <object width="450px" height="400px" type="image/svg+xml" data="{% static 'kleep/campus.svg' %}">
+                O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
+                Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
+            </object>
+        </div>
+        <div>
+            <h2>Planta</h2>
+            <object width="450px" height="400px" type="image/svg+xml" data="{% static 'kleep/vii-sample.svg' %}">
+                O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
+                Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
+            </object>
+        </div>
+
+        <div>
+            {% if building.buildingusage_set.exists %}
+                <h2>Departamentos:</h2>
+                <ul>
+                    {% for department in building.department_set.all %}
+                        <li><a href="{% url 'department' department.id %}">{{ department.name }}</a></li>
+                    {% endfor %}
+                </ul>
+
+            {% endif %}
+            {% if building.service_set.exists %}<h2>Serviços:</h2>
+                <ul>
+                    {% for service in building.service_set.all %}
+                        <li><a href="{% url 'service' service.id %}">{{ service.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <h2>Núcleos:</h2>
+            <ul>
+                <li>TODO</li>
+            </ul>
+        </div>
+        <div>
+            <h2>Salas de aula:</h2>
+            <ul style="list-style: none">
+                {% for place in classrooms.all %}
+                    <li>{{ place.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <h2>Laboratórios:</h2>
+            <ul style="list-style: none">
+                {% for place in laboratories.all %}
+                    <li>{{ place.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <h2>Auditórios:</h2>
+            <ul style="list-style: none">
+                {% for place in auditoriums.all %}
+                    <li>{{ place.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+
+        </div>
+    </div>
+{% endblock %}

@@ -4,7 +4,7 @@ from kleep.views import build_base_context
 from store.models import StoreItem
 
 
-def all_items_view(request):
+def index(request):
     context = build_base_context(request)
     context['title'] = 'Loja'
     context['items'] = StoreItem.objects.all()[0:50]
@@ -12,7 +12,7 @@ def all_items_view(request):
     return render(request, 'store/items.html', context)
 
 
-def item_view(request, item_id):
+def item(request, item_id):
     context = build_base_context(request)
     item = get_object_or_404(StoreItem, id=item_id)
     context['title'] = item.name

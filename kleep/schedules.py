@@ -1,4 +1,5 @@
-from kleep.models import ClassInstance, TurnInstance, Student, Turn
+from college.models import Turn
+from kleep.models import TurnInstance
 
 
 def build_schedule(turn_instances: [TurnInstance]):

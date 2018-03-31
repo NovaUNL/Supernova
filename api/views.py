@@ -4,10 +4,12 @@ from rest_framework.views import APIView
 from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer, BuildingWithServicesSerializer, \
     BuildingMinimalSerializer, DepartmentMinimalSerializer, CourseSerializer, SynopsisAreaSerializer, \
     SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupTypeSerializer, \
-    StoreItemSerializer, BarListMenusSerializer, ProfileMinimalSerializer, ProfileDetailedSerializer
-from kleep.models import Bar, Service, Building, Department, Course, Class, \
-    GroupType, Profile
+    StoreItemSerializer, BarListMenusSerializer, ProfileDetailedSerializer
+from college.models import Department, Class, Course
+from groups.models import GroupType
+from kleep.models import Building, Profile
 from news.models import NewsItem
+from services.models import Service, Bar
 from store.models import StoreItem
 from synopses.models import SynopsisArea, SynopsisTopic
 

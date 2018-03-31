@@ -1,0 +1,70 @@
+{% extends 'kleep/content_navigation.html' %}
+{% load static %}
+{% block head %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .flex-wrapper > div {
+            margin: 10px 20px 10px 20px;
+        }
+
+        tr:nth-of-type(odd) {
+            background-color: #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-graduation-cap"></i> Alunos de {{ course }}</h1>
+    <h3 style="margin-left: 20px">Departamento de {{ course.department }}</h3>
+    <div>
+        <h2>Estudantes registados:</h2>
+        <table>
+            <tr>
+                <th>Numero</th>
+                <th>Nome</th>
+                <th>Matriculas</th>
+                <th>ECTS</th>
+                <th>Perfil</th>
+            </tr>
+            {% for student in students %}
+                <tr>
+{#                    <td>{{ student.number }}</td>#}
+{#                    <td>{{ student.user.name }}</td>#}
+{#                    <td>TODO</td>#}
+{#                    <td>TODO</td>#}
+{#                    <td><a href="{% url 'profile' student.user.nickname %}">Perfil</a></td>#}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div>
+        <h2>Estudantes não registados:</h2>
+        <table>
+            <tr>
+                <th>Numero</th>
+                <th>Nome</th>
+                <th>Matriculas</th>
+                <th>ECTS</th>
+            </tr>
+            {% for student in unregistered_students %}
+                <tr>
+                    <td>{{ student.internal_id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>TODO</td>
+                    <td>TODO</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry" href="{% url 'course_curriculum' course.id %}">Programa curricular</a>
+    <a class="menu_entry selected">Alunos</a>
+{% endblock %}

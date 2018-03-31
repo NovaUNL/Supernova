@@ -50,9 +50,9 @@
     <div class="flex-wrapper">
         <div class="flex-wrapper vertical">
             <div>
-                <a href="{% url 'news:recent' %}"><h2>Últimas notícias</h2></a>
+                <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
                 {% for news_item in news %}
-                    <a href="{% url 'news:news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
+                    <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
                     <p>{{ news_item.summary }}</p>
                     <p>Por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a>,
                         {{ news_item.datetime }}</p>

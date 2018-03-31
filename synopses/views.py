@@ -2,8 +2,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
+from college.models import Class
 from kleep.forms import CreateSynopsisSectionForm
-from kleep.models import Class
 from kleep.views import build_base_context
 
 from synopses.models import SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, \

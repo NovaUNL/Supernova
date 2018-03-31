@@ -1,0 +1,22 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+
+{% block content %}
+    <style>
+        .flex-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+    </style>
+
+    {% include 'groups/header.html' %}
+    <div class="flex-wrapper">
+        <h1>TODO</h1>
+    </div>
+{% endblock %}
+
+{% block navigation %}
+    {% include 'groups/navigation.html' %}
+{% endblock %}

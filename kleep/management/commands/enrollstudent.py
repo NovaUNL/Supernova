@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
-from kleep.models import Student, TurnStudents, Enrollment
-from clip import clip as clip
+from clip import models as clip
+from college.models import Student, TurnStudents, Enrollment
 
 
 class Command(BaseCommand):

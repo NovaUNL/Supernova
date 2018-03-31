@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField
 
-from kleep.models import KLEEP_TABLE_PREFIX, Class
+from clip.models import Class
+from kleep.models import KLEEP_TABLE_PREFIX
 
 
 class SynopsisArea(Model):
@@ -75,7 +76,7 @@ class ClassSynopsesSections(Model):
         unique_together = ('section', 'index',)
 
     def __str__(self):
-        return f'{self.section} annexed to {self.corresponding_class.abbreviation}.'
+        return f'{self.section} annexed to {self.corresponding_class}.'
 
 
 class SynopsisSectionTopic(Model):

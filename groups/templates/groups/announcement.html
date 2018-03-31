@@ -1,0 +1,15 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+
+{% block content %}
+    <h1>{{ announcement.title }}</h1>
+    <p>{{ announcement.announcement }}</p>
+    <hr>
+    Colocado ás {{ announcement.datetime }} por
+    <a href="{% url 'profile' announcement.announcer.nickname %}">{{ announcement.announcer.name }}</a>
+{% endblock %}
+
+{% block navigation %}
+    {% include 'groups/navigation.html' %}
+{% endblock %}
