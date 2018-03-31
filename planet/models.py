@@ -4,7 +4,6 @@ from django.db.models import Model, TextField, DateTimeField, ManyToManyField, F
 from django.utils import timezone
 
 from college.models import Area
-from kleep.models import KLEEP_TABLE_PREFIX
 
 
 class Post(Model):
@@ -15,8 +14,7 @@ class Post(Model):
     areas = ManyToManyField(Area)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'planet_post'
+        unique_together = ['name', 'content']
 
 
 class Comment(Model):
@@ -24,10 +22,6 @@ class Comment(Model):
     author = ForeignKey(User, on_delete=models.CASCADE)
     content = TextField()
     timestamp = DateTimeField(default=timezone.now)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'planet_comment'
 
 
 VOTE_TYPE_CHOICES = (
@@ -38,21 +32,18 @@ VOTE_TYPE_CHOICES = (
 )
 
 
+# A vote given to a post
 class PostVote(Model):
     post = ForeignKey(Post, on_delete=models.CASCADE)
     type = IntegerField(choices=VOTE_TYPE_CHOICES)
     user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'planet_post_votes'
 
-
+# A vote given to a comment
 class CommentVote(Model):
     comment = ForeignKey(Comment, on_delete=models.CASCADE)
     type = IntegerField(choices=VOTE_TYPE_CHOICES)
     user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'planet_comment_votes'
+        unique_together = ['comment', 'user']

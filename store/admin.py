@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from store.models import ClassifiedItem, StoreItem
+from store.models import Item, ClassifiedItem
 
-admin.site.register(StoreItem)
+admin.site.register(Item)
 admin.site.register(ClassifiedItem)

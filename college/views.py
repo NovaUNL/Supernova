@@ -7,14 +7,14 @@ from college.models import Building, Classroom, Laboratory, Auditorium, Place, C
     Class, Department
 from kleep.schedules import build_schedule, build_turns_schedule
 from kleep.views import build_base_context
-from services.models import Service, BarDailyMenu
+# from services.models import Service, BarDailyMenu
 
 
 def campus(request):
     context = build_base_context(request)
     context['title'] = "Mapa do campus"
     context['buildings'] = Building.objects.all()
-    context['services'] = Service.objects.all()
+    # context['services'] = Service.objects.all()
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': reverse('campus')}]
     return render(request, 'college/campus.html', context)
 
@@ -229,25 +229,25 @@ def classroom(request, classroom_id):
 
 
 def service(request, service_id):
-    service = get_object_or_404(Service, id=service_id)
-    building = service.building
+    # service = get_object_or_404(Service, id=service_id)
+    # building = service.building
     context = build_base_context(request)
-    context['title'] = service.name
+    # context['title'] = service.name
     is_bar = hasattr(service, 'bar')
     context['is_bar'] = is_bar
     if is_bar:
         menu = []
         # TODO today filter
-        for menu_item in BarDailyMenu.objects.filter(bar=service.bar).order_by('date').all():
-            price = menu_item.price
-            if price > 0:
-                menu.append((menu_item.item, menu_item.price_str()))
-            else:
-                menu.append((menu_item.item, None))
-        context['menu'] = menu
+        # for menu_item in BarDailyMenu.objects.filter(bar=service.bar).order_by('date').all():
+        #     price = menu_item.price
+        #     if price > 0:
+        #         menu.append((menu_item.item, menu_item.price_str()))
+        #     else:
+        #         menu.append((menu_item.item, None))
+        # context['menu'] = menu
     context['building'] = building
     context['service'] = service
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': building.name, 'url': reverse('building', args=[building.id])},
-                          {'name': service.name, 'url': reverse('service', args=[service_id])}]
+    # context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+    #                       {'name': building.name, 'url': reverse('building', args=[building.id])},
+    #                       {'name': service.name, 'url': reverse('service', args=[service_id])}]
     return render(request, 'college/service.html', context)

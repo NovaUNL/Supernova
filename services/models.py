@@ -2,14 +2,13 @@ from django.db import models
 from django.db.models import Model, IntegerField, TextField, ForeignKey, DateField, BooleanField, OneToOneField, \
     TimeField
 
-from kleep.models import KLEEP_TABLE_PREFIX
 from college.models import Building
 from store.models import Sellable
 
 
 class Service(Model):
     name = TextField(max_length=50)
-    building = ForeignKey(Building, null=True, blank=True, on_delete=models.SET_NULL)
+    building = ForeignKey(Building, null=True, blank=True, on_delete=models.SET_NULL)  # Convert to a place
     map_tag = TextField(max_length=15)
     opening = TimeField(null=True, blank=True)
     lunch_start = TimeField(null=True, blank=True)  # For a bar this is the meal time, for other places this is a break
@@ -19,19 +18,14 @@ class Service(Model):
     open_sunday = BooleanField(default=False)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'services'
+        unique_together = ['name', 'building']
 
     def __str__(self):
         return "{} ({})".format(self.name, self.building)
 
 
-class Bar(Model):
+class Bar(Model):  # TODO, convert this to inheritance
     service = OneToOneField(Service, on_delete=models.CASCADE)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'bars'
 
     def __str__(self):
         return str(self.service)
@@ -44,8 +38,8 @@ class BarDailyMenu(Sellable, Model):
     price = IntegerField()
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'bar_daily_menus'
+        ordering = ['item']
+        unique_together = ['bar', 'item']
 
     def __str__(self):
         return f'{self.item}, {self.bar} ({self.date})'
@@ -57,8 +51,8 @@ class BarPrice(Sellable, Model):
     price = IntegerField()
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'bar_prices'
+        ordering = ['item']
+        unique_together = ['bar', 'item']
 
     def __str__(self):
         return '%s, %0.2f€ (%s)' % (self.item, self.price / 100, self.bar.service.name)

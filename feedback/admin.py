@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from feedback.models import Comment, FeedbackEntry, FeedbackEntryComment
+from feedback.models import Comment, Entry, EntryComment
 
 admin.site.register(Comment)
-admin.site.register(FeedbackEntry)
-admin.site.register(FeedbackEntryComment)
+admin.site.register(Entry)
+admin.site.register(EntryComment)

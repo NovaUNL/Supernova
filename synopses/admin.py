@@ -1,12 +1,11 @@
 from django.contrib import admin
 
-from synopses.models import SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, ClassSynopsesSections, \
-    SynopsisSectionTopic, SynopsisSectionLog
+from synopses.models import Area, Subarea, Topic, Section, ClassSection, SectionTopic, SectionLog
 
-admin.site.register(SynopsisArea)
-admin.site.register(SynopsisSubarea)
-admin.site.register(SynopsisTopic)
-admin.site.register(SynopsisSection)
-admin.site.register(ClassSynopsesSections)
-admin.site.register(SynopsisSectionTopic)
-admin.site.register(SynopsisSectionLog)
+admin.site.register(Area)
+admin.site.register(Subarea)
+admin.site.register(Topic)
+admin.site.register(Section)
+admin.site.register(ClassSection)
+admin.site.register(SectionTopic)
+admin.site.register(SectionLog)

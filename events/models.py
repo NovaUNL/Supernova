@@ -4,7 +4,6 @@ from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTim
 
 from college.models import Place, TurnInstance
 from groups.models import Group
-from kleep.models import KLEEP_TABLE_PREFIX
 from users.models import Profile
 
 
@@ -12,12 +11,8 @@ class Event(Model):
     start_datetime = DateTimeField()
     end_datetime = DateTimeField()
     announce_date = DateField(default=date.today)
-    classroom = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
-    users = ManyToManyField(Profile, through='EventUsers')
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'events'
+    place = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
+    users = ManyToManyField(Profile, through='EventUser')
 
     def __str__(self):
         return f'from {self.datetime_to_eventtime(self.start_datetime)} ' \
@@ -39,32 +34,22 @@ class Event(Model):
         return '%02d-%02d, %02d:%02d' % (datetime.day, datetime.month, datetime.hour, datetime.minute)
 
 
-class EventUsers(Model):
+class EventUser(Model):
     event = ForeignKey(Event, on_delete=models.CASCADE)
     user = ForeignKey(Profile, on_delete=models.CASCADE)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'event_users'
 
 
 class TurnEvent(Event):
     turn_instance = ForeignKey(TurnInstance, on_delete=models.CASCADE)
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'turn_events'
-
 
 class Workshop(Model):
     name = TextField(max_length=100)
     description = TextField(max_length=4096, null=True, blank=True)
-    capacity = IntegerField(null=True, blank=True)
     creator = ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'workshops'
+        unique_together = ['name', 'creator']
 
     def __str__(self):
         return self.name
@@ -72,20 +57,14 @@ class Workshop(Model):
 
 class WorkshopEvent(Event):
     workshop = ForeignKey(Workshop, on_delete=models.CASCADE)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'workshop_events'
+    capacity = IntegerField(null=True, blank=True)
 
 
 class Party(Model):
     name = TextField(max_length=100)
     description = TextField(max_length=4096, null=True, blank=True)
-    capacity = IntegerField(null=True, blank=True)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'parties'
         verbose_name_plural = 'parties'
 
     def __str__(self):
@@ -94,7 +73,4 @@ class Party(Model):
 
 class PartyEvent(Event):
     party = ForeignKey(Party, on_delete=models.CASCADE)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'party_events'
+    capacity = IntegerField(null=True, blank=True)

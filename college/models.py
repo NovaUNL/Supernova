@@ -5,11 +5,8 @@ from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToM
 from clip import models as clip
 from users.models import Profile
 
-KLEEP_TABLE_PREFIX = 'kleep_'
-
 
 class Student(Model):
-    # A student can exist without having an account
     profile = ForeignKey(Profile, null=True, on_delete=models.CASCADE)
     number = IntegerField(null=True, blank=True)
     abbreviation = TextField(null=True, blank=True)
@@ -19,24 +16,23 @@ class Student(Model):
     first_year = IntegerField(null=True, blank=True)
     last_year = IntegerField(null=True, blank=True)
     confirmed = BooleanField(default=False)
-    clip_student = ForeignKey(clip.Student, on_delete=models.PROTECT)
+    clip_student = OneToOneField(clip.Student, on_delete=models.PROTECT)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'students'
+        ordering = ['number']
+        unique_together = ('clip_student', 'profile')
 
     def __str__(self):
         return str(self.profile)
 
 
 class Area(Model):
-    name = TextField(max_length=200)
+    name = TextField(max_length=200, unique=True)
     description = TextField(max_length=4096, null=True, blank=True)
-    variants = ManyToManyField('Course', through='CourseArea')
+    courses = ManyToManyField('Course', through='CourseArea')
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'areas'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -49,8 +45,7 @@ class Building(Model):
     clip_building = OneToOneField(clip.Building, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'buildings'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -61,12 +56,7 @@ class Place(Model):
     building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT)
     floor = IntegerField(default=0)
     unlocked = NullBooleanField(null=True, default=None)
-    clip_classroom = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'places'
-        ordering = ('building', 'name')
+    clip_place = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT)
 
     def __str__(self):
         return f"{self.building} {self.name}"
@@ -78,39 +68,24 @@ class Place(Model):
 class Classroom(Place):
     capacity = IntegerField()
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'classrooms'
-
 
 class Auditorium(Place):
     capacity = IntegerField()
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'auditoriums'
 
 
 class Laboratory(Place):
     description = TextField(max_length=2048)
     equipment = TextField(max_length=2048)
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'laboratories'
-        verbose_name_plural = 'Laboratories'
 
-
-class BuildingUsage(Model):
+class BuildingUsage(Model):  # TODO deprecate this model
     usage = TextField(max_length=100)
     building = ForeignKey(Building, on_delete=models.CASCADE)
     url = TextField(max_length=100, null=True, blank=True)
     relevant = BooleanField(default=False)
 
     class Meta:
-        managed = True
-        ordering = ['relevant']
-        db_table = KLEEP_TABLE_PREFIX + 'building_usages'
+        ordering = ('relevant',)
 
     def __str__(self):
         return "{} ({})".format(self.usage, self.building)
@@ -118,14 +93,14 @@ class BuildingUsage(Model):
 
 class Department(Model):
     name = TextField(max_length=100)
-    description = TextField(max_length=1024, null=True, blank=True)
+    description = TextField(max_length=4096, null=True, blank=True)
     building = ForeignKey(Building, on_delete=models.PROTECT, null=True, blank=True)
     clip_department = OneToOneField(clip.Department, on_delete=models.PROTECT)
     img_url = TextField(null=True, blank=True)
+    extinguished = BooleanField(default=True)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'departments'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -137,15 +112,15 @@ class Course(Model):
     degree = ForeignKey(clip.Degree, on_delete=models.PROTECT)
     abbreviation = TextField(max_length=100, null=True, blank=True)
     active = BooleanField(default=True)
-    clip_course = ForeignKey(clip.Course, on_delete=models.PROTECT, related_name='crawled_course')
+    clip_course = OneToOneField(clip.Course, on_delete=models.PROTECT)
     department = ForeignKey('Department', on_delete=models.PROTECT)
     areas = ManyToManyField(Area, through='CourseArea')
     url = TextField(max_length=256, null=True, blank=True)
     curriculum = ManyToManyField('Class', through='Curriculum')
+    extinguished = BooleanField(default=False)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'courses'
+        ordering = ['name']
 
     def __str__(self):
         return f'{self.degree.name} em {self.name}'
@@ -155,28 +130,22 @@ class CourseArea(Model):
     area = ForeignKey(Area, on_delete=models.PROTECT)
     course = ForeignKey(Course, on_delete=models.PROTECT)
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'course_areas'
-
     def __str__(self):
         return f'{self.course} -> {self.area}'
 
 
 class Class(Model):
     name = TextField(max_length=30)
-    abbreviation = TextField(max_length=10, default='HELP')
+    abbreviation = TextField(max_length=10, default='HELP')  # TODO enforce uniqueness
     description = TextField(max_length=1024, null=True, blank=True)
     credits = IntegerField(null=True, blank=True)
     department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
     clip_class = OneToOneField(clip.Class, on_delete=models.PROTECT, related_name='related_class')
     courses = ManyToManyField(Course, through='Curriculum')
+    extinguished = BooleanField(default=False)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'classes'
-        verbose_name_plural = 'Classes'
-
+        ordering = ['name']
 
     def __str__(self):
         return self.name
@@ -191,8 +160,8 @@ class Curriculum(Model):
     required = BooleanField()
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'curriculum'
+        ordering = ['year', 'period_type', 'period']
+        unique_together = ['course', 'corresponding_class']
 
 
 class ClassInstance(Model):
@@ -203,8 +172,7 @@ class ClassInstance(Model):
     students = ManyToManyField(Student, through='Enrollment')
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'class_instances'
+        unique_together = ['parent', 'period', 'year']
 
     def __str__(self):
         return f"{self.parent.abbreviation}, {self.period} de {self.year}"
@@ -219,11 +187,10 @@ class Enrollment(Model):
     # u => unknown, r => reproved, n => approved@normal, e => approved@exam, s => approved@special
     result = CharField(default='u', max_length=1)
     grade = FloatField(null=True, blank=True)
-    clip_enrollment = ForeignKey(clip.Enrollment, on_delete=models.PROTECT)
+    clip_enrollment = OneToOneField(clip.Enrollment, on_delete=models.PROTECT)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'enrollments'
+        unique_together = ['student', 'class_instance']
 
 
 class Turn(Model):
@@ -235,8 +202,7 @@ class Turn(Model):
     students = ManyToManyField(Student, through='TurnStudents')
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'turns'
+        unique_together = ['class_instance', 'turn_type', 'number']
 
     def __str__(self):
         return f"{self.class_instance} {self.turn_type.abbreviation.upper()}{self.number}"
@@ -247,9 +213,7 @@ class TurnStudents(Model):
     student = ForeignKey(Student, on_delete=models.CASCADE)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'turn_students'
-        verbose_name_plural = 'Turn Students'
+        verbose_name_plural = 'turn students'
 
     def __str__(self):
         return f'{self.student} enrolled to turn {self.turn}'
@@ -268,8 +232,7 @@ class TurnInstance(Model):
     classroom = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'turn_instances'
+        ordering = ['weekday', 'start']
 
     def __str__(self):
         return f"{self.turn}, d{self.weekday}, {self.minutes_to_str(self.start)}"
@@ -280,7 +243,7 @@ class TurnInstance(Model):
                self.start < turn_instance.start + turn_instance.duration and \
                turn_instance.start < self.start + self.duration
 
-    def weekday_pt(self):
+    def weekday_pt(self):  # TODO ewk, get rid of me!
         if self.weekday == 0:
             return 'Segunda-feira'
         elif self.weekday == 1:

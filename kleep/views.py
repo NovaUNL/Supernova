@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.shortcuts import render
 
 from kleep.forms import LoginForm
-from kleep.models import ChangeLog, Catchphrase
+from kleep.models import Changelog, Catchphrase
 from kleep.settings import VERSION
 from news.models import NewsItem
 
@@ -13,7 +13,7 @@ def index(request):
     context = build_base_context(request)
     context['title'] = "O sistema que não deixa folhas soltas"
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
-    context['changelog'] = ChangeLog.objects.order_by('date').reverse()[0:3]
+    context['changelog'] = Changelog.objects.order_by('date').reverse()[0:3]
     context['catchphrase'] = random.choice(Catchphrase.objects.all())
     return render(request, 'kleep/index.html', context)
 

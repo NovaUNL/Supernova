@@ -4,7 +4,7 @@ from django.urls import reverse
 
 from chat.models import GroupExternalConversation
 from documents.models import Document
-from groups.models import Group, GroupAnnouncement
+from groups.models import Group, Announcement
 from kleep.views import build_base_context
 
 
@@ -25,7 +25,7 @@ def group_view(request, group_id):
     context['title'] = group.name
     context['group'] = group
     context['page'] = 'group'
-    context['announcements'] = GroupAnnouncement.objects.filter(group=group).order_by('datetime').reverse()[0:5]
+    context['announcements'] = Announcement.objects.filter(group=group).order_by('datetime').reverse()[0:5]
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])}]
     return render(request, 'groups/group.html', context)
@@ -37,7 +37,7 @@ def announcements_view(request, group_id):
     context['title'] = f'Anúncios de {group.name}'
     context['group'] = group
     context['page'] = 'group_anouncements'
-    context['announcements'] = GroupAnnouncement.objects.filter(group=group).order_by('datetime').reverse()
+    context['announcements'] = Announcement.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])},
                           {'name': 'Anúncios', 'url': reverse('group_announcement', args=[group_id])}]
@@ -45,14 +45,14 @@ def announcements_view(request, group_id):
 
 
 def announcement_view(request, announcement_id):
-    announcement = get_object_or_404(GroupAnnouncement, id=announcement_id)
+    announcement = get_object_or_404(Announcement, id=announcement_id)
     group = announcement.group
     context = build_base_context(request)
     context['title'] = announcement.title
     context['group'] = group
     context['announcement'] = announcement
     context['page'] = 'group_anouncement'
-    context['announcements'] = GroupAnnouncement.objects.filter(group=group).order_by('datetime').reverse()
+    context['announcements'] = Announcement.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group.id])},
                           {'name': 'Anúncios', 'url': reverse('group_announcements', args=[group.id])},

@@ -4,17 +4,11 @@ from django.db.models import Model, TextField, ForeignKey, DateTimeField, DateFi
 from groups.models import Group
 from users.models import Profile
 
-KLEEP_TABLE_PREFIX = 'kleep_'
-
 
 class Conversation(Model):
     creator = ForeignKey(Profile, on_delete=models.PROTECT, related_name='creator')
     date = DateField(auto_now_add=True)
     users = ManyToManyField(Profile, through='ConversationUser')
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'conversations'
 
 
 class Message(Model):
@@ -24,8 +18,7 @@ class Message(Model):
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'messages'
+        unique_together = ['author', 'datetime', 'content', 'conversation']
 
 
 # A user relation to a conversation
@@ -42,15 +35,7 @@ class GroupExternalConversation(Conversation):
     group_ack = BooleanField()
     closed = BooleanField()
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'group_external_conversations'
-
 
 # A conversation within a group
 class GroupInternalConversation(Conversation):
     group = ForeignKey(Group, on_delete=models.PROTECT)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'group_internal_conversations'

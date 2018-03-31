@@ -34,9 +34,18 @@ INSTALLED_APPS = [
     'analytical',
     'clip',
     'kleep.apps.KleepConfig',
+    'users',
+    'groups',
+    'college',
     'news',
     'synopses',
+    'services',
     'store',
+    'chat',
+    'events',
+    'feedback',
+    'planet',
+    'documents',
     'api',
 ]
 

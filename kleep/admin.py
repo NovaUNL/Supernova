@@ -2,7 +2,7 @@ from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.contrib import admin
 
-from kleep.models import ChangeLog, Catchphrase
+from kleep.models import Changelog, Catchphrase
 
 
 class ChangeLogAdminForm(forms.ModelForm):
@@ -10,12 +10,12 @@ class ChangeLogAdminForm(forms.ModelForm):
 
     class Meta:
         fields = '__all__'
-        model = ChangeLog
+        model = Changelog
 
 
 class ChangeLogAdmin(admin.ModelAdmin):
     form = ChangeLogAdminForm
 
 
-admin.site.register(ChangeLog, ChangeLogAdmin)
+admin.site.register(Changelog, ChangeLogAdmin)
 admin.site.register(Catchphrase)

@@ -4,7 +4,6 @@ from django.db.models import Model, TextField, ForeignKey, DateTimeField, DateFi
 from ckeditor.fields import RichTextField
 
 from college.models import Place, TurnInstance, Building
-from kleep.models import KLEEP_TABLE_PREFIX
 from users.models import Profile
 
 
@@ -20,26 +19,17 @@ class Document(Model):
                              related_name='document_editor')
 
     class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'documents'
+        ordering = ['creation']
 
     def __str__(self):
         return f'{self.title}, {self.author_user}'
 
 
-class DocumentUserPermission(Model):
+class UserPermission(Model):
     document = ForeignKey(Document, on_delete=models.CASCADE)
     user = ForeignKey(Profile, on_delete=models.CASCADE)
 
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'document_users'
 
-
-class DocumentGroupPermission(Model):
+class GroupPermission(Model):
     document = ForeignKey(Document, on_delete=models.CASCADE)
     group = ForeignKey(Group, on_delete=models.CASCADE)
-
-    class Meta:
-        managed = True
-        db_table = KLEEP_TABLE_PREFIX + 'document_groups'

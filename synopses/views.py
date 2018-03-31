@@ -6,20 +6,20 @@ from college.models import Class
 from kleep.forms import CreateSynopsisSectionForm
 from kleep.views import build_base_context
 
-from synopses.models import SynopsisArea, SynopsisSubarea, SynopsisTopic, SynopsisSection, SynopsisSectionTopic, \
-    SynopsisSectionLog, ClassSynopsesSections
+from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
+    SectionLog, ClassSection
 
 
 def areas_view(request):
     context = build_base_context(request)
     context['title'] = 'Resumos - Areas de estudo'
-    context['areas'] = SynopsisArea.objects.all()
+    context['areas'] = Area.objects.all()
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')}]
     return render(request, 'synopses/areas.html', context)
 
 
 def area_view(request, area_id):
-    area = get_object_or_404(SynopsisArea, id=area_id)
+    area = get_object_or_404(Area, id=area_id)
     context = build_base_context(request)
     context['title'] = 'Resumos - Categorias de %s' % area.name
     context['area'] = area
@@ -29,7 +29,7 @@ def area_view(request, area_id):
 
 
 def subarea_view(request, subarea_id):
-    subarea = get_object_or_404(SynopsisSubarea, id=subarea_id)
+    subarea = get_object_or_404(Subarea, id=subarea_id)
     area = subarea.area
     context = build_base_context(request)
     context['title'] = 'Resumos - %s (%s)' % (subarea.name, area.name)
@@ -43,7 +43,7 @@ def subarea_view(request, subarea_id):
 
 def topic_view(request, topic_id):
     context = build_base_context(request)
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
+    topic = get_object_or_404(Topic, id=topic_id)
     subarea = topic.sub_area
     area = subarea.area
     context['title'] = topic.name
@@ -60,8 +60,8 @@ def topic_view(request, topic_id):
 
 def section_view(request, topic_id, section_id):
     context = build_base_context(request)
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
-    section = get_object_or_404(SynopsisSection, id=section_id)
+    topic = get_object_or_404(Topic, id=topic_id)
+    section = get_object_or_404(Section, id=section_id)
     if section not in topic.sections.all():
         return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
     subarea = topic.sub_area
@@ -71,10 +71,10 @@ def section_view(request, topic_id, section_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['section'] = section
-    section_topic_relation = SynopsisSectionTopic.objects.filter(topic=topic, section=section).first()
-    prev_section = SynopsisSectionTopic.objects.filter(
+    section_topic_relation = SectionTopic.objects.filter(topic=topic, section=section).first()
+    prev_section = SectionTopic.objects.filter(
         topic=topic, index__lt=section_topic_relation.index).order_by('index').last()
-    next_section = SynopsisSectionTopic.objects.filter(
+    next_section = SectionTopic.objects.filter(
         topic=topic, index__gt=section_topic_relation.index).order_by('index').first()
     if prev_section:
         context['previous_section'] = prev_section.section
@@ -92,10 +92,10 @@ def section_view(request, topic_id, section_id):
 def section_creation_view(request, topic_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
+    topic = get_object_or_404(Topic, id=topic_id)
     context = build_base_context(request)
     choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.name),
-                                         SynopsisSection.objects.filter(synopsistopic=topic_id)
+                                         Section.objects.filter(synopsistopic=topic_id)
                                          .order_by('synopsissectiontopic__index').all()))
     if request.method == 'POST':
         form = CreateSynopsisSectionForm(data=request.POST)
@@ -105,17 +105,17 @@ def section_creation_view(request, topic_id):
                 index = 1
             else:
                 # TODO validate
-                index = SynopsisSectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
+                index = SectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
 
-            for entry in SynopsisSectionTopic.objects.filter(topic=topic, index__gte=index).all():
+            for entry in SectionTopic.objects.filter(topic=topic, index__gte=index).all():
                 entry.index += 1
                 entry.save()
 
-            section = SynopsisSection(name=form.cleaned_data['name'], content=form.cleaned_data['content'])
+            section = Section(name=form.cleaned_data['name'], content=form.cleaned_data['content'])
             section.save()
-            section_topic_rel = SynopsisSectionTopic(topic=topic, section=section, index=index)
+            section_topic_rel = SectionTopic(topic=topic, section=section, index=index)
             section_topic_rel.save()
-            section_log = SynopsisSectionLog(author=request.user, section=section)
+            section_log = SectionLog(author=request.user, section=section)
             section_log.save()
             return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
     else:
@@ -141,14 +141,14 @@ def section_creation_view(request, topic_id):
 def section_edition_view(request, topic_id, section_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
-    topic = get_object_or_404(SynopsisTopic, id=topic_id)
-    section = get_object_or_404(SynopsisSection, id=section_id)
-    if not SynopsisSectionTopic.objects.filter(section=section, topic=topic).exists():
+    topic = get_object_or_404(Topic, id=topic_id)
+    section = get_object_or_404(Section, id=section_id)
+    if not SectionTopic.objects.filter(section=section, topic=topic).exists():
         return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
-    section_topic_rel = SynopsisSectionTopic.objects.get(section=section, topic=topic)
+    section_topic_rel = SectionTopic.objects.get(section=section, topic=topic)
     context = build_base_context(request)
     choices = [(0, 'Início')]
-    for other_section in SynopsisSection.objects.filter(synopsistopic=topic).order_by(
+    for other_section in Section.objects.filter(synopsistopic=topic).order_by(
             'synopsissectiontopic__index').all():
         if other_section == section:
             continue
@@ -161,16 +161,16 @@ def section_edition_view(request, topic_id, section_id):
             if form.cleaned_data['after'] == '0':
                 index = 1
             else:
-                index = SynopsisSectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
+                index = SectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
 
-            if SynopsisSectionTopic.objects.filter(topic=topic, index=index).exclude(section=section).exists():
-                for entry in SynopsisSectionTopic.objects.filter(topic=topic, index__gte=index).all():
+            if SectionTopic.objects.filter(topic=topic, index=index).exclude(section=section).exists():
+                for entry in SectionTopic.objects.filter(topic=topic, index__gte=index).all():
                     entry.index += 1
                     entry.save()
 
             section.name = form.cleaned_data['name']
             if section.content != form.cleaned_data['content']:
-                log = SynopsisSectionLog(author=request.user, section=section, previous_content=section.content)
+                log = SectionLog(author=request.user, section=section, previous_content=section.content)
                 section.content = form.cleaned_data['content']
                 log.save()
             section.save()
@@ -179,7 +179,7 @@ def section_edition_view(request, topic_id, section_id):
             section_topic_rel.save()
             return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
     else:
-        prev_topic_section = SynopsisSectionTopic.objects.filter(
+        prev_topic_section = SectionTopic.objects.filter(
             topic=topic, index__lt=section_topic_rel.index).order_by('index').last()
         if prev_topic_section:
             prev_section_id = prev_topic_section.section.id
@@ -215,11 +215,11 @@ def class_synopsis(request, class_id):
 
 def class_synopsis_section(request, class_id, section_id):
     class_ = get_object_or_404(Class, id=class_id)
-    section = get_object_or_404(SynopsisSection, id=section_id)
+    section = get_object_or_404(Section, id=section_id)
 
-    class_synopsis_section = ClassSynopsesSections.objects.get(section=section,
-                                                               class_synopsis__corresponding_class=class_)
-    related_sections = ClassSynopsesSections.objects \
+    class_synopsis_section = ClassSection.objects.get(section=section,
+                                                      class_synopsis__corresponding_class=class_)
+    related_sections = ClassSection.objects \
         .filter(class_synopsis__corresponding_class=class_).order_by('index')
     previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
     next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()

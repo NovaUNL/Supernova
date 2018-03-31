@@ -9,8 +9,8 @@ from college.models import Department, Class, Course, Building
 from groups.models import GroupType
 from news.models import NewsItem
 from services.models import Service, Bar
-from store.models import StoreItem
-from synopses.models import SynopsisArea, SynopsisTopic
+from store.models import Item
+from synopses import models as synopses
 from users.models import Profile
 
 
@@ -84,7 +84,7 @@ class GroupList(APIView):
 
 class Store(APIView):
     def get(self, request, format=None):
-        serializer = StoreItemSerializer(StoreItem.objects.all(), many=True)
+        serializer = StoreItemSerializer(Item.objects.all(), many=True)
         return Response(serializer.data)
 
 
@@ -102,13 +102,13 @@ class News(APIView):
 
 class SyopsesAreas(APIView):
     def get(self, request, format=None):
-        serializer = SynopsisAreaSerializer(SynopsisArea.objects.all(), many=True)
+        serializer = SynopsisAreaSerializer(synopses.Area.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class SyopsesTopicSections(APIView):
     def get(self, request, pk, format=None):
-        serializer = SynopsisTopicSectionsSerializer(SynopsisTopic.objects.get(id=pk))
+        serializer = SynopsisTopicSectionsSerializer(synopses.Topic.objects.get(id=pk))
         return Response(serializer.data)
 
 
