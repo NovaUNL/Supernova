@@ -50,8 +50,7 @@
             <h3>Autores:</h3>
             <ul style="padding: 0; margin: 0; list-style: none;">
                 {% for log in author_log %}
-                    <li><a href="{% url 'profile'  log.author.profile.nickname %}">{{ log.author.get_full_name }}</a>
-                    </li>
+                    <li><a href="{% url 'profile'  log.author.nickname %}">{{ log.author.get_full_name }}</a></li>
                 {% endfor %}
             </ul>
         </div>

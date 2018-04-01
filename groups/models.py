@@ -4,12 +4,12 @@ from django.db.models import Model, TextField, ForeignKey, DateTimeField, ManyTo
 from users.models import User
 
 
-class GroupType(Model):
-    type = TextField(max_length=50)
+class Type(Model):
+    name = TextField(max_length=50)
     description = TextField()
 
     def __str__(self):
-        return self.type
+        return self.name
 
 
 class Role(Model):
@@ -23,7 +23,7 @@ class Group(Model):
     name = TextField(max_length=50)
     description = TextField()
     invite_only = BooleanField(default=True)
-    type = ForeignKey(GroupType, on_delete=models.PROTECT, null=True, blank=True)
+    type = ForeignKey(Type, on_delete=models.PROTECT, null=True, blank=True)
     public_members = BooleanField(default=False)
     members = ManyToManyField(User, through='GroupMember')
     roles = ManyToManyField(Role, through='GroupRole')

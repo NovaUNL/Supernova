@@ -8,10 +8,12 @@ class User(AbstractUser):
     birth_date = DateField(null=True)
 
 class Badge(Model):
-    name = TextField(max_length=30, unique=True, default=None)
+    name = TextField(max_length=30, unique=True)
+    style = TextField(max_length=15, null=True, default=None)
 
 
 class UserBadge(Model):
     user = ForeignKey(User, on_delete=models.CASCADE)
     badge = ForeignKey(Badge, on_delete=models.PROTECT)
+    receive_date = DateField(auto_created=True)
 

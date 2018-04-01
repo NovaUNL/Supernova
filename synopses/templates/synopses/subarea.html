@@ -27,12 +27,12 @@
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ subarea.name }}</h1>
     <h2>Descrição:</h2>
-    <p>{{ subarea.description }}</p>
+    <p>{{ subarea.description|safe }}</p>
     <h2>Tópicos:</h2>
     <ul id="topic-list">
-        {% for topic in subarea.synopsistopic_set.all %}
+        {% for topic in subarea.topic_set.all %}
             <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
-                ({{ topic.synopsissection_set.count }} secções)
+                ({{ topic.section_set.count }} secções)
             </li>
         {% endfor %}
     </ul>

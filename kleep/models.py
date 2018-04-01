@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User, Group
 from django.db.models import Model, TextField, DateField
 from ckeditor.fields import RichTextField
 

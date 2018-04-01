@@ -1,9 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
 from django.db.models import Model, TextField, ForeignKey, DateTimeField, DateField, BooleanField
 from ckeditor.fields import RichTextField
 
 from college.models import Place, TurnInstance, Building
+from groups.models import Group
 from users.models import User
 
 

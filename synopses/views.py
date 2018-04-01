@@ -50,7 +50,7 @@ def topic_view(request, topic_id):
     context['area'] = area
     context['subarea'] = subarea
     context['topic'] = topic
-    context['sections'] = topic.sections.order_by('synopsissectiontopic__index').all()
+    context['sections'] = topic.sections.order_by('sectiontopic__index').all()
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
@@ -80,7 +80,7 @@ def section_view(request, topic_id, section_id):
         context['previous_section'] = prev_section.section
     if next_section:
         context['next_section'] = next_section.section
-    context['author_log'] = section.synopsissectionlog_set.distinct('author')
+    context['author_log'] = section.sectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
@@ -96,7 +96,7 @@ def section_creation_view(request, topic_id):
     context = build_base_context(request)
     choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.name),
                                          Section.objects.filter(synopsistopic=topic_id)
-                                         .order_by('synopsissectiontopic__index').all()))
+                                         .order_by('sectiontopic__index').all()))
     if request.method == 'POST':
         form = CreateSynopsisSectionForm(data=request.POST)
         form.fields['after'].choices = choices

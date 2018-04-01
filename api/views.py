@@ -6,7 +6,7 @@ from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer,
     SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupTypeSerializer, \
     StoreItemSerializer, BarListMenusSerializer, ProfileDetailedSerializer
 from college.models import Department, Class, Course, Building
-from groups.models import GroupType
+from groups.models import Type
 from news.models import NewsItem
 from services.models import Service, Bar
 from store.models import Item
@@ -78,7 +78,7 @@ class ClassDetailed(APIView):
 
 class GroupList(APIView):
     def get(self, request, format=None):
-        serializer = GroupTypeSerializer(GroupType.objects.all(), many=True)
+        serializer = GroupTypeSerializer(Type.objects.all(), many=True)
         return Response(serializer.data)
 
 
