@@ -136,9 +136,9 @@ class CourseArea(Model):
 
 class Class(Model):
     name = TextField(max_length=30)
-    abbreviation = TextField(max_length=10, default='HELP')  # TODO enforce uniqueness
+    abbreviation = TextField(max_length=10, default='---')
     description = TextField(max_length=1024, null=True, blank=True)
-    credits = IntegerField(null=True, blank=True)
+    credits = IntegerField(null=True, blank=True)  # 2 credits = 1 ECTS
     department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
     clip_class = OneToOneField(clip.Class, on_delete=models.PROTECT, related_name='related_class')
     courses = ManyToManyField(Course, through='Curriculum')

@@ -105,6 +105,8 @@ class Class(Model):
     id = IntegerField(primary_key=True)
     name = TextField(null=True)
     internal_id = TextField(null=True)
+    abbreviation = TextField()
+    ects = IntegerField(null=True)
     department = ForeignKey(Department, on_delete=models.PROTECT, db_column='department_id')
 
     class Meta:

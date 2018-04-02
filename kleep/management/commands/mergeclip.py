@@ -40,11 +40,9 @@ class Command(BaseCommand):
             if hasattr(clip_class, 'related_class'):
                 corresponding_class = clip_class.related_class
             else:
-                abbreviation = ''
-                for word in clip_class.name.split():
-                    abbreviation += word[0]
-                corresponding_class = Class(name=clip_class.name, clip_class=clip_class, abbreviation=abbreviation,
-                                            department=clip_class.department.department)
+                corresponding_class = Class(name=clip_class.name, clip_class=clip_class,
+                                            abbreviation=clip_class.abbreviation,
+                                            department=clip_class.department.department, credits=clip_class.ects)
                 corresponding_class.save()
                 print(f'Created class {corresponding_class}')
 
