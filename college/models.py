@@ -66,15 +66,24 @@ class Place(Model):
         return f"{self.name} ({self.building.abbreviation})"
 
 
-class Classroom(Place):
-    capacity = IntegerField()
+class Classroom(Model):
+    place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
+    capacity = IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Sala {self.place}'
 
 
-class Auditorium(Place):
-    capacity = IntegerField()
+class Auditorium(Model):
+    place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
+    capacity = IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Auditório {self.place}'
 
 
-class Laboratory(Place):
+class Laboratory(Model):
+    place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
     description = TextField(max_length=2048)
     equipment = TextField(max_length=2048)
 
@@ -82,7 +91,7 @@ class Laboratory(Place):
         verbose_name_plural = 'laboratories'
 
     def __str__(self):
-        return f'Laboratorio {super().__str__()}'
+        return f'Laboratorio {self.place}'
 
 
 class BuildingUsage(Model):  # TODO deprecate this model

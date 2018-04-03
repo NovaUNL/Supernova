@@ -7,7 +7,10 @@ from college.models import Building, Classroom, Laboratory, Auditorium, Place, C
     Class, Department
 from kleep.schedules import build_schedule, build_turns_schedule
 from kleep.views import build_base_context
+
+
 # from services.models import Service, BarDailyMenu
+from services.models import Service
 
 
 def campus(request):
@@ -203,9 +206,11 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    context['classrooms'] = Classroom.objects.filter(building=building)
-    context['laboratories'] = Laboratory.objects.filter(building=building)
-    context['auditoriums'] = Auditorium.objects.filter(building=building)
+    context['classrooms'] = Classroom.objects.order_by('place__name').filter(place__building=building)
+    context['laboratories'] = Laboratory.objects.order_by('place__name').filter(place__building=building)
+    context['auditoriums'] = Auditorium.objects.order_by('place__name').filter(place__building=building)
+    context['services'] = Service.objects.order_by('name').filter(place__building=building)
+    context['departments'] = Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building_id])}]
     context['building'] = building

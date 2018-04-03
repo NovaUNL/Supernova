@@ -16,6 +16,35 @@
         .flex-wrapper .svg-inline--fa {
             font-size: 2em;
         }
+
+        .room-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            padding-left: 0;
+        }
+
+        .room-list li {
+            display: inline-block;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 5px 10px;
+            margin: 5px 5px;
+            border-radius: 5px;
+            border: 2px solid #626262;
+        }
+
+        .classroom {
+            background-color: #97d5ff;
+        }
+
+        .laboratory {
+            background-color: #acff70;
+        }
+
+        .auditorium {
+            background-color: #ffcf78;
+        }
     </style>
 {% endblock %}
 
@@ -38,18 +67,18 @@
         </div>
 
         <div>
-            {% if building.buildingusage_set.exists %}
+            {% if departments.exists %}
                 <h2>Departamentos:</h2>
                 <ul>
-                    {% for department in building.department_set.all %}
+                    {% for department in departments.all %}
                         <li><a href="{% url 'department' department.id %}">{{ department.name }}</a></li>
                     {% endfor %}
                 </ul>
 
             {% endif %}
-            {% if building.service_set.exists %}<h2>Serviços:</h2>
+            {% if services.exists %}<h2>Serviços:</h2>
                 <ul>
-                    {% for service in building.service_set.all %}
+                    {% for service in services.all %}
                         <li><a href="{% url 'service' service.id %}">{{ service.name }}</a></li>
                     {% endfor %}
                 </ul>
@@ -61,25 +90,31 @@
         </div>
         <div>
             <h2>Salas de aula:</h2>
-            <ul style="list-style: none">
-                {% for place in classrooms.all %}
-                    <li>{{ place.name }}</li>
+            <ul class="room-list">
+                {% for classroom in classrooms.all %}
+                    <a href="{% url 'classroom' classroom.place.id %}">
+                        <li class="classroom">{{ classroom.place.name }}</li>
+                    </a>
                 {% endfor %}
             </ul>
         </div>
         <div>
             <h2>Laboratórios:</h2>
-            <ul style="list-style: none">
-                {% for place in laboratories.all %}
-                    <li>{{ place.name }}</li>
+            <ul class="room-list">
+                {% for laboratory in laboratories.all %}
+                    <a href="{% url 'classroom' laboratory.place.id %}">
+                        <li class="laboratory">{{ laboratory.place.name }}</li>
+                    </a>
                 {% endfor %}
             </ul>
         </div>
         <div>
             <h2>Auditórios:</h2>
-            <ul style="list-style: none">
-                {% for place in auditoriums.all %}
-                    <li>{{ place.name }}</li>
+            <ul class="room-list">
+                {% for auditorium in auditoriums.all %}
+                    <a href="{% url 'classroom' auditorium.place.id %}">
+                        <li class="auditorium">{{ auditorium.place.name }}</li>
+                    </a>
                 {% endfor %}
             </ul>
         </div>
