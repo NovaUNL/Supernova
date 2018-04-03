@@ -56,13 +56,14 @@ class Place(Model):
     building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT)
     floor = IntegerField(default=0)
     unlocked = NullBooleanField(null=True, default=None)
-    clip_place = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT)
+    # Related name *REALLY* needs to be 'place', otherwise manage.py mergeclip adds duplicates
+    clip_place = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT, related_name='place')
 
     def __str__(self):
-        return f"{self.building} {self.name}"
+        return f"{self.name} ({self.building})"
 
     def short_str(self):
-        return f"{self.name}\n{self.building.abbreviation}"
+        return f"{self.name} ({self.building.abbreviation})"
 
 
 class Classroom(Place):
@@ -76,6 +77,12 @@ class Auditorium(Place):
 class Laboratory(Place):
     description = TextField(max_length=2048)
     equipment = TextField(max_length=2048)
+
+    class Meta:
+        verbose_name_plural = 'laboratories'
+
+    def __str__(self):
+        return f'Laboratorio {super().__str__()}'
 
 
 class BuildingUsage(Model):  # TODO deprecate this model
@@ -146,6 +153,7 @@ class Class(Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name_plural = 'classes'
 
     def __str__(self):
         return self.name
@@ -168,7 +176,7 @@ class ClassInstance(Model):
     parent = ForeignKey(Class, on_delete=models.PROTECT)
     period = ForeignKey(clip.Period, on_delete=models.PROTECT)
     year = IntegerField()
-    clip_class_instance = OneToOneField(clip.ClassInstance, on_delete=models.PROTECT)
+    clip_class_instance = OneToOneField(clip.ClassInstance, on_delete=models.PROTECT, related_name='class_instance')
     students = ManyToManyField(Student, through='Enrollment')
 
     class Meta:
@@ -197,7 +205,7 @@ class Turn(Model):
     class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE)  # Eg: Analysis
     turn_type = ForeignKey(clip.TurnType, on_delete=models.PROTECT)  # Theoretical
     number = IntegerField()  # 1
-    clip_turn = OneToOneField(clip.Turn, on_delete=models.PROTECT)
+    clip_turn = OneToOneField(clip.Turn, on_delete=models.PROTECT, related_name='turn')
     required = BooleanField(default=True)  # Optional attendance
     students = ManyToManyField(Student, through='TurnStudents')
 
@@ -222,14 +230,14 @@ class TurnStudents(Model):
 class TurnInstance(Model):
     turn = ForeignKey(Turn, on_delete=models.PROTECT)  # Eg: Theoretical 1
     # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
-    clip_turn_instance = OneToOneField(clip.TurnInstance, on_delete=models.PROTECT)
+    clip_turn_instance = OneToOneField(clip.TurnInstance, on_delete=models.PROTECT, related_name='turn_instance')
     recurring = BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
     # Whether this is a recurring turn
     weekday = IntegerField(null=True, blank=True)  # 1 - Monday
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
-    classroom = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True)
+    place = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
         ordering = ['weekday', 'start']

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from college.models import Student, Auditorium, Laboratory, Classroom, BuildingUsage, Department, Place, Building, \
-    Course, CourseArea, Area, Curriculum, TurnStudents, Class, Turn, Enrollment, TurnInstance
+    Course, CourseArea, Area, Curriculum, TurnStudents, Class, Turn, Enrollment, TurnInstance, ClassInstance
 
 
 class StudentClipStudentAdmin(admin.ModelAdmin):
@@ -16,6 +16,7 @@ admin.site.register(Course)
 admin.site.register(CourseArea)
 admin.site.register(Curriculum)
 admin.site.register(Class)
+admin.site.register(ClassInstance)
 admin.site.register(Classroom)
 admin.site.register(Department)
 admin.site.register(Enrollment)

@@ -77,7 +77,8 @@ class Institution(TemporalEntity, Model):
 class Building(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=30)
-    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(
+        Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='buildings')
 
     class Meta:
         managed = False
@@ -91,7 +92,8 @@ class Department(Model, TemporalEntity):
     id = IntegerField(primary_key=True)
     internal_id = TextField()
     name = TextField(max_length=50)
-    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
+    institution = ForeignKey(
+        Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='departments')
 
     class Meta:
         managed = False
@@ -107,7 +109,7 @@ class Class(Model):
     internal_id = TextField(null=True)
     abbreviation = TextField()
     ects = IntegerField(null=True)
-    department = ForeignKey(Department, on_delete=models.PROTECT, db_column='department_id')
+    department = ForeignKey(Department, on_delete=models.PROTECT, db_column='department_id', related_name='classes')
 
     class Meta:
         managed = False
@@ -120,7 +122,7 @@ class Class(Model):
 class Classroom(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=70)
-    building = ForeignKey(Building, on_delete=models.PROTECT, db_column='building_id')
+    building = ForeignKey(Building, on_delete=models.PROTECT, db_column='building_id', related_name='classrooms')
 
     class Meta:
         managed = False
@@ -145,8 +147,8 @@ class Teacher(Model):
 
 class ClassInstance(Model):
     id = IntegerField(primary_key=True)
-    parent = ForeignKey(Class, on_delete=models.PROTECT, db_column='class_id')
-    period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id', related_name='clip_class_instances')
+    parent = ForeignKey(Class, on_delete=models.PROTECT, db_column='class_id', related_name='instances')
+    period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id', related_name='class_instances')
     year = IntegerField()
 
     # regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
@@ -164,9 +166,9 @@ class Course(TemporalEntity, Model):
     internal_id = IntegerField()
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
-    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
-    degree = ForeignKey(Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True,
-                        related_name='clip_courses')
+    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='courses')
+    degree = ForeignKey(
+        Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True, related_name='courses')
 
     class Meta:
         managed = False
@@ -182,8 +184,8 @@ class Student(Model):
     name = TextField()
     internal_id = IntegerField()
     abbreviation = TextField(null=True, max_length=30)
-    course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id')
-    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id')
+    course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id', related_name='students')
+    institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='students')
 
     class Meta:
         managed = False
@@ -195,8 +197,8 @@ class Student(Model):
 
 class Admission(Model):
     id = IntegerField(primary_key=True)
-    student = ForeignKey(Student, on_delete=models.PROTECT, db_column='student_id')
-    course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id')
+    student = ForeignKey(Student, on_delete=models.PROTECT, db_column='student_id', related_name='admissions')
+    course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id', related_name='admissions')
     phase = IntegerField(null=True)
     year = IntegerField(null=True)
     option = IntegerField(null=True)
@@ -217,8 +219,9 @@ class Admission(Model):
 
 class Enrollment(Model):
     id = IntegerField(primary_key=True)
-    student = ForeignKey(Student, on_delete=models.PROTECT, db_column='student_id')
-    class_instance = ForeignKey(ClassInstance, on_delete=models.PROTECT, db_column='class_instance_id')
+    student = ForeignKey(Student, on_delete=models.PROTECT, db_column='student_id', related_name='enrollments')
+    class_instance = ForeignKey(
+        ClassInstance, on_delete=models.PROTECT, db_column='class_instance_id', related_name='enrollments')
     attempt = IntegerField(null=True)
     student_year = IntegerField(null=True)
     statutes = TextField(blank=True, null=True, max_length=20)
@@ -236,16 +239,17 @@ class Enrollment(Model):
 class Turn(Model):
     id = IntegerField(primary_key=True)
     number = IntegerField()
-    type = ForeignKey(TurnType, on_delete=models.PROTECT, related_name='clip_turns')
-    class_instance = ForeignKey(ClassInstance, on_delete=models.PROTECT, db_column='class_instance_id')
+    type = ForeignKey(TurnType, on_delete=models.PROTECT, related_name='turns')
+    class_instance = ForeignKey(
+        ClassInstance, on_delete=models.PROTECT, db_column='class_instance_id', related_name='turns')
     minutes = IntegerField(null=True)
     enrolled = IntegerField(null=True)
     capacity = IntegerField(null=True)
     routes = TextField(blank=True, null=True, max_length=30)
     restrictions = TextField(blank=True, null=True, max_length=30)
     state = TextField(blank=True, null=True, max_length=30)
-    students = ManyToManyField(Student, through='TurnStudent')
-    teachers = ManyToManyField(Teacher, through='TurnTeacher')
+    students = ManyToManyField(Student, through='TurnStudent', related_name='turns')
+    teachers = ManyToManyField(Teacher, through='TurnTeacher', related_name='turns')
 
     class Meta:
         managed = False
@@ -257,11 +261,11 @@ class Turn(Model):
 
 class TurnInstance(Model):
     id = IntegerField(primary_key=True)
-    turn = ForeignKey(Turn, on_delete=models.PROTECT, db_column='turn_id')
+    turn = ForeignKey(Turn, on_delete=models.PROTECT, db_column='turn_id', related_name='instances')
     start = IntegerField()
     end = IntegerField(null=True)
     weekday = IntegerField(null=True)
-    classroom = ForeignKey(Classroom, on_delete=models.PROTECT, db_column='classroom_id')
+    classroom = ForeignKey(Classroom, on_delete=models.PROTECT, db_column='classroom_id', related_name='turn_instances')
 
     class Meta:
         managed = False
