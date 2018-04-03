@@ -18,7 +18,7 @@ class Command(BaseCommand):
         period = clip.Period.objects.get(id=options['period'][0])
 
         for clip_place in clip.Classroom.objects.all():
-            lab_exp = re.compile('[Ll]ab[\.]? (?P<name>.*)$')
+            lab_exp = re.compile('[Ll]ab[.]? (?P<name>.*)$')
             clip_building: clip.Building = clip_place.building
             try:
                 building: Building = clip_building.building

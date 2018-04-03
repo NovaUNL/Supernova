@@ -86,10 +86,16 @@
 
 {% block content %}
     <h1><i class="fas fa-map-marker-alt"></i> Sala {{ classroom.name }}</h1>
-    <h3 style="margin-left: 30px">{{ building.name }}</h3>
+    <h3 style="margin-left: 30px; margin-bottom: 0;">{{ building.name }}</h3>
 
     <div class="flex-wrapper">
-        <div><h2>Localização</h2><br><img src="#" width="450px" height="400px"></div>
+        <div>
+            <h2>Localização</h2>
+            <object width="450px" height="400px" type="image/svg+xml" data="{% static 'kleep/vii-sample.svg' %}">
+                O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
+                Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
+            </object>
+        </div>
 
         <div style="overflow-x: scroll; width: 700px;">
             <h2>Horário:</h2>

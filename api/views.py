@@ -8,7 +8,7 @@ from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer,
 from college.models import Department, Class, Course, Building
 from groups.models import Type
 from news.models import NewsItem
-from services.models import Service, Bar
+from services.models import Service
 from store.models import Item
 from synopses import models as synopses
 from users.models import User
@@ -114,7 +114,7 @@ class SyopsesTopicSections(APIView):
 
 class Menus(APIView):
     def get(self, request, format=None):
-        serializer = BarListMenusSerializer(Bar.objects.all(), many=True)
+        serializer = BarListMenusSerializer(Service.objects.filter(restaurant=True).all(), many=True)
         return Response(serializer.data)
 
 

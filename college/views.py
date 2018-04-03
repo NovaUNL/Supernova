@@ -6,11 +6,11 @@ from clip.models import Degree
 from college.models import Building, Classroom, Laboratory, Auditorium, Place, Course, Curriculum, Area, ClassInstance, \
     Class, Department
 from kleep.schedules import build_schedule, build_turns_schedule
+from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 
-
 # from services.models import Service, BarDailyMenu
-from services.models import Service
+from services.models import Service, MenuDish
 
 
 def campus(request):
@@ -227,32 +227,32 @@ def classroom(request, classroom_id):
                           {'name': classroom.name, 'url': reverse('classroom', args=[classroom_id])}]
     context['building'] = building
     context['classroom'] = classroom
-    turn_instances = classroom.turninstance_set.filter(  # TODO create function to return current school year/period
-        turn__class_instance__year=2018, turn__class_instance__period=2).all()
+    turn_instances = classroom.turninstance_set.filter(
+        turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
     return render(request, 'college/classroom.html', context)
 
 
 def service(request, service_id):
-    # service = get_object_or_404(Service, id=service_id)
-    # building = service.building
+    service = get_object_or_404(Service, id=service_id)
+    building = service.place.building
     context = build_base_context(request)
-    # context['title'] = service.name
+    context['title'] = service.name
     is_bar = hasattr(service, 'bar')
     context['is_bar'] = is_bar
     if is_bar:
         menu = []
         # TODO today filter
-        # for menu_item in BarDailyMenu.objects.filter(bar=service.bar).order_by('date').all():
-        #     price = menu_item.price
-        #     if price > 0:
-        #         menu.append((menu_item.item, menu_item.price_str()))
-        #     else:
-        #         menu.append((menu_item.item, None))
-        # context['menu'] = menu
+        for menu_item in MenuDish.objects.filter(service=service).all():
+            price = menu_item.price
+            if price > 0:
+                menu.append((menu_item.item, menu_item.price_str()))
+            else:
+                menu.append((menu_item.item, None))
+        context['menu'] = menu
     context['building'] = building
     context['service'] = service
-    # context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-    #                       {'name': building.name, 'url': reverse('building', args=[building.id])},
-    #                       {'name': service.name, 'url': reverse('service', args=[service_id])}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+                          {'name': building.name, 'url': reverse('building', args=[building.id])},
+                          {'name': service.name, 'url': reverse('service', args=[service_id])}]
     return render(request, 'college/service.html', context)

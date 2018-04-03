@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from kleep.forms import AccountSettingsForm, ClipLoginForm, LoginForm, AccountCreationForm
 from kleep.schedules import build_turns_schedule
-from kleep.settings import REGISTRATIONS_ENABLED
+from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 from users.models import User
 
@@ -75,7 +75,8 @@ def user_schedule_view(request, nickname):
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
-    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(student.turn_set.all())
+    turns = student.turns.filter(class_instance__year=COLLEGE_YEAR, class_instance__period_id=COLLEGE_PERIOD).all()
+    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(turns)
     return render(request, 'users/profile_schedule.html', context)
 
 

@@ -170,3 +170,6 @@ VERSION = subprocess.check_output([
 REGISTRATIONS_ENABLED = False
 
 AUTH_USER_MODEL = 'users.User'
+
+COLLEGE_YEAR = 2018  # TODO deduce me PS: 2018 = 2017/2018
+COLLEGE_PERIOD = 3  # TODO deduce me

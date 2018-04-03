@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from college.models import Class
-from services.models import BarDailyMenu
+from services.models import MenuDish
 
 
 class DegreeSerializer(serializers.Serializer):
@@ -158,7 +158,7 @@ class TodaysBarMenuSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('item', 'price')
         list_serializer_class = TodaysMenuFilteredListSerializer
-        model = BarDailyMenu
+        model = MenuDish
 
 
 class BarListMenusSerializer(serializers.Serializer):
