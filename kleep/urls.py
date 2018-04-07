@@ -1,5 +1,4 @@
 from django.conf.urls import url
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
@@ -10,8 +9,6 @@ import events.views as events
 import feedback.views as feedback
 import documents.views as documents
 import news.views as news
-
-from kleep import settings
 import api.urls
 from . import views
 
@@ -79,7 +76,3 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

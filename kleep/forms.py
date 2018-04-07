@@ -1,5 +1,4 @@
 from captcha.fields import CaptchaField
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.contrib.auth import authenticate
 
@@ -163,9 +162,3 @@ class ClipLoginForm(forms.Form):
         password = self.cleaned_data.get('password')
         # TODO
         return self.cleaned_data
-
-
-class CreateSynopsisSectionForm(forms.Form):
-    name = forms.CharField(label='Título', max_length=100, required=True)
-    content = forms.CharField(label='Conteudo:', widget=CKEditorUploadingWidget())
-    after = forms.ChoiceField(label='Após:')

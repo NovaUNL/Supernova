@@ -2,6 +2,10 @@
 
 {% load static %}
 
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'kleep/synopses.css' %}"/>
+{% endblock %}
+
 {% block content %}
     <h1><i class="fas fa-book"></i> Categorias em {{ area.name }}</h1>
 
@@ -20,11 +24,10 @@
             </a>
         {% endfor %}
     </div>
-    <h2>Contribuir:</h2>
+    <h2 style="margin-bottom: 5px">Contribuir:</h2>
     {% if user.is_authenticated %}
         <div id="contribute">
             <a class="generic-button">Propor nova categoria</a>
-            <a class="generic-button">Propor remoção da secção</a>
         </div>
     {% else %}
         <b>Autentique-se para poder efetuar alterações.</b>

@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from college.models import Class
-from kleep.forms import CreateSynopsisSectionForm
 from kleep.views import build_base_context
+from synopses.forms import SynopsisSectionForm
 
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection
@@ -63,7 +63,7 @@ def section_view(request, topic_id, section_id):
     topic = get_object_or_404(Topic, id=topic_id)
     section = get_object_or_404(Section, id=section_id)
     if section not in topic.sections.all():
-        return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
+        return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
     subarea = topic.sub_area
     area = subarea.area
     context['title'] = topic.name
@@ -95,10 +95,10 @@ def section_creation_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     context = build_base_context(request)
     choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.name),
-                                         Section.objects.filter(synopsistopic=topic_id)
+                                         Section.objects.filter(topic=topic)
                                          .order_by('sectiontopic__index').all()))
     if request.method == 'POST':
-        form = CreateSynopsisSectionForm(data=request.POST)
+        form = SynopsisSectionForm(data=request.POST)
         form.fields['after'].choices = choices
         if form.is_valid():
             if form.cleaned_data['after'] == '0':
@@ -119,7 +119,7 @@ def section_creation_view(request, topic_id):
             section_log.save()
             return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
     else:
-        form = CreateSynopsisSectionForm()
+        form = SynopsisSectionForm()
         form.fields['after'].choices = choices
 
     subarea = topic.sub_area
@@ -129,6 +129,8 @@ def section_creation_view(request, topic_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['form'] = form
+    context['action_page'] = reverse('synopses:create_section', args=[topic_id])
+    context['action_name'] = 'Criar'
 
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
@@ -144,18 +146,17 @@ def section_edition_view(request, topic_id, section_id):
     topic = get_object_or_404(Topic, id=topic_id)
     section = get_object_or_404(Section, id=section_id)
     if not SectionTopic.objects.filter(section=section, topic=topic).exists():
-        return HttpResponseRedirect(reverse('synopsis_topic', args=[topic_id]))
+        return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
     section_topic_rel = SectionTopic.objects.get(section=section, topic=topic)
     context = build_base_context(request)
     choices = [(0, 'Início')]
-    for other_section in Section.objects.filter(synopsistopic=topic).order_by(
-            'synopsissectiontopic__index').all():
+    for other_section in Section.objects.filter(topic=topic).order_by('sectiontopic__index').all():
         if other_section == section:
             continue
         choices += ((other_section.id, other_section.name),)
 
     if request.method == 'POST':
-        form = CreateSynopsisSectionForm(data=request.POST)
+        form = SynopsisSectionForm(data=request.POST)
         form.fields['after'].choices = choices
         if form.is_valid():
             if form.cleaned_data['after'] == '0':
@@ -185,8 +186,7 @@ def section_edition_view(request, topic_id, section_id):
             prev_section_id = prev_topic_section.section.id
         else:
             prev_section_id = 0
-        form = CreateSynopsisSectionForm(
-            initial={'name': section.name, 'content': section.content, 'after': prev_section_id})
+        form = SynopsisSectionForm(initial={'name': section.name, 'content': section.content, 'after': prev_section_id})
         form.fields['after'].choices = choices
 
     subarea = topic.sub_area
@@ -196,6 +196,8 @@ def section_edition_view(request, topic_id, section_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['form'] = form
+    context['action_page'] = reverse('synopses:create_section', args=[topic_id])
+    context['action_name'] = 'Editar'
 
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
@@ -217,8 +219,7 @@ def class_synopsis_section(request, class_id, section_id):
     class_ = get_object_or_404(Class, id=class_id)
     section = get_object_or_404(Section, id=section_id)
 
-    class_synopsis_section = ClassSection.objects.get(section=section,
-                                                      class_synopsis__corresponding_class=class_)
+    class_synopsis_section = ClassSection.objects.get(section=section, class_synopsis__corresponding_class=class_)
     related_sections = ClassSection.objects \
         .filter(class_synopsis__corresponding_class=class_).order_by('index')
     previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()

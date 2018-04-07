@@ -3,12 +3,11 @@
 {% load static %}
 
 {% block content %}
-
     <h1><i class="fas fa-book"></i> {{ title }}</h1>
-    <form method="post" action="../../../kleep/templates/kleep/synopses">
+    <form method="post" action="{{ action_page }}">
         {% csrf_token %}
         {{ form.media }}
         {{ form.as_p }}
-        <input type="submit" value="Criar / Editar"/>
+        <input type="submit" value="{{ action_name }}"/>
     </form>
 {% endblock %}
