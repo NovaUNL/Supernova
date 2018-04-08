@@ -1,10 +1,11 @@
+from dal import autocomplete
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from college.models import Class
 from kleep.views import build_base_context
-from synopses.forms import SynopsisSectionForm
+from synopses.forms import SectionForm, TopicForm, SubareaForm
 
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection
@@ -36,15 +37,64 @@ def subarea_view(request, subarea_id):
     context['subarea'] = subarea
     context['area'] = area
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
-                          {'name': area.name, 'url': reverse('synopses:subarea', args=[area.id])},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea_id])}]
     return render(request, 'synopses/subarea.html', context)
+
+
+def subarea_create_view(request, area_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    area = get_object_or_404(Area, id=area_id)
+    context = build_base_context(request)
+
+    if request.method == 'POST':
+        form = SubareaForm(data=request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)  # TODO something with this
+            new_subarea_id = None
+            return HttpResponseRedirect(reverse('synopses:subarea_create', args=[new_subarea_id]))
+    else:
+        form = SubareaForm(initial={'area': area})
+        form.fields['area'].disabled = True
+
+    context['title'] = 'Criar nova categoria de "%s"' % area.name
+    context['area'] = area
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subarea_create', args=[area_id])
+    context['action_name'] = 'Criar'
+
+    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': 'Propor nova categoria', 'url': reverse('synopses:subarea_create', args=[area_id])}]
+    return render(request, 'synopses/generic_form.html', context)
+
+
+def subarea_edit_view(request, subarea_id):
+    subarea = get_object_or_404(Subarea, id=subarea_id)
+    context = build_base_context(request)
+
+    if request.method == 'POST':
+        form = TopicForm(data=request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)  # TODO
+            return HttpResponseRedirect(reverse('synopses:subarea', args=[subarea_id]))
+    else:
+        form = SubareaForm(instance=subarea)
+        form.fields['area'].disabled = True
+
+    context['title'] = 'Editar categoria "%s"' % subarea.name
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subarea_edit', args=[subarea_id])
+    context['action_name'] = 'Aplicar alterações'
+    return render(request, 'synopses/generic_form.html', context)
 
 
 def topic_view(request, topic_id):
     context = build_base_context(request)
     topic = get_object_or_404(Topic, id=topic_id)
-    subarea = topic.sub_area
+    subarea = topic.subarea
     area = subarea.area
     context['title'] = topic.name
     context['area'] = area
@@ -58,13 +108,53 @@ def topic_view(request, topic_id):
     return render(request, 'synopses/topic.html', context)
 
 
+def topic_create_view(request, subarea_id):
+    subarea = get_object_or_404(Subarea, id=subarea_id)
+    context = build_base_context(request)
+
+    if request.method == 'POST':
+        form = TopicForm(data=request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)  # TODO
+            topic_id = None
+            return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
+    else:
+        form = TopicForm(initial={'subarea': subarea})
+        form.fields['subarea'].disabled = True
+
+    context['title'] = 'Criar tópico em "%s"' % subarea.name
+    context['form'] = form
+    context['action_page'] = reverse('synopses:topic_create', args=[subarea_id])
+    context['action_name'] = 'Criar'
+    return render(request, 'synopses/generic_form.html', context)
+
+
+def topic_edit_view(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    context = build_base_context(request)
+
+    if request.method == 'POST':
+        form = TopicForm(data=request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)  # TODO
+            return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
+    else:
+        form = TopicForm(instance=topic)
+
+    context['title'] = 'Editar tópico "%s"' % topic.name
+    context['form'] = form
+    context['action_page'] = reverse('synopses:topic_edit', args=[topic_id])
+    context['action_name'] = 'Aplicar alterações'
+    return render(request, 'synopses/generic_form.html', context)
+
+
 def section_view(request, topic_id, section_id):
     context = build_base_context(request)
     topic = get_object_or_404(Topic, id=topic_id)
     section = get_object_or_404(Section, id=section_id)
     if section not in topic.sections.all():
         return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
-    subarea = topic.sub_area
+    subarea = topic.subarea
     area = subarea.area
     context['title'] = topic.name
     context['area'] = area
@@ -89,7 +179,7 @@ def section_view(request, topic_id, section_id):
     return render(request, 'synopses/section.html', context)
 
 
-def section_creation_view(request, topic_id):
+def section_create_view(request, topic_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
     topic = get_object_or_404(Topic, id=topic_id)
@@ -98,7 +188,7 @@ def section_creation_view(request, topic_id):
                                          Section.objects.filter(topic=topic)
                                          .order_by('sectiontopic__index').all()))
     if request.method == 'POST':
-        form = SynopsisSectionForm(data=request.POST)
+        form = SectionForm(data=request.POST)
         form.fields['after'].choices = choices
         if form.is_valid():
             if form.cleaned_data['after'] == '0':
@@ -119,28 +209,28 @@ def section_creation_view(request, topic_id):
             section_log.save()
             return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
     else:
-        form = SynopsisSectionForm()
+        form = SectionForm()
         form.fields['after'].choices = choices
 
-    subarea = topic.sub_area
+    subarea = topic.subarea
     area = subarea.area
     context['title'] = 'Criar nova entrada em %s' % topic.name
     context['area'] = area
     context['subarea'] = subarea
     context['topic'] = topic
     context['form'] = form
-    context['action_page'] = reverse('synopses:create_section', args=[topic_id])
+    context['action_page'] = reverse('synopses:section_create', args=[topic_id])
     context['action_name'] = 'Criar'
 
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': 'Criar entrada', 'url': reverse('synopses:create_section', args=[topic_id])}]
+                          {'name': 'Criar entrada'}]
     return render(request, 'synopses/generic_form.html', context)
 
 
-def section_edition_view(request, topic_id, section_id):
+def section_edit_view(request, topic_id, section_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
     topic = get_object_or_404(Topic, id=topic_id)
@@ -156,7 +246,7 @@ def section_edition_view(request, topic_id, section_id):
         choices += ((other_section.id, other_section.name),)
 
     if request.method == 'POST':
-        form = SynopsisSectionForm(data=request.POST)
+        form = SectionForm(data=request.POST)
         form.fields['after'].choices = choices
         if form.is_valid():
             if form.cleaned_data['after'] == '0':
@@ -186,17 +276,17 @@ def section_edition_view(request, topic_id, section_id):
             prev_section_id = prev_topic_section.section.id
         else:
             prev_section_id = 0
-        form = SynopsisSectionForm(initial={'name': section.name, 'content': section.content, 'after': prev_section_id})
+        form = SectionForm(initial={'name': section.name, 'content': section.content, 'after': prev_section_id})
         form.fields['after'].choices = choices
 
-    subarea = topic.sub_area
+    subarea = topic.subarea
     area = subarea.area
     context['title'] = 'Editar %s' % section.name
     context['area'] = area
     context['subarea'] = subarea
     context['topic'] = topic
     context['form'] = form
-    context['action_page'] = reverse('synopses:create_section', args=[topic_id])
+    context['action_page'] = reverse('synopses:section_edit', args=[topic_id])
     context['action_name'] = 'Editar'
 
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
@@ -204,15 +294,8 @@ def section_edition_view(request, topic_id, section_id):
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
                           {'name': section.name, 'url': reverse('synopses:section', args=[topic_id, section_id])},
-                          {'name': 'Editar', 'url': reverse('synopses:edit_section', args=[topic_id, section_id])}]
+                          {'name': 'Editar'}]
     return render(request, 'synopses/generic_form.html', context)
-
-
-def class_synopsis(request, class_id):
-    class_ = get_object_or_404(Class, id=class_id)
-    context = build_base_context(request)
-    # TODO redo me
-    return render(request, 'synopses/class.html', context)
 
 
 def class_synopsis_section(request, class_id, section_id):
@@ -238,3 +321,35 @@ def class_synopsis_section(request, class_id, section_id):
                           {'name': class_.name, 'url': reverse('class', args=[class_id])},
                           {'name': 'Resumo', 'url': 'TODO'}]
     return render(request, 'synopses/class_section.html', context)
+
+
+class AreaAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Area.objects.all()
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+        return qs
+
+
+class SubareaAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Subarea.objects.all()
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+        return qs
+
+
+class TopicAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Topic.objects.all()
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+        return qs
+
+
+class SectionAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Section.objects.all()
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+        return qs

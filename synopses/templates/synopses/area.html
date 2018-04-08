@@ -27,7 +27,7 @@
     <h2 style="margin-bottom: 5px">Contribuir:</h2>
     {% if user.is_authenticated %}
         <div id="contribute">
-            <a class="generic-button">Propor nova categoria</a>
+            <a class="generic-button" href="{% url 'synopses:subarea_create' area.id %}">Criar categoria</a>
         </div>
     {% else %}
         <b>Autentique-se para poder efetuar alterações.</b>

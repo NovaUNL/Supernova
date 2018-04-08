@@ -21,9 +21,8 @@
     <h2>Contribuir:</h2>
     {% if user.is_authenticated %}
         <div id="contribute">
-            <a class="disabled generic-button">Criar novo tópico</a>
-            <a class="disabled generic-button">Editar descrição</a>
-            <a class="disabled generic-button">Propor remoção da secção</a>
+            <a class="generic-button" href="{% url 'synopses:topic_create' subarea.id %}">Criar novo tópico</a>
+            <a class="generic-button" href="{% url 'synopses:subarea_edit' subarea.id %}">Editar</a>
         </div>
     {% else %}
         <b>Autentique-se para poder efetuar alterações.</b>

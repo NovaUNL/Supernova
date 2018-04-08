@@ -1,8 +1,9 @@
 from ckeditor.fields import RichTextField
 from django.db import models
-from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField
+from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField, OneToOneField
 
 from clip.models import Class
+from documents.models import Document
 from users.models import User
 
 
@@ -18,10 +19,10 @@ class Area(Model):
 
 
 class Subarea(Model):
-    name = TextField(max_length=50)
-    description = TextField(max_length=1024)
+    name = TextField(max_length=50, verbose_name='nome')
+    description = TextField(max_length=1024, verbose_name='descrição')
     area = ForeignKey(Area, on_delete=models.PROTECT)
-    img_url = TextField(null=True, blank=True)
+    img_url = TextField(null=True, blank=True, verbose_name='imagem (url)')
 
     class Meta:
         ordering = ('name',)
@@ -31,23 +32,24 @@ class Subarea(Model):
 
 
 class Topic(Model):
-    name = TextField()
+    name = TextField(verbose_name='nome')
     index = IntegerField()
-    sub_area = ForeignKey(Subarea, on_delete=models.PROTECT)
-    sections = ManyToManyField('Section', through='SectionTopic')
+    subarea = ForeignKey(Subarea, on_delete=models.PROTECT, verbose_name='subarea')
+    sections = ManyToManyField('Section', through='SectionTopic', verbose_name='secções')
 
     class Meta:
         ordering = ('name',)
-        unique_together = ('index', 'sub_area',)
+        unique_together = ('index', 'subarea',)
 
     def __str__(self):
         return self.name
 
 
 class Section(Model):
-    name = TextField()
-    content = RichTextField()
-    topics = ManyToManyField(Topic, through='SectionTopic')
+    name = TextField(verbose_name='nome')
+    content = RichTextField(verbose_name='conteúdo')
+    # example = RichTextField(verbose_name='exemplo') TODO separate
+    topics = ManyToManyField(Topic, through='SectionTopic', verbose_name='tópicos')
 
     class Meta:
         ordering = ('name',)
@@ -89,3 +91,24 @@ class SectionLog(Model):
 
     def __str__(self):
         return f'{self.author} edited {self.section} @ {self.timestamp}.'
+
+# TODO
+# class SectionSource(Model):
+#     section = ForeignKey(Section, on_delete=models.CASCADE)
+#     title = TextField(max_length=300)
+#     url = TextField(max_length=200)
+
+
+# class SectionRequirement(Model):
+#     section = ForeignKey(Section, on_delete=models.CASCADE)
+#     requirement = ForeignKey(Section, on_delete=models.CASCADE)
+
+
+# class SectionContinuation(Model):
+#     section = ForeignKey(Section, on_delete=models.CASCADE)
+#     continuation = ForeignKey(Section, on_delete=models.CASCADE)
+
+# class Resource(Model):
+#     name = TextField(max_length=100)
+#     document = OneToOneField(Document, null=True, blank=True, on_delete=models.PROTECT)
+#     webpage = TextField(max_length=200)

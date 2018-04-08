@@ -3,11 +3,15 @@
 {% load static %}
 
 {% block content %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <h1><i class="fas fa-book"></i> {{ title }}</h1>
     <form method="post" action="{{ action_page }}">
         {% csrf_token %}
-        {{ form.media }}
         {{ form.as_p }}
         <input type="submit" value="{{ action_name }}"/>
     </form>
+
+    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+    {{ form.media }}
+
 {% endblock %}
