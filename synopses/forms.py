@@ -1,4 +1,3 @@
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from dal import autocomplete
 from django.forms import ChoiceField, ModelForm, TextInput
 from django import forms
@@ -45,6 +44,5 @@ class SectionForm(ModelForm):
         model = Section
         fields = ('name', 'content')
         widgets = {
-            'name': TextInput(),
-            'content': CKEditorUploadingWidget()
+            'name': TextInput()
         }

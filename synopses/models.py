@@ -1,4 +1,4 @@
-from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField, OneToOneField
 
@@ -47,7 +47,7 @@ class Topic(Model):
 
 class Section(Model):
     name = TextField(verbose_name='nome')
-    content = RichTextField(verbose_name='conteúdo')
+    content = RichTextUploadingField(verbose_name='conteúdo')
     # example = RichTextField(verbose_name='exemplo') TODO separate
     topics = ManyToManyField(Topic, through='SectionTopic', verbose_name='tópicos')
 
