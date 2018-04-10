@@ -2,7 +2,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField, OneToOneField
 
-from clip.models import Class
+from college.models import Class
 from documents.models import Document
 from users.models import User
 

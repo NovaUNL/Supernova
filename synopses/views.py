@@ -286,7 +286,7 @@ def section_edit_view(request, topic_id, section_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['form'] = form
-    context['action_page'] = reverse('synopses:section_edit', args=[topic_id])
+    context['action_page'] = reverse('synopses:section_edit', args=[topic_id, section_id])
     context['action_name'] = 'Editar'
 
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},

@@ -25,6 +25,7 @@ urlpatterns = [
     path('departamentos/', college.departments, name='departments'),
     path('departamento/<int:department_id>/', college.department, name='department'),
     path('cadeira/<int:class_id>/', college.class_view, name='class'),
+    path('ac/class/', college.ClassAutocomplete.as_view(), name='class_ac'),
     # path('cadeira/<int:class_id>/resumo/', #, name='class_synopsis'),
     # path('cadeira/<int:class_id>/resumo/<int:section_id>/', #, name='class_synopsis_section'),
     path('cadeira/i/<int:instance_id>/', college.class_instance, name='class_instance'),

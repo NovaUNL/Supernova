@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -11,6 +12,8 @@ from kleep.views import build_base_context
 
 # from services.models import Service, BarDailyMenu
 from services.models import Service, MenuDish
+
+Class
 
 
 def campus(request):
@@ -256,3 +259,11 @@ def service(request, service_id):
                           {'name': building.name, 'url': reverse('building', args=[building.id])},
                           {'name': service.name, 'url': reverse('service', args=[service_id])}]
     return render(request, 'college/service.html', context)
+
+
+class ClassAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Class.objects.all()
+        if self.q:
+            qs = qs.filter(name__startswith=self.q)
+        return qs

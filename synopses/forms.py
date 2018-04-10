@@ -1,8 +1,9 @@
 from dal import autocomplete
+from django.core.exceptions import ValidationError
 from django.forms import ChoiceField, ModelForm, TextInput
 from django import forms
 
-from synopses.models import Area, Subarea, Topic, Section
+from synopses.models import Area, Subarea, Topic, Section, ClassSection
 
 
 class AreaForm(ModelForm):
@@ -45,4 +46,14 @@ class SectionForm(ModelForm):
         fields = ('name', 'content')
         widgets = {
             'name': TextInput()
+        }
+
+
+class ClassSectionForm(ModelForm):
+    class Meta:
+        model = ClassSection
+        fields = '__all__'
+        widgets = {
+            'corresponding_class': autocomplete.ModelSelect2(url='class_ac'),
+            'section': autocomplete.ModelSelect2(url='synopses:section_ac'),
         }
