@@ -1,125 +1,121 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializers import ServiceWithBuildingSerializer, DepartmentSerializer, BuildingWithServicesSerializer, \
-    BuildingMinimalSerializer, DepartmentMinimalSerializer, CourseSerializer, SynopsisAreaSerializer, \
-    SynopsisTopicSectionsSerializer, NewsSerializer, NewsMinimalSerializer, GroupTypeSerializer, \
-    StoreItemSerializer, BarListMenusSerializer, ProfileDetailedSerializer
-from college.models import Department, Class, Course, Building
-from groups.models import Type
-from news.models import NewsItem
-from services.models import Service
-from store.models import Item
+from api import serializers
+from college import models as college
+from groups import models as groups
+from news import models as news
+from store import models as store
+from services import models as services
+from users import models as users
 from synopses import models as synopses
-from users.models import User
 
 
 class BuildingList(APIView):
     def get(self, request, format=None):
-        serializer = BuildingWithServicesSerializer(Building.objects.all(), many=True)
+        serializer = serializers.college.BuildingSerializer(college.Building.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class BuildingDetailed(APIView):
     def get(self, request, pk, format=None):
-        serializer = BuildingWithServicesSerializer(Building.objects.get(pk=pk))
+        serializer = serializers.college.BuildingSerializer(college.Building.objects.get(pk=pk))
         return Response(serializer.data)
 
 
 class CampusMap(APIView):
     def get(self, request, format=None):
-        serializer = BuildingMinimalSerializer(Building.objects.all(), many=True)
+        serializer = serializers.college.BuildingSerializer(college.Building.objects.all(), many=True)
         return Response({'map_url': 'https://gitlab.com/claudiop/KleepAssets/raw/master/Campus.svg',
                          'buildings': serializer.data})
 
 
-class TransportationMap(APIView):
-    def get(self, request, format=None):
-        return Response('https://gitlab.com/claudiop/KleepAssets/raw/master/Transportation.minimal.svg')
-
-
 class ServiceList(APIView):
     def get(self, request, format=None):
-        serializer = ServiceWithBuildingSerializer(Service.objects.filter(bar__isnull=True).all(), many=True)
+        serializer = serializers.services.ServiceWithBuildingSerializer(
+            college.Service.objects.filter(bar__isnull=True).all(), many=True)
         return Response(serializer.data)
 
 
 class BarList(APIView):
     def get(self, request, format=None):
-        serializer = ServiceWithBuildingSerializer(Service.objects.filter(bar__isnull=False).all(), many=True)
+        serializer = serializers.services.ServiceWithBuildingSerializer(
+            college.Service.objects.filter(bar__isnull=False).all(), many=True)
         return Response(serializer.data)
 
 
 class DepartmentList(APIView):
     def get(self, request, format=None):
-        serializer = DepartmentMinimalSerializer(Department.objects.all(), many=True)
+        serializer = serializers.college.DepartmentMinimalSerializer(
+            college.Department.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class DepartmentDetailed(APIView):
     def get(self, request, pk, format=None):
-        serializer = DepartmentSerializer(Department.objects.get(id=pk))
+        serializer = serializers.college.DepartmentSerializer(college.Department.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class CourseDetailed(APIView):
     def get(self, request, pk, format=None):
-        course = Course.objects.get(id=pk)
-        data = CourseSerializer(course).data
+        course = college.Course.objects.get(id=pk)
+        data = serializers.college.CourseSerializer(course).data
         data['degree'] = course.degree.name
         return Response(data)
 
 
 class ClassDetailed(APIView):
     def get(self, request, pk, format=None):
-        serializer = CourseSerializer(Class.objects.get(id=pk))
+        serializer = serializers.college.CourseSerializer(college.Class.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class GroupList(APIView):
     def get(self, request, format=None):
-        serializer = GroupTypeSerializer(Type.objects.all(), many=True)
+        serializer = serializers.groups.GroupTypeSerializer(groups.Type.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class Store(APIView):
     def get(self, request, format=None):
-        serializer = StoreItemSerializer(Item.objects.all(), many=True)
+        serializer = serializers.services.StoreItemSerializer(store.Item.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class NewsList(APIView):
     def get(self, request, format=None):
-        serializer = NewsMinimalSerializer(NewsItem.objects.all(), many=True)
+        serializer = serializers.news.NewsMinimalSerializer(news.NewsItem.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class News(APIView):
     def get(self, request, pk, format=None):
-        serializer = NewsSerializer(NewsItem.objects.get(id=pk))
+        serializer = serializers.news.NewsSerializer(news.NewsItem.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class SyopsesAreas(APIView):
     def get(self, request, format=None):
-        serializer = SynopsisAreaSerializer(synopses.Area.objects.all(), many=True)
+        serializer = serializers.synopses.AreaSerializer(synopses.Area.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class SyopsesTopicSections(APIView):
     def get(self, request, pk, format=None):
-        serializer = SynopsisTopicSectionsSerializer(synopses.Topic.objects.get(id=pk))
+        serializer = serializers.synopses.TopicSectionsSerializer(synopses.Topic.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class Menus(APIView):
     def get(self, request, format=None):
-        serializer = BarListMenusSerializer(Service.objects.filter(restaurant=True).all(), many=True)
+        serializer = serializers.services.BarListMenusSerializer(
+            services.Service.objects.filter(restaurant=True).all(), many=True)
         return Response(serializer.data)
 
 
 class ProfileDetailed(APIView):
     def get(self, request, nickname, format=None):  # TODO authentication
-        user = User.objects.get(nickname=nickname)
-        serializer = ProfileDetailedSerializer(user)
+        user = users.User.objects.get(nickname=nickname)
+        serializer = serializers.users.ProfileDetailedSerializer(user)
         return Response(serializer.data)
