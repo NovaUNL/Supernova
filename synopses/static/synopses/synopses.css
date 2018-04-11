@@ -1,0 +1,78 @@
+h1 {
+    margin: 10px 0;
+}
+
+h2 {
+    margin: 8px 0;
+}
+
+h3 {
+    margin: 5px 0;
+}
+
+#topic-list {
+    list-style: none;
+    font-weight: bold;
+    font-size: 1.5em;
+    line-height: 2em;
+    margin-top: 0;
+    padding-left: 10px;
+}
+
+#contribute {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#contribute > a {
+    margin: 0 10px;
+}
+
+#section-navigation a {
+    line-height: 20px;
+    background-color: #d3d3d3;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#section-navigation a {
+    line-height: 20px;
+    background-color: #d3d3d3;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#sortable-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.sortable-line {
+    display: block;
+    padding: 5px 10px;
+    background-color: #eeeeee;
+    margin-bottom: 10px;
+    font-size: 1.8em;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 2px solid #5a5a5a;
+}
+
+.list-line-index {
+    font-size: 1.2em;
+}
+
+.list-line-delete {
+    display: inline-block;
+    float: right;
+    color: #ffffff;
+    background-color: red;
+    padding: 2px 8px;
+    border-radius: 5px;
+}
+
+.save-button {
+    padding: 5px 10px;
+    font-size: 1.5em;
+    float: right;
+}

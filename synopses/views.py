@@ -147,6 +147,29 @@ def topic_edit_view(request, topic_id):
     context['action_name'] = 'Aplicar alterações'
     return render(request, 'synopses/generic_form.html', context)
 
+def topic_manage_view(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    subarea = topic.subarea
+    area = subarea.area
+    context = build_base_context(request)
+
+    if request.method == 'POST':
+        form = TopicForm(data=request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)  # TODO
+            return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
+    else:
+        form = TopicForm(instance=topic)
+
+    context['title'] = 'Gerir tópico "%s"' % topic.name
+    context['form'] = form
+    context['topic'] = topic
+    context['subarea'] = subarea
+    context['area'] = area
+    context['topic'] = topic
+    context['action_page'] = reverse('synopses:topic_manage', args=[topic_id])
+    context['action_name'] = 'Aplicar alterações'
+    return render(request, 'synopses/topic_management.html', context)
 
 def section_view(request, topic_id, section_id):
     context = build_base_context(request)

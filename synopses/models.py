@@ -21,7 +21,7 @@ class Area(Model):
 class Subarea(Model):
     name = TextField(max_length=50, verbose_name='nome')
     description = TextField(max_length=1024, verbose_name='descrição')
-    area = ForeignKey(Area, on_delete=models.PROTECT)
+    area = ForeignKey(Area, on_delete=models.PROTECT, related_name='areas')
     img_url = TextField(null=True, blank=True, verbose_name='imagem (url)')
 
     class Meta:
@@ -34,7 +34,7 @@ class Subarea(Model):
 class Topic(Model):
     name = TextField(verbose_name='nome')
     index = IntegerField()
-    subarea = ForeignKey(Subarea, on_delete=models.PROTECT, verbose_name='subarea')
+    subarea = ForeignKey(Subarea, on_delete=models.PROTECT, verbose_name='subarea', related_name='subareas')
     sections = ManyToManyField('Section', through='SectionTopic', verbose_name='secções')
 
     class Meta:
@@ -60,7 +60,7 @@ class Section(Model):
 
 class ClassSection(Model):
     corresponding_class = ForeignKey(Class, on_delete=models.PROTECT)
-    section = ForeignKey(Section, on_delete=models.CASCADE)
+    section = ForeignKey(Section, on_delete=models.CASCADE, related_name='synopses_sections')
     index = IntegerField()
 
     class Meta:
@@ -76,7 +76,7 @@ class SectionTopic(Model):
     index = IntegerField()
 
     class Meta:
-        ordering = ('section', 'topic', 'index',)
+        ordering = ('topic', 'index',)
         unique_together = ('section', 'index',)
 
     def __str__(self):

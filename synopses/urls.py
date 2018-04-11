@@ -13,6 +13,7 @@ urlpatterns = [
     path('subarea/<int:subarea_id>/criar_topico/', views.topic_create_view, name='topic_create'),
     path('topico/<int:topic_id>/', views.topic_view, name='topic'),
     path('topico/<int:topic_id>/editar/', views.topic_edit_view, name='topic_edit'),
+    path('topico/<int:topic_id>/gerir/', views.topic_manage_view, name='topic_manage'),
     path('topico/<int:topic_id>/<int:section_id>/', views.section_view, name='section'),
     path('topico/<int:topic_id>/criar_seccao/', views.section_create_view, name='section_create'),
     path('topico/<int:topic_id>/<int:section_id>/editar/', views.section_edit_view, name='section_edit'),
