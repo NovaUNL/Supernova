@@ -12,9 +12,9 @@
     <p>{{ subarea.description|safe }}</p>
     <h2>Tópicos:</h2>
     <ul id="topic-list">
-        {% for topic in subarea.topic_set.all %}
+        {% for topic in subarea.topics.all %}
             <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
-                ({{ topic.section_set.count }} secções)
+                ({{ topic.sections.count }} secções)
             </li>
         {% endfor %}
     </ul>

@@ -1,0 +1,41 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+    <style>
+        #topic-list {
+            list-style: none;
+            font-weight: bold;
+            font-size: 1.5em;
+            line-height: 2em;
+        }
+
+        #contribute {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        #contribute > a {
+            margin: 0 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1><i class="fas fa-book"></i> {{ synopsis_class.name }}</h1>
+    <ul id="topic-list">
+        {% for section in sections %}
+            <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <h2>Contribuir:</h2>
+    {% if user.is_authenticated %}
+        <div id="contribute">
+            <a class="generic-button" href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir secções</a>
+        </div>
+    {% else %}
+        <b>Autentique-se para poder efetuar alterações.</b>
+    {% endif %}
+{% endblock %}

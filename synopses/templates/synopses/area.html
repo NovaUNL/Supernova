@@ -10,7 +10,7 @@
     <h1><i class="fas fa-book"></i> Categorias em {{ area.name }}</h1>
 
     <div class="flex-wrapper">
-        {% for subarea in area.subarea_set.all %}
+        {% for subarea in area.subareas.all %}
             <a href="{% url 'synopses:subarea' subarea.id %}">
                 {% if subarea.img_url %}
                     <div class="flex-grid-item"
@@ -19,7 +19,7 @@
                     <div class="flex-grid-item">
                 {% endif %}
                 <span class="flex-grid-item-top">{{ subarea.name }}</span>
-                <span class="flex-grid-item-bottom">{{ subarea.topic_set.count }} tópico(s)</span>
+                <span class="flex-grid-item-bottom">{{ subarea.topics.count }} tópico(s)</span>
                 </div>
             </a>
         {% endfor %}

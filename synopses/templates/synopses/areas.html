@@ -4,6 +4,21 @@
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+    <style>
+        .synopsis-class {
+            display: inline-block;
+            margin: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            vertical-align: top;
+            box-shadow: 0 0 5px #777;
+        }
+
+        .synopsis-class a {
+            vertical-align: top;
+            color: #333;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -13,14 +28,25 @@
         {% for area in areas %}
             <a href="{% url 'synopses:area' area.id %}">
                 {% if area.img_url %}
-                    <div class="flex-grid-item"
-                         style="background-image: url({{ area.img_url }}); background-size: cover">
+                    <div class="flex-grid-item" style="background-image:url({{ area.img_url }}); background-size:cover">
                 {% else %}
                     <div class="flex-grid-item">
                 {% endif %}
                 <span class="flex-grid-item-top">{{ area.name }}</span>
-                <span class="flex-grid-item-bottom">{{ area.subarea_set.count }} categoria(s)</span>
+                <span class="flex-grid-item-bottom">{{ area.subareas.count }} categoria(s)</span>
                 </div>
+            </a>
+        {% endfor %}
+    </div>
+    <h1><i class="fas fa-graduation-cap"></i> Cadeiras</h1>
+    <div class="flex-wrapper" style="align-items: start;">
+        {% for class_synopsis in class_synopses %}
+            <a class="synopsis-class" href="{% url 'synopses:class' class_synopsis.corresponding_class.id %}">
+                <span style="font-size: 2em">{{ class_synopsis.corresponding_class.name }}</span>
+                <br>
+                <span style="font-size: 1.2em;margin-right: 20px">
+                    {{ class_synopsis.corresponding_class.classsection_set.count }} secções
+                </span>
             </a>
         {% endfor %}
     </div>

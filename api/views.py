@@ -1,3 +1,7 @@
+from django.db import transaction, IntegrityError
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -101,10 +105,94 @@ class SyopsesAreas(APIView):
         return Response(serializer.data)
 
 
-class SyopsesTopicSections(APIView):
+class SynopsesTopicSections(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, pk, format=None):
         serializer = serializers.synopses.TopicSectionsSerializer(synopses.Topic.objects.get(id=pk))
         return Response(serializer.data)
+
+    def put(self, request, pk, format=None):  # TODO CSRF mitigation
+        topic = synopses.Topic.objects.get(id=pk)
+        section_pairs = []
+        try:
+            for entry in request.data:
+                if not (isinstance(entry['index'], int) and isinstance(entry['id'], int)):
+                    raise ValidationError("Invalid data format", code=None)
+                content = (entry['index'], entry['id'])
+                section_pairs.append(content)
+        except KeyError:
+            raise ValidationError("Invalid data format", code=None)
+        section_pairs.sort(key=lambda x: x[0])
+
+        if len(section_pairs) == 0:
+            # Delete everything, require confirmation since client-side code can have errors and users are silly
+            return Response("Not so soon")  # TODO implement
+
+        index = 0
+        sections = set()
+        for pair in section_pairs:
+            if pair[0] != index:
+                raise ValidationError("Missing indexes")
+            index += 1
+            if pair[1] in sections:
+                raise ValidationError("Duplicated sections")
+            sections.add(pair[1])
+
+        try:
+            with transaction.atomic():
+                synopses.SectionTopic.objects.filter(topic=topic).delete()
+                for pair in section_pairs:
+                    synopses.SectionTopic(topic=topic, index=pair[0], section_id=pair[1]).save()
+        except IntegrityError:
+            raise ValidationError("Database transaction failed")  # TODO, change exception type
+        return Response("SUCCESS")  # TODO Proper way to do this?
+
+
+class SynopsesClassSections(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, pk, format=None):
+        serializer = serializers.synopses.ClassSectionsSerializer(synopses.Class.objects.get(id=pk))
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):  # TODO CSRF mitigation
+        synopsis_class = college.Class.objects.get(id=pk)
+        section_pairs = []
+        try:
+            for entry in request.data:
+                if not (isinstance(entry['index'], int) and isinstance(entry['id'], int)):
+                    raise ValidationError("Invalid data format", code=None)
+                content = (entry['index'], entry['id'])
+                section_pairs.append(content)
+        except KeyError:
+            raise ValidationError("Invalid data format", code=None)
+        section_pairs.sort(key=lambda x: x[0])
+
+        if len(section_pairs) == 0:
+            # Delete everything, require confirmation since client-side code can have errors and users are silly
+            return Response("Not so soon")  # TODO implement
+
+        index = 0
+        sections = set()
+        for pair in section_pairs:
+            if pair[0] != index:
+                raise ValidationError("Missing indexes")
+            index += 1
+            if pair[1] in sections:
+                raise ValidationError("Duplicated sections")
+            sections.add(pair[1])
+
+        try:
+            with transaction.atomic():
+                synopses.ClassSection.objects.filter(corresponding_class=synopsis_class).delete()
+                for pair in section_pairs:
+                    synopses.ClassSection(corresponding_class=synopsis_class, index=pair[0], section_id=pair[1]).save()
+        except IntegrityError:
+            raise ValidationError("Database transaction failed")  # TODO, change exception type
+        return Response("SUCCESS")  # TODO Proper way to do this?
 
 
 class Menus(APIView):

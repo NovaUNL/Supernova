@@ -17,6 +17,9 @@ urlpatterns = [
     path('topico/<int:topic_id>/<int:section_id>/', views.section_view, name='section'),
     path('topico/<int:topic_id>/criar_seccao/', views.section_create_view, name='section_create'),
     path('topico/<int:topic_id>/<int:section_id>/editar/', views.section_edit_view, name='section_edit'),
+    path('cadeira/<int:class_id>/', views.class_sections_view, name='class'),
+    path('cadeira/<int:class_id>/gerir/', views.class_manage_view, name='class_manage'),
+    path('cadeira/<int:class_id>/<int:section_id>/', views.class_section_view, name='class_section'),
     # Autocompletion helpers
     path('ac/area/', views.AreaAutocomplete.as_view(), name='area_ac'),
     path('ac/subarea/', views.SubareaAutocomplete.as_view(), name='subarea_ac'),

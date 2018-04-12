@@ -15,6 +15,7 @@ def areas_view(request):
     context = build_base_context(request)
     context['title'] = 'Resumos - Areas de estudo'
     context['areas'] = Area.objects.all()
+    context['class_synopses'] = ClassSection.objects.distinct('corresponding_class').all()
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')}]
     return render(request, 'synopses/areas.html', context)
 
@@ -147,6 +148,7 @@ def topic_edit_view(request, topic_id):
     context['action_name'] = 'Aplicar alterações'
     return render(request, 'synopses/generic_form.html', context)
 
+
 def topic_manage_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     subarea = topic.subarea
@@ -170,6 +172,7 @@ def topic_manage_view(request, topic_id):
     context['action_page'] = reverse('synopses:topic_manage', args=[topic_id])
     context['action_name'] = 'Aplicar alterações'
     return render(request, 'synopses/topic_management.html', context)
+
 
 def section_view(request, topic_id, section_id):
     context = build_base_context(request)
@@ -345,6 +348,36 @@ def class_synopsis_section(request, class_id, section_id):
                           {'name': 'Resumo', 'url': 'TODO'}]
     return render(request, 'synopses/class_section.html', context)
 
+
+def class_sections_view(request, class_id):
+    context = build_base_context(request)
+    classs = get_object_or_404(Class, id=class_id)
+    context['title'] = "Sintese de %s" % classs.name
+    context['synopsis_class'] = classs
+    context['sections'] = Section.objects.filter(class_sections__corresponding_class=classs).order_by('class_sections__index')
+    return render(request, 'synopses/class_sections.html', context)
+
+
+def class_manage_view(request, class_id):
+    classs = get_object_or_404(Class, id=class_id)
+    context = build_base_context(request)
+
+    if request.method == 'POST':
+        form = TopicForm(data=request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)  # TODO
+            return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
+    else:
+        form = TopicForm(instance=classs)
+
+    context['title'] = "Sintese de %s" % classs.name
+    context['form'] = form
+    context['synopsis_class'] = classs
+    context['action_name'] = 'Aplicar alterações'
+    return render(request, 'synopses/topic_management.html', context)
+
+def class_section_view(request):
+    pass
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):

@@ -17,7 +17,8 @@ urlpatterns = [
     path('groups/', views.GroupList.as_view()),
     path('menus/', views.Menus.as_view()),
     path('synopses/areas/', views.SyopsesAreas.as_view()),
-    path('synopses/topic/<int:pk>/', views.SyopsesTopicSections.as_view()),
+    path('synopses/topic/<int:pk>/', views.SynopsesTopicSections.as_view()),
+    path('synopses/class/<int:pk>/', views.SynopsesClassSections.as_view()),
     path('store/', views.Store.as_view()),
     path('campus_map/', views.CampusMap.as_view()),
 ]
