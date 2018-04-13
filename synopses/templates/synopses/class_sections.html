@@ -7,7 +7,11 @@
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-book"></i> {{ synopsis_class.name }}</h1>
+    <h1>
+        <i class="fas fa-book"></i>
+        Síntese de <a href="{% url 'class' synopsis_class.id %}">{{ synopsis_class.name }}</a>
+    </h1>
+    <h2>(Departamento de {{ synopsis_class.department.name }})</h2>
     <ul id="content-list">
         {% for section in sections %}
             <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a></li>
