@@ -384,6 +384,7 @@ def class_section_view(request, class_id, section_id):
     context['section'] = class_synopsis_section.section
     context['previous_section'] = previous_section
     context['next_section'] = next_section
+    context['author_log'] = section.sectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
                           {'name': section.name, 'url': reverse('synopses:class_section', args=[class_id, section_id])}]

@@ -28,12 +28,30 @@
         {% endif %}
     </nav>
     <hr>
-    <h3>Autores:</h3>
-    <ul style="padding: 0; margin: 0; list-style: none;">
-        {% for log in author_log %}
-            <li><a href="{% url 'profile' log.author.profile.nickname %}">{{ log.author.get_full_name }}</a>,</li>
-        {% endfor %}
-    </ul>
-    <h3>Fontes:</h3>
-    TODO
+    <div class="flex-wrapper">
+        <div style="min-width: 300px">
+            <h3>Autores:</h3>
+            <ul style="padding: 0; margin: 0; list-style: none;">
+                {% for log in author_log %}
+                    <li><a href="{% url 'profile'  log.author.nickname %}">{{ log.author.get_full_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div style="flex-basis: 500px">
+            <h3>Fontes/recursos:</h3>
+            TODO
+        </div>
+        <div>
+            <h3>Contribuir:</h3>
+            {% if user.is_authenticated %}
+                <div id="contribute">
+                    <a class="generic-button" href="{% url 'synopses:section_edit' topic.id section.id %}">
+                        Editar conteudo</a>
+                    <a class="disabled generic-button">Editar relações</a>
+                </div>
+            {% else %}
+                <b>Autentique-se para poder efetuar alterações.</b>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

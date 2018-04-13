@@ -10,11 +10,11 @@ h3 {
     margin: 5px 0;
 }
 
-#topic-list {
+#content-list {
     list-style: none;
     font-weight: bold;
     font-size: 1.5em;
-    line-height: 2em;
+    line-height: 1.8em;
     margin-top: 0;
     padding-left: 10px;
 }

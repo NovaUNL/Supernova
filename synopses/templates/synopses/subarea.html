@@ -11,7 +11,7 @@
     <h2>Descrição:</h2>
     <p>{{ subarea.description|safe }}</p>
     <h2>Tópicos:</h2>
-    <ul id="topic-list">
+    <ul id="content-list">
         {% for topic in subarea.topics.all %}
             <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
                 ({{ topic.sections.count }} secções)
