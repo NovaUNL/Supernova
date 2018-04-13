@@ -70,6 +70,9 @@ function save(sorter, url) {
         credentials: 'include',
     }).then(res => res.json())
         .catch(error => console.error('Error:', error))
-        .then(response => console.log('Success:', response));
-    console.log(result);
+        .then(response => {
+            console.log('Success:', response);
+            location.reload();
+        });
+
 }

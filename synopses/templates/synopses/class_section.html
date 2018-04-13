@@ -17,13 +17,13 @@
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
         {% if previous_section.section %}
             <a class="generic-button"
-               href="{% url 'class_synopsis_section' class_obj.id previous_section.section.id %}">
+               href="{% url 'synopses:class_section' synopsis_class.id previous_section.section.id %}">
                 <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.section.name }}</a>
         {% endif %}
         <a style="padding: 0;"></a>
         {% if next_section.section %}
             <a class="generic-button"
-               href="{% url 'class_synopsis_section' class_obj.id next_section.section.id %}">Seguinte: {{ next_section.section.name }}
+               href="{% url 'synopses:class_section' synopsis_class.id next_section.section.id %}">Seguinte: {{ next_section.section.name }}
                 <i class="fas fa-angle-double-right"></i></a>
         {% endif %}
     </nav>

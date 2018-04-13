@@ -74,6 +74,7 @@ def subarea_create_view(request, area_id):
 
 def subarea_edit_view(request, subarea_id):
     subarea = get_object_or_404(Subarea, id=subarea_id)
+    area = subarea.area
     context = build_base_context(request)
 
     if request.method == 'POST':
@@ -89,6 +90,10 @@ def subarea_edit_view(request, subarea_id):
     context['form'] = form
     context['action_page'] = reverse('synopses:subarea_edit', args=[subarea_id])
     context['action_name'] = 'Aplicar alterações'
+    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea_id])},
+                          {'name': 'Editar', 'url': reverse('synopses:subarea_edit', args=[subarea_id])}]
     return render(request, 'synopses/generic_form.html', context)
 
 
@@ -132,6 +137,8 @@ def topic_create_view(request, subarea_id):
 
 def topic_edit_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
+    subarea = topic.subarea
+    area = subarea.area
     context = build_base_context(request)
 
     if request.method == 'POST':
@@ -146,6 +153,11 @@ def topic_edit_view(request, topic_id):
     context['form'] = form
     context['action_page'] = reverse('synopses:topic_edit', args=[topic_id])
     context['action_name'] = 'Aplicar alterações'
+    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
+                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
+                          {'name': 'Editar', 'url': reverse('synopses:topic_edit', args=[topic_id])}]
     return render(request, 'synopses/generic_form.html', context)
 
 
@@ -163,7 +175,7 @@ def topic_manage_view(request, topic_id):
     else:
         form = TopicForm(instance=topic)
 
-    context['title'] = 'Gerir tópico "%s"' % topic.name
+    context['title'] = 'Editar secções em "%s"' % topic.name
     context['form'] = form
     context['topic'] = topic
     context['subarea'] = subarea
@@ -171,6 +183,11 @@ def topic_manage_view(request, topic_id):
     context['topic'] = topic
     context['action_page'] = reverse('synopses:topic_manage', args=[topic_id])
     context['action_name'] = 'Aplicar alterações'
+    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
+                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
+                          {'name': 'Secções', 'url': reverse('synopses:topic_manage', args=[topic_id])}]
     return render(request, 'synopses/topic_management.html', context)
 
 
@@ -324,13 +341,38 @@ def section_edit_view(request, topic_id, section_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-def class_synopsis_section(request, class_id, section_id):
+def class_sections_view(request, class_id):
+    context = build_base_context(request)
+    class_ = get_object_or_404(Class, id=class_id)
+    context['title'] = "Sintese de %s" % class_.name
+    context['synopsis_class'] = class_
+    context['sections'] = Section.objects.filter(class_sections__corresponding_class=class_).order_by(
+        'class_sections__index')
+    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
+    return render(request, 'synopses/class_sections.html', context)
+
+
+def class_manage_view(request, class_id):
+    class_ = get_object_or_404(Class, id=class_id)
+    context = build_base_context(request)
+
+    context['title'] = "Editar secções na sintese de %s" % class_.name
+    context['synopsis_class'] = class_
+    context['action_name'] = 'Aplicar alterações'
+    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
+                          {'name': 'Secções', 'url': reverse('synopses:class_manage', args=[class_id])}]
+    return render(request, 'synopses/class_management.html', context)
+
+
+def class_section_view(request, class_id, section_id):
     class_ = get_object_or_404(Class, id=class_id)
     section = get_object_or_404(Section, id=section_id)
 
-    class_synopsis_section = ClassSection.objects.get(section=section, class_synopsis__corresponding_class=class_)
+    class_synopsis_section = ClassSection.objects.get(section=section, corresponding_class=class_)
     related_sections = ClassSection.objects \
-        .filter(class_synopsis__corresponding_class=class_).order_by('index')
+        .filter(corresponding_class=class_).order_by('index')
     previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
     next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
 
@@ -338,46 +380,15 @@ def class_synopsis_section(request, class_id, section_id):
     department = class_.department
     context['title'] = '%s (%s)' % (class_synopsis_section.section.name, class_.name)
     context['department'] = department
-    context['class_obj'] = class_
+    context['synopsis_class'] = class_
     context['section'] = class_synopsis_section.section
     context['previous_section'] = previous_section
     context['next_section'] = next_section
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department.name, 'url': reverse('department', args=[department.id])},
-                          {'name': class_.name, 'url': reverse('class', args=[class_id])},
-                          {'name': 'Resumo', 'url': 'TODO'}]
+    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
+                          {'name': section.name, 'url': reverse('synopses:class_section', args=[class_id, section_id])}]
     return render(request, 'synopses/class_section.html', context)
 
-
-def class_sections_view(request, class_id):
-    context = build_base_context(request)
-    classs = get_object_or_404(Class, id=class_id)
-    context['title'] = "Sintese de %s" % classs.name
-    context['synopsis_class'] = classs
-    context['sections'] = Section.objects.filter(class_sections__corresponding_class=classs).order_by('class_sections__index')
-    return render(request, 'synopses/class_sections.html', context)
-
-
-def class_manage_view(request, class_id):
-    classs = get_object_or_404(Class, id=class_id)
-    context = build_base_context(request)
-
-    if request.method == 'POST':
-        form = TopicForm(data=request.POST)
-        if form.is_valid():
-            print(form.cleaned_data)  # TODO
-            return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
-    else:
-        form = TopicForm(instance=classs)
-
-    context['title'] = "Sintese de %s" % classs.name
-    context['form'] = form
-    context['synopsis_class'] = classs
-    context['action_name'] = 'Aplicar alterações'
-    return render(request, 'synopses/topic_management.html', context)
-
-def class_section_view(request):
-    pass
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
@@ -407,5 +418,5 @@ class SectionAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Section.objects.all()
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__contains=self.q)
         return qs
