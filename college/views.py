@@ -37,7 +37,7 @@ def transportation(request):
 def departments(request):
     context = build_base_context(request)
     context['title'] = "Departamentos"
-    context['departments'] = Department.objects.order_by('name').all()
+    context['departments'] = Department.objects.order_by('name').filter(extinguished=False).all()
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')}]
     return render(request, 'college/departments.html', context)
 

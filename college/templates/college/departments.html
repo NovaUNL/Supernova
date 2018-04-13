@@ -9,7 +9,7 @@
     <div class="flex-wrapper">
         {% for department in departments %}
             <a href="{% url 'department' department.id %}">
-                <div class="flex-grid-item" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
+                <div class="flex-grid-item" style="background-image: url({{ department.img_url }})">
                     <div class="flex-grid-item-top">
                         <span>{{ department.name }}</span>
                     </div>
