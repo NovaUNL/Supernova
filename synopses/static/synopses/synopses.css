@@ -76,3 +76,19 @@ h3 {
     font-size: 1.5em;
     float: right;
 }
+
+.class-synopsis {
+    display: inline-block;
+    margin: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 2px solid #AAA;
+    vertical-align: top;
+    box-shadow: 0 0 5px #777;
+    background: linear-gradient(to bottom, #ffffff 0%,#f1f1f1 52%, #ebebeb 52%,#f6f6f6 100%);
+}
+
+.class-synopsis a {
+    vertical-align: top;
+    color: #333;
+}
