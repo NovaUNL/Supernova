@@ -13,7 +13,11 @@ function showSubmenu(id) {
         let menu = document.getElementById(id);
         let container = menu.parentNode;
         menu.style.display = 'inline';
-        container.style.height = '110px';
+        if(window.innerWidth > 1200){
+            container.style.height = '110px';
+        }else{
+            container.style.height = '70px';
+        }
         container.style.borderBottom = '2px solid rgb(57, 130, 53)';
         console.log(kleep_opened_nav_stage);
         if (kleep_opened_nav_stage !== null) {

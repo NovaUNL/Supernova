@@ -371,7 +371,6 @@ footer img {
     width: 2%;
     font-size: 4em;
     margin: 10px 0;
-
     color: #ffffff;
 }
 
@@ -445,7 +444,7 @@ footer img {
         line-height: 50px;
         transition: background-color 0.5s;
         transform: skewx(0deg);
-        background: linear-gradient(to bottom, #c9de96 0%, #8ab66b 20%, #377533 100%);
+        background: linear-gradient(to bottom, #c9de96 0%, #779c5c 44%, #398235 100%);
     }
 
     #top_nav > ul > li > a {
@@ -461,6 +460,32 @@ footer img {
     #top_nav {
         padding: 0 2%;
         height: 50px;
+    }
+
+    #nav_stage {
+        padding: 0 2%;
+        font-weight: bold;
+        font-size: 1.0em;
+    }
+
+    #nav_stage > div .svg-inline--fa {
+        font-size: 2em;
+    }
+
+    #nav_stage a {
+        margin-right: 15px;
+        line-height: 30px;
+        margin-top: 5px;
+    }
+
+    #nav_stage_close_button {
+        width: 40px;
+        font-size: 3em;
+        margin: 5px 0;
+    }
+
+    .breadcrumb a:first-child {
+        padding-left: 20px;
     }
 
     #auth {
