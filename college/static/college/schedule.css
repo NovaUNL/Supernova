@@ -1,0 +1,66 @@
+.schedule {
+    height: 100%;
+    border: none;
+}
+
+.schedule td {
+    height: 100% !important;
+    min-width: 50px;
+    padding: 0;
+}
+
+.schedule tr:first-child {
+    background-color: #8b9e9d !important;
+    color: white;
+}
+
+.schedule th {
+    border: 2px solid #777;
+    border-right: 0;
+}
+
+.schedule th:first-child {
+    border-left: 0;
+}
+
+.schedule td:first-child {
+    width: 50px;
+    font-weight: bold;
+    background-color: #777;
+    color: white;
+    line-height: 15px;
+    text-align: right;
+    border-bottom: 2px solid #8b9e9d;
+
+}
+
+.schedule tr:nth-of-type(odd) {
+    background-color: #e1e1e1;
+}
+
+.turn {
+    /*display: flex;*/
+    justify-content: center;
+    flex-direction: column;
+    border: 1px solid #b0b0b0;
+    background-color: #53cc4c;
+    /*height: 100% !important;*/
+    text-align: center;
+}
+
+.turn > a {
+    padding: 2px;
+    color: black;
+}
+
+.end-time {
+    font-size: 0.7em;
+}
+
+.theoretical-turn {
+    background-color: #97d5ff;
+}
+
+.practical-turn {
+    background-color: #c2ffa4;
+}
