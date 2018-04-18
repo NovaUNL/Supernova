@@ -12,7 +12,7 @@
     <p>{{ subarea.description|safe }}</p>
     <h2>Tópicos:</h2>
     <ul id="content-list">
-        {% for topic in subarea.topics.all %}
+        {% for topic in subarea.topics.all|dictsort:"index" %}
             <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
                 ({{ topic.sections.count }} secções)
             </li>

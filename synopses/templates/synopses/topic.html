@@ -9,7 +9,7 @@
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ topic.name }}</h1>
     <h3>{{ subarea.name }}, {{ area.name }}</h3>
-    <ul id="topic-list">
+    <ul id="content-list">
         {% for section in sections %}
             <li><a href="{% url 'synopses:section' topic.id section.id %}">{{ section.name }}</a></li>
         {% endfor %}
