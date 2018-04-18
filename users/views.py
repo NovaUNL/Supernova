@@ -57,6 +57,11 @@ def profile_view(request, nickname):
     page_name = f"Perfil de {user.get_full_name()}"
     context['page'] = 'profile'
     context['title'] = page_name
+    if user.students.count() == 1:
+        context['student'] = user.students.first()
+    else:
+        pass  # TODO
+
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
     return render(request, 'users/profile.html', context)
 

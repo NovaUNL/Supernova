@@ -7,7 +7,7 @@ from users.models import User
 
 
 class Student(Model):
-    user = ForeignKey(User, null=True, on_delete=models.CASCADE)
+    user = ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='students')
     number = IntegerField(null=True, blank=True)
     abbreviation = TextField(null=True, blank=True)
     course = ForeignKey('Course', on_delete=models.PROTECT)
@@ -23,7 +23,9 @@ class Student(Model):
         unique_together = ('user', 'clip_student')
 
     def __str__(self):
-        return str(self.user)
+        if self.user:
+            return f'{self.number} - {self.abbreviation} ({self.user})'
+        return f'{self.number} - {self.abbreviation}'
 
 
 class Area(Model):
