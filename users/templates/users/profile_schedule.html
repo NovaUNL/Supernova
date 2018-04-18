@@ -24,7 +24,7 @@
                     {% for element in row.1 %}
 
                         {% if element %}
-                            <td class='turn {{ element.turn.turn.turn_type.name|lower }}-turn'
+                            <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
                                 rowspan="{{ element.rowspan }}">
                                 <a href="{% url 'class_instance' element.turn.turn.class_instance.id %}">
                                     {{ element.turn.turn.class_instance.parent.abbreviation }}<br>

@@ -57,10 +57,10 @@
     font-size: 0.7em;
 }
 
-.theoretical-turn {
+.turn-theoretical {
     background-color: #97d5ff;
 }
 
-.practical-turn {
-    background-color: #c2ffa4;
+.turn-practical {
+    background-color: #acff70;
 }

@@ -3,6 +3,7 @@
 {% load static %}
 {% block head %}
     {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
     <style>
         table {
             height: 100%;
@@ -93,8 +94,8 @@
                                 rowspan="{{ element.rowspan }}">
                                 {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
                                 {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
-                                <a href="{% url 'classroom' element.turn.classroom.id %}">
-                                    {{ element.turn.classroom.short_str }}</a>
+                                <a href="{% url 'classroom' element.turn.place.id %}">
+                                    {{ element.turn.place.short_str }}</a>
                             </td>
                         {% else %}
                             <td></td>
