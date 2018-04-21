@@ -12,12 +12,12 @@ with open(BASE_DIR + '/settings.json') as json_data:
     DATABASES = settings['DATABASES']
     PIWIK_DOMAIN_PATH = settings['PIWIK_DOMAIN_PATH']
     PIWIK_SITE_ID = settings['PIWIK_SITE_ID']
+    ALLOWED_HOSTS = settings['HOSTS']
 
 DEBUG = False
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-
-ALLOWED_HOSTS = ['kleep.claudiop.com', 'beta.kleep.claudiop.com', 'kleep.com']
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
 
 # Application definition
 INSTALLED_APPS = [
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'planet',
     'documents',
     'api',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -129,11 +130,11 @@ CKEDITOR_CONFIGS = {
                        'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
             {'name': 'links', 'items': ['Link', 'Unlink']},
             {'name': 'insert',
-             'items': ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Mathjax', 'CodeSnippet', 'Source']},
+             'items': ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Mathjax', 'CodeSnippet', 'Iframe']},
             '/',
             {'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
             {'name': 'colors', 'items': ['TextColor', 'BGColor']},
-            {'name': 'tools', 'items': ['ShowBlocks', 'Preview', 'Maximize']}
+            {'name': 'tools', 'items': ['ShowBlocks', 'Source', 'Preview', 'Maximize']}
         ],
         'toolbar': 'ToolbarConfig',
         'width': '100%',
@@ -175,3 +176,8 @@ AUTH_USER_MODEL = 'users.User'
 
 COLLEGE_YEAR = 2018  # TODO deduce me PS: 2018 = 2017/2018
 COLLEGE_PERIOD = 3  # TODO deduce me
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
+}
