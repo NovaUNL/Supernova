@@ -75,3 +75,21 @@
 #social > span .svg-inline--fa {
     font-size: 1.5em !important;
 }
+
+.settings .flex-wrapper .svg-inline--fa {
+    font-size: 2em;
+}
+
+.settings .flex-wrapper > div {
+    margin: 10px 20px 10px 20px;
+    flex-basis: 200px;
+}
+
+.settings input[type=submit] {
+    height: 50px;
+    background-color: #4dcc70;
+    border: solid 1px #999;
+    box-shadow: 0 0 3px #777;
+    font-weight: bold;
+    color: white;
+}

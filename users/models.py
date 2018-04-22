@@ -4,10 +4,10 @@ from django.db.models import Model, TextField, ForeignKey, DateField, IntegerFie
 
 
 class User(AbstractUser):
-    nickname = TextField(null=True, max_length=20)
-    birth_date = DateField(null=True)
+    nickname = TextField(null=True, max_length=20, verbose_name='Alcunha')
+    birth_date = DateField(null=True, verbose_name='Nascimento')
     last_activity = DateTimeField()
-    residence = TextField(max_length=50, null=True, blank=True)
+    residence = TextField(max_length=50, null=True, blank=True, verbose_name='Residência')
 
     HIDDEN = 1  # No profile at all
     LIMITED = 2  # Show limited information, only to users
@@ -31,7 +31,7 @@ class User(AbstractUser):
     GENDER_CHOICES = (
         (MALE, 'Homem'),
         (FEMALE, 'Mulher'),
-        (MULTIPLEGENDERS, 'Mixórdia')
+        (MULTIPLEGENDERS, 'É complicado')
     )
     gender = IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
 

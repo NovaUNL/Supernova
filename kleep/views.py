@@ -3,7 +3,7 @@ import psutil
 from django.core.cache import cache
 from django.shortcuts import render
 
-from kleep.forms import LoginForm
+from users.forms import LoginForm
 from kleep.models import Changelog, Catchphrase
 from kleep.settings import VERSION
 from news.models import NewsItem
@@ -22,7 +22,6 @@ def about(request):
     context = build_base_context(request)
     context['title'] = "Sobre"
     context['version'] = VERSION
-    print(VERSION)
     return render(request, 'kleep/about.html', context)
 
 

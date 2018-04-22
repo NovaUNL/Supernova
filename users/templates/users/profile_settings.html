@@ -1,78 +1,37 @@
 {% extends 'users/profile_base.html' %}
 
 {% load static %}
-{% block head %}
-    {{ block.super }}
-    <style>
-        .flex-wrapper > div {
-            margin: 10px 20px 10px 20px;
-            flex-basis: 200px;
-        }
 
-        .flex-wrapper .svg-inline--fa {
-            font-size: 2em;
-        }
-
-        input[type=submit] {
-            height: 50px;
-            background-color: #4dcc70;
-            border: solid 1px #999;
-            box-shadow: 0 0 3px #777;
-            font-weight: bold;
-            color: white;
-            float: right;
-        }
-    </style>
-{% endblock %}
 
 {% block content %}
     <h1><i class="fas fa-cogs"></i> Definições de {{ user }}</h1>
-    <div>
+    <div class="settings">
         <h2><i class="fas fa-user"></i> Informação pessoal</h2>
         <div class="flex-wrapper">
             <div style="flex-basis: 200px;">
-                <i class="fas fa-user-secret"></i> Alcunha: {{ settings_form.nickname }}
+                <i class="fas fa-user-secret"></i> {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
             </div>
             <div style="flex-basis: 200px;">
-                <i class="fas fa-home"></i> {{ settings_form.residency.label }} {{ settings_form.residency }}
+                <i class="fas fa-home"></i> {{ settings_form.residence.label }}: {{ settings_form.residence }}
             </div>
             <span class="flex-line-break"></span>
-            <div><i class="fas fa-mars"></i> {{ settings_form.gender.0 }} </div>
-            <div><i class="fas fa-venus"></i> {{ settings_form.gender.1 }} </div>
-            <div><i class="fas fa-wheelchair"></i> {{ settings_form.gender.2 }} </div>
-
-
+            <div><i class="fas fa-mars"></i> {{ settings_form.gender.1 }} </div>
+            <div><i class="fas fa-venus"></i> {{ settings_form.gender.2 }} </div>
+            <div><i class="fas fa-wheelchair"></i> {{ settings_form.gender.3 }} </div>
         </div>
         <h2><i class="fas fa-eye"></i> Visibilidade do perfil</h2>
-        <div> {{ settings_form.public_to_users.label }}{{ settings_form.public_to_users }}</div>
-        <div> {{ settings_form.public_to_outsiders.label }}{{ settings_form.public_to_outsiders }}</div>
-        <h2><i class="fas fa-globe"></i> Redes sociais</h2>
-        <div class="flex-wrapper">
-            <div><i class="fab fa-gitlab"></i> {{ settings_form.gitlab.label }}{{ settings_form.gitlab }}</div>
-            <div><i class="fab fa-github"></i> {{ settings_form.github.label }}{{ settings_form.github }}</div>
-            <div><i class="fab fa-reddit"></i> {{ settings_form.reddit.label }}{{ settings_form.reddit }}</div>
-            <div><i class="fab fa-discord"></i> {{ settings_form.discord.label }}{{ settings_form.discord }}</div>
-            <div><i class="fab fa-linkedin"></i> {{ settings_form.linkedin.label }}{{ settings_form.linkedin }}</div>
-            <div><i class="fab fa-twitter"></i> {{ settings_form.twitter.label }}{{ settings_form.twitter }}</div>
-            <div><i class="fab fa-google-plus"></i> {{ settings_form.google_plus.label }}{{ settings_form.google_plus }}
-            </div>
-            <div><i class="fab fa-facebook"></i> {{ settings_form.facebook.label }}{{ settings_form.facebook }}</div>
-            <div><i class="fab fa-vimeo-v"></i> {{ settings_form.vimeo.label }}{{ settings_form.vimeo }}</div>
-            <div><i class="fab fa-youtube"></i> {{ settings_form.youtube.label }}{{ settings_form.youtube }}</div>
-            <div><i class="fab fa-deviantart"></i> {{ settings_form.deviantart.label }}{{ settings_form.deviantart }}
-            </div>
-            <div><i class="fab fa-instagram"></i> {{ settings_form.instagram.label }}{{ settings_form.instagram }}</div>
-            <div><i class="fab fa-flickr"></i> {{ settings_form.flickr.label }}{{ settings_form.flickr }}</div>
-        </div>
-
-        <h2><i class="fas fa-key"></i> Autenticação</h2>
-        <div class="flex-wrapper">
-            <div> {{ settings_form.new_password.label }}{{ settings_form.new_password }}</div>
-            <div> {{ settings_form.new_password_confirmation.label }}{{ settings_form.new_password_confirmation }}</div>
-        </div>
+        <div> Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>
+        <p>
+            <b style="font-size: 1.2em">Significados:</b><br>
+            Um perfil <b>oculto</b> é invisível para toda a gente.<br>
+            Um perfil <b>limitado</b> mostra alguma informação a outros utilizadores.<br>
+            Um perfil para <b>utilizadores</b> mostra tudo o que fizeres a outros utilizadores.<br>
+            Um perfil <b>misto</b> permite aos utilizadores ver tudo, e aos visitantes ver alguma informação.<br>
+            Um perfil <b>público</b> permite a toda a gente, visitantes e utilizadores, ver tudo o que fizeres.
+        </p>
         <h2><i class="fas fa-check"></i> Aplicar</h2>
-        <div class="flex-wrapper">
-            <div> {{ settings_form.password.label }}{{ settings_form.password }}</div>
+        <div class="flex-wrapper" style="justify-content: space-between">
+            <span>{{ settings_form.password.label }}: {{ settings_form.password }}</span>
             <input type="submit" value="Aplicar alterações">
         </div>
     </div>

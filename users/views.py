@@ -3,11 +3,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from kleep.forms import AccountSettingsForm, ClipLoginForm, LoginForm, AccountCreationForm
+from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, AccountCreationForm, PasswordChangeForm
 from kleep.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
-from users.models import User
+from users.models import User, SocialNetworkAccount
 
 
 def login_view(request):
@@ -72,8 +72,8 @@ def user_schedule_view(request, nickname):
     context = build_base_context(request)
     user = get_object_or_404(User, id=request.user.id)
 
-    if user.student_set.exists():
-        student = user.student_set.first()  # FIXME
+    if user.students.exists():
+        student = user.students.first()  # FIXME
     else:
         return HttpResponseRedirect(reverse('profile', args=[nickname]))
     context['page'] = 'profile_schedule'
@@ -90,10 +90,6 @@ def user_profile_settings_view(request, nickname):
         return HttpResponseRedirect(reverse('index'))
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
-    context['page'] = 'profile_settings'
-    context['title'] = "Definições da conta"
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Definições", 'url': reverse('profile_settings', args=[nickname])}]
     if request.method == 'POST':
         form = AccountSettingsForm(data=request.POST)
         if form.is_valid():
@@ -104,7 +100,56 @@ def user_profile_settings_view(request, nickname):
     else:
         context['settings_form'] = AccountSettingsForm()
 
+    context['page'] = 'profile_settings'
+    context['title'] = "Definições da conta"
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
+                          {'name': "Dados pessoais", 'url': reverse('profile_settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)
+
+
+def user_profile_social_view(request, nickname):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+    context = build_base_context(request)
+    user = User.objects.get(id=request.user.id)
+    if request.method == 'POST':
+        form = PasswordChangeForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            context['password_change_form'] = form
+    else:
+        context['password_change_form'] = PasswordChangeForm()
+
+    context['page'] = 'profile_social'
+    context['title'] = "Definições da conta"
+    context['social_networks'] = SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
+                          {'name': "Redes sociais", 'url': reverse('profile_social', args=[nickname])}]
+    return render(request, 'users/profile_social_networks.html', context)
+
+
+def user_profile_password_view(request, nickname):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+    context = build_base_context(request)
+    user = User.objects.get(id=request.user.id)
+    if request.method == 'POST':
+        form = PasswordChangeForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return HttpResponseRedirect(reverse('index'))
+        else:
+            context['password_change_form'] = form
+    else:
+        context['password_change_form'] = PasswordChangeForm()
+
+    context['page'] = 'profile_password'
+    context['title'] = "Definições da conta"
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
+                          {'name': "Alterar palavra passe", 'url': reverse('profile_password', args=[nickname])}]
+    return render(request, 'users/profile_password_change.html', context)
 
 
 def user_clip_crawler_view(request, nickname):
