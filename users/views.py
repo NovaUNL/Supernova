@@ -67,8 +67,6 @@ def profile_view(request, nickname):
 
 
 def user_schedule_view(request, nickname):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('index'))
     context = build_base_context(request)
     user = get_object_or_404(User, id=request.user.id)
 
@@ -87,7 +85,8 @@ def user_schedule_view(request, nickname):
 
 def user_profile_settings_view(request, nickname):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('login'))
+
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -109,7 +108,8 @@ def user_profile_settings_view(request, nickname):
 
 def user_profile_social_view(request, nickname):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('login'))
+
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -132,7 +132,8 @@ def user_profile_social_view(request, nickname):
 
 def user_profile_password_view(request, nickname):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('login'))
+
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -154,14 +155,14 @@ def user_profile_password_view(request, nickname):
 
 def user_clip_crawler_view(request, nickname):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('login'))
+
+    user = User.objects.get(id=request.user.id)
     context = build_base_context(request)
-    profile = request.user.profile
     context['page'] = 'profile_crawler'
     context['title'] = "Definições da conta"
-    context['sub_nav'] = [{'name': "Perfil de " + profile.name, 'url': reverse('profile', args=[nickname])},
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Agregar CLIP", 'url': reverse('profile_crawler', args=[nickname])}]
-    context['profile'] = profile
     if request.method == 'POST':
         pass
     context['clip_login_form'] = ClipLoginForm()

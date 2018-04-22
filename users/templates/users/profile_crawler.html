@@ -50,7 +50,7 @@
             <li>Desligamento de sessão do CLIP.</li>
         </ul>
         Caso queiras manter informações como o teu nascimento ou localidade privados terás de posteriormente ir ás
-        <a href="{% url 'profile_settings' user %}">definições da tua conta</a> e alterar a
+        <a href="{% url 'profile_settings' user.nickname %}">definições da tua conta</a> e alterar a
         visibilidade ou apagar o valor do campo.<br>Eventualmente será adicionada a opção de ser efetuada uma agregação
         parcial
         ignorando o que não for solicitado.
@@ -67,7 +67,7 @@
             <br>
             Os novos dados deverão de aparecer no Kleep a partir do momento em que tenham sido obtidos.
         </p>
-        <form action="../../../kleep/templates/kleep/profile">
+        <form action="{% url 'profile_crawler' user.nickname %}">
             {{ clip_login_form }}
             <input type="button" value="Agregar">
         </form>
