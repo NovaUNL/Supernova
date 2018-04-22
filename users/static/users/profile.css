@@ -1,3 +1,20 @@
+/* TODO make these default globally and set margin to initial where default needed */
+h1 {
+    margin: 10px 0;
+}
+
+h2 {
+    margin: 8px 0;
+}
+
+h3 {
+    margin: 5px 0;
+}
+
+.flex-box {
+    margin-top: 0;
+}
+
 .archievement {
     display: inline-block;
     padding: 6px 10px;
@@ -81,8 +98,9 @@
 }
 
 .settings .flex-wrapper > div {
-    margin: 10px 20px 10px 20px;
+    margin: 10px 20px 10px 0;
     flex-basis: 200px;
+    line-height: 30px;
 }
 
 .settings input[type=submit] {
