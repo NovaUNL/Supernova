@@ -2,37 +2,50 @@
 
 {% load static %}
 
-
 {% block content %}
     <h1><i class="fas fa-cogs"></i> Definições de {{ user }}</h1>
     <div class="settings">
-        <h2><i class="fas fa-user"></i> Informação pessoal</h2>
-        <div class="flex-wrapper">
-            <div style="flex-basis: 200px;">
-                <i class="fas fa-user-secret"></i> {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
+        <form action="{% url 'profile_settings' user.nickname %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2><i class="fas fa-user"></i> Informação pessoal</h2>
+            {{ settings_form.errors }}
+            <div class="flex-wrapper">
+                <div style="flex-basis: 200px;">
+                    <i class="far fa-image"></i> {{ settings_form.picture.label }}<br>
+                    {% if user.picture %}
+                        <img src="{% get_media_prefix %}{{ user.picture }}" style="max-width: 150px; max-height: 150px;"><br>
+                    {% endif %}
+                        {{ settings_form.picture }}
+                </div>
+                <div style="flex-basis: 200px;">
+                    <i class="fas fa-user-secret"></i> {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
+                </div>
+                <div style="flex-basis: 200px;">
+                    <i class="fas fa-home"></i> {{ settings_form.residence.label }}: {{ settings_form.residence }}
+                </div>
+                <div style="flex-basis: 250px;">
+                    <i class="fas fa-home"></i> {{ settings_form.birth_date.label }}:<br>{{ settings_form.birth_date }}
+                </div>
+                <span class="flex-line-break"></span>
+                <div><i class="fas fa-mars"></i> {{ settings_form.gender.1 }} </div>
+                <div><i class="fas fa-venus"></i> {{ settings_form.gender.2 }} </div>
+                <div><i class="fas fa-wheelchair"></i> {{ settings_form.gender.3 }} </div>
             </div>
-            <div style="flex-basis: 200px;">
-                <i class="fas fa-home"></i> {{ settings_form.residence.label }}: {{ settings_form.residence }}
+            <h2><i class="fas fa-eye"></i> Visibilidade do perfil</h2>
+            <div> Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>
+            <p>
+                <b style="font-size: 1.2em">Significados:</b><br>
+                Um perfil <b>oculto</b> é invisível para toda a gente.<br>
+                Um perfil <b>limitado</b> mostra alguma informação a outros utilizadores.<br>
+                Um perfil para <b>utilizadores</b> mostra tudo o que fizeres a outros utilizadores.<br>
+                Um perfil <b>misto</b> permite aos utilizadores ver tudo, e aos visitantes ver alguma informação.<br>
+                Um perfil <b>público</b> permite a toda a gente, visitantes e utilizadores, ver tudo o que fizeres.
+            </p>
+            <h2><i class="fas fa-check"></i> Aplicar</h2>
+            <div class="flex-wrapper" style="justify-content: space-between">
+                <span>{{ settings_form.password.label }}: {{ settings_form.password }}</span>
+                <input type="submit" value="Aplicar alterações">
             </div>
-            <span class="flex-line-break"></span>
-            <div><i class="fas fa-mars"></i> {{ settings_form.gender.1 }} </div>
-            <div><i class="fas fa-venus"></i> {{ settings_form.gender.2 }} </div>
-            <div><i class="fas fa-wheelchair"></i> {{ settings_form.gender.3 }} </div>
-        </div>
-        <h2><i class="fas fa-eye"></i> Visibilidade do perfil</h2>
-        <div> Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>
-        <p>
-            <b style="font-size: 1.2em">Significados:</b><br>
-            Um perfil <b>oculto</b> é invisível para toda a gente.<br>
-            Um perfil <b>limitado</b> mostra alguma informação a outros utilizadores.<br>
-            Um perfil para <b>utilizadores</b> mostra tudo o que fizeres a outros utilizadores.<br>
-            Um perfil <b>misto</b> permite aos utilizadores ver tudo, e aos visitantes ver alguma informação.<br>
-            Um perfil <b>público</b> permite a toda a gente, visitantes e utilizadores, ver tudo o que fizeres.
-        </p>
-        <h2><i class="fas fa-check"></i> Aplicar</h2>
-        <div class="flex-wrapper" style="justify-content: space-between">
-            <span>{{ settings_form.password.label }}: {{ settings_form.password }}</span>
-            <input type="submit" value="Aplicar alterações">
-        </div>
+        </form>
     </div>
 {% endblock %}

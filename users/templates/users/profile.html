@@ -5,6 +5,12 @@
 {% block content %}
     <h1><i class="fas fa-user-circle"></i> {{ user.get_full_name }}</h1>
     <div class="flex-wrapper">
+        {% if user.picture %}
+            <div class="flex-box">
+                <h2><i class="fas fa-image"></i> Foto</h2>
+                <img src="{% get_media_prefix %}{{ user.picture }}" style="max-width: 300px; max-height: 150px;"><br>
+            </div>
+        {% endif %}
         <div class="flex-box">
             <h2><i class="fas fa-id-card"></i> Sobre</h2>
             <b>CLIP ID: </b>{{ student.abbreviation }}<br>

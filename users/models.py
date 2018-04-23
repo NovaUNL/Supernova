@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Model, TextField, ForeignKey, DateField, IntegerField, DateTimeField, ManyToManyField
+from django.db.models import Model, TextField, ForeignKey, DateField, IntegerField, DateTimeField, ManyToManyField, \
+    ImageField
+
+
+def user_directory_path(instance, filename):
+    return f'u/{instance.user.id}/{instance.user}'
 
 
 class User(AbstractUser):
@@ -8,6 +13,7 @@ class User(AbstractUser):
     birth_date = DateField(null=True, verbose_name='Nascimento')
     last_activity = DateTimeField()
     residence = TextField(max_length=50, null=True, blank=True, verbose_name='Residência')
+    picture = ImageField(upload_to=user_directory_path, null=True, blank=True, verbose_name='Foto')
 
     HIDDEN = 1  # No profile at all
     LIMITED = 2  # Show limited information, only to users

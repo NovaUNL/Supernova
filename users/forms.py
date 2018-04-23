@@ -81,11 +81,12 @@ class AccountSettingsForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('nickname', 'birth_date', 'residence', 'profile_visibility', 'gender')
+        fields = ('nickname', 'birth_date', 'residence', 'profile_visibility', 'gender', 'picture')
         widgets = {
             'nickname': forms.TextInput(),
             'residence': forms.TextInput(),
-            'gender': forms.RadioSelect()
+            'gender': forms.RadioSelect(),
+            'birth_date': forms.SelectDateWidget(years=range(1950, 2000))
         }
 
     def clean_password(self):
