@@ -2,6 +2,10 @@
 
 {% load static %}
 
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+{% endblock %}
+
 {% block navigation %}
     <a class="menu_entry" href="../">Resumo</a>
     {% if page == 'instance_turns' %}

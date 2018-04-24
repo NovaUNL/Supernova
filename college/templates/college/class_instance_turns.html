@@ -3,7 +3,8 @@
 {% load static %}
 
 {% block head %}
-    {{ super.block }}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
     <style>
         .flex-wrapper {
             align-items: start;
@@ -16,19 +17,12 @@
             vertical-align: top;
             flex-basis: 320px;
             box-shadow: 0 0 5px #777;
+            text-align: left;
         }
 
         .turn a {
             vertical-align: top;
             color: #333;
-        }
-
-        .turn-theoretical {
-            background-color: #97d5ff;
-        }
-
-        .turn-practical {
-            background-color: #acff70;
         }
     </style>
 {% endblock %}
@@ -45,8 +39,8 @@
                 <div style="display: inline-block;">
                     {% for instance in turn.turninstance_set.all %}
                         <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
-                        <a style="border-bottom: 1px solid black" href="{% url 'classroom' instance.classroom.id %}">
-                            {{ instance.classroom }}
+                        <a style="border-bottom: 1px solid black" href="{% url 'classroom' instance.place.id %}">
+                            {{ instance.place }}
                         </a><br>
                     {% endfor %}
                 </div>
