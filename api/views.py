@@ -13,6 +13,7 @@ from store import models as store
 from services import models as services
 from users import models as users
 from synopses import models as synopses
+from users.utils import get_network_identifier
 
 
 class BuildingList(APIView):
@@ -207,3 +208,43 @@ class ProfileDetailed(APIView):
         user = users.User.objects.get(nickname=nickname)
         serializer = serializers.users.ProfileDetailedSerializer(user)
         return Response(serializer.data)
+
+
+class UserSocialNetworks(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, nickname, format=None):  # TODO restrict to privacy level
+        user = users.User.objects.get(nickname=nickname)
+        serializer = serializers.users.SocialNetworksSerializer(user.social_networks, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, nickname, format=None):  # TODO restrict to owner
+        user = users.User.objects.get(nickname=nickname)
+        if 'profile' not in request.data or 'network' not in request.data:
+            raise Exception()  # TODO proper django exception
+        try:
+            network = int(request.data['network'])
+        except TypeError:
+            raise Exception()  # TODO proper django exception
+        if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
+            raise Exception()  # TODO proper django exception
+        profile = get_network_identifier(network, request.data['profile'])
+        if users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
+            raise Exception()  # TODO proper django exception
+
+        users.SocialNetworkAccount(user=user, network=network, profile=profile).save()
+        return Response({'profile': profile, 'network': network})
+
+    def delete(self, request, nickname, format=None):
+        user = users.User.objects.get(nickname=nickname)
+        if 'profile' not in request.data or 'network' not in request.data:
+            raise Exception()  # TODO proper django exception
+        network = request.data['network']
+        if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
+            raise Exception()  # TODO proper django exception
+        profile = get_network_identifier(request.data['network'], request.data['profile'])
+        if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).count() == 1:
+            raise Exception()  # TODO proper django exception
+        users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).delete()
+        return Response("SUCCESS")  # TODO Proper way to do this?

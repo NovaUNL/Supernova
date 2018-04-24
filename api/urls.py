@@ -4,6 +4,7 @@ from api import views
 
 urlpatterns = [
     path('profile/<str:nickname>/', views.ProfileDetailed.as_view()),
+    path('profile/<str:nickname>/socialnetworks/', views.UserSocialNetworks.as_view(), name='social_networks'),
     path('buildings/', views.BuildingList.as_view()),
     path('building/<int:pk>/', views.BuildingDetailed.as_view()),
     path('bars/', views.BarList.as_view()),
