@@ -52,7 +52,7 @@
                 <div style="margin-left: 10px;">
                     <ul>
                         <span>Departamentos:</span>
-                        {% for department in building.department_set.all %}
+                        {% for department in building.departments.all %}
                             <li>
                                 <a href="{% url 'department' department.id %}">{{ department.name }}</a>
                             </li>

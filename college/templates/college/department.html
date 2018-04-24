@@ -18,7 +18,7 @@
         <div style="margin-right: 50px">
             <h2>Cadeiras</h2>
             <ul>
-                {% for class in department.class_set.all|dictsort:'name' %}
+                {% for class in department.classes.all|dictsort:'name' %}
                     <li><a href="{% url 'class' class.id %}">{{ class.name }}</a></li>
                 {% endfor %}
             </ul>

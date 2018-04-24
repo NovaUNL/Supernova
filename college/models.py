@@ -10,7 +10,7 @@ class Student(Model):
     user = ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='students')
     number = IntegerField(null=True, blank=True)
     abbreviation = TextField(null=True, blank=True)
-    course = ForeignKey('Course', on_delete=models.PROTECT)
+    course = ForeignKey('Course', on_delete=models.PROTECT, related_name='students')
     turns = ManyToManyField('Turn', through='TurnStudents')
     class_instances = ManyToManyField('ClassInstance', through='Enrollment')
     first_year = IntegerField(null=True, blank=True)
@@ -55,7 +55,7 @@ class Building(Model):
 
 class Place(Model):
     name = TextField(max_length=100)
-    building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT)
+    building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT, related_name='places')
     floor = IntegerField(default=0)
     unlocked = NullBooleanField(null=True, default=None)
     # Related name *REALLY* needs to be 'place', otherwise manage.py mergeclip adds duplicates
@@ -112,7 +112,7 @@ class BuildingUsage(Model):  # TODO deprecate this model
 class Department(Model):
     name = TextField(max_length=100)
     description = TextField(max_length=4096, null=True, blank=True)
-    building = ForeignKey(Building, on_delete=models.PROTECT, null=True, blank=True)
+    building = ForeignKey(Building, on_delete=models.PROTECT, null=True, blank=True, related_name='departments')
     clip_department = OneToOneField(clip.Department, on_delete=models.PROTECT)
     img_url = TextField(null=True, blank=True)
     extinguished = BooleanField(default=True)
@@ -131,10 +131,10 @@ class Course(Model):
     abbreviation = TextField(max_length=100, null=True, blank=True)
     active = BooleanField(default=True)
     clip_course = OneToOneField(clip.Course, on_delete=models.PROTECT)
-    department = ForeignKey('Department', on_delete=models.PROTECT)
+    department = ForeignKey('Department', on_delete=models.PROTECT, related_name='courses')
     areas = ManyToManyField(Area, through='CourseArea')
     url = TextField(max_length=256, null=True, blank=True)
-    curriculum = ManyToManyField('Class', through='Curriculum')
+    curriculum_classes = ManyToManyField('Class', through='Curriculum')
     extinguished = BooleanField(default=False)
 
     class Meta:
@@ -157,7 +157,7 @@ class Class(Model):
     abbreviation = TextField(max_length=10, default='---')
     description = TextField(max_length=1024, null=True, blank=True)
     credits = IntegerField(null=True, blank=True)  # 2 credits = 1 ECTS
-    department = ForeignKey(Department, on_delete=models.PROTECT, null=True)
+    department = ForeignKey(Department, on_delete=models.PROTECT, null=True, related_name='classes')
     clip_class = OneToOneField(clip.Class, on_delete=models.PROTECT, related_name='related_class')
     courses = ManyToManyField(Course, through='Curriculum')
     extinguished = BooleanField(default=False)
@@ -171,7 +171,7 @@ class Class(Model):
 
 
 class Curriculum(Model):
-    course = ForeignKey(Course, on_delete=models.CASCADE, related_name='course')
+    course = ForeignKey(Course, on_delete=models.CASCADE)
     corresponding_class = ForeignKey(Class, on_delete=models.PROTECT)  # Guess I can't simply call it 'class'
     period_type = CharField(max_length=1, null=True, blank=True)  # 's' => semester, 't' => trimester, 'a' => anual
     period = IntegerField(null=True, blank=True)
@@ -184,7 +184,7 @@ class Curriculum(Model):
 
 
 class ClassInstance(Model):
-    parent = ForeignKey(Class, on_delete=models.PROTECT)
+    parent = ForeignKey(Class, on_delete=models.PROTECT, related_name='instances')
     period = ForeignKey(clip.Period, on_delete=models.PROTECT)
     year = IntegerField()
     clip_class_instance = OneToOneField(clip.ClassInstance, on_delete=models.PROTECT, related_name='class_instance')
@@ -201,8 +201,8 @@ class ClassInstance(Model):
 
 
 class Enrollment(Model):
-    student = ForeignKey(Student, on_delete=models.CASCADE)
-    class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE)
+    student = ForeignKey(Student, on_delete=models.CASCADE, related_name='enrollments')
+    class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE, related_name='enrollments')
     # u => unknown, r => reproved, n => approved@normal, e => approved@exam, s => approved@special
     result = CharField(default='u', max_length=1)
     grade = FloatField(null=True, blank=True)
@@ -213,7 +213,7 @@ class Enrollment(Model):
 
 
 class Turn(Model):
-    class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE)  # Eg: Analysis
+    class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE, related_name='turns')  # Eg: Analysis
     turn_type = ForeignKey(clip.TurnType, on_delete=models.PROTECT)  # Theoretical
     number = IntegerField()  # 1
     clip_turn = OneToOneField(clip.Turn, on_delete=models.PROTECT, related_name='turn')
@@ -239,7 +239,7 @@ class TurnStudents(Model):
 
 
 class TurnInstance(Model):
-    turn = ForeignKey(Turn, on_delete=models.PROTECT)  # Eg: Theoretical 1
+    turn = ForeignKey(Turn, on_delete=models.PROTECT, related_name='instances')  # Eg: Theoretical 1
     # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
     clip_turn_instance = OneToOneField(clip.TurnInstance, on_delete=models.PROTECT, related_name='turn_instance')
     recurring = BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
@@ -248,7 +248,7 @@ class TurnInstance(Model):
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
-    place = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True)
+    place = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True, related_name='turn_instances')
 
     class Meta:
         ordering = ['weekday', 'start']
