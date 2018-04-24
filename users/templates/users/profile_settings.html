@@ -10,13 +10,15 @@
             <h2><i class="fas fa-user"></i> Informação pessoal</h2>
             {{ settings_form.errors }}
             <div class="flex-wrapper">
-                <div style="flex-basis: 200px;">
+                <div style="flex-basis: 500px;">
                     <i class="far fa-image"></i> {{ settings_form.picture.label }}<br>
                     {% if user.picture %}
-                        <img src="{% get_media_prefix %}{{ user.picture }}" style="max-width: 150px; max-height: 150px;"><br>
+                        <img src="{% get_media_prefix %}{{ user.picture }}"
+                             style="max-width: 500px; max-height: 300px;"><br>
                     {% endif %}
-                        {{ settings_form.picture }}
+                    {{ settings_form.picture }}
                 </div>
+                <span class="flex-line-break"></span>
                 <div style="flex-basis: 200px;">
                     <i class="fas fa-user-secret"></i> {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
                 </div>
@@ -30,6 +32,7 @@
                 <div><i class="fas fa-mars"></i> {{ settings_form.gender.1 }} </div>
                 <div><i class="fas fa-venus"></i> {{ settings_form.gender.2 }} </div>
                 <div><i class="fas fa-wheelchair"></i> {{ settings_form.gender.3 }} </div>
+
             </div>
             <h2><i class="fas fa-eye"></i> Visibilidade do perfil</h2>
             <div> Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>

@@ -25,14 +25,14 @@ const NETWORK_URLS = [
 ];
 
 
-function populateSocialNetworks(url) {
+function populateSocialNetworks(url, edit = false) {
     fetch(url, {
         credentials: 'include'
     }).then(function (response) {
         return response.json();
     }).then(function (socialNetworks) {
         for (account of socialNetworks) {
-            addNetworkToList(account, document.getElementById("social-network-list"));
+            addNetworkToList(account, document.getElementById("social-network-list"), edit);
         }
     });
 }
@@ -60,7 +60,7 @@ function addNetwork() {
         });
 }
 
-function addNetworkToList(account, listElement) {
+function addNetworkToList(account, listElement, editable = false) {
     let line = document.createElement("li");
     let icon = document.createElement("i");
     if (account.network <= NETWORK_TO_FA.length) {
@@ -78,17 +78,18 @@ function addNetworkToList(account, listElement) {
     }
     link.text = " " + account.profile + " ";
     line.appendChild(link);
-    let delIconAnchor = document.createElement("span");
-    let delIcon = document.createElement("i");
-    delIconAnchor.classList.add('delete-icon');
-    delIcon.classList.add("fas", "fa-times");
-    delIconAnchor.appendChild(delIcon);
-    line.appendChild(delIconAnchor);
+    if (editable) {
+        let delIconAnchor = document.createElement("span");
+        let delIcon = document.createElement("i");
+        delIconAnchor.classList.add('delete-icon');
+        delIcon.classList.add("fas", "fa-times");
+        delIconAnchor.appendChild(delIcon);
+        line.appendChild(delIconAnchor);
+        delIconAnchor.onclick = function () {
+            deleteNetwork(account, this.parentNode);
+        };
+    }
     listElement.appendChild(line);
-
-    delIconAnchor.onclick = function () {
-        deleteNetwork(account, this.parentNode);
-    };
 }
 
 function deleteNetwork(account, listElement) {

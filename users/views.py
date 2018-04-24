@@ -90,14 +90,14 @@ def user_profile_settings_view(request, nickname):
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
-        form = AccountSettingsForm(data=request.POST)
+        form = AccountSettingsForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
-            login(request, form.get_user())
-            return HttpResponseRedirect(reverse('index'))
+            form.save()
+            return HttpResponseRedirect(reverse('profile', args=[nickname]))
         else:
             context['settings_form'] = form
     else:
-        context['settings_form'] = AccountSettingsForm()
+        context['settings_form'] = AccountSettingsForm(instance=user)
 
     context['page'] = 'profile_settings'
     context['title'] = "Definições da conta"

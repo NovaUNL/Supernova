@@ -85,12 +85,14 @@ h3 {
     font-weight: bold;
 }
 
-#social > span {
+#social-network-list {
     font-size: 1.2em;
+    list-style: none;
+    padding-left: 10px;
 }
 
-#social > span .svg-inline--fa {
-    font-size: 1.5em !important;
+#social-network-list .svg-inline--fa {
+    font-size: 1.2em;
 }
 
 .settings .flex-wrapper .svg-inline--fa {
@@ -115,7 +117,7 @@ h3 {
 .delete-icon{
     color: red;
     display: inline-block;
-    background: lightgrey;
+    background: #d9d9d9;
     padding: 0 5px;
     border-radius: 5px;
 }
