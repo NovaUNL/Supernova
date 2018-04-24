@@ -111,3 +111,16 @@ h3 {
     font-weight: bold;
     color: white;
 }
+
+.delete-icon{
+    color: red;
+    display: inline-block;
+    background: lightgrey;
+    padding: 0 5px;
+    border-radius: 5px;
+}
+
+.delete-icon:hover{
+    color: white;
+    background: red;
+}

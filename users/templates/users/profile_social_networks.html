@@ -2,17 +2,29 @@
 
 {% load static %}
 
+{% block head %}
+    {{ head.super }}
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'users/socialNetworks.js' %}"></script>
+{% endblock %}
+
 {% block content %}
+    {% csrf_token %}
     <h1><i class="fas fa-globe"></i> Redes sociais de {{ user }}</h1>
     <div class="settings">
-        <h2>Por fazer</h2>
-        <select>
+        <ul id="social-network-list" style="font-size: 1.2em">
+        </ul>
+        <select id="network">
             {% for network in social_networks %}
                 <option value="{{ network.0 }}" selected="">{{ network.1 }}</option>
             {% endfor %}
         </select>
-        <input type="text" placeholder="Link para perfil">
-        <input type="button" value="Adicionar">
-        <input type="submit" value="Aplicar alterações" style="float: right;">
+        <input id="network-link" type="text" placeholder="Perfil">
+        <input type="button" value="Adicionar" onclick="addNetwork()">
     </div>
+    <script>
+        let apiURL = "{% url 'social_networks' user.nickname %}";
+        populateSocialNetworks(apiURL);
+    </script>
+    <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
 {% endblock %}
