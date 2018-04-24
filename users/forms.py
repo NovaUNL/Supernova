@@ -81,11 +81,13 @@ class AccountSettingsForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('nickname', 'birth_date', 'residence', 'profile_visibility', 'gender', 'picture')
+        fields = ('nickname', 'birth_date', 'residence', 'profile_visibility', 'gender', 'picture', 'webpage')
         widgets = {
             'nickname': forms.TextInput(),
             'residence': forms.TextInput(),
+            'webpage': forms.TextInput(),
             'gender': forms.RadioSelect(),
+            'picture': forms.FileInput(),
             'birth_date': forms.SelectDateWidget(years=range(1950, 2000))
         }
 

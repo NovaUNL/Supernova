@@ -14,6 +14,7 @@ class User(AbstractUser):
     last_activity = DateTimeField()
     residence = TextField(max_length=50, null=True, blank=True, verbose_name='Residência')
     picture = ImageField(upload_to=user_directory_path, null=True, blank=True, verbose_name='Foto')
+    webpage = TextField(max_length=200, null=True, blank=True, verbose_name='Página pessoal')
 
     HIDDEN = 0  # No profile at all
     LIMITED = 1  # Show limited information, only to users

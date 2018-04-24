@@ -23,7 +23,7 @@
             <b>Curso: </b>{{ student.course.compact }}<br>
             <b>Residência:</b> {{ user.residence }}<br>
             <b>Ultima atividade:</b> 5 horas atrás<br>
-            <b>Página:</b> <a href="https://claudiop.com">https://claudiop.com</a><br>
+            <b>Página:</b> <a href="{{ user.webpage }}">{{ user.webpage }}</a><br>
         </div>
         <div id="social" class="flex-box">
             <h2><i class="fas fa-globe"></i> Social</h2>
