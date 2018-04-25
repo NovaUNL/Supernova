@@ -11,7 +11,7 @@
             {% if not type_filter or group.type.name == type_filter %}
                 <a href="{% url 'group' group.id %}">
                     <div class="flex-grid-item"
-                         style="background-image: url({% static 'kleep/images/placeholder.png' %})">
+                         style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
                         <div class="flex-grid-item-top">
                             {% if group.abbreviation %}
                                 <span>{{ group.abbreviation }}</span>
@@ -44,10 +44,10 @@
     <br><br>
     <span style="font-size: 1.2em; font-weight: bold;">Filtro:</span>
     {% for type in group_types %}
-        {% if type_filter == type.type %}
-            <a class="menu_entry selected" href="?filtro={{ type.type }}">{{ type.type }}</a>
+        {% if type_filter == type.0 %}
+            <a class="menu_entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>
         {% else %}
-            <a class="menu_entry" href="?filtro={{ type.type }}">{{ type.type }}</a>
+            <a class="menu_entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>
         {% endif %}
     {% endfor %}
 {% endblock %}

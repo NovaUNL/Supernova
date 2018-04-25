@@ -516,6 +516,7 @@ footer img {
     justify-content: space-between;
     background-color: white;
     background-size: cover;
+    background-position: center;
     box-shadow: 0 0 5px #3d3d3d;
     border-radius: 5px;
     margin: 10px;

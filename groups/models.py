@@ -30,6 +30,7 @@ class Group(Model):
     ACADEMIC_ASSOCIATION = 2
     PEDAGOGIC = 3
     PRAXIS = 4
+    COMMUNITY = 5
 
     GROUP_TYPES = (
         (INSTITUTIONAL, 'Intitucional'),
@@ -37,6 +38,7 @@ class Group(Model):
         (ACADEMIC_ASSOCIATION, 'Associação'),
         (PEDAGOGIC, 'Pedagógico'),
         (PRAXIS, 'CoPe'),
+        (COMMUNITY, 'Comunidade'),
     )
 
     type = IntegerField(choices=GROUP_TYPES)

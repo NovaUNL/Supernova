@@ -8,13 +8,13 @@ from groups.models import Group, Announcement
 from kleep.views import build_base_context
 
 
-def grous_view(request):
+def groups_view(request):
     context = build_base_context(request)
     if 'filtro' in request.GET:
-        context['type_filter'] = request.GET['filtro']
+        context['type_filter'] = int(request.GET['filtro'])
     context['title'] = "Grupos"
     context['groups'] = Group.objects.all()
-    context['group_types'] = None
+    context['group_types'] = Group.GROUP_TYPES
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')}]
     return render(request, 'groups/groups.html', context)
 
