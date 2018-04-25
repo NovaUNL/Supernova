@@ -3,9 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models import Model, TextField, ForeignKey, DateField, IntegerField, DateTimeField, ManyToManyField, \
     ImageField
 
-
-def user_directory_path(instance, filename):
-    return f'u/{instance.user.id}/{instance.user}'
+from users.utils import user_profile_pic_path
 
 
 class User(AbstractUser):
@@ -13,7 +11,7 @@ class User(AbstractUser):
     birth_date = DateField(null=True, verbose_name='Nascimento')
     last_activity = DateTimeField()
     residence = TextField(max_length=50, null=True, blank=True, verbose_name='Residência')
-    picture = ImageField(upload_to=user_directory_path, null=True, blank=True, verbose_name='Foto')
+    picture = ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
     webpage = TextField(max_length=200, null=True, blank=True, verbose_name='Página pessoal')
 
     HIDDEN = 0  # No profile at all

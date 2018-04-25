@@ -100,7 +100,7 @@ def user_profile_settings_view(request, nickname):
         context['settings_form'] = AccountSettingsForm(instance=user)
 
     context['page'] = 'profile_settings'
-    context['title'] = "Definições da conta"
+    context['title'] = 'Definições da conta'
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Dados pessoais", 'url': reverse('profile_settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)
@@ -123,7 +123,7 @@ def user_profile_social_view(request, nickname):
         context['password_change_form'] = PasswordChangeForm()
 
     context['page'] = 'profile_social'
-    context['title'] = "Definições da conta"
+    context['title'] = 'Redes sociais'
     context['social_networks'] = SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Redes sociais", 'url': reverse('profile_social', args=[nickname])}]
@@ -147,7 +147,7 @@ def user_profile_password_view(request, nickname):
         context['password_change_form'] = PasswordChangeForm()
 
     context['page'] = 'profile_password'
-    context['title'] = "Definições da conta"
+    context['title'] = 'Alteração de palavra-passe'
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Alterar palavra passe", 'url': reverse('profile_password', args=[nickname])}]
     return render(request, 'users/profile_password_change.html', context)

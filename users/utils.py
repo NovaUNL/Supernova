@@ -47,3 +47,7 @@ def get_network_url(network: int, identifier: str):
     if network >= len(NETWORK_PROFILE_URL_REGEX):
         raise Exception()  # TODO proper django exception
     return NETWORK_URLS[network].format(identifier)
+
+
+def user_profile_pic_path(user, filename):
+    return f'u/{user.id}/pic.{filename.split(".")[-1]}'
