@@ -20,8 +20,6 @@ class Group(Model):
     abbreviation = TextField(max_length=30, null=True, blank=True)
     name = TextField(max_length=50)
     description = TextField()
-    invite_only = BooleanField(default=True)
-    public_members = BooleanField(default=False)
     members = ManyToManyField(User, through='GroupMember')
     roles = ManyToManyField(Role, through='GroupRole')
     place = ForeignKey(Place, on_delete=models.SET_NULL, null=True, blank=True)
@@ -45,13 +43,31 @@ class Group(Model):
 
     type = IntegerField(choices=GROUP_TYPES)
 
+    SECRET = 0  # The group is invisible
+    CLOSED = 1  # The group is visible but closed to join and invitations have to be sent by group members
+    CLOSED_PRIVATE = 2  # Same as CLOSED, but by default only members can see what happens
+    REQUEST = 3  # The group is visible and closed to join, but users can request to become members
+    REQUEST_PRIVATE = 4  # Same as REQUEST, but by default only members can see what happens
+    OPEN = 5  # Anyone can join the group freely without authorization.
+
+    NON_MEMBER_PERMISSION_CHOICES = (
+        (SECRET, 'Secreto'),
+        (CLOSED, 'Fechado'),
+        (CLOSED_PRIVATE, 'Fechado (Privado)'),
+        (REQUEST, 'Pedido'),
+        (REQUEST_PRIVATE, 'Pedido (Privado)'),
+        (OPEN, 'Aberta'),
+    )
+
+    non_member_permission = IntegerField(choices=NON_MEMBER_PERMISSION_CHOICES, default=SECRET)
+
     def __str__(self):
         return self.name
 
 
 class GroupMember(Model):
-    group = ForeignKey(Group, on_delete=models.CASCADE)
-    member = ForeignKey(User, on_delete=models.CASCADE)
+    group = ForeignKey(Group, on_delete=models.CASCADE, related_name='member_roles')
+    member = ForeignKey(User, on_delete=models.CASCADE, related_name='group_roles')
     role = ForeignKey(Role, on_delete=models.PROTECT)
 
 

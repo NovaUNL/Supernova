@@ -8,7 +8,7 @@
     <h1><i class="fas fa-users"></i> Grupos</h1>
     <div class="flex-wrapper">
         {% for group in groups %}
-            {% if not type_filter or group.type.name == type_filter %}
+            {% if not type_filter or group.type == type_filter %}
                 <a href="{% url 'group' group.id %}">
                     <div class="flex-grid-item"
                          style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
@@ -20,12 +20,12 @@
                             {% endif %}
                         </div>
                         <div class="flex-grid-item-bottom">
-                            {% if group.invite_only %}
+                            {% if group.non_member_permission < group.OPEN %}
                                 <i class="fas fa-lock"></i>
                             {% else %}
                                 <i class="fas fa-lock-open"></i>
                             {% endif %}&nbsp;
-                            <i class="fas fa-user-times"></i>0{{ group.groupusers_set.all.count }}
+                            <i class="fas fa-user-times"></i>{{ group.members.count }}
                             <i class="fas fa-star"></i> 0
                         </div>
                     </div>

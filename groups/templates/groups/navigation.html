@@ -3,7 +3,7 @@
 {% else %}
     <a class="menu_entry" href="{% url 'group' group.id %}">Página inícial</a>
 {% endif %}
-{% if page == 'group_anounce' %}
+{% if page == 'group_anouncements' %}
     <a class="menu_entry selected">Anúncios</a>
 {% else %}
     <a class="menu_entry" href="{% url 'group_announcements' group.id %}">Anúncios</a>
