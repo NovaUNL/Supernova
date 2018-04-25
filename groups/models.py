@@ -1,15 +1,12 @@
 from django.db import models
-from django.db.models import Model, TextField, ForeignKey, DateTimeField, ManyToManyField, BooleanField
+from django.db.models import Model, TextField, ForeignKey, DateTimeField, ManyToManyField, BooleanField, IntegerField, \
+    ImageField
 
 from users.models import User
 
 
-class Type(Model):
-    name = TextField(max_length=50)
-    description = TextField()
-
-    def __str__(self):
-        return self.name
+def group_profile_pic_path(group, filename):
+    return f'g/{group.id}/pic.{filename.split(".")[-1]}'
 
 
 class Role(Model):
@@ -23,11 +20,26 @@ class Group(Model):
     name = TextField(max_length=50)
     description = TextField()
     invite_only = BooleanField(default=True)
-    type = ForeignKey(Type, on_delete=models.PROTECT, null=True, blank=True)
     public_members = BooleanField(default=False)
     members = ManyToManyField(User, through='GroupMember')
     roles = ManyToManyField(Role, through='GroupRole')
-    img_url = TextField(null=True, blank=True)
+    image = ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
+
+    INSTITUTIONAL = 0
+    STUDENTS_ASSOCIATION = 1
+    ACADEMIC_ASSOCIATION = 2
+    PEDAGOGIC = 3
+    PRAXIS = 4
+
+    GROUP_TYPES = (
+        (INSTITUTIONAL, 'Intitucional'),
+        (STUDENTS_ASSOCIATION, 'Núcleo'),
+        (ACADEMIC_ASSOCIATION, 'Associação'),
+        (PEDAGOGIC, 'Pedagógico'),
+        (PRAXIS, 'CoPe'),
+    )
+
+    type = IntegerField(choices=GROUP_TYPES)
 
     def __str__(self):
         return self.name
