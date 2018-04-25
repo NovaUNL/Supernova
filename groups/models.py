@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Model, TextField, ForeignKey, DateTimeField, ManyToManyField, BooleanField, IntegerField, \
     ImageField
 
+from college.models import Place
 from users.models import User
 
 
@@ -23,6 +24,7 @@ class Group(Model):
     public_members = BooleanField(default=False)
     members = ManyToManyField(User, through='GroupMember')
     roles = ManyToManyField(Role, through='GroupRole')
+    place = ForeignKey(Place, on_delete=models.SET_NULL, null=True, blank=True)
     image = ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
 
     INSTITUTIONAL = 0

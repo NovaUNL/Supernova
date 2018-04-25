@@ -82,7 +82,7 @@ def contact_view(request, group_id):
     context['group'] = group
     context['page'] = 'group_contact'
     context['conversations'] = GroupExternalConversation.objects.filter(
-        group=group, creator=request.user.profile).order_by('date').reverse()
+        group=group, creator=request.user).order_by('date').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups')},
                           {'name': group.name, 'url': reverse('group', args=[group_id])},
                           {'name': 'Contactar', 'url': reverse('group_contact', args=[group_id])}]
