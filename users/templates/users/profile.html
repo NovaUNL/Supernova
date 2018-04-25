@@ -35,7 +35,7 @@
                 <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
             {% endfor %}
         </div>
-        <div id="record" class="flex-box">
+        <!--<div id="record" class="flex-box">
             <h2><i class="fas fa-comment-alt"></i> Cadastro (placeholder)</h2>
             <table>
                 <tr>
@@ -93,15 +93,14 @@
                     </td>
                 </tr>
             </table>
-        </div>
+        </div>-->
         <div class="flex-box">
-            <h2><i class="fas fa-users"></i> Grupos (placeholder)</h2>
-            <span class="group"
-                  style="background-image: url({% static 'kleep/images/groups/kleep-devs-banner.png' %})">
-                    Kleep Devs</span>
-            <span class="group"
-                  style="background-image: url({% static 'kleep/images/groups/tiro-com-arco-banner.png' %})">
-                    Núcleo Tiro com Arco</span>
+            <h2><i class="fas fa-users"></i> Grupos</h2>
+            {% for group in user.group_set.all %}
+                <a href="{% url 'group' group.id %}"><span class="group"
+                      style="background-size: cover;background-image: url({% get_media_prefix %}{{ group.image }}">
+                    {{ group.abbreviation }}</span></a>
+            {% endfor %}
         </div>
         <script>
             let apiURL = "{% url 'social_networks' user.nickname %}";

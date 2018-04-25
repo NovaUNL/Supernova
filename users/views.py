@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, AccountCreationForm, PasswordChangeForm
-from kleep.schedules import build_turns_schedule
+from college.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 from users.models import User, SocialNetworkAccount

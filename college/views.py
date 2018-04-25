@@ -6,7 +6,7 @@ from clip import models as clip
 from clip.models import Degree
 from college.models import Building, Classroom, Laboratory, Auditorium, Place, Course, Curriculum, Area, ClassInstance, \
     Class, Department
-from kleep.schedules import build_schedule, build_turns_schedule
+from college.schedules import build_schedule, build_turns_schedule
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 

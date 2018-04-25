@@ -110,7 +110,7 @@ def build_schedule(turn_instances: [TurnInstance]):
 def build_turns_schedule(turns: [Turn]):
     turn_instances = []
     for turn in turns:  # Fetch every turn of this class instance
-        for turn_instance in turn.turninstance_set.all():  # Fetch every instance of this turn
+        for turn_instance in turn.instances.all():  # Fetch every instance of this turn
             turn_instances.append(turn_instance)
 
     return build_schedule(turn_instances)
