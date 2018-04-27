@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Model, TextField, ForeignKey, DateField, IntegerField, DateTimeField, ManyToManyField, \
-    ImageField
+    ImageField, OneToOneField
 
+from clip.models import Student
 from users.utils import user_profile_pic_path
 
 
@@ -93,3 +94,14 @@ class SocialNetworkAccount(Model):
 
     def __str__(self):
         return f'{self.SOCIAL_NETWORK_CHOICES[self.network][1]}: {self.profile} ({self.user})'
+
+
+class Registration(Model):
+    email = TextField()
+    username = TextField()
+    nickname = TextField()
+    student = OneToOneField(Student, on_delete=models.CASCADE)
+    password = TextField()
+    creation = DateTimeField(auto_created=True)
+    token = TextField()
+    failed_attempts = IntegerField(default=0)

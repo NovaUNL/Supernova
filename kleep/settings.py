@@ -9,6 +9,10 @@ with open(BASE_DIR + '/settings.json') as json_data:
     SECRET_KEY = settings['SECRET_KEY']
     CLIP_USERNAME = settings['CLIP_USERNAME']
     CLIP_PASSWORD = settings['CLIP_PASSWORD']
+    EMAIL_SERVER = settings['EMAIL_SERVER']
+    EMAIL_SUFFIX = settings['EMAIL_SUFFIX']
+    EMAIL_ACCOUNT = settings['EMAIL_ACCOUNT']
+    EMAIL_PASSWORD = settings['EMAIL_PASSWORD']
     DATABASES = settings['DATABASES']
     PIWIK_DOMAIN_PATH = settings['PIWIK_DOMAIN_PATH']
     PIWIK_SITE_ID = settings['PIWIK_SITE_ID']
@@ -18,6 +22,9 @@ DEBUG = False
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+else:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
 
 # Application definition
 INSTALLED_APPS = [
@@ -171,6 +178,9 @@ VERSION = subprocess.check_output([
 ]).decode('ascii')
 
 REGISTRATIONS_ENABLED = False
+REGISTRATIONS_ATTEMPTS_TOKEN = 3
+REGISTRATIONS_TIMEWINDOW = 60  # Minutes
+REGISTRATIONS_TOKEN_LENGTH = 6
 
 AUTH_USER_MODEL = 'users.User'
 

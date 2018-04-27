@@ -16,7 +16,7 @@ class Student(Model):
     first_year = IntegerField(null=True, blank=True)
     last_year = IntegerField(null=True, blank=True)
     confirmed = BooleanField(default=False)
-    clip_student = OneToOneField(clip.Student, on_delete=models.PROTECT)
+    clip_student = OneToOneField(clip.Student, on_delete=models.PROTECT, related_name='student')
 
     class Meta:
         ordering = ['number']
