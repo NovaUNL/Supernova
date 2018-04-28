@@ -1,0 +1,39 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <style>
+        #content_form {
+            width: 320px;
+            margin: auto;
+        }
+
+        #content_form > form input[type=text], #content input[type=password] {
+            height: 30px;
+            width: 300px;
+            margin-bottom: 10px;
+
+        }
+
+        #content_form > form input[type=submit] {
+            height: 35px;
+            width: 100%;
+        }
+    </style>
+    <h1><i class="fas fa-user-plus"></i> Criar conta</h1>
+    <div id="content_form">
+        <form method="get" action="{{ request.get_full_path }}">
+            {{ form.as_p }}
+            <input type="submit" value="Validar registo">
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block navigation %}
+    <a class="menu_entry" href="{% url 'login' %}">Autenticação</a>
+    <a class="menu_entry selected">Criar conta</a>
+{% endblock %}

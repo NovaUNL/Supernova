@@ -3,7 +3,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, AccountCreationForm, PasswordChangeForm
+from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, RegistrationForm, PasswordChangeForm, \
+    RegistrationValidationForm
 from college.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
@@ -36,19 +37,29 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('index'))
 
 
-def account_creation_view(request):
+def registration_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('profile', args=[request.user.nickname]))
 
     context = build_base_context(request)
-    context['title'] = "Criação de conta"
+    context['title'] = "Criar conta"
     context['enabled'] = REGISTRATIONS_ENABLED
     if request.method == 'POST':
         pass
 
     else:
-        context['creation_form'] = AccountCreationForm()
-    return render(request, 'users/create_account.html', context)
+        context['creation_form'] = RegistrationForm()
+    return render(request, 'users/registration.html', context)
+
+
+def registration_validation_view(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('profile', args=[request.user.nickname]))
+
+    context = build_base_context(request)
+    context['title'] = "Validar registo"
+    context['form'] = RegistrationValidationForm()
+    return render(request, 'users/registration_validation.html', context)
 
 
 def profile_view(request, nickname):

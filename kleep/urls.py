@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
@@ -10,6 +11,7 @@ import feedback.views as feedback
 import documents.views as documents
 import news.views as news
 import api.urls
+from kleep.settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
 app_name = 'kleep'
@@ -48,11 +50,12 @@ urlpatterns = [
     path('perfil/<str:nickname>/definicoes/', users.user_profile_settings_view, name='profile_settings'),
     path('perfil/<str:nickname>/social/', users.user_profile_social_view, name='profile_social'),
     path('perfil/<str:nickname>/password/', users.user_profile_password_view, name='profile_password'),
-    path('criar/', users.account_creation_view, name='create_account'),
+    path('criar/', users.registration_view, name='registration'),
+    path('confirmar/', users.registration_validation_view, name='registration_validation'),
     path('entrar/', users.login_view, name='login'),
     path('sair/', users.logout_view, name='logout'),
     # Group views
-    path('grupos/', groups.grous_view, name='groups'),
+    path('grupos/', groups.groups_view, name='groups'),
     path('grupo/<str:group_id>/', groups.group_view, name='group'),
     path('grupo/<str:group_id>/documentos/', groups.documents_view, name='group_documents'),
     path('grupo/<str:group_id>/anuncios/', groups.announcements_view, name='group_announcements'),
@@ -79,3 +82,5 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
+if DEBUG:
+    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

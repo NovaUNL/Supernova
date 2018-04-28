@@ -1,7 +1,10 @@
+import re
+
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import authenticate
 
+from kleep.settings import REGISTRATIONS_TOKEN_LENGTH
 from kleep.utils import password_strength
 from users.models import User
 
@@ -49,7 +52,7 @@ class LoginForm(forms.Form):
         return self.user_cache
 
 
-class AccountCreationForm(forms.Form):
+class RegistrationForm(forms.Form):
     clip = forms.CharField(label='Identificador do CLIP', max_length=30, required=True, error_messages=default_errors)
     nickname = forms.CharField(label='Alcunha (alteravel posteriormente)', max_length=100, required=False,
                                widget=forms.TextInput(attrs={'placeholder': 'Opcional'}), error_messages=default_errors)
@@ -72,6 +75,23 @@ class AccountCreationForm(forms.Form):
     def clean_password_confirmation(self):
         if self.cleaned_data["new_password"] != self.cleaned_data["new_password_confirmation"]:
             raise forms.ValidationError("As palavas-passe não coincidem.")
+        return self.cleaned_data["new_password_confirmation"]
+
+
+class RegistrationValidationForm(forms.Form):
+    email = forms.CharField(label='Email', max_length=50)
+    token = forms.CharField(label='Código', max_length=REGISTRATIONS_TOKEN_LENGTH)
+
+    def clean_token(self):
+        token = self.cleaned_data["token"]
+        if not token.isalnum():
+            raise forms.ValidationError("Invalid token.")
+        return token
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if re.match(r'^[\w.-]+@[\w]+.[\w.]+$', email) is None:
+            raise forms.ValidationError("Invalid email format")
         return self.cleaned_data["new_password_confirmation"]
 
 
