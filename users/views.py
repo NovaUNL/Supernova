@@ -63,6 +63,8 @@ def registration_validation_view(request):
 
 
 def profile_view(request, nickname):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
     user = get_object_or_404(User, nickname=nickname)
     context = build_base_context(request)
     page_name = f"Perfil de {user.get_full_name()}"
