@@ -98,10 +98,10 @@ class SocialNetworkAccount(Model):
 
 class Registration(Model):
     email = TextField()
-    username = TextField()
-    nickname = TextField()
-    student = OneToOneField(Student, on_delete=models.CASCADE)
-    password = TextField()
-    creation = DateTimeField(auto_created=True)
+    username = TextField(verbose_name='utilizador')
+    nickname = TextField(verbose_name='alcunha')
+    student = OneToOneField(Student, on_delete=models.CASCADE, verbose_name='estudante')
+    password = TextField(verbose_name='palavra-passe')
+    creation = DateTimeField(auto_now_add=True)
     token = TextField()
     failed_attempts = IntegerField(default=0)

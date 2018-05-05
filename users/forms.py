@@ -4,9 +4,11 @@ from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import authenticate
 
+import clip.models as clip
+from college.models import Student
 from kleep.settings import REGISTRATIONS_TOKEN_LENGTH
 from kleep.utils import password_strength
-from users.models import User
+from users.models import User, Registration
 
 default_errors = {
     'required': 'Este campo é obrigatório',
@@ -52,30 +54,74 @@ class LoginForm(forms.Form):
         return self.user_cache
 
 
-class RegistrationForm(forms.Form):
-    clip = forms.CharField(label='Identificador do CLIP', max_length=30, required=True, error_messages=default_errors)
-    nickname = forms.CharField(label='Alcunha (alteravel posteriormente)', max_length=100, required=False,
-                               widget=forms.TextInput(attrs={'placeholder': 'Opcional'}), error_messages=default_errors)
-    password = forms.CharField(label='Palavra passe', widget=forms.PasswordInput(), required=True,
-                               error_messages=default_errors)
-    password_confirmation = forms.CharField(label='Palavra passe(confirmação)', widget=forms.PasswordInput(),
+class RegistrationForm(forms.ModelForm):
+    password_confirmation = forms.CharField(label='Palavra-passe(confirmação)', widget=forms.PasswordInput(),
                                             required=True, error_messages=default_errors)
-    captcha = CaptchaField(label='Ser bot ou não ser, eis a questão...', error_messages=default_errors)
+    captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
+    student = forms.CharField(label='Identificador', widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
+    nickname = forms.CharField(label='Alcunha', widget=forms.TextInput(), required=False)
+
+
+    class Meta:
+        model = Registration
+        fields = ('nickname', 'username', 'password', 'email', 'student')
+        widgets = {
+            'username': forms.TextInput(),
+            'email': forms.TextInput(attrs={'onChange': 'emailModified=true;'}),
+            'password': forms.PasswordInput()
+        }
 
     def clean_password(self):
-        password = self.cleaned_data["new_password"]
+        password = self.cleaned_data["password"]
         if len(password) < 7:
             raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
-
         if password_strength(password) < 5:
             raise forms.ValidationError("A password é demasiado fraca.<br>"
                                         "Experimenta misturar maiusculas, minusculas, numeros ou pontuação.")
         return password
 
     def clean_password_confirmation(self):
-        if self.cleaned_data["new_password"] != self.cleaned_data["new_password_confirmation"]:
+        confirmation = self.cleaned_data["password_confirmation"]
+        if self.data["password"] != confirmation:
             raise forms.ValidationError("As palavas-passe não coincidem.")
-        return self.cleaned_data["new_password_confirmation"]
+        return confirmation
+
+    def clean_student(self):
+        student_id: str = self.cleaned_data["student"]
+        student = clip.Student.objects.filter(abbreviation=student_id)
+        if not student.exists():
+            raise forms.ValidationError(f"O aluno {student} não foi encontrado.")
+        if Student.objects.filter(abbreviation=student_id, user__isnull=False).exists():
+            raise forms.ValidationError(f"O aluno {student} já está registado.")
+        return student.first()
+
+    def clean_email(self):
+        pattern = re.compile(r'^[\w\d.\-_+]+@[\w\d\-_]+(.[\w\d]+)*(\.\w{2,})$')
+        email = self.cleaned_data["email"]
+        if not pattern.match(email):
+            raise forms.ValidationError("Formato inválido de email.")
+        if 'unl.pt' not in email.split('@')[-1]:
+            raise forms.ValidationError("Email")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        users = User.objects.filter(username=username)
+        if users.exists():
+            raise forms.ValidationError(f"Já existe um utilizador com a credencial {username}.")
+        users = User.objects.filter(nickname=username)
+        if users.exists():
+            raise forms.ValidationError(f"Existe um utilizador cuja alcunha é a tua credencial. Escolhe outra.")
+        return username
+
+    def clean_nickname(self):
+        nickname = self.cleaned_data["nickname"]
+        if nickname is None:
+            nickname = self.data["username"]
+        users = User.objects.filter(nickname=nickname)
+        if users.exists():
+            raise forms.ValidationError(f"Já existe um utilizador com a alcunha {nickname}.")
+        return nickname
 
 
 class RegistrationValidationForm(forms.Form):

@@ -43,10 +43,15 @@ def registration_view(request):
 
     context = build_base_context(request)
     context['title'] = "Criar conta"
+    context['disable_auth'] = True  # Disable auth overlay
     context['enabled'] = REGISTRATIONS_ENABLED
     if request.method == 'POST':
-        pass
-
+        form = RegistrationForm(data=request.POST)
+        print(form.is_valid())
+        if form.is_valid():
+            form.save()
+            HttpResponseRedirect(reverse('login'))
+        context['creation_form'] = form
     else:
         context['creation_form'] = RegistrationForm()
     return render(request, 'users/registration.html', context)

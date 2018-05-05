@@ -6,68 +6,98 @@
 
 {% block content %}
     <style>
-        #content_form {
-            width: 660px;
-            margin: auto;
+        #help-panel {
+            flex-basis: 300px;
+            flex-grow: 1;
+            margin-right: 10px;
         }
 
-        #content_form > div {
+        #form-fields {
+            flex-basis: 600px;
+            flex-grow: 5;
+        }
+
+        #form-fields > div {
             width: 300px;
         }
 
-        #content_form > form input[type=text], #content input[type=password] {
+        #form-fields input[type=text], #form-fields input[type=password] {
             height: 30px;
-            width: 300px;
+            width: 250px;
             margin-bottom: 10px;
-
         }
 
-        #content_form > form input[type=submit] {
+        form input[type=submit] {
             height: 35px;
-            width: 100%;
+            width: 100px;
+            float: right;
         }
     </style>
+    <script>
+        let emailModified = false;
+
+        function studentIDChanged(student) {
+            if (emailModified) return;
+            let element = document.getElementById('id_email');
+            element.value = student.value + "@campus.fct.unl.pt"
+        }
+    </script>
     <h1><i class="fas fa-user-plus"></i> Criar conta</h1>
-    <div id="content_form">
-        {% if not enabled %}
-            <span style="font-weight: bold; font-size: 1.5em; color: red;">Os registos encontram-se desactivados!</span>
-        {% endif %}
-        <form method="post" action="{{ request.get_full_path }}">
-            {% csrf_token %}
-            {{ creation_form.non_field_errors }}
-
-            <div style="float: left; margin-right: 20px;">
-                {{ creation_form.clip.label }}<br>
-                {{ creation_form.clip }}<br>
-
+    {% if not enabled %}
+        <span style="font-weight: bold; font-size: 1.5em; color: red;">Os registos encontram-se desactivados!</span>
+    {% endif %}
+    <form method="post" action="{{ request.get_full_path }}" style="justify-content: left">
+        {% csrf_token %}
+        <div class="flex-wrapper" style="justify-content: space-between">
+            <div id="help-panel">
+                <p>O <b>utilizador</b> é utilizado para te autenticares.</p>
+                <p>A <b>alcunha</b> identifica o teu perfil aos restantes.<br>
+                    É posteriormente alteravel nas tuas definições, e se não definires uma será utilizado o teu
+                    nome de utilizador.</p>
+                <p>O <b>identificador</b> é a tua credencial do CLIP.</p>
             </div>
-
-            <div>
-                {{ creation_form.nickname.label }}<br>
-                {{ creation_form.nickname }}<br>
+            <div class="flex-wrapper" id="form-fields">
+                {{ creation_form.non_field_errors }}
+                <div>
+                    {{ creation_form.username.label }}<br>
+                    {{ creation_form.username }}
+                    {{ creation_form.username.errors }}
+                </div>
+                <div>
+                    {{ creation_form.nickname.label }}<br>
+                    {{ creation_form.nickname }}
+                    {{ creation_form.nickname.errors }}
+                </div>
+                <div>
+                    {{ creation_form.student.label }}<br>
+                    {{ creation_form.student }}
+                    {{ creation_form.student.errors }}
+                </div>
+                <div>
+                    {{ creation_form.email.label }}<br>
+                    {{ creation_form.email }}
+                    {{ creation_form.email.errors }}
+                </div>
+                <div>
+                    {{ creation_form.password.label }}<br>
+                    {{ creation_form.password }}
+                    {{ creation_form.password.errors }}
+                </div>
+                <div>
+                    {{ creation_form.password_confirmation.label }}<br>
+                    {{ creation_form.password_confirmation }}
+                    {{ creation_form.password_confirmation.errors }}
+                </div>
+                <div style="flex-basis: 500px">
+                    {{ creation_form.captcha.label }}<br>
+                    {{ creation_form.captcha }}
+                    {{ creation_form.captcha.errors }}
+                </div>
             </div>
-
-
-            <div style="float: left; margin-right: 20px;">
-                {{ creation_form.password.label }}<br>
-                {{ creation_form.password }}<br>
-
-            </div>
-            <div>
-                {{ creation_form.password_confirmation.label }}<br>
-                {{ creation_form.password_confirmation }}<br>
-            </div>
-
-            <div>
-                {{ creation_form.captcha.label }}<br>
-                {{ creation_form.captcha }}<br>
-            </div>
-            <input type="submit" value="Registar" {% if not enabled %}disabled{% endif %}>
-        </form>
-    </div>
+        </div>
+        <input type="submit" value="Registar" {% if not enabled %}disabled{% endif %}>
+    </form>
 {% endblock %}
-
-
 
 {% block navigation %}
     <a class="menu_entry" href="{% url 'login' %}">Autenticação</a>
