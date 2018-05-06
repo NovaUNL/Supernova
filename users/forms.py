@@ -1,14 +1,16 @@
+import hashlib
 import re
 
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 
 import clip.models as clip
 from college.models import Student
-from kleep.settings import REGISTRATIONS_TOKEN_LENGTH
-from kleep.utils import password_strength
-from users.models import User, Registration
+from kleep.settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
+from kleep.utils import password_strength, correlated
+from users.models import User, Registration, VulnerableHash
 
 default_errors = {
     'required': 'Este campo é obrigatório',
@@ -58,9 +60,9 @@ class RegistrationForm(forms.ModelForm):
     password_confirmation = forms.CharField(label='Palavra-passe(confirmação)', widget=forms.PasswordInput(),
                                             required=True, error_messages=default_errors)
     captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
-    student = forms.CharField(label='Identificador', widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
+    student = forms.CharField(label='Identificador',
+                              widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
     nickname = forms.CharField(label='Alcunha', widget=forms.TextInput(), required=False)
-
 
     class Meta:
         model = Registration
@@ -73,11 +75,23 @@ class RegistrationForm(forms.ModelForm):
 
     def clean_password(self):
         password = self.cleaned_data["password"]
-        if len(password) < 7:
-            raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
+        if correlated(self.data['username'], password, threshold=0.3):  # TODO magic number to settings
+            raise forms.ValidationError("Password demasiado similar à credencial")
+
+        if correlated(self.data['nickname'], password, threshold=0.3):
+            raise forms.ValidationError("Password demasiado similar à alcunha")
+
         if password_strength(password) < 5:
             raise forms.ValidationError("A password é demasiado fraca.<br>"
-                                        "Experimenta misturar maiusculas, minusculas, numeros ou pontuação.")
+                                        "Mistura maiusculas, minusculas, numeros e pontuação.")
+        if len(password) < 7:
+            raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
+
+        if VULNERABILITY_CHECKING:
+            sha1 = hashlib.sha1(password.encode()).hexdigest().upper()  # Produces clean SHA1 of the password
+            if VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
+                raise forms.ValidationError('Por favor lê <a href="#">isto</a>.')  # Deny and tell user about it
+        password = make_password(password)  # Produces a way stronger hash of the password for storage
         return password
 
     def clean_password_confirmation(self):
@@ -90,9 +104,9 @@ class RegistrationForm(forms.ModelForm):
         student_id: str = self.cleaned_data["student"]
         student = clip.Student.objects.filter(abbreviation=student_id)
         if not student.exists():
-            raise forms.ValidationError(f"O aluno {student} não foi encontrado.")
+            raise forms.ValidationError(f"O aluno {student_id} não foi encontrado.")
         if Student.objects.filter(abbreviation=student_id, user__isnull=False).exists():
-            raise forms.ValidationError(f"O aluno {student} já está registado.")
+            raise forms.ValidationError(f"O aluno {student_id} já está registado.")
         return student.first()
 
     def clean_email(self):
@@ -182,7 +196,7 @@ class PasswordChangeForm(forms.Form):
 
         if password_strength(password) < 5:
             raise forms.ValidationError("A password é demasiado fraca.<br>"
-                                        "Experimenta misturar maiusculas, minusculas, numeros ou pontuação.")
+                                        "Mistura maiusculas, minusculas, numeros e pontuação.")
         return password
 
     def clean_password_confirmation(self):

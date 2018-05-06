@@ -105,3 +105,12 @@ class Registration(Model):
     creation = DateTimeField(auto_now_add=True)
     token = TextField()
     failed_attempts = IntegerField(default=0)
+
+
+class VulnerableHash(Model):
+    hash = TextField()
+
+    class Meta:
+        # TODO figure how to assign to a database
+        managed = False
+        db_table = 'Hashes'
