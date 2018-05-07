@@ -10,44 +10,35 @@ from django.utils import timezone
 
 from clip.models import Student as ClipStudent
 from college.models import Student
-from kleep.settings import EMAIL_SERVER, EMAIL_SUFFIX, EMAIL_ACCOUNT, EMAIL_PASSWORD, REGISTRATIONS_ATTEMPTS_TOKEN, \
+from kleep.settings import EMAIL_SERVER, EMAIL_ACCOUNT, EMAIL_PASSWORD, REGISTRATIONS_ATTEMPTS_TOKEN, \
     REGISTRATIONS_TIMEWINDOW, REGISTRATIONS_TOKEN_LENGTH
-from users.exceptions import UnknownStudent, InvalidToken, InvalidUsername, ExpiredRegistration, \
+from users.exceptions import InvalidToken, InvalidUsername, ExpiredRegistration, \
     AccountExists, AssignedStudent
 from users.models import User, Registration
 
 
-def pre_register(clip_id: str, username: str, nickname: str, password_hash: str):
-    clip_students = ClipStudent.objects.filter(abbreviation=clip_id)
-
-    if not clip_students.exists():
-        raise UnknownStudent(f'O estudante {clip_id} não foi encontado no CLIP.')
-
-    if clip_students.count() > 1:
-        raise UnknownStudent(f'Existem varios estudantes identificados pelo identificador {clip_id}. PSST: Bug!',
-                             multiple=True)
-
-    clip_student = clip_students.first()
+def pre_register(data: Registration):
+    username = data.username
+    nickname = data.nickname
     if ClipStudent.objects.filter(Q(internal_id=username) | Q(abbreviation=username)) \
-            .exclude(id=clip_student.id).exists():
+            .exclude(data.student).exists():
         raise InvalidUsername(f'The username {username} matches a CLIP ID.')
 
     if User.objects.filter(Q(username=username) | Q(nickname=nickname)).exists():
         raise AccountExists(f'There is already an account with the username {username} or the nickname {nickname}.')
 
     # Delete any existing registration request for this user
-    Registration.objects.filter(student=clip_student).delete()
+    Registration.objects.filter(student=data.student).delete()
 
-    if hasattr(clip_student, 'student'):
-        user = clip_student.student.user
+    if hasattr(data.student, 'student'):
+        user = data.student.student.user  # Registration -> clip_student -> student -> user
         if user is not None:
-            raise AssignedStudent(f'The student {clip_id} is already assigned to the account {user.username}.')
+            raise AssignedStudent(f'The student {username} is already assigned to the account {user}.')
 
     token = generate_token(REGISTRATIONS_TOKEN_LENGTH)
-    email = clip_student + EMAIL_SUFFIX
-    Registration(email=email, username=username, nickname=nickname,
-                 student=clip_student, password=password_hash, token=token).save()
-    send_mail(email, token)
+    send_mail(data.email, token)
+    data.token = token
+    data.save()
 
 
 def validate_token(email, token):

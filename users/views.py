@@ -9,6 +9,7 @@ from college.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 from users.models import User, SocialNetworkAccount
+from users.registrations import generate_token, send_mail, pre_register
 
 
 def login_view(request):
@@ -49,7 +50,8 @@ def registration_view(request):
         form = RegistrationForm(data=request.POST)
         print(form.is_valid())
         if form.is_valid():
-            form.save()
+            registration = form.save(commit=False)
+            pre_register(registration)
             HttpResponseRedirect(reverse('login'))
         context['creation_form'] = form
     else:
