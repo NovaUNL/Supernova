@@ -3,13 +3,14 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
+from users.exceptions import InvalidToken, ExpiredRegistration
 from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, RegistrationForm, PasswordChangeForm, \
     RegistrationValidationForm
 from college.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 from users.models import User, SocialNetworkAccount
-from users.registrations import generate_token, send_mail, pre_register
+from users.registrations import generate_token, send_mail, pre_register, validate_token
 
 
 def login_view(request):
@@ -64,8 +65,25 @@ def registration_validation_view(request):
         return HttpResponseRedirect(reverse('profile', args=[request.user.nickname]))
 
     context = build_base_context(request)
+    if request.method == 'POST':
+        form = RegistrationValidationForm(data=request.POST)
+        if form.is_valid():
+            pass
+        else:
+            context['form'] = form
+            validate_token(form.email, form.token)
+    else:
+        if 'email' in request.GET and 'token' in request.GET:
+            try:
+                user = validate_token(request.GET['email'], request.GET['token'])
+                return HttpResponseRedirect(reverse('profile', args=[user.nickname]))
+            except ExpiredRegistration or InvalidToken as e:
+                form = RegistrationValidationForm(data=request.GET)
+                form.add_error(None, str(e))
+                context['form'] = form
+        else:
+            context['form'] = RegistrationValidationForm()
     context['title'] = "Validar registo"
-    context['form'] = RegistrationValidationForm()
     return render(request, 'users/registration_validation.html', context)
 
 

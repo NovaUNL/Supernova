@@ -90,7 +90,8 @@ class RegistrationForm(forms.ModelForm):
         if VULNERABILITY_CHECKING:
             sha1 = hashlib.sha1(password.encode()).hexdigest().upper()  # Produces clean SHA1 of the password
             if VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
-                raise forms.ValidationError('Por favor lê <a href="#">isto</a>.')  # Deny and tell user about it
+                # Refuse the vulnerable password and tell user about it
+                raise forms.ValidationError('Password vulneravel. Espreita a FAQ.')
         password = make_password(password)  # Produces a way stronger hash of the password for storage
         return password
 
@@ -138,9 +139,13 @@ class RegistrationForm(forms.ModelForm):
         return nickname
 
 
-class RegistrationValidationForm(forms.Form):
+class RegistrationValidationForm(forms.ModelForm):
     email = forms.CharField(label='Email', max_length=50)
     token = forms.CharField(label='Código', max_length=REGISTRATIONS_TOKEN_LENGTH)
+
+    class Meta:
+        model = Registration
+        fields = ['email', 'token']
 
     def clean_token(self):
         token = self.cleaned_data["token"]
@@ -152,7 +157,7 @@ class RegistrationValidationForm(forms.Form):
         email = self.cleaned_data["email"]
         if re.match(r'^[\w.-]+@[\w]+.[\w.]+$', email) is None:
             raise forms.ValidationError("Invalid email format")
-        return self.cleaned_data["new_password_confirmation"]
+        return email
 
 
 class AccountSettingsForm(forms.ModelForm):

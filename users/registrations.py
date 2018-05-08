@@ -41,26 +41,35 @@ def pre_register(data: Registration):
     data.save()
 
 
-def validate_token(email, token):
-    registration = Registration.objects.get(email=email)
+def validate_token(email, token) -> User:
+    registration = Registration.objects.filter(email=email)
+    if registration.exists():
+        registration = registration.order_by('creation').reverse().first()
+    else:
+        raise ExpiredRegistration('Não foi possível encontrar um registo com este email.')
     if registration.token == token:  # Correct token
-
         elapsed_minutes = (timezone.now() - registration.creation).seconds / 60
         if elapsed_minutes < REGISTRATIONS_TIMEWINDOW:
-            error_msg = f'The registration {registration} was used after its time window.'
             registration.delete()
-            raise ExpiredRegistration(error_msg)
+            raise ExpiredRegistration('O registo foi validado após o tempo permitido.')
 
-        user = User.objects.create_user(username=registration.username, email=None, nickname=registration.nickname)
+        user = User.objects.create_user(
+            username=registration.username,
+            email=registration.email,
+            nickname=registration.nickname,
+            last_activity=timezone.now()
+        )
         clip_student = registration.student
-        user.password = registration.password
+        user.password = registration.password  # Copy hash
         user.save()
         student = student_from_clip_student(clip_student)
         student.confirmed = True
+        student.user = user
         try:
             pass  # TODO populate student enrollments and turns
         finally:
             student.save()
+        return user
     else:
         if registration.failed_attempts < REGISTRATIONS_ATTEMPTS_TOKEN - 1:
             registration.failed_attempts += 1
