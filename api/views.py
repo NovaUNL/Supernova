@@ -38,14 +38,14 @@ class CampusMap(APIView):
 class ServiceList(APIView):
     def get(self, request, format=None):
         serializer = serializers.services.ServiceWithBuildingSerializer(
-            college.Service.objects.filter(bar__isnull=True).all(), many=True)
+            services.Service.objects.filter(bar__isnull=True).all(), many=True)
         return Response(serializer.data)
 
 
 class BarList(APIView):
     def get(self, request, format=None):
         serializer = serializers.services.ServiceWithBuildingSerializer(
-            college.Service.objects.filter(bar__isnull=False).all(), many=True)
+            services.Service.objects.filter(bar__isnull=False).all(), many=True)
         return Response(serializer.data)
 
 
@@ -78,7 +78,7 @@ class ClassDetailed(APIView):
 
 class GroupList(APIView):
     def get(self, request, format=None):
-        serializer = serializers.groups.GroupTypeSerializer(groups.Type.objects.all(), many=True)
+        serializer = serializers.groups.GroupTypeSerializer(groups.Group.objects.all(), many=True)
         return Response(serializer.data)
 
 

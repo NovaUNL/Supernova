@@ -10,10 +10,7 @@ from college.schedules import build_schedule, build_turns_schedule
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 
-# from services.models import Service, BarDailyMenu
 from services.models import Service, MenuDish
-
-Class
 
 
 def campus(request):
@@ -102,7 +99,7 @@ def class_instance_schedule(request, instance_id):
     occasion = instance.occasion()
     context['occasion'] = occasion
 
-    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(instance.turn_set.all())
+    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(instance.turns.all())
 
     context['sub_nav'] = [
         {'name': 'Departamentos', 'url': reverse('departments')},
@@ -126,7 +123,7 @@ def class_instance_turns(request, instance_id):
     context['instance'] = instance
     occasion = instance.occasion()
     context['occasion'] = occasion
-    context['turns'] = instance.turn_set.order_by('turn_type', 'number')
+    context['turns'] = instance.turns.order_by('turn_type', 'number')
 
     context['sub_nav'] = [
         {'name': 'Departamentos', 'url': reverse('departments')},
@@ -178,7 +175,7 @@ def course_students(request, course_id):
     context['title'] = 'Alunos de %s' % course
 
     context['course'] = course
-    context['students'] = course.student_set.order_by('number').all()
+    context['students'] = course.students.order_by('number').all()
     context['unregistered_students'] = clip.Student.objects.filter(course=course.clip_course, student=None).order_by(
         'internal_id')
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
@@ -230,7 +227,7 @@ def classroom(request, classroom_id):
                           {'name': classroom.name, 'url': reverse('classroom', args=[classroom_id])}]
     context['building'] = building
     context['classroom'] = classroom
-    turn_instances = classroom.turninstance_set.filter(
+    turn_instances = classroom.turn_instances.filter(
         turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
     return render(request, 'college/classroom.html', context)
