@@ -177,7 +177,7 @@ VERSION = subprocess.check_output([
     "HEAD"
 ]).decode('ascii')
 
-REGISTRATIONS_ENABLED = False
+REGISTRATIONS_ENABLED = True
 REGISTRATIONS_ATTEMPTS_TOKEN = 3
 REGISTRATIONS_TIMEWINDOW = 60  # Minutes
 REGISTRATIONS_TOKEN_LENGTH = 6
@@ -193,3 +193,23 @@ REST_FRAMEWORK = {
 }
 
 VULNERABILITY_CHECKING = 'vulnerabilities' in DATABASES
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/kleep.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'propagate': True,
+        },
+    },
+}
+if DEBUG:
+    LOGGING['loggers']['django']['level'] = 'DEBUG'
