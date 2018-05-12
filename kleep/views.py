@@ -38,7 +38,9 @@ def privacy(request):
 
 
 def build_base_context(request):
-    result = {'cpu': __cpu_load(),
+    result = {'disable_auth': False,
+              'sub_nav': None,
+              'cpu': __cpu_load(),
               'people': 0  # TODO
               }
     if not request.user.is_authenticated:
