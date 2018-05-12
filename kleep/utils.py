@@ -1,3 +1,4 @@
+from difflib import SequenceMatcher
 from math import log
 
 
@@ -24,3 +25,7 @@ def password_strength(password: str):
                + log(number + 1) + number * 0.2
                # Specials are great, but a special only password would be silly
                + log(special + 1) * 2 + special * 0.5)
+
+
+def correlated(a, b, threshold=0.5):
+    return SequenceMatcher(a, b).ratio() > threshold
