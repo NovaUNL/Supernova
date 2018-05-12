@@ -22,7 +22,6 @@ class LoginForm(forms.Form):
     username = forms.CharField(label='Utilizador', max_length=100, required=True, error_messages=default_errors)
     password = forms.CharField(label='Palavra passe', widget=forms.PasswordInput(),
                                required=True, error_messages=default_errors)
-    remember = forms.BooleanField(label='Lembrar', required=False)  # TODO use me
 
     error_messages = {
         'invalid_login': "Combinação inválida!",
