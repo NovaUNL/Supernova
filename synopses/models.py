@@ -1,6 +1,6 @@
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField, OneToOneField
+from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField
 
 from college.models import Class
 from documents.models import Document
@@ -39,7 +39,7 @@ class Topic(Model):
 
     class Meta:
         ordering = ('name',)
-        unique_together = ('index', 'subarea',)
+        unique_together = ('index', 'subarea')
 
     def __str__(self):
         return self.name
@@ -65,7 +65,7 @@ class ClassSection(Model):
     index = IntegerField()
 
     class Meta:
-        unique_together = ('section', 'corresponding_class')
+        unique_together = [('section', 'corresponding_class'), ('index', 'corresponding_class')]
 
     def __str__(self):
         return f'{self.section} annexed to {self.corresponding_class}.'
@@ -78,7 +78,7 @@ class SectionTopic(Model):
 
     class Meta:
         ordering = ('topic', 'index',)
-        unique_together = ('section', 'topic')
+        unique_together = [('section', 'topic'), ('index', 'topic')]
 
     def __str__(self):
         return f'{self.section} linked to {self.topic} ({self.index}).'
