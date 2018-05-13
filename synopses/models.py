@@ -49,7 +49,8 @@ class Section(Model):
     name = TextField(verbose_name='nome')
     content = RichTextUploadingField(verbose_name='conteúdo')
     # example = RichTextField(verbose_name='exemplo') TODO separate
-    topics = ManyToManyField(Topic, through='SectionTopic', verbose_name='sections')
+    topics = ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
+    requirements = ManyToManyField('Section', verbose_name='requisitos')
 
     class Meta:
         ordering = ('name',)
@@ -97,12 +98,6 @@ class SectionLog(Model):
 #     section = ForeignKey(Section, on_delete=models.CASCADE)
 #     title = TextField(max_length=300)
 #     url = TextField(max_length=200)
-
-
-# class SectionRequirement(Model):
-#     section = ForeignKey(Section, on_delete=models.CASCADE)
-#     requirement = ForeignKey(Section, on_delete=models.CASCADE)
-
 
 # class SectionContinuation(Model):
 #     section = ForeignKey(Section, on_delete=models.CASCADE)

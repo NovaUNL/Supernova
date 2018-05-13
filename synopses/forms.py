@@ -1,5 +1,4 @@
 from dal import autocomplete
-from django.core.exceptions import ValidationError
 from django.forms import ChoiceField, ModelForm, TextInput
 from django import forms
 
@@ -43,9 +42,10 @@ class SectionForm(ModelForm):
 
     class Meta:
         model = Section
-        fields = ('name', 'content')
+        fields = ('name', 'content', 'requirements')
         widgets = {
-            'name': TextInput()
+            'name': TextInput(),
+            'requirements':  autocomplete.Select2Multiple(url='synopses:section_ac'),
         }
 
 

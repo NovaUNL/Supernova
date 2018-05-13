@@ -252,7 +252,8 @@ def section_create_view(request, topic_id):
             section_log.save()
             return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
     else:
-        form = SectionForm()
+        # form = SectionForm()
+        form = SectionForm(initial={'after': choices[-1][0]})
         form.fields['after'].choices = choices
 
     subarea = topic.subarea
