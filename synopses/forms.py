@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.core.exceptions import ValidationError
 from django.forms import ChoiceField, ModelForm, TextInput
 from django import forms
 
@@ -29,11 +30,10 @@ class SubareaForm(ModelForm):
 class TopicForm(ModelForm):
     class Meta:
         model = Topic
-        fields = ('subarea', 'name', 'sections')
+        fields = ('subarea', 'name')
         widgets = {
             'name': TextInput(),
-            'subarea': autocomplete.ModelSelect2(url='synopses:subarea_ac'),
-            'sections': autocomplete.Select2Multiple(url='synopses:section_ac')
+            'subarea': autocomplete.ModelSelect2(url='synopses:subarea_ac')
         }
 
 
@@ -45,8 +45,16 @@ class SectionForm(ModelForm):
         fields = ('name', 'content', 'requirements')
         widgets = {
             'name': TextInput(),
-            'requirements':  autocomplete.Select2Multiple(url='synopses:section_ac'),
+            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac'),
         }
+
+    def clean_after(self):
+        after = self.cleaned_data['after']
+        try:
+            after = int(after)
+        except ValueError:
+            raise ValidationError("Invalid 'after' value.")
+        return after
 
 
 class ClassSectionForm(ModelForm):
