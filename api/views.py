@@ -1,6 +1,6 @@
 from django.db import transaction, IntegrityError
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, ParseError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -192,8 +192,8 @@ class SynopsesClassSections(APIView):
                 for pair in section_pairs:
                     synopses.ClassSection(corresponding_class=synopsis_class, index=pair[0], section_id=pair[1]).save()
         except IntegrityError:
-            raise ValidationError("Database transaction failed")  # TODO, change exception type
-        return Response("SUCCESS")  # TODO Proper way to do this?
+            raise ValidationError("Database transaction failed")
+        return Response("success")
 
 
 class Menus(APIView):
@@ -222,16 +222,16 @@ class UserSocialNetworks(APIView):
     def put(self, request, nickname, format=None):  # TODO restrict to owner
         user = users.User.objects.get(nickname=nickname)
         if 'profile' not in request.data or 'network' not in request.data:
-            raise Exception()  # TODO proper django exception
+            raise ParseError()
         try:
             network = int(request.data['network'])
         except TypeError:
-            raise Exception()  # TODO proper django exception
+            raise ParseError()
         if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
-            raise Exception()  # TODO proper django exception
+            raise ValidationError("Unknown network")
         profile = get_network_identifier(network, request.data['profile'])
         if users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
-            raise Exception()  # TODO proper django exception
+            raise ValidationError("Duplicated network")
 
         users.SocialNetworkAccount(user=user, network=network, profile=profile).save()
         return Response({'profile': profile, 'network': network})
@@ -239,12 +239,12 @@ class UserSocialNetworks(APIView):
     def delete(self, request, nickname, format=None):
         user = users.User.objects.get(nickname=nickname)
         if 'profile' not in request.data or 'network' not in request.data:
-            raise Exception()  # TODO proper django exception
+            raise ParseError()
         network = request.data['network']
         if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
-            raise Exception()  # TODO proper django exception
+            raise ValidationError("Unknown network")
         profile = get_network_identifier(request.data['network'], request.data['profile'])
-        if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).count() == 1:
-            raise Exception()  # TODO proper django exception
+        if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
+            raise ValidationError("Not found")
         users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).delete()
-        return Response("SUCCESS")  # TODO Proper way to do this?
+        return Response("success")

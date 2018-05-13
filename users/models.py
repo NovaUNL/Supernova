@@ -95,6 +95,9 @@ class SocialNetworkAccount(Model):
     def __str__(self):
         return f'{self.SOCIAL_NETWORK_CHOICES[self.network][1]}: {self.profile} ({self.user})'
 
+    class Meta:
+        unique_together = ['user', 'network', 'profile']
+
 
 class Registration(Model):
     email = TextField()
