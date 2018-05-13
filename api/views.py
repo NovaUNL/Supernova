@@ -140,7 +140,6 @@ class SynopsesTopicSections(APIView):
             if pair[1] in sections:
                 raise ValidationError("Duplicated sections")
             sections.add(pair[1])
-
         try:
             with transaction.atomic():
                 synopses.SectionTopic.objects.filter(topic=topic).delete()
@@ -148,7 +147,6 @@ class SynopsesTopicSections(APIView):
                     synopses.SectionTopic(topic=topic, index=pair[0], section_id=pair[1]).save()
         except IntegrityError:
             raise ValidationError("Database transaction failed")  # TODO, change exception type
-        return Response("SUCCESS")  # TODO Proper way to do this?
 
 
 class SynopsesClassSections(APIView):
@@ -159,7 +157,7 @@ class SynopsesClassSections(APIView):
         serializer = serializers.synopses.ClassSectionsSerializer(synopses.Class.objects.get(id=pk))
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):  # TODO CSRF mitigation
+    def put(self, request, pk, format=None):
         synopsis_class = college.Class.objects.get(id=pk)
         section_pairs = []
         try:
@@ -193,7 +191,6 @@ class SynopsesClassSections(APIView):
                     synopses.ClassSection(corresponding_class=synopsis_class, index=pair[0], section_id=pair[1]).save()
         except IntegrityError:
             raise ValidationError("Database transaction failed")
-        return Response("success")
 
 
 class Menus(APIView):
@@ -247,4 +244,3 @@ class UserSocialNetworks(APIView):
         if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
             raise ValidationError("Not found")
         users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).delete()
-        return Response("success")

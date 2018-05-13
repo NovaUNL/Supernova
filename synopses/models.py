@@ -64,7 +64,7 @@ class ClassSection(Model):
     index = IntegerField()
 
     class Meta:
-        unique_together = ('section', 'index',)
+        unique_together = ('section', 'corresponding_class')
 
     def __str__(self):
         return f'{self.section} annexed to {self.corresponding_class}.'
@@ -77,7 +77,7 @@ class SectionTopic(Model):
 
     class Meta:
         ordering = ('topic', 'index',)
-        unique_together = ('section', 'index',)
+        unique_together = ('section', 'topic')
 
     def __str__(self):
         return f'{self.section} linked to {self.topic} ({self.index}).'
