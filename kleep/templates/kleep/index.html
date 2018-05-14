@@ -8,22 +8,9 @@
             background-attachment: fixed !important;
         }
 
-        h2 {
-
-        }
-
-        .flex-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-        }
-
         .flex-wrapper.vertical {
             flex-basis: 800px;
-            display: flex;
-            flex-wrap: wrap;
             flex-flow: column;
-            align-items: baseline;
         }
 
         .flex-wrapper.vertical > div {
@@ -33,21 +20,13 @@
         #content_large {
             background-color: rgba(255, 255, 255, 0.85);
         }
-
-        .flex-wrapper h2 {
-            margin: 8px 0;
-        }
-
-        .flex-wrapper h3 {
-            margin: 5px 0;
-        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1>Bem vindo ao Kleep</h1>
-    <span>{{ catchphrase }}</span><br>
-    <div class="flex-wrapper">
+    <h1 style="margin-bottom: 5px;">Bem vindo ao Kleep</h1>
+    <span>{{ catchphrase }}</span>
+    <div class="flex-wrapper"  style="margin-top: 10px">
         <div class="flex-wrapper vertical">
             <div>
                 <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
