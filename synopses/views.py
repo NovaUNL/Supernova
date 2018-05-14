@@ -170,7 +170,7 @@ def topic_manage_sections_view(request, topic_id):
     context['topic'] = topic
     context['action_page'] = reverse('synopses:topic_manage', args=[topic_id])
     context['action_name'] = 'Aplicar alterações'
-    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
@@ -178,7 +178,17 @@ def topic_manage_sections_view(request, topic_id):
     return render(request, 'synopses/topic_management.html', context)
 
 
-def section_view(request, topic_id, section_id):
+def section_view(request, section_id):
+    context = build_base_context(request)
+    section = get_object_or_404(Section, id=section_id)
+    context['section'] = section
+    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': section.name, 'url': '#'}]
+    return render(request, 'synopses/section.html', context)
+
+
+def topic_section_view(request, topic_id, section_id):
     context = build_base_context(request)
     topic = get_object_or_404(Topic, id=topic_id)
     section = get_object_or_404(Section, id=section_id)
@@ -208,7 +218,7 @@ def section_view(request, topic_id, section_id):
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': section.name, 'url': reverse('synopses:section', args=[topic_id, section_id])}]
+                          {'name': section.name, 'url': reverse('synopses:topic_section', args=[topic_id, section_id])}]
     return render(request, 'synopses/section.html', context)
 
 
@@ -238,8 +248,8 @@ def section_create_view(request, topic_id):
                 entry.save()
 
             # Save the new section
-            section = Section(name=form.cleaned_data['name'], content=form.cleaned_data['content'])
-            section.save()
+            section = form.save()
+
             # Annex it to the topic where it was created
             section_topic_rel = SectionTopic(topic=topic, section=section, index=index)
             section_topic_rel.save()
@@ -247,7 +257,7 @@ def section_create_view(request, topic_id):
             section_log = SectionLog(author=request.user, section=section)
             section_log.save()
             # Redirect to the newly created section
-            return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
+            return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
     else:
         # This is a request for the creation form. Fill the possible choices
         form = SectionForm(initial={'after': choices[-1][0]})
@@ -305,23 +315,21 @@ def section_edit_view(request, topic_id, section_id):
             section_topic_rel.index = index
             section_topic_rel.save()
 
-            section.name = form.cleaned_data['name']
             # If the section content changed then log the change to prevent vandalism and allow reversion.
             if section.content != form.cleaned_data['content']:
                 log = SectionLog(author=request.user, section=section, previous_content=section.content)
-                section.content = form.cleaned_data['content']
                 log.save()
-            section.save()
+            form.save()
 
             # Redirect user to the updated section
-            return HttpResponseRedirect(reverse('synopses:section', args=[topic_id, section.id]))
+            return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
     else:
         # Get the section which is indexed before this one
         prev_topic_section = SectionTopic.objects.filter(
             topic=topic, index__lt=section_topic_rel.index).order_by('index').last()
         # If it exists mark it in the previous section field (0 means no section, at the start).
         prev_section_id = prev_topic_section.section.id if prev_topic_section else 0
-        form = SectionForm(initial={'name': section.name, 'content': section.content, 'after': prev_section_id})
+        form = SectionForm(instance=section)
         form.fields['after'].choices = choices
 
     subarea = topic.subarea
@@ -338,7 +346,7 @@ def section_edit_view(request, topic_id, section_id):
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': section.name, 'url': reverse('synopses:section', args=[topic_id, section_id])},
+                          {'name': section.name, 'url': reverse('synopses:topic_section', args=[topic_id, section_id])},
                           {'name': 'Editar'}]
     return render(request, 'synopses/generic_form.html', context)
 

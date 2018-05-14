@@ -11,7 +11,7 @@
     <h3>{{ subarea.name }}, {{ area.name }}</h3>
     <ul id="content-list">
         {% for section in sections %}
-            <li><a href="{% url 'synopses:section' topic.id section.id %}">{{ section.name }}</a></li>
+            <li><a href="{% url 'synopses:topic_section' topic.id section.id %}">{{ section.name }}</a></li>
         {% endfor %}
     </ul>
     <h2>Contribuir:</h2>
