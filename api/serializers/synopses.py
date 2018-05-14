@@ -35,7 +35,14 @@ class TopicSectionsSerializer(serializers.Serializer):
     name = serializers.CharField()
     sections = SectionRelationSerializer(source='sectiontopic_set', many=True)
 
+
 class ClassSectionsSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    sections = SectionRelationSerializer(source='classsection_set', many=True)
+
+
+class SectionSourceSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     sections = SectionRelationSerializer(source='classsection_set', many=True)
