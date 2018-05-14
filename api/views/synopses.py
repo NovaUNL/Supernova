@@ -10,13 +10,25 @@ from college.models import Class
 from synopses import models as synopses
 
 
-class SyopsesAreas(APIView):
+class Areas(APIView):
     def get(self, request, format=None):
         serializer = serializers.AreaSerializer(synopses.Area.objects.all(), many=True)
         return Response(serializer.data)
 
 
-class SynopsesTopicSections(APIView):
+class Area(APIView):
+    def get(self, request, pk, format=None):
+        serializer = serializers.AreaSerializer(synopses.Area.objects.get(id=pk))
+        return Response(serializer.data)
+
+
+class Subarea(APIView):
+    def get(self, request, pk, format=None):
+        serializer = serializers.SubareaSerializer(synopses.Subarea.objects.get(id=pk))
+        return Response(serializer.data)
+
+
+class TopicSections(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
@@ -59,7 +71,7 @@ class SynopsesTopicSections(APIView):
             raise ValidationError("Database transaction failed")
 
 
-class SynopsesClassSections(APIView):
+class ClassSections(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
@@ -101,3 +113,9 @@ class SynopsesClassSections(APIView):
                     synopses.ClassSection(corresponding_class=synopsis_class, index=pair[0], section_id=pair[1]).save()
         except IntegrityError:
             raise ValidationError("Database transaction failed")
+
+
+class Section(APIView):
+    def get(self, request, pk, format=None):
+        serializer = serializers.SectionSerializer(synopses.Section.objects.get(id=pk))
+        return Response(serializer.data)

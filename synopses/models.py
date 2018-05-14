@@ -1,6 +1,6 @@
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField
+from django.db.models import Model, TextField, ForeignKey, ManyToManyField, IntegerField, DateTimeField, URLField
 
 from college.models import Class
 from documents.models import Document
@@ -93,11 +93,16 @@ class SectionLog(Model):
     def __str__(self):
         return f'{self.author} edited {self.section} @ {self.timestamp}.'
 
+
+class SectionSource(Model):
+    section = ForeignKey(Section, on_delete=models.CASCADE, related_name='sources')
+    title = TextField(max_length=300)
+    url = URLField()
+
+    class Meta:
+        unique_together = (('section', 'title'), ('section', 'url'))
+
 # TODO
-# class SectionSource(Model):
-#     section = ForeignKey(Section, on_delete=models.CASCADE)
-#     title = TextField(max_length=300)
-#     url = TextField(max_length=200)
 
 # class SectionContinuation(Model):
 #     section = ForeignKey(Section, on_delete=models.CASCADE)
@@ -106,4 +111,4 @@ class SectionLog(Model):
 # class Resource(Model):
 #     name = TextField(max_length=100)
 #     document = OneToOneField(Document, null=True, blank=True, on_delete=models.PROTECT)
-#     webpage = TextField(max_length=200)
+#     webpage = URLField(max_length=200)

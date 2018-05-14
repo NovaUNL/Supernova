@@ -18,13 +18,6 @@ class BuildingDetailed(APIView):
         return Response(serializer.data)
 
 
-class CampusMap(APIView):
-    def get(self, request, format=None):
-        serializer = serializers.BuildingSerializer(college.Building.objects.all(), many=True)
-        return Response({'map_url': 'https://gitlab.com/claudiop/KleepAssets/raw/master/Campus.svg',
-                         'buildings': serializer.data})
-
-
 class DepartmentList(APIView):
     def get(self, request, format=None):
         serializer = serializers.DepartmentMinimalSerializer(

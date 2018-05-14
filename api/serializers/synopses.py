@@ -18,10 +18,24 @@ class AreaSerializer(serializers.Serializer):
     subareas = SubareaSerializer(many=True)
 
 
+# Serializes a section source
+class SectionSourceSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    url = serializers.URLField()
+
+
+# Serializes a reference to a section (its id and name).
+class SectionReferenceSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
 class SectionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     content = serializers.CharField()
+    sources = SectionSourceSerializer(many=True)
+    requirements = SectionReferenceSerializer(many=True)
 
 
 class SectionRelationSerializer(serializers.Serializer):
@@ -37,12 +51,6 @@ class TopicSectionsSerializer(serializers.Serializer):
 
 
 class ClassSectionsSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    sections = SectionRelationSerializer(source='classsection_set', many=True)
-
-
-class SectionSourceSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     sections = SectionRelationSerializer(source='classsection_set', many=True)

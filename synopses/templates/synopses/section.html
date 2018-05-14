@@ -19,7 +19,7 @@
         <div style="flex-basis: 500px">
             <h3>Necessitas de entender:</h3>
             {% for requirement in section.requirements.all %}
-                <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>123,
+                <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>;
             {% endfor %}
         </div>
     {% endif %}
