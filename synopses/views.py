@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -43,10 +44,8 @@ def subarea_view(request, subarea_id):
     return render(request, 'synopses/subarea.html', context)
 
 
+@login_required
 def subarea_create_view(request, area_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     area = get_object_or_404(Area, id=area_id)
 
     if request.method == 'POST':
@@ -70,6 +69,7 @@ def subarea_create_view(request, area_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+@login_required
 def subarea_edit_view(request, subarea_id):
     subarea = get_object_or_404(Subarea, id=subarea_id)
     area = subarea.area
@@ -112,6 +112,7 @@ def topic_view(request, topic_id):
     return render(request, 'synopses/topic.html', context)
 
 
+@login_required
 def topic_create_view(request, subarea_id):
     subarea = get_object_or_404(Subarea, id=subarea_id)
 
@@ -132,6 +133,7 @@ def topic_create_view(request, subarea_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+@login_required
 def topic_edit_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     subarea = topic.subarea
@@ -158,6 +160,7 @@ def topic_edit_view(request, topic_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+@login_required
 def topic_manage_sections_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     subarea = topic.subarea
@@ -222,9 +225,8 @@ def topic_section_view(request, topic_id, section_id):
     return render(request, 'synopses/section.html', context)
 
 
+@login_required
 def section_create_view(request, topic_id):
-    if not request.user.is_authenticated:  # Unauthenticated users cannot create
-        return HttpResponseRedirect(reverse('login'))
     topic = get_object_or_404(Topic, id=topic_id)
     context = build_base_context(request)
     # Choices (for the 'after' field) are at the topic start, or after any section other than this one
@@ -293,9 +295,8 @@ def section_create_view(request, topic_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+@login_required
 def section_edit_view(request, topic_id, section_id):
-    if not request.user.is_authenticated:  # Unauthenticated users cannot edit
-        return HttpResponseRedirect(reverse('login'))
     topic = get_object_or_404(Topic, id=topic_id)
     section = get_object_or_404(Section, id=section_id)
     # If this section does not exist within this topic, redirect to the topic page
@@ -391,6 +392,7 @@ def class_sections_view(request, class_id):
     return render(request, 'synopses/class_sections.html', context)
 
 
+@login_required
 def class_manage_sections_view(request, class_id):
     class_ = get_object_or_404(Class, id=class_id)
     context = build_base_context(request)

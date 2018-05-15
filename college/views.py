@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -168,6 +169,7 @@ def course(request, course_id):
     return render(request, 'college/course.html', context)
 
 
+@login_required
 def course_students(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     context = build_base_context(request)

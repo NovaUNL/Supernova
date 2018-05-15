@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -25,9 +26,10 @@ def login_view(request):
         form = LoginForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
+            if 'next' in request.GET:
+                return HttpResponseRedirect(request.GET['next'])
             return HttpResponseRedirect(reverse('index'))
         else:
-            print("Invalid")
             context['login_form'] = form
     else:
         context['login_form'] = LoginForm()
@@ -49,11 +51,10 @@ def registration_view(request):
     context['enabled'] = REGISTRATIONS_ENABLED
     if request.method == 'POST':
         form = RegistrationForm(data=request.POST)
-        print(form.is_valid())
         if form.is_valid():
             registration = form.save(commit=False)
             pre_register(registration)
-            HttpResponseRedirect(reverse('login'))
+            HttpResponseRedirect(reverse('registration_validation'))
         context['creation_form'] = form
     else:
         context['creation_form'] = RegistrationForm()
@@ -88,8 +89,7 @@ def registration_validation_view(request):
 
 
 def profile_view(request, nickname):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
+    # TODO visibility
     user = get_object_or_404(User, nickname=nickname)
     context = build_base_context(request)
     page_name = f"Perfil de {user.get_full_name()}"
@@ -104,6 +104,7 @@ def profile_view(request, nickname):
     return render(request, 'users/profile.html', context)
 
 
+@login_required
 def user_schedule_view(request, nickname):
     context = build_base_context(request)
     user = get_object_or_404(User, id=request.user.id)
@@ -121,10 +122,8 @@ def user_schedule_view(request, nickname):
     return render(request, 'users/profile_schedule.html', context)
 
 
+@login_required
 def user_profile_settings_view(request, nickname):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -144,10 +143,8 @@ def user_profile_settings_view(request, nickname):
     return render(request, 'users/profile_settings.html', context)
 
 
+@login_required
 def user_profile_social_view(request, nickname):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -168,10 +165,8 @@ def user_profile_social_view(request, nickname):
     return render(request, 'users/profile_social_networks.html', context)
 
 
+@login_required
 def user_profile_password_view(request, nickname):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     context = build_base_context(request)
     user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
@@ -191,10 +186,8 @@ def user_profile_password_view(request, nickname):
     return render(request, 'users/profile_password_change.html', context)
 
 
+@login_required
 def user_clip_crawler_view(request, nickname):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     user = User.objects.get(id=request.user.id)
     context = build_base_context(request)
     context['page'] = 'profile_crawler'

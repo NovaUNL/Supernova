@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
@@ -73,9 +74,8 @@ def documents_view(request, group_id):
     return render(request, 'groups/documents.html', context)
 
 
+@login_required
 def contact_view(request, group_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
     group = get_object_or_404(Group, id=group_id)
     context = build_base_context(request)
     context['title'] = f'Contactar {group.name}'

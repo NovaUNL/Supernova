@@ -2,6 +2,8 @@ import json
 import os
 import subprocess
 
+from django.urls import reverse
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 with open(BASE_DIR + '/settings.json') as json_data:
@@ -213,3 +215,5 @@ LOGGING = {
 }
 if DEBUG:
     LOGGING['loggers']['django']['level'] = 'DEBUG'
+
+LOGIN_URL = '/entrar'
