@@ -9,11 +9,12 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
         {{ form.as_p }}
-        {% if formset %}
-            {{ formset.management_form }}
-            {{ formset.non_form_errors }}
+        {% if sources_formset %}
+            <h3>Fontes:</h3>
+            {{ sources_formset.management_form }}
+            {{ sources_formset.non_form_errors }}
             <table>
-                {% for subform in formset.forms %}
+                {% for subform in sources_formset.forms %}
                     {% if subform.non_field_errors %}
                         <tr>{{ subform.non_field_errors }}</tr>
                     {% endif %}

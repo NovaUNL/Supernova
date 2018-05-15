@@ -232,36 +232,48 @@ def section_create_view(request, topic_id):
                                          Section.objects.filter(topic=topic)
                                          .order_by('sectiontopic__index').all()))
     if request.method == 'POST':
-        form = SectionForm(data=request.POST)
-        form.fields['after'].choices = choices
-        if form.is_valid():
+        section_form = SectionForm(data=request.POST)
+        section_form.fields['after'].choices = choices
+        sources_formset = SectionSourcesFormSet(request.POST, prefix="sources")
+        if section_form.is_valid():
             # Obtain the requested index
-            if form.cleaned_data['after'] == 0:
+            if section_form.cleaned_data['after'] == 0:
                 index = 1
             else:
-                index = SectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
+                index = SectionTopic.objects.get(topic=topic, section_id=section_form.cleaned_data['after']).index + 1
 
             # Avoid index collisions. If the wanted index is taken by some other section
-            # Then increment the index of every section with an index >= the desired one.
-            for entry in SectionTopic.objects.filter(topic=topic, index__gte=index).all():
-                entry.index += 1
-                entry.save()
+            if SectionTopic.objects.filter(topic=topic, index=index).exists():
+                # Then increment the index of every section with an index >= the desired one.
+                for entry in SectionTopic.objects.filter(topic=topic, index__gte=index) \
+                        .order_by('index').reverse().all():
+                    entry.index += 1
+                    entry.save()
 
             # Save the new section
-            section = form.save()
+            section = section_form.save()
 
             # Annex it to the topic where it was created
             section_topic_rel = SectionTopic(topic=topic, section=section, index=index)
             section_topic_rel.save()
+
             # Create an empty log entry for the author to be identifiable
             section_log = SectionLog(author=request.user, section=section)
             section_log.save()
+
+            # Process the sources subform
+            sources = sources_formset.save(commit=False)
+            for source in sources:
+                source.section = section
+                source.save()
+
             # Redirect to the newly created section
             return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
     else:
         # This is a request for the creation form. Fill the possible choices
-        form = SectionForm(initial={'after': choices[-1][0]})
-        form.fields['after'].choices = choices
+        section_form = SectionForm(initial={'after': choices[-1][0]})
+        section_form.fields['after'].choices = choices
+        sources_formset = SectionSourcesFormSet(prefix="sources")
 
     subarea = topic.subarea
     area = subarea.area
@@ -269,7 +281,8 @@ def section_create_view(request, topic_id):
     context['area'] = area
     context['subarea'] = subarea
     context['topic'] = topic
-    context['form'] = form
+    context['form'] = section_form
+    context['sources_formset'] = sources_formset
     context['action_page'] = reverse('synopses:section_create', args=[topic_id])
     context['action_name'] = 'Criar'
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
@@ -311,7 +324,8 @@ def section_edit_view(request, topic_id, section_id):
             # Avoid index collisions. If the wanted index is taken by some other section
             if SectionTopic.objects.filter(topic=topic, index=index).exclude(section=section).exists():
                 # Then increment the index of every section with an index >= the desired one.
-                for entry in SectionTopic.objects.filter(topic=topic, index__gte=index).all():
+                for entry in SectionTopic.objects.filter(topic=topic, index__gte=index) \
+                        .order_by('index').reverse().all():
                     entry.index += 1
                     entry.save()
             section_topic_rel.index = index
@@ -352,7 +366,7 @@ def section_edit_view(request, topic_id, section_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['form'] = section_form
-    context['formset'] = sources_formset
+    context['sources_formset'] = sources_formset
     context['action_page'] = reverse('synopses:section_edit', args=[topic_id, section_id])
     context['action_name'] = 'Editar'
 

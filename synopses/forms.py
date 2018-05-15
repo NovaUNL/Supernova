@@ -1,6 +1,6 @@
 from dal import autocomplete
 from django.core.exceptions import ValidationError
-from django.forms import ChoiceField, ModelForm, TextInput, inlineformset_factory, URLInput
+from django.forms import ChoiceField, ModelForm, TextInput, inlineformset_factory, URLInput, URLField
 from django import forms
 
 from synopses.models import Area, Subarea, Topic, Section, ClassSection, SectionSource
@@ -70,13 +70,14 @@ class ClassSectionForm(ModelForm):
 
 
 class SectionSourceForm(ModelForm):
+    url = URLField(widget=URLInput(attrs={'placeholder': 'Endreço (opcional)'}), required=False)
+
     class Meta:
         model = SectionSource
         fields = ('title', 'url')
         widgets = {
-            'title': TextInput(attrs={'placeholder': 'Nome da fonte'}),
-            'url': URLInput(attrs={'placeholder': 'Endreço (opcional)'})
+            'title': TextInput(attrs={'placeholder': 'Nome da fonte'})
         }
 
 
-SectionSourcesFormSet = inlineformset_factory(Section, SectionSource, form=SectionSourceForm, extra=5)
+SectionSourcesFormSet = inlineformset_factory(Section, SectionSource, form=SectionSourceForm, extra=3)

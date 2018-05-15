@@ -97,7 +97,7 @@ class SectionLog(Model):
 class SectionSource(Model):
     section = ForeignKey(Section, on_delete=models.CASCADE, related_name='sources')
     title = TextField(max_length=300, verbose_name='título')
-    url = URLField(verbose_name='endreço')
+    url = URLField(blank=True, null=True, verbose_name='endreço')
 
     class Meta:
         unique_together = (('section', 'title'), ('section', 'url'))
