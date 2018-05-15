@@ -7,10 +7,29 @@
     <h1><i class="fas fa-book"></i> {{ title }}</h1>
     <form method="post" action="{{ action_page }}">
         {% csrf_token %}
+        {{ form.non_field_errors }}
         {{ form.as_p }}
+        {% if formset %}
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+            <table>
+                {% for subform in formset.forms %}
+                    {% if subform.non_field_errors %}
+                        <tr>{{ subform.non_field_errors }}</tr>
+                    {% endif %}
+                    <tr>
+                        {{ subform.id }}
+                        <td>{{ subform.title }} <span style="color: red;">{{ subform.title.errors }}</span></td>
+                        <td>{{ subform.url }} <span style="color: red;">{{ subform.url.errors }}</span></td>
+                        {% if subform.instance.pk %}
+                            <td>Apagar: {{ subform.DELETE }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
         <input type="submit" value="{{ action_name }}"/>
     </form>
-
     <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
     {{ form.media }}
 

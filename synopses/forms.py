@@ -1,9 +1,9 @@
 from dal import autocomplete
 from django.core.exceptions import ValidationError
-from django.forms import ChoiceField, ModelForm, TextInput
+from django.forms import ChoiceField, ModelForm, TextInput, inlineformset_factory, URLInput
 from django import forms
 
-from synopses.models import Area, Subarea, Topic, Section, ClassSection
+from synopses.models import Area, Subarea, Topic, Section, ClassSection, SectionSource
 
 
 class AreaForm(ModelForm):
@@ -39,14 +39,16 @@ class TopicForm(ModelForm):
 
 class SectionForm(ModelForm):
     after = ChoiceField(label='Após:', required=True)
+    requirements = forms.ModelMultipleChoiceField(
+        widget=autocomplete.Select2Multiple(url='synopses:section_ac'),
+        queryset=Section.objects.all(),
+        required=False)
 
     class Meta:
         model = Section
         fields = ('name', 'content', 'requirements')
         widgets = {
-            'name': TextInput(),
-            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac'),
-        }
+            'name': TextInput()}
 
     def clean_after(self):
         after = self.cleaned_data['after']
@@ -65,3 +67,16 @@ class ClassSectionForm(ModelForm):
             'corresponding_class': autocomplete.ModelSelect2(url='class_ac'),
             'section': autocomplete.ModelSelect2(url='synopses:section_ac'),
         }
+
+
+class SectionSourceForm(ModelForm):
+    class Meta:
+        model = SectionSource
+        fields = ('title', 'url')
+        widgets = {
+            'title': TextInput(attrs={'placeholder': 'Nome da fonte'}),
+            'url': URLInput(attrs={'placeholder': 'Endreço (opcional)'})
+        }
+
+
+SectionSourcesFormSet = inlineformset_factory(Section, SectionSource, form=SectionSourceForm, extra=5)

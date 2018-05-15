@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from college.models import Class
 from kleep.views import build_base_context
-from synopses.forms import SectionForm, TopicForm, SubareaForm
+from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet
 
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection
@@ -298,13 +298,15 @@ def section_edit_view(request, topic_id, section_id):
         choices += ((other_section.id, other_section.name),)
 
     if request.method == 'POST':
-        form = SectionForm(data=request.POST, instance=section)
-        form.fields['after'].choices = choices
-        if form.is_valid():
-            if form.cleaned_data['after'] == 0:
+        section_form = SectionForm(data=request.POST, instance=section)
+        sources_formset = SectionSourcesFormSet(
+            request.POST, instance=section, prefix="sources", queryset=section.sources.all())
+        section_form.fields['after'].choices = choices
+        if section_form.is_valid() and sources_formset.is_valid():
+            if section_form.cleaned_data['after'] == 0:
                 index = 1
             else:
-                index = SectionTopic.objects.get(topic=topic, section_id=form.cleaned_data['after']).index + 1
+                index = SectionTopic.objects.get(topic=topic, section_id=section_form.cleaned_data['after']).index + 1
 
             # Avoid index collisions. If the wanted index is taken by some other section
             if SectionTopic.objects.filter(topic=topic, index=index).exclude(section=section).exists():
@@ -316,10 +318,20 @@ def section_edit_view(request, topic_id, section_id):
             section_topic_rel.save()
 
             # If the section content changed then log the change to prevent vandalism and allow reversion.
-            if section.content != form.cleaned_data['content']:
+            if section.content != section_form.cleaned_data['content']:
                 log = SectionLog(author=request.user, section=section, previous_content=section.content)
                 log.save()
-            form.save()
+            section = section_form.save()
+
+            # Process the sources subform
+            sources = sources_formset.save(commit=False)
+            # Delete any tagged object
+            for source in sources_formset.deleted_objects:
+                source.delete()
+            # Add new objects
+            for source in sources:
+                source.section = section
+                source.save()
 
             # Redirect user to the updated section
             return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
@@ -329,8 +341,9 @@ def section_edit_view(request, topic_id, section_id):
             topic=topic, index__lt=section_topic_rel.index).order_by('index').last()
         # If it exists mark it in the previous section field (0 means no section, at the start).
         prev_section_id = prev_topic_section.section.id if prev_topic_section else 0
-        form = SectionForm(instance=section)
-        form.fields['after'].choices = choices
+        section_form = SectionForm(instance=section, initial={'after': prev_section_id})
+        sources_formset = SectionSourcesFormSet(instance=section, prefix="sources")
+        section_form.fields['after'].choices = choices
 
     subarea = topic.subarea
     area = subarea.area
@@ -338,7 +351,8 @@ def section_edit_view(request, topic_id, section_id):
     context['area'] = area
     context['subarea'] = subarea
     context['topic'] = topic
-    context['form'] = form
+    context['form'] = section_form
+    context['formset'] = sources_formset
     context['action_page'] = reverse('synopses:section_edit', args=[topic_id, section_id])
     context['action_name'] = 'Editar'
 
