@@ -17,18 +17,22 @@
 
         .flex-wrapper > div {
             min-width: 300px;
-            margin-right: 10px;
+            margin-right: 20px;
         }
     </style>
 {% endblock %}
 
 {% block content %}
     <h1><i class="fas fa-book"></i> {{ section.name }}</h1>
-    {% if topic %}
-        <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
+    {% if synopsis_class %}
+        <h3><a href="{% url 'synopses:class' synopsis_class.id %}">Síntese de {{ synopsis_class.name }}</a></h3>
+    {% else %}
+        {% if topic %}
+            <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
+        {% endif %}
     {% endif %}
     {% if section.requirements.exists %}
-        <div style="flex-basis: 500px">
+        <div>
             <h3>Necessitas de entender:</h3>
             {% for requirement in section.requirements.all %}
                 <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>;
@@ -39,16 +43,31 @@
     <div class="clearfix" style="font-family: sans-serif;">{{ section.content|safe }}</div>
     <hr>
     <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-        {% if previous_section %}
-            <a class="generic-button"
-               href="{% url 'synopses:topic_section' topic.id previous_section.id %}">
-                <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}</a>
-        {% endif %}
-        <a style="padding: 0;"></a>
-        {% if next_section %}
-            <a class="generic-button"
-               href="{% url 'synopses:topic_section' topic.id next_section.id %}">Seguinte: {{ next_section.name }}
-                <i class="fas fa-angle-double-right"></i></a>
+        {% if topic %}
+            {% if previous_section %}
+                <a class="generic-button" href="{% url 'synopses:topic_section' topic.id previous_section.id %}">
+                    <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
+                </a>
+            {% endif %}
+            <a style="padding: 0;"></a>
+            {% if next_section %}
+                <a class="generic-button" href="{% url 'synopses:topic_section' topic.id next_section.id %}">
+                    Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
+                </a>
+            {% endif %}
+        {% elif synopsis_class %}
+            {% if previous_section %}
+                <a class="generic-button"
+                   href="{% url 'synopses:class_section' synopsis_class.id previous_section.id %}">
+                    <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
+                </a>
+            {% endif %}
+            <a style="padding: 0;"></a>
+            {% if next_section %}
+                <a class="generic-button" href="{% url 'synopses:class_section' synopsis_class.id next_section.id %}">
+                    Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
+                </a>
+            {% endif %}
         {% endif %}
     </nav>
     <div class="flex-wrapper">
@@ -81,24 +100,38 @@
             <ul>
                 {% for class_section in section.class_sections.all %}
                     <li>
-                        <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">{{ class_section.corresponding_class.name }}</a>
+                        <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
+                            {{ class_section.corresponding_class.name }}
+                        </a>
                     </li>
                 {% endfor %}
             </ul>
         </div>
         <div>
-            <h3>Contribuir:</h3>
-            {% if user.is_authenticated %}
-                {% if topic %}
+            <h3>Tópicos:</h3>
+            <ul>
+                {% for topic in section.topics.all %}
+                    <li>
+                        <a href="{% url 'synopses:topic' topic.id %}">
+                            {{ topic.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if topic %}
+            <div>
+                <h3>Contribuir:</h3>
+                {% if user.is_authenticated %}
                     <div id="contribute">
                         <a class="generic-button" href="{% url 'synopses:section_edit' topic.id section.id %}">
                             Editar
                         </a>
                     </div>
+                {% else %}
+                    <b>Autentique-se para poder efetuar alterações.</b>
                 {% endif %}
-            {% else %}
-                <b>Autentique-se para poder efetuar alterações.</b>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

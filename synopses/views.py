@@ -425,7 +425,7 @@ def class_section_view(request, class_id, section_id):
     context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
                           {'name': section.name, 'url': reverse('synopses:class_section', args=[class_id, section_id])}]
-    return render(request, 'synopses/class_section.html', context)
+    return render(request, 'synopses/section.html', context)
 
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):
