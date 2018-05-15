@@ -8,6 +8,18 @@
     <script src="{% static 'kleep/prism.js' %}"></script>
     <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <style>
+        .flex-wrapper > div ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .flex-wrapper > div {
+            min-width: 300px;
+            margin-right: 10px;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -40,24 +52,39 @@
         {% endif %}
     </nav>
     <div class="flex-wrapper">
-        <div style="min-width: 300px">
+        <div>
             <h3>Autores:</h3>
-            <ul style="padding: 0; margin: 0; list-style: none;">
+            <ul style="">
                 {% for log in author_log %}
                     <li><a href="{% url 'profile' log.author.nickname %}">{{ log.author.get_full_name }}</a></li>
                 {% endfor %}
             </ul>
         </div>
-        <div style="min-width: 300px">
-            <h3>Fontes/recursos:</h3>
-            TODO
-        </div>
-        <div style="min-width: 100px; max-width: 300px; margin-right: 10px;">
+        {% if section.sources.exists %}
+            <div style="min-width: 300px">
+                <h3>Fontes:</h3>
+                <ul>
+                    {% for source in section.sources.all %}
+                        <li>
+                            {% if source.url %}
+                                <a href="{{ source.url }}">{{ source.title }}</a>
+                            {% else %}
+                                {{ source.title }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <div>
             <h3>Cadeiras:</h3>
-            {% for class_section in section.class_sections.all %}
-                <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
-                    {{ class_section.corresponding_class.name }}</a>,
-            {% endfor %}
+            <ul>
+                {% for class_section in section.class_sections.all %}
+                    <li>
+                        <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">{{ class_section.corresponding_class.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
         <div>
             <h3>Contribuir:</h3>
@@ -65,7 +92,8 @@
                 {% if topic %}
                     <div id="contribute">
                         <a class="generic-button" href="{% url 'synopses:section_edit' topic.id section.id %}">
-                            Editar</a>
+                            Editar
+                        </a>
                     </div>
                 {% endif %}
             {% else %}
