@@ -37,7 +37,7 @@
                     {{ turn.turn_type.abbreviation|upper }}{{ turn.number }}
                 </a>
                 <div style="display: inline-block;">
-                    {% for instance in turn.turninstance_set.all %}
+                    {% for instance in turn.instances.all %}
                         <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
                         <a style="border-bottom: 1px solid black" href="{% url 'classroom' instance.place.id %}">
                             {{ instance.place }}

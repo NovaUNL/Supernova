@@ -18,7 +18,6 @@ def campus(request):
     context = build_base_context(request)
     context['title'] = "Mapa do campus"
     context['buildings'] = Building.objects.all()
-    # context['services'] = Service.objects.all()
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': reverse('campus')}]
     return render(request, 'college/campus.html', context)
 

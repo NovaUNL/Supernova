@@ -17,7 +17,7 @@
     <a class="menu_entry" href="{% url 'synopses:class' class_obj.id %}">Resumo</a>
     <br><br>
     <span style="font-size: 1.2em; font-weight: bold;">Instâncias:</span>
-    {% for instance in class_obj.classinstance_set.all %}
+    {% for instance in class_obj.instances.all %}
         <a class="menu_entry"
            href="{% url 'class_instance' instance.id %}">
             {{ instance.occasion }}</a>
