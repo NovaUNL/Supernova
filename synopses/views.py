@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from college.models import Class
 from kleep.views import build_base_context
-from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet
+from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet, SectionResourcesFormSet
 
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection
@@ -315,8 +315,9 @@ def section_edit_view(request, topic_id, section_id):
         section_form = SectionForm(data=request.POST, instance=section)
         sources_formset = SectionSourcesFormSet(
             request.POST, instance=section, prefix="sources", queryset=section.sources.all())
+        resources_formset = SectionResourcesFormSet(request.POST, instance=section, prefix="resources")
         section_form.fields['after'].choices = choices
-        if section_form.is_valid() and sources_formset.is_valid():
+        if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
             if section_form.cleaned_data['after'] == 0:
                 index = 1
             else:
@@ -348,6 +349,15 @@ def section_edit_view(request, topic_id, section_id):
                 source.section = section
                 source.save()
 
+            # Process the resources subform
+            resources = resources_formset.save(commit=False)
+            # Delete any tagged object
+            for resource in resources_formset.deleted_objects:
+                resource.delete()
+            # Add new objects
+            for resource in resources:
+                resource.save()
+
             # Redirect user to the updated section
             return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
     else:
@@ -358,6 +368,7 @@ def section_edit_view(request, topic_id, section_id):
         prev_section_id = prev_topic_section.section.id if prev_topic_section else 0
         section_form = SectionForm(instance=section, initial={'after': prev_section_id})
         sources_formset = SectionSourcesFormSet(instance=section, prefix="sources")
+        resources_formset = SectionResourcesFormSet(instance=section, prefix="resources")
         section_form.fields['after'].choices = choices
 
     subarea = topic.subarea
@@ -368,6 +379,7 @@ def section_edit_view(request, topic_id, section_id):
     context['topic'] = topic
     context['form'] = section_form
     context['sources_formset'] = sources_formset
+    context['resources_formset'] = resources_formset
     context['action_page'] = reverse('synopses:section_edit', args=[topic_id, section_id])
     context['action_name'] = 'Editar'
 

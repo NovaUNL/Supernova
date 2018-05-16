@@ -48,7 +48,6 @@ class Topic(Model):
 class Section(Model):
     name = TextField(verbose_name='nome')
     content = RichTextUploadingField(verbose_name='conteúdo')
-    # example = RichTextField(verbose_name='exemplo') TODO separate
     topics = ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
     requirements = ManyToManyField('Section', verbose_name='requisitos')
 
@@ -102,13 +101,9 @@ class SectionSource(Model):
     class Meta:
         unique_together = (('section', 'title'), ('section', 'url'))
 
-# TODO
 
-# class SectionContinuation(Model):
-#     section = ForeignKey(Section, on_delete=models.CASCADE)
-#     continuation = ForeignKey(Section, on_delete=models.CASCADE)
-
-# class Resource(Model):
-#     name = TextField(max_length=100)
-#     document = OneToOneField(Document, null=True, blank=True, on_delete=models.PROTECT)
-#     webpage = URLField(max_length=200)
+class SectionResource(Model):
+    section = ForeignKey(Section, on_delete=models.CASCADE, related_name='resource')
+    name = TextField(max_length=100)
+    document = ForeignKey(Document, null=True, blank=True, on_delete=models.PROTECT)
+    webpage = URLField(null=True, blank=True)

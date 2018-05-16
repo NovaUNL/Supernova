@@ -29,6 +29,40 @@
                 {% endfor %}
             </table>
         {% endif %}
+        {% if resources_formset %}
+            <h3>Recursos:</h3>
+            {{ resources_formset.management_form }}
+            {{ resources_formset.non_form_errors }}
+            <table>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Página</th>
+                    <th></th>
+                    <th>Documento</th>
+                </tr>
+                {% for subform in resources_formset.forms %}
+                    {% if subform.non_field_errors %}
+                        <tr>
+                            <td colspan="5"><span style="color: red;">{{ subform.non_field_errors }}</span></td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        {{ subform.id }}
+                        <td><span style="color: red;">{{ subform.name.errors }}</span>{{ subform.name }}</td>
+                        <td><span
+                                style="color: red;">{{ subform.resource_type.errors }}</span>{{ subform.resource_type }}
+                        </td>
+                        <td><span style="color: red;">{{ subform.webpage.errors }}</span>{{ subform.webpage }}</td>
+                        <td>←<b> ou </b>→</td>
+                        <td><span style="color: red;">{{ subform.document.errors }}</span>{{ subform.document }}</td>
+                        {% if subform.instance.pk %}
+                            <td>Apagar: {{ subform.DELETE }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
         <input type="submit" value="{{ action_name }}"/>
     </form>
     <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
