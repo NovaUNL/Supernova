@@ -237,7 +237,8 @@ def section_create_view(request, topic_id):
         section_form = SectionForm(data=request.POST)
         section_form.fields['after'].choices = choices
         sources_formset = SectionSourcesFormSet(request.POST, prefix="sources")
-        if section_form.is_valid():
+        resources_formset = SectionResourcesFormSet(request.POST, prefix="resources")
+        if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
             # Obtain the requested index
             if section_form.cleaned_data['after'] == 0:
                 index = 1
@@ -276,6 +277,7 @@ def section_create_view(request, topic_id):
         section_form = SectionForm(initial={'after': choices[-1][0]})
         section_form.fields['after'].choices = choices
         sources_formset = SectionSourcesFormSet(prefix="sources")
+        resources_formset = SectionResourcesFormSet(prefix="resources")
 
     subarea = topic.subarea
     area = subarea.area
@@ -285,6 +287,7 @@ def section_create_view(request, topic_id):
     context['topic'] = topic
     context['form'] = section_form
     context['sources_formset'] = sources_formset
+    context['resources_formset'] = resources_formset
     context['action_page'] = reverse('synopses:section_create', args=[topic_id])
     context['action_name'] = 'Criar'
     context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
