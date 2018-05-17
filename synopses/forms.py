@@ -106,9 +106,8 @@ class SectionResourceForm(ModelForm):
         return None if webpage == '' else webpage
 
     def clean(self):
-        super().clean()
-
-        resource_type = self.cleaned_data['resource_type']
+        data = super().clean()
+        resource_type = data.get('resource_type')
         if resource_type == 1 and self.cleaned_data['webpage'] is None:
             self.add_error('webpage', 'Link em falta')
         elif resource_type == 2 and self.cleaned_data['document'] is None:
