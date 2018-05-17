@@ -95,6 +95,22 @@
                 </ul>
             </div>
         {% endif %}
+        {% if section.resources.exists %}
+            <div style="min-width: 300px">
+                <h3>Recursos:</h3>
+                <ul>
+                    {% for resource in section.resources.all %}
+                        <li>
+                            {% if resource.webpage %}
+                                <a href="{{ resource.webpage }}">{{ resource.name }}</a>
+                            {% elif resource.document %}
+                                <a href="{% url 'document' resource.document.id %}">{{ resource.name }}</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
         <div>
             <h3>Cadeiras:</h3>
             <ul>

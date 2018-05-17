@@ -103,7 +103,7 @@ class SectionSource(Model):
 
 
 class SectionResource(Model):
-    section = ForeignKey(Section, on_delete=models.CASCADE, related_name='resource')
+    section = ForeignKey(Section, on_delete=models.CASCADE, related_name='resources')
     name = TextField(max_length=100)
     document = ForeignKey(Document, null=True, blank=True, on_delete=models.PROTECT)
     webpage = URLField(null=True, blank=True)
