@@ -96,7 +96,7 @@
             </div>
         {% endif %}
         {% if section.resources.exists %}
-            <div style="min-width: 300px">
+            <div style="min-width: 200px">
                 <h3>Recursos:</h3>
                 <ul>
                     {% for resource in section.resources.all %}
@@ -111,18 +111,20 @@
                 </ul>
             </div>
         {% endif %}
-        <div>
-            <h3>Cadeiras:</h3>
-            <ul>
-                {% for class_section in section.class_sections.all %}
-                    <li>
-                        <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
-                            {{ class_section.corresponding_class.name }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+        {% if section.class_sections.exists %}
+            <div>
+                <h3>Cadeiras:</h3>
+                <ul>
+                    {% for class_section in section.class_sections.all %}
+                        <li>
+                            <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
+                                {{ class_section.corresponding_class.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
         <div>
             <h3>Tópicos:</h3>
             <ul>
