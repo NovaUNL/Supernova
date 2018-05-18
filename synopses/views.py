@@ -1,5 +1,6 @@
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
+from django.forms import HiddenInput
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -52,10 +53,10 @@ def subarea_create_view(request, area_id):
         form = SubareaForm(data=request.POST)
         if form.is_valid():
             new_subarea = form.save()
-            return HttpResponseRedirect(reverse('synopses:subarea_create', args=[new_subarea.id]))
+            return HttpResponseRedirect(reverse('synopses:subarea', args=[new_subarea.id]))
     else:
         form = SubareaForm(initial={'area': area})
-        form.fields['area'].disabled = True
+        form.fields['area'].widget = HiddenInput()
 
     context = build_base_context(request)
     context['title'] = 'Criar nova categoria de "%s"' % area.name
@@ -75,13 +76,12 @@ def subarea_edit_view(request, subarea_id):
     area = subarea.area
 
     if request.method == 'POST':
-        form = TopicForm(data=request.POST, instance=subarea)
+        form = SubareaForm(data=request.POST, instance=subarea)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('synopses:subarea', args=[subarea_id]))
     else:
         form = SubareaForm(instance=subarea)
-        form.fields['area'].disabled = True
 
     context = build_base_context(request)
     context['title'] = 'Editar categoria "%s"' % subarea.name
@@ -119,11 +119,17 @@ def topic_create_view(request, subarea_id):
     if request.method == 'POST':
         form = TopicForm(data=request.POST)
         if form.is_valid():
-            topic = form.save()
+            topic = form.save(commit=False)
+            # TODO 'after' field instead of playing the *guess the index* game
+            if topic.subarea.topics.exists():
+                topic.index = topic.subarea.topics.order_by('index').last().index + 1
+            else:
+                topic.index = 0
+            topic.save()
             return HttpResponseRedirect(reverse('synopses:topic', args=[topic.id]))
     else:
         form = TopicForm(initial={'subarea': subarea})
-        form.fields['subarea'].disabled = True
+        form.fields['subarea'].widget = HiddenInput()
 
     context = build_base_context(request)
     context['title'] = 'Criar tópico em "%s"' % subarea.name
