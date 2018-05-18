@@ -32,7 +32,7 @@
         <div id="auth">
             {% if user.is_authenticated %}
                 <a href="{% url 'profile' user.nickname %}"><span>{{ user.nickname }}</span></a>
-                <a href="{% url 'logout' %}"><span id="logout_btn">Sair</span></a>
+                <a href="{% url 'logout' %}?next={{ request.get_full_path }}"><span id="logout_btn">Sair</span></a>
             {% endif %}
             {% if login_form is not None and disable_auth != True %}
                 <a href="javascript:authShowPrompt();"><span id="auth_btn">Autenticar</span></a>
@@ -112,7 +112,7 @@
         <a id="overlay_close_button" href="javascript:overlayClose();">X</a>
         {% if login_form is not None %}
             <h2>Autenticação</h2>
-            <form method="post" action="{% url 'login' %}">{# TODO next=request.get_full_path #}
+            <form method="post" action="{% url 'login' %}?next={{ request.get_full_path }}">
                 {% csrf_token %}
                 {{ login_form.username.label }} {{ login_form.username.errors }}<br>
                 {{ login_form.username }}<br><br>

@@ -38,6 +38,8 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    if 'next' in request.GET:
+        return HttpResponseRedirect(request.GET['next'])
     return HttpResponseRedirect(reverse('index'))
 
 
