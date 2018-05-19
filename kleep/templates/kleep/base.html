@@ -18,9 +18,13 @@
 
 {% analytical_body_top %}
 <div id="wrapper">
-    <nav id="top_nav">
-        <a href="{% url 'index' %}"><img id="logo" src="{% static 'kleep/images/title.png' %}"/></a>
-        <ul>
+    <header id="header">
+        <button id="mobile-hamburger" onclick="toggleHamburger();">&#9776;
+        </button>
+
+        <a id="logo" href="{% url 'index' %}"><img src="{% static 'kleep/images/title.png' %}"/></a>
+        <ul id="main-navigation">
+            <span class="popover-arrow"></span>
             {% if user.is_authenticated %}
                 <li><a href="javascript:showStudentSubmenu();"><span>Estudante</span></a></li>
             {% else %}
@@ -31,14 +35,17 @@
         </ul>
         <div id="auth">
             {% if user.is_authenticated %}
-                <a href="{% url 'profile' user.nickname %}"><span>{{ user.nickname }}</span></a>
-                <a href="{% url 'logout' %}?next={{ request.get_full_path }}"><span id="logout_btn">Sair</span></a>
+                <a class="long" href="{% url 'profile' user.nickname %}"><span
+                        id="auth-username">{{ user.nickname }}</span></a>
+                <a href="{% url 'logout' %}?next={{ request.get_full_path }}"><span id="logout_btn"><span class="short">&#9211;</span><span
+                        class="long">Sair</span></span></a>
             {% endif %}
             {% if login_form is not None and disable_auth != True %}
-                <a href="javascript:authShowPrompt();"><span id="auth_btn">Autenticar</span></a>
+                <a href="javascript:authShowPrompt();"><span id="auth_btn"><span class="short">&#128273;</span><span
+                        class="long">Autenticar</span></span></a>
             {% endif %}
         </div>
-    </nav>
+    </header>
     <nav id="nav_stage">
         <a id="nav_stage_close_button" href="javascript:closeSubmenu();"><i class="fas fa-angle-double-up"></i></a>
         {% if user.is_authenticated %}
@@ -84,7 +91,7 @@
     </div>
     <footer>
         <ul>
-{#            <li><a href="{% url 'beg' %}">Para passar a AM...</a></li>#}
+            {#            <li><a href="{% url 'beg' %}">Para passar a AM...</a></li>#}
             <li><a href="{% url 'privacy' %}">Privacidade</a></li>
             <li><a href="{% url 'about' %}">Sobre</a></li>
             <li><a href="#">FAQ</a></li>
