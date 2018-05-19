@@ -275,8 +275,7 @@ footer img {
 /* Content styles*/
 #middle {
     margin-top: 20px;
-    padding: 0 8%;
-    padding-bottom: 80px;
+    padding: 0 8% 80px;
     width: 84%;
 }
 
@@ -465,7 +464,7 @@ footer img {
     }
 
     #middle {
-        padding: 0 20px;
+        padding: 0 20px 70px;
         width: calc(100% - 40px);
     }
 
