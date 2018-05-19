@@ -737,4 +737,8 @@ footer img {
     #overlay_prompt > form input[type=text], #overlay_prompt input[type=password] {
         width: 90%;
     }
+
+    .breadcrumb {
+        display: none;
+    }
 }
