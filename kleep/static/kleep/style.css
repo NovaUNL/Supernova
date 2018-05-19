@@ -727,4 +727,14 @@ footer img {
         padding: 0 5px;
         font-weight: 600;
     }
+
+    #overlay_prompt {
+        padding: 20px;
+        width: calc(100% - 40px);
+        border-radius: 0;
+    }
+
+    #overlay_prompt > form input[type=text], #overlay_prompt input[type=password] {
+        width: 90%;
+    }
 }
