@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Kleep - {{ title }}</title>
     <link rel="icon" href="{% static 'kleep/images/favicon.png' %}" type="image/x-icon"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'kleep/style.css' %}"/>
     <script src="{% static 'kleep/script.js' %}"></script>
@@ -21,7 +22,6 @@
     <header id="header">
         <button id="mobile-hamburger" onclick="toggleHamburger();">&#9776;
         </button>
-
         <a id="logo" href="{% url 'index' %}"><img src="{% static 'kleep/images/title.png' %}"/></a>
         <ul id="main-navigation">
             <span class="popover-arrow"></span>

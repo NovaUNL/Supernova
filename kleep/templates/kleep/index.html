@@ -2,10 +2,16 @@
 {% load static %}
 {% block head %}
     <style>
-        body {
-            background: url({% static 'kleep/images/background.jpg' %}) bottom;
-            background-size: cover;
-            background-attachment: fixed !important;
+        @media only screen and (min-width: 840px) {
+            body {
+                background: url({% static 'kleep/images/background.jpg' %}) bottom;
+                background-size: cover;
+                background-attachment: fixed !important;
+            }
+
+            #content_large {
+                background-color: rgba(255, 255, 255, 0.85);
+            }
         }
 
         .flex-wrapper.vertical {
@@ -17,16 +23,16 @@
             margin-bottom: 20px;
         }
 
-        #content_large {
-            background-color: rgba(255, 255, 255, 0.85);
-        }
+
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1 style="margin-bottom: 5px;">Bem vindo ao Kleep</h1>
-    <span>{{ catchphrase }}</span>
-    <div class="flex-wrapper"  style="margin-top: 10px">
+    <span class="long"><!-- Desktop only -->
+        <h1 style="margin-bottom: 5px;">Bem vindo ao Kleep</h1>
+        <span>{{ catchphrase }}</span>
+    </span>
+    <div class="flex-wrapper" style="margin-top: 10px">
         <div class="flex-wrapper vertical">
             <div>
                 <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
@@ -37,7 +43,7 @@
                         {{ news_item.datetime }}</p>
                 {% endfor %}
             </div>
-            <div style="flex-basis: 50%; min-width:500px;">
+            <div style="max-width: 600px;">
                 <h2>Próximos eventos</h2>
                 <h3>Competição de plágio</h3>
                 <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>
@@ -46,7 +52,7 @@
                 <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>
                 <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>
             </div>
-            <div style="flex-basis: 50%; min-width:200px;">
+            <div style="max-width: 600px;">
                 <h2>Ementas</h2>
                 <h3>Bar Teresa Gato</h3>
                 <p>"Especiarias" com hipotese de ovo-algo-estrelado.</p>
@@ -56,7 +62,7 @@
                 <p>Pão de alho</p>
             </div>
         </div>
-        <div style="flex-basis: 40%; min-width:200px;">
+        <div style="max-width: 400px;">
             <h2>Alterações</h2>
             {% for change in changelog %}
                 <h3 style="display: inline-block;">{{ change.title }}</h3> <span>{{ change.date }}</span>
