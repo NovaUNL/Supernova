@@ -12,18 +12,22 @@
             #content_large {
                 background-color: rgba(255, 255, 255, 0.85);
             }
+
+            .flex-wrapper.vertical > div {
+                margin-bottom: 20px;
+            }
+        }
+
+        @media only screen and (max-width: 840px) {
+            .flex-wrapper {
+                justify-content: start;
+            }
         }
 
         .flex-wrapper.vertical {
             flex-basis: 800px;
             flex-flow: column;
         }
-
-        .flex-wrapper.vertical > div {
-            margin-bottom: 20px;
-        }
-
-
     </style>
 {% endblock %}
 

@@ -697,7 +697,7 @@ footer img {
     #middle {
         margin-top: 0;
         padding: 0 10px 70px;
-        width: calc(100% - 40px);
+        width: calc(100% - 20px);
     }
 
     #content {
@@ -711,11 +711,11 @@ footer img {
     #content_large {
         float: none;
         margin: auto;
-        width: calc(100% - 24px);
+        width: 100%;
         background-color: white;
         border-radius: unset;
         border: none;
-        padding: 0 20px 10px;
+        padding: 0 0 10px;
     }
 
     footer {
@@ -740,5 +740,9 @@ footer img {
 
     .breadcrumb {
         display: none;
+    }
+
+    .flex-wrapper {
+        justify-content: space-around;
     }
 }
