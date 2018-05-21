@@ -15,19 +15,19 @@ from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
 
 def areas_view(request):
     context = build_base_context(request)
-    context['title'] = 'Resumos - Areas de estudo'
+    context['title'] = 'Sínteses - Areas de estudo'
     context['areas'] = Area.objects.all()
     context['class_synopses'] = ClassSection.objects.distinct('corresponding_class').all()
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')}]
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')}]
     return render(request, 'synopses/areas.html', context)
 
 
 def area_view(request, area_id):
     area = get_object_or_404(Area, id=area_id)
     context = build_base_context(request)
-    context['title'] = 'Resumos - Categorias de %s' % area.name
+    context['title'] = 'Sínteses - Categorias de %s' % area.name
     context['area'] = area
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area_id])}]
     return render(request, 'synopses/area.html', context)
 
@@ -36,10 +36,10 @@ def subarea_view(request, subarea_id):
     subarea = get_object_or_404(Subarea, id=subarea_id)
     area = subarea.area
     context = build_base_context(request)
-    context['title'] = 'Resumos - %s (%s)' % (subarea.name, area.name)
+    context['title'] = 'Sínteses - %s (%s)' % (subarea.name, area.name)
     context['subarea'] = subarea
     context['area'] = area
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea_id])}]
     return render(request, 'synopses/subarea.html', context)
@@ -64,7 +64,7 @@ def subarea_create_view(request, area_id):
     context['form'] = form
     context['action_page'] = reverse('synopses:subarea_create', args=[area_id])
     context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': 'Propor nova categoria', 'url': reverse('synopses:subarea_create', args=[area_id])}]
     return render(request, 'synopses/generic_form.html', context)
@@ -88,7 +88,7 @@ def subarea_edit_view(request, subarea_id):
     context['form'] = form
     context['action_page'] = reverse('synopses:subarea_edit', args=[subarea_id])
     context['action_name'] = 'Aplicar alterações'
-    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea_id])},
                           {'name': 'Editar', 'url': reverse('synopses:subarea_edit', args=[subarea_id])}]
@@ -105,7 +105,7 @@ def topic_view(request, topic_id):
     context['subarea'] = subarea
     context['topic'] = topic
     context['sections'] = topic.sections.order_by('sectiontopic__index').all()
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])}]
@@ -158,7 +158,7 @@ def topic_edit_view(request, topic_id):
     context['form'] = form
     context['action_page'] = reverse('synopses:topic_edit', args=[topic_id])
     context['action_name'] = 'Aplicar alterações'
-    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
@@ -223,7 +223,7 @@ def topic_section_view(request, topic_id, section_id):
     context['topic'] = topic
     context['section'] = section
     context['author_log'] = section.sectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
@@ -296,7 +296,7 @@ def section_create_view(request, topic_id):
     context['resources_formset'] = resources_formset
     context['action_page'] = reverse('synopses:section_create', args=[topic_id])
     context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
@@ -392,7 +392,7 @@ def section_edit_view(request, topic_id, section_id):
     context['action_page'] = reverse('synopses:section_edit', args=[topic_id, section_id])
     context['action_name'] = 'Editar'
 
-    context['sub_nav'] = [{'name': 'Resumos', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
                           {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
@@ -408,7 +408,7 @@ def class_sections_view(request, class_id):
     context['synopsis_class'] = class_
     context['sections'] = Section.objects.filter(class_sections__corresponding_class=class_).order_by(
         'class_sections__index')
-    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
     return render(request, 'synopses/class_sections.html', context)
 
@@ -419,7 +419,7 @@ def class_manage_sections_view(request, class_id):
     context = build_base_context(request)
     context['title'] = "Editar secções na sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
                           {'name': 'Secções', 'url': reverse('synopses:class_manage', args=[class_id])}]
     return render(request, 'synopses/class_management.html', context)
@@ -447,7 +447,7 @@ def class_section_view(request, class_id, section_id):
     if next_section:
         context['next_section'] = next_section.section
     context['author_log'] = section.sectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Sinteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
                           {'name': section.name, 'url': reverse('synopses:class_section', args=[class_id, section_id])}]
     return render(request, 'synopses/section.html', context)
