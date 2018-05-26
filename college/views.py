@@ -5,8 +5,8 @@ from django.urls import reverse
 
 from clip import models as clip
 from clip.models import Degree
-from college.models import Building, Classroom, Laboratory, Auditorium, Place, Course, Curriculum, Area, ClassInstance, \
-    Class, Department
+from college.models import Building, Classroom, Place, Course, Curriculum, Area, ClassInstance, Class, Department, \
+    TurnInstance
 from college.schedules import build_schedule, build_turns_schedule
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
@@ -207,9 +207,12 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    context['classrooms'] = Classroom.objects.order_by('place__name').filter(place__building=building)
-    context['laboratories'] = Laboratory.objects.order_by('place__name').filter(place__building=building)
-    context['auditoriums'] = Auditorium.objects.order_by('place__name').filter(place__building=building)
+    context['classrooms'] = Classroom.objects.order_by('place__name').filter(place__building=building,
+                                                                             topology=Classroom.CLASSROOM)
+    context['laboratories'] = Classroom.objects.order_by('place__name').filter(place__building=building,
+                                                                               topology=Classroom.LABORATORY)
+    context['auditoriums'] = Classroom.objects.order_by('place__name').filter(place__building=building,
+                                                                              topology=Classroom.AUDITORIUM)
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
@@ -257,6 +260,47 @@ def service(request, service_id):
                           {'name': building.name, 'url': reverse('building', args=[building.id])},
                           {'name': service.name, 'url': reverse('service', args=[service_id])}]
     return render(request, 'college/service.html', context)
+
+
+def available_places(request):
+    context = build_base_context(request)
+    context['buildings'] = Building.objects.order_by('abbreviation').all()
+
+    building_turns = []
+    for building in Building.objects.order_by('abbreviation').all():
+        classrooms = []
+        for classroom in Classroom.objects.filter(place__building=building).order_by('place__name').all():
+            time_slots = []
+            time = 8 * 60  # Start at 8 AM
+            for turn in TurnInstance.objects.filter(place=classroom.place, weekday=0,
+                                                    turn__class_instance__period=COLLEGE_PERIOD,
+                                                    turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
+                if turn.start < time:
+                    if turn.start + turn.duration > time:
+                        busy_slots = int(turn.start - time + turn.duration / 30)
+                        time = turn.start + turn.duration
+                    else:
+                        continue
+                else:
+                    empty_slots = int((turn.start - time) / 30)
+                    busy_slots = int(turn.duration / 30)
+                    time = turn.start + turn.duration
+
+                    for _ in range(empty_slots):
+                        time_slots.append(False)  # False stands for empty
+                for _ in range(busy_slots):
+                    time_slots.append(True)  # True stands for busy
+            for _ in range(time, 20 * 60, 30):
+                time_slots.append(False)
+            classrooms.append((classroom, time_slots))
+        if len(classrooms) > 0:
+            building_turns.append((building, classrooms))
+
+    context['turns'] = building_turns
+
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+                          {'name': 'Espaços disponíveis', 'url': reverse('available_places')}]
+    return render(request, 'college/available_places.html', context)
 
 
 class ClassAutocomplete(autocomplete.Select2QuerySetView):

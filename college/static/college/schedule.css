@@ -56,3 +56,47 @@
 .end-time {
     font-size: 0.7em;
 }
+
+.empty_time_slot {
+    background-color: #2fa40c;
+}
+
+.busy_time_slot {
+    background-color: #c90014;
+}
+
+.schedule_wrapper {
+    width: 100%;
+    overflow-x: scroll;
+}
+
+.building_schedule_map {
+    border-spacing: 0;
+}
+
+.building_schedule_map td, .building_schedule_map th {
+    margin: 0;
+    border-bottom: 2px solid black;
+    white-space: nowrap;
+    border-top-width: 0;
+    min-width: 25px;
+}
+
+.building_schedule_map th {
+    border-left: 2px solid white;
+}
+
+.building_schedule_map td:nth-of-type(odd) {
+    border-left: 2px solid #ffffff;
+    border-right: 2px dotted #666666;
+}
+
+.building_schedule_map tr:first-child {
+    background-color: #ccc !important;
+}
+
+.building_schedule_map th:first-child {
+    background-color: #777 !important;
+    color: white;
+    font-size: 1.2em;
+}

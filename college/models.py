@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from django.db import models
 from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToManyField, BooleanField, OneToOneField, \
     CharField, FloatField, NullBooleanField
 
 from clip import models as clip
+from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from users.models import User
 
 
@@ -67,33 +70,34 @@ class Place(Model):
     def short_str(self):
         return f"{self.name} ({self.building.abbreviation})"
 
+    def occupied(self):
+        for instance in self.turn_instances.all():
+            if instance.happening():
+                return False
+        return True
+
 
 class Classroom(Model):
     place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
     capacity = IntegerField(null=True, blank=True)
 
-    def __str__(self):
-        return f'Sala {self.place}'
+    CLASSROOM = 1
+    AUDITORIUM = 2
+    LABORATORY = 3
 
+    TOPOLOGY_CHOICES = (
+        (0, ''),
+        (CLASSROOM, 'Sala'),
+        (AUDITORIUM, 'Auditório'),
+        (LABORATORY, 'Laboratory')
+    )
 
-class Auditorium(Model):
-    place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
-    capacity = IntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return f'Auditório {self.place}'
-
-
-class Laboratory(Model):
-    place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
-    description = TextField(max_length=2048)
-    equipment = TextField(max_length=2048)
-
-    class Meta:
-        verbose_name_plural = 'laboratories'
+    topology = IntegerField(choices=TOPOLOGY_CHOICES, default=0)
+    description = TextField(max_length=2048, null=True, blank=True)
+    equipment = TextField(max_length=2048, null=True, blank=True)
 
     def __str__(self):
-        return f'Laboratorio {self.place}'
+        return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {self.place.name}'
 
 
 class BuildingUsage(Model):  # TODO deprecate this model
@@ -283,6 +287,14 @@ class TurnInstance(Model):
 
     def end_str(self):
         return self.minutes_to_str(self.start + self.duration)
+
+    def happening(self):
+        now = datetime.now()
+        if not (self.turn.class_instance.year == COLLEGE_YEAR and self.turn.class_instance.period == COLLEGE_PERIOD):
+            return False
+
+        # same weekday and within current time interval
+        return self.weekday == now.isoweekday() and self.start < now.hour * 60 + now.min < self.start + self.duration
 
     @staticmethod
     def minutes_to_str(minutes):

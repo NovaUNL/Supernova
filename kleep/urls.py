@@ -37,6 +37,7 @@ urlpatterns = [
     path('campus/transportes/', college.transportation, name='transportation'),
     path('campus/edificio/<int:building_id>/', college.building, name='building'),
     path('campus/servico/<int:service_id>/', college.service, name='service'),
+    path('campus/espacos_disponiveis/', college.available_places, name='available_places'),
     path('sala/<int:classroom_id>/', college.classroom, name='classroom'),
     path('areas/', college.areas, name='areas'),
     path('area/<int:area_id>/', college.area, name='area'),

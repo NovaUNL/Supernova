@@ -1,0 +1,52 @@
+{% extends 'kleep/content_navigation.html' %}
+
+{% load static %}
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <h1>Espaços disponíveis</h1>
+    {% for building in turns %}
+        <h2>{{ building.0 }}</h2>
+
+        <div class="schedule_wrapper">
+            <table class="building_schedule_map">
+                <tr>
+                    <th>Sala:</th>
+                    <th colspan="2">8-9h</th>
+                    <th colspan="2">9-10h</th>
+                    <th colspan="2">10-11h</th>
+                    <th colspan="2">11-12h</th>
+                    <th colspan="2">12-13h</th>
+                    <th colspan="2">13-14h</th>
+                    <th colspan="2">14-15h</th>
+                    <th colspan="2">15-16h</th>
+                    <th colspan="2">16-17h</th>
+                    <th colspan="2">17-18h</th>
+                    <th colspan="2">18-19h</th>
+                    <th colspan="2">19-20h</th>
+                </tr>
+                {% for classroom in building.1 %}
+                    <tr>
+                        <th>{{ classroom.0 }}</th>
+                        {% for turn in classroom.1 %}
+                            {% if turn %}
+                                <td class="busy_time_slot"></td>
+                            {% else %}
+                                <td class="empty_time_slot"></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block navigation %}
+    <a class="menu_entry" href="{% url 'campus' %}">Mapa</a>
+    <a class="menu_entry" href="{% url 'transportation' %}">Transportes</a>
+    <a class="menu_entry selected">Espaços livres</a>
+{% endblock %}
