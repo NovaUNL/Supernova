@@ -7,44 +7,53 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Espaços disponíveis</h1>
-    {% for building in turns %}
-        <h2>{{ building.0 }}</h2>
+    <h1>Espaços</h1>
+    <h2>Previsão para {{ date }}</h2>
+    {% if weekend %}
+        <span style="font-size: 2em">
+            Em dias de fim-de-semana apenas o edifício VII se encontra aberto.<br>
+            É ainda possível entrares no edifício do teu departamento mediante utilização do
+            cartão de estudante nas portas automáticas.
+        </span>
+    {% else %}
+        {% for building in turns %}
+            <h2>{{ building.0 }}</h2>
 
-        <div class="schedule_wrapper">
-            <table class="building_schedule_map">
-                <tr>
-                    <th>Sala:</th>
-                    <th colspan="2">8-9h</th>
-                    <th colspan="2">9-10h</th>
-                    <th colspan="2">10-11h</th>
-                    <th colspan="2">11-12h</th>
-                    <th colspan="2">12-13h</th>
-                    <th colspan="2">13-14h</th>
-                    <th colspan="2">14-15h</th>
-                    <th colspan="2">15-16h</th>
-                    <th colspan="2">16-17h</th>
-                    <th colspan="2">17-18h</th>
-                    <th colspan="2">18-19h</th>
-                    <th colspan="2">19-20h</th>
-                </tr>
-                {% for room in building.1 %}
+            <div class="schedule_wrapper">
+                <table class="building_schedule_map">
                     <tr>
-                        <th><a href="{% url 'room' room.0.id %}">{{ room.0.short_str }}</a></th>
-                        {% for turn in room.1 %}
-                            {% if turn %}
-                                <td class="busy_time_slot"></td>
-                            {% elif turn == False %}
-                                <td class="empty_time_slot"></td>
-                            {% else %}
-                                <td class="unknown_time_slot"></td>
-                            {% endif %}
-                        {% endfor %}
+                        <th>Sala:</th>
+                        <th colspan="2">8-9h</th>
+                        <th colspan="2">9-10h</th>
+                        <th colspan="2">10-11h</th>
+                        <th colspan="2">11-12h</th>
+                        <th colspan="2">12-13h</th>
+                        <th colspan="2">13-14h</th>
+                        <th colspan="2">14-15h</th>
+                        <th colspan="2">15-16h</th>
+                        <th colspan="2">16-17h</th>
+                        <th colspan="2">17-18h</th>
+                        <th colspan="2">18-19h</th>
+                        <th colspan="2">19-20h</th>
                     </tr>
-                {% endfor %}
-            </table>
-        </div>
-    {% endfor %}
+                    {% for room in building.1 %}
+                        <tr>
+                            <th><a href="{% url 'room' room.0.id %}">{{ room.0.name }}</a></th>
+                            {% for turn in room.1 %}
+                                {% if turn %}
+                                    <td class="busy_time_slot"></td>
+                                {% elif turn == False %}
+                                    <td class="empty_time_slot"></td>
+                                {% else %}
+                                    <td class="unknown_time_slot"></td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endblock %}
 
 {% block navigation %}

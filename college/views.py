@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
@@ -227,11 +229,11 @@ def room(request, room_id):
                           {'name': building.name, 'url': reverse('building', args=[building.id])},
                           {'name': room.name, 'url': reverse('room', args=[room_id])}]
     context['building'] = building
-    context['classroom'] = room
+    context['room'] = room
     turn_instances = room.turn_instances.filter(
         turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
-    return render(request, 'college/classroom.html', context)
+    return render(request, 'college/room.html', context)
 
 
 def service(request, service_id):
@@ -262,8 +264,17 @@ def service(request, service_id):
 def available_places(request):
     context = build_base_context(request)
     context['title'] = 'Espaços'
-    context['buildings'] = Building.objects.order_by('id').all()
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
+                          {'name': 'Espaços', 'url': reverse('available_places')}]
 
+    date = datetime.now().date()
+    context['date'] = date
+
+    if date.isoweekday() > 5:
+        context['weekend'] = True
+        return render(request, 'college/available_places.html', context)
+
+    context['weekend'] = False
     building_turns = []
     for building in Building.objects.order_by('name').all():
         rooms = []
@@ -271,10 +282,9 @@ def available_places(request):
             time_slots = []
             time = 8 * 60  # Start at 8 AM
             empty_state = False if room.topology == room.CLASSROOM or room.unlocked else None
-            for turn in TurnInstance.objects.filter(room=room, weekday=0,
+            for turn in TurnInstance.objects.filter(room=room, weekday=date.isoweekday(),
                                                     turn__class_instance__period=COLLEGE_PERIOD,
                                                     turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
-
                 if turn.start < time:
                     if turn.start + turn.duration > time:
                         busy_slots = int((turn.start - time + turn.duration) / 30)
@@ -301,7 +311,7 @@ def available_places(request):
     context['turns'] = building_turns
 
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': 'Espaços disponíveis', 'url': reverse('available_places')}]
+                          {'name': 'Espaços', 'url': reverse('available_places')}]
     return render(request, 'college/available_places.html', context)
 
 

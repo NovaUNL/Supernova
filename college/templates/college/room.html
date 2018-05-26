@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-map-marker-alt"></i> Sala {{ classroom.name }}</h1>
+    <h1><i class="fas fa-map-marker-alt"></i> {{ room }}</h1>
     <h3 style="margin-left: 30px; margin-bottom: 0;">{{ building.name }}</h3>
 
     <div class="flex-wrapper">
@@ -53,7 +53,7 @@
                                     <a href="{% url 'class_instance' element.turn.turn.class_instance.id %}">
                                         {{ element.turn.turn.class_instance.parent.abbreviation }}</a><br>
                                     {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
-                                    {{ element.turn.classroom.short_str }}
+                                    {{ element.turn.room.short_str }}
 
                                 </td>
                             {% else %}

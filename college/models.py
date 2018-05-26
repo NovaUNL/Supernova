@@ -66,7 +66,7 @@ class Place(Model):
         unique_together = ('name', 'building')
 
     def __str__(self):
-        return f"{self.name} ({self.building})"
+        return self.name
 
     def short_str(self):
         return f"{self.name} ({self.building.abbreviation})"
@@ -98,12 +98,6 @@ class Room(Place):
 
     def __str__(self):
         return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {super().__str__()}'
-
-    def short_str(self):
-        if self.topology == self.LABORATORY:
-            return f'L{self.name}'
-        else:
-            return self.name
 
 
 class BuildingUsage(Model):  # TODO deprecate this model
