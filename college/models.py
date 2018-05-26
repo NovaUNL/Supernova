@@ -61,8 +61,9 @@ class Place(Model):
     building = ForeignKey(Building, null=True, blank=True, on_delete=models.PROTECT, related_name='places')
     floor = IntegerField(default=0)
     unlocked = NullBooleanField(null=True, default=None)
-    # Related name *REALLY* needs to be 'place', otherwise manage.py mergeclip adds duplicates
-    clip_place = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT, related_name='place')
+
+    class Meta:
+        unique_together = ('name', 'building')
 
     def __str__(self):
         return f"{self.name} ({self.building})"
@@ -70,34 +71,33 @@ class Place(Model):
     def short_str(self):
         return f"{self.name} ({self.building.abbreviation})"
 
-    def occupied(self):
-        for instance in self.turn_instances.all():
-            if instance.happening():
-                return False
-        return True
 
-
-class Classroom(Model):
-    place = OneToOneField(Place, primary_key=True, on_delete=models.CASCADE)
+class Room(Place):
     capacity = IntegerField(null=True, blank=True)
+    door_number = IntegerField(null=True, blank=True)
+    clip_classroom = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT, related_name='room')
 
+    UNKNOWN = 0
     CLASSROOM = 1
     AUDITORIUM = 2
     LABORATORY = 3
 
     TOPOLOGY_CHOICES = (
-        (0, ''),
+        (UNKNOWN, ''),
         (CLASSROOM, 'Sala'),
         (AUDITORIUM, 'Auditório'),
-        (LABORATORY, 'Laboratory')
+        (LABORATORY, 'Laboratório')
     )
 
     topology = IntegerField(choices=TOPOLOGY_CHOICES, default=0)
     description = TextField(max_length=2048, null=True, blank=True)
     equipment = TextField(max_length=2048, null=True, blank=True)
 
+    class Meta:
+        ordering = ('floor', 'door_number', 'name')
+
     def __str__(self):
-        return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {self.place.name}'
+        return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {self.name}'
 
 
 class BuildingUsage(Model):  # TODO deprecate this model
@@ -252,7 +252,7 @@ class TurnInstance(Model):
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
-    place = ForeignKey(Place, on_delete=models.PROTECT, null=True, blank=True, related_name='turn_instances')
+    room = ForeignKey(Room, on_delete=models.PROTECT, null=True, blank=True, related_name='turn_instances')
 
     class Meta:
         ordering = ['weekday', 'start']

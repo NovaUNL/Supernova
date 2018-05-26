@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from college.models import Student, Classroom, BuildingUsage, Department, Place, Building, \
+from college.models import Student, Room, BuildingUsage, Department, Place, Building, \
     Course, CourseArea, Area, Curriculum, TurnStudents, Class, Turn, Enrollment, TurnInstance, ClassInstance
 
 
@@ -16,7 +16,7 @@ admin.site.register(CourseArea)
 admin.site.register(Curriculum)
 admin.site.register(Class)
 admin.site.register(ClassInstance)
-admin.site.register(Classroom)
+admin.site.register(Room)
 admin.site.register(Department)
 admin.site.register(Enrollment)
 admin.site.register(Place)

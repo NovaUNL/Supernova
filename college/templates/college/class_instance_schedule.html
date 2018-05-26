@@ -28,8 +28,8 @@
                                 rowspan="{{ element.rowspan }}">
                                 {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
                                 {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
-                                <a href="{% url 'classroom' element.turn.place.id %}">
-                                    {{ element.turn.place.short_str }}</a>
+                                <a href="{% url 'room' element.turn.room.id %}">
+                                    {{ element.turn.room.short_str }}</a>
                             </td>
                         {% else %}
                             <td></td>

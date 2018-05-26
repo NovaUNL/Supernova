@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from clip import models as clip
 from clip.models import Degree
-from college.models import Building, Classroom, Place, Course, Curriculum, Area, ClassInstance, Class, Department, \
+from college.models import Building, Room, Place, Course, Curriculum, Area, ClassInstance, Class, Department, \
     TurnInstance
 from college.schedules import build_schedule, build_turns_schedule
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
@@ -207,12 +207,9 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    context['classrooms'] = Classroom.objects.order_by('place__name').filter(place__building=building,
-                                                                             topology=Classroom.CLASSROOM)
-    context['laboratories'] = Classroom.objects.order_by('place__name').filter(place__building=building,
-                                                                               topology=Classroom.LABORATORY)
-    context['auditoriums'] = Classroom.objects.order_by('place__name').filter(place__building=building,
-                                                                              topology=Classroom.AUDITORIUM)
+    context['classrooms'] = Room.objects.filter(building=building, topology=Room.CLASSROOM)
+    context['laboratories'] = Room.objects.filter(building=building, topology=Room.LABORATORY)
+    context['auditoriums'] = Room.objects.filter(building=building, topology=Room.AUDITORIUM)
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
@@ -221,17 +218,17 @@ def building(request, building_id):
     return render(request, 'college/building.html', context)
 
 
-def classroom(request, classroom_id):
-    classroom = get_object_or_404(Place, id=classroom_id)
-    building = classroom.building
+def room(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+    building = room.building
     context = build_base_context(request)
-    context['title'] = str(classroom)
+    context['title'] = str(room)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
                           {'name': building.name, 'url': reverse('building', args=[building.id])},
-                          {'name': classroom.name, 'url': reverse('classroom', args=[classroom_id])}]
+                          {'name': room.name, 'url': reverse('room', args=[room_id])}]
     context['building'] = building
-    context['classroom'] = classroom
-    turn_instances = classroom.turn_instances.filter(
+    context['classroom'] = room
+    turn_instances = room.turn_instances.filter(
         turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
     return render(request, 'college/classroom.html', context)
@@ -264,15 +261,15 @@ def service(request, service_id):
 
 def available_places(request):
     context = build_base_context(request)
-    context['buildings'] = Building.objects.order_by('abbreviation').all()
+    context['buildings'] = Building.objects.order_by('id').all()
 
     building_turns = []
-    for building in Building.objects.order_by('abbreviation').all():
+    for building in Building.objects.order_by('name').all():
         classrooms = []
-        for classroom in Classroom.objects.filter(place__building=building).order_by('place__name').all():
+        for room in Room.objects.filter(building=building).all():
             time_slots = []
             time = 8 * 60  # Start at 8 AM
-            for turn in TurnInstance.objects.filter(place=classroom.place, weekday=0,
+            for turn in TurnInstance.objects.filter(room=room, weekday=0,
                                                     turn__class_instance__period=COLLEGE_PERIOD,
                                                     turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
                 if turn.start < time:
@@ -292,7 +289,7 @@ def available_places(request):
                     time_slots.append(True)  # True stands for busy
             for _ in range(time, 20 * 60, 30):
                 time_slots.append(False)
-            classrooms.append((classroom, time_slots))
+            classrooms.append((room, time_slots))
         if len(classrooms) > 0:
             building_turns.append((building, classrooms))
 

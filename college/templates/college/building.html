@@ -91,9 +91,9 @@
         <div>
             <h2>Salas de aula:</h2>
             <ul class="room-list">
-                {% for classroom in classrooms.all %}
-                    <a href="{% url 'classroom' classroom.place.id %}">
-                        <li class="classroom">{{ classroom.place.name }}</li>
+                {% for room in classrooms.all %}
+                    <a href="{% url 'room' room.id %}">
+                        <li class="classroom">{{ room.name }}</li>
                     </a>
                 {% endfor %}
             </ul>
@@ -101,9 +101,9 @@
         <div>
             <h2>Laboratórios:</h2>
             <ul class="room-list">
-                {% for laboratory in laboratories.all %}
-                    <a href="{% url 'classroom' laboratory.place.id %}">
-                        <li class="laboratory">{{ laboratory.place.name }}</li>
+                {% for room in laboratories.all %}
+                    <a href="{% url 'room' room.id %}">
+                        <li class="laboratory">{{ room.name }}</li>
                     </a>
                 {% endfor %}
             </ul>
@@ -111,9 +111,9 @@
         <div>
             <h2>Auditórios:</h2>
             <ul class="room-list">
-                {% for auditorium in auditoriums.all %}
-                    <a href="{% url 'classroom' auditorium.place.id %}">
-                        <li class="auditorium">{{ auditorium.place.name }}</li>
+                {% for room in auditoriums.all %}
+                    <a href="{% url 'room' room.id %}">
+                        <li class="auditorium">{{ room.name }}</li>
                     </a>
                 {% endfor %}
             </ul>
