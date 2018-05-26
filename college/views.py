@@ -261,6 +261,7 @@ def service(request, service_id):
 
 def available_places(request):
     context = build_base_context(request)
+    context['title'] = 'Espaços'
     context['buildings'] = Building.objects.order_by('id').all()
 
     building_turns = []

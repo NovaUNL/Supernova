@@ -97,7 +97,7 @@ class Room(Place):
         ordering = ('floor', 'door_number', 'name')
 
     def __str__(self):
-        return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {self.name}'
+        return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {super().__str__()}'
 
     def short_str(self):
         if self.topology == self.LABORATORY:
