@@ -45,8 +45,8 @@ class Area(Model):
 
 class Building(Model):
     name = TextField(max_length=30, unique=True)
-    abbreviation = TextField(max_length=10, unique=True, null=True)
-    map_tag = TextField(max_length=20)
+    abbreviation = CharField(max_length=10, unique=True, null=True)
+    map_tag = CharField(max_length=20, unique=True)
     clip_building = OneToOneField(clip.Building, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
@@ -242,13 +242,24 @@ class TurnStudents(Model):
         return f'{self.student} enrolled to turn {self.turn}'
 
 
+WEEKDAY_CHOICES = (
+    (0, 'Segunda-feira'),
+    (1, 'Terça-feira'),
+    (2, 'Quarta-feira'),
+    (3, 'Quinta-feira'),
+    (4, 'Sexta-feira'),
+    (5, 'Sábado-feira'),
+    (6, 'Domingo-feira')
+)
+
+
 class TurnInstance(Model):
     turn = ForeignKey(Turn, on_delete=models.PROTECT, related_name='instances')  # Eg: Theoretical 1
     # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
     clip_turn_instance = OneToOneField(clip.TurnInstance, on_delete=models.PROTECT, related_name='turn_instance')
     recurring = BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
     # Whether this is a recurring turn
-    weekday = IntegerField(null=True, blank=True)  # 1 - Monday
+    weekday = IntegerField(null=True, blank=True, choices=WEEKDAY_CHOICES)  # 0 - Monday
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
@@ -266,21 +277,8 @@ class TurnInstance(Model):
                self.start < turn_instance.start + turn_instance.duration and \
                turn_instance.start < self.start + self.duration
 
-    def weekday_pt(self):  # TODO ewk, get rid of me!
-        if self.weekday == 0:
-            return 'Segunda-feira'
-        elif self.weekday == 1:
-            return 'Terça-feira'
-        elif self.weekday == 2:
-            return 'Quarta-feira'
-        elif self.weekday == 3:
-            return 'Quinta-feira'
-        elif self.weekday == 4:
-            return 'Sexta-feira'
-        elif self.weekday == 5:
-            return 'Sábado'
-        elif self.weekday == 6:
-            return 'Domingo'
+    def weekday_pt(self):
+        return WEEKDAY_CHOICES[self.weekday][1]
 
     def start_str(self):
         return self.minutes_to_str(self.start)
