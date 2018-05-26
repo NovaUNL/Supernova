@@ -99,6 +99,12 @@ class Room(Place):
     def __str__(self):
         return f'{self.TOPOLOGY_CHOICES[self.topology][1]} {self.name}'
 
+    def short_str(self):
+        if self.topology == self.LABORATORY:
+            return f'L{self.name}'
+        else:
+            return self.name
+
 
 class BuildingUsage(Model):  # TODO deprecate this model
     usage = TextField(max_length=100)

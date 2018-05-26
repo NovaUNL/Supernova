@@ -65,6 +65,10 @@
     background-color: #c90014;
 }
 
+.unknown_time_slot {
+    background-color: #c9b616;
+}
+
 .schedule_wrapper {
     width: 100%;
     overflow-x: scroll;
@@ -97,6 +101,10 @@
 
 .building_schedule_map th:first-child {
     background-color: #777 !important;
-    color: white;
+    color: white !important;
     font-size: 1.2em;
+}
+
+.building_schedule_map th:first-child a {
+    color: white !important;
 }

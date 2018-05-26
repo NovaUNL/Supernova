@@ -28,14 +28,16 @@
                     <th colspan="2">18-19h</th>
                     <th colspan="2">19-20h</th>
                 </tr>
-                {% for classroom in building.1 %}
+                {% for room in building.1 %}
                     <tr>
-                        <th>{{ classroom.0 }}</th>
-                        {% for turn in classroom.1 %}
+                        <th><a href="{% url 'room' room.0.id %}">{{ room.0.short_str }}</a></th>
+                        {% for turn in room.1 %}
                             {% if turn %}
                                 <td class="busy_time_slot"></td>
-                            {% else %}
+                            {% elif turn == False %}
                                 <td class="empty_time_slot"></td>
+                            {% else %}
+                                <td class="unknown_time_slot"></td>
                             {% endif %}
                         {% endfor %}
                     </tr>

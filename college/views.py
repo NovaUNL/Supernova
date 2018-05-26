@@ -265,16 +265,18 @@ def available_places(request):
 
     building_turns = []
     for building in Building.objects.order_by('name').all():
-        classrooms = []
+        rooms = []
         for room in Room.objects.filter(building=building).all():
             time_slots = []
             time = 8 * 60  # Start at 8 AM
+            empty_state = False if room.topology == room.CLASSROOM or room.unlocked else None
             for turn in TurnInstance.objects.filter(room=room, weekday=0,
                                                     turn__class_instance__period=COLLEGE_PERIOD,
                                                     turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
+
                 if turn.start < time:
                     if turn.start + turn.duration > time:
-                        busy_slots = int(turn.start - time + turn.duration / 30)
+                        busy_slots = int((turn.start - time + turn.duration) / 30)
                         time = turn.start + turn.duration
                     else:
                         continue
@@ -284,14 +286,16 @@ def available_places(request):
                     time = turn.start + turn.duration
 
                     for _ in range(empty_slots):
-                        time_slots.append(False)  # False stands for empty
+                        time_slots.append(empty_state)  # False stands for empty
+                if time > 20 * 60:  # Past 8PM, remove additional slots
+                    busy_slots -= int((time - (20 * 60)) / 30)
                 for _ in range(busy_slots):
                     time_slots.append(True)  # True stands for busy
             for _ in range(time, 20 * 60, 30):
-                time_slots.append(False)
-            classrooms.append((room, time_slots))
-        if len(classrooms) > 0:
-            building_turns.append((building, classrooms))
+                time_slots.append(empty_state)
+            rooms.append((room, time_slots))
+        if len(rooms) > 0:
+            building_turns.append((building, rooms))
 
     context['turns'] = building_turns
 
