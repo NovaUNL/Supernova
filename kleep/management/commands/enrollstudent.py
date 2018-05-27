@@ -1,33 +1,18 @@
+import logging
+
 from django.core.management.base import BaseCommand
-from clip import models as clip
-from college.models import Student, TurnStudents, Enrollment
+from college.clip_synchronization import sync_student_enrollments
+from college.models import Student
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Command(BaseCommand):
-    help = 'Generates events to match the turn instances'
+    help = 'Synchronizes the crawled enrollments and turns for a given student.'
 
     def add_arguments(self, parser):
-        parser.add_argument('student_id', nargs='+', type=int)
-        parser.add_argument('year', nargs='+', type=int)
-        parser.add_argument('period', nargs='+', type=int)
+        parser.add_argument('abbreviation', nargs='+', type=str)
 
     def handle(self, *args, **options):
-        student = Student.objects.get(id=options['student_id'][0])
-        year = options['year'][0]  # TODO apply filter
-        period = clip.Period.objects.get(id=options['period'][0])  # TODO apply filter
-
-        clip_student = student.clip_student
-        for clip_turn in clip_student.turns.all():  # TODO filter
-            if hasattr(clip_turn, 'turn') and \
-                    not TurnStudents.objects.filter(student=student, turn=clip_turn.turn).exists():
-                class_instance = clip_turn.turn.class_instance
-                clip_enrollment = clip.Enrollment.objects.get(student=clip_student,
-                                                              class_instance=class_instance.clip_class_instance)
-                if not Enrollment.objects.filter(student=student, class_instance=class_instance,
-                                                 clip_enrollment=clip_enrollment).exists():
-                    Enrollment(student=student, class_instance=class_instance,
-                               clip_enrollment=clip_enrollment).save()
-                    print(f'Enrolled student {student} to {class_instance}')
-
-                TurnStudents(student=student, turn=clip_turn.turn).save()
-                print(f'Added turn {clip_turn.turn} to student {student}')
+        student = Student.objects.get(abbreviation=options['abbreviation'][0])
+        sync_student_enrollments(student)

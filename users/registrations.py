@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from clip.models import Student as ClipStudent
-from college.models import Student
+from college.clip_synchronization import create_student
 from kleep.settings import EMAIL_SERVER, EMAIL_ACCOUNT, EMAIL_PASSWORD, REGISTRATIONS_ATTEMPTS_TOKEN, \
     REGISTRATIONS_TIMEWINDOW, REGISTRATIONS_TOKEN_LENGTH
 from users.exceptions import InvalidToken, InvalidUsername, ExpiredRegistration, \
@@ -62,13 +62,10 @@ def validate_token(email, token) -> User:
         clip_student = registration.student
         user.password = registration.password  # Copy hash
         user.save()
-        student = student_from_clip_student(clip_student)
+        student = create_student(clip_student)
         student.confirmed = True
         student.user = user
-        try:
-            pass  # TODO populate student enrollments and turns
-        finally:
-            student.save()
+        student.save()
         return user
     else:
         if registration.failed_attempts < REGISTRATIONS_ATTEMPTS_TOKEN - 1:
@@ -78,15 +75,6 @@ def validate_token(email, token) -> User:
         else:
             registration.delete()
             raise InvalidToken(deleted=True)
-
-
-def student_from_clip_student(clip_student: ClipStudent) -> Student:
-    if hasattr(clip_student, 'student'):
-        raise RuntimeError('Student already exists')
-    student = Student(number=int(clip_student.internal_id), abbreviation=clip_student.abbreviation,
-                      course=clip_student.course.course, clip_student=clip_student)
-    student.save()
-    return student
 
 
 def generate_token(length: int) -> str:

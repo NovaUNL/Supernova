@@ -1,6 +1,7 @@
 import re
 
-from college.models import Building, Room, Department, Class, Turn, ClassInstance, TurnInstance
+from college.models import Building, Room, Department, Class, Turn, ClassInstance, TurnInstance, Student, TurnStudents, \
+    Enrollment
 from clip import models as clip
 
 import logging
@@ -132,3 +133,33 @@ def sync_turn_instances(turn: Turn):
                                          duration=duration, room=room)
             turn_instance.save()
             logger.info(f'Created turn instance {turn_instance}.')
+
+
+def create_student(clip_student: clip.Student) -> Student:
+    if hasattr(clip_student, 'student'):
+        student = clip_student.student
+        logger.warning(f"Attempted to create a studend which already exists ({student}).")
+        return student
+
+    student = Student(number=int(clip_student.internal_id), abbreviation=clip_student.abbreviation,
+                      course=clip_student.course.course, clip_student=clip_student)
+    student.save()
+    sync_student_enrollments(student)
+    return student
+
+
+def sync_student_enrollments(student: Student):
+    for clip_enrollment in clip.Enrollment.objects.filter(student=student.clip_student).all():
+        if not hasattr(clip_enrollment, 'enrollment'):
+            class_instance = clip_enrollment.class_instance.class_instance
+            Enrollment(student=student, class_instance=class_instance, clip_enrollment=clip_enrollment).save()
+            logger.info(f'Enrolled student {student} to {class_instance}.')
+    sync_student_turns(student)
+
+
+def sync_student_turns(student: Student):
+    for clip_turn in clip.Turn.objects.filter(students=student.clip_student).all():
+        if clip_turn.turn not in student.turns.all():
+            TurnStudents(student=student, turn=clip_turn.turn).save()
+            logger.info(f'Added turn {clip_turn.turn} to student {student}.')
+    # TODO delete old turns
