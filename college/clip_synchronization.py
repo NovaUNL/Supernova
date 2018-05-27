@@ -1,7 +1,7 @@
 import re
 
 from college.models import Building, Room, Department, Class, Turn, ClassInstance, TurnInstance, Student, TurnStudents, \
-    Enrollment
+    Enrollment, Course
 from clip import models as clip
 
 import logging
@@ -54,7 +54,6 @@ def update_room_details(room: Room, clip_classroom: clip.Classroom):
 
         if room.door_number != int(door_matches.group('door_number')):
             room.door_number = int(door_matches.group('door_number'))
-
     room.save()
 
 
@@ -67,6 +66,21 @@ def sync_departments():
             logger.info(f'Created department {corresponding_department}.')
 
 
+def sync_courses():
+    clip_institution = clip.Institution.objects.get(abbreviation='FCT')
+    for clip_course in clip_institution.courses.all():
+        if not hasattr(clip_course, 'course'):
+            if clip_course.degree is None:
+                logger.warning(f'Unable to create course {clip_course} since it has no degree.')
+                continue
+            course = Course(name=clip_course.name,
+                            degree=clip_course.degree,
+                            abbreviation=clip_course.degree,
+                            clip_course=clip_course)
+            course.save()
+            logger.info(f'Created course {course}.')
+
+
 def sync_class_and_instances(year: int, period: int, bootstrap=False):
     for clip_class_instance in clip.ClassInstance.objects.filter(year=year, period=period).all():
         clip_class: clip.Class = clip_class_instance.parent
@@ -74,15 +88,20 @@ def sync_class_and_instances(year: int, period: int, bootstrap=False):
         if hasattr(clip_class, 'related_class'):  # There's a class attached to this crawled class.
             related_class = clip_class.related_class
         else:  # No corresponding class. Create one.
-            related_class = Class(name=clip_class.name, clip_class=clip_class, abbreviation=clip_class.abbreviation,
-                                  department=clip_class.department.department, credits=clip_class.ects)
+            related_class = Class(name=clip_class.name,
+                                  clip_class=clip_class,
+                                  abbreviation=clip_class.abbreviation,
+                                  department=clip_class.department.department,
+                                  credits=clip_class.ects)
             related_class.save()
             logger.info(f'Created class {related_class}.')
 
         if hasattr(clip_class_instance, 'class_instance'):  # There's a class attached to this crawled class.
             class_instance = clip_class_instance.class_instance
         else:
-            class_instance = ClassInstance(parent=related_class, period=period, year=year,
+            class_instance = ClassInstance(parent=related_class,
+                                           period=period,
+                                           year=year,
                                            clip_class_instance=clip_class_instance)
             class_instance.save()
             logger.info(f'Created class instance {class_instance}.')
@@ -96,7 +115,9 @@ def sync_turns(class_instance: ClassInstance, bootstrap=False):
         if hasattr(clip_turn, 'turn'):  # There is already a turn for this crawled turn.
             turn: Turn = clip_turn.turn
         else:  # No corresponding turn. Create one.
-            turn = Turn(clip_turn=clip_turn, turn_type=clip_turn.type, number=clip_turn.number,
+            turn = Turn(clip_turn=clip_turn,
+                        turn_type=clip_turn.type,
+                        number=clip_turn.number,
                         class_instance=class_instance)
             logger.info(f'Created turn {turn}.')
             turn.save()
@@ -128,9 +149,12 @@ def sync_turn_instances(turn: Turn):
             else:  # No corresponding turn instance. Create one.
                 room = None
 
-            turn_instance = TurnInstance(turn=turn, clip_turn_instance=clip_turn_instance,
-                                         weekday=clip_turn_instance.weekday, start=clip_turn_instance.start,
-                                         duration=duration, room=room)
+            turn_instance = TurnInstance(turn=turn,
+                                         clip_turn_instance=clip_turn_instance,
+                                         weekday=clip_turn_instance.weekday,
+                                         start=clip_turn_instance.start,
+                                         duration=duration,
+                                         room=room)
             turn_instance.save()
             logger.info(f'Created turn instance {turn_instance}.')
 
@@ -138,11 +162,13 @@ def sync_turn_instances(turn: Turn):
 def create_student(clip_student: clip.Student) -> Student:
     if hasattr(clip_student, 'student'):
         student = clip_student.student
-        logger.warning(f"Attempted to create a studend which already exists ({student}).")
+        logger.warning(f"Attempted to create a student which already exists ({student}).")
         return student
 
-    student = Student(number=int(clip_student.internal_id), abbreviation=clip_student.abbreviation,
-                      course=clip_student.course.course, clip_student=clip_student)
+    student = Student(number=int(clip_student.internal_id),
+                      abbreviation=clip_student.abbreviation,
+                      course=clip_student.course.course,
+                      clip_student=clip_student)
     student.save()
     sync_student_enrollments(student)
     return student

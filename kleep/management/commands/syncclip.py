@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from college.clip_synchronization import sync_classrooms, sync_departments, sync_class_and_instances
+from college.clip_synchronization import sync_classrooms, sync_departments, sync_class_and_instances, sync_courses
 from clip import models as clip
 
 logging.basicConfig(level=logging.INFO)
@@ -21,4 +21,5 @@ class Command(BaseCommand):
 
         sync_classrooms()
         sync_departments()
+        sync_courses()
         sync_class_and_instances(year, period, bootstrap=True)

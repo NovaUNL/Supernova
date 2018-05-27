@@ -133,13 +133,12 @@ class Course(Model):
     description = TextField(max_length=4096, null=True, blank=True)
     degree = ForeignKey(clip.Degree, on_delete=models.PROTECT)
     abbreviation = TextField(max_length=100, null=True, blank=True)
-    active = BooleanField(default=True)
+    active = BooleanField(default=False)
     clip_course = OneToOneField(clip.Course, on_delete=models.PROTECT)
-    department = ForeignKey('Department', on_delete=models.PROTECT, related_name='courses')
+    department = ForeignKey('Department', null=True, blank=True, on_delete=models.PROTECT, related_name='courses')
     areas = ManyToManyField(Area, through='CourseArea')
     url = TextField(max_length=256, null=True, blank=True)
     curriculum_classes = ManyToManyField('Class', through='Curriculum')
-    extinguished = BooleanField(default=False)
 
     class Meta:
         ordering = ['name']
