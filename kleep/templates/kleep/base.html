@@ -35,14 +35,22 @@
         </ul>
         <div id="auth">
             {% if user.is_authenticated %}
-                <a class="long" href="{% url 'profile' user.nickname %}"><span
+                <a class="high-res-only" href="{% url 'profile' user.nickname %}"><span
                         id="auth-username">{{ user.nickname }}</span></a>
-                <a href="{% url 'logout' %}?next={{ request.get_full_path }}"><span id="logout_btn"><span class="short">&#9211;</span><span
-                        class="long">Sair</span></span></a>
+                <a href="{% url 'logout' %}?next={{ request.get_full_path }}">
+                    <span id="logout_btn">
+                        <span class="low-res-only">x</span>
+                        <span class="high-res-only">Sair</span>
+                    </span>
+                </a>
             {% endif %}
             {% if login_form is not None and disable_auth != True %}
-                <a href="javascript:authShowPrompt();"><span id="auth_btn"><span class="short">&#128273;</span><span
-                        class="long">Autenticar</span></span></a>
+                <a href="javascript:authShowPrompt();">
+                    <span id="auth_btn">
+                        <span class="low-res-only">&#128273;</span>
+                        <span class="high-res-only">Autenticar</span>
+                    </span>
+                </a>
             {% endif %}
         </div>
     </header>
@@ -91,7 +99,7 @@
     </div>
     <footer>
         <ul>
-            {#            <li><a href="{% url 'beg' %}">Para passar a AM...</a></li>#}
+            {# <li><a href="{% url 'beg' %}">Para passar a AM...</a></li>#}
             <li><a href="{% url 'privacy' %}">Privacidade</a></li>
             <li><a href="{% url 'about' %}">Sobre</a></li>
             <li><a href="#">FAQ</a></li>

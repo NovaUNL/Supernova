@@ -19,26 +19,26 @@ function toggleHamburger() {
     hamburgerMenuDisplayed = !hamburgerMenuDisplayed;
 }
 
-let kleep_opened_nav_stage = null;
+let openedNavStageElem = null;
 
 function showSubmenu(id) {
-    if (kleep_opened_nav_stage !== id) {
+    if (openedNavStageElem !== id) {
         let menu = document.getElementById(id);
         let container = menu.parentNode;
         menu.style.display = 'inline';
         if (window.innerWidth > 1200) {
             container.style.height = '110px';
-        } else if (window.innerWidth > 840){
+        } else if (window.innerWidth > 840) {
             container.style.height = '70px';
-        }else{
+        } else {
             container.style.height = 'auto';
         }
         container.style.borderBottom = '2px solid rgb(57, 130, 53)';
-        console.log(kleep_opened_nav_stage);
-        if (kleep_opened_nav_stage !== null) {
-            document.getElementById(kleep_opened_nav_stage).style.display = 'none';
+        console.log(openedNavStageElem);
+        if (openedNavStageElem !== null) {
+            document.getElementById(openedNavStageElem).style.display = 'none';
         }
-        kleep_opened_nav_stage = id;
+        openedNavStageElem = id;
     }
     // The mobile interface was used, close it
     if (hamburgerMenuDisplayed) {
@@ -65,3 +65,13 @@ function closeSubmenu() {
     container.style.borderBottom = 'none';
 }
 
+let sidebarDisplayed = false;
+
+function toggleSidebar() {
+    if (sidebarDisplayed) {
+        document.getElementById("middle").style.left = '-250px';
+    } else {
+        document.getElementById("middle").style.left = '0';
+    }
+    sidebarDisplayed = !sidebarDisplayed;
+}

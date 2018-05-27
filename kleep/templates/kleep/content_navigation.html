@@ -7,10 +7,14 @@
             {% endblock %}
         </div>
         <br>
-            {% block side_extra %}
-            {% endblock %}
+        {% block side_extra %}
+        {% endblock %}
     </nav>
-
+    <div id="side-menu-trigger-wrapper">
+        <a id="side-menu-trigger" class="low-res-only" onclick="toggleSidebar();">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    </div>
     <div id="content">
         {% block content %}
         {% endblock %}
