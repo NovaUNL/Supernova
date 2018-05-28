@@ -298,6 +298,7 @@ footer img {
 #side_container {
     flex-basis: 250px;
     margin-right: 20px;
+    flex-shrink: 0;
 }
 
 #side, #side_extra {
@@ -702,7 +703,6 @@ footer img {
 
     #side_container {
         width: 240px;
-        flex-shrink: 0;
         overflow: hidden;
         margin: 0;
         transition: 0.5s;
