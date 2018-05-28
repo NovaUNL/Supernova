@@ -13,40 +13,6 @@ class TemporalEntity:
         return not (self.first_year is None or self.last_year is None)
 
 
-class Degree(Model):
-    id = IntegerField(primary_key=True)
-    internal_id = TextField(null=True, max_length=5)
-    name = TextField()
-
-    class Meta:
-        managed = False
-        db_table = CLIPY_TABLE_PREFIX + 'degrees'
-
-    def __str__(self):
-        return self.name
-
-
-class Period(Model):
-    id = IntegerField(primary_key=True)
-    part = IntegerField()
-    parts = IntegerField()
-    letter = TextField()
-    start_month = IntegerField(null=True)
-    end_month = IntegerField(null=True)
-
-    class Meta:
-        managed = False
-        db_table = CLIPY_TABLE_PREFIX + 'periods'
-
-    def __str__(self):
-        if self.id == 1:
-            return f' Ano'
-        elif self.id <= 3:
-            return f'{self.part}º Semestre'
-        else:
-            return f'{self.part}º Trimestre'
-
-
 class TurnType(Model):
     id = IntegerField(primary_key=True)
     name = TextField(max_length=30)
@@ -148,7 +114,7 @@ class Teacher(Model):
 class ClassInstance(Model):
     id = IntegerField(primary_key=True)
     parent = ForeignKey(Class, on_delete=models.PROTECT, db_column='class_id', related_name='instances')
-    period = ForeignKey(Period, on_delete=models.PROTECT, db_column='period_id', related_name='class_instances')
+    period = IntegerField(db_column='period_id')
     year = IntegerField()
 
     # regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
@@ -167,8 +133,7 @@ class Course(TemporalEntity, Model):
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
     institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='courses')
-    degree = ForeignKey(
-        Degree, on_delete=models.PROTECT, db_column='degree_id', null=True, blank=True, related_name='courses')
+    degree = IntegerField(db_column='degree_id', null=True, blank=True)
 
     class Meta:
         managed = False

@@ -128,10 +128,51 @@ class Department(Model):
         return self.name
 
 
+class Degree:
+    BACHELORS = 1
+    MASTERS = 2
+    PHD = 3
+    INTEGRATED_MASTERS = 4
+    POST_GRADUATION = 5
+    ADVANCED_STUDIES = 6
+    PRE_GRADUATION = 7
+
+    CHOICES = (
+        (BACHELORS, 'Licenciatura'),
+        (MASTERS, 'Mestrado'),
+        (PHD, 'Doutoramento'),
+        (INTEGRATED_MASTERS, 'Mestrado Integrado'),
+        (POST_GRADUATION, 'Pos-Graduação'),
+        (ADVANCED_STUDIES, 'Estudos Avançados'),
+        (PRE_GRADUATION, 'Pré-Graduação'),
+    )
+    ABBREVIATIONS = {
+        BACHELORS: 'L',
+        MASTERS: 'M',
+        PHD: 'D',
+        INTEGRATED_MASTERS: 'Mi',
+        POST_GRADUATION: 'Pg',
+        ADVANCED_STUDIES: 'EA',
+        PRE_GRADUATION: 'pG'
+    }
+
+    @staticmethod
+    def abbreviation(degree: int):
+        if degree in range(0, 7):
+            return Degree.ABBREVIATIONS[degree]
+        return ""
+
+    @staticmethod
+    def name(degree: int):
+        if degree in range(1, 8):
+            return Degree.CHOICES[degree - 1][1]
+        return "Estágio"  # AKA, Nothing, Nilch, Nada
+
+
 class Course(Model):
     name = TextField(max_length=200)
     description = TextField(max_length=4096, null=True, blank=True)
-    degree = ForeignKey(clip.Degree, on_delete=models.PROTECT)
+    degree = IntegerField(choices=Degree.CHOICES)
     abbreviation = TextField(max_length=100, null=True, blank=True)
     active = BooleanField(default=False)
     clip_course = OneToOneField(clip.Course, on_delete=models.PROTECT)
@@ -144,7 +185,7 @@ class Course(Model):
         ordering = ['name']
 
     def __str__(self):
-        return f'{self.degree.name} em {self.name}'
+        return f'{Degree.name(self.degree)} em {self.name}'
 
 
 class CourseArea(Model):
@@ -186,9 +227,29 @@ class Curriculum(Model):
         unique_together = ['course', 'corresponding_class']
 
 
+class Period:
+    ANNUAL = 1
+    FIRST_SEMESTER = 2
+    SECOND_SEMESTER = 3
+    FIRST_TRIMESTER = 4
+    SECOND_TRIMESTER = 5
+    THIRD_TRIMESTER = 6
+    FOURTH_TRIMESTER = 7
+
+    CHOICES = (
+        (ANNUAL, 'Anual'),
+        (FIRST_SEMESTER, '1º semestre'),
+        (SECOND_SEMESTER, '2º semestre'),
+        (FIRST_TRIMESTER, '1º trimestre'),
+        (SECOND_TRIMESTER, '2º trimestre'),
+        (THIRD_TRIMESTER, '3º trimestre'),
+        (FOURTH_TRIMESTER, '4º trimestre'),
+    )
+
+
 class ClassInstance(Model):
     parent = ForeignKey(Class, on_delete=models.PROTECT, related_name='instances')
-    period = ForeignKey(clip.Period, on_delete=models.PROTECT)
+    period = IntegerField(choices=Period.CHOICES)
     year = IntegerField()
     clip_class_instance = OneToOneField(clip.ClassInstance, on_delete=models.PROTECT, related_name='class_instance')
     students = ManyToManyField(Student, through='Enrollment')
@@ -200,7 +261,7 @@ class ClassInstance(Model):
         return f"{self.parent.abbreviation}, {self.period} de {self.year}"
 
     def occasion(self):
-        return f'{self.period}, {self.year-1}/{self.year}'
+        return f'{Period.CHOICES[self.period-1][1]}, {self.year-1}/{self.year}'
 
 
 class Enrollment(Model):
@@ -215,9 +276,37 @@ class Enrollment(Model):
         unique_together = ['student', 'class_instance']
 
 
+class TurnType:
+    THEORETICAL = 1
+    PRACTICAL = 2
+    PRACTICAL_THEORETICAL = 3
+    SEMINAR = 4
+    TUTORIAL_ORIENTATION = 5
+    CHOICES = (
+        (THEORETICAL, 'Teórico'),
+        (PRACTICAL, 'Teórico'),
+        (PRACTICAL_THEORETICAL, 'Teórico-pratico'),
+        (SEMINAR, 'Seminário'),
+        (TUTORIAL_ORIENTATION, 'Orientação tutorial'),
+    )
+    ABBREVIATIONS = {
+        THEORETICAL: 'T',
+        PRACTICAL: 'P',
+        PRACTICAL_THEORETICAL: 'TP',
+        SEMINAR: 'S',
+        TUTORIAL_ORIENTATION: 'OT'
+    }
+
+    @staticmethod
+    def abbreviation(turn_type):
+        if turn_type in TurnType.ABBREVIATIONS:
+            return TurnType.ABBREVIATIONS[turn_type]
+        return ""
+
+
 class Turn(Model):
     class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE, related_name='turns')  # Eg: Analysis
-    turn_type = ForeignKey(clip.TurnType, on_delete=models.PROTECT)  # Theoretical
+    turn_type = IntegerField(choices=TurnType.CHOICES)  # Theoretical
     number = IntegerField()  # 1
     clip_turn = OneToOneField(clip.Turn, on_delete=models.PROTECT, related_name='turn')
     required = BooleanField(default=True)  # Optional attendance
@@ -227,7 +316,10 @@ class Turn(Model):
         unique_together = ['class_instance', 'turn_type', 'number']
 
     def __str__(self):
-        return f"{self.class_instance} {self.turn_type.abbreviation.upper()}{self.number}"
+        return f"{self.class_instance} {TurnType.abbreviation(self.turn_type)}{self.number}"
+
+    def type_abbreviation(self):
+        return TurnType.abbreviation(self.turn_type)
 
 
 class TurnStudents(Model):

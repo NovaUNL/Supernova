@@ -6,9 +6,8 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from clip import models as clip
-from clip.models import Degree
-from college.models import Building, Room, Place, Course, Curriculum, Area, ClassInstance, Class, Department, \
-    TurnInstance
+from college.models import Building, Room, Course, Curriculum, Area, ClassInstance, Class, Department, TurnInstance, \
+    Degree
 from college.schedules import build_schedule, build_turns_schedule
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
@@ -46,8 +45,12 @@ def department(request, department_id):
     context = build_base_context(request)
     context['title'] = f'Departamento de {department.name}'
     context['department'] = department
-    context['degrees'] = Degree.objects.filter(course__department=department).all()
-    context['courses'] = Course.objects.filter(department=department).all()
+
+    degrees = Course.objects.filter(department=department).values_list('degree').distinct()
+    courses_by_degree = list(map(
+        lambda degree: (Degree.name(degree[0]), Course.objects.filter(department=department, degree=degree[0]).all()),
+        degrees))
+    context['courses'] = courses_by_degree
     context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
                           {'name': department.name, 'url': reverse('department', args=[department_id])}]
     return render(request, 'college/department.html', context)
@@ -151,7 +154,7 @@ def area(request, area_id):
     context['title'] = 'Area de ' + area.name
     context['area'] = area
     context['courses'] = Course.objects.filter(area=area).order_by('degree_id').all()
-    context['degrees'] = Degree.objects.filter(course__area=area).all()
+    context['degrees'] = Degree.objects.filter(course__area=area).all()  # FIXME
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')},
                           {'name': area.name, 'url': reverse('area', args=[area_id])}]
     return render(request, 'college/area.html', context)
@@ -270,7 +273,7 @@ def available_places(request):
     date = datetime.now().date()
     context['date'] = date
 
-    if date.isoweekday() > 5:
+    if date.isoweekday() > 7:
         context['weekend'] = True
         return render(request, 'college/available_places.html', context)
 
@@ -282,7 +285,7 @@ def available_places(request):
             time_slots = []
             time = 8 * 60  # Start at 8 AM
             empty_state = False if room.topology == room.CLASSROOM or room.unlocked else None
-            for turn in TurnInstance.objects.filter(room=room, weekday=date.isoweekday(),
+            for turn in TurnInstance.objects.filter(room=room, weekday=0,
                                                     turn__class_instance__period=COLLEGE_PERIOD,
                                                     turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
                 if turn.start < time:

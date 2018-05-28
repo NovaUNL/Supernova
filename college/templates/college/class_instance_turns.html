@@ -32,15 +32,15 @@
     <h3>Departamento de {{ department.name }}, {{ occasion }}</h3>
     <div class="flex-wrapper">
         {% for turn in turns %}
-            <div class="turn turn-{{ turn.turn_type.name|lower }}" href="#">
+            <div class="turn turn-{{ turn.type_abbreviation|lower }}" href="#">
                 <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
-                    {{ turn.turn_type.abbreviation|upper }}{{ turn.number }}
+                    {{ turn.type_abbreviation }}{{ turn.number }}
                 </a>
                 <div style="display: inline-block;">
                     {% for instance in turn.instances.all %}
                         <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
                         <a style="border-bottom: 1px solid black" href="{% url 'room' instance.room.id %}">
-                            {{ instance.place }}
+                            {{ instance.room }}
                         </a><br>
                     {% endfor %}
                 </div>

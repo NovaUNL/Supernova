@@ -119,7 +119,7 @@ def user_schedule_view(request, nickname):
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
-    turns = student.turns.filter(class_instance__year=COLLEGE_YEAR, class_instance__period_id=COLLEGE_PERIOD).all()
+    turns = student.turns.filter(class_instance__year=COLLEGE_YEAR, class_instance__period=COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(turns)
     return render(request, 'users/profile_schedule.html', context)
 

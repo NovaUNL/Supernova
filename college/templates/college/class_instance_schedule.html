@@ -24,10 +24,10 @@
                     <td>{{ row.0|safe }}</td>
                     {% for element in row.1 %}
                         {% if element %}
-                            <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
+                            <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
                                 rowspan="{{ element.rowspan }}">
                                 {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
-                                {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
+                                {{ element.turn.turn.type_abbreviation|upper }}{{ element.turn.turn.number }}<br>
                                 <a href="{% url 'room' element.turn.room.id %}">
                                     {{ element.turn.room.short_str }}</a>
                             </td>

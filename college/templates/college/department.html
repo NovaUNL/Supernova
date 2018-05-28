@@ -19,18 +19,16 @@
             <h2>Cadeiras</h2>
             <ul>
                 {% for class in department.classes.all|dictsort:'name' %}
-                    <li><a href="{% url 'class' class.id %}">{{ class.name }}</a></li>
+                    <li><a href="{% url 'class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a></li>
                 {% endfor %}
             </ul>
         </div>
         <div>
             <h2>Cursos</h2>
-            {% for degree in degrees %}
-                <h3 class="degree">{{ degree.name }}</h3>
-                {% for course in courses %}
-                    {% if course.degree == degree %}
-                        <a class="course" href="{% url 'course' course.id %}">{{ course }}</a>
-                    {% endif %}
+            {% for degree in courses %}
+                <h3 class="degree">{{ degree.0 }}</h3>
+                {% for course in degree.1 %}
+                    <a class="course" href="{% url 'course' course.id %}">{{ course }}</a>
                 {% endfor %}
             {% endfor %}
         </div>
