@@ -1,0 +1,192 @@
+#header, footer { /* TODO Move to theme */
+    color: white;
+    background: linear-gradient(to bottom, #c9de96 0%, #8ab66b 44%, #398235 100%);
+}
+
+#main-navigation > li {
+    border-color: #0f7400;
+    background: linear-gradient(to bottom, #c9de96 0%, #8ab66b 20%, #377533 100%);
+}
+
+#header {
+    border-bottom: 2px solid #565656;
+}
+
+#header a, footer a {
+    color: white;
+}
+
+#main-navigation > li:hover {
+    background: #8ab66b;
+    color: #7ccc84;
+}
+
+#auth_btn {
+    background: linear-gradient(to bottom, #71c73c 0%, #398235 44%, #398235 100%);
+    border: 2px solid #398235;
+}
+
+#logout_btn {
+    background: linear-gradient(to bottom, #ff3019 0%, #cf0404 100%);
+    border: 2px solid #ac0000;
+}
+
+footer {
+    border-top: 2px solid forestgreen;
+}
+
+footer > ul > li {
+    color: white;
+}
+
+#sub_nav {
+    background-color: #398235;
+    background: linear-gradient(to bottom, rgba(201, 222, 150, 1) 0%, rgba(138, 182, 107, 1) 44%, rgba(57, 130, 53, 1) 100%);
+}
+
+.breadcrumb a {
+    color: white;
+    background: #666;
+    background: linear-gradient(to bottom, rgba(201, 222, 150, 1) 0%, rgba(138, 182, 107, 1) 44%, rgba(57, 130, 53, 1) 100%);
+}
+
+.breadcrumb a.active, .breadcrumb a:hover {
+    background: #008a00;
+}
+
+.breadcrumb a.active:after, .breadcrumb a:hover:after {
+    background: #008a00;
+}
+
+.breadcrumb a:after {
+    background: #666;
+    background: linear-gradient(135deg, rgba(201, 222, 150, 1) 0%, rgba(138, 182, 107, 1) 44%, rgba(57, 130, 53, 1) 100%);
+    box-shadow: 2px -2px 0 2px rgba(0, 0, 0, 0.4), 3px -3px 0 2px rgba(255, 255, 255, 0.1);
+}
+
+#side, #side_extra {
+    background-color: white;
+    border: 2px solid #b7ccb1;
+}
+
+#side_container .menu_entry {
+    color: white;
+    background-color: #008a00;
+    box-shadow: 0 2px 6px #777;
+}
+
+#side_container .selected {
+    color: white;
+    background-color: #8ab66b;
+    box-shadow: inset 0 0 2px #398235;
+}
+
+#nav_stage {
+    background-color: rgb(62, 156, 62);
+}
+
+#nav_stage a {
+    color: white;
+}
+
+#nav_stage_close_button {
+    color: white;
+}
+
+#overlay_prompt {
+    background-color: white;
+}
+
+#overlay_close_button {
+    background-color: red;
+    color: white;
+}
+
+.disabled {
+    color: #565656 !important;
+}
+
+.flex-grid-item {
+    background-color: white;
+    box-shadow: 0 0 5px #3d3d3d;
+    color: white;
+    border: 2px solid #666;
+}
+
+.flex-grid-item-top {
+    background-color: rgba(170, 170, 170, 0.5);
+    text-shadow: 0 0 2px black;
+}
+
+.flex-grid-item-bottom {
+    background-color: rgba(170, 170, 170, 0.5);
+}
+
+.generic-button {
+    background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
+    border: 2px solid #dddddd;
+}
+
+/* Big screens */
+@media only screen and (min-width: 1201px) {
+    body {
+        background-color: #e6e6e6; /* TODO to theme & desktop only */
+    }
+}
+
+/* Medium and big screens */
+@media only screen and (min-width: 841px) {
+    #main-navigation > li {
+        background: linear-gradient(to bottom, #c9de96 0%, #779c5c 44%, #398235 100%);
+    }
+
+    #content, #content_large {
+        background-color: white;
+        border: 2px solid #b7ccb1;
+    }
+}
+
+/* Medium screens */
+@media only screen and (min-width: 841px) and (max-width: 1200px) {
+    #main-navigation > li {
+        background: linear-gradient(to bottom, #c9de96 0%, #779c5c 44%, #398235 100%);
+    }
+}
+
+/* Small screens */
+@media only screen and (max-width: 840px) {
+    body {
+        background-color: white !important;
+    }
+
+    #mobile-hamburger {
+        background: rgba(155, 155, 155, 0.20);
+    }
+
+    #main-navigation {
+        background-color: rgb(255, 255, 255);
+        box-shadow: 3px -2px 4px #AAA;
+    }
+
+    #main-navigation > span {
+        border-bottom: 20px solid rgb(255, 255, 255);
+        filter: drop-shadow(0 -2px 2px #AAA);
+    }
+
+    #main-navigation > li {
+        background: #398235 !important;
+    }
+
+    #main-navigation > li {
+        background: linear-gradient(to bottom, #c9de96 0%, #779c5c 44%, #398235 100%);
+    }
+
+    #content, #content_large {
+        background-color: white;
+    }
+
+    #side-menu-trigger {
+        color: #777;
+        box-shadow: inset 25px 0 25px -25px rgba(0, 0, 0, 0.45);
+    }
+}

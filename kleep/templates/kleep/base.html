@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'kleep/style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'kleep/themes/default.css' %}"/>
     <script src="{% static 'kleep/script.js' %}"></script>
     {% block head %}
     {% endblock %}
@@ -61,6 +62,7 @@
                 <a href="{% url 'profile_schedule' user.nickname %}"><i class="fas fa-clock"></i><br>Horario</a>
                 <a class="disabled"><i class="fas fa-calendar"></i><br>Calendario</a>
                 <a class="disabled"><i class="fas fa-star"></i><br>Avaliações</a>
+                <a class="disabled"><i class="fas fa-pencil-alt"></i><br>Exercícios</a>
                 <a class="disabled"><i class="fas fa-graduation-cap"></i><br>Curso</a>
             </div>
         {% endif %}
@@ -78,7 +80,6 @@
             <a class="disabled"><i class="fas fa-globe"></i><br>Planeta</a>
             <a class="disabled"><i class="fas fa-trash"></i><br>Classificados</a>
             <a class="disabled"><i class="fas fa-comments"></i><br>Opiniões</a>
-            <a class="disabled"><i class="fas fa-pencil-alt"></i><br>Exercícios</a>
             <a class="disabled"><i class="fas fa-superscript"></i><br>Resolve-me</a>
             <a href="{% url 'store:all_items' %}"><i class="fas fa-euro-sign"></i><br>Loja</a>
         </div>
