@@ -22,17 +22,17 @@
 
 {% block navigation %}
     {% if type_filter %}
-        <a class="menu_entry" href="#">Todos os grupos</a>
+        <a class="menu-entry" href="#">Todos os grupos</a>
     {% else %}
-        <a class="menu_entry selected">Todos os grupos</a>
+        <a class="menu-entry selected">Todos os grupos</a>
     {% endif %}
     <br><br>
     <span style="font-size: 1.2em; font-weight: bold;">Filtro:</span>
     {% for type in group_types %}
         {% if type_filter == type.type %}
-            <a class="menu_entry selected" href="?filtro={{ type.type }}">{{ type.type }}</a>
+            <a class="menu-entry selected" href="?filtro={{ type.type }}">{{ type.type }}</a>
         {% else %}
-            <a class="menu_entry" href="?filtro={{ type.type }}">{{ type.type }}</a>
+            <a class="menu-entry" href="?filtro={{ type.type }}">{{ type.type }}</a>
         {% endif %}
     {% endfor %}
 {% endblock %}

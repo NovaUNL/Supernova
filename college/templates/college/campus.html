@@ -29,13 +29,13 @@
     </object>
 {% endblock %}
 {% block navigation %}
-    <a class="menu_entry selected">Mapa</a>
-    <a class="menu_entry" href="{% url 'transportation' %}">Transportes</a>
-    <a class="menu_entry" href="{% url 'available_places' %}">Espaços</a>
+    <a class="menu-entry selected">Mapa</a>
+    <a class="menu-entry" href="{% url 'transportation' %}">Transportes</a>
+    <a class="menu-entry" href="{% url 'available_places' %}">Espaços</a>
 {% endblock %}
 {% block side_extra %}
-    <div id="side_extra">
-        <span class="menu_entry selected">Legenda:</span><br>
+    <div id="side-extra">
+        <span class="menu-entry selected">Legenda:</span><br>
         <ul>
             <li><span style="background-color: lawngreen" class="place">
             </span> Entrada <span style="background-color: lawngreen; border-style: dotted;"
@@ -49,7 +49,7 @@
         </ul>
         {% for building in buildings %}
             <div id="{{ building.map_tag }}" class="mapEntry">
-                <a href="{% url 'building' building.id %}"><span class="menu_entry">{{ building.name }}</span></a><br>
+                <a href="{% url 'building' building.id %}"><span class="menu-entry">{{ building.name }}</span></a><br>
                 <div style="margin-left: 10px;">
                     <ul>
                         <span>Departamentos:</span>
@@ -65,7 +65,7 @@
         {% endfor %}
         {% for service in services %}
             <div id="{{ service.map_tag }}" class="mapEntry">
-                <span class="menu_entry">{{ service.name }}</span><br>
+                <span class="menu-entry">{{ service.name }}</span><br>
                 <ul>
                     <li>{{ building_usage.usage }}</li>
                 </ul>

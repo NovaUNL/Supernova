@@ -7,48 +7,48 @@
 
 {% block navigation %}
     {% if page == 'profile' %}
-        <a class="menu_entry selected">Perfil</a>
+        <a class="menu-entry selected">Perfil</a>
     {% else %}
-        <a class="menu_entry" href="{% url 'profile' user.nickname %}">Perfil</a>
+        <a class="menu-entry" href="{% url 'profile' user.nickname %}">Perfil</a>
     {% endif %}
     {% if page == 'profile_schedule' %}
-        <a class="menu_entry selected">Horário</a>
+        <a class="menu-entry selected">Horário</a>
     {% else %}
-        <a class="menu_entry" href="{% url 'profile_schedule' user.nickname %}">Horário</a>
+        <a class="menu-entry" href="{% url 'profile_schedule' user.nickname %}">Horário</a>
     {% endif %}
     {% if page == 'profile_activity' %}
-        <a class="menu_entry selected">Atividade</a>
+        <a class="menu-entry selected">Atividade</a>
     {% else %}
-        <a class="menu_entry" href="#">Atividade</a>
+        <a class="menu-entry" href="#">Atividade</a>
     {% endif %}
 {% endblock %}
 
 {% block side_extra %}
-    <div id="side_extra">
+    <div id="side-extra">
         {% if page == 'profile_settings' %}
-            <a class="menu_entry selected">Dados pessoais</a>
+            <a class="menu-entry selected">Dados pessoais</a>
         {% else %}
-            <a class="menu_entry" href="{% url 'profile_settings' user.nickname %}">Dados pessoais</a>
+            <a class="menu-entry" href="{% url 'profile_settings' user.nickname %}">Dados pessoais</a>
         {% endif %}
         {% if page == 'profile_social' %}
-            <a class="menu_entry selected">Redes sociais</a>
+            <a class="menu-entry selected">Redes sociais</a>
         {% else %}
-            <a class="menu_entry" href="{% url 'profile_social' user.nickname %}">Redes sociais</a>
+            <a class="menu-entry" href="{% url 'profile_social' user.nickname %}">Redes sociais</a>
         {% endif %}
         {% if page == 'profile_password' %}
-            <a class="menu_entry selected">Alterar palavra-passe</a>
+            <a class="menu-entry selected">Alterar palavra-passe</a>
         {% else %}
-            <a class="menu_entry" href="{% url 'profile_password' user.nickname %}">Alterar palavra-passe</a>
+            <a class="menu-entry" href="{% url 'profile_password' user.nickname %}">Alterar palavra-passe</a>
         {% endif %}
         {% if page == 'profile_crawler' %}
-            <a class="menu_entry selected">Agregar CLIP</a>
+            <a class="menu-entry selected">Agregar CLIP</a>
         {% else %}
-            <a class="menu_entry" href="{% url 'profile_crawler' user.nickname %}">Agregar CLIP</a>
+            <a class="menu-entry" href="{% url 'profile_crawler' user.nickname %}">Agregar CLIP</a>
         {% endif %}
         {% if page == 'profile_theme' %}
-            <a class="menu_entry selected">Tema</a>
+            <a class="menu-entry selected">Tema</a>
         {% else %}
-            <a class="menu_entry" href="#">Tema</a>
+            <a class="menu-entry" href="#">Tema</a>
         {% endif %}
     </div>
 {% endblock %}

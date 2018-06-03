@@ -9,7 +9,7 @@ function overlayClose() {
 let hamburgerMenuDisplayed = false;
 
 function toggleHamburger() {
-    let navigation = document.getElementById("main-navigation");
+    let navigation = document.getElementById("pre-navigation");
 
     if (hamburgerMenuDisplayed) {
         navigation.style.display = 'none';
@@ -25,7 +25,7 @@ function showSubmenu(id) {
     if (openedNavStageElem !== id) {
         let menu = document.getElementById(id);
         let container = menu.parentNode;
-        menu.style.display = 'inline';
+        menu.style.display = 'flex';
         if (window.innerWidth > 1200) {
             container.style.height = '110px';
         } else if (window.innerWidth > 840) {
@@ -60,7 +60,7 @@ function showCommunitySubmenu() {
 }
 
 function closeSubmenu() {
-    let container = document.getElementById("nav_stage");
+    let container = document.getElementById("navigation");
     container.style.height = '0';
     container.style.borderBottom = 'none';
 }

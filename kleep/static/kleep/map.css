@@ -13,11 +13,11 @@
     border: 2px solid black;
 }
 
-#side_extra ul {
+#side-extra ul {
     padding: 0;
 }
 
-#side_extra li {
+#side-extra li {
     list-style: none;
     margin-left: 5px;
     margin-bottom: 5px;
@@ -80,8 +80,7 @@
 }
 
 .ML {
-    background: linear-gradient(
-            to right, #ff0000 25%, #ffff00 25%, #ffff00 50%, #57d300 50%, #57d300 75%, #0657ff 75%);
+    background: linear-gradient(to right, #ff0000 25%, #ffff00 25%, #ffff00 50%, #57d300 50%, #57d300 75%, #0657ff 75%);
     border: 3px solid #a05a2c;
     display: inline-block;
 }
