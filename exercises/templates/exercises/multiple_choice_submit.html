@@ -1,6 +1,4 @@
-{% extends 'kleep/content_only.html' %}
-
-{% load static %}
+{% extends 'exercises/submit.html' %}
 
 {% block content %}
     <h1><i class="fas fa-pencil-alt"></i> {{ title }}</h1>
@@ -24,6 +22,5 @@
         {{ exercise_form.explanation }}
         <br><input type="submit" value="Submeter"/>
     </form>
-    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
     {{ exercise_form.media }}
 {% endblock %}

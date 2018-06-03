@@ -1,0 +1,11 @@
+#exercise-options > div {
+    padding: 20px;
+}
+
+#exercise-options > div > pre {
+    padding: 5px;
+    border: 2px solid #999;
+    border-radius: 5px;
+    font-family: sans-serif;
+    background-color: #fafafa;
+}

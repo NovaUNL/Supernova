@@ -1,28 +1,9 @@
-{% extends 'kleep/content_only.html' %}
-
-{% load static %}
-
-{% block head %}
-    {{ block.super }}
-    <style>
-        #options > div {
-            padding: 20px;
-        }
-
-        #options > div > pre {
-            padding: 5px;
-            border: 2px solid #999;
-            border-radius: 5px;
-            font-family: sans-serif;
-            background-color: #fafafa;
-        }
-    </style>
-{% endblock %}
+{% extends 'exercises/submit.html' %}
 
 {% block content %}
     <h1><i class="fas fa-pencil-alt"></i> {{ title }}</h1>
     <h2>Escolhe o tipo de exercício pretendido</h2>
-    <div id="options">
+    <div id="exercise-options">
         <div>
             <pre>Qual o montante da taxa de matricula na FCT?<br>Resposta: 35€</pre>
             <a href="{% url 'exercises:create_qa_exercise' %}"><span class="generic-button">Questão-resposta</span></a>
