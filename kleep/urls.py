@@ -75,6 +75,7 @@ urlpatterns = [
     path('noticia/<str:news_item_id>/', news.item, name='news_item'),
     # Synopses views
     url(r'^sinteses/', include('synopses.urls')),
+    url(r'^exercicios/', include('exercises.urls')),
     url(r'^loja/', include('store.urls')),
     # REST API views
     url(r'^api/', include(api.urls)),

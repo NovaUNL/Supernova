@@ -1,0 +1,29 @@
+{% extends 'kleep/content_only.html' %}
+
+{% load static %}
+
+{% block content %}
+    <h1><i class="fas fa-pencil-alt"></i> {{ title }}</h1>
+    <form method="post" action="{{ action_page }}">
+        {% csrf_token %}
+        {{ exercise_form.non_field_errors }}
+        <h3>{{ exercise_form.synopses_sections.label }}</h3>
+        {{ exercise_form.synopses_sections }}
+        <h3>{{ exercise_form.source.label }}</h3>
+        {{ exercise_form.source.label }}: {{ exercise_form.source }}
+        {{ exercise_form.source_url.label }} {{ exercise_form.source_url }}
+        <h3>{{ exercise_form.enunciation.label }}</h3>
+        {{ exercise_form.enunciation }}
+        <h3>Respostas possíveis:</h3>
+        {% for form in answers_formset.forms %}
+            {{ form.answer }}
+        {% endfor %}
+        <h3>{{ exercise_form.correct_answer.label }}</h3>
+        {{ exercise_form.correct_answer }}
+        <h3>{{ exercise_form.explanation.label }}</h3>
+        {{ exercise_form.explanation }}
+        <br><input type="submit" value="Submeter"/>
+    </form>
+    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+    {{ exercise_form.media }}
+{% endblock %}
