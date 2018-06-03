@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'feedback',
     'planet',
     'documents',
+    'exercises',
     'api',
     'django_extensions',
 ]
@@ -129,43 +130,48 @@ CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_ALLOW_NONIMAGE_FILES = True
 CKEDITOR_IMAGE_BACKEND = 'pillow'
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar_ToolbarConfig': [
+CKEDITOR_MATHJAX_URL='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/MathJax.js?config=TeX-AMS_HTML'
+CKEDITOR_SIMPLE_TOOLBAR = [
+            {'name': 'styles', 'items': ['Styles']},
             {'name': 'basicstyles',
              'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
+            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
+            {'name': 'paragraph', 'items': ['NumberedList', 'BulletedList', 'Blockquote']},
+            {'name': 'insert', 'items': ['Image', 'Table', 'Mathjax', 'CodeSnippet']},
+            {'name': 'tools', 'items': ['Source', 'Preview', 'Maximize']}
+        ]
+CKEDITOR_COMPLEX_TOOLBAR = [
+            {'name': 'styles', 'items': ['Styles', 'Format',  'FontSize']},
+            {'name': 'basicstyles',
+             'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
+            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
             {'name': 'paragraph',
              'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-',
                        'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']},
             {'name': 'links', 'items': ['Link', 'Unlink']},
             {'name': 'insert',
              'items': ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Mathjax', 'CodeSnippet', 'Iframe']},
-            '/',
-            {'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
-            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
             {'name': 'tools', 'items': ['ShowBlocks', 'Source', 'Preview', 'Maximize']}
-        ],
-        'toolbar': 'ToolbarConfig',
+        ]
+CKEDITOR_EXTRA_PLUGINS = 'uploadimage,mathjax,codesnippet,div,autolink,autoembed,embedsemantic,' \
+                         'autogrow,widget,lineutils,clipboard,dialog,dialogui,elementspath'
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar_Simple': CKEDITOR_SIMPLE_TOOLBAR,
+        'toolbar': 'Simple',
         'width': '100%',
-        'mathJaxLib': '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/MathJax.js?config=TeX-AMS_HTML',
+        'mathJaxLib': CKEDITOR_MATHJAX_URL,
         'tabSpaces': 4,
-        'extraPlugins': ','.join([
-            'uploadimage',
-            'mathjax',
-            'codesnippet',
-            'div',
-            'autolink',
-            'autoembed',
-            'embedsemantic',
-            'autogrow',
-            'widget',
-            'lineutils',
-            'clipboard',
-            'dialog',
-            'dialogui',
-            'elementspath'
-        ]),
-    }
+        'extraPlugins': CKEDITOR_EXTRA_PLUGINS,
+    },
+    'complex': {
+        'toolbar_Complex': CKEDITOR_COMPLEX_TOOLBAR,
+        'toolbar': 'Complex',
+        'width': '100%',
+        'mathJaxLib': CKEDITOR_MATHJAX_URL,
+        'tabSpaces': 4,
+        'extraPlugins': CKEDITOR_EXTRA_PLUGINS,
+    },
 }
 
 # Captcha plugin

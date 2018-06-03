@@ -47,7 +47,7 @@ class Topic(Model):
 
 class Section(Model):
     name = TextField(verbose_name='nome')
-    content = RichTextUploadingField(verbose_name='conteúdo')
+    content = RichTextUploadingField(verbose_name='conteúdo', config_name='complex')
     topics = ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
     requirements = ManyToManyField('Section', verbose_name='requisitos')
 
