@@ -1,7 +1,11 @@
 __pycache__
-*/migrations/
+migrations
 kleep/static/kleep/images/
 *.svg
 *.woff2
 /venv/
-manage.py
+ignore.py
+settings.json
+_build
+_static
+_templates
