@@ -3,7 +3,13 @@ from math import log
 
 
 def password_strength(password: str):
-    # > 10 excellent; < 5 awful
+    """
+    | Checks for variety and strong elements in a password and gives a strength index.
+    | The index can be read as: > 10 excellent; < 5 awful
+
+    :param password: The password to evaluate
+    :return: password strength value.
+    """
     uppercase = 0
     lowercase = 0
     number = 0
@@ -27,5 +33,12 @@ def password_strength(password: str):
                + log(special + 1) * 2 + special * 0.5)
 
 
-def correlated(a, b, threshold=0.5):
+def correlated(a: str, b: str, threshold=0.5):
+    """
+    Checks if two strings are above a correlation threshold
+    :param a: First string
+    :param b: Second string
+    :param threshold: Minimum correlation
+    :return: Related
+    """
     return SequenceMatcher(a, b).ratio() > threshold
