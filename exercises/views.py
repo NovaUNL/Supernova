@@ -1,14 +1,13 @@
 from django.shortcuts import render
 from django.urls import reverse
 
-from exercises.forms import ExerciseForm, MultipleChoiceExerciseForm, AnswerFormSet
+from exercises.forms import ExerciseForm, AnswerFormSet
 from kleep.views import build_base_context
 
 
 def create_exercise(request):
     context = build_base_context(request)
     context['title'] = 'Submeter exercício'
-    context['exercise'] = ExerciseForm()
     context['sub_nav'] = [{'name': 'Exercicios', 'url': '#TODO'},
                           {'name': 'Submeter exercício', 'url': reverse('exercises:create_exercise')}]
     return render(request, 'exercises/pre_submit.html', context)
@@ -24,10 +23,10 @@ def create_qa_exercise(request):
     return render(request, 'exercises/qa_submit.html', context)
 
 
-def create_multiple_choice_exercise(request):
+def create_mc_exercise(request):
     context = build_base_context(request)
     context['title'] = 'Submeter exercício de escolha múltipla'
-    context['exercise_form'] = MultipleChoiceExerciseForm()
+    context['exercise_form'] = ExerciseForm()
     context['answers_formset'] = AnswerFormSet()
     context['sub_nav'] = [{'name': 'Exercicios', 'url': '#TODO'},
                           {'name': 'Submeter exercício', 'url': reverse('exercises:create_exercise')},

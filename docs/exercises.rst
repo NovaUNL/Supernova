@@ -20,8 +20,8 @@ exercises.models module
 
 .. automodule:: exercises.models
     :members:
-    :undoc-members:
     :show-inheritance:
+    :exclude-members:  DoesNotExist, MultipleObjectsReturned
 
 exercises.views module
 ----------------------
