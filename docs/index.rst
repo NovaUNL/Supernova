@@ -21,6 +21,15 @@ simply refer to it as Kleep, though they're bread and butter and in the future o
 
    modules
 
+Future
+------
+You can check the project :doc:`roadmap` to know about the future plans.
+
+| This is made with volunteer time, and as such things can get slow to progress.
+| If you know how to contribute (Django/Python) you can lend us an hand.
+| Waiting for your `pull requests <https://gitlab.com/claudiop/Kleep>`_.
+
+
 Indices and tables
 ==================
 
