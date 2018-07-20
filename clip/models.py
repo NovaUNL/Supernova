@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToManyField
+from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToManyField, BooleanField, DateField
 from django.forms import DateTimeField
 
 CLIPY_TABLE_PREFIX = 'clip_'
@@ -42,8 +42,7 @@ class Institution(TemporalEntity, Model):
     | Once upon a time CLIP had several institutions under the same system.
     | Although that is no longer the case, the data is still there.
     """
-    id = IntegerField(primary_key=True)
-    internal_id = IntegerField()  #: CLIP internal code for this institution
+    id = IntegerField(primary_key=True)  #: CLIP internal code for this institution
     abbreviation = TextField(max_length=10)  #: The institution string abbreviation
     name = TextField(null=True, max_length=50)  #: The institution name
 
@@ -77,8 +76,7 @@ class Department(Model, TemporalEntity):
     | A department is an entity responsible for teaching several :py:class:`Class` es.
     | It also creates courses, although a course doesn't exclusively rely on its main department.
     """
-    id = IntegerField(primary_key=True)
-    internal_id = TextField()  #: CLIP internal code for this department
+    id = IntegerField(primary_key=True)  #: CLIP internal code for this department
     name = TextField(max_length=50)  #: Department name
     institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id',
                              related_name='departments')  #: CLIP institution relation
@@ -88,7 +86,7 @@ class Department(Model, TemporalEntity):
         db_table = CLIPY_TABLE_PREFIX + 'departments'
 
     def __str__(self):
-        return "{}({})".format(self.name, self.internal_id)
+        return "{}({})".format(self.name, self.id)
 
 
 class Class(Model):
@@ -97,8 +95,8 @@ class Class(Model):
     | It is a timeless concept, refer to :py:class:`ClassInstance` for the temporal version.
     """
     id = IntegerField(primary_key=True)
-    name = TextField(null=True)
-    internal_id = TextField(null=True)  #: CLIP class internal code (TODO numeric?)
+    iid = IntegerField()  #: CLIP class internal code
+    name = TextField()
     abbreviation = TextField()  #: CLIP string abbreviation of this class name
     ects = IntegerField(null=True)  #: ECTS are stored as halves. 2 DB ECTS = 1 real ECTS
     department = ForeignKey(Department, on_delete=models.PROTECT, db_column='department_id', related_name='classes')
@@ -108,20 +106,21 @@ class Class(Model):
         db_table = CLIPY_TABLE_PREFIX + 'classes'
 
     def __str__(self):
-        return "{}({})".format(self.name, self.internal_id)
+        return "{}({})".format(self.name, self.iid)
 
 
-class Classroom(Model):
+class Room(Model):
     """
     The CLIP notion of a classroom is either a generic room, laboratory, auditorium or even a random place.
     """
     id = IntegerField(primary_key=True)
     name = TextField(max_length=70)  #: CLIP string representation of the classroom name
+    room_type = IntegerField()  # TODO choices
     building = ForeignKey(Building, on_delete=models.PROTECT, db_column='building_id', related_name='classrooms')
 
     class Meta:
         managed = False
-        db_table = CLIPY_TABLE_PREFIX + 'classrooms'
+        db_table = CLIPY_TABLE_PREFIX + 'rooms'
 
     def __str__(self):
         return "{} - {}".format(self.name, self.building.name)
@@ -133,7 +132,9 @@ class Teacher(Model):
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
     id = IntegerField(primary_key=True)
+    iid = IntegerField()
     name = TextField(max_length=100)  #: Teacher name, which is what distinguishes them right now.
+    department = ForeignKey(Department, on_delete=models.PROTECT, db_column='department_id', related_name='teachers')
 
     class Meta:
         managed = False
@@ -149,10 +150,49 @@ class ClassInstance(Model):
     """
     id = IntegerField(primary_key=True)
     parent = ForeignKey(Class, on_delete=models.PROTECT, db_column='class_id', related_name='instances')
-    period = IntegerField(db_column='period_id')
+    period = IntegerField(db_column='period_id')  # TODO choice
     year = IntegerField()
-
-    # regent = ForeignKey(ClipTeacher, on_delete=models.PROTECT, db_column='regent_id')
+    description_pt = TextField(null=True)
+    description_en = TextField(null=True)
+    description_edited_datetime = DateTimeField(null=True)
+    description_editor = TextField(null=True)
+    objectives_pt = TextField(null=True)
+    objectives_en = TextField(null=True)
+    objectives_edited_datetime = DateTimeField(null=True)
+    objectives_editor = TextField(null=True)
+    requirements_pt = TextField(null=True)
+    requirements_en = TextField(null=True)
+    requirements_edited_datetime = DateTimeField(null=True)
+    requirements_editor = TextField(null=True)
+    competences_pt = TextField(null=True)
+    competences_en = TextField(null=True)
+    competences_edited_datetime = DateTimeField(null=True)
+    competences_editor = TextField(null=True)
+    program_pt = TextField(null=True)
+    program_en = TextField(null=True)
+    program_edited_datetime = DateTimeField(null=True)
+    program_editor = TextField(null=True)
+    bibliography_pt = TextField(null=True)
+    bibliography_en = TextField(null=True)
+    bibliography_edited_datetime = DateTimeField(null=True)
+    bibliography_editor = TextField(null=True)
+    assistance_pt = TextField(null=True)
+    assistance_en = TextField(null=True)
+    assistance_edited_datetime = DateTimeField(null=True)
+    assistance_editor = TextField(null=True)
+    teaching_methods_pt = TextField(null=True)
+    teaching_methods_en = TextField(null=True)
+    teaching_methods_edited_datetime = DateTimeField(null=True)
+    teaching_methods_editor = TextField(null=True)
+    evaluation_methods_pt = TextField(null=True)
+    evaluation_methods_en = TextField(null=True)
+    evaluation_methods_edited_datetime = DateTimeField(null=True)
+    evaluation_methods_editor = TextField(null=True)
+    extra_info_pt = TextField(null=True)
+    extra_info_en = TextField(null=True)
+    extra_info_edited_datetime = DateTimeField(null=True)
+    extra_info_editor = TextField(null=True)
+    working_hours = TextField(null=True)
 
     class Meta:
         managed = False
@@ -167,7 +207,7 @@ class Course(TemporalEntity, Model):
     Courses define their :py:class:`Student` s academic routes.
     """
     id = IntegerField(primary_key=True)
-    internal_id = IntegerField()
+    iid = IntegerField()
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
     institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='courses')
@@ -178,7 +218,7 @@ class Course(TemporalEntity, Model):
         db_table = CLIPY_TABLE_PREFIX + 'courses'
 
     def __str__(self):
-        return "{}(ID:{} Abbreviation:{}, Degree:{})".format(self.name, self.internal_id, self.abbreviation,
+        return "{}(ID:{} Abbreviation:{}, Degree:{})".format(self.name, self.iid, self.abbreviation,
                                                              self.degree)
 
 
@@ -190,8 +230,8 @@ class Student(Model):
     | Why? Because that's how CLIP works!
     """
     id = IntegerField(primary_key=True)
-    name = TextField()
-    internal_id = IntegerField()
+    name = IntegerField()
+    iid = IntegerField()
     """ 
     CLIP public representation of a student id (eg: 12345).
     "internal" is misleading since there's a private one which seems not to be crawlable
@@ -201,13 +241,14 @@ class Student(Model):
     course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id', related_name='students')
     #: The course a student is known to be enrolled to. FIXME couldn't this be null?
     institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='students')
+    gender = BooleanField(null=True)
 
     class Meta:
         managed = False
         db_table = CLIPY_TABLE_PREFIX + 'students'
 
     def __str__(self):
-        return "{}, {}".format(self.name, self.internal_id, self.abbreviation)
+        return "{}, {}".format(self.name, self.iid, self.abbreviation)
 
 
 class Admission(Model):
@@ -255,6 +296,18 @@ class Enrollment(Model):
     student_year = IntegerField(null=True)
     statutes = TextField(blank=True, null=True, max_length=20)
     observation = TextField(blank=True, null=True, max_length=30)
+    attendance = BooleanField()
+    attendance_date = DateField()
+    improved = BooleanField()
+    improvement_grade = IntegerField()
+    improvement_grade_date = DateField(null=True)
+    continuous_grade = IntegerField()
+    continuous_grade_date = DateField(null=True)
+    exam_grade = IntegerField()
+    exam_grade_date = DateField()
+    special_grade = IntegerField()
+    special_grade_date = DateField(null=True)
+    approved = BooleanField(null=True)
 
     class Meta:
         managed = False
@@ -303,7 +356,7 @@ class TurnInstance(Model):
     start = IntegerField()  #: Turn start day minute (0 is midnight, 120 is 2:00)
     end = IntegerField(null=True)  #: Turn end day minute (0 is midnight, 120 is 2:00)
     weekday = IntegerField(null=True)  #: Weekday, starting on monday=0
-    classroom = ForeignKey(Classroom, on_delete=models.PROTECT, db_column='classroom_id', related_name='turn_instances')
+    classroom = ForeignKey(Room, on_delete=models.PROTECT, db_column='classroom_id', related_name='turn_instances')
 
     class Meta:
         managed = False

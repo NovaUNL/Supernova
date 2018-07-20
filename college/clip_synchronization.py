@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def sync_classrooms():
-    for clip_classroom in clip.Classroom.objects.all():
+    for clip_classroom in clip.Room.objects.all():
         if hasattr(clip_classroom, 'room'):  # Room already exists, check if details match
             room = clip_classroom.room
             update_room_details(room, clip_classroom)
@@ -24,7 +24,7 @@ lab_exp = re.compile('[Ll]ab[.]? (?P<name>.*)$')
 door_number_exp = re.compile('(?P<floor>\d)\.?(?P<door_number>\d+)')
 
 
-def update_room_details(room: Room, clip_classroom: clip.Classroom):
+def update_room_details(room: Room, clip_classroom: clip.Room):
     clip_building: clip.Building = clip_classroom.building
     try:
         building: Building = clip_building.building
@@ -165,7 +165,7 @@ def create_student(clip_student: clip.Student) -> Student:
         logger.warning(f"Attempted to create a student which already exists ({student}).")
         return student
 
-    student = Student(number=int(clip_student.internal_id),
+    student = Student(number=int(clip_student.iid),
                       abbreviation=clip_student.abbreviation,
                       course=clip_student.course.course,
                       clip_student=clip_student)

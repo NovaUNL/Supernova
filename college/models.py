@@ -75,7 +75,7 @@ class Place(Model):
 class Room(Place):
     capacity = IntegerField(null=True, blank=True)
     door_number = IntegerField(null=True, blank=True)
-    clip_classroom = OneToOneField(clip.Classroom, null=True, blank=True, on_delete=models.PROTECT, related_name='room')
+    clip_room = OneToOneField(clip.Room, null=True, blank=True, on_delete=models.PROTECT, related_name='room')
 
     UNKNOWN = 0
     CLASSROOM = 1
