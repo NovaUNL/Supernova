@@ -7,6 +7,7 @@ from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToM
 from clip import models as clip
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from users.models import User
+from . import choice_types as ctypes
 
 
 class Student(Model):
@@ -128,51 +129,10 @@ class Department(Model):
         return self.name
 
 
-class Degree:
-    BACHELORS = 1
-    MASTERS = 2
-    PHD = 3
-    INTEGRATED_MASTERS = 4
-    POST_GRADUATION = 5
-    ADVANCED_STUDIES = 6
-    PRE_GRADUATION = 7
-
-    CHOICES = (
-        (BACHELORS, 'Licenciatura'),
-        (MASTERS, 'Mestrado'),
-        (PHD, 'Doutoramento'),
-        (INTEGRATED_MASTERS, 'Mestrado Integrado'),
-        (POST_GRADUATION, 'Pos-Graduação'),
-        (ADVANCED_STUDIES, 'Estudos Avançados'),
-        (PRE_GRADUATION, 'Pré-Graduação'),
-    )
-    ABBREVIATIONS = {
-        BACHELORS: 'L',
-        MASTERS: 'M',
-        PHD: 'D',
-        INTEGRATED_MASTERS: 'Mi',
-        POST_GRADUATION: 'Pg',
-        ADVANCED_STUDIES: 'EA',
-        PRE_GRADUATION: 'pG'
-    }
-
-    @staticmethod
-    def abbreviation(degree: int):
-        if degree in range(0, 7):
-            return Degree.ABBREVIATIONS[degree]
-        return ""
-
-    @staticmethod
-    def name(degree: int):
-        if degree in range(1, 8):
-            return Degree.CHOICES[degree - 1][1]
-        return "Estágio"  # AKA, Nothing, Nilch, Nada
-
-
 class Course(Model):
     name = TextField(max_length=200)
     description = TextField(max_length=4096, null=True, blank=True)
-    degree = IntegerField(choices=Degree.CHOICES)
+    degree = IntegerField(choices=ctypes.Degree.CHOICES)
     abbreviation = TextField(max_length=100, null=True, blank=True)
     active = BooleanField(default=False)
     clip_course = OneToOneField(clip.Course, on_delete=models.PROTECT)
@@ -185,7 +145,7 @@ class Course(Model):
         ordering = ['name']
 
     def __str__(self):
-        return f'{Degree.name(self.degree)} em {self.name}'
+        return f'{ctypes.Degree.name(self.degree)} em {self.name}'
 
 
 class CourseArea(Model):
@@ -227,29 +187,9 @@ class Curriculum(Model):
         unique_together = ['course', 'corresponding_class']
 
 
-class Period:
-    ANNUAL = 1
-    FIRST_SEMESTER = 2
-    SECOND_SEMESTER = 3
-    FIRST_TRIMESTER = 4
-    SECOND_TRIMESTER = 5
-    THIRD_TRIMESTER = 6
-    FOURTH_TRIMESTER = 7
-
-    CHOICES = (
-        (ANNUAL, 'Anual'),
-        (FIRST_SEMESTER, '1º semestre'),
-        (SECOND_SEMESTER, '2º semestre'),
-        (FIRST_TRIMESTER, '1º trimestre'),
-        (SECOND_TRIMESTER, '2º trimestre'),
-        (THIRD_TRIMESTER, '3º trimestre'),
-        (FOURTH_TRIMESTER, '4º trimestre'),
-    )
-
-
 class ClassInstance(Model):
     parent = ForeignKey(Class, on_delete=models.PROTECT, related_name='instances')
-    period = IntegerField(choices=Period.CHOICES)
+    period = IntegerField(choices=ctypes.Period.CHOICES)
     year = IntegerField()
     clip_class_instance = OneToOneField(clip.ClassInstance, on_delete=models.PROTECT, related_name='class_instance')
     students = ManyToManyField(Student, through='Enrollment')
@@ -261,7 +201,7 @@ class ClassInstance(Model):
         return f"{self.parent.abbreviation}, {self.period} de {self.year}"
 
     def occasion(self):
-        return f'{Period.CHOICES[self.period-1][1]}, {self.year-1}/{self.year}'
+        return f'{ctypes.Period.CHOICES[self.period-1][1]}, {self.year-1}/{self.year}'
 
 
 class Enrollment(Model):
@@ -276,37 +216,9 @@ class Enrollment(Model):
         unique_together = ['student', 'class_instance']
 
 
-class TurnType:
-    THEORETICAL = 1
-    PRACTICAL = 2
-    PRACTICAL_THEORETICAL = 3
-    SEMINAR = 4
-    TUTORIAL_ORIENTATION = 5
-    CHOICES = (
-        (THEORETICAL, 'Teórico'),
-        (PRACTICAL, 'Teórico'),
-        (PRACTICAL_THEORETICAL, 'Teórico-pratico'),
-        (SEMINAR, 'Seminário'),
-        (TUTORIAL_ORIENTATION, 'Orientação tutorial'),
-    )
-    ABBREVIATIONS = {
-        THEORETICAL: 'T',
-        PRACTICAL: 'P',
-        PRACTICAL_THEORETICAL: 'TP',
-        SEMINAR: 'S',
-        TUTORIAL_ORIENTATION: 'OT'
-    }
-
-    @staticmethod
-    def abbreviation(turn_type):
-        if turn_type in TurnType.ABBREVIATIONS:
-            return TurnType.ABBREVIATIONS[turn_type]
-        return ""
-
-
 class Turn(Model):
     class_instance = ForeignKey(ClassInstance, on_delete=models.CASCADE, related_name='turns')  # Eg: Analysis
-    turn_type = IntegerField(choices=TurnType.CHOICES)  # Theoretical
+    turn_type = IntegerField(choices=ctypes.TurnType.CHOICES)  # Theoretical
     number = IntegerField()  # 1
     clip_turn = OneToOneField(clip.Turn, on_delete=models.PROTECT, related_name='turn')
     required = BooleanField(default=True)  # Optional attendance
@@ -333,24 +245,13 @@ class TurnStudents(Model):
         return f'{self.student} enrolled to turn {self.turn}'
 
 
-WEEKDAY_CHOICES = (
-    (0, 'Segunda-feira'),
-    (1, 'Terça-feira'),
-    (2, 'Quarta-feira'),
-    (3, 'Quinta-feira'),
-    (4, 'Sexta-feira'),
-    (5, 'Sábado-feira'),
-    (6, 'Domingo-feira')
-)
-
-
 class TurnInstance(Model):
     turn = ForeignKey(Turn, on_delete=models.PROTECT, related_name='instances')  # Eg: Theoretical 1
     # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
     clip_turn_instance = OneToOneField(clip.TurnInstance, on_delete=models.PROTECT, related_name='turn_instance')
     recurring = BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
     # Whether this is a recurring turn
-    weekday = IntegerField(null=True, blank=True, choices=WEEKDAY_CHOICES)  # 0 - Monday
+    weekday = IntegerField(null=True, blank=True, choices=ctypes.WEEKDAY_CHOICES)  # 0 - Monday
     start = IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
     duration = IntegerField(null=True, blank=True)  # 60 minutes
     # --------------
@@ -369,7 +270,7 @@ class TurnInstance(Model):
                turn_instance.start < self.start + self.duration
 
     def weekday_pt(self):
-        return WEEKDAY_CHOICES[self.weekday][1]
+        return ctypes.WEEKDAY_CHOICES[self.weekday][1]
 
     def start_str(self):
         return self.minutes_to_str(self.start)

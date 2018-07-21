@@ -1,6 +1,8 @@
 from django.db import models
-from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToManyField, BooleanField, DateField
-from django.forms import DateTimeField
+from django.db.models import Model, IntegerField, TextField, ForeignKey, ManyToManyField, BooleanField, DateField, \
+    DateTimeField, NullBooleanField
+
+from college import choice_types as ctypes
 
 CLIPY_TABLE_PREFIX = 'clip_'
 
@@ -19,22 +21,6 @@ class TemporalEntity:
         :return:
         """
         return not (self.first_year is None or self.last_year is None)
-
-
-class TurnType(Model):
-    """
-    The type of a :py:class:`Turn`.
-    """
-    id = IntegerField(primary_key=True)
-    name = TextField(max_length=30)  #: A string identified for this turn type (Eg. "theoretical")
-    abbreviation = TextField(max_length=5)  #: A string abbreviation for this turn type (Eg. "tp")
-
-    class Meta:
-        managed = False
-        db_table = CLIPY_TABLE_PREFIX + 'turn_types'
-
-    def __str__(self):
-        return self.abbreviation
 
 
 class Institution(TemporalEntity, Model):
@@ -126,7 +112,7 @@ class Room(Model):
         return "{} - {}".format(self.name, self.building.name)
 
 
-class Teacher(Model):
+class Teacher(Model, TemporalEntity):
     """
     | A person who teaches.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
@@ -150,7 +136,7 @@ class ClassInstance(Model):
     """
     id = IntegerField(primary_key=True)
     parent = ForeignKey(Class, on_delete=models.PROTECT, db_column='class_id', related_name='instances')
-    period = IntegerField(db_column='period_id')  # TODO choice
+    period = IntegerField(db_column='period_id', choices=ctypes.Period.CHOICES)
     year = IntegerField()
     description_pt = TextField(null=True)
     description_en = TextField(null=True)
@@ -211,18 +197,17 @@ class Course(TemporalEntity, Model):
     name = TextField(max_length=70)
     abbreviation = TextField(null=True, max_length=15)
     institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='courses')
-    degree = IntegerField(db_column='degree_id', null=True, blank=True)
+    degree = IntegerField(db_column='degree_id', null=True, blank=True, choices=ctypes.Degree.CHOICES)
 
     class Meta:
         managed = False
         db_table = CLIPY_TABLE_PREFIX + 'courses'
 
     def __str__(self):
-        return "{}(ID:{} Abbreviation:{}, Degree:{})".format(self.name, self.iid, self.abbreviation,
-                                                             self.degree)
+        return "{}(ID:{} Abbreviation:{}, Degree:{})".format(self.name, self.iid, self.abbreviation, self.degree)
 
 
-class Student(Model):
+class Student(Model, TemporalEntity):
     """
     | A student can be one of many "aliases" a person can have.
     | Every student has a person behind, but a person can be several students.
@@ -241,7 +226,7 @@ class Student(Model):
     course = ForeignKey(Course, on_delete=models.PROTECT, db_column='course_id', related_name='students')
     #: The course a student is known to be enrolled to. FIXME couldn't this be null?
     institution = ForeignKey(Institution, on_delete=models.PROTECT, db_column='institution_id', related_name='students')
-    gender = BooleanField(null=True)
+    gender = NullBooleanField(null=True)
 
     class Meta:
         managed = False
@@ -296,7 +281,7 @@ class Enrollment(Model):
     student_year = IntegerField(null=True)
     statutes = TextField(blank=True, null=True, max_length=20)
     observation = TextField(blank=True, null=True, max_length=30)
-    attendance = BooleanField()
+    attendance = NullBooleanField(null=True)
     attendance_date = DateField()
     improved = BooleanField()
     improvement_grade = IntegerField()
@@ -307,7 +292,7 @@ class Enrollment(Model):
     exam_grade_date = DateField()
     special_grade = IntegerField()
     special_grade_date = DateField(null=True)
-    approved = BooleanField(null=True)
+    approved = NullBooleanField(null=True)
 
     class Meta:
         managed = False
@@ -327,7 +312,7 @@ class Turn(Model):
     """
     id = IntegerField(primary_key=True)
     number = IntegerField()
-    type = ForeignKey(TurnType, on_delete=models.PROTECT, related_name='turns')
+    type = IntegerField(choices=ctypes.TurnType.CHOICES, db_column='type_id')
     class_instance = ForeignKey(
         ClassInstance, on_delete=models.PROTECT, db_column='class_instance_id', related_name='turns')
     minutes = IntegerField(null=True)
@@ -344,7 +329,7 @@ class Turn(Model):
         db_table = CLIPY_TABLE_PREFIX + 'turns'
 
     def __str__(self):
-        return "{}{} of {}".format(self.type.abbreviation.upper(), self.number, self.class_instance)
+        return "{}{} of {}".format(ctypes.TurnType.CHOICES[self.type], self.number, self.class_instance)
 
 
 class TurnInstance(Model):
