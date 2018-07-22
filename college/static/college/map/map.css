@@ -38,11 +38,6 @@
     color: white;
 }
 
-.map {
-    width: 100%;
-    height: 70vh;
-    min-height: 400px;
-}
 
 .caption {
     list-style: none;
@@ -68,9 +63,6 @@
     border-right: 2px solid #b7ccb1;
 }
 
-
-
-
 .place {
     display: inline-block;
     padding: 8px;
@@ -78,45 +70,38 @@
     border: 2px solid #777;
 }
 
-#side-extra ul {
-    padding: 0;
-}
-
-#side-extra li {
-    list-style: none;
-    margin-left: 5px;
-    margin-bottom: 5px;
-}
 
 /* Campus Map */
+.map {
+    width: 100%;
+    height: 70vh;
+    min-height: 400px;
+}
 
 /*Transportation Map */
+/*TODO add official colors*/
 .MTS, .TST, .FER, .SFT, .ML, .CP, .TT, .TCB {
-    width: 30px;
-    height: 12px;
+    padding: 8px;
+    border-radius: 10px;
+    border: 2px solid #777;
     display: inline-block;
-    border-left: 0 !important;
-    border-right: 0 !important;
+    margin-right: 5px;
 }
 
 .MTS {
     background-color: #00ccff;
-    border: 3px solid #a05a2c;
 }
 
 .TST {
     background-color: #06f;
-    border: 3px solid white;
 }
 
 .FER {
     background-color: #a40c0c;
-    border: 3px solid #003860;
 }
 
 .SFT {
     background-color: #aa87de;
-    border: 3px solid white;
 }
 
 .TT {
@@ -126,17 +111,14 @@
 
 .ML {
     background: linear-gradient(to right, #ff0000 25%, #ffff00 25%, #ffff00 50%, #57d300 50%, #57d300 75%, #0657ff 75%);
-    border: 3px solid #a05a2c;
     display: inline-block;
 }
 
 .CP {
     background-color: #2fa40c;
-    border: 3px solid #003860;
 }
 
 .TCB {
     background-color: #8dd35f;
-    border: 3px solid white;
 }
 
