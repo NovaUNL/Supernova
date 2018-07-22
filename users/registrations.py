@@ -20,7 +20,7 @@ from users.models import User, Registration
 def pre_register(data: Registration):
     username = data.username
     nickname = data.nickname
-    if ClipStudent.objects.filter(Q(internal_id=username) | Q(abbreviation=username)) \
+    if ClipStudent.objects.filter(Q(iid=username) | Q(abbreviation=username)) \
             .exclude(data.student).exists():
         raise InvalidUsername(f'The username {username} matches a CLIP ID.')
 

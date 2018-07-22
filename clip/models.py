@@ -224,6 +224,7 @@ class Student(djm.Model, TemporalEntity):
     institution = djm.ForeignKey(Institution, on_delete=djm.PROTECT, db_column='institution_id',
                                  related_name='students')
     gender = djm.NullBooleanField(null=True)
+    graduation_grade = djm.IntegerField(null=True)
 
     class Meta:
         managed = False
@@ -370,3 +371,54 @@ class TurnStudent(djm.Model):
     class Meta:
         managed = False
         db_table = CLIPY_TABLE_PREFIX + 'turn_students'
+
+
+class File(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    name = djm.TextField(null=True)
+    type = djm.IntegerField(db_column='file_type')  # TODO choices
+    size = djm.IntegerField()
+    hash = djm.CharField(max_length=40, null=True)
+    location = djm.TextField(null=True)
+    mime = djm.TextField(null=True)
+
+    class Meta:
+        managed = False
+        db_table = CLIPY_TABLE_PREFIX + 'files'
+
+
+class ClassInstanceFile(djm.Model):
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, db_column='class_instance_id')
+    file = djm.ForeignKey(File, on_delete=djm.PROTECT, db_column='file_id')
+    upload_datetime = djm.DateTimeField()
+    uploader = djm.TextField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = CLIPY_TABLE_PREFIX + 'class_instance_files'
+
+
+class ClassEvaluation(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, db_column='class_instance_id')
+    datetime = djm.DateTimeField()
+    type = djm.IntegerField(db_column='evaluation_type')  # TODO choices
+
+    class Meta:
+        managed = False
+        db_table = CLIPY_TABLE_PREFIX + 'class_evaluations'
+
+
+class ClassInstanceMessages(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, db_column='class_instance_id')
+    teacher = djm.ForeignKey(Teacher, on_delete=djm.PROTECT, db_column='teacher_id')
+    title = djm.TextField(max_length=200)
+    message = djm.TextField()
+    upload_datetime = djm.DateTimeField()
+    uploader = djm.TextField(max_length=100)
+    datetime = djm.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = CLIPY_TABLE_PREFIX + 'class_instance_messages'

@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from django.contrib.postgres import fields as pgm
 from django.db import models as djm
 from clip import models as clip
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
@@ -74,7 +76,7 @@ class Room(Place):
     door_number = djm.IntegerField(null=True, blank=True)
     clip_room = djm.OneToOneField(clip.Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='room')
 
-    topology = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
+    type = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
     description = djm.TextField(max_length=2048, null=True, blank=True)
     equipment = djm.TextField(max_length=2048, null=True, blank=True)
 
@@ -82,7 +84,7 @@ class Room(Place):
         ordering = ('floor', 'door_number', 'name')
 
     def __str__(self):
-        return f'{ctypes.RoomType.CHOICES[self.topology][1]} {super().__str__()}'
+        return f'{ctypes.RoomType.CHOICES[self.type][1]} {super().__str__()}'
 
 
 class Department(djm.Model):
@@ -164,6 +166,7 @@ class ClassInstance(djm.Model):
     year = djm.IntegerField()
     clip_class_instance = djm.OneToOneField(clip.ClassInstance, on_delete=djm.PROTECT, related_name='class_instance')
     students = djm.ManyToManyField(Student, through='Enrollment')
+    information = pgm.JSONField()
 
     class Meta:
         unique_together = ['parent', 'period', 'year']
@@ -260,3 +263,55 @@ class TurnInstance(djm.Model):
     @staticmethod
     def minutes_to_str(minutes):
         return "%02d:%02d" % (minutes // 60, minutes % 60)
+
+
+class Teacher(djm.Model):
+    """
+    | A person who teaches.
+    | Note that there is an intersection between students and teachers. A student might become a teacher.
+    """
+    id = djm.IntegerField(primary_key=True)
+    iid = djm.IntegerField()
+    name = djm.TextField(max_length=100)
+    # This isn't really a M2M, but the crawler tables are unmodifiable
+    clip_teachers = djm.ManyToManyField(clip.Teacher)
+    #: Departments this teacher has worked for
+    departments = djm.ManyToManyField(Department)
+
+
+class File(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    name = djm.TextField(null=True)
+    type = djm.IntegerField(db_column='file_type', choices=ctypes.FileType.CHOICES)
+    size = djm.IntegerField()
+    hash = djm.CharField(max_length=40, null=True)
+    location = djm.TextField(null=True)
+    mime = djm.TextField(null=True)
+    clip_file = djm.ForeignKey(clip.File, on_delete=djm.CASCADE)
+    class_instances = djm.ManyToManyField(ClassInstance, through='ClassInstanceFile')
+
+
+class ClassInstanceFile(djm.Model):
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
+    file = djm.ForeignKey(File, on_delete=djm.PROTECT, db_column='file_id')
+    upload_datetime = djm.DateTimeField()
+    uploader = djm.TextField(max_length=100)
+
+
+class ClassEvaluation(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
+    datetime = djm.DateTimeField()
+    type = djm.IntegerField(db_column='evaluation_type', choices=ctypes.EvaluationType.CHOICES)
+
+
+class ClassInstanceMessages(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
+    teacher = djm.ForeignKey(Teacher, on_delete=djm.PROTECT, db_column='teacher_id')
+    title = djm.TextField(max_length=200)
+    message = djm.TextField()
+    upload_datetime = djm.DateTimeField()
+    uploader = djm.TextField(max_length=100)
+    datetime = djm.DateTimeField()
+    clip_message = djm.ForeignKey(clip.ClassInstanceMessages, on_delete=djm.CASCADE)

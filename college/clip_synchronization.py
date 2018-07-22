@@ -33,12 +33,12 @@ def update_room_details(room: Room, clip_classroom: clip.Room):
 
     room.building = building
 
-    if room.topology == Room.UNKNOWN:
+    if room.type == Room.UNKNOWN:
         if 'lab' in clip_classroom.name.lower():
-            room.topology = Room.LABORATORY
+            room.type = Room.LABORATORY
 
     if True or room.name is None or room.name.strip() == '':
-        if room.topology == Room.LABORATORY:
+        if room.type == Room.LABORATORY:
             lab_matches = lab_exp.search(clip_classroom.name)
             if lab_matches:
                 room.name = f'L{lab_matches.group("name")}'
