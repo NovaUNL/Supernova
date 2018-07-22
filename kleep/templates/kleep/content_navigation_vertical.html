@@ -1,0 +1,15 @@
+{% extends 'kleep/base.html' %}
+
+{% block content_wrapper %}
+    <div style="width: 100%">
+        <div id="top-content-wrapper">
+            {% block content-top %}{% endblock %}
+        </div>
+        <div id="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+        <div id="bottom-content-wrapper">
+            {% block content-bottom %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}
