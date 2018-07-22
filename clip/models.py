@@ -44,8 +44,6 @@ class Building(djm.Model):
     """
     id = djm.IntegerField(primary_key=True)
     name = djm.TextField(max_length=30)  #: The CLIP internal building string representation
-    institution = djm.ForeignKey(Institution, on_delete=djm.PROTECT, db_column='institution_id',
-                                 related_name='buildings')  #: CLIP institution relation
 
     class Meta:
         managed = False

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.gis.db import models as gis
 from django.contrib.postgres import fields as pgm
 from django.db import models as djm
 from clip import models as clip
@@ -46,6 +47,7 @@ class Building(djm.Model):
     name = djm.TextField(max_length=30, unique=True)
     abbreviation = djm.CharField(max_length=10, unique=True, null=True)
     map_tag = djm.CharField(max_length=20, unique=True)
+    location = gis.PointField(geography=True, null=True)
     clip_building = djm.OneToOneField(clip.Building, null=True, blank=True, on_delete=djm.PROTECT)
 
     class Meta:
@@ -60,9 +62,7 @@ class Place(djm.Model):
     building = djm.ForeignKey(Building, null=True, blank=True, on_delete=djm.PROTECT, related_name='places')
     floor = djm.IntegerField(default=0)
     unlocked = djm.NullBooleanField(null=True, default=None)
-
-    class Meta:
-        unique_together = ('name', 'building')
+    location = gis.PointField(geography=True, null=True)
 
     def __str__(self):
         return self.name
@@ -82,9 +82,13 @@ class Room(Place):
 
     class Meta:
         ordering = ('floor', 'door_number', 'name')
+        #unique_together = ('name', 'building', 'type') inheritance forbids this
 
     def __str__(self):
-        return f'{ctypes.RoomType.CHOICES[self.type][1]} {super().__str__()}'
+        try:
+            return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
+        except:
+            print()
 
 
 class Department(djm.Model):

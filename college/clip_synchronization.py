@@ -8,15 +8,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def sync_classrooms():
+def sync_rooms():
     for clip_room in clip.Room.objects.all():
         if hasattr(clip_room, 'room'):  # Room already exists, check if details match
             room = clip_room.room
             update_room_details(room, clip_room)
         else:  # New room
-            room = m.Room(clip_room=clip_room)
+            if hasattr(clip_room.building, 'building'):
+                building = clip_room.building.building
+            else:
+                logger.info(f"Skipped room {clip_room}")
+                continue
+            room = m.Room(type=clip_room.room_type, building=building, clip_room=clip_room)
             update_room_details(room, clip_room)
-            logger.info(f'Created classroom {room}.')
+            logger.info(f'Created room {room}.')
 
 
 door_number_exp = re.compile('(?P<floor>\d)\.?(?P<door_number>\d+)')
@@ -152,9 +157,10 @@ def create_student(clip_student: clip.Student) -> m.Student:
         logger.warning(f"Attempted to create a student which already exists ({student}).")
         return student
 
-    student = m.Student(number=int(clip_student.iid),
+    student = m.Student(number=clip_student.iid,
                         abbreviation=clip_student.abbreviation,
                         course=clip_student.course.course,
+                        graduation_grade=clip_student.graduation_grade,
                         clip_student=clip_student)
     student.save()
     sync_student_enrollments(student)
