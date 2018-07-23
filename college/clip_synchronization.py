@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def sync_rooms():
+def rooms():
     for clip_room in clip.Room.objects.all():
         if hasattr(clip_room, 'room'):  # Room already exists, check if details match
             room = clip_room.room
@@ -49,7 +49,7 @@ def update_room_details(room: m.Room, clip_room: clip.Room):
     room.save()
 
 
-def sync_departments():
+def departments():
     institution = clip.Institution.objects.get(abbreviation='FCT')
     for clip_department in clip.Department.objects.filter(institution=institution):
         if not hasattr(clip_department, 'department'):
@@ -58,7 +58,7 @@ def sync_departments():
             logger.info(f'Created department {corresponding_department}.')
 
 
-def sync_courses():
+def courses():
     clip_institution = clip.Institution.objects.get(abbreviation='FCT')
     for clip_course in clip_institution.courses.all():
         if not hasattr(clip_course, 'course'):
@@ -73,7 +73,28 @@ def sync_courses():
             logger.info(f'Created course {course}.')
 
 
-def sync_class_and_instances(year: int, period: int, bootstrap=False):
+def teachers():
+    departments = m.Department.objects.all()
+    for department in departments:
+        clip_department = department.clip_department
+        for clip_teacher in clip_department.teachers.all():
+            if m.Teacher.objects.filter(iid=clip_teacher.iid).count() == 0:
+                teacher = m.Teacher(iid=clip_teacher.iid, name=clip_teacher.name)
+                teacher.save()
+                logger.info(f'Created teacher {teacher}')
+            else:
+                teacher = m.Teacher.objects.get(iid=clip_teacher.iid)
+
+            if clip_teacher not in teacher.clip_teachers.all():
+                teacher.clip_teachers.add(clip_teacher)
+                logger.info(f"{clip_teacher} matched with {teacher}")
+
+            if department not in teacher.departments.all():
+                teacher.departments.add(department)
+                logger.info(f"Added {department} to teacher {teacher}")
+
+
+def class_and_instances(year: int, period: int, bootstrap=False):
     for clip_class_instance in clip.ClassInstance.objects.filter(year=year, period=period).all():
         clip_class: clip.Class = clip_class_instance.parent
 
@@ -99,10 +120,10 @@ def sync_class_and_instances(year: int, period: int, bootstrap=False):
             logger.info(f'Created class instance {class_instance}.')
 
         if bootstrap:
-            sync_turns(class_instance, bootstrap=True)
+            turns(class_instance, bootstrap=True)
 
 
-def sync_turns(class_instance: m.ClassInstance, bootstrap=False):
+def turns(class_instance: m.ClassInstance, bootstrap=False):
     for clip_turn in class_instance.clip_class_instance.turns.all():
         if hasattr(clip_turn, 'turn'):  # There is already a turn for this crawled turn.
             turn: m.Turn = clip_turn.turn
@@ -115,10 +136,10 @@ def sync_turns(class_instance: m.ClassInstance, bootstrap=False):
             turn.save()
 
         if bootstrap:
-            sync_turn_instances(turn)
+            turn_instances(turn)
 
 
-def sync_turn_instances(turn: m.Turn):
+def turn_instances(turn: m.Turn):
     for clip_turn_instance in turn.clip_turn.instances.all():
         if hasattr(clip_turn_instance, 'turn_instance'):
             turn_instance = clip_turn_instance.turn_instance
@@ -163,20 +184,20 @@ def create_student(clip_student: clip.Student) -> m.Student:
                         graduation_grade=clip_student.graduation_grade,
                         clip_student=clip_student)
     student.save()
-    sync_student_enrollments(student)
+    student_enrollments(student)
     return student
 
 
-def sync_student_enrollments(student: m.Student):
+def student_enrollments(student: m.Student):
     for clip_enrollment in clip.Enrollment.objects.filter(student=student.clip_student).all():
         if not hasattr(clip_enrollment, 'enrollment'):
             class_instance = clip_enrollment.class_instance.class_instance
             m.Enrollment(student=student, class_instance=class_instance, clip_enrollment=clip_enrollment).save()
             logger.info(f'Enrolled student {student} to {class_instance}.')
-    sync_student_turns(student)
+    student_turns(student)
 
 
-def sync_student_turns(student: m.Student):
+def student_turns(student: m.Student):
     for clip_turn in clip.Turn.objects.filter(students=student.clip_student).all():
         if clip_turn.turn not in student.turns.all():
             m.TurnStudents(student=student, turn=clip_turn.turn).save()

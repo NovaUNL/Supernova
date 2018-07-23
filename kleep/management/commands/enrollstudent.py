@@ -1,7 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from college.clip_synchronization import sync_student_enrollments
+from college.clip_synchronization import student_enrollments
 from college.models import Student
 
 logging.basicConfig(level=logging.INFO)
@@ -15,4 +15,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         student = Student.objects.get(abbreviation=options['abbreviation'][0])
-        sync_student_enrollments(student)
+        student_enrollments(student)

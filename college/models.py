@@ -82,7 +82,7 @@ class Room(Place):
 
     class Meta:
         ordering = ('floor', 'door_number', 'name')
-        #unique_together = ('name', 'building', 'type') inheritance forbids this
+        # unique_together = ('name', 'building', 'type') inheritance forbids this
 
     def __str__(self):
         try:
@@ -274,7 +274,6 @@ class Teacher(djm.Model):
     | A person who teaches.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
-    id = djm.IntegerField(primary_key=True)
     iid = djm.IntegerField()
     name = djm.TextField(max_length=100)
     # This isn't really a M2M, but the crawler tables are unmodifiable
@@ -282,9 +281,11 @@ class Teacher(djm.Model):
     #: Departments this teacher has worked for
     departments = djm.ManyToManyField(Department)
 
+    def __str__(self):
+        return f"{self.name} ({self.iid})"
+
 
 class File(djm.Model):
-    id = djm.IntegerField(primary_key=True)
     name = djm.TextField(null=True)
     type = djm.IntegerField(db_column='file_type', choices=ctypes.FileType.CHOICES)
     size = djm.IntegerField()
@@ -303,14 +304,12 @@ class ClassInstanceFile(djm.Model):
 
 
 class ClassEvaluation(djm.Model):
-    id = djm.IntegerField(primary_key=True)
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
     datetime = djm.DateTimeField()
     type = djm.IntegerField(db_column='evaluation_type', choices=ctypes.EvaluationType.CHOICES)
 
 
 class ClassInstanceMessages(djm.Model):
-    id = djm.IntegerField(primary_key=True)
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
     teacher = djm.ForeignKey(Teacher, on_delete=djm.PROTECT, db_column='teacher_id')
     title = djm.TextField(max_length=200)

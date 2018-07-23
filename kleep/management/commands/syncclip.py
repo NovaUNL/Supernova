@@ -2,8 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from college.clip_synchronization import sync_classrooms, sync_departments, sync_class_and_instances, sync_courses
-from clip import models as clip
+from college import clip_synchronization as sync
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,9 +16,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         year = options['year'][0]
-        period = clip.Period.objects.get(id=options['period'][0])
+        period = options['period'][0]
 
-        sync_classrooms()
-        sync_departments()
-        sync_courses()
-        sync_class_and_instances(year, period, bootstrap=True)
+        sync.rooms()
+        sync.departments()
+        sync.courses()
+        sync.teachers()
+        sync.class_and_instances(year, period, bootstrap=True)
