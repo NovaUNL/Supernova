@@ -65,17 +65,17 @@ def courses():
             if clip_course.degree is None:
                 logger.warning(f'Unable to create course {clip_course} since it has no degree.')
                 continue
-            course = m.Course(name=clip_course.name,
-                              degree=clip_course.degree,
-                              abbreviation=clip_course.degree,
-                              clip_course=clip_course)
+            course = m.Course(
+                name=clip_course.name,
+                degree=clip_course.degree,
+                abbreviation=clip_course.degree,
+                clip_course=clip_course)
             course.save()
             logger.info(f'Created course {course}.')
 
 
 def teachers():
-    departments = m.Department.objects.all()
-    for department in departments:
+    for department in m.Department.objects.all():
         clip_department = department.clip_department
         for clip_teacher in clip_department.teachers.all():
             if m.Teacher.objects.filter(iid=clip_teacher.iid).count() == 0:
@@ -101,21 +101,25 @@ def class_and_instances(year: int, period: int, bootstrap=False):
         if hasattr(clip_class, 'related_class'):  # There's a class attached to this crawled class.
             related_class = clip_class.related_class
         else:  # No corresponding class. Create one.
-            related_class = m.Class(name=clip_class.name,
-                                    clip_class=clip_class,
-                                    abbreviation=clip_class.abbreviation,
-                                    department=clip_class.department.department,
-                                    credits=clip_class.ects)
+            related_class = m.Class(
+                name=clip_class.name,
+                clip_class=clip_class,
+                abbreviation=clip_class.abbreviation,
+                department=clip_class.department.department,
+                credits=clip_class.ects)
             related_class.save()
             logger.info(f'Created class {related_class}.')
 
         if hasattr(clip_class_instance, 'class_instance'):  # There's a class attached to this crawled class.
             class_instance = clip_class_instance.class_instance
         else:
-            class_instance = m.ClassInstance(parent=related_class,
-                                             period=period,
-                                             year=year,
-                                             clip_class_instance=clip_class_instance)
+            information = generate_class_instance_information(clip_class_instance)
+            class_instance = m.ClassInstance(
+                parent=related_class,
+                period=period,
+                year=year,
+                clip_class_instance=clip_class_instance,
+                information=information)
             class_instance.save()
             logger.info(f'Created class instance {class_instance}.')
 
@@ -128,10 +132,11 @@ def turns(class_instance: m.ClassInstance, bootstrap=False):
         if hasattr(clip_turn, 'turn'):  # There is already a turn for this crawled turn.
             turn: m.Turn = clip_turn.turn
         else:  # No corresponding turn. Create one.
-            turn = m.Turn(clip_turn=clip_turn,
-                          turn_type=clip_turn.type,
-                          number=clip_turn.number,
-                          class_instance=class_instance)
+            turn = m.Turn(
+                clip_turn=clip_turn,
+                turn_type=clip_turn.type,
+                number=clip_turn.number,
+                class_instance=class_instance)
             logger.info(f'Created turn {turn}.')
             turn.save()
 
@@ -162,12 +167,13 @@ def turn_instances(turn: m.Turn):
             else:  # No corresponding turn instance. Create one.
                 room = None
 
-            turn_instance = m.TurnInstance(turn=turn,
-                                           clip_turn_instance=clip_turn_instance,
-                                           weekday=clip_turn_instance.weekday,
-                                           start=clip_turn_instance.start,
-                                           duration=duration,
-                                           room=room)
+            turn_instance = m.TurnInstance(
+                turn=turn,
+                clip_turn_instance=clip_turn_instance,
+                weekday=clip_turn_instance.weekday,
+                start=clip_turn_instance.start,
+                duration=duration,
+                room=room)
             turn_instance.save()
             logger.info(f'Created turn instance {turn_instance}.')
 
@@ -178,11 +184,12 @@ def create_student(clip_student: clip.Student) -> m.Student:
         logger.warning(f"Attempted to create a student which already exists ({student}).")
         return student
 
-    student = m.Student(number=clip_student.iid,
-                        abbreviation=clip_student.abbreviation,
-                        course=clip_student.course.course,
-                        graduation_grade=clip_student.graduation_grade,
-                        clip_student=clip_student)
+    student = m.Student(
+        number=clip_student.iid,
+        abbreviation=clip_student.abbreviation,
+        course=clip_student.course.course,
+        graduation_grade=clip_student.graduation_grade,
+        clip_student=clip_student)
     student.save()
     student_enrollments(student)
     return student
@@ -203,3 +210,94 @@ def student_turns(student: m.Student):
             m.TurnStudents(student=student, turn=clip_turn.turn).save()
             logger.info(f'Added turn {clip_turn.turn} to student {student}.')
     # TODO delete old turns
+
+
+# Helper functions
+
+def generate_class_instance_information(clip_instance: clip.ClassInstance) -> dict:
+    """
+    Generates the class instance information dictionary
+    :param clip_instance: :py:class:`clip.ClassInstance`
+    :return: Dictionary with the information fields
+    """
+    information = {}
+    if clip_instance.description_pt is not None:
+        information['description'] = {
+            'pt': clip_instance.description_pt,
+            'en': clip_instance.description_en,
+            'edited_datetime': clip_instance.description_edited_datetime,
+            'editor': clip_instance.description_editor}
+
+    if clip_instance.objectives_pt is not None:
+        information['objectives'] = {
+            'pt': clip_instance.objectives_pt,
+            'en': clip_instance.objectives_en,
+            'edited_datetime': clip_instance.objectives_edited_datetime,
+            'editor': clip_instance.objectives_editor}
+
+    if clip_instance.requirements_pt is not None:
+        information['requirements'] = {
+            'pt': clip_instance.requirements_pt,
+            'en': clip_instance.requirements_en,
+            'edited_datetime': clip_instance.requirements_edited_datetime,
+            'editor': clip_instance.requirements_editor}
+
+    if clip_instance.competences_pt is not None:
+        information['competences'] = {
+            'pt': clip_instance.competences_pt,
+            'en': clip_instance.competences_en,
+            'edited_datetime': clip_instance.competences_edited_datetime,
+            'editor': clip_instance.competences_editor}
+
+    if clip_instance.program_pt is not None:
+        information['program'] = {
+            'pt': clip_instance.program_pt,
+            'en': clip_instance.program_en,
+            'edited_datetime': clip_instance.program_edited_datetime,
+            'editor': clip_instance.program_editor}
+
+    if clip_instance.bibliography_pt is not None:
+        information['bibliography'] = {
+            'pt': clip_instance.bibliography_pt,
+            'en': clip_instance.bibliography_en,
+            'edited_datetime': clip_instance.bibliography_edited_datetime,
+            'editor': clip_instance.bibliography_editor}
+
+    if clip_instance.assistance_pt is not None:
+        information['assistance'] = {
+            'pt': clip_instance.assistance_pt,
+            'en': clip_instance.assistance_en,
+            'edited_datetime': clip_instance.assistance_edited_datetime,
+            'editor': clip_instance.assistance_editor}
+
+    if clip_instance.assistance_pt is not None:
+        information['teaching'] = {
+            'pt': clip_instance.teaching_methods_pt,
+            'en': clip_instance.teaching_methods_en,
+            'edited_datetime': clip_instance.teaching_methods_edited_datetime,
+            'editor': clip_instance.teaching_methods_editor}
+
+    if clip_instance.teaching_methods_pt is not None:
+        information['teaching'] = {
+            'pt': clip_instance.teaching_methods_pt,
+            'en': clip_instance.teaching_methods_en,
+            'edited_datetime': clip_instance.teaching_methods_edited_datetime,
+            'editor': clip_instance.teaching_methods_editor}
+
+    if clip_instance.evaluation_methods_pt is not None:
+        information['evaluation'] = {
+            'pt': clip_instance.evaluation_methods_pt,
+            'en': clip_instance.evaluation_methods_en,
+            'edited_datetime': clip_instance.evaluation_methods_edited_datetime,
+            'editor': clip_instance.evaluation_methods_editor}
+    if clip_instance.extra_info_pt is not None:
+        information['extra'] = {
+            'pt': clip_instance.extra_info_pt,
+            'en': clip_instance.extra_info_en,
+            'edited_datetime': clip_instance.extra_info_edited_datetime,
+            'editor': clip_instance.extra_info_editor}
+
+    if clip_instance.working_hours is not None:
+        information['working_hours'] = clip_instance.working_hours
+
+    return information

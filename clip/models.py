@@ -340,7 +340,7 @@ class TurnInstance(djm.Model):
     end = djm.IntegerField(null=True)
     #: Weekday, starting on monday=0
     weekday = djm.IntegerField(null=True)
-    classroom = djm.ForeignKey(Room, on_delete=djm.PROTECT, db_column='classroom_id', related_name='turn_instances')
+    classroom = djm.ForeignKey(Room, on_delete=djm.PROTECT, db_column='room_id', related_name='turn_instances')
 
     class Meta:
         managed = False

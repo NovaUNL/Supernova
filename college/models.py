@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.gis.db import models as gis
 from django.contrib.postgres import fields as pgm
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models as djm
 from clip import models as clip
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
@@ -170,7 +171,7 @@ class ClassInstance(djm.Model):
     year = djm.IntegerField()
     clip_class_instance = djm.OneToOneField(clip.ClassInstance, on_delete=djm.PROTECT, related_name='class_instance')
     students = djm.ManyToManyField(Student, through='Enrollment')
-    information = pgm.JSONField()
+    information = pgm.JSONField(encoder=DjangoJSONEncoder)
 
     class Meta:
         unique_together = ['parent', 'period', 'year']
