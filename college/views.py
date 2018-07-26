@@ -6,8 +6,8 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
 from clip import models as clip
-from college.models import Building, Room, Course, Curriculum, Area, ClassInstance, Class, Department, TurnInstance, \
-    Degree
+from college.choice_types import Degree, RoomType
+from college.models import Building, Room, Course, Curriculum, Area, ClassInstance, Class, Department, TurnInstance
 from college.schedules import build_schedule, build_turns_schedule
 from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
@@ -154,7 +154,7 @@ def area(request, area_id):
     context['title'] = 'Area de ' + area.name
     context['area'] = area
     context['courses'] = Course.objects.filter(area=area).order_by('degree_id').all()
-    context['degrees'] = Degree.objects.filter(course__area=area).all()  # FIXME
+    # context['degrees'] = Degree.objects.filter(course__area=area).all()  # FIXME
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')},
                           {'name': area.name, 'url': reverse('area', args=[area_id])}]
     return render(request, 'college/area.html', context)
@@ -212,9 +212,9 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    context['classrooms'] = Room.objects.filter(building=building, topology=Room.CLASSROOM)
-    context['laboratories'] = Room.objects.filter(building=building, topology=Room.LABORATORY)
-    context['auditoriums'] = Room.objects.filter(building=building, topology=Room.AUDITORIUM)
+    context['classrooms'] = Room.objects.filter(building=building, type=RoomType.CLASSROOM)
+    context['laboratories'] = Room.objects.filter(building=building, type=RoomType.LABORATORY)
+    context['auditoriums'] = Room.objects.filter(building=building, type=RoomType.AUDITORIUM)
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
@@ -284,7 +284,7 @@ def available_places(request):
         for room in Room.objects.filter(building=building).all():
             time_slots = []
             time = 8 * 60  # Start at 8 AM
-            empty_state = False if room.topology == room.CLASSROOM or room.unlocked else None
+            empty_state = False if room.type == RoomType.CLASSROOM or room.unlocked else None
             for turn in TurnInstance.objects.filter(room=room, weekday=0,
                                                     turn__class_instance__period=COLLEGE_PERIOD,
                                                     turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
