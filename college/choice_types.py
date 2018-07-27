@@ -65,6 +65,19 @@ class RoomType:
         (MASTERS, 'Sala de mestrados'),
     )
 
+    @staticmethod
+    def plural(room_type):
+        plurals = {1: 'Salas',
+                   2: 'Salas de aula',
+                   3: 'Auditórios',
+                   4: 'Laboratórios',
+                   5: 'Salas de computadores',
+                   6: 'Salas de reuniões',
+                   7: 'Salas de mestrados'}
+        if room_type not in plurals:
+            return None
+        return plurals[room_type]
+
 
 class EvaluationType:
     TEST = 1

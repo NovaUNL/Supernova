@@ -1,6 +1,16 @@
 {% extends 'kleep/content_only.html' %}
 {% load static %}
+{% load leaflet_tags %}
+
 {% block head %}
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <script>
+        let center = [
+            {{ building.location.coords.1|stringformat:"f" }},
+            {{ building.location.coords.0|stringformat:"f" }}];
+    </script>
+    <script src="{% static 'college/map/map.js' %}"></script>
     <style>
         .flex-wrapper {
             display: flex;
@@ -45,81 +55,63 @@
         .auditorium {
             background-color: #ffcf78;
         }
+
+        #campus-map {
+            height: 400px;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-map-marker"></i> {{ building.name }}</h1>
-    <div class="flex-wrapper">
-        <div>
-            <h2>Localização</h2>
-            <object width="450px" height="400px" type="image/svg+xml" data="{% static 'kleep/campus.svg' %}">
-                O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
-                Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
-            </object>
-        </div>
-        <div>
-            <h2>Planta</h2>
-            <object width="450px" height="400px" type="image/svg+xml" data="{% static 'kleep/vii-sample.svg' %}">
-                O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
-                Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
-            </object>
-        </div>
+    <div class="content-formatter">
+        <h1><i class="fas fa-map-marker"></i> {{ building.name }}</h1>
+        <div class="flex-wrapper">
+            <div>
+                <h2>Localização</h2>
+                {% leaflet_map "campus-map" callback="initBuildingMap" %}
+            </div>
+            <div>
+                <h2>Planta</h2>
+                <object width="450px" height="400px" type="image/svg+xml" data="{% static 'kleep/vii-sample.svg' %}">
+                    O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20
+                    anos</a>...<br>
+                    Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
+                </object>
+            </div>
+            <div>
+                {% if departments.exists %}
+                    <h2>Departamentos:</h2>
+                    <ul>
+                        {% for department in departments.all %}
+                            <li><a href="{% url 'department' department.id %}">{{ department.name }}</a></li>
+                        {% endfor %}
+                    </ul>
 
-        <div>
-            {% if departments.exists %}
-                <h2>Departamentos:</h2>
+                {% endif %}
+                {% if services.exists %}<h2>Serviços:</h2>
+                    <ul>
+                        {% for service in services.all %}
+                            <li><a href="{% url 'service' service.id %}">{{ service.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <h2>Núcleos:</h2>
                 <ul>
-                    {% for department in departments.all %}
-                        <li><a href="{% url 'department' department.id %}">{{ department.name }}</a></li>
-                    {% endfor %}
+                    <li>TODO</li>
                 </ul>
-
-            {% endif %}
-            {% if services.exists %}<h2>Serviços:</h2>
-                <ul>
-                    {% for service in services.all %}
-                        <li><a href="{% url 'service' service.id %}">{{ service.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <h2>Núcleos:</h2>
-            <ul>
-                <li>TODO</li>
-            </ul>
-        </div>
-        <div>
-            <h2>Salas de aula:</h2>
-            <ul class="room-list">
-                {% for room in classrooms.all %}
-                    <a href="{% url 'room' room.id %}">
-                        <li class="classroom">{{ room.name }}</li>
-                    </a>
-                {% endfor %}
-            </ul>
-        </div>
-        <div>
-            <h2>Laboratórios:</h2>
-            <ul class="room-list">
-                {% for room in laboratories.all %}
-                    <a href="{% url 'room' room.id %}">
-                        <li class="laboratory">{{ room.name }}</li>
-                    </a>
-                {% endfor %}
-            </ul>
-        </div>
-        <div>
-            <h2>Auditórios:</h2>
-            <ul class="room-list">
-                {% for room in auditoriums.all %}
-                    <a href="{% url 'room' room.id %}">
-                        <li class="auditorium">{{ room.name }}</li>
-                    </a>
-                {% endfor %}
-            </ul>
-        </div>
-        <div>
-
+            </div>
+            {% for type in rooms %}
+                <div>
+                    <h2>{{ type.0 }}:</h2>
+                    <ul class="room-list">
+                        {% for room in type.1 %}
+                            <a href="{% url 'room' room.id %}">
+                                <li class="room-type-{{ room.type }}">{{ room.name }}</li>
+                            </a>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

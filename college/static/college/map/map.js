@@ -132,3 +132,18 @@ let initTransportationMap = function (element) {
     });
     map.contain();
 };
+
+let initBuildingMap =  function (map, options) {
+    console.log(options);
+    let tileSource = L.tileLayer(
+        'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
+            attribution: '&copy; ' +
+            '<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> / ' +
+            '<a href="http://cartodb.com/attributions">CartoDB</a>',
+            minZoom: 16,
+            maxZoom: 19
+        });
+    tileSource.addTo(map);
+    map.setView(center, 18);
+};

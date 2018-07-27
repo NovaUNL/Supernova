@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import datetime
 
 from dal import autocomplete
@@ -212,9 +213,14 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    context['classrooms'] = Room.objects.filter(building=building, type=RoomType.CLASSROOM)
-    context['laboratories'] = Room.objects.filter(building=building, type=RoomType.LABORATORY)
-    context['auditoriums'] = Room.objects.filter(building=building, type=RoomType.AUDITORIUM)
+    rooms = Room.objects.filter(building=building).order_by('type').all()
+    rooms_by_type = {}
+    for room in rooms:
+        plural = RoomType.plural(room.type)
+        if plural not in rooms_by_type:
+            rooms_by_type[plural] = []
+        rooms_by_type[plural].append(room)
+    context['rooms'] = sorted(rooms_by_type.items(), key=lambda t: t[0])
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
@@ -279,7 +285,7 @@ def available_places(request):
 
     context['weekend'] = False
     building_turns = []
-    for building in Building.objects.order_by('name').all():
+    for building in Building.objects.order_by('id').all():
         rooms = []
         for room in Room.objects.filter(building=building).all():
             time_slots = []
