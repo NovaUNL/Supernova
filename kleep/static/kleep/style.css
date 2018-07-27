@@ -186,16 +186,56 @@ h3 {
     margin-top: 0;
 }
 
+#top-container {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#top-container > a {
+    display: inline-block;
+    padding: 8px 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-bottom: 0;
+}
+
+#top-container a:first-child {
+    border-top-left-radius: 10px;
+}
+
+#top-container a:last-child {
+    border-top-right-radius: 10px;
+}
+
 #content, #content-large {
     padding: 10px 20px;
-    border-radius: 0 20px;
     flex-grow: 1;
 }
 
-#content img, #content-large img {
-    padding: 10px;
-    background-color: white;
-    border-radius: 5px;
+.content-formatter {
+    padding: 10px 20px;
+}
+
+.caption {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.caption > li {
+    display: inline-block;
+    padding: 4px 15px;
+}
+
+.caption > li:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.caption > li:last-child {
+    border-bottom-right-radius: 10px;
 }
 
 /* Footer styles */

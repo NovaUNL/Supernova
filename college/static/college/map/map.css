@@ -1,75 +1,9 @@
-#top-container {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-#top-container > a {
-    display: inline-block;
-    padding: 8px 20px;
-    background-color: #eee;
-    font-size: 1.2em;
-    font-weight: bold;
-    border-right: 2px solid #b7ccb1;
-    border-top: 2px solid #b7ccb1;
-    border-bottom: 0;
-}
-
-#top-container > a:hover {
-    background-color: #c9de96;
-}
-
-#top-container a {
-    color: #999;
-}
-
-#top-container a:first-child {
-    border-top-left-radius: 10px;
-    border-left: 2px solid #b7ccb1;
-}
-
-#top-container a:last-child {
-    border-top-right-radius: 10px;
-}
-
-#top-container a.selected {
-    background-color: #aaa;
-    color: white;
-}
-
-
-.caption {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
-}
-
-.caption > li {
-    display: inline-block;
-    padding: 4px 15px;
-    background-color: #f5f5f5;
-    border-bottom: 2px solid #b7ccb1;
-}
-
-.caption > li:first-child {
-    border-bottom-left-radius: 10px;
-    border-left: 2px solid #b7ccb1;
-}
-
-.caption > li:last-child {
-    border-bottom-right-radius: 10px;
-    border-right: 2px solid #b7ccb1;
-}
-
 .place {
     display: inline-block;
     padding: 8px;
     border-radius: 10px;
     border: 2px solid #777;
 }
-
 
 /* Campus Map */
 .map {
