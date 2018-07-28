@@ -213,7 +213,7 @@ def building(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    rooms = Room.objects.filter(building=building).order_by('type').all()
+    rooms = Room.objects.filter(building=building).order_by('type', 'name', 'door_number').all()
     rooms_by_type = {}
     for room in rooms:
         plural = RoomType.plural(room.type)

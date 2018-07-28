@@ -50,6 +50,7 @@ class Building(djm.Model):
     map_tag = djm.CharField(max_length=20, unique=True)
     location = gis.PointField(geography=True, null=True)
     clip_building = djm.OneToOneField(clip.Building, null=True, blank=True, on_delete=djm.PROTECT)
+    map = djm.URLField(null=True, blank=True, default=None)
 
     class Meta:
         ordering = ['name']
