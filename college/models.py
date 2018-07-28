@@ -81,6 +81,7 @@ class Room(Place):
     type = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
     description = djm.TextField(max_length=2048, null=True, blank=True)
     equipment = djm.TextField(max_length=2048, null=True, blank=True)
+    features = djm.ManyToManyField('Feature', blank=True)
 
     class Meta:
         ordering = ('floor', 'door_number', 'name')
@@ -320,3 +321,12 @@ class ClassInstanceMessages(djm.Model):
     uploader = djm.TextField(max_length=100)
     datetime = djm.DateTimeField()
     clip_message = djm.ForeignKey(clip.ClassInstanceMessages, on_delete=djm.CASCADE)
+
+
+class Feature(djm.Model):
+    name = djm.CharField(max_length=100)
+    description = djm.TextField()
+    icon = djm.FileField(upload_to='icons/features/')
+
+    def __str__(self):
+        return self.name
