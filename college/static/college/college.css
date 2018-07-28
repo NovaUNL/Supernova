@@ -13,6 +13,16 @@
     padding: 20px;
 }
 
+#content-title-decorator h3 {
+    font-size: 2em;
+    text-shadow: black 0 0 3px;
+    margin-left: 50px;
+}
+
+#content-title-decorator h3 a {
+    color: white;
+}
+
 #content-title-decorator .svg-inline--fa {
     filter: drop-shadow(0 0 5px black);
 }

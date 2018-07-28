@@ -214,6 +214,10 @@ h3 {
     flex-grow: 1;
 }
 
+#content-wrapper {
+    width: 100%;
+}
+
 .content-formatter {
     padding: 10px 20px;
 }
