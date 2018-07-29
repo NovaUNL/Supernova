@@ -64,44 +64,6 @@ class Building(djm.Model):
         return self.name
 
 
-class Place(djm.Model):
-    name = djm.TextField(max_length=100)
-    building = djm.ForeignKey(Building, null=True, blank=True, on_delete=djm.PROTECT, related_name='places')
-    floor = djm.IntegerField(default=0)
-    unlocked = djm.NullBooleanField(null=True, default=None)
-    location = gis.PointField(geography=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-    def short_str(self):
-        return f"{self.name} ({self.building.abbreviation})"
-
-
-def room_pic_path(room, filename):
-    return f'c/b/{room.id}/pic.{filename.split(".")[-1]}'
-
-
-class Room(Place):
-    capacity = djm.IntegerField(null=True, blank=True)
-    door_number = djm.IntegerField(null=True, blank=True)
-    clip_room = djm.OneToOneField(clip.Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='room')
-
-    type = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
-    description = djm.TextField(max_length=2048, null=True, blank=True)
-    equipment = djm.TextField(max_length=2048, null=True, blank=True)
-    features = djm.ManyToManyField('Feature', blank=True)
-    extinguished = djm.BooleanField(default=False)
-    picture = djm.ImageField(upload_to=room_pic_path, null=True, blank=True)
-
-    class Meta:
-        ordering = ('floor', 'door_number', 'name')
-        # unique_together = ('name', 'building', 'type') inheritance forbids this
-
-    def __str__(self):
-        return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
-
-
 def department_pic_path(department, filename):
     return f'c/d/{department.id}/pic.{filename.split(".")[-1]}'
 
@@ -119,6 +81,45 @@ class Department(djm.Model):
 
     def __str__(self):
         return self.name
+
+
+class Place(djm.Model):
+    name = djm.TextField(max_length=100)
+    building = djm.ForeignKey(Building, null=True, blank=True, on_delete=djm.PROTECT, related_name='places')
+    floor = djm.IntegerField(default=0)
+    unlocked = djm.NullBooleanField(null=True, default=None)
+    location = gis.PointField(geography=True, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.name} ({self.building})'
+
+    def short_str(self):
+        return f"{self.name} ({self.building.abbreviation})"
+
+
+def room_pic_path(room, filename):
+    return f'c/b/{room.id}/pic.{filename.split(".")[-1]}'
+
+
+class Room(Place):
+    department = djm.ForeignKey(Department, on_delete=djm.PROTECT, related_name='rooms', null=True, blank=True)
+    capacity = djm.IntegerField(null=True, blank=True)
+    door_number = djm.IntegerField(null=True, blank=True)
+    clip_room = djm.OneToOneField(clip.Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='room')
+
+    type = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
+    description = djm.TextField(max_length=2048, null=True, blank=True)
+    equipment = djm.TextField(max_length=2048, null=True, blank=True)
+    features = djm.ManyToManyField('Feature', blank=True)
+    extinguished = djm.BooleanField(default=False)
+    picture = djm.ImageField(upload_to=room_pic_path, null=True, blank=True)
+
+    class Meta:
+        ordering = ('floor', 'door_number', 'name')
+        # unique_together = ('name', 'building', 'type') inheritance forbids this
+
+    def __str__(self):
+        return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
 
 
 class Course(djm.Model):

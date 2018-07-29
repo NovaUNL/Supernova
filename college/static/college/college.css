@@ -13,10 +13,15 @@
     padding: 20px;
 }
 
+#content-title-decorator h1 a {
+    color: white;
+}
+
 #content-title-decorator h3 {
     font-size: 2em;
     text-shadow: black 0 0 3px;
     margin-left: 50px;
+    color: white;
 }
 
 #content-title-decorator h3 a {
