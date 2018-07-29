@@ -44,6 +44,10 @@ class Area(djm.Model):
         return self.name
 
 
+def building_pic_path(building, filename):
+    return f'c/b/{building.id}/pic.{filename.split(".")[-1]}'
+
+
 class Building(djm.Model):
     name = djm.TextField(max_length=30, unique=True)
     abbreviation = djm.CharField(max_length=10, unique=True, null=True)
@@ -51,6 +55,7 @@ class Building(djm.Model):
     location = gis.PointField(geography=True, null=True)
     clip_building = djm.OneToOneField(clip.Building, null=True, blank=True, on_delete=djm.PROTECT)
     map = djm.URLField(null=True, blank=True, default=None)
+    picture = djm.ImageField(upload_to=building_pic_path, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -73,6 +78,10 @@ class Place(djm.Model):
         return f"{self.name} ({self.building.abbreviation})"
 
 
+def room_pic_path(room, filename):
+    return f'c/b/{room.id}/pic.{filename.split(".")[-1]}'
+
+
 class Room(Place):
     capacity = djm.IntegerField(null=True, blank=True)
     door_number = djm.IntegerField(null=True, blank=True)
@@ -82,16 +91,19 @@ class Room(Place):
     description = djm.TextField(max_length=2048, null=True, blank=True)
     equipment = djm.TextField(max_length=2048, null=True, blank=True)
     features = djm.ManyToManyField('Feature', blank=True)
+    extinguished = djm.BooleanField(default=False)
+    picture = djm.ImageField(upload_to=room_pic_path, null=True, blank=True)
 
     class Meta:
         ordering = ('floor', 'door_number', 'name')
         # unique_together = ('name', 'building', 'type') inheritance forbids this
 
     def __str__(self):
-        try:
-            return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
-        except:
-            print()
+        return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
+
+
+def department_pic_path(department, filename):
+    return f'c/d/{department.id}/pic.{filename.split(".")[-1]}'
 
 
 class Department(djm.Model):
@@ -99,8 +111,8 @@ class Department(djm.Model):
     description = djm.TextField(max_length=4096, null=True, blank=True)
     building = djm.ForeignKey(Building, on_delete=djm.PROTECT, null=True, blank=True, related_name='departments')
     clip_department = djm.OneToOneField(clip.Department, on_delete=djm.PROTECT)
-    img_url = djm.TextField(null=True, blank=True)
     extinguished = djm.BooleanField(default=True)
+    picture = djm.ImageField(upload_to=department_pic_path, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -323,10 +335,14 @@ class ClassInstanceMessages(djm.Model):
     clip_message = djm.ForeignKey(clip.ClassInstanceMessages, on_delete=djm.CASCADE)
 
 
+def feature_pic_path(feature, filename):
+    return f'c/f/{feature.id}.{filename.split(".")[-1]}'
+
+
 class Feature(djm.Model):
     name = djm.CharField(max_length=100)
     description = djm.TextField()
-    icon = djm.FileField(upload_to='icons/features/')
+    icon = djm.FileField(upload_to=feature_pic_path)
 
     def __str__(self):
         return self.name
