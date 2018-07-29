@@ -7,11 +7,7 @@
 {% endblock %}
 
 {% block content-top %}
-    <nav id="top-container">
-        <a href="{% url 'campus' %}">Mapa</a>
-        <a href="{% url 'transportation' %}">Transportes</a>
-        <a class="selected">Espaços</a>
-    </nav>
+    {% include 'college/campus_navigation.html' %}
 {% endblock %}
 
 {% block content %}
@@ -26,7 +22,7 @@
         </span>
         {% else %}
             {% for building in turns %}
-                <h2><a href="{% url 'building' building.0.id %}">{{ building.0 }}</a></h2>
+                <h2><a href="{% url 'college:building' building.0.id %}">{{ building.0 }}</a></h2>
                 <div class="schedule_wrapper">
                     <table class="building_schedule_map">
                         <tr>
@@ -46,7 +42,7 @@
                         </tr>
                         {% for room in building.1 %}
                             <tr>
-                                <th><a href="{% url 'room' room.0.id %}">{{ room.0.name }}</a></th>
+                                <th><a href="{% url 'college:room' room.0.id %}">{{ room.0.name }}</a></th>
                                 {% for turn in room.1 %}
                                     {% if turn %}
                                         <td class="busy_time_slot"></td>

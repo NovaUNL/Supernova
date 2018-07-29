@@ -40,7 +40,7 @@
                     {% for instance in turn.instances.all %}
                         <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
                         {% if instance.room %}
-                            <a style="border-bottom: 1px solid black" href="{% url 'room' instance.room.id %}">
+                            <a style="border-bottom: 1px solid black" href="{% url 'college:room' instance.room.id %}">
                                 {{ instance.room }}
                             </a><br>
                         {% endif %}

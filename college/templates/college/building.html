@@ -17,6 +17,12 @@
             margin: 10px 20px;
             flex-basis: 475px;
         }
+
+        #content-title-decorator {
+        {% if  building.picture %}
+            background-image: url("{{ building.picture.url }}");
+        {% endif %}
+        }
     </style>
 {% endblock %}
 
@@ -35,14 +41,14 @@
                 <h2>Planta</h2>
                 {% if building.map %}
                 {% else %}
-                        As plantas encontram-se a ser feitas à mão a partir das plantas de incêndio.<br>
-                        Alguns edifícios não tem planta de incêndio e a administração recusa-se a partilhar o que quer
-                        que seja não vão os malandros dos alunos andar a consultar sem permissão as salas que tem na sua
-                        faculdade.<br>
-                        Assim que algum escravo acabe de mapear a planta deste edifício (ou a administração decida
-                        colaborar) a mesma será embutida aqui.<br>
-                        Caso seja uma personalidade bem socializada com a administração tenha a amabilidade de solicitar
-                        que os mesmos partilhem o que por lei é público.
+                    As plantas encontram-se a ser feitas à mão a partir das plantas de incêndio.<br>
+                    Alguns edifícios não tem planta de incêndio e a administração recusa-se a partilhar o que quer
+                    que seja não vão os malandros dos alunos andar a consultar sem permissão as salas que tem na sua
+                    faculdade.<br>
+                    Assim que algum escravo acabe de mapear a planta deste edifício (ou a administração decida
+                    colaborar) a mesma será embutida aqui.<br>
+                    Caso seja uma personalidade bem socializada com a administração tenha a amabilidade de solicitar
+                    que os mesmos partilhem o que por lei é público.
                 {% endif %}
             </div>
             <div>
@@ -50,7 +56,7 @@
                     <h2>Departamentos:</h2>
                     <ul style="list-style: none; padding-left: 20px;">
                         {% for department in departments.all %}
-                            <li><a href="{% url 'department' department.id %}">{{ department.name }}</a></li>
+                            <li><a href="{% url 'college:department' department.id %}">{{ department.name }}</a></li>
                         {% endfor %}
                     </ul>
                 {% endif %}
@@ -71,7 +77,7 @@
                     <h2>{{ type.0 }}:</h2>
                     <div class="room-list">
                         {% for room in type.1 %}
-                            <a class="room-type-{{ room.type }}" href="{% url 'room' room.id %}">
+                            <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
                                 {{ room.name }}
                             </a>
                         {% endfor %}

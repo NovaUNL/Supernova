@@ -8,11 +8,7 @@
 
 
 {% block content-top %}
-    <nav id="top-container">
-        <a class="menu-entry" href="{% url 'campus' %}">Mapa</a>
-        <a class="menu-entry selected">Transportes</a>
-        <a class="menu-entry" href="{% url 'available_places' %}">Espaços</a>
-    </nav>
+    {% include 'college/campus_navigation.html' %}
 {% endblock %}
 
 {% block content %}
@@ -21,15 +17,6 @@
         O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
         Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
     </object>
-{% endblock %}
-
-
-{% block navigation %}
-    <a class="menu-entry" href="{% url 'campus' %}">Mapa</a>
-    <a class="menu-entry selected">Transportes</a>
-    <a class="menu-entry" href="{% url 'available_places' %}">Espaços</a>
-{% endblock %}
-{% block side_extra %}
 {% endblock %}
 
 {% block content-bottom %}

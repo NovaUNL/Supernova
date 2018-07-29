@@ -60,5 +60,5 @@
 
 {% block navigation %}
     <a class="menu-entry selected">Programa curricular</a>
-    <a class="menu-entry" href="{% url 'course_students' course.id %}">Alunos</a>
+    <a class="menu-entry" href="{% url 'college:course_students' course.id %}">Alunos</a>
 {% endblock %}

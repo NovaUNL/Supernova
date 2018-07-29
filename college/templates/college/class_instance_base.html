@@ -11,7 +11,7 @@
     {% if page == 'instance_turns' %}
         <a class="menu-entry selected">Turnos</a>
     {% else %}
-        <a class="menu-entry" href="{% url 'class_instance_turns' instance.id %}">Turnos</a>
+        <a class="menu-entry" href="{% url 'college:class_instance_turns' instance.id %}">Turnos</a>
     {% endif %}
     {% if page == 'instance_enrolled' %}
         <a class="menu-entry selected">Inscritos</a>
@@ -21,7 +21,7 @@
     {% if page == 'instance_schedule' %}
         <a class="menu-entry selected">Horário</a>
     {% else %}
-        <a class="menu-entry" href="{% url 'class_instance_schedule' instance.id %}">Horário</a>
+        <a class="menu-entry" href="{% url 'college:class_instance_schedule' instance.id %}">Horário</a>
     {% endif %}
     {% if page == 'instance_summary' %}
         <a class="menu-entry selected">Sumários</a>

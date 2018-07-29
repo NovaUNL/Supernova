@@ -20,7 +20,17 @@ def campus(request):
     context = build_base_context(request)
     context['title'] = "Mapa do campus"
     context['buildings'] = Building.objects.all()
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')}, {'name': 'Mapa', 'url': reverse('campus')}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': 'Mapa', 'url': reverse('college:map')}]
+    return render(request, 'college/campus.html', context)
+
+
+def map(request):
+    context = build_base_context(request)
+    context['title'] = "Mapa do campus"
+    context['buildings'] = Building.objects.all()
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': 'Mapa', 'url': reverse('college:map')}]
     return render(request, 'college/campus.html', context)
 
 
@@ -28,8 +38,8 @@ def transportation(request):
     context = build_base_context(request)
     context['title'] = "Transportes para o campus"
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('campus')},
-        {'name': 'Transportes', 'url': reverse('transportation')}]
+        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Transportes', 'url': reverse('college:transportation')}]
     return render(request, 'college/transportation.html', context)
 
 
@@ -37,7 +47,7 @@ def departments(request):
     context = build_base_context(request)
     context['title'] = "Departamentos"
     context['departments'] = Department.objects.order_by('name').filter(extinguished=False).all()
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')}]
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('college:departments')}]
     return render(request, 'college/departments.html', context)
 
 
@@ -48,12 +58,14 @@ def department(request, department_id):
     context['department'] = department
 
     degrees = Course.objects.filter(department=department).values_list('degree').distinct()
-    courses_by_degree = list(map(
-        lambda degree: (Degree.name(degree[0]), Course.objects.filter(department=department, degree=degree[0]).all()),
-        degrees))
-    context['courses'] = courses_by_degree
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department.name, 'url': reverse('department', args=[department_id])}]
+    # courses_by_degree = list(
+    #     map(lambda degree:
+    #         (Degree.name(degree[0]),
+    #          Course.objects.filter(department=department, degree=degree[0]).all()),
+    #         degrees))
+    # context['courses'] = courses_by_degree
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('college:departments')},
+                          {'name': department.name, 'url': reverse('college:department', args=[department_id])}]
     return render(request, 'college/department.html', context)
 
 
@@ -64,9 +76,9 @@ def class_view(request, class_id):
     context['title'] = class_.name
     context['department'] = department
     context['class_obj'] = class_
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department.name, 'url': reverse('department', args=[department.id])},
-                          {'name': class_.name, 'url': reverse('class', args=[class_id])}]
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('college:departments')},
+                          {'name': department.name, 'url': reverse('college:department', args=[department.id])},
+                          {'name': class_.name, 'url': reverse('college:class', args=[class_id])}]
     return render(request, 'college/class.html', context)
 
 
@@ -84,10 +96,10 @@ def class_instance(request, instance_id):
     context['occasion'] = occasion
 
     context['sub_nav'] = [
-        {'name': 'Departamentos', 'url': reverse('departments')},
-        {'name': department.name, 'url': reverse('department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('class_instance', args=[instance_id])}
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        {'name': department.name, 'url': reverse('college:department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])}
     ]
     return render(request, 'college/class_instance.html', context)
 
@@ -108,10 +120,10 @@ def class_instance_schedule(request, instance_id):
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(instance.turns.all())
 
     context['sub_nav'] = [
-        {'name': 'Departamentos', 'url': reverse('departments')},
-        {'name': department.name, 'url': reverse('department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('class_instance', args=[instance_id])},
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        {'name': department.name, 'url': reverse('college:department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])},
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'college/class_instance_schedule.html', context)
@@ -132,10 +144,10 @@ def class_instance_turns(request, instance_id):
     context['turns'] = instance.turns.order_by('turn_type', 'number')
 
     context['sub_nav'] = [
-        {'name': 'Departamentos', 'url': reverse('departments')},
-        {'name': department.name, 'url': reverse('department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('class_instance', args=[instance_id])},
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        {'name': department.name, 'url': reverse('college:department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])},
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'college/class_instance_turns.html', context)
@@ -145,7 +157,7 @@ def areas(request):
     context = build_base_context(request)
     context['title'] = 'Areas de estudo'
     context['areas'] = Area.objects.order_by('name').all()
-    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')}]
+    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('college:areas')}]
     return render(request, 'college/areas.html', context)
 
 
@@ -156,8 +168,8 @@ def area(request, area_id):
     context['area'] = area
     context['courses'] = Course.objects.filter(area=area).order_by('degree_id').all()
     # context['degrees'] = Degree.objects.filter(course__area=area).all()  # FIXME
-    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('areas')},
-                          {'name': area.name, 'url': reverse('area', args=[area_id])}]
+    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('college:areas')},
+                          {'name': area.name, 'url': reverse('college:area', args=[area_id])}]
     return render(request, 'college/area.html', context)
 
 
@@ -168,9 +180,9 @@ def course(request, course_id):
     context['title'] = str(course)
 
     context['course'] = course
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department, 'url': reverse('department', args=[department.id])},
-                          {'name': course, 'url': reverse('course', args=[course_id])}]
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('college:departments')},
+                          {'name': department, 'url': reverse('college:department', args=[department.id])},
+                          {'name': course, 'url': reverse('college:course', args=[course_id])}]
     return render(request, 'college/course.html', context)
 
 
@@ -183,12 +195,13 @@ def course_students(request, course_id):
 
     context['course'] = course
     context['students'] = course.students.order_by('number').all()
-    context['unregistered_students'] = clip.Student.objects.filter(course=course.clip_course, student=None).order_by(
-        'internal_id')
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department, 'url': reverse('department', args=[department.id])},
-                          {'name': course, 'url': reverse('course', args=[course_id])},
-                          {'name': 'Alunos', 'url': reverse('course_students', args=[course_id])}]
+    context['unregistered_students'] = clip.Student.objects \
+        .filter(course=course.clip_course, student=None) \
+        .order_by('internal_id')
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('college:departments')},
+                          {'name': department, 'url': reverse('college:department', args=[department.id])},
+                          {'name': course, 'url': reverse('college:course', args=[course_id])},
+                          {'name': 'Alunos', 'url': reverse('college:course_students', args=[course_id])}]
     return render(request, 'college/course_students.html', context)
 
 
@@ -202,10 +215,11 @@ def course_curriculum(request, course_id):
 
     context['course'] = course
     context['curriculum'] = curriculum
-    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('departments')},
-                          {'name': department, 'url': reverse('department', args=[department.id])},
-                          {'name': course, 'url': reverse('course', args=[course_id])},
-                          {'name': 'Programa curricular', 'url': reverse('course_curriculum', args=[course_id])}]
+    context['sub_nav'] = [{'name': 'Departamentos', 'url': reverse('college:departments')},
+                          {'name': department, 'url': reverse('college:department', args=[department.id])},
+                          {'name': course, 'url': reverse('college:course', args=[course_id])},
+                          {'name': 'Programa curricular',
+                           'url': reverse('college:course_curriculum', args=[course_id])}]
     return render(request, 'college/course_curriculum.html', context)
 
 
@@ -223,8 +237,8 @@ def building(request, building_id):
     context['rooms'] = sorted(rooms_by_type.items(), key=lambda t: t[0])
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = Department.objects.order_by('name').filter(building=building)
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': building.name, 'url': reverse('building', args=[building_id])}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': building.name, 'url': reverse('college:building', args=[building_id])}]
     context['building'] = building
     return render(request, 'college/building.html', context)
 
@@ -234,9 +248,9 @@ def room(request, room_id):
     building = room.building
     context = build_base_context(request)
     context['title'] = str(room)
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': building.name, 'url': reverse('building', args=[building.id])},
-                          {'name': room.name, 'url': reverse('room', args=[room_id])}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': building.name, 'url': reverse('college:building', args=[building.id])},
+                          {'name': room.name, 'url': reverse('college:room', args=[room_id])}]
     context['building'] = building
     context['room'] = room
     turn_instances = room.turn_instances.filter(
@@ -264,17 +278,17 @@ def service(request, service_id):
         context['menu'] = menu
     context['building'] = building
     context['service'] = service
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': building.name, 'url': reverse('building', args=[building.id])},
-                          {'name': service.name, 'url': reverse('service', args=[service_id])}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': building.name, 'url': reverse('college:building', args=[building.id])},
+                          {'name': service.name, 'url': reverse('college:service', args=[service_id])}]
     return render(request, 'college/service.html', context)
 
 
 def available_places(request):
     context = build_base_context(request)
     context['title'] = 'Espaços'
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': 'Espaços', 'url': reverse('available_places')}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': 'Espaços', 'url': reverse('college:available_places')}]
 
     date = datetime.now().date()
     context['date'] = date
@@ -319,8 +333,8 @@ def available_places(request):
 
     context['turns'] = building_turns
 
-    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('campus')},
-                          {'name': 'Espaços', 'url': reverse('available_places')}]
+    context['sub_nav'] = [{'name': 'Campus', 'url': reverse('college:campus')},
+                          {'name': 'Espaços', 'url': reverse('college:available_places')}]
     return render(request, 'college/available_places.html', context)
 
 

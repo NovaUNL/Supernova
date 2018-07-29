@@ -67,8 +67,7 @@
             </div>
         {% endif %}
         <div id="university_nav_stage">
-            <a href="{% url 'campus' %}"><i class="fas fa-map"></i><br>Campus</a>
-            <a href="{% url 'departments' %}"><i class="fas fa-graduation-cap"></i><br>Departamentos</a>
+            <a href="{% url 'college:campus' %}"><i class="fas fa-map"></i><br>Campus</a>
             <a href="{% url 'news_index' %}"><i class="fas fa-newspaper"></i><br>Notícias</a>
             <a class="disabled" href="{% url 'events' %}"><i class="fas fa-bullhorn"></i><br>Eventos</a>
             <a href="{% url 'groups' %}"><i class="fas fa-users"></i><br>Grupos</a>

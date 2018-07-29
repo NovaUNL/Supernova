@@ -4,10 +4,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
     <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
     <style>
-        .flex-wrapper {
-            vertical-align: top;
-        }
-
         .flex-wrapper > div {
             margin: 10px 20px 10px 20px;
         }
@@ -18,7 +14,7 @@
         <span class="clearfix"></span>
         <h1><i class="fas fa-map-marker-alt"></i> {{ room }}</h1>
         <h3>
-            <a href="{% url 'building' building.id %}">{{ building.name }}</a>
+            <a href="{% url 'college:building' building.id %}">{{ building.name }}</a>
         </h3>
     </div>
     <div class="content-formatter">
@@ -28,14 +24,14 @@
 
                 {% if building.map %}
                 {% else %}
-                        As plantas encontram-se a ser feitas à mão a partir das plantas de incêndio.<br>
-                        Alguns edifícios não tem planta de incêndio e a administração recusa-se a partilhar o que quer
-                        que seja não vão os malandros dos alunos andar a consultar sem permissão as salas que tem na sua
-                        faculdade.<br>
-                        Assim que algum escravo acabe de mapear a planta deste edifício (ou a administração decida
-                        colaborar) a mesma será embutida aqui.<br>
-                        Caso seja uma personalidade bem socializada com a administração tenha a amabilidade de solicitar
-                        que os mesmos partilhem o que por lei é público.
+                    As plantas encontram-se a ser feitas à mão a partir das plantas de incêndio.<br>
+                    Alguns edifícios não tem planta de incêndio e a administração recusa-se a partilhar o que quer
+                    que seja não vão os malandros dos alunos andar a consultar sem permissão as salas que tem na sua
+                    faculdade.<br>
+                    Assim que algum escravo acabe de mapear a planta deste edifício (ou a administração decida
+                    colaborar) a mesma será embutida aqui.<br>
+                    Caso seja uma personalidade bem socializada com a administração tenha a amabilidade de solicitar
+                    que os mesmos partilhem o que por lei é público.
                 {% endif %}
             </div>
 
@@ -58,7 +54,7 @@
                                 {% if element %}
                                     <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
                                         rowspan="{{ element.rowspan }}">
-                                        <a href="{% url 'class_instance' element.turn.turn.class_instance.id %}">
+                                        <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
                                             {{ element.turn.turn.class_instance.parent.abbreviation }}</a><br>
                                         {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
                                         {{ element.turn.room.short_str }}
@@ -72,6 +68,16 @@
                     {% endfor %}
                 </table>
             </div>
+            {% if room.features.exists %}
+                <div style="flex-basis: 500px">
+                    {% for feature in room.features %}
+                        <div>
+                        <img src="{{ feature.image }}">
+                        <span>{{ feature.name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
     </div>
 

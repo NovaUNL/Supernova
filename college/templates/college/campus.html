@@ -14,11 +14,7 @@
 {% endblock %}
 
 {% block content-top %}
-    <nav id="top-container">
-        <a class="selected">Mapa</a>
-        <a href="{% url 'transportation' %}">Transportes</a>
-        <a href="{% url 'available_places' %}">Espaços</a>
-    </nav>
+    {% include 'college/campus_navigation.html' %}
 {% endblock %}
 
 {% block content %}
