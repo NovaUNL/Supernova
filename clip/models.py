@@ -217,12 +217,12 @@ class Student(djm.Model, TemporalEntity):
     #: CLIP public representation of a student id (eg: 12345).
     iid = djm.IntegerField()
     abbreviation = djm.TextField(null=True, max_length=30)
-    course = djm.ForeignKey(Course, on_delete=djm.PROTECT, db_column='course_id', related_name='students')
     #: The course a student is known to be enrolled to. FIXME couldn't this be null?
     institution = djm.ForeignKey(Institution, on_delete=djm.PROTECT, db_column='institution_id',
                                  related_name='students')
     gender = djm.NullBooleanField(null=True)
     graduation_grade = djm.IntegerField(null=True)
+    courses = djm.ManyToManyField(Course, through='StudentCourse', related_name='students')
 
     class Meta:
         managed = False
@@ -230,6 +230,17 @@ class Student(djm.Model, TemporalEntity):
 
     def __str__(self):
         return "{}, {}".format(self.name, self.iid, self.abbreviation)
+
+
+class StudentCourse(djm.Model):
+    id = djm.IntegerField(primary_key=True)
+    course = djm.ForeignKey(Course, on_delete=djm.PROTECT, db_column='course_id', related_name='student_relations')
+    students = djm.ForeignKey(Student, on_delete=djm.PROTECT, db_column='student_id', related_name='course_relations')
+    year = djm.IntegerField
+
+    class Meta:
+        managed = False
+        db_table = CLIPY_TABLE_PREFIX + 'student_courses'
 
 
 class Admission(djm.Model):
@@ -325,7 +336,7 @@ class Turn(djm.Model):
         db_table = CLIPY_TABLE_PREFIX + 'turns'
 
     def __str__(self):
-        return "{}{} of {}".format(ctypes.TurnType.CHOICES[self.type][1], self.number, self.class_instance)
+        return "{}{} of {}".format(ctypes.TurnType.CHOICES[self.type-1][1], self.number, self.class_instance)
 
 
 class TurnInstance(djm.Model):
@@ -340,7 +351,7 @@ class TurnInstance(djm.Model):
     end = djm.IntegerField(null=True)
     #: Weekday, starting on monday=0
     weekday = djm.IntegerField(null=True)
-    classroom = djm.ForeignKey(Room, on_delete=djm.PROTECT, db_column='room_id', related_name='turn_instances')
+    room = djm.ForeignKey(Room, on_delete=djm.PROTECT, db_column='room_id', related_name='turn_instances')
 
     class Meta:
         managed = False
