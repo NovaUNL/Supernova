@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def rooms():
+    populated = m.Room.objects.exists()
     for clip_room in clip.Room.objects.all():
         if hasattr(clip_room, 'room'):  # Room already exists, check if details match
             room = clip_room.room
@@ -19,9 +20,17 @@ def rooms():
             else:
                 logger.info(f"Skipped room {clip_room}")
                 continue
-            room = m.Room(type=clip_room.room_type, building=building, clip_room=clip_room)
-            update_room_details(room, clip_room)
-            logger.info(f'Created room {room}.')
+
+            if populated:
+                confirmation = input(f"Type 'yes' to add new room {clip_room} (ignored otherwise)")
+                if confirmation == 'yes':
+                    room = m.Room(type=clip_room.room_type, building=building, clip_room=clip_room)
+                    update_room_details(room, clip_room)
+                    logger.info(f'Created room {room}.')
+            else:
+                room = m.Room(type=clip_room.room_type, building=building, clip_room=clip_room)
+                update_room_details(room, clip_room)
+                logger.info(f'Created room {room}.')
 
 
 door_number_exp = re.compile('(?P<floor>\d)\.?(?P<door_number>\d+)')
@@ -148,11 +157,11 @@ def turn_instances(turn: m.Turn):
     for clip_turn_instance in turn.clip_turn.instances.all():
         if hasattr(clip_turn_instance, 'turn_instance'):
             turn_instance = clip_turn_instance.turn_instance
-            if hasattr(clip_turn_instance, 'classroom'):
-                if turn_instance.room != clip_turn_instance.classroom.room:
+            if hasattr(clip_turn_instance, 'room'):
+                if turn_instance.room != clip_turn_instance.room.room:
                     logger.warning(f'Turn instance {turn_instance} changed '
-                                   f'from {turn_instance.room} to {clip_turn_instance.classroom.room}.')
-                    turn_instance.room = clip_turn_instance.classroom.room
+                                   f'from {turn_instance.room} to {clip_turn_instance.room.room}.')
+                    turn_instance.room = clip_turn_instance.room.room
                     turn_instance.save()
 
         else:
@@ -161,9 +170,9 @@ def turn_instances(turn: m.Turn):
             else:
                 duration = None
 
-            if hasattr(clip_turn_instance, 'classroom'):  # There is already a turn instance for this crawled instance.
-                # ...  ClipTurnInstance.ClipClassroom.Room
-                room = clip_turn_instance.classroom.room
+            if hasattr(clip_turn_instance, 'room'):  # There is already a turn instance for this crawled instance.
+                # ...  ClipTurnInstance.ClipRoom.Room
+                room = clip_turn_instance.room.room
             else:  # No corresponding turn instance. Create one.
                 room = None
 
@@ -187,7 +196,7 @@ def create_student(clip_student: clip.Student) -> m.Student:
     student = m.Student(
         number=clip_student.iid,
         abbreviation=clip_student.abbreviation,
-        course=clip_student.course.course,
+        #course=clip_student.course.course, FIXME
         graduation_grade=clip_student.graduation_grade,
         clip_student=clip_student)
     student.save()
