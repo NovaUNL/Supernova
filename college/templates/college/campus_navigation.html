@@ -3,6 +3,7 @@
     {% url 'college:transportation' as transportation_url %}
     {% url 'college:available_places' as available_places_url %}
     {% url 'college:departments' as departments_url %}
+    {% url 'college:buildings' as buildings_url %}
 
     {% if map_url in request.path %}
         <a class="selected">Mapa</a>
@@ -14,6 +15,12 @@
         <a class="selected">Transportes</a>
     {% else %}
         <a href="{{ transportation_url }}">Transportes</a>
+    {% endif %}
+
+    {% if buildings_url in request.path %}
+        <a class="selected">Edifícios</a>
+    {% else %}
+        <a href="{{ buildings_url }}">Edifícios</a>
     {% endif %}
 
     {% if departments_url in request.path %}

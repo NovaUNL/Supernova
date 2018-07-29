@@ -9,6 +9,7 @@ urlpatterns = [
     path('campus/mapa/', views.map_view, name='map'),
     path('campus/transportes/', views.transportation_view, name='transportation'),
     path('campus/disponivel/', views.available_places_view, name='available_places'),
+    path('campus/edificios/', views.buildings_view, name='buildings'),
     path('campus/edificio/<int:building_id>/', views.building_view, name='building'),
     path('campus/servico/<int:service_id>/', views.service_view, name='service'),
     path('departamentos/', views.departments_view, name='departments'),

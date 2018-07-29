@@ -236,6 +236,16 @@ def course_curriculum_view(request, course_id):
     return render(request, 'college/course_curriculum.html', context)
 
 
+def buildings_view(request):
+    context = build_base_context(request)
+    context['title'] = "Edifícios"
+    context['buildings'] = Building.objects.order_by('id').all()
+    context['sub_nav'] = [
+        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Edifícios', 'url': reverse('college:buildings')}]
+    return render(request, 'college/buildings.html', context)
+
+
 def building_view(request, building_id):
     building = get_object_or_404(Building, id=building_id)
     context = build_base_context(request)
@@ -252,6 +262,7 @@ def building_view(request, building_id):
     context['departments'] = Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Edifícios', 'url': reverse('college:buildings')},
         {'name': building.name, 'url': reverse('college:building', args=[building_id])}]
     context['building'] = building
     return render(request, 'college/building.html', context)
