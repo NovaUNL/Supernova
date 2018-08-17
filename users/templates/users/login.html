@@ -1,4 +1,5 @@
-{% extends 'kleep/content_navigation.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
+
 {% load static %}
 {% block head %}
     <style>
@@ -20,24 +21,28 @@
     </style>
 {% endblock %}
 
-{% block content %}
-    <h1><i class="fas fa-key"></i> Autenticação</h1>
-    <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
-    <form id="login-form" method="post" action="{{ request.get_full_path }}">
-        {% csrf_token %}
-        <div>{{ login_form.username.errors }}<br>
-            {{ login_form.username.label }}<br>
-            {{ login_form.username }}
-        </div>
-        <div> {{ login_form.password.errors }}<br>
-            {{ login_form.password.label }}<br>
-            {{ login_form.password }}
-        </div>
-        <input type="submit" value="Entrar">
-    </form>
+{% block content-top %}
+    <nav id="top-container">
+        <a class="menu-entry" href="{% url 'registration' %}">Criar conta</a>
+        <a class="menu-entry selected">Autenticação</a>
+    </nav>
 {% endblock %}
 
-{% block navigation %}
-    <a class="menu-entry selected">Autenticação</a>
-    <a class="menu-entry" href="{% url 'registration' %}">Criar conta</a>
+{% block content %}
+    <div class="content-formatter">
+        <h1><i class="fas fa-key"></i> Autenticação</h1>
+        <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
+        <form id="login-form" method="post" action="{{ request.get_full_path }}">
+            {% csrf_token %}
+            <div>{{ login_form.username.errors }}<br>
+                {{ login_form.username.label }}<br>
+                {{ login_form.username }}
+            </div>
+            <div> {{ login_form.password.errors }}<br>
+                {{ login_form.password.label }}<br>
+                {{ login_form.password }}
+            </div>
+            <input type="submit" value="Entrar">
+        </form>
+    </div>
 {% endblock %}
