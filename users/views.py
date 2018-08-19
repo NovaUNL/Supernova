@@ -55,7 +55,7 @@ def registration_view(request):
         form = RegistrationForm(data=request.POST)
         if form.is_valid():
             registration = form.save(commit=False)
-            pre_register(registration)
+            pre_register(request, registration)
             HttpResponseRedirect(reverse('registration_validation'))
         context['creation_form'] = form
     else:

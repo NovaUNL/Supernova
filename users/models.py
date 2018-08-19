@@ -3,8 +3,11 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models import Model, TextField, ForeignKey, DateField, IntegerField, DateTimeField, ManyToManyField, \
     ImageField, OneToOneField
 
-from clip.models import Student
-from users.utils import user_profile_pic_path
+from clip import models as clip
+
+
+def user_profile_pic_path(user, filename):
+    return f'u/{user.id}/pic.{filename.split(".")[-1]}'
 
 
 class User(AbstractUser):
@@ -103,7 +106,7 @@ class Registration(Model):
     email = TextField()
     username = TextField(verbose_name='utilizador')
     nickname = TextField(verbose_name='alcunha')
-    student = OneToOneField(Student, on_delete=models.CASCADE, verbose_name='estudante')
+    student = OneToOneField(clip.Student, on_delete=models.CASCADE, verbose_name='estudante')
     password = TextField(verbose_name='palavra-passe')
     creation = DateTimeField(auto_now_add=True)
     token = TextField()
