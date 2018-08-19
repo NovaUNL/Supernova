@@ -1,16 +1,26 @@
-{% extends 'kleep/content_navigation.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
 
 {% load static %}
 {% block head %}
 {% endblock %}
 
+
+{% block content-top %}
+    <nav id="top-container">
+        <a class="menu-entry" href="{% url 'registration' %}">Criar conta</a>
+        <a class="menu-entry" href="{% url 'login' %}">Autenticação</a>
+    </nav>
+{% endblock %}
+
 {% block content %}
-    <h1><i class="fas fa-user-plus"></i> Criar conta</h1>
-    <div id="content_form">
-        <form method="get" action="{{ request.get_full_path }}">
-            {{ form.as_p }}
-            <input type="submit" value="Validar registo">
-        </form>
+    <div class="content-formatter">
+        <h1><i class="fas fa-user-plus"></i> Validar registo</h1>
+        <div id="content_form">
+            <form method="get" action="{{ request.get_full_path }}">
+                {{ form.as_p }}
+                <input type="submit" value="Validar registo">
+            </form>
+        </div>
     </div>
 {% endblock %}
 
