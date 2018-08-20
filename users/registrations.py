@@ -82,14 +82,14 @@ def generate_token(length: int) -> str:
 
 def send_mail(request, registration: Registration):
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "Link"
+    msg['Subject'] = "Ativação de conta do Kleep"
     msg['From'] = EMAIL_ACCOUNT
     msg['To'] = registration.email
 
     # Create the body of the message (a plain-text and an HTML version).
     text = f"""
     Olá. Penso que tentaste criar uma conta no Kleep. Se não foste tu então podes ignorar este email.\n
-    Por favor vai a <{request.get_host()}{reverse('registration_validation')}> e insere o código {registration.token}.\n
+    Por favor vai a <https://{request.get_host()}{reverse('registration_validation')}> e insere o código {registration.token}.\n
     Este código só é valido na próxima hora.
     """
     html = f"""
@@ -97,8 +97,8 @@ def send_mail(request, registration: Registration):
       <body>
         <p>Olá. Penso que tentaste criar uma conta no Kleep. Se não foste tu então podes ignorar este email.</p>
         <p>Para concluires o registo carrega 
-        <a href="{request.get_host()}{reverse('registration_validation')}?email={registration.email}&token={registration.token}">aqui</a>.</p>
-        <p>Caso o link não seja um link, por favor vai manualmente a {request.get_host()}{reverse('registration_validation')}
+        <a href="https://{request.get_host()}{reverse('registration_validation')}?email={registration.email}&token={registration.token}">aqui</a>.</p>
+        <p>Caso o link não seja um link, por favor vai manualmente a https://{request.get_host()}{reverse('registration_validation')}
         e insere o código {registration.token}.</p>
         <p style="font-size:0.8em">Este código só é valido na próxima hora.</p>
       </body>
