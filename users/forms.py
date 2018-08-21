@@ -107,7 +107,11 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError(f"O aluno {student_id} não foi encontrado.")
         if Student.objects.filter(abbreviation=student_id, user__isnull=False).exists():
             raise forms.ValidationError(f"O aluno {student_id} já está registado.")
-        return student.first()
+
+        student = student.first()
+        # Delete any existing registration attempt for this student
+        Registration.objects.filter(student=student).delete()
+        return student
 
     def clean_email(self):
         pattern = re.compile(r'^[\w\d.\-_+]+@[\w\d\-_]+(.[\w\d]+)*(\.\w{2,})$')
@@ -115,7 +119,10 @@ class RegistrationForm(forms.ModelForm):
         if not pattern.match(email):
             raise forms.ValidationError("Formato inválido de email.")
         if 'unl.pt' not in email.split('@')[-1]:
-            raise forms.ValidationError("Email")
+            raise forms.ValidationError("Email não pertencente ao campus")
+
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Já existe uma conta registada com o email fornecido.")
         return email
 
     def clean_username(self):
@@ -136,6 +143,14 @@ class RegistrationForm(forms.ModelForm):
         if users.exists():
             raise forms.ValidationError(f"Já existe um utilizador com a alcunha {nickname}.")
         return nickname
+
+    def clean(self):
+        email_prefix = self.cleaned_data["email"].split('@')[0]
+        student = self.cleaned_data["student"]
+        prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
+        if prefix_owner is not None and prefix_owner != student:
+            raise forms.ValidationError("O email utilizado pertence a outro estudante.")
+        return self.cleaned_data
 
 
 class RegistrationValidationForm(forms.ModelForm):

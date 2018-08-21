@@ -10,7 +10,7 @@ from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, Registrat
 from college.schedules import build_turns_schedule
 from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
-from users.models import User, SocialNetworkAccount
+from users.models import User, SocialNetworkAccount, Registration
 from users.registrations import generate_token, send_mail, pre_register, validate_token
 
 
@@ -56,7 +56,7 @@ def registration_view(request):
         if form.is_valid():
             registration = form.save(commit=False)
             pre_register(request, registration)
-            HttpResponseRedirect(reverse('registration_validation'))
+            return HttpResponseRedirect(reverse('registration_validation'))
         context['creation_form'] = form
     else:
         context['creation_form'] = RegistrationForm()
@@ -69,23 +69,30 @@ def registration_validation_view(request):
 
     context = build_base_context(request)
     if request.method == 'POST':
-        form = RegistrationValidationForm(data=request.POST)
-        if form.is_valid():
-            pass
-        else:
-            context['form'] = form
-            validate_token(form.email, form.token)
+        data = request.POST
+    elif 'email' in request.GET and 'token' in request.GET:
+        data = request.GET
     else:
-        if 'email' in request.GET and 'token' in request.GET:
-            try:
-                user = validate_token(request.GET['email'], request.GET['token'])
-                return HttpResponseRedirect(reverse('profile', args=[user.nickname]))
-            except ExpiredRegistration or InvalidToken as e:
-                form = RegistrationValidationForm(data=request.GET)
-                form.add_error(None, str(e))
-                context['form'] = form
+        data = None
+
+    if data is not None:
+        if 'token' in data and 'email' in data:
+            registration = Registration.objects.filter(email=data['email'], token=data['token']).first()
+            form = RegistrationValidationForm(instance=registration, data=data)
         else:
-            context['form'] = RegistrationValidationForm()
+            form = RegistrationValidationForm(data=data)
+
+        if form.is_valid():
+            try:
+                user = validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
+                login(request, user)
+                return HttpResponseRedirect(reverse('profile', args=[user.id]))
+            except ExpiredRegistration or InvalidToken as e:
+                form.add_error(None, str(e))
+    else:
+        form = RegistrationValidationForm()
+
+    context['form'] = form
     context['title'] = "Validar registo"
     return render(request, 'users/registration_validation.html', context)
 
