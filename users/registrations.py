@@ -27,7 +27,7 @@ def pre_register(request, data: Registration):
         raise AccountExists(f'There is already an account using the username {username} or the nickname {nickname}.')
 
     # Delete any existing registration request for this user
-    Registration.objects.filter(student=data.student).delete()
+    # Registration.objects.filter(student=data.student).delete()
 
     if hasattr(data.student, 'student'):
         user = data.student.student.user  # Registration -> clip_student -> student -> user
@@ -37,7 +37,7 @@ def pre_register(request, data: Registration):
     token = generate_token(REGISTRATIONS_TOKEN_LENGTH)
     data.token = token
     send_mail(request, data)
-    # data.save()
+    data.save()
 
 
 def validate_token(email, token) -> User:
@@ -46,10 +46,16 @@ def validate_token(email, token) -> User:
         registration = registration.order_by('creation').reverse().first()
     else:
         raise ExpiredRegistration('Não foi possível encontrar um registo com este email.')
+
+    if User.objects.filter(username=registration.username).exists():
+        raise ExpiredRegistration("Utilizador solicitado já foi criado. Se não foi por ti regista um novo.")
+
+    if registration.failed_attempts > REGISTRATIONS_ATTEMPTS_TOKEN:
+        raise ExpiredRegistration("Já tentou validar este registo demasiadas vezes. Faça um novo.")
+
     if registration.token == token:  # Correct token
         elapsed_minutes = (timezone.now() - registration.creation).seconds / 60
-        if elapsed_minutes < REGISTRATIONS_TIMEWINDOW:
-            registration.delete()
+        if elapsed_minutes > REGISTRATIONS_TIMEWINDOW:
             raise ExpiredRegistration('O registo foi validado após o tempo permitido.')
 
         user = User.objects.create_user(
@@ -62,7 +68,10 @@ def validate_token(email, token) -> User:
         user.password = registration.password  # Copy hash
         user.save()
         student = create_student(clip_student)
-        student.confirmed = True
+
+        if registration.email.endswith('unl.pt'):
+            student.confirmed = True
+
         student.user = user
         student.save()
         return user
@@ -72,7 +81,7 @@ def validate_token(email, token) -> User:
             registration.save()
             raise InvalidToken()
         else:
-            registration.delete()
+            # registration.delete()
             raise InvalidToken(deleted=True)
 
 

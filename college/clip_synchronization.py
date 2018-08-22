@@ -193,10 +193,17 @@ def create_student(clip_student: clip.Student) -> m.Student:
         logger.warning(f"Attempted to create a student which already exists ({student}).")
         return student
 
+    courses = clip_student.courses
+    if len(courses) == 1:
+        clip_course: clip.Course = courses[0]
+        course = clip_course.course
+    else:
+        course = None
+
     student = m.Student(
         number=clip_student.iid,
         abbreviation=clip_student.abbreviation,
-        #course=clip_student.course.course, FIXME
+        course=course,
         graduation_grade=clip_student.graduation_grade,
         clip_student=clip_student)
     student.save()

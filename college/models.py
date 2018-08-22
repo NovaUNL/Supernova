@@ -14,12 +14,13 @@ class Student(djm.Model):
     user = djm.ForeignKey(User, null=True, on_delete=djm.CASCADE, related_name='students')
     number = djm.IntegerField(null=True, blank=True)
     abbreviation = djm.TextField(null=True, blank=True)
-    course = djm.ForeignKey('Course', on_delete=djm.PROTECT, related_name='students')
+    course = djm.ForeignKey('Course', on_delete=djm.PROTECT, related_name='students', null=True, blank=True)
     turns = djm.ManyToManyField('Turn', through='TurnStudents')
     class_instances = djm.ManyToManyField('ClassInstance', through='Enrollment')
     first_year = djm.IntegerField(null=True, blank=True)
     last_year = djm.IntegerField(null=True, blank=True)
     confirmed = djm.BooleanField(default=False)
+    graduation_grade = djm.IntegerField(null=True, blank=True, default=None)
     clip_student = djm.OneToOneField(clip.Student, on_delete=djm.PROTECT, related_name='student')
 
     class Meta:
