@@ -8,23 +8,35 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
-from clip import models as clip
-from college.clip_synchronization import create_student
-from kleep.settings import EMAIL_SERVER, EMAIL_ACCOUNT, EMAIL_PASSWORD, REGISTRATIONS_ATTEMPTS_TOKEN, \
-    REGISTRATIONS_TIMEWINDOW, REGISTRATIONS_TOKEN_LENGTH
-from users.exceptions import InvalidToken, InvalidUsername, ExpiredRegistration, \
-    AccountExists, AssignedStudent
-from users.models import User, Registration
+import clip.models as clip
+import users.models as users
+import college.clip_synchronization as clip_sync
+import kleep.settings as settings
+from users.exceptions import InvalidToken, InvalidUsername, ExpiredRegistration, AccountExists, AssignedStudent
 
 
-def pre_register(request, data: Registration):
+def pre_register(request, data: users.Registration):
+    """
+    | Validates and stores registration request data waiting for further confirmation
+    | Raises :py:class:`users.exceptions.InvalidUsername` when the asked username matches a student identifier other
+        than the requested student.
+    | Raises :py:class:`users.exceptions.AccountExists` when the requested username or nickname collides with other
+        users or the email is already registered.
+    | Raises :py:class:`users.exceptions.AssignedStudent` when the requested student is already bound to an account.
+
+    :param request: Request that originated this call
+    :param data: Validated and instantiated ModelForm of a :py:class:`users.Registration` object.
+    """
     username = data.username
     nickname = data.nickname
     if clip.Student.objects.filter(abbreviation=username).exclude(id=data.student.id).exists():
         raise InvalidUsername(f'The username {username} matches a CLIP ID.')
 
-    if User.objects.filter(Q(username=username) | Q(username=nickname) | Q(nickname=nickname)).exists():
+    if users.User.objects.filter(Q(username=username) | Q(username=nickname) | Q(nickname=nickname)).exists():
         raise AccountExists(f'There is already an account using the username {username} or the nickname {nickname}.')
+
+    if users.User.objects.filter(email=data.email).exists():
+        raise AccountExists(f'There is a registered account with the email {data.email}')
 
     # Delete any existing registration request for this user
     # Registration.objects.filter(student=data.student).delete()
@@ -34,31 +46,47 @@ def pre_register(request, data: Registration):
         if user is not None:
             raise AssignedStudent(f'The student {username} is already assigned to the account {user}.')
 
-    token = generate_token(REGISTRATIONS_TOKEN_LENGTH)
+    token = generate_token(settings.REGISTRATIONS_TOKEN_LENGTH)
     data.token = token
     send_mail(request, data)
     data.save()
 
 
-def validate_token(email, token) -> User:
-    registration = Registration.objects.filter(email=email)
+def validate_token(email, token) -> users.User:
+    """
+    | Perform validation of a confirmation email-token pair, completing the registration process.
+    | Raises :py:class:`users.exceptions.InvalidToken` if the provided token is invalid.
+    | Raises :py:class:`users.exceptions.ExpiredRegistration` if the allowed time span has passed, if the registration
+        was already used or if there were too many attempts to finish the registration process.
+    | Raises :py:class:`users.exceptions.AccountExists` if the email was already used to register
+        another account or if the requested username was registered and validated by someone
+        else during the validation time.
+
+    :param email: Registration email
+    :param token: Corresponding token
+    :return: Created user
+    """
+    registration = users.Registration.objects.filter(email=email)
     if registration.exists():
         registration = registration.order_by('creation').reverse().first()
     else:
         raise ExpiredRegistration('Não foi possível encontrar um registo com este email.')
 
-    if User.objects.filter(username=registration.username).exists():
-        raise ExpiredRegistration("Utilizador solicitado já foi criado. Se não foi por ti regista um novo.")
+    if users.User.objects.filter(username=registration.username).exists():
+        raise AccountExists("Utilizador solicitado já foi criado. Se não foi por ti regista um novo.")
 
-    if registration.failed_attempts > REGISTRATIONS_ATTEMPTS_TOKEN:
+    if users.User.objects.filter(email=registration.email).exists():
+        raise AccountExists(f'Another account with the email {registration.email} was validated.')
+
+    if registration.failed_attempts > settings.REGISTRATIONS_ATTEMPTS_TOKEN:
         raise ExpiredRegistration("Já tentou validar este registo demasiadas vezes. Faça um novo.")
 
     if registration.token == token:  # Correct token
         elapsed_minutes = (timezone.now() - registration.creation).seconds / 60
-        if elapsed_minutes > REGISTRATIONS_TIMEWINDOW:
+        if elapsed_minutes > settings.REGISTRATIONS_TIMEWINDOW:
             raise ExpiredRegistration('O registo foi validado após o tempo permitido.')
 
-        user = User.objects.create_user(
+        user = users.User.objects.create_user(
             username=registration.username,
             email=registration.email,
             nickname=registration.nickname,
@@ -67,7 +95,7 @@ def validate_token(email, token) -> User:
         clip_student = registration.student
         user.password = registration.password  # Copy hash
         user.save()
-        student = create_student(clip_student)
+        student = clip_sync.create_student(clip_student)
 
         if registration.email.endswith('unl.pt'):
             student.confirmed = True
@@ -76,7 +104,7 @@ def validate_token(email, token) -> User:
         student.save()
         return user
     else:
-        if registration.failed_attempts < REGISTRATIONS_ATTEMPTS_TOKEN - 1:
+        if registration.failed_attempts < settings.REGISTRATIONS_ATTEMPTS_TOKEN - 1:
             registration.failed_attempts += 1
             registration.save()
             raise InvalidToken()
@@ -86,13 +114,23 @@ def validate_token(email, token) -> User:
 
 
 def generate_token(length: int) -> str:
+    """
+    Generates a random alphanumeric mixed-case token.
+    :param length: Token length
+    :return: Token
+    """
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
-def send_mail(request, registration: Registration):
+def send_mail(request, registration: users.Registration):
+    """
+    Sends a registration validation email.
+    :param request: Request that originated this call
+    :param registration: :py:class:`users.models.Registration` for which the email is sent after.
+    """
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "Ativação de conta do Kleep"
-    msg['From'] = EMAIL_ACCOUNT
+    msg['From'] = settings.EMAIL_ACCOUNT
     msg['To'] = registration.email
 
     # Create the body of the message (a plain-text and an HTML version).
@@ -118,9 +156,9 @@ def send_mail(request, registration: Registration):
     msg.attach(MIMEText(html, 'html'))
 
     # TODO async
-    server = smtplib.SMTP(EMAIL_SERVER, 587, 30)
+    server = smtplib.SMTP(settings.EMAIL_SERVER, 587, 30)
     server.ehlo()
     server.starttls()
-    server.login(EMAIL_ACCOUNT, EMAIL_PASSWORD)
-    server.sendmail(EMAIL_ACCOUNT, registration.email, msg.as_string())
+    server.login(settings.EMAIL_ACCOUNT, settings.EMAIL_PASSWORD)
+    server.sendmail(settings.EMAIL_ACCOUNT, registration.email, msg.as_string())
     server.quit()
