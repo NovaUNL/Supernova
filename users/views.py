@@ -4,14 +4,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from users.exceptions import InvalidToken, ExpiredRegistration
-from users.forms import AccountSettingsForm, ClipLoginForm, LoginForm, RegistrationForm, PasswordChangeForm, \
-    RegistrationValidationForm
-from college.schedules import build_turns_schedule
-from kleep.settings import REGISTRATIONS_ENABLED, COLLEGE_YEAR, COLLEGE_PERIOD
+from kleep import settings
+from . import models as m, exceptions, forms, registrations
+from college import schedules
 from kleep.views import build_base_context
-from users.models import User, SocialNetworkAccount, Registration
-from users.registrations import generate_token, send_mail, pre_register, validate_token
 
 
 def login_view(request):
@@ -23,7 +19,7 @@ def login_view(request):
         return HttpResponseRedirect(reverse('profile', args=[request.user]))
 
     if request.method == 'POST':
-        form = LoginForm(data=request.POST)
+        form = forms.LoginForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             if 'next' in request.GET:
@@ -32,7 +28,7 @@ def login_view(request):
         else:
             context['login_form'] = form
     else:
-        context['login_form'] = LoginForm()
+        context['login_form'] = forms.LoginForm()
     return render(request, 'users/login.html', context)
 
 
@@ -50,16 +46,16 @@ def registration_view(request):
     context = build_base_context(request)
     context['title'] = "Criar conta"
     context['disable_auth'] = True  # Disable auth overlay
-    context['enabled'] = REGISTRATIONS_ENABLED
+    context['enabled'] = settings.REGISTRATIONS_ENABLED
     if request.method == 'POST':
-        form = RegistrationForm(data=request.POST)
+        form = forms.RegistrationForm(data=request.POST)
         if form.is_valid():
             registration = form.save(commit=False)
-            pre_register(request, registration)
+            registrations.pre_register(request, registration)
             return HttpResponseRedirect(reverse('registration_validation'))
         context['creation_form'] = form
     else:
-        context['creation_form'] = RegistrationForm()
+        context['creation_form'] = forms.RegistrationForm()
     return render(request, 'users/registration.html', context)
 
 
@@ -77,20 +73,23 @@ def registration_validation_view(request):
 
     if data is not None:
         if 'token' in data and 'email' in data:
-            registration = Registration.objects.filter(email=data['email'], token=data['token']).first()
-            form = RegistrationValidationForm(instance=registration, data=data)
+            registration = m.Registration.objects \
+                .order_by('creation') \
+                .filter(email=data['email'], token=data['token']) \
+                .first()
+            form = forms.RegistrationValidationForm(instance=registration, data=data)
         else:
-            form = RegistrationValidationForm(data=data)
+            form = forms.RegistrationValidationForm(data=data)
 
         if form.is_valid():
             try:
-                user = validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
+                user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
                 login(request, user)
                 return HttpResponseRedirect(reverse('profile', args=[user.id]))
-            except ExpiredRegistration or InvalidToken as e:
+            except exceptions.ExpiredRegistration or exceptions.InvalidToken or exceptions.AccountExists as e:
                 form.add_error(None, str(e))
     else:
-        form = RegistrationValidationForm()
+        form = forms.RegistrationValidationForm()
 
     context['form'] = form
     context['title'] = "Validar registo"
@@ -99,7 +98,7 @@ def registration_validation_view(request):
 
 def profile_view(request, nickname):
     # TODO visibility
-    user = get_object_or_404(User, nickname=nickname)
+    user = get_object_or_404(m.User, nickname=nickname)
     context = build_base_context(request)
     page_name = f"Perfil de {user.get_full_name()}"
     context['page'] = 'profile'
@@ -116,7 +115,7 @@ def profile_view(request, nickname):
 @login_required
 def user_schedule_view(request, nickname):
     context = build_base_context(request)
-    user = get_object_or_404(User, id=request.user.id)
+    user = get_object_or_404(m.User, id=request.user.id)
 
     if user.students.exists():
         student = user.students.first()  # FIXME
@@ -126,24 +125,26 @@ def user_schedule_view(request, nickname):
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
-    turns = student.turns.filter(class_instance__year=COLLEGE_YEAR, class_instance__period=COLLEGE_PERIOD).all()
-    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(turns)
+    turns = student.turns.filter(
+        class_instance__year=settings.COLLEGE_YEAR,
+        class_instance__period=settings.COLLEGE_PERIOD).all()
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
     return render(request, 'users/profile_schedule.html', context)
 
 
 @login_required
 def user_profile_settings_view(request, nickname):
     context = build_base_context(request)
-    user = User.objects.get(id=request.user.id)
+    user = m.User.objects.get(id=request.user.id)
     if request.method == 'POST':
-        form = AccountSettingsForm(request.POST, request.FILES, instance=user)
+        form = forms.AccountSettingsForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('profile', args=[nickname]))
         else:
             context['settings_form'] = form
     else:
-        context['settings_form'] = AccountSettingsForm(instance=user)
+        context['settings_form'] = forms.AccountSettingsForm(instance=user)
 
     context['page'] = 'profile_settings'
     context['title'] = 'Definições da conta'
@@ -155,20 +156,20 @@ def user_profile_settings_view(request, nickname):
 @login_required
 def user_profile_social_view(request, nickname):
     context = build_base_context(request)
-    user = User.objects.get(id=request.user.id)
+    user = m.User.objects.get(id=request.user.id)
     if request.method == 'POST':
-        form = PasswordChangeForm(data=request.POST)
+        form = forms.PasswordChangeForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return HttpResponseRedirect(reverse('index'))
         else:
             context['password_change_form'] = form
     else:
-        context['password_change_form'] = PasswordChangeForm()
+        context['password_change_form'] = forms.PasswordChangeForm()
 
     context['page'] = 'profile_social'
     context['title'] = 'Redes sociais'
-    context['social_networks'] = SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
+    context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
                           {'name': "Redes sociais", 'url': reverse('profile_social', args=[nickname])}]
     return render(request, 'users/profile_social_networks.html', context)
@@ -177,16 +178,16 @@ def user_profile_social_view(request, nickname):
 @login_required
 def user_profile_password_view(request, nickname):
     context = build_base_context(request)
-    user = User.objects.get(id=request.user.id)
+    user = m.User.objects.get(id=request.user.id)
     if request.method == 'POST':
-        form = PasswordChangeForm(data=request.POST)
+        form = forms.PasswordChangeForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return HttpResponseRedirect(reverse('index'))
         else:
             context['password_change_form'] = form
     else:
-        context['password_change_form'] = PasswordChangeForm()
+        context['password_change_form'] = forms.PasswordChangeForm()
 
     context['page'] = 'profile_password'
     context['title'] = 'Alteração de palavra-passe'
@@ -197,7 +198,7 @@ def user_profile_password_view(request, nickname):
 
 @login_required
 def user_clip_crawler_view(request, nickname):
-    user = User.objects.get(id=request.user.id)
+    user = m.User.objects.get(id=request.user.id)
     context = build_base_context(request)
     context['page'] = 'profile_crawler'
     context['title'] = "Definições da conta"
@@ -205,6 +206,6 @@ def user_clip_crawler_view(request, nickname):
                           {'name': "Agregar CLIP", 'url': reverse('profile_crawler', args=[nickname])}]
     if request.method == 'POST':
         pass
-    context['clip_login_form'] = ClipLoginForm()
+    context['clip_login_form'] = forms.ClipLoginForm()
 
     return render(request, 'users/profile_crawler.html', context)
