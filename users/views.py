@@ -21,7 +21,12 @@ def login_view(request):
     if request.method == 'POST':
         form = forms.LoginForm(data=request.POST)
         if form.is_valid():
-            login(request, form.get_user())
+            user: m.User = form.get_user()
+            login(request, user)
+
+            if user.last_login is None:
+                return HttpResponseRedirect(reverse('profile_settings', args=[user.username]))
+
             if 'next' in request.GET:
                 return HttpResponseRedirect(request.GET['next'])
             return HttpResponseRedirect(reverse('index'))
