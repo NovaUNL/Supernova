@@ -193,7 +193,7 @@ def create_student(clip_student: clip.Student) -> m.Student:
         logger.warning(f"Attempted to create a student which already exists ({student}).")
         return student
 
-    courses = clip_student.courses
+    courses = clip_student.courses.all()
     if len(courses) == 1:
         clip_course: clip.Course = courses[0]
         course = clip_course.course

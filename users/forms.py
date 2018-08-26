@@ -81,7 +81,7 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Password demasiado similar à alcunha")
 
         if password_strength(password) < 5:
-            raise forms.ValidationError("A password é demasiado fraca.<br>"
+            raise forms.ValidationError("A password é demasiado fraca. "
                                         "Mistura maiusculas, minusculas, numeros e pontuação.")
         if len(password) < 7:
             raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
@@ -145,11 +145,12 @@ class RegistrationForm(forms.ModelForm):
         return nickname
 
     def clean(self):
-        email_prefix = self.cleaned_data["email"].split('@')[0]
-        student = self.cleaned_data["student"]
-        prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
-        if prefix_owner is not None and prefix_owner != student:
-            raise forms.ValidationError("O email utilizado pertence a outro estudante.")
+        if 'student' in self.cleaned_data and 'email' in self.cleaned_data:
+            email_prefix = self.cleaned_data["email"].split('@')[0]
+            student = self.cleaned_data["student"]
+            prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
+            if prefix_owner is not None and prefix_owner != student:
+                raise forms.ValidationError("O email utilizado pertence a outro estudante.")
         return self.cleaned_data
 
 
@@ -214,7 +215,7 @@ class PasswordChangeForm(forms.Form):
             raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
 
         if password_strength(password) < 5:
-            raise forms.ValidationError("A password é demasiado fraca.<br>"
+            raise forms.ValidationError("A password é demasiado fraca. "
                                         "Mistura maiusculas, minusculas, numeros e pontuação.")
         return password
 
