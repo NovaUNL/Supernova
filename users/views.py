@@ -151,6 +151,9 @@ def user_profile_settings_view(request, nickname):
     else:
         context['settings_form'] = forms.AccountSettingsForm(instance=user)
 
+    context['password_change_form'] = forms.PasswordChangeForm()
+    context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
+
     context['page'] = 'profile_settings'
     context['title'] = 'Definições da conta'
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},

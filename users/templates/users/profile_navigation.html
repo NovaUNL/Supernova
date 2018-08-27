@@ -3,7 +3,7 @@
     {% url 'profile_schedule' user.nickname as schedule_url %}
     {% url 'profile_settings' user.nickname as settings_url %}
 
-    {% if profile_url in request.path %}
+    {% if profile_url == request.path %}
         <a class="selected">Perfil</a>
     {% else %}
         <a href="{{ profile_url }}">Perfil</a>

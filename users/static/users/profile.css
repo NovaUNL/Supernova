@@ -114,7 +114,7 @@ h3 {
     color: white;
 }
 
-.delete-icon{
+.delete-icon {
     color: red;
     display: inline-block;
     background: #d9d9d9;
@@ -122,7 +122,38 @@ h3 {
     border-radius: 5px;
 }
 
-.delete-icon:hover{
+.delete-icon:hover {
     color: white;
     background: red;
+}
+
+.hint {
+    position: relative;
+    margin-left: 10px;
+}
+
+.hint .hint-hidden {
+    position: absolute;
+    top: 100%;
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hint-hidden {
+    background-color: white;
+    min-width: 50vw;
+}
+
+.hint:hover .hint-hidden {
+    display: block;
+}
+
+.hint button {
+    background: #bababa;
+    color: #ffffff;
+    border: none;
+    margin: 0;
+    padding: 5px 10px;
 }
