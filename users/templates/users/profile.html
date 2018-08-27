@@ -1,4 +1,4 @@
-{% extends 'users/profile_base.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
 
 {% load static %}
 
@@ -7,104 +7,112 @@
     <script type="text/javascript" src="{% static 'users/socialNetworks.js' %}"></script>
 {% endblock %}
 
+{% block content-top %}
+    {% include 'users/profile_navigation.html' %}
+{% endblock %}
+
 {% block content %}
-    <h1><i class="fas fa-user-circle"></i> {{ user.get_full_name }}</h1>
-    <div class="flex-wrapper">
-        {% if user.picture %}
+    <div class="content-formatter">
+        <h1><i class="fas fa-user-circle"></i> {{ user.get_full_name }}</h1>
+        <div class="flex-wrapper">
+            {% if user.picture %}
+                <div class="flex-box">
+                    <h2><i class="fas fa-image"></i> Foto</h2>
+                    <img src="{% get_media_prefix %}{{ user.picture }}" style="max-width: 200px; max-height: 150px;">
+                    <br>
+                </div>
+            {% endif %}
             <div class="flex-box">
-                <h2><i class="fas fa-image"></i> Foto</h2>
-                <img src="{% get_media_prefix %}{{ user.picture }}" style="max-width: 200px; max-height: 150px;"><br>
+                <h2><i class="fas fa-id-card"></i> Sobre</h2>
+                <b>CLIP ID: </b>{{ student.abbreviation }}<br>
+                <b>Numero: </b>{{ student.number }}<br>
+                <b>Curso: </b>{{ student.course.compact }}<br>
+                <b>Residência:</b> {{ user.residence }}<br>
+                <b>Ultima atividade:</b> 5 horas atrás<br>
+                <b>Página:</b> <a href="{{ user.webpage }}">{{ user.webpage }}</a><br>
             </div>
-        {% endif %}
-        <div class="flex-box">
-            <h2><i class="fas fa-id-card"></i> Sobre</h2>
-            <b>CLIP ID: </b>{{ student.abbreviation }}<br>
-            <b>Numero: </b>{{ student.number }}<br>
-            <b>Curso: </b>{{ student.course.compact }}<br>
-            <b>Residência:</b> {{ user.residence }}<br>
-            <b>Ultima atividade:</b> 5 horas atrás<br>
-            <b>Página:</b> <a href="{{ user.webpage }}">{{ user.webpage }}</a><br>
+            <div id="social" class="flex-box">
+                <h2><i class="fas fa-globe"></i> Social</h2>
+                <ul id="social-network-list"></ul>
+            </div>
+            <div class="flex-box">
+                <h2><i class="fas fa-trophy"></i> Conquistas</h2>
+                {% for badge in user.badges.all %}
+                    <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
+                {% endfor %}
+            </div>
+            <!--<div id="record" class="flex-box">
+                <h2><i class="fas fa-comment-alt"></i> Cadastro (placeholder)</h2>
+                <table>
+                    <tr>
+                        <td>Sínteses</td>
+                        <td class="like">15 <i class="far fa-thumbs-up"></i></td>
+                        <td><span class="likebar"
+                                  style="background: linear-gradient(to right, #2fa40c 88%,#ff0000 88%);"></span></td>
+                        <td class="dislike">2 <i class="far fa-thumbs-down"></i></td>
+                        <td class="favorite">5 <i class="far fa-heart"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Artigos</td>
+                        <td class="like">3 <i class="far fa-thumbs-up"></i></td>
+                        <td><span class="likebar"
+                                  style="background: linear-gradient(to right, #2fa40c 75%,#ff0000 75%);"></span></td>
+                        <td class="dislike">1 <i class="far fa-thumbs-down"></i></td>
+                        <td class="favorite">2 <i class="far fa-heart"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Noticias</td>
+                        <td class="like">5 <i class="far fa-thumbs-up"></i></td>
+                        <td><span class="likebar"
+                                  style="background: linear-gradient(to right, #2fa40c 50%,#ff0000 50%);"></span></td>
+                        <td class="dislike">5 <i class="far fa-thumbs-down"></i></td>
+                        <td class="favorite">1 <i class="far fa-heart"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Vendedor</td>
+                        <td class="like">1 <i class="far fa-thumbs-up"></i></td>
+                        <td><span class="likebar"
+                                  style="background: linear-gradient(to right, #2fa40c 100%,#ff0000 100%);"></span></td>
+                        <td class="dislike">0 <i class="far fa-thumbs-down"></i></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="flex-box">
+                <h2><i class="fas fa-fire"></i> Muro da fama (placeholder)</h2>
+                <table>
+                    <tr class="wall-item">
+                        <td class="news">Noticia</td>
+                        <td><a href="#">Estudantes recuperam 35€</a></td>
+                        <td>
+                            <span class="like">3 <i class="far fa-thumbs-up"></i></span>
+                            <span class="dislike">1 <i class="far fa-thumbs-down"></i></span>
+                            <span class="favorite">2 <i class="far fa-heart"></i></span>
+                        </td>
+                    </tr>
+                    <tr class="wall-item">
+                        <td class="article">Artigo</td>
+                        <td><a href="#">Professores chocados. Clique para descubrir o que ...</a></td>
+                        <td>
+                            <span class="like">2 <i class="far fa-thumbs-up"></i></span>
+                            <span class="dislike">4 <i class="far fa-thumbs-down"></i></span>
+                            <span class="favorite">1 <i class="far fa-heart"></i></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>-->
+            <div class="flex-box">
+                <h2><i class="fas fa-users"></i> Grupos</h2>
+                {% for group in user.group_set.all %}
+                    <a href="{% url 'group' group.id %}">
+                        <span class="group" style="background-size: cover;background-image: url({% get_media_prefix %}{{ group.image }}">
+                            {{ group.abbreviation }}
+                        </span></a>
+                {% endfor %}
+            </div>
+            <script>
+                let apiURL = "{% url 'social_networks' user.nickname %}";
+                populateSocialNetworks(apiURL);
+            </script>
         </div>
-        <div id="social" class="flex-box">
-            <h2><i class="fas fa-globe"></i> Social</h2>
-            <ul id="social-network-list"></ul>
-        </div>
-        <div class="flex-box">
-            <h2><i class="fas fa-trophy"></i> Conquistas</h2>
-            {% for badge in user.badges.all %}
-                <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
-            {% endfor %}
-        </div>
-        <!--<div id="record" class="flex-box">
-            <h2><i class="fas fa-comment-alt"></i> Cadastro (placeholder)</h2>
-            <table>
-                <tr>
-                    <td>Sínteses</td>
-                    <td class="like">15 <i class="far fa-thumbs-up"></i></td>
-                    <td><span class="likebar"
-                              style="background: linear-gradient(to right, #2fa40c 88%,#ff0000 88%);"></span></td>
-                    <td class="dislike">2 <i class="far fa-thumbs-down"></i></td>
-                    <td class="favorite">5 <i class="far fa-heart"></i></td>
-                </tr>
-                <tr>
-                    <td>Artigos</td>
-                    <td class="like">3 <i class="far fa-thumbs-up"></i></td>
-                    <td><span class="likebar"
-                              style="background: linear-gradient(to right, #2fa40c 75%,#ff0000 75%);"></span></td>
-                    <td class="dislike">1 <i class="far fa-thumbs-down"></i></td>
-                    <td class="favorite">2 <i class="far fa-heart"></i></td>
-                </tr>
-                <tr>
-                    <td>Noticias</td>
-                    <td class="like">5 <i class="far fa-thumbs-up"></i></td>
-                    <td><span class="likebar"
-                              style="background: linear-gradient(to right, #2fa40c 50%,#ff0000 50%);"></span></td>
-                    <td class="dislike">5 <i class="far fa-thumbs-down"></i></td>
-                    <td class="favorite">1 <i class="far fa-heart"></i></td>
-                </tr>
-                <tr>
-                    <td>Vendedor</td>
-                    <td class="like">1 <i class="far fa-thumbs-up"></i></td>
-                    <td><span class="likebar"
-                              style="background: linear-gradient(to right, #2fa40c 100%,#ff0000 100%);"></span></td>
-                    <td class="dislike">0 <i class="far fa-thumbs-down"></i></td>
-                </tr>
-            </table>
-        </div>
-        <div class="flex-box">
-            <h2><i class="fas fa-fire"></i> Muro da fama (placeholder)</h2>
-            <table>
-                <tr class="wall-item">
-                    <td class="news">Noticia</td>
-                    <td><a href="#">Estudantes recuperam 35€</a></td>
-                    <td>
-                        <span class="like">3 <i class="far fa-thumbs-up"></i></span>
-                        <span class="dislike">1 <i class="far fa-thumbs-down"></i></span>
-                        <span class="favorite">2 <i class="far fa-heart"></i></span>
-                    </td>
-                </tr>
-                <tr class="wall-item">
-                    <td class="article">Artigo</td>
-                    <td><a href="#">Professores chocados. Clique para descubrir o que ...</a></td>
-                    <td>
-                        <span class="like">2 <i class="far fa-thumbs-up"></i></span>
-                        <span class="dislike">4 <i class="far fa-thumbs-down"></i></span>
-                        <span class="favorite">1 <i class="far fa-heart"></i></span>
-                    </td>
-                </tr>
-            </table>
-        </div>-->
-        <div class="flex-box">
-            <h2><i class="fas fa-users"></i> Grupos</h2>
-            {% for group in user.group_set.all %}
-                <a href="{% url 'group' group.id %}"><span class="group"
-                      style="background-size: cover;background-image: url({% get_media_prefix %}{{ group.image }}">
-                    {{ group.abbreviation }}</span></a>
-            {% endfor %}
-        </div>
-        <script>
-            let apiURL = "{% url 'social_networks' user.nickname %}";
-            populateSocialNetworks(apiURL);
-        </script>
     </div>
 {% endblock %}

@@ -1,0 +1,25 @@
+<nav id="top-container">
+    {% url 'profile' user.nickname as profile_url %}
+    {% url 'profile_schedule' user.nickname as schedule_url %}
+    {% url 'profile_settings' user.nickname as settings_url %}
+
+    {% if profile_url in request.path %}
+        <a class="selected">Perfil</a>
+    {% else %}
+        <a href="{{ profile_url }}">Perfil</a>
+    {% endif %}
+
+    {% if schedule_url in request.path %}
+        <a class="selected">Horário</a>
+    {% else %}
+        <a href="{{ schedule_url }}">Horário</a>
+    {% endif %}
+
+    <a href="#">Actividade</a>
+
+    {% if settings_url in request.path %}
+        <a class="selected">Definições</a>
+    {% else %}
+        <a href="{{ settings_url }}">Definições</a>
+    {% endif %}
+</nav>
