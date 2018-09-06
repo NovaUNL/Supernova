@@ -9,7 +9,7 @@
                 background-attachment: fixed !important;
             }
 
-            #content-large {
+            #content-wrapper {
                 background-color: rgba(255, 255, 255, 0.85);
             }
 
@@ -32,46 +32,49 @@
 {% endblock %}
 
 {% block content %}
+    <div class="content-formatter">
     <span class="high-res-only">
         <h1 style="margin-bottom: 5px;">Bem vindo ao Kleep</h1>
         <span>{{ catchphrase }}</span>
     </span>
-    <div class="flex-wrapper" style="margin-top: 10px">
-        <div class="flex-wrapper vertical">
-            <div>
-                <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
-                {% for news_item in news %}
-                    <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
-                    <p>{{ news_item.summary }}</p>
-                    <p>Por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a>,
-                        {{ news_item.datetime }}</p>
+        <div class="flex-wrapper" style="margin-top: 10px">
+            <div class="flex-wrapper vertical">
+                <div>
+                    <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
+                    {% for news_item in news %}
+                        <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
+                        <p>{{ news_item.summary }}</p>
+                        <p>Por <a
+                                href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a>,
+                            {{ news_item.datetime }}</p>
+                    {% endfor %}
+                </div>
+                <div style="max-width: 600px;">
+                    <h2>Próximos eventos</h2>
+                    <h3>Competição de plágio</h3>
+                    <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>
+                    <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>
+                    <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>
+                    <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>
+                    <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>
+                </div>
+                <div style="max-width: 600px;">
+                    <h2>Ementas</h2>
+                    <h3>Bar Teresa Gato</h3>
+                    <p>"Especiarias" com hipotese de ovo-algo-estrelado.</p>
+                    <h3>Bar My Spot</h3>
+                    <p>Aquela salada com tudo por 3,10€ #MyShekels</p>
+                    <h3>Minimercado MiniNova</h3>
+                    <p>Pão de alho</p>
+                </div>
+            </div>
+            <div style="max-width: 400px;">
+                <h2>Alterações</h2>
+                {% for change in changelog %}
+                    <h3 style="display: inline-block;">{{ change.title }}</h3> <span>{{ change.date }}</span>
+                    {{ change.content|safe }}
                 {% endfor %}
             </div>
-            <div style="max-width: 600px;">
-                <h2>Próximos eventos</h2>
-                <h3>Competição de plágio</h3>
-                <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>
-                <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>
-                <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>
-                <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>
-                <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>
-            </div>
-            <div style="max-width: 600px;">
-                <h2>Ementas</h2>
-                <h3>Bar Teresa Gato</h3>
-                <p>"Especiarias" com hipotese de ovo-algo-estrelado.</p>
-                <h3>Bar My Spot</h3>
-                <p>Aquela salada com tudo por 3,10€ #MyShekels</p>
-                <h3>Minimercado MiniNova</h3>
-                <p>Pão de alho</p>
-            </div>
-        </div>
-        <div style="max-width: 400px;">
-            <h2>Alterações</h2>
-            {% for change in changelog %}
-                <h3 style="display: inline-block;">{{ change.title }}</h3> <span>{{ change.date }}</span>
-                {{ change.content|safe }}
-            {% endfor %}
         </div>
     </div>
 {% endblock %}
