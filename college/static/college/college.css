@@ -1,37 +1,3 @@
-#content-title-decorator {
-    width: 100%;
-    height: 200px;
-    background-image: url("/static/college/decorator-placeholder.jpg");
-    background-size: cover;
-    background-position: center;
-}
-
-#content-title-decorator h1 {
-    color: white;
-    font-size: 3em;
-    text-shadow: black 0 0 5px;
-    padding: 20px;
-}
-
-#content-title-decorator h1 a {
-    color: white;
-}
-
-#content-title-decorator h3 {
-    font-size: 2em;
-    text-shadow: black 0 0 3px;
-    margin-left: 50px;
-    color: white;
-}
-
-#content-title-decorator h3 a {
-    color: white;
-}
-
-#content-title-decorator .svg-inline--fa {
-    filter: drop-shadow(0 0 5px black);
-}
-
 .turn-t {
     background-color: #97d5ff !important;
 }

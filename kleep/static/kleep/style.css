@@ -186,14 +186,14 @@ h3 {
     margin-top: 0;
 }
 
-#top-container {
+#top-container, #bot-container {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-#top-container > a {
+#top-container > a, #bot-container > a {
     display: inline-block;
     padding: 8px 20px;
     font-size: 1.2em;
@@ -234,12 +234,52 @@ h3 {
     padding: 4px 15px;
 }
 
-.caption > li:first-child {
+#bot-container a:first-child, .caption > li:first-child {
     border-bottom-left-radius: 10px;
 }
 
-.caption > li:last-child {
+#bot-container a:last-child, .caption > li:last-child {
     border-bottom-right-radius: 10px;
+}
+
+#top-container.float-right, #bot-container.float-right {
+    float: right;
+    margin-right: 10px;
+}
+
+/* Content decorator styles */
+#content-title-decorator {
+    width: 100%;
+    height: 200px;
+    background-image: url("/static/college/decorator-placeholder.jpg");
+    background-size: cover;
+    background-position: center;
+}
+
+#content-title-decorator h1 {
+    color: white;
+    font-size: 3em;
+    text-shadow: black 0 0 5px;
+    padding: 20px;
+}
+
+#content-title-decorator h1 a {
+    color: white;
+}
+
+#content-title-decorator h3 {
+    font-size: 2em;
+    text-shadow: black 0 0 3px;
+    margin-left: 50px;
+    color: white;
+}
+
+#content-title-decorator h3 a {
+    color: white;
+}
+
+#content-title-decorator .svg-inline--fa {
+    filter: drop-shadow(0 0 5px black);
 }
 
 /* Footer styles */

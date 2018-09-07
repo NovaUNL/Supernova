@@ -1,35 +1,54 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
 
 {% load static %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+    <style>
+        .flex-wrapper > div {
+            margin: 10px 20px;
+            flex-basis: 475px;
+        }
+
+        #content-title-decorator {
+        {% if  area.img_url %}
+            background-image: url("{{ area.img_url}}");
+        {% endif %}
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-book"></i> Categorias em {{ area.name }}</h1>
-
-    <div class="flex-wrapper">
-        {% for subarea in area.subareas.all %}
-            <a href="{% url 'synopses:subarea' subarea.id %}">
-                {% if subarea.img_url %}
-                    <div class="flex-grid-item"
-                         style="background-image: url({{ subarea.img_url }}); background-size: cover; background-position: center">
-                {% else %}
-                    <div class="flex-grid-item">
-                {% endif %}
-                <span class="flex-grid-item-top">{{ subarea.name }}</span>
-                <span class="flex-grid-item-bottom">{{ subarea.topics.count }} tópico(s)</span>
-                </div>
-            </a>
-        {% endfor %}
+    <div id="content-title-decorator">
+        <span class="clearfix"></span>
+        <h1><i class="fas fa-book"></i> {{ area.name }}</h1>
     </div>
-    <h2 style="margin-bottom: 5px">Contribuir:</h2>
-    {% if user.is_authenticated %}
-        <div id="contribute">
-            <a class="generic-button" href="{% url 'synopses:subarea_create' area.id %}">Criar categoria</a>
+    <div class="content-formatter">
+        <div class="flex-wrapper">
+            {% for subarea in area.subareas.all %}
+                <a href="{% url 'synopses:subarea' subarea.id %}">
+                    {% if subarea.img_url %}
+                        <div class="flex-grid-item"
+                             style="background-image: url({{ subarea.img_url }}); background-size: cover; background-position: center">
+                    {% else %}
+                        <div class="flex-grid-item">
+                    {% endif %}
+                    <span class="flex-grid-item-top">{{ subarea.name }}</span>
+                    <span class="flex-grid-item-bottom">{{ subarea.topics.count }} tópico(s)</span>
+                    </div>
+                </a>
+            {% endfor %}
         </div>
-    {% else %}
-        <b>Autentique-se para poder efetuar alterações.</b>
-    {% endif %}
+    </div>
+{% endblock %}
+
+{% block content-bottom %}
+    <nav id="bot-container" class="float-right">
+        <a class="menu-entry selected">Contribuir:</a>
+        {% if user.is_authenticated %}
+            <a class="menu-entry" href="{% url 'synopses:subarea_create' area.id %}">Criar categoria</a>
+        {% else %}
+            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>
+        {% endif %}
+    </nav>
 {% endblock %}

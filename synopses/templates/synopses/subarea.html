@@ -1,30 +1,52 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
 
 {% load static %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+    <style>
+        .flex-wrapper > div {
+            margin: 10px 20px;
+            flex-basis: 475px;
+        }
+
+        #content-title-decorator {
+        {% if  area.img_url %}
+            background-image: url("{{ subarea.img_url}}");
+        {% endif %}
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <h1><i class="fas fa-book"></i> {{ subarea.name }}</h1>
-    <h2>Descrição:</h2>
-    <p>{{ subarea.description|safe }}</p>
-    <h2>Tópicos:</h2>
-    <ul id="content-list">
-        {% for topic in subarea.topics.all|dictsort:"index" %}
-            <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
-                ({{ topic.sections.count }} secções)
-            </li>
-        {% endfor %}
-    </ul>
-    <h2>Contribuir:</h2>
-    {% if user.is_authenticated %}
-        <div id="contribute">
-            <a class="generic-button" href="{% url 'synopses:topic_create' subarea.id %}">Criar novo tópico</a>
-            <a class="generic-button" href="{% url 'synopses:subarea_edit' subarea.id %}">Editar</a>
-        </div>
-    {% else %}
-        <b>Autentique-se para poder efetuar alterações.</b>
-    {% endif %}
+    <div id="content-title-decorator">
+        <span class="clearfix"></span>
+        <h1><i class="fas fa-book"></i> {{ subarea.name }}</h1>
+        <h3><a href="{% url 'synopses:area' area.id %}">{{ area }}</a></h3>
+    </div>
+    <div class="content-formatter">
+        <h2>Descrição:</h2>
+        <p>{{ subarea.description|safe }}</p>
+        <h2>Tópicos:</h2>
+        <ul id="content-list">
+            {% for topic in subarea.topics.all|dictsort:"index" %}
+                <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
+                    ({{ topic.sections.count }} secções)
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+
+{% block content-bottom %}
+    <nav id="bot-container" class="float-right">
+        <a class="menu-entry selected">Contribuir:</a>
+        {% if user.is_authenticated %}
+            <a class="menu-entry" href="{% url 'synopses:topic_create' subarea.id %}">Criar novo tópico</a>
+            <a class="menu-entry" href="{% url 'synopses:subarea_edit' subarea.id %}">Editar</a>
+        {% else %}
+            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>
+        {% endif %}
+    </nav>
 {% endblock %}
