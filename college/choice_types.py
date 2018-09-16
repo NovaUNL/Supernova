@@ -24,19 +24,22 @@ class TurnType:
     PRACTICAL_THEORETICAL = 3
     SEMINAR = 4
     TUTORIAL_ORIENTATION = 5
+    FIELD_WORK = 6
     CHOICES = (
         (THEORETICAL, 'Teórico'),
         (PRACTICAL, 'Teórico'),
         (PRACTICAL_THEORETICAL, 'Teórico-pratico'),
         (SEMINAR, 'Seminário'),
         (TUTORIAL_ORIENTATION, 'Orientação tutorial'),
+        (FIELD_WORK, 'Trabalho de campo'),
     )
     ABBREVIATIONS = {
         THEORETICAL: 'T',
         PRACTICAL: 'P',
         PRACTICAL_THEORETICAL: 'TP',
         SEMINAR: 'S',
-        TUTORIAL_ORIENTATION: 'OT'
+        TUTORIAL_ORIENTATION: 'OT',
+        FIELD_WORK: 'TC'
     }
 
     @staticmethod
