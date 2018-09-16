@@ -395,6 +395,7 @@ h3 {
     flex-direction: column;
     justify-content: space-between;
     background-size: cover;
+    background-position: center;
     border-radius: 5px;
     margin: 10px;
     width: 220px;
