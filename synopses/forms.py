@@ -13,23 +13,22 @@ class AreaForm(ModelForm):
         model = Area
         fields = '__all__'
         widgets = {
-            'area': autocomplete.ModelSelect2(url='synopses:area_ac'),
-            'img_url': forms.URLInput()  # TODO URL Field?
+            'area': autocomplete.ModelSelect2(url='synopses:area_ac')
         }
 
 
 class SubareaForm(ModelForm):
     class Meta:
         model = Subarea
-        fields = ('area', 'name', 'description', 'img_url')
+        fields = '__all__'
         widgets = {
             'name': TextInput(),
-            'area': autocomplete.ModelSelect2(url='synopses:area_ac'),
-            'img_url': forms.URLInput()  # TODO URL Field?
+            'area': autocomplete.ModelSelect2(url='synopses:area_ac')
         }
 
 
 class TopicForm(ModelForm):
+    # TODO after field (ordering)
     class Meta:
         model = Topic
         fields = ('subarea', 'name')
