@@ -1,68 +1,66 @@
+from django.core import exceptions as dje
+from django import forms as djf
 from dal import autocomplete
-from django.core.exceptions import ValidationError
-from django.forms import ChoiceField, ModelForm, TextInput, inlineformset_factory, URLInput, URLField, CharField, \
-    ModelChoiceField
-from django import forms
 
-from documents.models import Document
-from synopses.models import Area, Subarea, Topic, Section, ClassSection, SectionSource, SectionResource
+from documents import models as documents
+from synopses import models as synopsis
 
 
-class AreaForm(ModelForm):
+class AreaForm(djf.ModelForm):
     class Meta:
-        model = Area
+        model = synopsis.Area
         fields = '__all__'
         widgets = {
             'area': autocomplete.ModelSelect2(url='synopses:area_ac')
         }
 
 
-class SubareaForm(ModelForm):
+class SubareaForm(djf.ModelForm):
     class Meta:
-        model = Subarea
+        model = synopsis.Subarea
         fields = '__all__'
         widgets = {
-            'name': TextInput(),
+            'name': djf.TextInput(),
             'area': autocomplete.ModelSelect2(url='synopses:area_ac')
         }
 
 
-class TopicForm(ModelForm):
+class TopicForm(djf.ModelForm):
     # TODO after field (ordering)
     class Meta:
-        model = Topic
+        model = synopsis.Topic
         fields = ('subarea', 'name')
         widgets = {
-            'name': TextInput(),
+            'name': djf.TextInput(),
             'subarea': autocomplete.ModelSelect2(url='synopses:subarea_ac')
         }
 
 
-class SectionForm(ModelForm):
-    after = ChoiceField(label='Após:', required=True)
-    requirements = forms.ModelMultipleChoiceField(
+class SectionForm(djf.ModelForm):
+    after = djf.ChoiceField(label='Após:', required=True)
+    requirements = djf.ModelMultipleChoiceField(
         widget=autocomplete.Select2Multiple(url='synopses:section_ac'),
-        queryset=Section.objects.all(),
+        queryset=synopsis.Section.objects.all(),
         required=False)
 
     class Meta:
-        model = Section
+        model = synopsis.Section
         fields = ('name', 'content', 'requirements')
         widgets = {
-            'name': TextInput()}
+            'name': djf.TextInput()}
 
     def clean_after(self):
         after = self.cleaned_data['after']
         try:
             after = int(after)
         except ValueError:
-            raise ValidationError("Invalid 'after' value.")
+            raise dje.ValidationError("Invalid 'after' value.")
         return after
 
 
-class ClassSectionForm(ModelForm):
+class ClassSectionForm(djf.ModelForm):
     class Meta:
-        model = ClassSection
+        model = synopsis.ClassSection
         fields = '__all__'
         widgets = {
             'corresponding_class': autocomplete.ModelSelect2(url='class_ac'),
@@ -70,35 +68,36 @@ class ClassSectionForm(ModelForm):
         }
 
 
-class SectionSourceForm(ModelForm):
-    url = URLField(widget=URLInput(attrs={'placeholder': 'Endreço (opcional)'}), required=False)
+class SectionSourceForm(djf.ModelForm):
+    url = djf.URLField(widget=djf.URLInput(attrs={'placeholder': 'Endreço (opcional)'}), required=False)
 
     class Meta:
-        model = SectionSource
+        model = synopsis.SectionSource
         fields = ('title', 'url')
         widgets = {
-            'title': TextInput(attrs={'placeholder': 'Nome da fonte'})
+            'title': djf.TextInput(attrs={'placeholder': 'Nome da fonte'})
         }
 
 
-SectionSourcesFormSet = inlineformset_factory(Section, SectionSource, form=SectionSourceForm, extra=3)
+SectionSourcesFormSet = djf.inlineformset_factory(synopsis.Section, synopsis.SectionSource,
+                                                  form=SectionSourceForm, extra=3)
 
 
-class SectionResourceForm(ModelForm):
-    name = CharField(label='Nome')
-    resource_type = ChoiceField(choices=((None, ''), (1, 'Página'), (2, 'Documento')), initial=None)
-    webpage = URLField(required=False)
-    document = ModelChoiceField(queryset=Document.objects.all(), required=False)  # TODO select2
+class SectionResourceForm(djf.ModelForm):
+    name = djf.CharField(label='Nome')
+    resource_type = djf.ChoiceField(choices=((None, ''), (1, 'Página'), (2, 'Documento')), initial=None)
+    webpage = djf.URLField(required=False)
+    document = djf.ModelChoiceField(queryset=documents.Document.objects.all(), required=False)  # TODO select2
 
     class Meta:
-        model = SectionResource
+        model = synopsis.SectionResource
         fields = ('name', 'webpage', 'document')
 
     def clean_resource_type(self):
         try:
             return int(self.cleaned_data['resource_type'])
         except ValueError:
-            raise ValidationError("Tipo de documento inválido")
+            raise dje.ValidationError("Tipo de documento inválido")
 
     def clean_webpage(self):
         webpage = self.cleaned_data['webpage'].strip()
@@ -113,4 +112,5 @@ class SectionResourceForm(ModelForm):
             self.add_error('webpage', 'Documento por escolher.')
 
 
-SectionResourcesFormSet = inlineformset_factory(Section, SectionResource, form=SectionResourceForm, extra=3)
+SectionResourcesFormSet = djf.inlineformset_factory(synopsis.Section, synopsis.SectionResource,
+                                                    form=SectionResourceForm, extra=3)
