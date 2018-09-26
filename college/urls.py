@@ -18,7 +18,6 @@ urlpatterns = [
     # path('cadeira/<int:class_id>/resumo/', #, name='class_synopsis'),
     # path('cadeira/<int:class_id>/resumo/<int:section_id>/', #, name='class_synopsis_section'),
     path('cadeira/i/<int:instance_id>/', views.class_instance_view, name='class_instance'),
-    path('cadeira/i/<int:instance_id>/horario', views.class_instance_schedule_view, name='class_instance_schedule'),
     path('cadeira/i/<int:instance_id>/turnos', views.class_instance_turns_view, name='class_instance_turns'),
     path('sala/<int:room_id>/', views.room_view, name='room'),
     path('areas/', views.areas_view, name='areas'),

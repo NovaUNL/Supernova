@@ -1,0 +1,23 @@
+{% url 'college:class_instance' instance.id as info_url %}
+{% url 'college:class_instance_turns' instance.id as turns_url %}
+{% url 'synopses:class' instance.id as synopsis_url %}
+
+{% if info_url == request.path %}
+    <a class="menu-entry selected">Info</a>
+{% else %}
+    <a class="menu-entry" href="{{ info_url }}">Info</a>
+{% endif %}
+{% if turns_url in request.path %}
+    <a class="menu-entry selected">Turnos</a>
+{% else %}
+    <a class="menu-entry" href="{{ turns_url }}">Turnos</a>
+{% endif %}
+{#<a class="menu-entry">Inscritos</a>#}
+{#<a class="menu-entry">Ficheiros</a>#}
+{#<a class="menu-entry">Sumários</a>#}
+{#<a class="menu-entry">Notas</a>#}
+{% if synopsis_url in request.path %}
+    <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
+{% else %}
+    <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
+{% endif %}

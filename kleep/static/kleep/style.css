@@ -406,6 +406,14 @@ h3 {
     font-size: 1.2em;
 }
 
+.hidden {
+    display: none;
+}
+
+.shown {
+    display: block;
+}
+
 .flex-grid-item-bottom {
     width: 100%;
 }

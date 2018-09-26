@@ -1,12 +1,67 @@
-{% extends 'college/class_instance_base.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
+
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+{% endblock %}
+
+{% block content-top %}
+    <nav id="top-container">
+        {% include 'college/class_navigation.html' %}
+    </nav>
+{% endblock %}
 
 {% block content %}
-    <h1>{{ parent_class.name }}</h1>
-    <h3>Departamento de {{ department.name }}, {{ occasion }}</h3>
-    <h2>Descrição:</h2>
-    <p>{{ class_obj.description }}</p>
-    <h2>Informação:</h2>
-    <p>TODO</p>
-    <h2>Programa curricular:</h2>
-    <p>TODO</p>
+    {% include 'college/class_decorator.html' %}
+    <div class="content-formatter">
+        <span style="color: red;">A informação extraida do CLIP. Não é garantido que esteja correta ou atualizada.</span>
+        {% if instance.clip_class_instance.description_pt is not none %}
+            <h2>Descrição</h2>
+            <p>{{ instance.clip_class_instance.description_pt|safe }}</p>
+        {% endif %}
+        {% if instance.clip_class_instance.evaluation_methods_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('evaluation-content');">Avaliação</a></h2>
+            <div id="evaluation-content" class="hidden">
+                <p>{{ instance.clip_class_instance.evaluation_methods_pt|safe }}</p>
+            </div>
+        {% endif %}
+        {% if instance.clip_class_instance.description_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('requirements-content');">Objetivos</a></h2>
+            <div id="requirements-content" class="hidden">
+                <p>{{ instance.clip_class_instance.objectives_pt|safe }}</p>
+            </div>
+        {% endif %}
+        {% if instance.clip_class_instance.program_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('program-content');">Programa</a></h2>
+            <div id="program-content" class="hidden">
+                <p>{{ instance.clip_class_instance.program_pt|safe }}</p>
+            </div>
+        {% endif %}
+        {% if instance.clip_class_instance.requirements_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('requirements-content');">Requisitos</a></h2>
+            <div id="requirements-content" class="hidden">
+                <p>{{ instance.clip_class_instance.requirements_pt|safe }}</p>
+            </div>
+        {% endif %}
+        {% if instance.clip_class_instance.teaching_methods_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('description-content');">Métodos de ensino</a></h2>
+            <div id="description-content" class="hidden">
+                <p>{{ instance.clip_class_instance.teaching_methods_pt|safe }}</p>
+            </div>
+        {% endif %}
+        {% if instance.clip_class_instance.assistance_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('assistance-content');">Horário de atendimento</a></h2>
+            <div id="assistance-content" class="hidden">
+                <p>{{ instance.clip_class_instance.assistance_pt|safe }}</p>
+            </div>
+        {% endif %}
+        {% if instance.clip_class_instance.bibliography_pt is not none %}
+            <h2><a href="javascript:toggleVisibility('bibliography-content');">Bibliografia</a></h2>
+            <div id="bibliography-content" class="hidden">
+                <p>{{ instance.clip_class_instance.bibliography_pt|safe }}</p>
+            </div>
+        {% endif %}
+    </div>
+
 {% endblock %}

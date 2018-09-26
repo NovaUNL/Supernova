@@ -1,0 +1,63 @@
+<div id="content-title-decorator">
+    <span class="clearfix"></span>
+    <div id="year-selector">
+        <a onclick="toggleVisibility('instance-years')">{{ instance.occasion }}</a>
+        <ul id="instance-years" class="hidden">
+            <hr>
+            {% for instance in instance.parent.instances.all %}
+                <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <h1><i class="fas fa-graduation-cap"></i> {{ parent_class.name }}</h1>
+    <h3 style="position: relative; bottom: 0;">
+        <a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a>
+    </h3>
+</div>
+
+<style>
+    #year-selector {
+        float: right;
+        background: white;
+        padding: 10px 15px;
+        font-size: 1.2em;
+        font-weight: bold;
+        border-bottom-left-radius: 10px;
+        border: 2px solid #b7ccb1;
+        border-top: none;
+        border-right: none;
+    }
+
+    #instance-years {
+        background-color: white;
+        border: 2px #777;
+        list-style: none;
+        margin-left: 0;
+        padding: 0;
+    }
+
+    #instance-years a {
+        width: 100%;
+        display: block;
+        padding: 8px 16px;
+        text-align: left;
+        border: none;
+        white-space: normal;
+        float: none;
+        outline: 0;
+        vertical-align: middle;
+        overflow: hidden;
+        text-decoration: none;
+    }
+</style>
+
+<script>
+    function toggleVisibility(id) {
+        var x = document.getElementById(id);
+        if (x.className.indexOf("shown") === -1) {
+            x.className += " shown";
+        } else {
+            x.className = x.className.replace(" shown", "");
+        }
+    }
+</script>
