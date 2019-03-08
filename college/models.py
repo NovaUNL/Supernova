@@ -5,7 +5,7 @@ from django.contrib.postgres import fields as pgm
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models as djm
 from clip import models as clip
-from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
+from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from users.models import User
 from . import choice_types as ctypes
 

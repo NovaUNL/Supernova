@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from kleep import settings
+import settings
 from . import models as m, exceptions, forms, registrations
 from college import schedules
 from kleep.views import build_base_context

@@ -11,7 +11,7 @@ import feedback.views as feedback
 import documents.views as documents
 import news.views as news
 import api.urls
-from kleep.settings import DEBUG, MEDIA_URL, MEDIA_ROOT
+from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
 app_name = 'kleep'
@@ -24,7 +24,6 @@ urlpatterns = [
     path('pedinchar/', views.beg, name='beg'),
     path('privacidade/', views.privacy, name='privacy'),
     # College views
-
     path('faculdade/', include('college.urls')),
     # User views
     path('perfil/<str:nickname>/', users.profile_view, name='profile'),

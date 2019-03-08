@@ -9,7 +9,7 @@ from clip import models as clip
 from college.choice_types import Degree, RoomType
 from college.models import Building, Room, Course, Curriculum, Area, ClassInstance, Class, Department, TurnInstance
 from college.schedules import build_schedule, build_turns_schedule
-from kleep.settings import COLLEGE_YEAR, COLLEGE_PERIOD
+from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from kleep.views import build_base_context
 
 from services.models import Service, MenuDish

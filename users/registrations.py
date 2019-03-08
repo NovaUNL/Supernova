@@ -11,7 +11,7 @@ from django.utils import timezone
 import clip.models as clip
 import users.models as users
 import college.clip_synchronization as clip_sync
-import kleep.settings as settings
+import settings
 from users.exceptions import InvalidToken, InvalidUsername, ExpiredRegistration, AccountExists, AssignedStudent
 
 

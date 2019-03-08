@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from users.forms import LoginForm
 from kleep.models import Changelog, Catchphrase
-from kleep.settings import VERSION
+from settings import VERSION
 from news.models import NewsItem
 
 
