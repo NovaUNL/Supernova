@@ -24,15 +24,18 @@ class NewsItem(Model):
         return self.title
 
 
-VOTE_TYPE_CHOICES = (
-    (1, 'upvote'),
-    (2, 'downvote'),
-    (3, 'award'),
-    (4, 'clickbait')
-)
-
-
 class NewsVote(Model):
+    UPVOTE = 1
+    DOWNVOTE = 2
+    AWARD = 3
+    CLICKBAIT = 4
+
+    VOTE_TYPE_CHOICES = (
+        (UPVOTE, 'upvote'),
+        (DOWNVOTE, 'downvote'),
+        (AWARD, 'award'),
+        (CLICKBAIT, 'clickbait')
+    )
     news_item = ForeignKey(NewsItem, on_delete=models.CASCADE)
     user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
     vote_type = IntegerField(choices=VOTE_TYPE_CHOICES)
