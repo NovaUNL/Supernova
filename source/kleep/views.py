@@ -1,5 +1,4 @@
 import random
-import psutil
 from django.core.cache import cache
 from django.shortcuts import render
 
@@ -38,25 +37,10 @@ def privacy(request):
 
 
 def build_base_context(request):
-    result = {'disable_auth': False,
-              'sub_nav': None,
-              'cpu': __cpu_load(),
-              'people': 0  # TODO
-              }
+    result = {
+        'disable_auth': False,
+        'sub_nav': None,
+    }
     if not request.user.is_authenticated:
         result['login_form'] = LoginForm()
     return result
-
-
-def __cpu_load():
-    cpu_load_val = cache.get('cpu_load')
-    if cpu_load_val is None:
-        cpu_load_val = psutil.cpu_percent(interval=0.10)  # cache instead of calculating for every request
-        cache.set('cpu_load', cpu_load_val, 10)
-
-    if cpu_load_val <= 50.0:
-        return 0  # low
-    elif cpu_load_val <= 80.0:
-        return 1  # medium
-    else:
-        return 2  # high

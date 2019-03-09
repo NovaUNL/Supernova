@@ -97,20 +97,9 @@
     </div>
     <footer id="footer">
         <ul>
-            {# <li><a href="{% url 'beg' %}">Para passar a AM...</a></li>#}
             <li><a href="{% url 'privacy' %}">Privacidade</a></li>
             <li><a href="{% url 'about' %}">Sobre</a></li>
             <li><a href="#">FAQ</a></li>
-            <li>
-                <a href="#">Servidor ({{ people }} pessoas) </a>
-                {% if cpu == 0 %}
-                    <span id="status" class="status-low"></span>
-                {% elif cpu == 1 %}
-                    <span id="status" class="status-medium"></span>
-                {% elif cpu == 2 %}
-                    <span id="status" class="status-high"></span>
-                {% endif %}
-            </li>
             <li>
                 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
                     <img alt="Licença Creative Commons" style="border-width:0"
