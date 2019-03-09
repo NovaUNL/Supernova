@@ -120,6 +120,9 @@ class Room(Place):
         # unique_together = ('name', 'building', 'type') inheritance forbids this
 
     def __str__(self):
+        return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
+
+    def long__str(self):
         return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
 
 
@@ -215,7 +218,7 @@ class Turn(djm.Model):
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='turns')  # Eg: Analysis
     turn_type = djm.IntegerField(choices=ctypes.TurnType.CHOICES)  # Theoretical
     number = djm.IntegerField()  # 1
-    clip_turn = djm.OneToOneField(clip.Turn, on_delete=djm.PROTECT, related_name='turn')
+    clip_turn = djm.OneToOneField(clip.Turn, on_delete=djm.CASCADE, related_name='turn')
     required = djm.BooleanField(default=True)  # Optional attendance
     students = djm.ManyToManyField(Student, through='TurnStudents')
 
@@ -241,9 +244,9 @@ class TurnStudents(djm.Model):
 
 
 class TurnInstance(djm.Model):
-    turn = djm.ForeignKey(Turn, on_delete=djm.PROTECT, related_name='instances')  # Eg: Theoretical 1
+    turn = djm.ForeignKey(Turn, on_delete=djm.CASCADE, related_name='instances')  # Eg: Theoretical 1
     # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
-    clip_turn_instance = djm.OneToOneField(clip.TurnInstance, on_delete=djm.PROTECT, related_name='turn_instance')
+    clip_turn_instance = djm.OneToOneField(clip.TurnInstance, on_delete=djm.CASCADE, related_name='turn_instance')
     recurring = djm.BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
     # Whether this is a recurring turn
     weekday = djm.IntegerField(null=True, blank=True, choices=ctypes.WEEKDAY_CHOICES)  # 0 - Monday
