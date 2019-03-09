@@ -1,0 +1,8 @@
+assets
+docs
+database
+dev
+__pycache__
+/venv/
+.git
+.idea
