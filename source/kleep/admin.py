@@ -6,7 +6,7 @@ from kleep.models import Changelog, Catchphrase
 
 
 class ChangeLogAdminForm(forms.ModelForm):
-    content = forms.CharField(widget=CKEditorUploadingWidget())
+    content = forms.CharField(widget=CKEditorUploadingWidget(config_name='complex'))
 
     class Meta:
         fields = '__all__'
