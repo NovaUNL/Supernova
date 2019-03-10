@@ -1,41 +1,39 @@
-from django.db import models
-from django.db.models import Model, TextField, ForeignKey, DateTimeField, DateField, BooleanField, ManyToManyField
-
+from django.db import models as djm
 from groups.models import Group
 from users.models import User
 
 
-class Conversation(Model):
-    creator = ForeignKey(User, on_delete=models.PROTECT, related_name='creator')
-    date = DateField(auto_now_add=True)
-    users = ManyToManyField(User, through='ConversationUser')
+class Conversation(djm.Model):
+    creator = djm.ForeignKey(User, on_delete=djm.PROTECT, related_name='creator')
+    date = djm.DateField(auto_now_add=True)
+    users = djm.ManyToManyField(User, through='ConversationUser')
 
 
-class Message(Model):
-    author = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
-    datetime = DateTimeField(auto_now_add=True)
-    content = TextField()
-    conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
+class Message(djm.Model):
+    author = djm.ForeignKey(User, on_delete=djm.PROTECT)  # TODO consider user deletion
+    datetime = djm.DateTimeField(auto_now_add=True)
+    content = djm.TextField()
+    conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
 
     class Meta:
         unique_together = ['author', 'datetime', 'content', 'conversation']
 
 
 # A user relation to a conversation
-class ConversationUser(Model):
-    conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
-    last_read_message = ForeignKey(Message, null=True, blank=True, on_delete=models.PROTECT)
+class ConversationUser(djm.Model):
+    conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
+    user = djm.ForeignKey(User, on_delete=djm.PROTECT)  # TODO consider user deletion
+    last_read_message = djm.ForeignKey(Message, null=True, blank=True, on_delete=djm.PROTECT)
 
 
 # A conversation from an outsider to a group
 class GroupExternalConversation(Conversation):
-    group = ForeignKey(Group, on_delete=models.PROTECT)
-    user_ack = BooleanField()
-    group_ack = BooleanField()
-    closed = BooleanField()
+    group = djm.ForeignKey(Group, on_delete=djm.PROTECT)
+    user_ack = djm.BooleanField()
+    group_ack = djm.BooleanField()
+    closed = djm.BooleanField()
 
 
 # A conversation within a group
 class GroupInternalConversation(Conversation):
-    group = ForeignKey(Group, on_delete=models.PROTECT)
+    group = djm.ForeignKey(Group, on_delete=djm.PROTECT)

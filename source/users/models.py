@@ -1,7 +1,5 @@
-from django.db import models
+from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Model, TextField, ForeignKey, DateField, IntegerField, DateTimeField, ManyToManyField, \
-    ImageField, OneToOneField
 
 from clip import models as clip
 
@@ -11,12 +9,12 @@ def user_profile_pic_path(user, filename):
 
 
 class User(AbstractUser):
-    nickname = TextField(null=True, max_length=20, verbose_name='Alcunha')
-    birth_date = DateField(null=True, verbose_name='Nascimento')
-    last_activity = DateTimeField()
-    residence = TextField(max_length=50, null=True, blank=True, verbose_name='Residência')
-    picture = ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
-    webpage = TextField(max_length=200, null=True, blank=True, verbose_name='Página pessoal')
+    nickname = djm.CharField(null=True, max_length=20, verbose_name='Alcunha')
+    birth_date = djm.DateField(null=True, verbose_name='Nascimento')
+    last_activity = djm.DateTimeField()
+    residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
+    picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
+    webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
 
     HIDDEN = 0  # No profile at all
     LIMITED = 1  # Show limited information, only to users
@@ -31,7 +29,7 @@ class User(AbstractUser):
         (MIXED, 'Misto'),
         (PUBLIC, 'Público'),
     )
-    profile_visibility = IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    profile_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
 
     MALE = 0
     FEMALE = 1
@@ -42,22 +40,22 @@ class User(AbstractUser):
         (FEMALE, 'Mulher'),
         (MULTIPLEGENDERS, 'É complicado')
     )
-    gender = IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
+    gender = djm.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
 
 
-class Badge(Model):
-    name = TextField(max_length=30, unique=True)
-    style = TextField(max_length=15, null=True, default=None)
-    users = ManyToManyField(User, through='UserBadge', related_name='badges')
+class Badge(djm.Model):
+    name = djm.CharField(max_length=32, unique=True)
+    style = djm.CharField(max_length=15, null=True, default=None)
+    users = djm.ManyToManyField(User, through='UserBadge', related_name='badges')
 
 
-class UserBadge(Model):
-    user = ForeignKey(User, on_delete=models.CASCADE)
-    badge = ForeignKey(Badge, on_delete=models.PROTECT)
-    receive_date = DateField(auto_created=True)
+class UserBadge(djm.Model):
+    user = djm.ForeignKey(User, on_delete=djm.CASCADE)
+    badge = djm.ForeignKey(Badge, on_delete=djm.PROTECT)
+    receive_date = djm.DateField(auto_created=True)
 
 
-class SocialNetworkAccount(Model):
+class SocialNetworkAccount(djm.Model):
     GITLAB = 0
     GITHUB = 1
     REDDIT = 2
@@ -91,9 +89,9 @@ class SocialNetworkAccount(Model):
         (MYANIMELIST, 'MyAnimeList'),
         (IMDB, 'IMDB'),
     )
-    user = ForeignKey(User, on_delete=models.CASCADE, related_name='social_networks')
-    network = IntegerField(choices=SOCIAL_NETWORK_CHOICES)
-    profile = TextField(max_length=200)
+    user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='social_networks')
+    network = djm.IntegerField(choices=SOCIAL_NETWORK_CHOICES)
+    profile = djm.CharField(max_length=128)
 
     def __str__(self):
         return f'{self.SOCIAL_NETWORK_CHOICES[self.network][1]}: {self.profile} ({self.user})'
@@ -102,19 +100,19 @@ class SocialNetworkAccount(Model):
         unique_together = ['user', 'network', 'profile']
 
 
-class Registration(Model):
-    email = TextField()
-    username = TextField(verbose_name='utilizador')
-    nickname = TextField(verbose_name='alcunha')
-    student = OneToOneField(clip.Student, on_delete=models.CASCADE, verbose_name='estudante')
-    password = TextField(verbose_name='palavra-passe')
-    creation = DateTimeField(auto_now_add=True)
-    token = TextField()
-    failed_attempts = IntegerField(default=0)
+class Registration(djm.Model):
+    email = djm.EmailField()
+    username = djm.CharField(verbose_name='utilizador', max_length=32)
+    nickname = djm.CharField(verbose_name='alcunha', max_length=32)
+    student = djm.OneToOneField(clip.Student, on_delete=djm.CASCADE, verbose_name='estudante')
+    password = djm.CharField(verbose_name='palavra-passe', max_length=64)
+    creation = djm.DateTimeField(auto_now_add=True)
+    token = djm.CharField(max_length=16)
+    failed_attempts = djm.IntegerField(default=0)
 
 
-class VulnerableHash(Model):
-    hash = TextField()
+class VulnerableHash(djm.Model):
+    hash = djm.TextField()
 
     class Meta:
         # TODO figure how to assign to a database

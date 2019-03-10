@@ -1,18 +1,17 @@
 from datetime import date
-from django.db import models
-from django.db.models import Model, IntegerField, TextField, ForeignKey, DateTimeField, ManyToManyField, DateField
+from django.db import models as djm
 
 from college.models import Place, TurnInstance
 from groups.models import Group
 from users.models import User
 
 
-class Event(Model):
-    start_datetime = DateTimeField()
-    end_datetime = DateTimeField()
-    announce_date = DateField(default=date.today)
-    place = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
-    users = ManyToManyField(User, through='EventUser')
+class Event(djm.Model):
+    start_datetime = djm.DateTimeField()
+    end_datetime = djm.DateTimeField()
+    announce_date = djm.DateField(default=date.today)
+    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL)
+    users = djm.ManyToManyField(User, through='EventUser')
 
     def __str__(self):
         return f'from {self.datetime_to_eventtime(self.start_datetime)} ' \
@@ -34,19 +33,19 @@ class Event(Model):
         return '%02d-%02d, %02d:%02d' % (datetime.day, datetime.month, datetime.hour, datetime.minute)
 
 
-class EventUser(Model):
-    event = ForeignKey(Event, on_delete=models.CASCADE)
-    user = ForeignKey(User, on_delete=models.CASCADE)
+class EventUser(djm.Model):
+    event = djm.ForeignKey(Event, on_delete=djm.CASCADE)
+    user = djm.ForeignKey(User, on_delete=djm.CASCADE)
 
 
 class TurnEvent(Event):
-    turn_instance = ForeignKey(TurnInstance, on_delete=models.CASCADE)
+    turn_instance = djm.ForeignKey(TurnInstance, on_delete=djm.CASCADE)
 
 
-class Workshop(Model):
-    name = TextField(max_length=100)
-    description = TextField(max_length=4096, null=True, blank=True)
-    creator = ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
+class Workshop(djm.Model):
+    name = djm.CharField(max_length=256)
+    description = djm.TextField(max_length=4096, null=True, blank=True)
+    creator = djm.ForeignKey(Group, null=True, blank=True, on_delete=djm.CASCADE)
 
     class Meta:
         unique_together = ['name', 'creator']
@@ -56,13 +55,13 @@ class Workshop(Model):
 
 
 class WorkshopEvent(Event):
-    workshop = ForeignKey(Workshop, on_delete=models.CASCADE)
-    capacity = IntegerField(null=True, blank=True)
+    workshop = djm.ForeignKey(Workshop, on_delete=djm.CASCADE)
+    capacity = djm.IntegerField(null=True, blank=True)
 
 
-class Party(Model):
-    name = TextField(max_length=100)
-    description = TextField(max_length=4096, null=True, blank=True)
+class Party(djm.Model):
+    name = djm.CharField(max_length=128)
+    description = djm.TextField(max_length=4096, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'parties'
@@ -72,5 +71,5 @@ class Party(Model):
 
 
 class PartyEvent(Event):
-    party = ForeignKey(Party, on_delete=models.CASCADE)
-    capacity = IntegerField(null=True, blank=True)
+    party = djm.ForeignKey(Party, on_delete=djm.CASCADE)
+    capacity = djm.IntegerField(null=True, blank=True)

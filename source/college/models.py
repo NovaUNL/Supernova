@@ -1,9 +1,9 @@
 from datetime import datetime
 
+from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.contrib.postgres import fields as pgm
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models as djm
 from clip import models as clip
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from users.models import User
@@ -13,7 +13,7 @@ from . import choice_types as ctypes
 class Student(djm.Model):
     user = djm.ForeignKey(User, null=True, on_delete=djm.CASCADE, related_name='students')
     number = djm.IntegerField(null=True, blank=True)
-    abbreviation = djm.TextField(null=True, blank=True)
+    abbreviation = djm.CharField(null=True, blank=True, max_length=64)
     course = djm.ForeignKey('Course', on_delete=djm.PROTECT, related_name='students', null=True, blank=True)
     turns = djm.ManyToManyField('Turn', through='TurnStudents')
     class_instances = djm.ManyToManyField('ClassInstance', through='Enrollment')
@@ -34,7 +34,7 @@ class Student(djm.Model):
 
 
 class Area(djm.Model):
-    name = djm.TextField(max_length=200, unique=True)
+    name = djm.CharField(max_length=200, unique=True)
     description = djm.TextField(max_length=4096, null=True, blank=True)
     courses = djm.ManyToManyField('Course', through='CourseArea')
 
@@ -50,8 +50,8 @@ def building_pic_path(building, filename):
 
 
 class Building(djm.Model):
-    name = djm.TextField(max_length=30, unique=True)
-    abbreviation = djm.CharField(max_length=10, unique=True, null=True)
+    name = djm.CharField(max_length=32, unique=True)
+    abbreviation = djm.CharField(max_length=16, unique=True, null=True)
     map_tag = djm.CharField(max_length=20, unique=True)
     location = gis.PointField(geography=True, null=True)
     clip_building = djm.OneToOneField(clip.Building, null=True, blank=True, on_delete=djm.PROTECT)
@@ -70,7 +70,7 @@ def department_pic_path(department, filename):
 
 
 class Department(djm.Model):
-    name = djm.TextField(max_length=100)
+    name = djm.CharField(max_length=128)
     description = djm.TextField(max_length=4096, null=True, blank=True)
     building = djm.ForeignKey(Building, on_delete=djm.PROTECT, null=True, blank=True, related_name='departments')
     clip_department = djm.OneToOneField(clip.Department, on_delete=djm.PROTECT)
@@ -85,7 +85,7 @@ class Department(djm.Model):
 
 
 class Place(djm.Model):
-    name = djm.TextField(max_length=100)
+    name = djm.CharField(max_length=128)
     building = djm.ForeignKey(Building, null=True, blank=True, on_delete=djm.PROTECT, related_name='places')
     floor = djm.IntegerField(default=0)
     unlocked = djm.NullBooleanField(null=True, default=None)
@@ -127,15 +127,15 @@ class Room(Place):
 
 
 class Course(djm.Model):
-    name = djm.TextField(max_length=200)
+    name = djm.CharField(max_length=256)
     description = djm.TextField(max_length=4096, null=True, blank=True)
     degree = djm.IntegerField(choices=ctypes.Degree.CHOICES)
-    abbreviation = djm.TextField(max_length=100, null=True, blank=True)
+    abbreviation = djm.CharField(max_length=128, null=True, blank=True)
     active = djm.BooleanField(default=False)
     clip_course = djm.OneToOneField(clip.Course, on_delete=djm.PROTECT)
     department = djm.ForeignKey('Department', null=True, blank=True, on_delete=djm.PROTECT, related_name='courses')
     areas = djm.ManyToManyField(Area, through='CourseArea')
-    url = djm.TextField(max_length=256, null=True, blank=True)
+    url = djm.URLField(max_length=256, null=True, blank=True)
     curriculum_classes = djm.ManyToManyField('Class', through='Curriculum')
 
     class Meta:
@@ -154,8 +154,8 @@ class CourseArea(djm.Model):
 
 
 class Class(djm.Model):
-    name = djm.TextField(max_length=30)
-    abbreviation = djm.TextField(max_length=10, default='---')
+    name = djm.CharField(max_length=64)
+    abbreviation = djm.CharField(max_length=16, default='---')
     description = djm.TextField(max_length=1024, null=True, blank=True)
     credits = djm.IntegerField(null=True, blank=True)  # 2 credits = 1 ECTS
     department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
@@ -306,7 +306,7 @@ class Teacher(djm.Model):
 
 
 class File(djm.Model):
-    name = djm.TextField(null=True)
+    name = djm.CharField(null=True, max_length=256)
     type = djm.IntegerField(db_column='file_type', choices=ctypes.FileType.CHOICES)
     size = djm.IntegerField()
     hash = djm.CharField(max_length=40, null=True)
@@ -320,7 +320,7 @@ class ClassInstanceFile(djm.Model):
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
     file = djm.ForeignKey(File, on_delete=djm.PROTECT, db_column='file_id')
     upload_datetime = djm.DateTimeField()
-    uploader = djm.TextField(max_length=100)
+    uploader = djm.CharField(max_length=100)
 
 
 class ClassEvaluation(djm.Model):
@@ -332,10 +332,10 @@ class ClassEvaluation(djm.Model):
 class ClassInstanceMessages(djm.Model):
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
     teacher = djm.ForeignKey(Teacher, on_delete=djm.PROTECT, db_column='teacher_id')
-    title = djm.TextField(max_length=200)
+    title = djm.CharField(max_length=256)
     message = djm.TextField()
     upload_datetime = djm.DateTimeField()
-    uploader = djm.TextField(max_length=100)
+    uploader = djm.CharField(max_length=128)
     datetime = djm.DateTimeField()
     clip_message = djm.ForeignKey(clip.ClassInstanceMessages, on_delete=djm.CASCADE)
 

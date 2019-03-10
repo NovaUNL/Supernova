@@ -1,27 +1,26 @@
-from django.db import models
-from django.db.models import Model, TextField, DateTimeField, ManyToManyField, ForeignKey, IntegerField
+from django.db import models as djm
 from django.utils import timezone
 
 from college.models import Area
 from users.models import User
 
 
-class Post(Model):
-    name = TextField(max_length=100)
-    content = TextField()
-    author = ManyToManyField(User)
-    timestamp = DateTimeField(default=timezone.now)
-    areas = ManyToManyField(Area)
+class Post(djm.Model):
+    name = djm.CharField(max_length=256)
+    content = djm.TextField()
+    author = djm.ManyToManyField(User)
+    timestamp = djm.DateTimeField(default=timezone.now)
+    areas = djm.ManyToManyField(Area)
 
     class Meta:
         unique_together = ['name', 'content']
 
 
-class Comment(Model):
-    post = ForeignKey(Post, on_delete=models.CASCADE)
-    author = ForeignKey(User, on_delete=models.CASCADE, related_name='planet_comments')
-    content = TextField()
-    timestamp = DateTimeField(default=timezone.now)
+class Comment(djm.Model):
+    post = djm.ForeignKey(Post, on_delete=djm.CASCADE)
+    author = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='planet_comments')
+    content = djm.TextField()
+    timestamp = djm.DateTimeField(default=timezone.now)
 
 
 VOTE_TYPE_CHOICES = (
@@ -33,17 +32,17 @@ VOTE_TYPE_CHOICES = (
 
 
 # A vote given to a post
-class PostVote(Model):
-    post = ForeignKey(Post, on_delete=models.CASCADE)
-    type = IntegerField(choices=VOTE_TYPE_CHOICES)
-    user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+class PostVote(djm.Model):
+    post = djm.ForeignKey(Post, on_delete=djm.CASCADE)
+    type = djm.IntegerField(choices=VOTE_TYPE_CHOICES)
+    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL)
 
 
 # A vote given to a comment
-class CommentVote(Model):
-    comment = ForeignKey(Comment, on_delete=models.CASCADE)
-    type = IntegerField(choices=VOTE_TYPE_CHOICES)
-    user = ForeignKey(User, null=True, on_delete=models.SET_NULL)
+class CommentVote(djm.Model):
+    comment = djm.ForeignKey(Comment, on_delete=djm.CASCADE)
+    type = djm.IntegerField(choices=VOTE_TYPE_CHOICES)
+    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL)
 
     class Meta:
         unique_together = ['comment', 'user']

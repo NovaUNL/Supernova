@@ -1,15 +1,13 @@
 from ckeditor.fields import RichTextField
 from django.contrib.postgres.fields import JSONField
-from django.db import models
-from django.db.models import Model, ForeignKey, DateTimeField, CharField, URLField, IntegerField, TextField, \
-    ManyToManyField
+from django.db import models as djm
 
 from college.models import Class
 from synopses.models import Section
 from users.models import User
 
 
-class Exercise(Model):
+class Exercise(djm.Model):
     QA = 0  #: Question-answer pair
     MC = 1  #: Multiple choice
     QAG = 2  #: Question-answer group
@@ -24,17 +22,17 @@ class Exercise(Model):
 
     introduction = RichTextField(null=True, blank=False, verbose_name='introduction')  #: Optional question introduction
     #: The :py:class:`users.models.User` which uploaded this exercise
-    author = ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='contributed_exercises')
+    author = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL, related_name='contributed_exercises')
     #: Creation datetime
-    datetime = DateTimeField(auto_now_add=True)
+    datetime = djm.DateTimeField(auto_now_add=True)
     #: Exercise type
-    type = IntegerField(choices=CONCLUSION_CHOICES, verbose_name='tipo')
+    type = djm.IntegerField(choices=CONCLUSION_CHOICES, verbose_name='tipo')
     #: Origin of this exercise
-    source = CharField(max_length=100, null=True, blank=True, verbose_name='origem')
+    source = djm.CharField(max_length=100, null=True, blank=True, verbose_name='origem')
     #: Optional URL of the origin
-    source_url = URLField(null=True, blank=True, verbose_name='endreço')
+    source_url = djm.URLField(null=True, blank=True, verbose_name='endreço')
     #: :py:class:`synopses.models.Section` for which this exercise makes sense (m2m)
-    synopses_sections = ManyToManyField(Section, verbose_name='secções de sínteses')
+    synopses_sections = djm.ManyToManyField(Section, verbose_name='secções de sínteses')
     content = JSONField()
     """
     Has JSON in the format when dealing with question-answer pairs::
@@ -57,11 +55,11 @@ class Exercise(Model):
     There are as many dictionaries as questions in the group. Singular exercises have a unitary length array
     """
     #: Time this exercise was successfully solved (should be redundant and act as cache)
-    successes = IntegerField(default=0)
+    successes = djm.IntegerField(default=0)
     #: Number of times users failed to solve this exercise (should be redundant and act as cache)
-    failures = IntegerField(default=0)
+    failures = djm.IntegerField(default=0)
     #: Number of times users skipped this exercise (should be redundant and act as cache)
-    skips = IntegerField(default=0)
+    skips = djm.IntegerField(default=0)
 
 
 class UserExerciseLog:
@@ -81,24 +79,24 @@ class UserExerciseLog:
     )
 
     #: :py:class:`users.models.User` which attempted to solve this exercise
-    user = ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='exercises')
+    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL, related_name='exercises')
     #: :py:class:`users.models.Exercise` being attempted
-    exercise = ForeignKey(Exercise, on_delete=models.CASCADE, related_name='users')
+    exercise = djm.ForeignKey(Exercise, on_delete=djm.CASCADE, related_name='users')
     #: Attempt result
-    status = IntegerField(choices=CONCLUSION_CHOICES)
+    status = djm.IntegerField(choices=CONCLUSION_CHOICES)
     #: (Optional) Given answer
     given_answer = JSONField(null=True, blank=True)
     #: Attempt datetime
-    datetime = DateTimeField(auto_now=True)
+    datetime = djm.DateTimeField(auto_now=True)
 
 
 class WrongAnswerReport:
     """
-    A user submitted report of an exercise which has a wrong answer.
+    An user submitted report of an exercise which has a wrong answer.
     """
     #: :py:class:`users.models.User` reporter
-    user = ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name='wrong_answer_reports')
+    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL, related_name='wrong_answer_reports')
     #: :py:class:`Exercise` being reported
-    exercise = ForeignKey(Exercise, on_delete=models.CASCADE, related_name='wrong_answer_reports')
+    exercise = djm.ForeignKey(Exercise, on_delete=djm.CASCADE, related_name='wrong_answer_reports')
     #: The issue
-    reason = TextField()
+    reason = djm.TextField()

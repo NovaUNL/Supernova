@@ -1,6 +1,4 @@
-from django.db import models
-from django.db.models import Model, TextField, ForeignKey, DateTimeField, ManyToManyField, BooleanField, IntegerField, \
-    ImageField
+from django.db import models as djm
 
 from college.models import Place
 from users.models import User
@@ -10,20 +8,20 @@ def group_profile_pic_path(group, filename):
     return f'g/{group.id}/pic.{filename.split(".")[-1]}'
 
 
-class Role(Model):
-    name = TextField(max_length=30)
-    is_group_admin = BooleanField(default=False)
-    is_group_manager = BooleanField(default=False)
+class Role(djm.Model):
+    name = djm.CharField(max_length=32)
+    is_group_admin = djm.BooleanField(default=False)
+    is_group_manager = djm.BooleanField(default=False)
 
 
-class Group(Model):
-    abbreviation = TextField(max_length=30, null=True, blank=True)
-    name = TextField(max_length=50)
-    description = TextField()
-    members = ManyToManyField(User, through='GroupMember')
-    roles = ManyToManyField(Role, through='GroupRole')
-    place = ForeignKey(Place, on_delete=models.SET_NULL, null=True, blank=True)
-    image = ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
+class Group(djm.Model):
+    abbreviation = djm.CharField(max_length=64, null=True, blank=True)
+    name = djm.CharField(max_length=65)
+    description = djm.TextField()
+    members = djm.ManyToManyField(User, through='GroupMember')
+    roles = djm.ManyToManyField(Role, through='GroupRole')
+    place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True)
+    image = djm.ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
 
     INSTITUTIONAL = 0
     STUDENTS_ASSOCIATION = 1
@@ -41,7 +39,7 @@ class Group(Model):
         (COMMUNITY, 'Comunidade'),
     )
 
-    type = IntegerField(choices=GROUP_TYPES)
+    type = djm.IntegerField(choices=GROUP_TYPES)
 
     SECRET = 0  # The group is invisible
     CLOSED = 1  # The group is visible but closed to join and invitations have to be sent by group members
@@ -59,29 +57,29 @@ class Group(Model):
         (OPEN, 'Aberta'),
     )
 
-    non_member_permission = IntegerField(choices=NON_MEMBER_PERMISSION_CHOICES, default=SECRET)
+    non_member_permission = djm.IntegerField(choices=NON_MEMBER_PERMISSION_CHOICES, default=SECRET)
 
     def __str__(self):
         return self.name
 
 
-class GroupMember(Model):
-    group = ForeignKey(Group, on_delete=models.CASCADE, related_name='member_roles')
-    member = ForeignKey(User, on_delete=models.CASCADE, related_name='group_roles')
-    role = ForeignKey(Role, on_delete=models.PROTECT)
+class GroupMember(djm.Model):
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='member_roles')
+    member = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='group_roles')
+    role = djm.ForeignKey(Role, on_delete=djm.PROTECT)
 
 
-class GroupRole(Model):
-    group = ForeignKey(Group, on_delete=models.CASCADE)
-    role = ForeignKey(Role, on_delete=models.PROTECT)
+class GroupRole(djm.Model):
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE)
+    role = djm.ForeignKey(Role, on_delete=djm.PROTECT)
 
 
-class Announcement(Model):
-    group = ForeignKey(Group, on_delete=models.CASCADE)
-    title = TextField(max_length=256)
-    announcement = TextField()
-    announcer = ForeignKey(User, on_delete=models.PROTECT)  # TODO consider user deletion
-    datetime = DateTimeField(auto_now_add=True)
+class Announcement(djm.Model):
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE)
+    title = djm.CharField(max_length=256)
+    announcement = djm.TextField()
+    announcer = djm.ForeignKey(User, on_delete=djm.PROTECT)  # TODO consider user deletion
+    datetime = djm.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title

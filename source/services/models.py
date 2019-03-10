@@ -1,21 +1,21 @@
-from django.db import models
-from django.db.models import Model, IntegerField, TextField, ForeignKey, DateField, BooleanField, TimeField
+from django.db import models as djm
 
 from college.models import Building, Place
 from store.models import Sellable
 
 
-class Service(Model):
-    name = TextField(max_length=50)
-    place = ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
-    map_tag = TextField(max_length=15)
-    opening = TimeField(null=True, blank=True)
-    restaurant = BooleanField()
-    lunch_start = TimeField(null=True, blank=True)  # For a bar this is the meal time, for other places this is a break
-    lunch_end = TimeField(null=True, blank=True)
-    closing = TimeField(null=True, blank=True)
-    open_saturday = BooleanField(default=False)
-    open_sunday = BooleanField(default=False)
+class Service(djm.Model):
+    name = djm.CharField(max_length=64)
+    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL)
+    map_tag = djm.CharField(max_length=15)
+    opening = djm.TimeField(null=True, blank=True)
+    restaurant = djm.BooleanField()
+    # For a bar this is the meal time, for other places this is a break
+    lunch_start = djm.TimeField(null=True, blank=True)
+    lunch_end = djm.TimeField(null=True, blank=True)
+    closing = djm.TimeField(null=True, blank=True)
+    open_saturday = djm.BooleanField(default=False)
+    open_sunday = djm.BooleanField(default=False)
 
     class Meta:
         unique_together = ['name', 'place']
@@ -25,20 +25,20 @@ class Service(Model):
         return "{} ({})".format(self.name, self.place.building)
 
 
-class Dish(Model):
-    name = TextField(max_length=100)
-    price = IntegerField()
+class Dish(djm.Model):
+    name = djm.CharField(max_length=128)
+    price = djm.IntegerField()
 
     class Meta:
         verbose_name_plural = 'dishes'
         ordering = ['name']
 
 
-class MenuDish(Model):
-    dish = ForeignKey(Dish, on_delete=models.CASCADE)
-    service = ForeignKey(Service, on_delete=models.CASCADE)
-    date = DateField()
-    price = IntegerField()
+class MenuDish(djm.Model):
+    dish = djm.ForeignKey(Dish, on_delete=djm.CASCADE)
+    service = djm.ForeignKey(Service, on_delete=djm.CASCADE)
+    date = djm.DateField()
+    price = djm.IntegerField()
 
     class Meta:
         unique_together = ['dish', 'service']
@@ -48,25 +48,25 @@ class MenuDish(Model):
         return f'{self.dish}, {self.service} ({self.date})'
 
 
-class ProductCategory(Model):
-    name = TextField(max_length=100)
+class ProductCategory(djm.Model):
+    name = djm.CharField(max_length=128)
 
     class Meta:
         verbose_name_plural = 'categories'
         ordering = ['name']
 
 
-class Product(Model):
-    name = TextField(max_length=100)
-    price = IntegerField()
-    category = ForeignKey(ProductCategory, on_delete=models.PROTECT, related_name='products')
-    check_date = DateField(auto_now_add=True)
+class Product(djm.Model):
+    name = djm.CharField(max_length=128)
+    price = djm.IntegerField()
+    category = djm.ForeignKey(ProductCategory, on_delete=djm.PROTECT, related_name='products')
+    check_date = djm.DateField(auto_now_add=True)
 
 
-class ServiceProduct(Sellable, Model):
-    service = ForeignKey(Service, on_delete=models.CASCADE)
-    product = ForeignKey(Product, on_delete=models.PROTECT)
-    price = IntegerField()
+class ServiceProduct(Sellable, djm.Model):
+    service = djm.ForeignKey(Service, on_delete=djm.CASCADE)
+    product = djm.ForeignKey(Product, on_delete=djm.PROTECT)
+    price = djm.IntegerField()
 
     class Meta:
         ordering = ['product']

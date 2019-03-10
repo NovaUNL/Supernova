@@ -11,7 +11,7 @@ def area_pic_path(area, filename):
 
 
 class Area(djm.Model):
-    name = djm.TextField(max_length=50)
+    name = djm.CharField(max_length=64)
     image = djm.ImageField(null=True, upload_to=area_pic_path, verbose_name='imagem')
     img_url = djm.TextField(null=True, blank=True)  # TODO deleteme
 
@@ -27,7 +27,7 @@ def subarea_pic_path(subarea, filename):
 
 
 class Subarea(djm.Model):
-    name = djm.TextField(max_length=50, verbose_name='nome')
+    name = djm.CharField(max_length=128, verbose_name='nome')
     description = djm.TextField(max_length=1024, verbose_name='descrição')
     area = djm.ForeignKey(Area, on_delete=djm.PROTECT, related_name='subareas')
     image = djm.ImageField(null=True, upload_to=subarea_pic_path, verbose_name='imagem')
@@ -41,7 +41,7 @@ class Subarea(djm.Model):
 
 
 class Topic(djm.Model):
-    name = djm.TextField(verbose_name='nome')
+    name = djm.CharField(verbose_name='nome', max_length=128)
     index = djm.IntegerField()
     subarea = djm.ForeignKey(Subarea, on_delete=djm.PROTECT, verbose_name='subarea', related_name='topics')
     sections = djm.ManyToManyField('Section', through='SectionTopic', verbose_name='topics')
@@ -55,7 +55,7 @@ class Topic(djm.Model):
 
 
 class Section(djm.Model):
-    name = djm.TextField(verbose_name='nome')
+    name = djm.CharField(verbose_name='nome', max_length=128)
     content = RichTextUploadingField(verbose_name='conteúdo', config_name='complex')
     topics = djm.ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
     requirements = djm.ManyToManyField('Section', verbose_name='requisitos')
@@ -104,7 +104,7 @@ class SectionLog(djm.Model):
 
 class SectionSource(djm.Model):
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='sources')
-    title = djm.TextField(max_length=300, verbose_name='título')
+    title = djm.CharField(max_length=300, verbose_name='título')
     url = djm.URLField(blank=True, null=True, verbose_name='endreço')
 
     class Meta:
@@ -113,6 +113,6 @@ class SectionSource(djm.Model):
 
 class SectionResource(djm.Model):
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='resources')
-    name = djm.TextField(max_length=100)
+    name = djm.CharField(max_length=256)
     document = djm.ForeignKey(documents.Document, null=True, blank=True, on_delete=djm.PROTECT)
     webpage = djm.URLField(null=True, blank=True)
