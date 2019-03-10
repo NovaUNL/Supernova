@@ -1,0 +1,15 @@
+CLIP-Crawler
+Pillow
+Pygments
+psycopg2-binary
+uWSGI
+Django
+django-analytical
+django-autocomplete-light
+django-ckeditor
+django-extensions
+django-simple-captcha
+django-leaflet
+djangorestframework
+Sphinx
+sphinx-rtd-theme
