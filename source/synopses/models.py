@@ -6,9 +6,14 @@ from documents import models as documents
 from users import models as users
 
 
+def area_pic_path(area, filename):
+    return f's/a/{area.id}/pic.{filename.split(".")[-1]}'
+
+
 class Area(djm.Model):
     name = djm.TextField(max_length=50)
-    img_url = djm.TextField(null=True, blank=True)
+    image = djm.ImageField(null=True, upload_to=area_pic_path, verbose_name='imagem')
+    img_url = djm.TextField(null=True, blank=True)  # TODO deleteme
 
     class Meta:
         ordering = ('name',)
@@ -17,12 +22,16 @@ class Area(djm.Model):
         return self.name
 
 
+def subarea_pic_path(subarea, filename):
+    return f's/sa/{subarea.id}/pic.{filename.split(".")[-1]}'
+
+
 class Subarea(djm.Model):
     name = djm.TextField(max_length=50, verbose_name='nome')
     description = djm.TextField(max_length=1024, verbose_name='descrição')
     area = djm.ForeignKey(Area, on_delete=djm.PROTECT, related_name='subareas')
-
-    img_url = djm.TextField(null=True, blank=True, verbose_name='imagem (url)')
+    image = djm.ImageField(null=True, upload_to=subarea_pic_path, verbose_name='imagem')
+    img_url = djm.TextField(null=True, blank=True, verbose_name='imagem (url)')  # TODO deleteme
 
     class Meta:
         ordering = ('name',)
