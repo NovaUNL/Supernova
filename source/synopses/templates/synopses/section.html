@@ -1,11 +1,11 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
 
 {% load static %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
     <link type="text/css" rel="stylesheet" href="{% static 'kleep/prism.css' %}">
-    <script src="{% static 'kleep/prism.js' %}"></script>
+    <script src="{% static 'prism.js' %}"></script>
     <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     <style>
@@ -139,20 +139,19 @@
                     {% endfor %}
                 </ul>
             </div>
-            {% if topic %}
-                <div>
-                    <h3>Contribuir:</h3>
-                    {% if user.is_authenticated %}
-                        <div id="contribute">
-                            <a class="generic-button" href="{% url 'synopses:section_edit' topic.id section.id %}">
-                                Editar
-                            </a>
-                        </div>
-                    {% else %}
-                        <b>Autentique-se para poder efetuar alterações.</b>
-                    {% endif %}
-                </div>
-            {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block content-bottom %}
+    {% if topic %}
+        <nav id="bot-container" class="float-right">
+            <a class="menu-entry selected">Contribuir:</a>
+            {% if user.is_authenticated %}
+                <a class="menu-entry" href="{% url 'synopses:section_edit' topic.id section.id %}">Editar</a>
+            {% else %}
+                <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>
+            {% endif %}
+        </nav>
+    {% endif %}
 {% endblock %}
