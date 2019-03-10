@@ -772,10 +772,8 @@ h3 {
     #middle {
         margin-top: 0;
         padding: 0;
-        width: calc(100% + 240px);
         flex-wrap: nowrap;
         height: 100%;
-        left: -250px;
         position: relative;
         transition: 0.5s;
     }
