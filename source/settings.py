@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'kleep.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
