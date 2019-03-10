@@ -1,4 +1,4 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'kleep/content_navigation_vertical.html' %}
 
 {% load static %}
 
@@ -7,22 +7,33 @@
 {% endblock %}
 
 {% block content %}
-    <h1>
-        <i class="fas fa-book"></i>
-        Síntese de <a href="{% url 'class' synopsis_class.id %}">{{ synopsis_class.name }}</a>
-    </h1>
-    <h2>(Departamento de {{ synopsis_class.department.name }})</h2>
-    <ul id="content-list">
-        {% for section in sections %}
-            <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a></li>
-        {% endfor %}
-    </ul>
-    <h2>Contribuir:</h2>
-    {% if user.is_authenticated %}
-        <div id="contribute">
-            <a class="generic-button" href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir secções</a>
-        </div>
-    {% else %}
-        <b>Autentique-se para poder efetuar alterações.</b>
-    {% endif %}
+    <div id="content-title-decorator">
+        <span class="clearfix"></span>
+        <h1><i class="fas fa-book"></i> Síntese de
+            <a href="{% url 'college:class' synopsis_class.id %}">{{ synopsis_class.name }}</a></h1>
+        <h3>Departamento de {{ synopsis_class.department.name }}</h3>
+    </div>
+    <div class="content-formatter">
+        {% if not sections.exists %}
+            Esta cadeira não tem conteudo na tua sintese.<br>
+            Se já existir conteudo, podes adiciona-lo.
+        {% endif %}
+        <ul id="content-list">
+            {% for section in sections %}
+                <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block content-bottom %}
+    <nav id="bot-container" class="float-right">
+        <a class="menu-entry selected">Contribuir:</a>
+        {% if user.is_authenticated %}
+            <a class="menu-entry" href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir secções</a>
+        {% else %}
+            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>
+        {% endif %}
+    </nav>
 {% endblock %}
