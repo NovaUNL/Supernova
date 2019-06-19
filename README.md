@@ -14,7 +14,7 @@ It still is in early development.
 New university of Lisbon (College of Sciences and Technology).
 
 ## When
-Still being built as of early 2018.
+Still being built.
 
 ## Why
 Because we can, also because CLIP sucks!
