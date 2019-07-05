@@ -1,0 +1,19 @@
+.news-list {
+    margin-left: 10px;
+}
+
+.news-list-item {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.news-list-item-image {
+    width: 100px;
+    height: 100px;
+    flex-basis: 100px;
+    background-size: cover;
+    flex-shrink: 0;
+    margin-right: 10px;
+    background-color: lightgrey;
+}

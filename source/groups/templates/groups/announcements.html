@@ -3,17 +3,17 @@
 {% load static %}
 
 {% block content %}
-    {% include 'groups/header.html' %}
-    <div>
-        {% for announcement in announcements %}
-            <a href="{% url 'group_announcement' announcement.id %}"><h2>{{ announcement.title }}</h2></a>
-            <span>{{ announcement.announcement }}</span><br>
-            Colocado ás {{ announcement.datetime }} por
-            <a href="{% url 'profile' announcement.announcer.nickname %}">{{ announcement.announcer.name }}</a>
-        {% endfor %}
-    </div>
+  {% include 'groups/header.html' %}
+  <div>
+    {% for announcement in announcements %}
+      <a href="{% url 'group_announcement' announcement.id %}"><h2>{{ announcement.title }}</h2></a>
+      <span>{{ announcement.announcement }}</span><br>
+      Colocado ás {{ announcement.datetime }} por
+      <a href="{% url 'profile' announcement.announcer.nickname %}">{{ announcement.announcer.name }}</a>
+    {% endfor %}
+  </div>
 {% endblock %}
 
 {% block navigation %}
-    {% include 'groups/navigation.html' %}
+  {% include 'groups/navigation.html' %}
 {% endblock %}

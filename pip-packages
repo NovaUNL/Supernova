@@ -13,3 +13,7 @@ django-leaflet
 djangorestframework
 Sphinx
 sphinx-rtd-theme
+django-markdownx
+scrapy
+scrapy-djangoitem
+html2text

@@ -17,7 +17,12 @@ def item(request, news_item_id):
     news_item = get_object_or_404(NewsItem, id=news_item_id)
     context['page'] = 'instance_turns'
     context['title'] = 'Notícia:' + news_item.title
+    if len(news_item.title) > 50:
+        short_title = news_item.title[:50] + " ..."
+    else:
+        short_title = news_item.title
     context['news_item'] = news_item
-    context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news_index')},
-                          {'name': news_item.title, 'url': reverse('news_item', args=[news_item_id])}]
+    context['sub_nav'] = [
+        {'name': 'Noticias', 'url': reverse('news_index')},
+        {'name': short_title, 'url': reverse('news_item', args=[news_item_id])}]
     return render(request, 'news/item.html', context)

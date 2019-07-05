@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'analytical',
     'leaflet',
+    'markdownx',
     'clip',
     'kleep.apps.KleepConfig',
     'users',

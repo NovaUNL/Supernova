@@ -1,6 +1,14 @@
-{% extends 'kleep/content_navigation_vertical.html' %}
+{% extends 'kleep/content_navigation.html' %}
 
 {% load static %}
+
+{% block head %}
+    <style>
+    .flex-grid-item {
+        background-size: contain;
+    }
+    </style>
+{% endblock %}
 
 {% block content-top %}
     <nav id="top-container">

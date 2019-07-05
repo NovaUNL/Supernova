@@ -1,0 +1,27 @@
+{% extends 'kleep/content_navigation_formatted.html' %}
+
+{% load static %}
+{% block head %}
+{% endblock %}
+
+{% block content-top %}
+  <nav id="top-container">
+    <a class="menu-entry" href="{% url 'synopses:class' class_obj.id %}">Síntese</a>
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <h1>{{ class_obj.name }}</h1>
+  <h3>Departamento de {{ department.name }}</h3>
+  <h2>Descrição:</h2>
+  <p>{{ class_obj.description }}</p>
+  <h2>Programa curricular actual:</h2>
+  <p>TODO</p>
+
+  <span class="menu-entry" style="font-size: 1.2em; font-weight: bold;">Instâncias:</span>
+  <ul>
+    {% for instance in class_obj.instances.all %}
+      <li><a class="menu-entry" href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

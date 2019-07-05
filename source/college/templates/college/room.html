@@ -22,7 +22,7 @@
     <div id="content-title-decorator">
         <span class="clearfix"></span>
         <h1>
-            <i class="fas fa-map-marker-alt"></i> {{ room.name }},
+            <i class="fas fa-map-marker-alt"></i> {{ room }},
             <small><a href="{% url 'college:building' building.id %}">{{ building.name }}</a></small>
         </h1>
         {% if room.description %}

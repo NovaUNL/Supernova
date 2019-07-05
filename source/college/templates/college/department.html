@@ -1,45 +1,44 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'kleep/content_only_formatted.html' %}
 
 {% load static %}
 {% block head %}
 {% endblock %}
 
 {% block content %}
-    <style>
-        .flex-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-        }
-    </style>
-    <h1>Departamento de {{ department.name }}</h1>
-    <div class="flex-wrapper">
-        <div style="margin-right: 50px">
-            <h2>Cadeiras</h2>
-            <ul>
-                {% for class in department.classes.all|dictsort:'name' %}
-                    <li>
-                        <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div>
-            <h2>Cursos</h2>
-            {% for degree in courses %}
-                <h3 class="degree">{{ degree.0 }}</h3>
-                {% for course in degree.1 %}
-                    <a class="course" href="{% url 'college:course' course.id %}">{{ course }}</a>
-                {% endfor %}
-            {% endfor %}
-        </div>
-        <div style="flex-basis: 500px">
-            <h2>Informação</h2>
-            <h3>Localização:</h3>
-            <a href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
-            <h3>Descrição:</h3>
-            {{ department.description }}
-        </div>
+  <style>
+    .flex-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+  </style>
+  <h1>Departamento de {{ department.name }}</h1>
+  <div class="flex-wrapper">
+    <div style="flex-basis: 500px">
+      <h2>Informação</h2>
+      <h3>Localização:</h3>
+      <a href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
+      <h3>Descrição:</h3>
+      {{ department.description }}
+
+      <h2>Cursos</h2>
+      {% for degree in courses %}
+        <h3 class="degree">{{ degree.0 }}</h3>
+        {% for course in degree.1 %}
+          <a class="course" href="{% url 'college:course' course.id %}">{{ course }}</a>
+        {% endfor %}
+      {% endfor %}
     </div>
+    <div style="margin-right: 50px">
+      <h2>Cadeiras</h2>
+      <ul>
+        {% for class in department.classes.all|dictsort:'name' %}
+          <li>
+            <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 {% endblock %}

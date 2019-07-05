@@ -4,7 +4,7 @@
 
 {% block head %}
     <style>
-        #rection_buttons {
+        #reaction_buttons {
             display: flex;
             flex-wrap: wrap;
         }
@@ -41,32 +41,36 @@
 {% endblock %}
 
 {% block content %}
-    <h1><i class="far fa-newspaper"></i> {{ news_item.title }}</h1>
-    <h3>{{ news_item.summary }}</h3>
-    <p>{{ news_item.content|safe }}</p>
-    <br>
-    <div id="rection_buttons">
-        <a href="#"><span class="reaction_button like">Boa notícia <i class="far fa-thumbs-up"></i></span></a>
-        <a href="#"><span class="reaction_button dislike">Má notícia <i class="far fa-thumbs-down"></i></span></a>
-        <a href="#"><span class="reaction_button favorite">Excelente trabalho <i class="far fa-heart"></i></span></a>
-    </div>
-    <br>
-    <h3>Fontes:</h3>
-    <ul>
-        <li>Por fazer</li>
-    </ul>
-    <span>Submetida por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a>
-    em {{ news_item.datetime }}
+    <div class="content-formatter">
+        <h1><i class="far fa-newspaper"></i> {{ news_item.title }}</h1>
+        {% if news_item.cover_img %}
+            <img src="{{ news_item.cover_img }}"/>
+        {% endif %}
+        <h3>{{ news_item.summary }}</h3>
+        <p>{{ news_item.content_html|safe }}</p>
+        <br>
+{#        <div id="reaction_buttons">#}
+{#            <a href="#"><span class="reaction_button like">Boa notícia <i class="far fa-thumbs-up"></i></span></a>#}
+{#            <a href="#"><span class="reaction_button dislike">Má notícia <i class="far fa-thumbs-down"></i></span></a>#}
+{#            <a href="#"><span class="reaction_button favorite">Excelente trabalho <i#}
+{#                    class="far fa-heart"></i></span></a>#}
+{#        </div>#}
+        <br>
+{#        <h3>Fontes:</h3>#}
+{#        <ul>#}
+{#            <li>Por fazer</li>#}
+{#        </ul>#}
+        {% if news_item.generated %}
+            <span>Obtida automáticamente(<a href="{{ news_item.source }}">fonte</a>), datada de {{ news_item.datetime.date }}</span><br>
+        {% else %}
+            <span>Submetida por <a
+                    href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}
     </span><br>
-    {% if news_item.edited %}
-        <span>Última edição por
-            <a href="{% url 'profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a>
-            em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})
+        {% endif %}
+        {% if news_item.edited %}
+            <span>Última edição por
+            <a href="{% url 'profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})
         </span>
-    {% endif %}
-{% endblock %}
-
-{% block navigation %}
-    <a class="menu-entry" href="#">Sugerir edição</a>
-    <a class="menu-entry" href="#">Reportar</a>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -2,6 +2,48 @@
 
 {% load static %}
 
+{% block content-top %}
+  <nav class="">
+  {% if page == 'group' %}
+    <a class="menu-entry selected">Página inícial</a>
+  {% else %}
+    <a class="menu-entry" href="{% url 'group' group.id %}">Página inícial</a>
+  {% endif %}
+    {% if page == 'group_anouncements' %}
+      <a class="menu-entry selected">Anúncios</a>
+    {% else %}
+      <a class="menu-entry" href="{% url 'group_announcements' group.id %}">Anúncios</a>
+    {% endif %}
+    {#{% if page == 'group_schedule' %}#}
+    {#    <a class="menu-entry selected">Horário</a>#}
+    {#{% else %}#}
+    {#    <a class="menu-entry">Horário</a>#}
+    {#{% endif %}#}
+    {#{% if page == 'group_calendar' %}#}
+    {#    <a class="menu-entry selected">Calendário</a>#}
+    {#{% else %}#}
+    {#    <a class="menu-entry">Calendário</a>#}
+    {#{% endif %}#}
+    {% if page == 'group_documents' %}
+      <a class="menu-entry selected">Documentos</a>
+    {% elif group.document_set.count > 0 %}
+      <a class="menu-entry" href="{% url 'group_documents' group.id %}">Documentos</a>
+    {% endif %}
+    {% if group.public_members %}
+      {% if page == 'group_members' %}
+        <a class="menu-entry selected">Membros</a>
+      {% else %}
+        <a class="menu-entry">Membros</a>
+      {% endif %}
+    {% endif %}
+    {% if page == 'group_contact' %}
+      <a class="menu-entry selected">Contactar</a>
+    {% else %}
+      <a class="menu-entry" href="{% url 'group_contact' group.id %}">Contactar</a>
+    {% endif %}
+  </nav>
+{% endblock %}
+
 {% block content %}
     <style>
         .flex-wrapper {
@@ -23,8 +65,4 @@
             </div>
         {% endfor %}
     </div>
-{% endblock %}
-
-{% block navigation %}
-    {% include 'groups/navigation.html' %}
 {% endblock %}

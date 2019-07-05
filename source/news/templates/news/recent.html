@@ -1,28 +1,47 @@
-{% extends 'kleep/content_navigation.html' %}
+{% extends 'kleep/content_only_formatted.html' %}
 
 {% load static %}
 
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'news/news.css' %}"/>
+{% endblock %}
+
+
+{% block content-top %}
+  {% include 'news/news_navigation.html' %}
+{% endblock %}
+
 {% block content %}
-    <h1><i class="far fa-newspaper"></i> Notícias</h1>
-    {% for news_item in news %}
-        <div>
-            <a href="{% url 'news_item' news_item.id %}"><h2>{{ news_item.title }}</h2></a>
-            <span>{{ news_item.summary }}</span>
-        </div>
-    {% endfor %}
-{% endblock %}
-
-{% block navigation %}
-    <a class="menu-entry selected">Todas</a>
-    <a class="disabled menu-entry">Campus</a>
-    <a class="disabled menu-entry">Minhas cadeiras</a>
-    <a class="disabled menu-entry">Subscrições</a>
-    <a class="disabled menu-entry">Generalistas</a>
-{% endblock %}
-
-{% block side_extra %}
-    <div id="side-extra">
-        <a class="disabled menu-entry">Gerir feed</a>
-        <a class="disabled menu-entry">Gerir subscrições</a>
+  <h1><i class="far fa-newspaper"></i> Notícias</h1>
+  {% for news_item in news %}
+    <div>
+      <a href="{% url 'news_item' news_item.id %}"><h2>{{ news_item.title }}</h2></a>
+      <div style="display: flex; flex-direction: row;">
+        <div style="width: 150px; height: 150px; background-image: url('{{ news_item.cover_img }}'); background-size: cover"></div>
+        <span>{{ news_item.summary }}</span>
+      </div>
     </div>
+  {% endfor %}
 {% endblock %}
+
+{% block content-bottom %}
+  <nav id="bot-container">
+    <a>Gerir feed</a>
+    <a>Gerir subscrições</a>
+  </nav>
+{% endblock %}
+
+{#{% block navigation %}#}
+{#    <a class="menu-entry selected">Todas</a>#}
+{#    <a class="disabled menu-entry">Campus</a>#}
+{#    <a class="disabled menu-entry">Minhas cadeiras</a>#}
+{#    <a class="disabled menu-entry">Subscrições</a>#}
+{#    <a class="disabled menu-entry">Generalistas</a>#}
+{#{% endblock %}#}
+{##}
+{#{% block side_extra %}#}
+{#    <div id="side-extra">#}
+{#        <a class="disabled menu-entry">Gerir feed</a>#}
+{#        <a class="disabled menu-entry">Gerir subscrições</a>#}
+{#    </div>#}
+{#{% endblock %}#}

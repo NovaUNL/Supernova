@@ -64,6 +64,7 @@ urlpatterns = [
     # Utils
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+    url(r'^markdownx/', include('markdownx.urls')),
 ]
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

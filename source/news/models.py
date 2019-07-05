@@ -29,6 +29,7 @@ class NewsItem(djm.Model):
 
     class Meta:
         unique_together = ['title', 'datetime']
+        ordering = ['datetime', 'title']
 
     @property
     def content_html(self):

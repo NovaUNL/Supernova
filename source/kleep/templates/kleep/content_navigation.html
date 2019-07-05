@@ -1,22 +1,15 @@
 {% extends 'kleep/base.html' %}
 
 {% block content_wrapper %}
-    <nav id="side-container">
-        <div id="side">
-            {% block navigation %}
-            {% endblock %}
+    <div style="width: 100%">
+        <div id="top-content-wrapper">
+            {% block content-top %}{% endblock %}
         </div>
-        <br>
-        {% block side_extra %}
-        {% endblock %}
-    </nav>
-    <div id="side-menu-trigger-wrapper">
-        <a id="side-menu-trigger" class="low-res-only" onclick="toggleSidebar();">
-            <i class="fas fa-angle-double-right"></i>
-        </a>
-    </div>
-    <div id="content">
-        {% block content %}
-        {% endblock %}
+        <div id="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+        <div id="bottom-content-wrapper">
+            {% block content-bottom %}{% endblock %}
+        </div>
     </div>
 {% endblock %}
