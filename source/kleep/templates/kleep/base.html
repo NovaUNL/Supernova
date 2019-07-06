@@ -3,127 +3,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% analytical_head_top %}
-    <meta charset="UTF-8">
-    <title>Kleep - {{ title }}</title>
-    <link rel="icon" href="{% static 'kleep/images/favicon.png' %}" type="image/x-icon"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'kleep/style.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'kleep/themes/default.css' %}"/>
-    <script src="{% static 'kleep/script.js' %}"></script>
-    {% block head %}
-    {% endblock %}
-    {% analytical_head_bottom %}
+  {% analytical_head_top %}
+  <meta charset="UTF-8">
+  <title>Kleep - {{ title }}</title>
+  <link rel="icon" href="{% static 'kleep/images/favicon.png' %}" type="image/x-icon"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://use.fontawesome.com/releases/v5.9.0/js/all.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'kleep/style.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'kleep/themes/default.css' %}"/>
+  <script src="{% static 'kleep/script.js' %}"></script>
+
+  {% block head %}
+  {% endblock %}
+  {% analytical_head_bottom %}
 </head>
 <body>
 {% analytical_body_top %}
 <div id="wrapper">
-    <header id="header">
-        <button id="mobile-hamburger" onclick="toggleHamburger();">&#9776;
-        </button>
-        <a id="logo" href="{% url 'index' %}"><img src="{% static 'kleep/images/title.png' %}"/></a>
-        <ul id="pre-navigation">
-            <span></span>
-            {% if user.is_authenticated %}
-                <li><a href="javascript:showStudentSubmenu();"><span>Estudante</span></a></li>
-            {% else %}
-                <li><a href="javascript:authShowPrompt();"><span>Estudante</span></a></li>
-            {% endif %}
-            <li><a href="javascript:showUniversitySubmenu();"><span>Faculdade</span></a></li>
-            <li><a href="javascript:showCommunitySubmenu();"><span>Comunidade</span></a></li>
-        </ul>
-        <div id="auth">
-            {% if user.is_authenticated %}
-                <a class="high-res-only" href="{% url 'profile' user.nickname %}"><span
-                        id="auth-username">{{ user.nickname }}</span></a>
-                <a href="{% url 'logout' %}?next={{ request.get_full_path }}">
-                    <span id="logout-button">
-                        <span class="low-res-only">x</span>
-                        <span class="high-res-only">Sair</span>
-                    </span>
-                </a>
-            {% endif %}
-            {% if login_form is not None and disable_auth != True %}
-                <a href="javascript:authShowPrompt();">
-                    <span id="auth-button">
-                        <span class="low-res-only">&#128273;</span>
-                        <span class="high-res-only">Autenticar</span>
-                    </span>
-                </a>
-            {% endif %}
+  <header id="header">
+    <div class="width-limiter">
+      <div id="logo-nav-wrapper">
+        <div id="low-res-logo-menu-trigger">
+          <label for="nav-toggle" id="nav-toggle-label">&#9776;</label>
+          <a id="logo" href="{% url 'index' %}">
+            <img src="{% static 'kleep/images/title.png' %}"/>
+          </a>
         </div>
-    </header>
-    <nav id="navigation">
-        <a id="navigation-close-button" href="javascript:closeSubmenu();"><i class="fas fa-angle-double-up"></i></a>
-        {% if user.is_authenticated %}
-            <div id="student_nav_stage">
-                <a href="{% url 'profile_schedule' user.nickname %}"><i class="fas fa-clock"></i><br>Horario</a>
-                <a class="disabled"><i class="fas fa-calendar"></i><br>Calendario</a>
-                <a class="disabled"><i class="fas fa-star"></i><br>Avaliações</a>
-                <a class="disabled"><i class="fas fa-pencil-alt"></i><br>Exercícios</a>
-                <a class="disabled"><i class="fas fa-graduation-cap"></i><br>Curso</a>
-            </div>
-        {% endif %}
-        <div id="university_nav_stage">
-            <a href="{% url 'college:campus' %}"><i class="fas fa-map"></i><br>Campus</a>
-            <a href="{% url 'news_index' %}"><i class="fas fa-newspaper"></i><br>Notícias</a>
-            <a class="disabled" href="{% url 'events' %}"><i class="fas fa-bullhorn"></i><br>Eventos</a>
-            <a href="{% url 'groups' %}"><i class="fas fa-users"></i><br>Grupos</a>
-            <a class="disabled"><i class="fas fa-utensils"></i><br>Menus</a>
-            <a class="disabled"><i class="fas fa-search"></i><br>Perdidos</a>
-        </div>
-        <div id="community_nav_stage">
-            <a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i><br>Sínteses</a>
-            <a class="disabled"><i class="fas fa-globe"></i><br>Planeta</a>
-            <a class="disabled"><i class="fas fa-trash"></i><br>Classificados</a>
-            <a class="disabled"><i class="fas fa-comments"></i><br>Opiniões</a>
-            <a class="disabled"><i class="fas fa-superscript"></i><br>Resolve-me</a>
-            <a href="{% url 'store:all_items' %}"><i class="fas fa-euro-sign"></i><br>Loja</a>
-        </div>
-    </nav>
-    {% if sub_nav is not None %}
-        <nav id="breadcrumbs">
-            {% for element in sub_nav %}
-                <a href="{{ element.url }}">{{ element.name }}</a>
-            {% endfor %}
-        </nav>
-    {% endif %}
-    <div id="middle">
-        {% block content_wrapper %}
-        {% endblock %}
-        <span class="clearfix"></span>
-    </div>
-    <footer id="footer">
-        <ul>
-            <li><a href="{% url 'privacy' %}">Privacidade</a></li>
-            <li><a href="{% url 'about' %}">Sobre</a></li>
-            <li><a href="#">FAQ</a></li>
+        <nav id="navigation">
+          <input type="checkbox" id="nav-toggle">
+          <ul class="main-menu clearfix">
             <li>
-                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
-                    <img alt="Licença Creative Commons" style="border-width:0"
-                         src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"/>
-                </a>
+              <a href="#">Aluno<span class="drop-icon"></span>
+                <label title="Toggle Drop-down" class="drop-icon" for="nav-l1">▾</label></a>
+              <input type="checkbox" id="nav-l1">
+              <ul class="sub-menu depth1">
+                <li><a href="#" class="disabled"><i class="fas fa-clock"></i> Horário</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-calendar"></i> Calendario</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-star"></i> Avaliações</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-graduation-cap"></i> Curso</a></li>
+              </ul>
             </li>
-        </ul>
-    </footer>
+            <li><a href="#">Faculdade
+              <span class="drop-icon"></span>
+              <label title="Toggle Drop-down" class="drop-icon" for="nav-l2">▾</label></a>
+              <input type="checkbox" id="nav-l2">
+              <ul class="sub-menu  depth1">
+                <li><a href="{% url 'news_index' %}"><i class="fas fa-newspaper"></i> Noticias</a></li>
+                <li><a href="{% url 'college:departments' %}"> Departamentos</a></li>
+                <li><a href="#"><i class="fas fa-map"></i> Campus
+                  <span class="drop-icon"></span>
+                  <label title="Toggle Drop-down" class="drop-icon" for="nav-l21">▾</label></a>
+                  <input type="checkbox" id="nav-l21">
+                  <ul class="sub-menu  depth2">
+                    <li><a href="{% url 'college:campus' %}"><i class="fas fa-map-marker"></i> Mapa</a></li>
+                    <li><a href="{% url 'college:transportation' %}">
+                      <i class="fas fa-subway"></i> Transportes</a>
+                    </li>
+                    <li><a href="{% url 'college:buildings' %}">
+                      <i class="fas fa-building"></i> Edíficios</a>
+                    </li>
+                    <li><a href="{% url 'college:available_places' %}">
+                      <i class="fas fa-door-closed"></i> Espaços</a>
+                    </li>
+                    <li><a href="#" class="disabled"><i class="fas fa-utensils"></i> Alimentação</a></li>
+                    <li><a href="#" class="disabled"><i class="fas fa-search"></i> Perdidos</a></li>
+                  </ul>
+                </li>
+                <li><a href="#"><i class="fas fa-bullhorn"></i> Eventos
+                  <span class="drop-icon"></span>
+                  <label title="Toggle Drop-down" class="drop-icon" for="nav-l22">▾</label>
+                </a>
+                  <input type="checkbox" id="nav-l22">
+                  <ul class="sub-menu depth2">
+                    <li><a href="#" class="disabled">Workshops</a></li>
+                    <li><a href="#" class="disabled">Festas</a></li>
+                    <li><a href="#" class="disabled">Competições</a></li>
+                  </ul>
+                </li>
+                <li><a href="{% url 'groups' %}"><i class="fas fa-users"></i> Grupos</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Estudo
+              <span class="drop-icon"></span>
+              <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>
+            </a>
+              <input type="checkbox" id="nav-l3">
+              <ul class="sub-menu depth1">
+                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">Comunidade
+                <span class="drop-icon"></span>
+                <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>
+              </a>
+              <input type="checkbox" id="nav-l3">
+              <ul class="sub-menu depth1">
+                <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <div id="auth">
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile' user.nickname %}"><span
+                  id="auth-username">{{ user.nickname }}</span></a>
+          <a href="{% url 'logout' %}?next={{ request.get_full_path }}">
+                        <span id="logout-button">
+                            <span class="low-res-only">x</span>
+                            <span class="high-res-only">Sair</span>
+                        </span>
+          </a>
+        {% endif %}
+        {% if login_form is not None and disable_auth != True %}
+          <a href="javascript:authShowPrompt();">
+                        <span id="auth-button">
+                            <span class="low-res-only">&#128273;</span>
+                            <span class="high-res-only">Autenticar</span>
+                        </span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  {% if sub_nav is not None %}
+    <nav id="breadcrumbs">
+      <div class="width-limiter">
+        {% for element in sub_nav %}
+          <a href="{{ element.url }}">{{ element.name }}</a>
+        {% endfor %}
+      </div>
+    </nav>
+  {% endif %}
+  <div id="middle" class="width-limiter">
+    {% block content_wrapper %}
+    {% endblock %}
+    <span class="clearfix"></span>
+  </div>
+  <footer id="footer">
+    <div class="width-limiter">
+      <ul>
+        <li><a href="{% url 'privacy' %}">Privacidade</a></li>
+        <li><a href="{% url 'about' %}">Sobre</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li>
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+            <img alt="Licença Creative Commons" style="border-width:0"
+                 src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"/>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
 </div>
 <div id="overlay">
-    <div id="overlay-prompt">
-        <a id="overlay-close-button" href="javascript:overlayClose();">X</a>
-        {% if login_form is not None %}
-            <h2>Autenticação</h2>
-            <form method="post" action="{% url 'login' %}?next={{ request.get_full_path }}">
-                {% csrf_token %}
-                {{ login_form.username.label }} {{ login_form.username.errors }}<br>
-                {{ login_form.username }}<br><br>
-                {{ login_form.password.label }} {{ login_form.password.errors }}<br>
-                {{ login_form.password }}
-                <input type="submit" value="Entrar"><br><br>
-            </form>
-        {% endif %}
-        <a href="{% url 'registration' %}">Criar</a>
-    </div>
+  <div id="overlay-prompt">
+    <a id="overlay-close-button" href="javascript:overlayClose();">X</a>
+    {% if login_form is not None %}
+      <h2>Autenticação</h2>
+      <form method="post" action="{% url 'login' %}?next={{ request.get_full_path }}">
+        {% csrf_token %}
+        {{ login_form.username.label }} {{ login_form.username.errors }}<br>
+        {{ login_form.username }}<br><br>
+        {{ login_form.password.label }} {{ login_form.password.errors }}<br>
+        {{ login_form.password }}
+        <input type="submit" value="Entrar"><br><br>
+      </form>
+    {% endif %}
+    <a href="{% url 'registration' %}">Criar</a>
+  </div>
 </div>
 {% analytical_body_bottom %}
 </body>
