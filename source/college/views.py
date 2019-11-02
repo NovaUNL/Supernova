@@ -164,10 +164,14 @@ def class_instance_files_view(request, instance_id):
 
 @login_required
 def class_instance_file_download(request, instance_id, file_hash):
-    class_file = get_object_or_404(clip.ClassInstanceFile, class_instance=instance_id, file__hash=file_hash)
+    class_instance = get_object_or_404(ClassInstance, id=instance_id)
+    clip_instance = class_instance.clip_class_instance
+    file = clip_instance.files.filter(hash=file_hash).first()
+    if file is None:
+        pass
     response = HttpResponse()
-    response['X-Accel-Redirect'] = f'/clip/{class_file.file.hash}'
-    response['Content-Disposition'] = f'attachment; filename="{class_file.file.name}"'
+    response['X-Accel-Redirect'] = f'/clip/{file_hash}'
+    response['Content-Disposition'] = f'attachment; filename="{file.name}"'
     return response
 
 
