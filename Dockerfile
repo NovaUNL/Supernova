@@ -24,7 +24,7 @@ RUN pacman -Rns gcc --noconfirm --noprogressbar
 # Put the source in place
 COPY source /supernova/source
 # Tag exports
-VOLUME  ["/supernova/config", "/supernova/http"]
+VOLUME  ["/supernova/config", "/srv/http/supernova"]
 # Change directory into it
 WORKDIR /supernova
 # Expose the uwsgi port
