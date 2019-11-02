@@ -6,24 +6,24 @@
     <h1><i class="fas fa-link"></i> Agregar CLIP de {{ user }}</h1>
     <div id="disclaimer">
         <p>
-            Algumas informações no CLIP são difíceis de digerir por parte do software que alimenta os dados do Kleep, e
+            Algumas informações no CLIP são difíceis de digerir por parte do software que alimenta os dados do Supernova, e
             podem ser calculadas indevidamente.<br>
-            Caso queiras que o Kleep te complete os teus dados, obtenha as tuas classificações finais, numero de
+            Caso queiras que o Supernova te complete os teus dados, obtenha as tuas classificações finais, numero de
             créditos
             e confirme a tua informação tal como as cadeiras que estás a fazer e os turnos em que estás inscrito então
             podes
-            deixar que o Kleep te aceda à conta do CLIP.
+            deixar que o Supernova te aceda à conta do CLIP.
         </p>
         <p>
             O acesso e armazenamento dos teus dados é feito de acordo com a <a href="{% url 'privacy' %}">politica de
-            privacidade</a>, mas é importante salientar que o Kleep é um programa <b>falivel</b> e enquanto que as tuas
+            privacidade</a>, mas é importante salientar que o Supernova é um programa <b>falivel</b> e enquanto que as tuas
             credênciais não serão armazenadas é possível a um atacante apanha-las em transito, ou mesmo invadir o
             servidor
             durante o processo de agregaçao.
             <br>
             Se estiveres consciente disso e aceitares o risco, então no mínimo verifica se tens uma ligação segura a
             esta
-            página.<br><img src="{% static 'kleep/images/https.png' %}">
+            página.<br><img src="{% static 'supernova/images/https.png' %}">
         </p>
         O processo de agregação passa por:
         <ul>
@@ -65,7 +65,7 @@
             bloqueios no acesso à tua conta (ex: não podes ter inqueritos por preencher) e que as coisas estejam nos
             sitios convencionais.
             <br>
-            Os novos dados deverão de aparecer no Kleep a partir do momento em que tenham sido obtidos.
+            Os novos dados deverão de aparecer no Supernova a partir do momento em que tenham sido obtidos.
         </p>
         <form action="{% url 'profile_crawler' user.nickname %}">
             {{ clip_login_form }}

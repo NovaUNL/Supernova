@@ -5,13 +5,13 @@
 <head>
   {% analytical_head_top %}
   <meta charset="UTF-8">
-  <title>Kleep - {{ title }}</title>
-  <link rel="icon" href="{% static 'kleep/images/favicon.png' %}" type="image/x-icon"/>
+  <title>Supernova - {{ title }}</title>
+  <link rel="icon" href="{% static 'supernova/images/favicon.png' %}" type="image/x-icon"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer src="https://use.fontawesome.com/releases/v5.9.0/js/all.js"></script>
-  <link rel="stylesheet" type="text/css" href="{% static 'kleep/style.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'kleep/themes/default.css' %}"/>
-  <script src="{% static 'kleep/script.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'supernova/style.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'supernova/themes/default.css' %}"/>
+  <script src="{% static 'supernova/script.js' %}"></script>
 
   {% block head %}
   {% endblock %}
@@ -26,7 +26,7 @@
         <div id="low-res-logo-menu-trigger">
           <label for="nav-toggle" id="nav-toggle-label">&#9776;</label>
           <a id="logo" href="{% url 'index' %}">
-            <img src="{% static 'kleep/images/title.png' %}"/>
+            <img src="{% static 'supernova/images/title.png' %}"/>
           </a>
         </div>
         <nav id="navigation">
@@ -69,7 +69,7 @@
                     <li><a href="#" class="disabled"><i class="fas fa-search"></i> Perdidos</a></li>
                   </ul>
                 </li>
-                <li><a href="#"><i class="fas fa-bullhorn"></i> Eventos
+                <li class="disabled"><a href="#"><i class="fas fa-bullhorn"></i> Eventos
                   <span class="drop-icon"></span>
                   <label title="Toggle Drop-down" class="drop-icon" for="nav-l22">▾</label>
                 </a>
@@ -80,32 +80,32 @@
                     <li><a href="#" class="disabled">Competições</a></li>
                   </ul>
                 </li>
-                <li><a href="{% url 'groups' %}"><i class="fas fa-users"></i> Grupos</a></li>
+                <li class="disabled"><a href="{% url 'groups' %}"><i class="fas fa-users"></i> Grupos</a></li>
               </ul>
             </li>
-            <li><a href="#">Estudo
+            <li class="disabled">
+              <a href="#">Estudo
               <span class="drop-icon"></span>
-              <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>
-            </a>
+              <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label></a>
               <input type="checkbox" id="nav-l3">
-              <ul class="sub-menu depth1">
-                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>
-                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>
-                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>
-              </ul>
+{#              <ul class="sub-menu depth1">#}
+{#                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>#}
+{#                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>#}
+{#                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>#}
+{#              </ul>#}
             </li>
-            <li>
+            <li  class="disabled">
               <a href="#">Comunidade
                 <span class="drop-icon"></span>
                 <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>
               </a>
               <input type="checkbox" id="nav-l3">
-              <ul class="sub-menu depth1">
-                <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>
-                <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>
-                <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>
-                <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>
-              </ul>
+{#              <ul class="sub-menu depth1">#}
+{#                <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>#}
+{#                <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>#}
+{#                <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>#}
+{#                <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>#}
+{#              </ul>#}
             </li>
           </ul>
         </nav>
@@ -149,9 +149,9 @@
   <footer id="footer">
     <div class="width-limiter">
       <ul>
-        <li><a href="{% url 'privacy' %}">Privacidade</a></li>
-        <li><a href="{% url 'about' %}">Sobre</a></li>
-        <li><a href="#">FAQ</a></li>
+{#        <li><a href="{% url 'privacy' %}">Privacidade</a></li>#}
+{#        <li><a href="{% url 'about' %}">Sobre</a></li>#}
+{#        <li><a href="#">FAQ</a></li>#}
         <li>
           <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
             <img alt="Licença Creative Commons" style="border-width:0"

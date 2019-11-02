@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from college.models import Class
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet, SectionResourcesFormSet
 
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \

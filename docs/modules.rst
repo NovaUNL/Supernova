@@ -11,7 +11,7 @@
    events
    groups
    feedback
-   kleep
+   supernova
    news
    planet
    services

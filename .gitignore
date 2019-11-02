@@ -1,7 +1,9 @@
 __pycache__
 migrations
-kleep/static/kleep/images/
+supernova/static/supernova/images/
 *.svg
+*.jpg
+*.png
 *.woff2
 /venv/
 ignore.py
@@ -9,3 +11,5 @@ settings.json
 _build
 _static
 _templates
+*/static/
+dev/

@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 
 from documents.models import Document
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 
 
 def document(request, document_id):

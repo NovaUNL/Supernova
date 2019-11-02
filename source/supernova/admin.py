@@ -2,7 +2,7 @@ from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.contrib import admin
 
-from kleep.models import Changelog, Catchphrase
+from supernova.models import Changelog, Catchphrase
 
 
 class ChangeLogAdminForm(forms.ModelForm):

@@ -1,4 +1,4 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'supernova/content_only.html' %}
 
 {% load static %}
 {% block head %}
@@ -40,7 +40,7 @@
     <div class="flex-wrapper">
         {% for area in areas %}
             <a href="{% url 'area' area.id %}">
-                <div class="group" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
+                <div class="group" style="background-image: url({% static 'supernova/images/placeholder.png' %})">
                     <div class="group-top">
                         <span>{{ area.name }}</span>
                     </div>

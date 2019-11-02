@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 
 
 def feedback_list(request):
@@ -9,7 +9,7 @@ def feedback_list(request):
     context['title'] = 'Opiniões'
     context['items'] = None  # TODO
     context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')}]
-    return render(request, 'kleep/TODO.html', context)
+    return render(request, 'supernova/TODO.html', context)
 
 
 def idea(request, idea_id):
@@ -19,4 +19,4 @@ def idea(request, idea_id):
     context['item'] = idea
     context['sub_nav'] = [{'name': 'Opiniões', 'url': reverse('feedback')},
                           {'name': idea.title, 'url': reverse('feedback_idea', args=[idea_id])}]
-    return render(request, 'kleep/TODO.html', context)
+    return render(request, 'supernova/TODO.html', context)

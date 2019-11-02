@@ -1,4 +1,4 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'supernova/content_only.html' %}
 {% load static %}
 {% block head %}
     <style>
@@ -40,7 +40,7 @@
     <h3 style="margin-left: 20px">Vendido por <a href="{% url 'group' item.seller.id %}">{{ item.seller }}</a></h3>
     <div class="flex-wrapper">
         <div style="flex-basis: 500px;">
-            <p><img src="{% static 'kleep/images/placeholder.png' %}" width="450px" height="400px"></p>
+            <p><img src="{% static 'supernova/images/placeholder.png' %}" width="450px" height="400px"></p>
         </div>
         <div style="flex-basis: 500px;">
             <h2 style="text-align: left;">{{ item.price_str }}€</h2>

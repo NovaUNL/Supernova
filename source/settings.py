@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'leaflet',
     'markdownx',
     'clip',
-    'kleep.apps.KleepConfig',
+    'supernova.apps.SupernovaConfig',
     'users',
     'groups',
     'college',
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'kleep.urls'
+ROOT_URLCONF = 'supernova.urls'
 
 TEMPLATES = [
     {
@@ -107,9 +107,9 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/srv/http/kleep/static/'
+STATIC_ROOT = '/srv/http/supernova/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/srv/http/kleep/media/'
+MEDIA_ROOT = '/srv/http/supernova/media/'
 
 # CKEditor plugin
 CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
@@ -209,8 +209,8 @@ VULNERABILITY_CHECKING = False
 
 # LOGGING = {}  # TODO
 
-assert 'KLEEP_CONFIG' in os.environ
-CONFIG_PATH = os.environ['KLEEP_CONFIG']
+assert 'SN_CONFIG' in os.environ
+CONFIG_PATH = os.environ['SN_CONFIG']
 assert os.path.isfile(CONFIG_PATH)
 
 with open(CONFIG_PATH) as file:

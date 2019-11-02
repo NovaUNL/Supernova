@@ -23,8 +23,8 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = 'Kleep'
-copyright = '2018, Cláudio Pereira (https://claudiop.com)'
+project = 'Supernova'
+copyright = '2018-2019, Cláudio Pereira (https://claudiop.com)'
 author = 'Cláudio Pereira'
 
 # The short X.Y version
@@ -108,7 +108,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Kleepdoc'
+htmlhelp_basename = 'Supernovadoc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -134,7 +134,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Kleep.tex', 'Kleep Documentation',
+    (master_doc, 'Supernova.tex', 'Supernova Documentation',
      'Cláudio Pereira', 'manual'),
 ]
 
@@ -143,7 +143,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'kleep', 'Kleep Documentation',
+    (master_doc, 'Supernova', 'Supernova Documentation',
      [author], 1)
 ]
 
@@ -153,8 +153,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Kleep', 'Kleep Documentation',
-     author, 'Kleep', 'A college portal.',
+    (master_doc, 'Supernova', 'Supernova Documentation',
+     author, 'Supernova', 'A college portal.',
      'Miscellaneous'),
 ]
 

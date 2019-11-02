@@ -2,6 +2,7 @@ from datetime import datetime
 
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -10,7 +11,7 @@ from college.choice_types import Degree, RoomType
 from college.models import Building, Room, Course, Curriculum, Area, ClassInstance, Class, Department, TurnInstance
 from college.schedules import build_schedule, build_turns_schedule
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 
 from services.models import Service, MenuDish
 
@@ -110,6 +111,7 @@ def class_instance_view(request, instance_id):
         {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])}]
     return render(request, 'college/class_instance.html', context)
 
+
 def class_instance_turns_view(request, instance_id):
     context = build_base_context(request)
     instance = get_object_or_404(ClassInstance, id=instance_id)
@@ -133,6 +135,40 @@ def class_instance_turns_view(request, instance_id):
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'college/class_instance_turns.html', context)
+
+
+@login_required
+def class_instance_files_view(request, instance_id):
+    context = build_base_context(request)
+    instance = get_object_or_404(ClassInstance, id=instance_id)
+    parent_class = instance.parent
+    department = parent_class.department
+    context['page'] = 'instance_files'
+    context['title'] = str(instance)
+    context['department'] = department
+    context['parent_class'] = parent_class
+    context['instance'] = instance
+    occasion = instance.occasion()
+    context['occasion'] = occasion
+    context['instance_files'] = instance.clip_class_instance.instance_files.order_by('upload_datetime')
+
+    context['sub_nav'] = [
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        {'name': department.name, 'url': reverse('college:department', args=[department.id])},
+        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
+        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])},
+        {'name': 'Turnos', 'url': request.get_raw_uri()}
+    ]
+    return render(request, 'college/class_instance_files.html', context)
+
+
+@login_required
+def class_instance_file_download(request, instance_id, file_hash):
+    class_file = get_object_or_404(clip.ClassInstanceFile, class_instance=instance_id, file__hash=file_hash)
+    response = HttpResponse()
+    response['X-Accel-Redirect'] = f'/clip/{class_file.file.hash}'
+    response['Content-Disposition'] = f'attachment; filename="{class_file.file.name}"'
+    return response
 
 
 def areas_view(request):

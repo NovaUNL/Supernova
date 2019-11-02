@@ -518,6 +518,10 @@ h3 {
         flex-direction: row;
     }
 
+    #logo {
+        margin-right: 10px;
+    }
+
     #logo-nav-wrapper {
         flex-direction: row;
         justify-content: space-between;
@@ -526,6 +530,7 @@ h3 {
     #navigation {
         display: inline-block;
         height: 100%;
+        z-index: 10000;
     }
 
     #navigation .main-menu {

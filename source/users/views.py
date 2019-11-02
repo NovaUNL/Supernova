@@ -7,7 +7,7 @@ from django.urls import reverse
 import settings
 from . import models as m, exceptions, forms, registrations
 from college import schedules
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 
 
 def login_view(request):

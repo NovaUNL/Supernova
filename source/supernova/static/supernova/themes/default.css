@@ -28,7 +28,8 @@
 }
 
 #auth-button {
-    background: linear-gradient(to bottom, #71c73c 0%, #398235 44%, #398235 100%);
+    /*background: linear-gradient(to bottom, #71c73c 0%, #398235 44%, #398235 100%);*/
+    background: linear-gradient(to bottom, #42802f 0%, #398235 44%, #398235 100%);
     border: 2px solid #398235;
 }
 

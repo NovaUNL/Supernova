@@ -1,7 +1,7 @@
 API
 ===
 
-The Kleep API.
+The Supernova API.
 
 These methods allow for native applications and external scripting.
 

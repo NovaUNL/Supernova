@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.shortcuts import render
 
 from users.forms import LoginForm
-from kleep.models import Changelog, Catchphrase
+from supernova.models import Changelog, Catchphrase
 from settings import VERSION
 from news.models import NewsItem
 
@@ -14,26 +14,26 @@ def index(request):
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
     context['changelog'] = Changelog.objects.order_by('date').reverse()[0:3]
     context['catchphrase'] = random.choice(Catchphrase.objects.all())
-    return render(request, 'kleep/index.html', context)
+    return render(request, 'supernova/index.html', context)
 
 
 def about(request):
     context = build_base_context(request)
     context['title'] = "Sobre"
     context['version'] = VERSION
-    return render(request, 'kleep/about.html', context)
+    return render(request, 'supernova/about.html', context)
 
 
 def beg(request):
     context = build_base_context(request)
     context['title'] = "Ajudas"
-    return render(request, 'kleep/beg.html', context)
+    return render(request, 'supernova/beg.html', context)
 
 
 def privacy(request):
     context = build_base_context(request)
     context['title'] = "Política de privacidade"
-    return render(request, 'kleep/privacy.html', context)
+    return render(request, 'supernova/privacy.html', context)
 
 
 def build_base_context(request):

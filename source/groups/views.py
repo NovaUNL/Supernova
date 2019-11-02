@@ -6,7 +6,7 @@ from django.urls import reverse
 from chat.models import GroupExternalConversation
 from documents.models import Document
 from groups.models import Group, Announcement
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 
 
 def groups_view(request):

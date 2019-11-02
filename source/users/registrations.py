@@ -129,20 +129,20 @@ def send_mail(request, registration: users.Registration):
     :param registration: :py:class:`users.models.Registration` for which the email is sent after.
     """
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "Ativação de conta do Kleep"
+    msg['Subject'] = "Ativação de conta - Supernova"
     msg['From'] = settings.EMAIL_ACCOUNT
     msg['To'] = registration.email
 
     # Create the body of the message (a plain-text and an HTML version).
     text = f"""
-    Olá. Penso que tentaste criar uma conta no Kleep. Se não foste tu então podes ignorar este email.\n
+    Olá. Penso que tentaste criar uma conta no Supernova. Se não foste tu então podes ignorar este email.\n
     Por favor vai a <https://{request.get_host()}{reverse('registration_validation')}> e insere o código {registration.token}.\n
     Este código só é valido na próxima hora.
     """
     html = f"""
     <html>
       <body>
-        <p>Olá. Penso que tentaste criar uma conta no Kleep. Se não foste tu então podes ignorar este email.</p>
+        <p>Olá. Penso que tentaste criar uma conta no Supernova. Se não foste tu então podes ignorar este email.</p>
         <p>Para concluires o registo carrega 
         <a href="https://{request.get_host()}{reverse('registration_validation')}?email={registration.email}&token={registration.token}">aqui</a>.</p>
         <p>Caso o link não seja um link, por favor vai manualmente a https://{request.get_host()}{reverse('registration_validation')}

@@ -68,7 +68,7 @@ Hopefully before the sun engulfs us
 
 Awaiting on CLIPy
 -----------------
-These are important tasks which require further progress on the CLIPy backend before getting implemented by Kleep:
+These are important tasks which require further progress on the CLIPy backend before getting implemented by Supernova:
 
 * Grades
 * CLIP documents

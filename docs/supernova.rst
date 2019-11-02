@@ -1,40 +1,40 @@
-Kleep
-=====
+Supernova
+=========
 
 This is the main app. It hold settings, root urls, and scripts/models that are independent and don't fit anywhere else.
 
 Submodules
 ----------
 
-kleep.models module
+supernova.models module
 -------------------
 
-.. automodule:: kleep.models
+.. automodule:: supernova.models
     :members:
     :undoc-members:
     :show-inheritance:
 
-kleep.settings module
+supernova.settings module
 ---------------------
 
-.. automodule:: kleep.settings
+.. automodule:: supernova.settings
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-kleep.utils module
+supernova.utils module
 ------------------
 
-.. automodule:: kleep.utils
+.. automodule:: supernova.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-kleep.views module
+supernova.views module
 ------------------
 
-.. automodule:: kleep.views
+.. automodule:: supernova.views
     :members:
     :undoc-members:
     :show-inheritance:
@@ -43,7 +43,7 @@ kleep.views module
 Module contents
 ---------------
 
-.. automodule:: kleep
+.. automodule:: supernova
     :members:
     :undoc-members:
     :show-inheritance:

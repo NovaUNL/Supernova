@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 from news.models import NewsItem
 
 

@@ -1,7 +1,7 @@
 CLIP
 ====
 | The clip app is a wrapper around CLIPy models.
-| It does nothing by itself other than giving Kleep the freedom to access the database directly.
+| It does nothing by itself other than giving Supernova the freedom to access the database directly.
 
 
 models

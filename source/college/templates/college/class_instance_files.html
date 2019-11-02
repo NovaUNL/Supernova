@@ -1,0 +1,35 @@
+{% extends 'supernova/content_navigation.html' %}
+
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+{% endblock %}
+
+{% block content-top %}
+  <nav id="top-container">
+    {% include 'college/class_navigation.html' %}
+  </nav>
+{% endblock %}
+
+{% block content %}
+  {% include 'college/class_decorator.html' %}
+  <div class="content-formatter">
+    <h2>Ficheiros</h2>
+    <div class="flex-wrapper">
+      <table>
+        {% for instance_file in instance_files %}
+          <tr>
+            <td>
+              <a href="{% url 'college:class_instance_file_download' instance.id instance_file.file.hash %}">
+                {{ instance_file.file.name }}
+              </a>
+            </td>
+            <td>{{ instance_file.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endblock %}

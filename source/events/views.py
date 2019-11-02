@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.timezone import now
 
 from events.models import Event, WorkshopEvent, PartyEvent
-from kleep.views import build_base_context
+from supernova.views import build_base_context
 
 
 def index(request):

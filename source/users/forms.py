@@ -9,7 +9,7 @@ from django.contrib.auth.hashers import make_password
 import clip.models as clip
 from college.models import Student
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
-from kleep.utils import password_strength, correlated
+from supernova.utils import password_strength, correlated
 from users.models import User, Registration, VulnerableHash
 
 default_errors = {

@@ -22,15 +22,15 @@ RUN pip install --no-cache-dir --trusted-host pypi.python.org -r /usr/src/pip-pa
 RUN pacman -Rns gcc --noconfirm --noprogressbar
 
 # Put the source in place
-COPY source /kleep/source
+COPY source /supernova/source
 # Tag exports
-VOLUME  ["/kleep/config", "/kleep/http"]
+VOLUME  ["/supernova/config", "/supernova/http"]
 # Change directory into it
-WORKDIR /kleep
+WORKDIR /supernova
 # Expose the uwsgi port
 EXPOSE 1893
 
-ENV KLEEP_CONFIG /kleep/config/settings.json
+ENV SN_CONFIG /supernova/config/settings.json
 ENV PYTHONUNBUFFERED 1
 
 # Execute uwsgi daemon once this container runs

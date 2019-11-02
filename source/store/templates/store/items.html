@@ -1,4 +1,4 @@
-{% extends 'kleep/content_only.html' %}
+{% extends 'supernova/content_only.html' %}
 
 {% load static %}
 {% block content %}
@@ -6,7 +6,7 @@
     <div class="flex-wrapper">
         {% for item in items %}
             <a href="{% url 'store:item' item.id %}">
-                <div class="flex-grid-item" style="background-image: url({% static 'kleep/images/placeholder.png' %})">
+                <div class="flex-grid-item" style="background-image: url({% static 'supernova/images/placeholder.png' %})">
                     <div class="flex-grid-item-top">
                         <span>{{ item.name }}</span><br>
                         por {{ item.seller }}

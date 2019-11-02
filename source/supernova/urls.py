@@ -14,7 +14,7 @@ import api.urls
 from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
-app_name = 'kleep'
+app_name = 'supernova'
 
 urlpatterns = [
     path('admin/', admin.site.urls),

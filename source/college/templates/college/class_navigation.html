@@ -1,5 +1,6 @@
 {% url 'college:class_instance' instance.id as info_url %}
 {% url 'college:class_instance_turns' instance.id as turns_url %}
+{% url 'college:class_instance_files' instance.id as files_url %}
 {% url 'synopses:class' instance.id as synopsis_url %}
 
 {% if info_url == request.path %}
@@ -12,8 +13,12 @@
 {% else %}
     <a class="menu-entry" href="{{ turns_url }}">Turnos</a>
 {% endif %}
+{% if files_url in request.path %}
+    <a class="menu-entry selected">Ficheiros</a>
+{% else %}
+    <a class="menu-entry" href="{{ files_url }}">Ficheiros</a>
+{% endif %}
 {#<a class="menu-entry">Inscritos</a>#}
-{#<a class="menu-entry">Ficheiros</a>#}
 {#<a class="menu-entry">Sumários</a>#}
 {#<a class="menu-entry">Notas</a>#}
 {% if synopsis_url in request.path %}
