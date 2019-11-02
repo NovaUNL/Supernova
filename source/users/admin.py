@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from users.models import Badge, UserBadge, User
+from users.models import Badge, UserBadge, User, SocialNetworkAccount
 
-admin.site.register(User, UserAdmin)
+admin.site.register(User)
 admin.site.register(Badge)
 admin.site.register(UserBadge)
+admin.site.register(SocialNetworkAccount)
