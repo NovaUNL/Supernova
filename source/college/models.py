@@ -154,7 +154,7 @@ class CourseArea(djm.Model):
 
 
 class Class(djm.Model):
-    name = djm.CharField(max_length=64)
+    name = djm.CharField(max_length=256)
     abbreviation = djm.CharField(max_length=16, default='---')
     description = djm.TextField(max_length=1024, null=True, blank=True)
     credits = djm.IntegerField(null=True, blank=True)  # 2 credits = 1 ECTS
