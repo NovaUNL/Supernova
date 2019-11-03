@@ -181,8 +181,8 @@ REGISTRATIONS_TOKEN_LENGTH = 6
 
 AUTH_USER_MODEL = 'users.User'
 
-COLLEGE_YEAR = 2018  # TODO deduce me PS: 2018 = 2017/2018
-COLLEGE_PERIOD = 3  # TODO deduce me
+COLLEGE_YEAR = 2020  # TODO deduce me PS: 2018 = 2017/2018
+COLLEGE_PERIOD = 2  # TODO deduce me
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -206,8 +206,7 @@ DEBUG = False
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 VULNERABILITY_CHECKING = False
-
-# LOGGING = {}  # TODO
+LOG_PATH = "../supernova.log"
 
 assert 'SN_CONFIG' in os.environ
 CONFIG_PATH = os.environ['SN_CONFIG']
@@ -219,9 +218,26 @@ with open(CONFIG_PATH) as file:
 if DEBUG:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
-    # LOGGING['loggers']['django']['level'] = 'DEBUG'
 
-try:
-    VULNERABILITY_CHECKING = 'vulnerabilities' in DATABASES
-except NameError:
-    pass
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': LOG_PATH,
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+    },
+}
