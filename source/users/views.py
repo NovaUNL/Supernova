@@ -56,8 +56,15 @@ def registration_view(request):
         form = forms.RegistrationForm(data=request.POST)
         if form.is_valid():
             registration = form.save(commit=False)
-            registrations.pre_register(request, registration)
-            return HttpResponseRedirect(reverse('registration_validation'))
+            try:
+                registrations.pre_register(request, registration)
+                return HttpResponseRedirect(reverse('registration_validation'))
+            except exceptions.InvalidUsername as e:
+                form.add_error(None, str(e))
+            except exceptions.AccountExists as e:
+                form.add_error(None, str(e))
+            except exceptions.AssignedStudent as e:
+                form.add_error(None, str(e))
         context['creation_form'] = form
     else:
         context['creation_form'] = forms.RegistrationForm()
@@ -91,7 +98,11 @@ def registration_validation_view(request):
                 user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
                 login(request, user)
                 return HttpResponseRedirect(reverse('profile', args=[user.id]))
-            except exceptions.ExpiredRegistration or exceptions.InvalidToken or exceptions.AccountExists as e:
+            except exceptions.AccountExists as e:
+                form.add_error(None, str(e))
+            except exceptions.ExpiredRegistration as e:
+                form.add_error(None, str(e))
+            except exceptions.InvalidToken as e:
                 form.add_error(None, str(e))
     else:
         form = forms.RegistrationValidationForm()

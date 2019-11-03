@@ -56,11 +56,15 @@ class LoginForm(forms.Form):
 
 
 class RegistrationForm(forms.ModelForm):
-    password_confirmation = forms.CharField(label='Palavra-passe(confirmação)', widget=forms.PasswordInput(),
-                                            required=True, error_messages=default_errors)
+    password_confirmation = forms.CharField(
+        label='Palavra-passe (confirmação)',
+        widget=forms.PasswordInput(),
+        required=True,
+        error_messages=default_errors)
     captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
-    student = forms.CharField(label='Identificador',
-                              widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
+    student = forms.CharField(
+        label='Identificador (ex. c.pereira)',
+        widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
     nickname = forms.CharField(label='Alcunha', widget=forms.TextInput(), required=False)
 
     class Meta:
@@ -91,7 +95,6 @@ class RegistrationForm(forms.ModelForm):
             if VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
                 # Refuse the vulnerable password and tell user about it
                 raise forms.ValidationError('Password vulneravel. Espreita a FAQ.')
-        password = make_password(password)  # Produces a way stronger hash of the password for storage
         return password
 
     def clean_password_confirmation(self):
@@ -116,10 +119,14 @@ class RegistrationForm(forms.ModelForm):
     def clean_email(self):
         pattern = re.compile(r'^[\w\d.\-_+]+@[\w\d\-_]+(.[\w\d]+)*(\.\w{2,})$')
         email = self.cleaned_data["email"]
+        student_id = self.data["student"]
         if not pattern.match(email):
             raise forms.ValidationError("Formato inválido de email.")
-        if 'unl.pt' not in email.split('@')[-1]:
+        prefix, suffix = email.split('@')
+        if 'unl.pt' not in suffix:
             raise forms.ValidationError("Email não pertencente ao campus")
+        if student_id != prefix:
+            raise forms.ValidationError("Este email não parece pertencer ao identificador indicado.")
 
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("Já existe uma conta registada com o email fornecido.")
@@ -151,6 +158,8 @@ class RegistrationForm(forms.ModelForm):
             prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
             if prefix_owner is not None and prefix_owner != student:
                 raise forms.ValidationError("O email utilizado pertence a outro estudante.")
+        if 'password' in self.cleaned_data:  # Hash the password using Django's prefered hasher.
+            self.cleaned_data['password'] = make_password(self.cleaned_data['password'])
         return self.cleaned_data
 
 
