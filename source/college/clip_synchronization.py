@@ -77,7 +77,7 @@ def courses():
             course = m.Course(
                 name=clip_course.name,
                 degree=clip_course.degree,
-                abbreviation=clip_course.degree,
+                abbreviation=clip_course.abbreviation,
                 clip_course=clip_course)
             course.save()
             logger.info(f'Created course {course}.')
