@@ -1,27 +1,27 @@
 const NETWORK_TO_FA = [
-    ['fab', 'fa-gitlab'], ['fab', 'fa-github'], ['fab', 'fa-reddit'], ['fab', 'fa-discord'],
-    ['fab', 'fa-linkedin'], ['fab', 'fa-twitter'], ['fab', 'fa-google-plus'], ['fab', 'fa-facebook'],
-    ['fab', 'fa-vimeo'], ['fab', 'fa-youtube'], ['fab', 'fa-deviantart'], ['fab', 'fa-instagram'],
-    ['fab', 'fa-flickr'], ['fas', 'fa-film'], ['fab', 'fa-imdb']
+    ['fab', 'fa-gitlab'],
+    ['fab', 'fa-github'],
+    ['fab', 'fa-linkedin'],
+    ['fab', 'fa-mastodon'],
+    ['fab', 'fa-vimeo'],
+    ['fab', 'fa-youtube'],
+    ['fab', 'fa-deviantart'],
+    ['fab', 'fa-flickr'],
+    ['fas', 'fa-cube'],
+    ['fab', 'fa-wikipedia-w']
 ];
 
 const NETWORK_URLS = [
     /*http, username prefix, username sufix*/
     [true, "https://gitlab.com/", ""],
     [true, "https://github.com/", ""],
-    [true, "https://reddit.com/user/", ""],
-    [false, "", ""],
     [true, "https://linkedin.com/in/", ""],
-    [true, "https://twitter.com/", ""],
-    [true, "https://plus.google.com/+", ""],
-    [true, "https://facebook.com/", ""],
     [true, "https://vimeo.com/", ""],
     [true, "https://youtube.com/channel/", ""],
     [true, "https://", ".deviantart.com/"],
-    [true, "https://instagram.com/p/", ""],
     [true, "https://flickr.com/photos/", ""],
-    [true, "https://myanimelist.net/profile/", ""],
-    [true, "https://imdb.com/user/", ""]
+    [true, "", ""],
+    [true, "https://wikipedia.org/", ""]
 ];
 
 

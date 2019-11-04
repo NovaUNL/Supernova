@@ -119,8 +119,9 @@ def profile_view(request, nickname):
     page_name = f"Perfil de {user.get_full_name()}"
     context['page'] = 'profile'
     context['title'] = page_name
+    context['profile_user'] = user
     if user.students.count() == 1:
-        context['student'] = user.students.first()
+        context['current_student'] = user.students.first()
     else:
         pass  # TODO
 

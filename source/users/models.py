@@ -58,37 +58,28 @@ class UserBadge(djm.Model):
 class SocialNetworkAccount(djm.Model):
     GITLAB = 0
     GITHUB = 1
-    REDDIT = 2
-    DISCORD = 3
-    LINKEDIN = 4
-    TWITTER = 5
-    GOOGLEPLUS = 6
-    FACEBOOK = 7
-    VIMEO = 8
-    YOUTUBE = 9
-    DEVIANTART = 10
-    INSTAGRAM = 11
-    FLICKR = 12
-    MYANIMELIST = 13
-    IMDB = 14
+    LINKEDIN = 2
+    MASTODON = 3
+    VIMEO = 4
+    YOUTUBE = 5
+    DEVIANTART = 6
+    FLICKR = 7
+    THINGIVERSE = 8
+    WIKIPEDIA = 9
 
     SOCIAL_NETWORK_CHOICES = (
         (GITLAB, 'GitLab'),
         (GITHUB, 'GitHub'),
-        (REDDIT, 'Reddit'),
-        (DISCORD, 'Discord'),
         (LINKEDIN, 'Linkedin'),
-        (TWITTER, 'Twitter'),
-        (GOOGLEPLUS, 'Google+'),
-        (FACEBOOK, 'Facebook'),
+        (MASTODON, 'Mastodon'),
         (VIMEO, 'Vimeo'),
         (YOUTUBE, 'Youtube'),
         (DEVIANTART, 'DeviantArt'),
-        (INSTAGRAM, 'Instagram'),
         (FLICKR, 'Flickr'),
-        (MYANIMELIST, 'MyAnimeList'),
-        (IMDB, 'IMDB'),
+        (THINGIVERSE, 'Thingiverse'),
+        (WIKIPEDIA, 'Wikipedia'),
     )
+    
     user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='social_networks')
     network = djm.IntegerField(choices=SOCIAL_NETWORK_CHOICES)
     profile = djm.CharField(max_length=128)

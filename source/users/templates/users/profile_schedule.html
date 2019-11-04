@@ -1,44 +1,48 @@
-{% extends 'users/profile_base.html' %}
+{% extends 'supernova/content_navigation_formatted.html' %}
 
 {% load static %}
 {% block head %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+{% endblock %}
+
+{% block content-top %}
+  {% include 'users/profile_navigation.html' %}
 {% endblock %}
 
 {% block content %}
-    <h1><i class="far fa-clock"></i> Horário de {{ user.get_full_name }}</h1>
-    <div style="overflow-x: scroll;">
-        <table class="schedule" cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-                <th>Hora</th>
-                <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
-                <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
-                <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
-                <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
-                <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
-            </tr>
-            {% for row in schedule %}
-                <tr>
-                    <td>{{ row.0|safe }}</td>
-                    {% for element in row.1 %}
+  <h1><i class="far fa-clock"></i> Horário de {{ user.get_full_name }}</h1>
+  <div style="overflow-x: scroll;">
+    <table class="schedule" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <th>Hora</th>
+        <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
+        <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
+        <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
+        <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
+        <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
+      </tr>
+      {% for row in schedule %}
+        <tr>
+          <td>{{ row.0|safe }}</td>
+          {% for element in row.1 %}
 
-                        {% if element %}
-                            <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
-                                rowspan="{{ element.rowspan }}">
-                                <a href="{% url 'class_instance' element.turn.turn.class_instance.id %}">
-                                    {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
-                                    {{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}<br></a>
-                                <a href="{% url 'room' element.turn.room.id %}">
-                                    {{ element.turn.romm.short_str }}</a>
-                            </td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
+            {% if element %}
+              <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
+                  rowspan="{{ element.rowspan }}">
+                <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
+                  {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
+                  {{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}<br></a>
+                <a href="{% url 'college:room' element.turn.room.id %}">
+                  {{ element.turn.romm.short_str }}</a>
+              </td>
+            {% else %}
+              <td></td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
 {% endblock %}
