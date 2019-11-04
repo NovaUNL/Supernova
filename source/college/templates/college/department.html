@@ -17,22 +17,27 @@
   <div class="flex-wrapper">
     <div style="flex-basis: 500px">
       <h2>Informação</h2>
-      <h3>Localização:</h3>
-      <a href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
-      <h3>Descrição:</h3>
-      {{ department.description }}
-
+      <div style="margin-left: 10px;">
+        <h3>Localização:</h3>
+        <a style="margin-left: 10px" href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
+{#        <h3>Descrição:</h3>#}
+{#        {{ department.description }}#}
+      </div>
       <h2>Cursos</h2>
-      {% for degree in courses %}
-        <h3 class="degree">{{ degree.0 }}</h3>
-        {% for course in degree.1 %}
-          <a class="course" href="{% url 'college:course' course.id %}">{{ course }}</a>
+      <div style="margin-left: 10px">
+        {% for degree in courses %}
+          <h3 class="degree">{{ degree.0 }}</h3>
+          <ul style="list-style: none; padding-left: 10px;">
+            {% for course in degree.1 %}
+              <li><a class="course" href="{% url 'college:course' course.id %}">{{ course }}</a></li>
+            {% endfor %}
+          </ul>
         {% endfor %}
-      {% endfor %}
+      </div>
     </div>
     <div style="margin-right: 50px">
       <h2>Cadeiras</h2>
-      <ul>
+      <ul style="list-style: none; padding-left: 10px;">
         {% for class in department.classes.all|dictsort:'name' %}
           <li>
             <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>

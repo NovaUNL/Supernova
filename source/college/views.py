@@ -61,13 +61,14 @@ def department_view(request, department_id):
     context['title'] = f'Departamento de {department.name}'
     context['department'] = department
 
-    degrees = Course.objects.filter(department=department).values_list('degree').distinct()
-    # courses_by_degree = list(
-    #     map(lambda degree:
-    #         (Degree.name(degree[0]),
-    #          Course.objects.filter(department=department, degree=degree[0]).all()),
-    #         degrees))
-    # context['courses'] = courses_by_degree
+    degrees = sorted(map(lambda degree: degree[0],
+                         set(Course.objects.filter(department=department).values_list('degree'))))
+    courses_by_degree = list(
+        map(lambda degree:
+            (Degree.name(degree),
+             Course.objects.filter(department=department, degree=degree).all()),
+            degrees))
+    context['courses'] = courses_by_degree
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
