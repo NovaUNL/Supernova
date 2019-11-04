@@ -2,62 +2,52 @@
 
 {% load static %}
 {% block content %}
-    <h1>Sobre</h1>
-    <h2>Versão</h2>
-    <p>A versão do Supernova que está a ser executada é a
-        <a href="https://gitlab.com/claudiop/Supernova/tree/{{ version }}">{{ version }}</a>.<br>
-        O Supernova segue um desenvolvimento iterativo, não tem versões por base em proezas alcançadas, mas sim revisões,
-        que podem ou não ser significativas.<br>
-        Esse código é o código da revisão, cada vez que alguma coisa alterar, a revisão também altera.<br>
-        Para utilizadores não muito técnicos, o <b>changelog</b> tem um resumo informal das alterações.
-    </p>
-    <h2>Contribuir</h2>
-    <p>
-        Apoios à manutenção do Supernova são muito bem vindos.<br>
-        O código do Supernova encontra-se <a href="https://gitlab.com/claudiop/Supernova">aqui</a>.
-        Sente-te à vontade para contribuir código.<br>
-        Também se aceitam contribuições em outros formatos (ex: uma imagem, uma correção).<br>
-        Tudo o que vem à rede é peixe!
-    </p>
-    <img src="{% static 'supernova/images/merchant.png' %}" width="150px"/><br>
-    <p>
-        Eventualmente, quem sabe faz-se uma aplicação desktop (leia-se, nativa).<br>
-        Tecnologia por decidir, podes ter um voto na matéria se ajudares!<br>
-        Temos um canal de desenvolvimento no Discord de MiEI. Se fores de outro curso entra em contacto connosco.
-    </p>
-    <h2>Contacto</h2>
-    <p>
-        Neste momento o Supernova não é desenvolvido por muita gente, sou só um e chamo-me Cláudio Pereira, prazer.
-        Podes contactar-me em supernova[arroba]claudiop.com ou cad.pereira@campus.fct.unl.pc se por algum motivo
-        tiveres preferência pelo email académico.
-    </p>
-    <span class="clearfix"></span><br>
-    <h2 id="amigos">Amigos do Supernova</h2>
-    <p>
-        Quem faça uma contribuição significativa ao projeto passa a constar como "Amigo do Supernova".<br>
-        Consta na lista o nome e opcionalmente um link para uma página pessoal (🎉 publicidade gratuita 🎉)
-    </p>
-    <ul>
-        <li><a href="https://claudiop.com">Cláudio Pereira</a> (cad.pereira, MIEI)</li>
-        <li><a href="https://github.com/Zelxy">José Pereira</a> (Instituto Politécnico de Setúbal, Eng. Informática)</li>
-        <li><a href="https://github.com/Louxis">Lyudmyla Torodiko</a> (Instituto Politécnico de Setúbal, Eng. Informática)</li>
-        <li><a href="https://github.com/ImNES97">Diogo Cruz</a> (Instituto Politécnico de Setúbal, Eng. Informática)</li>
-    </ul>
-    <h2>Créditos:</h2>
-    <p>
-        Os seguintes softwares, derivados ou serviços foram utilizados:
-    </p>
-    <ul>
-        <li><a href="https://www.python.org/">Python</a> - Linguagem de programação adotada</li>
-        <li><a href="https://gitlab.com/claudiop/CLIPy/">CLIPy</a> - Extração dos dados do CLIP</li>
-        <li><a href="https://www.djangoproject.com/">Django</a> - Web Framework</li>
-        <li><a href="https://www.postgresql.org/">PostgreSQL</a> - Base de dados</li>
-        <li><a href="https://design.ubuntu.com/font/">Ubuntu Font</a> - Fonte tipográfica da página</li>
-        <li><a href="https://fontawesome.com">Font Awesome</a> - Fonte de ícones da página</li>
-        <li><a href="https://openstreetmap.org/">Open Street Map</a> - Dados geográficos</li>
-        <li><a href="https://inkscape.org/">Inkscape</a> - Vectorizações</li>
-        <li><a href="https://github.com/ariutta/svg-pan-zoom">SVG-Pan-Zoom</a> - Visualizador de vectorizações</li>
-        <li><a href="https://www.mathjax.org/">MathJax</a> - Motor de renderização de TeX</li>
-        <li><a href="https://commons.wikimedia.org/wiki/Main_Page">Wikimedia Commons</a> - Conteúdo multimédia</li>
-    </ul>
+  <h1>Sobre</h1>
+  <h2>O que é essa coisa de Supernova?</h2>
+  <p>
+    Tipicamente a <a href="https://www.youtube.com/watch?v=YIKXvDlf8_0">morte explosiva de uma estrela</a>, mas não
+    esta.<br> Esta supernova é a tentativa por parte de alunos da <a href="https://www.fct.unl.pt/">FCT Nova</a> de promover
+    uma morte pacifica ao <a href="https://clip.unl.pt/">CLIP</a>.
+  </p>
+  <h2>Contribuir</h2>
+  <p>
+    Apoios à manutenção do Supernova são bem vindos. O código que faz esta plataforma funcionar encontra-se <a href="https://gitlab.com/claudiop/Supernova">aqui</a>.
+    Sente-te à vontade para contribuir.<br>
+    Também se aceitam contribuições noutros formatos (ex: uma imagem, uma correção).
+  </p>
+  <h2>Contacto</h2>
+  <p>
+    Neste momento o Supernova não é desenvolvido por muita gente, sou só um e chamo-me Cláudio Pereira, prazer.<br>
+    Podes contactar-me em supernova[arroba]claudiop.com ou cad.pereira@campus.fct.unl.pt se por algum motivo
+    tiveres preferência pelo email académico.
+  </p>
+  <h2 id="amigos">Amigos do Supernova</h2>
+  Constata-se algumas pessoas que fizeram uma contribuição significativa ao projeto:
+  <ul>
+    <li><a href="https://claudiop.com">Cláudio Pereira</a> (cad.pereira, MiEI)</li>
+    <li><a href="https://github.com/ImNES97">Diogo Cruz</a> (MiEI)</li>
+    <li><a href="https://github.com/Zelxy">José Pereira</a> (Instituto Politécnico de Setúbal, Eng. Informática)</li>
+    <li><a href="https://github.com/Louxis">Lyudmyla Torodiko</a> (Instituto Politécnico de Setúbal, Eng. Informática)
+    </li>
+  </ul>
+  <h2>Versão</h2>
+  <p>A versão do Supernova que está a ser executada é a
+    <a href="https://gitlab.com/claudiop/Supernova/tree/{{ version }}">{{ version }}</a>.<br>
+    Esse código é o código da revisão, cada vez que alguma coisa alterar, a revisão também altera.
+  </p>
+  <h2>Créditos:</h2>
+  Os seguintes softwares, derivados ou serviços foram utilizados:
+  <ul>
+    <li><a href="https://www.python.org/">Python</a> - Linguagem de programação adotada</li>
+    <li><a href="https://gitlab.com/claudiop/CLIPy/">CLIPy</a> - Extração dos dados do CLIP</li>
+    <li><a href="https://www.djangoproject.com/">Django</a> - Web Framework</li>
+    <li><a href="https://www.postgresql.org/">PostgreSQL</a> - Base de dados</li>
+    <li><a href="https://design.ubuntu.com/font/">Ubuntu Font</a> - Fonte tipográfica da página</li>
+    <li><a href="https://fontawesome.com">Font Awesome</a> - Fonte de ícones da página</li>
+    <li><a href="https://openstreetmap.org/">Open Street Map</a> - Dados geográficos</li>
+    <li><a href="https://inkscape.org/">Inkscape</a> - Vectorizações</li>
+    <li><a href="https://github.com/ariutta/svg-pan-zoom">SVG-Pan-Zoom</a> - Visualizador de vectorizações</li>
+    <li><a href="https://www.mathjax.org/">MathJax</a> - Motor de renderização de TeX</li>
+    <li><a href="https://commons.wikimedia.org/wiki/Main_Page">Wikimedia Commons</a> - Conteúdo multimédia</li>
+  </ul>
 {% endblock %}

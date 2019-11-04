@@ -1,13 +1,13 @@
-{% extends 'kleep/content_only_formatted.html' %}
+{% extends 'supernova/content_only_formatted.html' %}
 {% load static %}
 {% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'kleep/index.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'supernova/index.css' %}"/>
   <link rel="stylesheet" type="text/css" href="{% static 'news/news.css' %}"/>
 {% endblock %}
 
 {% block content %}
   <div class="high-res-only">
-    <h1 style="margin-bottom: 5px;">Bem vindo ao Kleep</h1>
+    <h1 style="margin-bottom: 5px;">Bem vindo ao Supernova</h1>
     <span>{{ catchphrase }}</span>
   </div>
   <div class="flex-wrapper" style="margin-top: 10px; flex-direction: row">
@@ -31,13 +31,22 @@
       </div>
     </div>
     <div class="flex-wrapper vertical">
-      <h2>Próximos eventos</h2>
-      <h3>Competição de plágio</h3>
-      <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>
-      <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>
-      <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>
-      <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>
-      <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>
+      <h2>O que é o Supernova</h2>
+      <p>O Supernova (ex Kleep) é uma tentativa por parte de um estudante para extender o nosso amado CLIP.</p>
+      <p>
+        Dados os ultimos problemas com o sistema informático, optou-se por disponibilizar a informação presente no CLIP.
+        Podes ler mais sobre isso <a href="https://claudiop.com/2019/11/03/Supernova-being-opened.html">aqui</a>.
+      </p>
+      <p>Sendo a informação presente no CLIP confidencial a estudantes, este mirror exige uma conta e uma prova de
+        identidade, a qual pode ser obtida com recurso ao email do campus.</p>
+      <p>Duvidas: cad.pereira -at- campus.fct.unl.pt ou discord de MiEI.</p>
+      {#      <h2>Próximos eventos</h2>#}
+      {#      <h3>Competição de plágio</h3>#}
+      {#      <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>#}
+      {#      <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>#}
+      {#      <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>#}
+      {#      <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>#}
+      {#      <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>#}
     </div>
   </div>
 {% endblock %}

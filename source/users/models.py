@@ -42,6 +42,17 @@ class User(AbstractUser):
     )
     gender = djm.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
 
+    @property
+    def primary_student(self):
+        students = self.students
+        count = students.count()
+        if count == 0:
+            return None
+        elif count == 1:
+            return students.first()
+        else:
+            return students.first()  # FIXME
+
 
 class Badge(djm.Model):
     name = djm.CharField(max_length=32, unique=True)
@@ -79,7 +90,7 @@ class SocialNetworkAccount(djm.Model):
         (THINGIVERSE, 'Thingiverse'),
         (WIKIPEDIA, 'Wikipedia'),
     )
-    
+
     user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='social_networks')
     network = djm.IntegerField(choices=SOCIAL_NETWORK_CHOICES)
     profile = djm.CharField(max_length=128)

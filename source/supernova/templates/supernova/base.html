@@ -37,10 +37,20 @@
                 <label title="Toggle Drop-down" class="drop-icon" for="nav-l1">▾</label></a>
               <input type="checkbox" id="nav-l1">
               <ul class="sub-menu depth1">
-                <li><a href="#" class="disabled"><i class="fas fa-clock"></i> Horário</a></li>
+                {% if user.is_authenticated %}
+                  <li><a href="{% url 'profile_schedule' user.nickname %}"><i class="fas fa-clock"></i> Horário</a></li>
+                  {% if user.primary_student is None %}
+                    <li><a href="#" class="disabled"><i class="fas fa-graduation-cap"></i> Curso</a></li>
+                  {% else %}
+                    <li><a href="{% url 'college:course' user.primary_student.course.id %}"><i
+                        class="fas fa-graduation-cap"></i> Curso</a></li>
+                  {% endif %}
+                {% else %}
+                  <li><a href="#" class="disabled"><i class="fas fa-clock"></i> Horário</a></li>
+                  <li><a href="#" class="disabled"><i class="fas fa-graduation-cap"></i> Curso</a></li>
+                {% endif %}
                 <li><a href="#" class="disabled"><i class="fas fa-calendar"></i> Calendario</a></li>
                 <li><a href="#" class="disabled"><i class="fas fa-star"></i> Avaliações</a></li>
-                <li><a href="#" class="disabled"><i class="fas fa-graduation-cap"></i> Curso</a></li>
               </ul>
             </li>
             <li><a href="#">Faculdade
@@ -85,27 +95,27 @@
             </li>
             <li class="disabled">
               <a href="#">Estudo
-              <span class="drop-icon"></span>
-              <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label></a>
+                <span class="drop-icon"></span>
+                <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label></a>
               <input type="checkbox" id="nav-l3">
-{#              <ul class="sub-menu depth1">#}
-{#                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>#}
-{#                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>#}
-{#                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>#}
-{#              </ul>#}
+              {#              <ul class="sub-menu depth1">#}
+              {#                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>#}
+              {#                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>#}
+              {#                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>#}
+              {#              </ul>#}
             </li>
-            <li  class="disabled">
+            <li class="disabled">
               <a href="#">Comunidade
                 <span class="drop-icon"></span>
                 <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>
               </a>
               <input type="checkbox" id="nav-l3">
-{#              <ul class="sub-menu depth1">#}
-{#                <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>#}
-{#                <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>#}
-{#                <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>#}
-{#                <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>#}
-{#              </ul>#}
+              {#              <ul class="sub-menu depth1">#}
+              {#                <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>#}
+              {#                <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>#}
+              {#                <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>#}
+              {#                <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>#}
+              {#              </ul>#}
             </li>
           </ul>
         </nav>
@@ -113,7 +123,7 @@
       <div id="auth">
         {% if user.is_authenticated %}
           <a href="{% url 'profile' user.nickname %}"><span
-                  id="auth-username">{{ user.nickname }}</span></a>
+              id="auth-username">{{ user.nickname }}</span></a>
           <a href="{% url 'logout' %}?next={{ request.get_full_path }}">
                         <span id="logout-button">
                             <span class="low-res-only">x</span>
@@ -149,9 +159,10 @@
   <footer id="footer">
     <div class="width-limiter">
       <ul>
-{#        <li><a href="{% url 'privacy' %}">Privacidade</a></li>#}
-{#        <li><a href="{% url 'about' %}">Sobre</a></li>#}
-{#        <li><a href="#">FAQ</a></li>#}
+        <li><a href="https://gitlab.com/claudiop/Supernova/"><i class="fab fa-gitlab"></i> Biforca-me!</a></li>
+        <li><a href="{% url 'privacy' %}">Privacidade</a></li>
+        <li><a href="{% url 'about' %}">Sobre</a></li>
+        {#        <li><a href="#">FAQ</a></li>#}
         <li>
           <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
             <img alt="Licença Creative Commons" style="border-width:0"
