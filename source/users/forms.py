@@ -62,14 +62,14 @@ class RegistrationForm(forms.ModelForm):
         required=True,
         error_messages=default_errors)
     captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
-    student = forms.CharField(
+    clip_identifier = forms.CharField(
         label='Identificador (ex. c.pereira)',
         widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
     nickname = forms.CharField(label='Alcunha', widget=forms.TextInput(), required=False)
 
     class Meta:
         model = Registration
-        fields = ('nickname', 'username', 'password', 'email', 'student')
+        fields = ('nickname', 'username', 'password', 'email', 'clip_identifier')
         widgets = {
             'username': forms.TextInput(),
             'email': forms.TextInput(attrs={'onChange': 'emailModified=true;'}),
@@ -103,23 +103,23 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError("As palavas-passe não coincidem.")
         return confirmation
 
-    def clean_student(self):
-        student_id: str = self.cleaned_data["student"]
+    def clean_clip_identifier(self):
+        student_id: str = self.cleaned_data["clip_identifier"].strip()
         student = clip.Student.objects.filter(abbreviation=student_id)
         if not student.exists():
             raise forms.ValidationError(f"O aluno {student_id} não foi encontrado.")
         if Student.objects.filter(abbreviation=student_id, user__isnull=False).exists():
             raise forms.ValidationError(f"O aluno {student_id} já está registado.")
 
-        student = student.first()
-        # Delete any existing registration attempt for this student
-        Registration.objects.filter(student=student).delete()
-        return student
+        # student = student.first()
+        # # Delete any existing registration attempt for this student
+        # Registration.objects.filter(student=student).delete()
+        return student_id
 
     def clean_email(self):
         pattern = re.compile(r'^[\w\d.\-_+]+@[\w\d\-_]+(.[\w\d]+)*(\.\w{2,})$')
         email = self.cleaned_data["email"]
-        student_id = self.data["student"]
+        student_id = self.data["clip_identifier"]
         if not pattern.match(email):
             raise forms.ValidationError("Formato inválido de email.")
         prefix, suffix = email.split('@')
@@ -144,7 +144,7 @@ class RegistrationForm(forms.ModelForm):
 
     def clean_nickname(self):
         nickname = self.cleaned_data["nickname"]
-        if nickname is None:
+        if nickname is None or nickname == '':
             nickname = self.data["username"]
         users = User.objects.filter(nickname=nickname)
         if users.exists():
@@ -152,11 +152,11 @@ class RegistrationForm(forms.ModelForm):
         return nickname
 
     def clean(self):
-        if 'student' in self.cleaned_data and 'email' in self.cleaned_data:
+        if 'clip_identifier' in self.cleaned_data and 'email' in self.cleaned_data:
             email_prefix = self.cleaned_data["email"].split('@')[0]
-            student = self.cleaned_data["student"]
+            clip_identifier = self.cleaned_data["clip_identifier"]
             prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
-            if prefix_owner is not None and prefix_owner != student:
+            if prefix_owner is not None and prefix_owner != clip_identifier:
                 raise forms.ValidationError("O email utilizado pertence a outro estudante.")
         if 'password' in self.cleaned_data:  # Hash the password using Django's prefered hasher.
             self.cleaned_data['password'] = make_password(self.cleaned_data['password'])

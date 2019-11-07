@@ -97,7 +97,7 @@ def registration_validation_view(request):
             try:
                 user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
                 login(request, user)
-                return HttpResponseRedirect(reverse('profile', args=[user.id]))
+                return HttpResponseRedirect(reverse('profile', args=[user.nickname]))
             except exceptions.AccountExists as e:
                 form.add_error(None, str(e))
             except exceptions.ExpiredRegistration as e:
@@ -120,11 +120,8 @@ def profile_view(request, nickname):
     context['page'] = 'profile'
     context['title'] = page_name
     context['profile_user'] = user
-    if user.students.count() == 1:
-        context['current_student'] = user.students.first()
-    else:
-        pass  # TODO
-
+    context['primary_student'] = user.primary_student
+    context['secondary_students'] = user.students.exclude(id=user.primary_student.id) if user.primary_student else None
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
     return render(request, 'users/profile.html', context)
 
@@ -135,13 +132,14 @@ def user_schedule_view(request, nickname):
     user = get_object_or_404(m.User, id=request.user.id)
 
     if user.students.exists():
-        student = user.students.first()  # FIXME
+        student = user.primary_student
     else:
         return HttpResponseRedirect(reverse('profile', args=[nickname]))
     context['page'] = 'profile_schedule'
     context['title'] = "Horário de " + nickname
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
+    context['sub_nav'] = [
+        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
+        {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
     turns = student.turns.filter(
         class_instance__year=settings.COLLEGE_YEAR,
         class_instance__period=settings.COLLEGE_PERIOD).all()

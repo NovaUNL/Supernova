@@ -92,16 +92,18 @@ def validate_token(email, token) -> users.User:
             nickname=registration.nickname,
             last_activity=timezone.now()
         )
-        clip_student = registration.student
+        clip_identifier = registration.clip_identifier
+        confirmed = registration.email.endswith('unl.pt')
         user.password = registration.password  # Copy hash
         user.save()
-        student = clip_sync.create_student(clip_student)
-
-        if registration.email.endswith('unl.pt'):
-            student.confirmed = True
-
-        student.user = user
-        student.save()
+        clip_students = clip.Student.objects.filter(abbreviation=registration.clip_identifier).all()
+        for clip_student in clip_students:
+            student = clip_sync.create_student(clip_student)
+            student.user = user
+            student.update_yearspan()
+            student.save()
+        user.update_primary()
+        user.save()
         return user
     else:
         if registration.failed_attempts < settings.REGISTRATIONS_ATTEMPTS_TOKEN - 1:

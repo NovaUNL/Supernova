@@ -15,6 +15,11 @@ class User(AbstractUser):
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
     picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
     webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
+    primary_student = djm.ForeignKey(
+        'college.Student',
+        on_delete=djm.PROTECT,
+        null=True, blank=True,
+        related_name="_user")
 
     HIDDEN = 0  # No profile at all
     LIMITED = 1  # Show limited information, only to users
@@ -33,25 +38,25 @@ class User(AbstractUser):
 
     MALE = 0
     FEMALE = 1
-    MULTIPLEGENDERS = 2
 
     GENDER_CHOICES = (
         (MALE, 'Homem'),
-        (FEMALE, 'Mulher'),
-        (MULTIPLEGENDERS, 'É complicado')
+        (FEMALE, 'Mulher')
     )
     gender = djm.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
 
-    @property
-    def primary_student(self):
-        students = self.students
-        count = students.count()
-        if count == 0:
-            return None
-        elif count == 1:
-            return students.first()
-        else:
-            return students.first()  # FIXME
+    def update_primary(self):
+        primary = None
+        last_year = 0
+        for student in self.students.all():
+            if student.last_year is not None and student.last_year > last_year:
+                last_year = student.last_year
+                primary = student
+        if primary is not None:
+            self.primary_student = primary
+            name = primary.clip_student.name
+            if name is not None:
+                self.first_name, self.last_name = name.split(' ', 1)
 
 
 class Badge(djm.Model):
@@ -104,9 +109,10 @@ class SocialNetworkAccount(djm.Model):
 
 class Registration(djm.Model):
     email = djm.EmailField()
-    username = djm.CharField(verbose_name='utilizador', max_length=32)
-    nickname = djm.CharField(verbose_name='alcunha', max_length=32)
+    username = djm.CharField(verbose_name='utilizador', max_length=128)
+    nickname = djm.CharField(verbose_name='alcunha', max_length=128)
     student = djm.OneToOneField(clip.Student, on_delete=djm.CASCADE, verbose_name='estudante')
+    clip_identifier = djm.CharField(max_length=128)
     password = djm.CharField(verbose_name='palavra-passe', max_length=128)
     creation = djm.DateTimeField(auto_now_add=True)
     token = djm.CharField(max_length=16)

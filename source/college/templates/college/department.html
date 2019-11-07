@@ -38,7 +38,7 @@
     <div style="margin-right: 50px">
       <h2>Cadeiras</h2>
       <ul style="list-style: none; padding-left: 10px;">
-        {% for class in department.classes.all|dictsort:'name' %}
+        {% for class in classes %}
           <li>
             <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
           </li>

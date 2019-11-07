@@ -32,6 +32,12 @@ class Student(djm.Model):
             return f'{self.number} - {self.abbreviation} ({self.user})'
         return f'{self.number} - {self.abbreviation}'
 
+    def update_yearspan(self):
+        years = list(self.class_instances.distinct('year').values_list('year', flat=True))
+        if len(years) > 0:
+            self.first_year = min(years)
+            self.last_year = max(years)
+
 
 class Area(djm.Model):
     name = djm.CharField(max_length=200, unique=True)

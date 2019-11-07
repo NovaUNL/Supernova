@@ -69,6 +69,7 @@ def department_view(request, department_id):
              Course.objects.filter(department=department, degree=degree).all()),
             degrees))
     context['courses'] = courses_by_degree
+    context['classes'] = department.classes.filter(extinguished=False).order_by('name').all()
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
