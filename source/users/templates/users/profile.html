@@ -68,6 +68,16 @@
         <b>Página:</b> <a href="{{ user.webpage }}">{{ user.webpage }}</a><br>
       {% endif %}
     </div>
+    {% if current_class_instances.exists %}
+      <div class="flex-box">
+        <h2><i class="fas fa-graduation-cap"></i> Inscrito a</h2>
+        <ul>
+          {% for instance in current_class_instances %}
+            <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
     {% if profile_user.social_networks.exists %}
       <div id="social" class="flex-box">
         <h2><i class="fas fa-globe"></i> Social</h2>

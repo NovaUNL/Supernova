@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 import settings
+from college.models import ClassInstance, Enrollment
 from . import models as m, exceptions, forms, registrations
 from college import schedules
 from supernova.views import build_base_context
@@ -123,6 +124,7 @@ def profile_view(request, nickname):
     context['primary_student'] = user.primary_student
     context['secondary_students'] = user.students.exclude(id=user.primary_student.id) if user.primary_student else None
     context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
+    context['current_class_instances'] = ClassInstance.objects.filter(student=user.primary_student, year=2020, period=2)
     return render(request, 'users/profile.html', context)
 
 
