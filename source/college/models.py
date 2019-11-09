@@ -227,6 +227,7 @@ class Turn(djm.Model):
     clip_turn = djm.OneToOneField(clip.Turn, on_delete=djm.CASCADE, related_name='turn')
     required = djm.BooleanField(default=True)  # Optional attendance
     students = djm.ManyToManyField(Student, through='TurnStudents')
+    teachers = djm.ManyToManyField('Teacher', related_name='turns')
 
     class Meta:
         unique_together = ['class_instance', 'turn_type', 'number']
@@ -305,7 +306,7 @@ class Teacher(djm.Model):
     # This isn't really a M2M, but the crawler tables are unmodifiable
     clip_teachers = djm.ManyToManyField(clip.Teacher)
     #: Departments this teacher has worked for
-    departments = djm.ManyToManyField(Department)
+    departments = djm.ManyToManyField(Department, related_name="teachers")
 
     def __str__(self):
         return f"{self.name} ({self.iid})"

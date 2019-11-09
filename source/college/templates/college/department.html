@@ -19,9 +19,10 @@
       <h2>Informação</h2>
       <div style="margin-left: 10px;">
         <h3>Localização:</h3>
-        <a style="margin-left: 10px" href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
-{#        <h3>Descrição:</h3>#}
-{#        {{ department.description }}#}
+        <a style="margin-left: 10px"
+           href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
+        {#        <h3>Descrição:</h3>#}
+        {#        {{ department.description }}#}
       </div>
       <h2>Cursos</h2>
       <div style="margin-left: 10px">
@@ -34,6 +35,12 @@
           </ul>
         {% endfor %}
       </div>
+      <h2>Professores</h2>
+      <ul>
+        {% for teacher in teachers %}
+          <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
     <div style="margin-right: 50px">
       <h2>Cadeiras</h2>

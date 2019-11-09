@@ -177,6 +177,7 @@ class ClassInstance(djm.Model):
     extra_info_edited_datetime = djm.DateTimeField(null=True)
     extra_info_editor = djm.TextField(null=True)
     working_hours = djm.TextField(null=True)
+    files = djm.ManyToManyField('File', through="ClassInstanceFile")
 
     class Meta:
         managed = False
@@ -336,7 +337,7 @@ class Turn(djm.Model):
         db_table = CLIPY_TABLE_PREFIX + 'turns'
 
     def __str__(self):
-        return "{}{} of {}".format(ctypes.TurnType.CHOICES[self.type-1][1], self.number, self.class_instance)
+        return "{}{} of {}".format(ctypes.TurnType.CHOICES[self.type - 1][1], self.number, self.class_instance)
 
 
 class TurnInstance(djm.Model):
@@ -367,7 +368,7 @@ class TurnTeacher(djm.Model):
 
     class Meta:
         managed = False
-        db_table = CLIPY_TABLE_PREFIX + 'turn_students'
+        db_table = CLIPY_TABLE_PREFIX + 'turn_teachers'
 
 
 class TurnStudent(djm.Model):
@@ -391,14 +392,25 @@ class File(djm.Model):
     location = djm.TextField(null=True)
     mime = djm.TextField(null=True)
 
+    def __str__(self):
+        return f"{self.name}"
+
     class Meta:
         managed = False
         db_table = CLIPY_TABLE_PREFIX + 'files'
 
 
 class ClassInstanceFile(djm.Model):
-    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, db_column='class_instance_id')
-    file = djm.ForeignKey(File, on_delete=djm.PROTECT, db_column='file_id')
+    class_instance = djm.OneToOneField(
+        ClassInstance,
+        on_delete=djm.PROTECT,
+        db_column='class_instance_id',
+        related_name="instance_files",
+        primary_key=True)
+    file = djm.ForeignKey(
+        File,
+        on_delete=djm.PROTECT,
+        db_column='file_id')
     upload_datetime = djm.DateTimeField()
     uploader = djm.TextField(max_length=100)
 

@@ -6,9 +6,10 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
+import settings
 from clip import models as clip
 from college.choice_types import Degree, RoomType
-from college.models import Building, Room, Course, Curriculum, Area, ClassInstance, Class, Department, TurnInstance
+from college import models as m, schedules
 from college.schedules import build_schedule, build_turns_schedule
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.views import build_base_context
@@ -19,7 +20,7 @@ from services.models import Service, MenuDish
 def campus_view(request):
     context = build_base_context(request)
     context['title'] = "Mapa do campus"
-    context['buildings'] = Building.objects.all()
+    context['buildings'] = m.Building.objects.all()
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Mapa', 'url': reverse('college:map')}]
@@ -29,7 +30,7 @@ def campus_view(request):
 def map_view(request):
     context = build_base_context(request)
     context['title'] = "Mapa do campus"
-    context['buildings'] = Building.objects.all()
+    context['buildings'] = m.Building.objects.all()
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Mapa', 'url': reverse('college:map')}]
@@ -48,7 +49,7 @@ def transportation_view(request):
 def departments_view(request):
     context = build_base_context(request)
     context['title'] = "Departamentos"
-    context['departments'] = Department.objects.order_by('name').filter(extinguished=False).all()
+    context['departments'] = m.Department.objects.order_by('name').filter(extinguished=False).all()
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Departamentos', 'url': reverse('college:departments')}]
@@ -56,29 +57,52 @@ def departments_view(request):
 
 
 def department_view(request, department_id):
-    department = get_object_or_404(Department, id=department_id)
+    department = get_object_or_404(m.Department, id=department_id)
     context = build_base_context(request)
     context['title'] = f'Departamento de {department.name}'
     context['department'] = department
 
     degrees = sorted(map(lambda degree: degree[0],
-                         set(Course.objects.filter(department=department).values_list('degree'))))
+                         set(m.Course.objects.filter(department=department).values_list('degree'))))
     courses_by_degree = list(
         map(lambda degree:
             (Degree.name(degree),
-             Course.objects.filter(department=department, degree=degree).all()),
+             m.Course.objects.filter(department=department, degree=degree).all()),
             degrees))
     context['courses'] = courses_by_degree
     context['classes'] = department.classes.filter(extinguished=False).order_by('name').all()
+    context['teachers'] = department.teachers.filter(turns__class_instance__year__gt=2015).distinct().order_by('name')  # FIXME
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department_id])}]
     return render(request, 'college/department.html', context)
 
+def teacher_view(request, teacher_id):
+    teacher = get_object_or_404(m.Teacher, id=teacher_id)
+    context = build_base_context(request)
+    context['title'] = teacher.name
+    context['teacher'] = teacher
+    context['class_instances'] = \
+        m.ClassInstance.objects\
+            .filter(turns__teachers=teacher)\
+            .order_by('parent__name', 'year', 'period')\
+            .distinct()
+
+    turns = teacher.turns.filter(
+        class_instance__year=settings.COLLEGE_YEAR,
+        class_instance__period=settings.COLLEGE_PERIOD).all()
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
+    context['sub_nav'] = [
+        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        {'name': '?', 'url': '#'},
+        {'name': teacher.name, 'url': '#'}]
+    return render(request, 'college/teacher.html', context)
+
 
 def class_view(request, class_id):
-    class_ = get_object_or_404(Class, id=class_id)
+    class_ = get_object_or_404(m.Class, id=class_id)
     context = build_base_context(request)
     department = class_.department
     context['title'] = class_.name
@@ -94,7 +118,7 @@ def class_view(request, class_id):
 
 
 def class_instance_view(request, instance_id):
-    instance = get_object_or_404(ClassInstance, id=instance_id)
+    instance = get_object_or_404(m.ClassInstance, id=instance_id)
     context = build_base_context(request)
     parent_class = instance.parent
     department = parent_class.department
@@ -114,9 +138,10 @@ def class_instance_view(request, instance_id):
         {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])}]
     return render(request, 'college/class_instance.html', context)
 
+
 def class_instance_turns_view(request, instance_id):
     context = build_base_context(request)
-    instance = get_object_or_404(ClassInstance, id=instance_id)
+    instance = get_object_or_404(m.ClassInstance, id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_turns'
@@ -138,10 +163,11 @@ def class_instance_turns_view(request, instance_id):
     ]
     return render(request, 'college/class_instance_turns.html', context)
 
+
 @login_required
 def class_instance_enrolled_view(request, instance_id):
     context = build_base_context(request)
-    instance = get_object_or_404(ClassInstance, id=instance_id)
+    instance = get_object_or_404(m.ClassInstance, id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_turns'
@@ -165,7 +191,7 @@ def class_instance_enrolled_view(request, instance_id):
 @login_required
 def class_instance_files_view(request, instance_id):
     context = build_base_context(request)
-    instance = get_object_or_404(ClassInstance, id=instance_id)
+    instance = get_object_or_404(m.ClassInstance, id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_files'
@@ -189,7 +215,7 @@ def class_instance_files_view(request, instance_id):
 
 @login_required
 def class_instance_file_download(request, instance_id, file_hash):
-    class_instance = get_object_or_404(ClassInstance, id=instance_id)
+    class_instance = get_object_or_404(m.ClassInstance, id=instance_id)
     clip_instance = class_instance.clip_class_instance
     file = clip_instance.files.filter(hash=file_hash).first()
     if file is None:
@@ -203,17 +229,17 @@ def class_instance_file_download(request, instance_id, file_hash):
 def areas_view(request):
     context = build_base_context(request)
     context['title'] = 'Areas de estudo'
-    context['areas'] = Area.objects.order_by('name').all()
+    context['areas'] = m.Area.objects.order_by('name').all()
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('college:areas')}]
     return render(request, 'college/areas.html', context)
 
 
 def area_view(request, area_id):
-    area = get_object_or_404(Area, id=area_id)
+    area = get_object_or_404(m.Area, id=area_id)
     context = build_base_context(request)
     context['title'] = 'Area de ' + area.name
     context['area'] = area
-    context['courses'] = Course.objects.filter(area=area).order_by('degree_id').all()
+    context['courses'] = m.Course.objects.filter(area=area).order_by('degree_id').all()
     # context['degrees'] = Degree.objects.filter(course__area=area).all()  # FIXME
     context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('college:areas')},
                           {'name': area.name, 'url': reverse('college:area', args=[area_id])}]
@@ -221,7 +247,7 @@ def area_view(request, area_id):
 
 
 def course_view(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(m.Course, id=course_id)
     context = build_base_context(request)
     department = course.department
     context['title'] = str(course)
@@ -237,7 +263,7 @@ def course_view(request, course_id):
 
 @login_required
 def course_students_view(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(m.Course, id=course_id)
     context = build_base_context(request)
     department = course.department
     context['title'] = 'Alunos de %s' % course
@@ -257,10 +283,10 @@ def course_students_view(request, course_id):
 
 
 def course_curriculum_view(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(m.Course, id=course_id)
     context = build_base_context(request)
     department = course.department
-    curriculum = Curriculum.objects.filter(course=course).order_by('year', 'period', 'period_type').all()
+    curriculum = m.Curriculum.objects.filter(course=course).order_by('year', 'period', 'period_type').all()
 
     context['title'] = 'Programa curricular de %s' % course
 
@@ -278,7 +304,7 @@ def course_curriculum_view(request, course_id):
 def buildings_view(request):
     context = build_base_context(request)
     context['title'] = "Edifícios"
-    context['buildings'] = Building.objects.order_by('id').all()
+    context['buildings'] = m.Building.objects.order_by('id').all()
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Edifícios', 'url': reverse('college:buildings')}]
@@ -286,10 +312,10 @@ def buildings_view(request):
 
 
 def building_view(request, building_id):
-    building = get_object_or_404(Building, id=building_id)
+    building = get_object_or_404(m.Building, id=building_id)
     context = build_base_context(request)
     context['title'] = building.name
-    rooms = Room.objects.filter(building=building).order_by('type', 'name', 'door_number').all()
+    rooms = m.Room.objects.filter(building=building).order_by('type', 'name', 'door_number').all()
     rooms_by_type = {}
     for room in rooms:
         plural = RoomType.plural(room.type)
@@ -298,7 +324,7 @@ def building_view(request, building_id):
         rooms_by_type[plural].append(room)
     context['rooms'] = sorted(rooms_by_type.items(), key=lambda t: t[0])
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
-    context['departments'] = Department.objects.order_by('name').filter(building=building)
+    context['departments'] = m.Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Edifícios', 'url': reverse('college:buildings')},
@@ -308,7 +334,7 @@ def building_view(request, building_id):
 
 
 def room_view(request, room_id):
-    room = get_object_or_404(Room, id=room_id)
+    room = get_object_or_404(m.Room, id=room_id)
     building = room.building
     context = build_base_context(request)
     context['title'] = str(room)
@@ -366,15 +392,17 @@ def available_places_view(request):
 
     context['weekend'] = False
     building_turns = []
-    for building in Building.objects.order_by('id').all():
+    for building in m.Building.objects.order_by('id').all():
         rooms = []
-        for room in Room.objects.filter(building=building).all():
+        for room in m.Room.objects.filter(building=building).all():
             time_slots = []
             time = 8 * 60  # Start at 8 AM
             empty_state = False if room.type == RoomType.CLASSROOM or room.unlocked else None
-            for turn in TurnInstance.objects.filter(room=room, weekday=0,
-                                                    turn__class_instance__period=COLLEGE_PERIOD,
-                                                    turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
+            for turn in m.TurnInstance.objects.filter(
+                    room=room,
+                    weekday=0,  # FIXME
+                    turn__class_instance__period=COLLEGE_PERIOD,
+                    turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
                 if turn.start < time:
                     if turn.start + turn.duration > time:
                         busy_slots = int((turn.start - time + turn.duration) / 30)
@@ -408,7 +436,7 @@ def available_places_view(request):
 
 class ClassAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Class.objects.all()
+        qs = m.Class.objects.all()
         if self.q:
             qs = qs.filter(name__startswith=self.q)
         return qs

@@ -14,6 +14,7 @@ urlpatterns = [
     path('campus/servico/<int:service_id>/', views.service_view, name='service'),
     path('departamentos/', views.departments_view, name='departments'),
     path('departamento/<int:department_id>/', views.department_view, name='department'),
+    path('professor/<int:teacher_id>', views.teacher_view, name='teacher'),
     path('cadeira/<int:class_id>/', views.class_view, name='class'),
     # path('cadeira/<int:class_id>/resumo/', #, name='class_synopsis'),
     # path('cadeira/<int:class_id>/resumo/<int:section_id>/', #, name='class_synopsis_section'),

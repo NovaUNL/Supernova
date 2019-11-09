@@ -1,0 +1,79 @@
+{% extends 'supernova/content_only_formatted.html' %}
+
+{% load static %}
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+{% endblock %}
+
+{% block content %}
+  <style>
+    .flex-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+  </style>
+  <h1>Professor {{ teacher.name }}</h1>
+  <div class="flex-wrapper">
+    <div>
+      ???
+    </div>
+    <div>
+      <h2>Departamentos</h2>
+      <ul>
+        {% for department in teacher.departments.all %}
+          <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div style="margin-right: 50px">
+      <h2>Cadeiras</h2>
+      <ul style="list-style: none; padding-left: 10px;">
+        {% for instance in class_instances %}
+          <li>
+            <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}({{ instance.occasion }})</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div>
+      <h2>Horario<sup style="color: red">*</sup></h2>
+      <div style="overflow-x: scroll;">
+        <table class="schedule" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <th>Hora</th>
+            <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
+            <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
+            <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
+            <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
+            <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
+          </tr>
+          {% for row in schedule %}
+            <tr>
+              <td>{{ row.0|safe }}</td>
+              {% for element in row.1 %}
+                {% if element %}
+                  <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
+                      rowspan="{{ element.rowspan }}">
+                    <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
+                      {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
+                      {{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}<br></a>
+                    <a href="{% url 'college:room' element.turn.room.id %}">
+                      {{ element.turn.romm.short_str }}</a>
+                  </td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+      <b style="color: red"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
+        Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.</b>
+    </div>
+  </div>
+{% endblock %}
