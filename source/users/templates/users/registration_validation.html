@@ -15,11 +15,17 @@
 {% block content %}
   <div class="content-formatter">
     <h1><i class="fas fa-user-plus"></i> Validar registo</h1>
-    <div id="content_form">
-      <form method="get" action="{{ request.get_full_path }}">
-        {{ form.as_p }}
-        <input type="submit" value="Validar registo">
-      </form>
+    <div style="margin-left: 10px">
+      <p>
+        Procura no teu email por um link de validação.<br>
+        Se vires o email mas o link não for visivel podes inserir aqui o token recebido:
+      </p>
+      <div id="content_form">
+        <form method="get" action="{{ request.get_full_path }}">
+          {{ form.as_p }}
+          <input type="submit" value="Validar registo">
+        </form>
+      </div>
     </div>
   </div>
 {% endblock %}

@@ -9,13 +9,15 @@
     <a href="{{ profile_url }}">Perfil</a>
   {% endif %}
 
-  {% if schedule_url in request.path %}
-    <a class="selected">Horário</a>
-  {% else %}
-    <a href="{{ schedule_url }}">Horário</a>
+  {% if user.primary_student %}
+    {% if schedule_url in request.path %}
+      <a class="selected">Horário</a>
+    {% else %}
+      <a href="{{ schedule_url }}">Horário</a>
+    {% endif %}
   {% endif %}
 
-  <a href="#" class="disabled">Actividade</a>
+  {#  <a href="#" class="disabled">Actividade</a>#}
 
   {% if settings_url in request.path %}
     <a class="selected">Definições</a>
