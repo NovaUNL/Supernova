@@ -19,6 +19,7 @@ urlpatterns = [
     # path('cadeira/<int:class_id>/resumo/<int:section_id>/', #, name='class_synopsis_section'),
     path('cadeira/i/<int:instance_id>/', views.class_instance_view, name='class_instance'),
     path('cadeira/i/<int:instance_id>/turnos', views.class_instance_turns_view, name='class_instance_turns'),
+    path('cadeira/i/<int:instance_id>/inscritos', views.class_instance_enrolled_view, name='class_instance_enrolled'),
     path('cadeira/i/<int:instance_id>/ficheiros', views.class_instance_files_view, name='class_instance_files'),
     path('cadeira/i/<int:instance_id>/ficheiro/<str:file_hash>', views.class_instance_file_download, name='class_instance_file_download'),
     path('sala/<int:room_id>/', views.room_view, name='room'),

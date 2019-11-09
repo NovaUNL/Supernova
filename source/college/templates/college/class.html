@@ -20,7 +20,7 @@
 
   <span class="menu-entry" style="font-size: 1.2em; font-weight: bold;">Instâncias:</span>
   <ul>
-    {% for instance in class_obj.instances.all %}
+    {% for instance in instances %}
       <li><a class="menu-entry" href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a></li>
     {% endfor %}
   </ul>

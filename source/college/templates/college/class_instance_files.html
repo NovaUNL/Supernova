@@ -5,6 +5,11 @@
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
   <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+  <style>
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
 {% endblock %}
 
 {% block content-top %}
@@ -19,6 +24,12 @@
     <h2>Ficheiros</h2>
     <div class="flex-wrapper">
       <table>
+        <thead style="font-weight: bold; background-color: #ccc">
+        <td>Nome</td>
+        <td>Data</td>
+        <td>Criador</td>
+        <td>Dimensão (KB)</td>
+        </thead>
         {% for instance_file in instance_files %}
           <tr>
             <td>
@@ -27,6 +38,8 @@
               </a>
             </td>
             <td>{{ instance_file.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</td>
+            <td>{{ instance_file.uploader }}</td>
+            <td>{% widthratio instance_file.file.size 1024 1 %}</td>
           </tr>
         {% endfor %}
       </table>

@@ -1,0 +1,59 @@
+{% extends 'supernova/content_navigation.html' %}
+
+{% load static %}
+
+{% block head %}
+  <style>
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+{% endblock %}
+
+{% block content-top %}
+  <nav id="top-container">
+    {% include 'college/class_navigation.html' %}
+  </nav>
+{% endblock %}
+
+{% block content %}
+  {% include 'college/class_decorator.html' %}
+  <div class="content-formatter">
+    <h2>Ficheiros</h2>
+    <div class="flex-wrapper">
+      <table>
+        <thead style="font-weight: bold; background-color: #ccc">
+        <td>Nome</td>
+        <td>Identificador</td>
+        <td>Numero</td>
+        </thead>
+        {% for enrollment in instance.enrollments.all %}
+          <tr>
+            <td>
+              <a href="{% url 'profile' enrollment.student.user.nickname %}">{{enrollment.student.clip_student.name}}</a>
+            </td>
+            <td>
+              {{enrollment.student.abbreviation}}
+            </td>
+            <td>
+              {{enrollment.student.number}}
+            </td>
+          </tr>
+        {% endfor %}
+        {% for enrollment in instance.clip_class_instance.enrollments.all %}
+          <tr>
+            <td>
+              {{enrollment.student.name}}
+            </td>
+            <td>
+              {{enrollment.student.abbreviation}}
+            </td>
+            <td>
+              {{enrollment.student.iid}}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endblock %}
