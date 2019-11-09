@@ -30,9 +30,9 @@
 {% endblock %}
 
 {% block content %}
-  <h1><i class="fas fa-user-circle"></i> {{ user.get_full_name }}</h1>
+  <h1><i class="fas fa-user-circle"></i> {{ profile_user.get_full_name }}</h1>
   <div class="flex-wrapper">
-    {% if user.picture %}
+    {% if profile_user.picture %}
       <div class="flex-box">
         <h2><i class="fas fa-image"></i> Foto</h2>
         <img src="{% get_media_prefix %}{{ profile_user.picture }}" style="max-width: 200px; max-height: 150px;">
@@ -60,12 +60,12 @@
           </div>
         {% endfor %}
       </div>
-      {% if user.residence %}
-        <b>Residência:</b> {{ user.residence }}<br>
+      {% if profile_user.residence %}
+        <b>Residência:</b> {{ profile_user.residence }}<br>
       {% endif %}
       <b>Ultima atividade:</b> 5 horas atrás<br>
-      {% if user.webpage %}
-        <b>Página:</b> <a href="{{ user.webpage }}">{{ user.webpage }}</a><br>
+      {% if profile_user.webpage %}
+        <b>Página:</b> <a href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a><br>
       {% endif %}
     </div>
     {% if current_class_instances.exists %}
@@ -87,7 +87,7 @@
     {% if profile_user.badges.exists %}
       <div class="flex-box">
         <h2><i class="fas fa-trophy"></i> Conquistas</h2>
-        {% for badge in user.badges.all %}
+        {% for badge in profile_user.badges.all %}
           <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
         {% endfor %}
       </div>
@@ -154,7 +154,7 @@
     {% if profile_user.groups.exists %}
       <div class="flex-box">
         <h2><i class="fas fa-users"></i> Grupos</h2>
-        {% for group in user.group_set.all %}
+        {% for group in profile_user.group_set.all %}
           <a href="{% url 'group' group.id %}">
                         <span class="group" style="background-size: cover;background-image: url(
                             {% get_media_prefix %}{{ group.image }}">
