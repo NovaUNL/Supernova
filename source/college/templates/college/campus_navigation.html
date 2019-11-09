@@ -1,37 +1,30 @@
 <nav id="top-container">
-    {% url 'college:map' as map_url %}
-    {% url 'college:transportation' as transportation_url %}
-    {% url 'college:available_places' as available_places_url %}
-    {% url 'college:departments' as departments_url %}
-    {% url 'college:buildings' as buildings_url %}
+  {% url 'college:map' as map_url %}
+  {% url 'college:transportation' as transportation_url %}
+  {% url 'college:available_places' as available_places_url %}
+  {% url 'college:buildings' as buildings_url %}
 
-    {% if map_url in request.path %}
-        <a class="selected">Mapa</a>
-    {% else %}
-        <a href="{{ map_url }}">Mapa</a>
-    {% endif %}
+  {% if map_url in request.path %}
+    <a class="selected">Mapa</a>
+  {% else %}
+    <a href="{{ map_url }}">Mapa</a>
+  {% endif %}
 
-    {% if transportation_url in request.path %}
-        <a class="selected">Transportes</a>
-    {% else %}
-        <a href="{{ transportation_url }}">Transportes</a>
-    {% endif %}
+  {% if transportation_url in request.path %}
+    <a class="selected">Transportes</a>
+  {% else %}
+    <a href="{{ transportation_url }}">Transportes</a>
+  {% endif %}
 
-    {% if buildings_url in request.path %}
-        <a class="selected">Edifícios</a>
-    {% else %}
-        <a href="{{ buildings_url }}">Edifícios</a>
-    {% endif %}
+  {% if buildings_url in request.path %}
+    <a class="selected">Edifícios</a>
+  {% else %}
+    <a href="{{ buildings_url }}">Edifícios</a>
+  {% endif %}
 
-    {% if departments_url in request.path %}
-        <a class="selected">Departamentos</a>
-    {% else %}
-        <a href="{{ departments_url }}">Departamentos</a>
-    {% endif %}
-
-    {% if available_places_url in request.path %}
-        <a class="selected">Espaços disponíveis</a>
-    {% else %}
-        <a href="{{ available_places_url }}">Espaços disponíveis</a>
-    {% endif %}
+  {% if available_places_url in request.path %}
+    <a class="selected">Espaços disponíveis</a>
+  {% else %}
+    <a href="{{ available_places_url }}">Espaços disponíveis</a>
+  {% endif %}
 </nav>
