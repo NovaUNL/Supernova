@@ -5,7 +5,8 @@ from . import views
 app_name = 'college'
 
 urlpatterns = [
-    path('campus/', views.campus_view, name='campus'),
+    path('', views.index_view, name='index'),
+    path('campus/', views.map_view, name='campus'),
     path('campus/mapa/', views.map_view, name='map'),
     path('campus/transportes/', views.transportation_view, name='transportation'),
     path('campus/disponivel/', views.available_places_view, name='available_places'),

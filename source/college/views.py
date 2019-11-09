@@ -17,14 +17,12 @@ from supernova.views import build_base_context
 from services.models import Service, MenuDish
 
 
-def campus_view(request):
+def index_view(request):
     context = build_base_context(request)
-    context['title'] = "Mapa do campus"
-    context['buildings'] = m.Building.objects.all()
+    context['title'] = "Faculdade"
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
-        {'name': 'Mapa', 'url': reverse('college:map')}]
-    return render(request, 'college/campus.html', context)
+        {'name': 'Faculdade', 'url': reverse('college:index')}]
+    return render(request, 'college/college.html', context)
 
 
 def map_view(request):
@@ -32,6 +30,7 @@ def map_view(request):
     context['title'] = "Mapa do campus"
     context['buildings'] = m.Building.objects.all()
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Mapa', 'url': reverse('college:map')}]
     return render(request, 'college/campus.html', context)
@@ -41,6 +40,7 @@ def transportation_view(request):
     context = build_base_context(request)
     context['title'] = "Transportes para o campus"
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Transportes', 'url': reverse('college:transportation')}]
     return render(request, 'college/transportation.html', context)
@@ -51,7 +51,7 @@ def departments_view(request):
     context['title'] = "Departamentos"
     context['departments'] = m.Department.objects.order_by('name').filter(extinguished=False).all()
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')}]
     return render(request, 'college/departments.html', context)
 
@@ -71,12 +71,14 @@ def department_view(request, department_id):
             degrees))
     context['courses'] = courses_by_degree
     context['classes'] = department.classes.filter(extinguished=False).order_by('name').all()
-    context['teachers'] = department.teachers.filter(turns__class_instance__year__gt=2015).distinct().order_by('name')  # FIXME
+    context['teachers'] = department.teachers.filter(turns__class_instance__year__gt=2015).distinct().order_by(
+        'name')  # FIXME
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department_id])}]
     return render(request, 'college/department.html', context)
+
 
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher, id=teacher_id)
@@ -84,9 +86,9 @@ def teacher_view(request, teacher_id):
     context['title'] = teacher.name
     context['teacher'] = teacher
     context['class_instances'] = \
-        m.ClassInstance.objects\
-            .filter(turns__teachers=teacher)\
-            .order_by('parent__name', 'year', 'period')\
+        m.ClassInstance.objects \
+            .filter(turns__teachers=teacher) \
+            .order_by('parent__name', 'year', 'period') \
             .distinct()
 
     turns = teacher.turns.filter(
@@ -94,9 +96,8 @@ def teacher_view(request, teacher_id):
         class_instance__period=settings.COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
-        {'name': 'Departamentos', 'url': reverse('college:departments')},
-        {'name': '?', 'url': '#'},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Professores', 'url': '#'},
         {'name': teacher.name, 'url': '#'}]
     return render(request, 'college/teacher.html', context)
 
@@ -110,7 +111,7 @@ def class_view(request, class_id):
     context['class_obj'] = class_
     context['instances'] = class_.instances.order_by('year', 'period')
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
         {'name': class_.name, 'url': reverse('college:class', args=[class_id])}]
@@ -131,7 +132,7 @@ def class_instance_view(request, instance_id):
     context['occasion'] = occasion
 
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
         {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
@@ -155,6 +156,7 @@ def class_instance_turns_view(request, instance_id):
     context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(instance.turns.all())
 
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
         {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
@@ -179,6 +181,7 @@ def class_instance_enrolled_view(request, instance_id):
     context['occasion'] = occasion
 
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
         {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
@@ -204,6 +207,7 @@ def class_instance_files_view(request, instance_id):
     context['instance_files'] = instance.clip_class_instance.instance_files.order_by('upload_datetime')
 
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
         {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
@@ -251,10 +255,14 @@ def course_view(request, course_id):
     context = build_base_context(request)
     department = course.department
     context['title'] = str(course)
-
     context['course'] = course
+    context['student_count'] = course.students.filter(last_year=settings.COLLEGE_YEAR).count()
+    context['new_students_count'] = \
+        course.students \
+            .filter(first_year=settings.COLLEGE_YEAR, last_year=settings.COLLEGE_YEAR) \
+            .count()
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department, 'url': reverse('college:department', args=[department.id])},
         {'name': course, 'url': reverse('college:course', args=[course_id])}]
@@ -274,7 +282,7 @@ def course_students_view(request, course_id):
         .filter(course=course.clip_course, student=None) \
         .order_by('internal_id')
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department, 'url': reverse('college:department', args=[department.id])},
         {'name': course, 'url': reverse('college:course', args=[course_id])},
@@ -293,7 +301,7 @@ def course_curriculum_view(request, course_id):
     context['course'] = course
     context['curriculum'] = curriculum
     context['sub_nav'] = [
-        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department, 'url': reverse('college:department', args=[department.id])},
         {'name': course, 'url': reverse('college:course', args=[course_id])},
@@ -306,6 +314,7 @@ def buildings_view(request):
     context['title'] = "Edifícios"
     context['buildings'] = m.Building.objects.order_by('id').all()
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Edifícios', 'url': reverse('college:buildings')}]
     return render(request, 'college/buildings.html', context)
@@ -326,6 +335,7 @@ def building_view(request, building_id):
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = m.Department.objects.order_by('name').filter(building=building)
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Edifícios', 'url': reverse('college:buildings')},
         {'name': building.name, 'url': reverse('college:building', args=[building_id])}]
@@ -339,6 +349,7 @@ def room_view(request, room_id):
     context = build_base_context(request)
     context['title'] = str(room)
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': building.name, 'url': reverse('college:building', args=[building.id])},
         {'name': room.name, 'url': reverse('college:room', args=[room_id])}]
@@ -370,6 +381,7 @@ def service_view(request, service_id):
     context['building'] = building
     context['service'] = service
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': building.name, 'url': reverse('college:building', args=[building.id])},
         {'name': service.name, 'url': reverse('college:service', args=[service_id])}]
@@ -429,6 +441,7 @@ def available_places_view(request):
     context['turns'] = building_turns
 
     context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': 'Espaços', 'url': reverse('college:available_places')}]
     return render(request, 'college/available_places.html', context)

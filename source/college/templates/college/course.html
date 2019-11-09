@@ -41,12 +41,15 @@
   {% if course.department is None %}
     <h3 style="margin-left: 20px">Sem departamento associado</h3>
   {% else %}
-    <h3 style="margin-left: 20px"><a href="{% url 'college:department' course.department.id%}">Departamento de {{ course.department }}</a></h3>
+    <h3 style="margin-left: 20px">
+      <a href="{% url 'college:department' course.department.id %}">Departamento de {{ course.department }}</a>
+    </h3>
   {% endif %}
   <div class="flex-wrapper">
     <div style="flex-basis: 60%;">
       <h2>Descrição</h2>
       <p>{{ course.description }}</p>
+      <h2>Estrutura curricular</h2>
     </div>
     <div id="info-div" style="flex-basis: 250px;">
       <h2 style="text-align: left;">Informação</h2>
@@ -57,9 +60,9 @@
       <h3>Comissão de Praxe:</h3>
       <span class="info-entry">TODO</span>
       <h3>Caloiros:</h3>
-      <span class="info-entry">TODO</span>
+      <span class="info-entry">{{ new_students_count }}</span>
       <h3>Alunos inscritos:</h3>
-      <span class="info-entry">TODO</span>
+      <span class="info-entry">{{ student_count }}</span>
       <h3>Média dos alunos:</h3>
       <span class="info-entry">TODO</span>
     </div>
