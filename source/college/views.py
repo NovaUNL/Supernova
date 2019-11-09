@@ -250,6 +250,24 @@ def area_view(request, area_id):
     return render(request, 'college/area.html', context)
 
 
+def courses_view(request):
+    context = build_base_context(request)
+    context['title'] = "Cursos"
+    degrees = sorted(map(lambda degree: degree[0],
+                         set(m.Course.objects.filter(active=True).values_list('degree'))))
+    courses_by_degree = list(
+        map(lambda degree:
+            (Degree.name(degree),
+             m.Course.objects.filter(active=True, degree=degree).all()),
+            degrees))
+    courses_by_degree[2], courses_by_degree[3] = courses_by_degree[3], courses_by_degree[2]
+    context['degrees'] = courses_by_degree
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Cursos', 'url': reverse('college:courses')}]
+    return render(request, 'college/courses.html', context)
+
+
 def course_view(request, course_id):
     course = get_object_or_404(m.Course, id=course_id)
     context = build_base_context(request)

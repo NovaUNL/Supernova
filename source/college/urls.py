@@ -27,6 +27,7 @@ urlpatterns = [
     path('sala/<int:room_id>/', views.room_view, name='room'),
     path('areas/', views.areas_view, name='areas'),
     path('area/<int:area_id>/', views.area_view, name='area'),
+    path('cursos/', views.courses_view, name='courses'),
     path('curso/<int:course_id>/', views.course_view, name='course'),
     path('curso/<int:course_id>/alunos/', views.course_students_view, name='course_students'),
     path('curso/<int:course_id>/programa/', views.course_curriculum_view, name='course_curriculum'),

@@ -1,0 +1,17 @@
+{% extends 'supernova/content_navigation_formatted.html' %}
+
+{% load static %}
+
+{% block content %}
+  <h1><i class="fas fa-graduation-cap"></i> Cursos</h1>
+  {% for degree in degrees %}
+    <h2>{{ degree.0 }}</h2>
+    <div>
+      {% for course in degree.1 %}
+        <div style="padding-left: 10px">
+          <h3><a href="{% url 'college:course' course.id %}"><span>{{ course.name }}</span></a></h3>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+{% endblock %}
