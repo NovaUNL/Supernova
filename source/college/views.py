@@ -279,10 +279,16 @@ def course_view(request, course_id):
         course.students \
             .filter(first_year=settings.COLLEGE_YEAR, last_year=settings.COLLEGE_YEAR) \
             .count()
+    if department is None:
+        department_name = "Desconhecido"
+        department_url = "#"
+    else:
+        department_name = str(department)
+        department_url = reverse('college:department', args=[department.id])
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
-        {'name': department, 'url': reverse('college:department', args=[department.id])},
+        {'name': department_name, 'url': department_url},
         {'name': course, 'url': reverse('college:course', args=[course_id])}]
     return render(request, 'college/course.html', context)
 

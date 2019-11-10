@@ -34,8 +34,10 @@
                 <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
                   {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
                   {{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}<br></a>
-                <a href="{% url 'college:room' element.turn.room.id %}">
-                  {{ element.turn.romm.short_str }}</a>
+                {% if element.turn.room %}
+                  <a href="{% url 'college:room' element.turn.room.id %}">
+                    {{ element.turn.room.short_str }}</a>
+                {% endif %}
               </td>
             {% else %}
               <td></td>
