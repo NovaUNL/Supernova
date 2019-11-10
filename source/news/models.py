@@ -1,3 +1,4 @@
+from bs4 import BeautifulSoup
 from django.db import models as djm
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
@@ -38,14 +39,15 @@ class NewsItem(djm.Model):
         return markdownify(self.content)
 
     def gen_summary(self):
-        content = self.content[:300]
-        if len(content) == 300:
+        html = markdownify(self.content)
+        soup = BeautifulSoup(html, 'html.parser')
+        content = soup.text[:300]
+        if len(content) < 300:
             summary = content
         else:
             summary = content.rsplit(' ', 1)[0] + " ..."
-        if summary != summary:
+        if summary != self.summary:
             self.summary = summary
-            self.save()
 
 
 class NewsVote(djm.Model):
