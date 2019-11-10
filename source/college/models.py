@@ -129,7 +129,10 @@ class Room(Place):
         return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
 
     def long__str(self):
-        return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {super().__str__()}'
+        return f'{self.building}, {ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
+
+    def schedule_str(self):
+        return f'Ed {self.building.abbreviation}, {ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
 
 
 class Course(djm.Model):

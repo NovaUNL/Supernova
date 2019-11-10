@@ -17,7 +17,7 @@
     <div>
       <a href="{% url 'news_item' news_item.id %}"><h2>{{ news_item.title }}</h2></a>
       <div style="display: flex; flex-direction: row;">
-        <div style="width: 150px; height: 150px; background-image: url('{{ news_item.cover_img }}'); background-size: cover"></div>
+        <div style="width: 150px; height: 150px; background-image: url('{% get_media_prefix %}{{ news_item.cover_img }}'); background-size: cover"></div>
         <span>{{ news_item.summary }}</span>
       </div>
     </div>

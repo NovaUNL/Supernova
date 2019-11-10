@@ -8,6 +8,8 @@ from users.models import User
 class NewsTag(djm.Model):
     name = djm.CharField(max_length=32)
 
+def news_item_picture(news_item, filename):
+    return f'news/{news_item.id}/pic.{filename.split(".")[-1]}'
 
 class NewsItem(djm.Model):
     title = djm.CharField(max_length=256)
@@ -21,7 +23,7 @@ class NewsItem(djm.Model):
     edit_author = djm.ForeignKey(User, null=True, blank=True, on_delete=djm.SET_NULL, related_name='edit_author')
     tags = djm.ManyToManyField(NewsTag, blank=True)
     source = djm.URLField(null=True, blank=True, max_length=256)
-    cover_img = djm.ImageField(null=True, blank=True, max_length=256)
+    cover_img = djm.ImageField(null=True, blank=True, max_length=256, upload_to=news_item_picture)
     generated = djm.BooleanField(default=True)
 
     def __str__(self):

@@ -49,7 +49,7 @@
                             {% if instance.room %}
                                 <a style="border-bottom: 1px solid black"
                                    href="{% url 'college:room' instance.room.id %}">
-                                    {{ instance.room }}
+                                    {{ instance.room.schedule_str }}
                                 </a><br>
                             {% endif %}
                         {% endfor %}

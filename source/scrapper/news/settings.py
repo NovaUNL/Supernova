@@ -5,6 +5,8 @@ NEWSPIDER_MODULE = 'scrapper.news'
 
 ROBOTSTXT_OBEY = True
 
+LOG_LEVEL = 'INFO'
+
 ITEM_PIPELINES = {
-   'scrapper.news.pipelines.NewsItemPipeline': 300,
+    'scrapper.news.pipelines.NewsItemPipeline': 300,
 }

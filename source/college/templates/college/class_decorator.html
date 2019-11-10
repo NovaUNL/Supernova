@@ -4,7 +4,7 @@
         <a onclick="toggleVisibility('instance-years')">{{ instance.occasion }}</a>
         <ul id="instance-years" class="hidden">
             <hr>
-            {% for instance in instance.parent.instances.all %}
+            {% for instance in instance.parent.instances.all|dictsort:'year' %}
                 <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a></li>
             {% endfor %}
         </ul>
