@@ -1,7 +1,7 @@
 import random
-from django.core.cache import cache
 from django.shortcuts import render
 
+from services.utils import get_next_meal_items
 from users.forms import LoginForm
 from supernova.models import Changelog, Catchphrase
 from settings import VERSION
@@ -10,10 +10,12 @@ from news.models import NewsItem
 
 def index(request):
     context = build_base_context(request)
-    context['title'] = "O sistema que não deixa folhas soltas"
+    context['title'] = "Mais do que arame torcido"
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
     context['changelog'] = Changelog.objects.order_by('date').reverse()[0:3]
     context['catchphrase'] = random.choice(Catchphrase.objects.all())
+    context['meal_items'], context['meal_date'], time = get_next_meal_items()
+    context['meal_name'] = 'Almoço' if time == 3 else 'Jantar'
     return render(request, 'supernova/index.html', context)
 
 

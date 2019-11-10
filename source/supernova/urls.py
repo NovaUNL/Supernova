@@ -25,6 +25,8 @@ urlpatterns = [
     path('privacidade/', views.privacy, name='privacy'),
     # College views
     path('faculdade/', include('college.urls')),
+    # Services views
+    path('servicos/', include('services.urls')),
     # User views
     path('perfil/<str:nickname>/', users.profile_view, name='profile'),
     path('perfil/<str:nickname>/horario/', users.user_schedule_view, name='profile_schedule'),

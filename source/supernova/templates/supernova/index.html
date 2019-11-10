@@ -3,6 +3,25 @@
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'supernova/index.css' %}"/>
   <link rel="stylesheet" type="text/css" href="{% static 'news/news.css' %}"/>
+  <style>
+    .meals td {
+      text-align: center;
+    }
+
+    .meals td:nth-child(2) {
+      text-align: left;
+    }
+
+    .meals tr:nth-child(odd) {
+      background-color: #eee;
+    }
+
+    .meals thead {
+      font-weight: bold;
+      background-color: #ddd;
+      line-height: 120%;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
@@ -47,6 +66,38 @@
       {#      <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>#}
       {#      <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>#}
       {#      <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>#}
+
+      <h2>{{ meal_name }} na <a>cantina</a> a {{ meal_date }}</h2>
+      <table class="meals">
+        <thead>
+        <td></td>
+        <td>Nome</td>
+        <td>Glic.</td>
+        <td>Lip.</td>
+        <td>Prot.</td>
+        <td>KCal</td>
+        </thead>
+        {% for item in meal_items %}
+          <tr>
+            <td>
+              {% if item.0 == 1 %}
+              {% elif item.0 == 2 %}
+                <i class="fas fa-drumstick-bite"></i>
+              {% elif item.0 == 3 %}
+                <i class="fas fa-fish"></i>
+              {% elif item.0 == 4 %}
+                <i class="fas fa-leaf"></i>
+              {% else %}
+              {% endif %}
+            </td>
+            <td>{{ item.1 }}</td>
+            <td>{{ item.2 }}</td>
+            <td>{{ item.3 }}</td>
+            <td>{{ item.4 }}</td>
+            <td>{{ item.5 }}</td>
+          </tr>
+        {% endfor %}
+      </table>
     </div>
   </div>
 {% endblock %}
