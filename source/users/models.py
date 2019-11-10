@@ -111,7 +111,6 @@ class Registration(djm.Model):
     email = djm.EmailField()
     username = djm.CharField(verbose_name='utilizador', max_length=128)
     nickname = djm.CharField(verbose_name='alcunha', max_length=128)
-    student = djm.OneToOneField(clip.Student, on_delete=djm.CASCADE, verbose_name='estudante')
     clip_identifier = djm.CharField(max_length=128)
     password = djm.CharField(verbose_name='palavra-passe', max_length=128)
     creation = djm.DateTimeField(auto_now_add=True)
@@ -119,7 +118,7 @@ class Registration(djm.Model):
     failed_attempts = djm.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.username}/{self.nickname} - {self.student.abbreviation} -{self.email}"
+        return f"{self.username}/{self.nickname}/{self.clip_identifier} -{self.email}"
 
 
 class VulnerableHash(djm.Model):

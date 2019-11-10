@@ -12,6 +12,7 @@ import clip.models as clip
 import users.models as users
 import college.clip_synchronization as clip_sync
 import settings
+from college.models import Student
 from users.exceptions import InvalidToken, InvalidUsername, ExpiredRegistration, AccountExists, AssignedStudent
 
 
@@ -29,11 +30,13 @@ def pre_register(request, data: users.Registration):
     """
     username = data.username
     nickname = data.nickname
-    if clip.Student.objects.filter(abbreviation=username).exclude(id=data.student.id).exists():
+    clip_id = data.clip_identifier
+    if username != clip_id and clip.Student.objects.filter(abbreviation=username).exclude(
+            id=data.clip_identifier).exists():
         raise InvalidUsername(f'The username {username} matches a CLIP ID.')
 
     if users.User.objects.filter(Q(username=username) | Q(username=nickname) | Q(nickname=nickname)).exists():
-        raise AccountExists(f'There is already an account using the username {username} or the nickname {nickname}.')
+        raise AccountExists(f'There is an account already using the username {username} or the nickname {nickname}.')
 
     if users.User.objects.filter(email=data.email).exists():
         raise AccountExists(f'There is a registered account with the email {data.email}')
@@ -41,10 +44,10 @@ def pre_register(request, data: users.Registration):
     # Delete any existing registration request for this user
     # Registration.objects.filter(student=data.student).delete()
 
-    if hasattr(data.student, 'student'):
-        user = data.student.student.user  # Registration -> clip_student -> student -> user
-        if user is not None:
-            raise AssignedStudent(f'The student {username} is already assigned to the account {user}.')
+    # TODO check this on registration activation
+    existing = Student.objects.filter(abbreviation=clip_id).first()
+    if existing is not None and Student.objects.filter(abbreviation=clip_id).first().user is not None:
+        raise AssignedStudent(f'The student {clip_id} is already assigned to the account {existing.user.nickname}.')
 
     token = generate_token(settings.REGISTRATIONS_TOKEN_LENGTH)
     data.token = token

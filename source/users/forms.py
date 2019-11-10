@@ -156,7 +156,7 @@ class RegistrationForm(forms.ModelForm):
             email_prefix = self.cleaned_data["email"].split('@')[0]
             clip_identifier = self.cleaned_data["clip_identifier"]
             prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
-            if prefix_owner is not None and prefix_owner != clip_identifier:
+            if prefix_owner is not None and email_prefix != clip_identifier:
                 raise forms.ValidationError("O email utilizado pertence a outro estudante.")
         if 'password' in self.cleaned_data:  # Hash the password using Django's prefered hasher.
             self.cleaned_data['password'] = make_password(self.cleaned_data['password'])
