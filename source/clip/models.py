@@ -401,21 +401,22 @@ class File(djm.Model):
 
 
 class ClassInstanceFile(djm.Model):
-    class_instance = djm.OneToOneField(
+    class_instance = djm.ForeignKey(
         ClassInstance,
         on_delete=djm.PROTECT,
         db_column='class_instance_id',
-        related_name="instance_files",
-        primary_key=True)
-    file = djm.ForeignKey(
+        related_name="instance_files")
+    file = djm.OneToOneField(
         File,
         on_delete=djm.PROTECT,
-        db_column='file_id')
+        db_column='file_id',
+        primary_key=True)
     upload_datetime = djm.DateTimeField()
     uploader = djm.TextField(max_length=100)
 
     class Meta:
         managed = False
+        unique_together = ('class_instance', 'file')
         db_table = CLIPY_TABLE_PREFIX + 'class_instance_files'
 
 
