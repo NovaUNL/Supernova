@@ -61,10 +61,10 @@
       <div class="flex-wrapper" style="justify-content: space-between">
         <div id="help-panel">
           <p>O <b>utilizador</b> é utilizado para te autenticares.</p>
-          <p>A <b>alcunha</b>, se preenchida, identifica-te perante os restantes. Caso seja deixada a branco será o <b>utilizador</b>
-            a servir esse propósito.<br>
-            A alcunha é posteriormente alteravel.</p>
+          <p>A <b>alcunha</b> identifica-te perante os restantes. Caso fique em branco é substituida pelo <b>utilizador</b>.<br>
+            A <b>alcunha</b> é posteriormente alteravel.</p>
           <p>O <b>identificador</b> é a tua credencial do CLIP (ex. c.pereira).</p>
+          <p>A <b>password</b>, <b style="color: red">NÃO</b> tem de ser a do CLIP.</p>
         </div>
         <div class="flex-wrapper" id="form-fields">
           {{ creation_form.non_field_errors }}
@@ -74,7 +74,7 @@
             {{ creation_form.username.errors }}
           </div>
           <div>
-            {{ creation_form.nickname.label }}<br>
+            {{ creation_form.nickname.label }} (Opcional)<br>
             {{ creation_form.nickname }}
             {{ creation_form.nickname.errors }}
           </div>
