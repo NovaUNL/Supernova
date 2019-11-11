@@ -1,4 +1,5 @@
 import re
+from datetime import date
 
 from . import models as m
 from clip import models as clip
@@ -81,6 +82,11 @@ def courses():
                 clip_course=clip_course)
             course.save()
             logger.info(f'Created course {course}.')
+        else:
+            course = clip_course.course
+            if clip_course.degree != course.degree:
+                course.degree = clip_course.degree
+                course.save()
 
 
 def teachers():
@@ -103,10 +109,8 @@ def teachers():
                 logger.info(f"Added {department} to teacher {teacher}")
 
 
-def class_and_instances(year: int, period: int, bootstrap=False):
-    for clip_class_instance in clip.ClassInstance.objects.filter(year=year, period=period).all():
-        clip_class: clip.Class = clip_class_instance.parent
-
+def classes_(year: int, period: int, bootstrap=False):
+    for clip_class in clip.Class.objects.filter(department__institution_id=97747).all():
         if hasattr(clip_class, 'related_class'):  # There's a class attached to this crawled class.
             related_class = clip_class.related_class
         else:  # No corresponding class. Create one.
@@ -119,21 +123,30 @@ def class_and_instances(year: int, period: int, bootstrap=False):
             related_class.save()
             logger.info(f'Created class {related_class}.')
 
-        if hasattr(clip_class_instance, 'class_instance'):  # There's a class attached to this crawled class.
+        if bootstrap:
+            class_instances(related_class, year, period)
+
+
+def class_instances(_class: m.Class, year: int, period: int):
+    for clip_class_instance in _class.clip_class.instances.filter(year=year, period=period).all():
+        if hasattr(clip_class_instance, 'class_instance'):
+            # There's a class instance attached to this crawled class instance.
             class_instance = clip_class_instance.class_instance
+            class_instance.year = clip_class_instance.year
+            class_instance.period = clip_class_instance.period
+            class_instance.save()
         else:
             information = generate_class_instance_information(clip_class_instance)
             class_instance = m.ClassInstance(
-                parent=related_class,
-                period=period,
-                year=year,
+                parent=_class,
+                period=clip_class_instance.period,
+                year=clip_class_instance.year,
                 clip_class_instance=clip_class_instance,
                 information=information)
             class_instance.save()
             logger.info(f'Created class instance {class_instance}.')
 
-        if bootstrap:
-            turns(class_instance, bootstrap=True)
+        turns(class_instance, bootstrap=True)
 
 
 def turns(class_instance: m.ClassInstance, bootstrap=False):
@@ -208,6 +221,7 @@ def create_student(clip_student: clip.Student) -> m.Student:
         clip_student=clip_student)
     student.save()
     student_enrollments(student)
+    student.update_yearspan()
     return student
 
 
@@ -228,8 +242,15 @@ def student_turns(student: m.Student):
     # TODO delete old turns
 
 
-# Helper functions
+def teacher_turns(teacher: m.Teacher):
+    for clip_teacher in teacher.clip_teachers.all():
+        for clip_turn in clip.Turn.objects.filter(teachers=clip_teacher).all():
+            if clip_turn.turn not in teacher.turns.all():
+                teacher.turns.add(clip_turn.turn)
+                logger.info(f'Added turn {clip_turn.turn} to teacher {teacher}.')
 
+
+# Helper functions
 def generate_class_instance_information(clip_instance: clip.ClassInstance) -> dict:
     """
     Generates the class instance information dictionary
@@ -317,3 +338,23 @@ def generate_class_instance_information(clip_instance: clip.ClassInstance) -> di
         information['working_hours'] = clip_instance.working_hours
 
     return information
+
+
+def calculate_active_classes():
+    today = date.today()
+    current_year = today.year + today.month % 8
+    for class_ in m.Class.objects.all():
+        first_year = 9999
+        last_year = 0
+        max_enrollments = 0
+        for instance in class_.instances.all():
+            if instance.year < first_year:
+                first_year = instance.year
+            if instance.year > last_year:
+                last_year = instance.year
+            # enrollments = instance.enrollments.count()
+            # if enrollments > max_enrollments:
+            #     max_enrollments = enrollments
+
+        class_.extinguished = last_year < current_year - 2  # or max_enrollments < 5  # TODO get rid of magic number
+        class_.save()
