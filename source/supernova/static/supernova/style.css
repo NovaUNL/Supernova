@@ -313,7 +313,7 @@ h3 {
     height: 100%;
     width: 100%;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, 0.6);
@@ -530,7 +530,7 @@ h3 {
     #navigation {
         display: inline-block;
         height: 100%;
-        z-index: 10000;
+        z-index: 500;
     }
 
     #navigation .main-menu {
