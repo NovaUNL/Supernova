@@ -2,7 +2,7 @@
 {% url 'college:class_instance_turns' instance.id as turns_url %}
 {% url 'college:class_instance_enrolled' instance.id as enrolled_url %}
 {% url 'college:class_instance_files' instance.id as files_url %}
-{% url 'synopses:class' instance.id as synopsis_url %}
+{% url 'synopses:class' instance.parent.id as synopsis_url %}
 
 {% if info_url == request.path %}
     <a class="menu-entry selected">Info</a>
