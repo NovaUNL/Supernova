@@ -258,7 +258,7 @@ h3 {
 /* Content decorator styles */
 #content-title-decorator {
     width: 100%;
-    height: 200px;
+    min-height: 200px;
     background-image: url("/static/college/decorator-placeholder.jpg");
     background-size: cover;
     background-position: center;
@@ -657,11 +657,6 @@ h3 {
         overflow-x: hidden;
     }
 
-    .width-limiter {
-        width: 96%;
-        padding: 0 2%;
-    }
-
     #header {
         height: auto;
         flex-direction: column;
@@ -696,6 +691,7 @@ h3 {
 
     #logo-nav-wrapper {
         flex-direction: column;
+        width: 100%;
     }
 
     #navigation {
@@ -729,10 +725,15 @@ h3 {
         display: none;
     }
 
+    #top-content-wrapper, #bottom-content-wrapper{
+        overflow-x: auto;
+    }
+
     #middle {
         margin-top: 0;
         padding: 0;
         flex-wrap: nowrap;
+        width: 100%;
         height: 100%;
         position: relative;
         transition: 0.5s;
@@ -762,9 +763,5 @@ h3 {
 
     #overlay-prompt > form input[type=text], #overlay-prompt input[type=password] {
         width: 90%;
-    }
-
-    .flex-wrapper { /* Override the default, to center items on mobile */
-        justify-content: space-around !important;
     }
 }

@@ -58,8 +58,9 @@
               <label title="Toggle Drop-down" class="drop-icon" for="nav-l2">▾</label></a>
               <input type="checkbox" id="nav-l2">
               <ul class="sub-menu  depth1">
-                <li><a href="{% url 'college:departments' %}"><i class="fas fa-graduation-cap"></i>  Departamentos</a></li>
-                <li><a href="{% url 'college:courses' %}"><i class="fas fa-graduation-cap"></i>  Cursos</a></li>
+                <li><a href="{% url 'college:departments' %}"><i class="fas fa-graduation-cap"></i> Departamentos</a>
+                </li>
+                <li><a href="{% url 'college:courses' %}"><i class="fas fa-graduation-cap"></i> Cursos</a></li>
                 <li><a href="{% url 'college:campus' %}"><i class="fas fa-map"></i> Campus
                   <span class="drop-icon"></span>
                   <label title="Toggle Drop-down" class="drop-icon" for="nav-l21">▾</label></a>
@@ -94,30 +95,30 @@
                 <li class="disabled"><a href="{% url 'groups' %}"><i class="fas fa-users"></i> Grupos</a></li>
               </ul>
             </li>
-            <li class="disabled">
+            <li>
               <a href="#">Estudo
                 <span class="drop-icon"></span>
                 <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label></a>
               <input type="checkbox" id="nav-l3">
-              {#              <ul class="sub-menu depth1">#}
-              {#                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>#}
-              {#                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>#}
-              {#                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>#}
-              {#              </ul>#}
+              <ul class="sub-menu depth1">
+                <li><a href="{% url 'synopses:areas' %}"><i class="fas fa-book"></i> Sinteses</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-pencil-alt"></i> Exercicios</a></li>
+                <li><a href="#" class="disabled"><i class="fas fa-superscript"></i> Resoluções</a></li>
+              </ul>
             </li>
-{#            <li class="disabled">#}
-{#              <a href="#">Comunidade#}
-{#                <span class="drop-icon"></span>#}
-{#                <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>#}
-{#              </a>#}
-{#              <input type="checkbox" id="nav-l3">#}
-{#                            <ul class="sub-menu depth1">#}
-{#                              <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>#}
-{#                              <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>#}
-{#                              <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>#}
-{#                              <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>#}
-{#                            </ul>#}
-{#            </li>#}
+            {#            <li class="disabled">#}
+            {#              <a href="#">Comunidade#}
+            {#                <span class="drop-icon"></span>#}
+            {#                <label title="Toggle Drop-down" class="drop-icon" for="nav-l3">▾</label>#}
+            {#              </a>#}
+            {#              <input type="checkbox" id="nav-l3">#}
+            {#                            <ul class="sub-menu depth1">#}
+            {#                              <li><a href="#" class="disabled"><i class="fas fa-globe"></i> Planeta</a></li>#}
+            {#                              <li><a href="#" class="disabled"><i class="fas fa-euro-sign"></i> Loja</a></li>#}
+            {#                              <li><a href="#" class="disabled"><i class="fas fa-trash"></i> Classificados</a></li>#}
+            {#                              <li><a href="#" class="disabled"><i class="fas fa-comments"></i> Opiniões</a></li>#}
+            {#                            </ul>#}
+            {#            </li>#}
           </ul>
         </nav>
       </div>

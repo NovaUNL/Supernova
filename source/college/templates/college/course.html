@@ -6,7 +6,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: baseline;
-      justify-content: space-between;
+      justify-content: left;
     }
 
     .flex-wrapper > div {
@@ -27,10 +27,13 @@
     }
 
     #info-div {
-      text-align: right;
+      min-width: 220px;
     }
 
     .info-entry {
+      margin-left: 20px;
+      width: 100%;
+      display: block;
       text-align: right;
     }
   </style>
@@ -46,25 +49,27 @@
     </h3>
   {% endif %}
   <div class="flex-wrapper">
-    <div style="flex-basis: 60%;">
+    <div style="min-width: 60%; flex-grow: 4;">
       <h2>Descrição</h2>
       <p>{{ course.description }}</p>
       <h2>Estrutura curricular</h2>
     </div>
-    <div id="info-div" style="flex-basis: 250px;">
+    <div id="info-div">
       <h2 style="text-align: left;">Informação</h2>
-      <h3>Concelho pedagógico:</h3>
-      <span class="info-entry">TODO</span>
-      <h3>Núcleo de estudantes:</h3>
-      <span class="info-entry">TODO</span>
-      <h3>Comissão de Praxe:</h3>
-      <span class="info-entry">TODO</span>
-      <h3>Caloiros:</h3>
-      <span class="info-entry">{{ new_students_count }}</span>
-      <h3>Alunos inscritos:</h3>
-      <span class="info-entry">{{ student_count }}</span>
-      <h3>Média dos alunos:</h3>
-      <span class="info-entry">TODO</span>
+      <div style="margin-left: 20px">
+        <h3>Concelho pedagógico:</h3>
+        <span class="info-entry">TODO</span>
+        <h3>Núcleo de estudantes:</h3>
+        <span class="info-entry">TODO</span>
+        <h3>Comissão de Praxe:</h3>
+        <span class="info-entry">TODO</span>
+        <h3>Caloiros:</h3>
+        <span class="info-entry">{{ new_students_count }}</span>
+        <h3>Alunos inscritos:</h3>
+        <span class="info-entry">{{ student_count }}</span>
+        <h3>Média dos alunos:</h3>
+        <span class="info-entry">TODO</span>
+      </div>
     </div>
   </div>
 {% endblock %}

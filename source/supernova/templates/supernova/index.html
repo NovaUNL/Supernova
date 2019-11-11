@@ -21,6 +21,18 @@
       background-color: #ddd;
       line-height: 120%;
     }
+
+    .meals .cal-green {
+      background-color: #beeabd;
+    }
+
+    .meals .cal-yellow {
+      background-color: #e0eaaa;
+    }
+
+    .meals .cal-red {
+      background-color: #eac4b8;
+    }
   </style>
 {% endblock %}
 
@@ -30,25 +42,6 @@
     <span>{{ catchphrase }}</span>
   </div>
   <div class="flex-wrapper" style="margin-top: 10px; flex-direction: row">
-    <div class="flex-wrapper vertical">
-      <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
-      <div class="news-list">
-        {% for news_item in news %}
-          <div class="news-list-item">
-            <div class="news-list-item-image" style="background-image: url('{{ news_item.cover_img }}')"></div>
-            <div>
-              <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
-              {% if news_item.author %}
-                <p>Por <a href="{% url 'profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
-                  {{ news_item.datetime }}</p>
-              {% else %}
-                <p><a href="{{ news_item.source }}">Fonte</a>, {{ news_item.datetime.date }}</p>
-              {% endif %}
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
     <div class="flex-wrapper vertical">
       <h2>O que é o Supernova</h2>
       <p>O Supernova (ex Kleep) é uma tentativa por parte de um estudante para extender o nosso amado CLIP.</p>
@@ -94,10 +87,35 @@
             <td>{{ item.2 }}</td>
             <td>{{ item.3 }}</td>
             <td>{{ item.4 }}</td>
-            <td>{{ item.5 }}</td>
+            {% if item.5 < 800 %}
+              <td class="cal-green">{{ item.5 }}</td>
+            {% elif item.5 < 1000 %}
+              <td class="cal-yellow">{{ item.5 }}</td>
+            {% else %}
+              <td class="cal-red">{{ item.5 }}</td>
+            {% endif %}
           </tr>
         {% endfor %}
       </table>
+    </div>
+    <div class="flex-wrapper vertical">
+      <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
+      <div class="news-list">
+        {% for news_item in news %}
+          <div class="news-list-item">
+            <div class="news-list-item-image" style="background-image: url('{% get_media_prefix %}{{ news_item.cover_img }}')"></div>
+            <div>
+              <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
+              {% if news_item.author %}
+                <p>Por <a href="{% url 'profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
+                  {{ news_item.datetime }}</p>
+              {% else %}
+                <p><a href="{{ news_item.source }}">Fonte</a>, {{ news_item.datetime.date }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 {% endblock %}
