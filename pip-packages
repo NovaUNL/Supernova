@@ -17,3 +17,4 @@ django-markdownx
 scrapy
 scrapy-djangoitem
 html2text
+beautifulsoup4
