@@ -436,7 +436,7 @@ def available_places_view(request):
             empty_state = False if room.type == RoomType.CLASSROOM or room.unlocked else None
             for turn in m.TurnInstance.objects.filter(
                     room=room,
-                    weekday=0,  # FIXME
+                    weekday=datetime.now().weekday(),
                     turn__class_instance__period=COLLEGE_PERIOD,
                     turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
                 if turn.start < time:
