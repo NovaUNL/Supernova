@@ -1,87 +1,79 @@
-{% extends 'supernova/content_only.html' %}
+{% extends 'supernova/base.html' %}
 {% load static %}
 {% load leaflet_tags %}
 
 {% block head %}
-    {% leaflet_js %}
-    {% leaflet_css %}
-    <script>
-        let center = [
-            {{ building.location.coords.1|stringformat:"f" }},
-            {{ building.location.coords.0|stringformat:"f" }}];
-    </script>
-    <script src="{% static 'college/map/map.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+  {% leaflet_js %}
+  {% leaflet_css %}
+  <script>
+      let center = [
+          {{ building.location.coords.1|stringformat:"f" }},
+          {{ building.location.coords.0|stringformat:"f" }}];
+  </script>
+  <script src="{% static 'college/map/map.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+  {% if  building.picture %}
     <style>
-        .flex-wrapper > div {
-            margin: 10px 20px;
-            flex-basis: 475px;
-        }
-
-        #content-title-decorator {
-        {% if  building.picture %}
-            background-image: url("{{ building.picture.url }}");
-        {% endif %}
-        }
+      .header-decorator {
+        background-image: url("{{ building.picture.url }}");
+      }
     </style>
+  {% endif %}
 {% endblock %}
 
-{% block content %}
-    <div id="content-title-decorator">
-        <span class="clearfix"></span>
-        <h1><i class="fas fa-map-marker"></i> {{ building.name }}</h1>
+{% block content_wrapper %}
+  <div class="col">
+    <div class="content-title-decorator">
+      <h1>{{ building.name }}</h1>
     </div>
-    <div class="content-formatter">
-        <div class="flex-wrapper">
-            <div>
-                <h2>Localização</h2>
-                {% leaflet_map "campus-map" callback="initBuildingMap" %}
-            </div>
-            <div>
-                <h2>Planta</h2>
-                {% if building.map %}
-                {% else %}
-                    As plantas encontram-se a ser feitas à mão a partir das plantas de incêndio.<br>
-                    Alguns edifícios não tem planta de incêndio e a administração recusa-se a partilhar o que quer
-                    que seja não vão os malandros dos alunos andar a consultar sem permissão as salas que tem na sua
-                    faculdade.<br>
-                    Assim que alguém acabe de mapear a planta deste edifício (ou a administração decida
-                    colaborar) a mesma será embutida aqui.
-                {% endif %}
-            </div>
-            <div>
-                {% if departments.exists %}
-                    <h2>Departamentos:</h2>
-                    <ul style="list-style: none; padding-left: 20px;">
-                        {% for department in departments.all %}
-                            <li><a href="{% url 'college:department' department.id %}">{{ department.name }}</a></li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                {% if services.exists %}<h2>Serviços:</h2>
-                    <ul>
-                        {% for service in services.all %}
-                            <li><a href="{% url 'service' service.id %}">{{ service.name }}</a></li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-                <h2>Núcleos:</h2>
-                <ul>
-                    <li>TODO</li>
-                </ul>
-            </div>
-            {% for type in rooms %}
-                <div class="type-and-room-list">
-                    <h2>{{ type.0 }}:</h2>
-                    <div class="room-list">
-                        {% for room in type.1 %}
-                            <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
-                                {{ room.name }}
-                            </a>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
+    <div class="row padded">
+      <div class="flex-pane big">
+        <div class="pane-title bg-grad"><h2>Localização</h2></div>
+        <div class="pane-content">{% leaflet_map "campus-map" callback="initBuildingMap" %}</div>
+      </div>
+      <div class="flex-pane big">
+        <div class="pane-title bg-grad"><h2>Planta</h2></div>
+        <div class="pane-content">
+          {% if building.map %}
+          {% else %}
+            Sem planta.
+          {% endif %}
         </div>
+      </div>
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Departamentos</h2></div>
+          <div class="pane-content">
+            <ul style="list-style: none; padding-left: 20px;">
+              {% for department in departments.all %}
+                <li><a href="{% url 'college:department' department.id %}">{{ department.name }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Núcleos</h2></div>
+          <div class="pane-content">
+            <ul>
+              <li>TODO</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="row full">
+        {% for type in rooms %}
+          <div class="flex-pane type-and-room-list">
+            <div class="pane-title bg-grad"><h2>{{ type.0 }}:</h2></div>
+            <div class="pane-content room-list">
+              {% for room in type.1 %}
+                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
+                  {{ room.name }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     </div>
+  </div>
 {% endblock %}

@@ -8,7 +8,6 @@
 /* Campus Map */
 .map {
     width: 100%;
-    height: 70vh;
     min-height: 400px;
 }
 
@@ -56,3 +55,6 @@
     background-color: #8dd35f;
 }
 
+.leaflet-pane {
+    z-index: 0;
+}

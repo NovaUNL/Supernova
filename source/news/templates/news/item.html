@@ -1,76 +1,26 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/content_only_formatted.html' %}
 
 {% load static %}
 
-{% block head %}
-    <style>
-        #reaction_buttons {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .reaction_button {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.1em;
-            background-color: #bcbcbc;
-            border-radius: 5px;
-            padding: 5px 10px;
-            margin-right: 20px;
-            color: white;
-            font-weight: bold;
-            border: solid 2px #777;
-        }
-
-        .reaction_button > .svg-inline--fa {
-            margin-left: 10px;
-        }
-
-        .like {
-            background-color: #2fa40c;
-        }
-
-        .dislike {
-            background-color: red;
-        }
-
-        .favorite {
-            background-color: deeppink;
-        }
-    </style>
+{% block title %}
+  <h2>{{ news_item.title }}</h2>
 {% endblock %}
 
 {% block content %}
-    <div class="content-formatter">
-        <h1><i class="far fa-newspaper"></i> {{ news_item.title }}</h1>
-        {% if news_item.cover_img %}
-            <img src="{% get_media_prefix %}{{ news_item.cover_img }}"/>
-        {% endif %}
-        <h3>{{ news_item.summary }}</h3>
-        <p>{{ news_item.content_html|safe }}</p>
-        <br>
-{#        <div id="reaction_buttons">#}
-{#            <a href="#"><span class="reaction_button like">Boa notícia <i class="far fa-thumbs-up"></i></span></a>#}
-{#            <a href="#"><span class="reaction_button dislike">Má notícia <i class="far fa-thumbs-down"></i></span></a>#}
-{#            <a href="#"><span class="reaction_button favorite">Excelente trabalho <i#}
-{#                    class="far fa-heart"></i></span></a>#}
-{#        </div>#}
-        <br>
-{#        <h3>Fontes:</h3>#}
-{#        <ul>#}
-{#            <li>Por fazer</li>#}
-{#        </ul>#}
-        {% if news_item.generated %}
-            <span>Obtida automáticamente(<a href="{{ news_item.source }}">fonte</a>), datada de {{ news_item.datetime.date }}</span><br>
-        {% else %}
-            <span>Submetida por <a
-                    href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}
-    </span><br>
-        {% endif %}
-        {% if news_item.edited %}
-            <span>Última edição por
-            <a href="{% url 'profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})
-        </span>
-        {% endif %}
-    </div>
+  {% if news_item.cover_img is None %}
+    <h1><i class="far fa-newspaper"></i> {{ news_item.title }}</h1>
+    <h3>{{ news_item.datetime.date }}</h3>
+  {% endif %}
+  <img src="{% get_media_prefix %}{{ news_item.cover_img }}">
+  <p>{{ news_item.content_html|safe }}</p>
+  {% if news_item.generated %}
+    <span>Obtida automáticamente(<a
+        href="{{ news_item.source }}">fonte</a>), datada de {{ news_item.datetime.date }}</span>
+    <br>
+  {% else %}
+    <span>Submetida por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}</span><br>
+  {% endif %}
+  {% if news_item.edited %}
+    <span>Última edição por <a href="{% url 'profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})</span>
+  {% endif %}
 {% endblock %}

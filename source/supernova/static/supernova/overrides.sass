@@ -1,0 +1,92 @@
+@import "variables"
+
+.pt-line
+  display: flex
+  flex-wrap: nowrap
+  margin-bottom: 5px
+
+  span
+    display: inline-block
+    padding: 5px
+    font-weight: 900
+    border: 2px solid $color-primary-3
+    background-color: $color-primary-0
+    margin: 0
+
+  .number
+    border-top-left-radius: 5px
+    border-bottom-left-radius: 5px
+
+  .time
+    border-left: 0
+    border-right: 0
+
+  .direction
+    border-top-right-radius: 5px
+    border-bottom-right-radius: 5px
+    flex-grow: 1
+
+.pt-line.bus .number
+  background-color: $blue
+
+.pt-line.metro .number
+  background-color: $green
+  padding-left: 25px
+
+.pane-content.news
+  display: flex
+  flex-wrap: wrap
+
+.news-list-item
+  display: flex
+  flex-direction: row
+  margin: 5px
+  background-color: $color-primary-0
+  flex-basis: 500px
+  flex-grow: 1
+  padding: 5px 10px
+  border-radius: 4px
+
+  img
+    max-width: 100px
+    max-height: 100px
+    flex-basis: 100px
+    background-size: cover
+    flex-shrink: 0
+    margin-right: 10px
+    background-color: lightgrey
+
+  div
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    width: 100%
+
+    span
+      align-self: flex-end
+
+.profile
+  .students
+    color: $color-primary-3
+    background-color: $color-primary-1
+    border-radius: 5px
+
+    div
+      padding: 5px
+
+    div:first-child
+      border: solid 2px $color-primary-2
+      background-color: $color-primary-0
+      border-radius: 5px
+      color: $color-primary-1 !important
+
+  .group
+    background-size: cover
+
+  ul
+    list-style: none
+    padding-left: 0
+    margin: 0
+
+  .flex-pane
+    flex-grow: 1

@@ -1,8 +1,0 @@
-<nav id="top-container">
-    {% url 'news_index' as index_url %}
-    {% if index_url in request.path %}
-        <a class="selected">Todas</a>
-    {% else %}
-        <a href="{{ index_url }}">Todas</a>
-    {% endif %}
-</nav>

@@ -1,132 +1,131 @@
-{% extends 'supernova/content_only.html' %}
+{% extends 'supernova/base.html' %}
 {% load static %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
-    <style>
-        .flex-wrapper > div {
-            margin: 10px 20px 10px 20px;
-        }
+  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+  <style>
+    .flex-wrapper > div {
+      margin: 10px 20px 10px 20px;
+    }
 
-        .room-feature {
-            font-weight: bold;
-            background-color: #FAFAFA;
-            border: 2px solid #ccc;
-            border-radius: 2px;
-            padding: 10px 5px;
-            margin: 5px;
-        }
-    </style>
+    .room-feature {
+      font-weight: bold;
+      background-color: #FAFAFA;
+      border: 2px solid #ccc;
+      border-radius: 2px;
+      padding: 10px 5px;
+      margin: 5px;
+    }
+  </style>
 {% endblock %}
-{% block content %}
-    <div id="content-title-decorator">
-        <span class="clearfix"></span>
-        <h1>
-            <i class="fas fa-map-marker-alt"></i> {{ room }},
-            <small><a href="{% url 'college:building' building.id %}">{{ building.name }}</a></small>
-        </h1>
-        {% if room.description %}
-            <h3>{{ room.description }}</h3>
-        {% endif %}
+{% block content_wrapper %}
+  <div class="col main">
+    <div class="header-decorator">
+      <h1>
+        {{ room }},
+        <small><a href="{% url 'college:building' building.id %}">{{ building.name }}</a></small>
+      </h1>
+      {% if room.description %}
+        <h3>{{ room.description }}</h3>
+      {% endif %}
     </div>
-    <div class="content-formatter">
-        <div class="flex-wrapper">
+    <div class="row padded" style="flex-wrap: nowrap">
+      <div class="col main">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Horário</h2></div>
+          <div class="pane-content">
+            <table class="schedule" cellpadding="0" cellspacing="0" width="700px">
+              <tr>
+                <th>Hora</th>
+                <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
+                <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
+                <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
+                <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
+                <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
+              </tr>
+              {% for row in schedule %}
+                <tr>
+                  <td>{{ row.0|safe }}</td>
+                  {% for element in row.1 %}
 
-            {% if room.description %}
-                <div>
-                    <h2>Informação:</h2>
-                    <div>
-                        <h3>Piso:</h3>
-                        {{ room.floor }}
-                    </div>
-                    <div>
-                        <h3>Aberta:</h3>
-                        {% if room.unlocked == True %}
-                            <span style="color: green">Sim</span>
-                        {% elif room.unlocked == False %}
-                            <span style="color: red">Não</span>
-                        {% else %}
-                            <span style="color: #baa135">Desconhecido</span>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <h3>Capacidade:</h3>
-                        {% if room.capacity %}
-                            {{ room.capacity }}
-                        {% else %}
-                            <span style="color: #baa135">Desconhecida</span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
-            <div style="flex-basis: 475px">
-                <h2>Localização</h2>
-
-                {% if building.map %}
-                {% else %}
-                    As plantas encontram-se a ser feitas à mão a partir das plantas de incêndio.<br>
-                    Alguns edifícios não tem planta de incêndio e a administração recusa-se a partilhar o que quer
-                    que seja não vão os malandros dos alunos andar a consultar sem permissão as salas que tem na sua
-                    faculdade.<br>
-                    Assim que alguém acabe de mapear a planta deste edifício (ou a administração decida
-                    colaborar) a mesma será embutida aqui.
-                {% endif %}
-            </div>
-            <div style="overflow-x: scroll; width: 700px;">
-                <h2>Horário:</h2>
-                <table class="schedule" cellpadding="0" cellspacing="0" width="700px">
-                    <tr>
-                        <th>Hora</th>
-                        <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
-                        <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
-                        <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
-                        <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
-                        <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
-                    </tr>
-                    {% for row in schedule %}
-                        <tr>
-                            <td>{{ row.0|safe }}</td>
-                            {% for element in row.1 %}
-
-                                {% if element %}
-                                    <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
-                                        rowspan="{{ element.rowspan }}">
-                                        <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
-                                            {{ element.turn.turn.class_instance.parent.abbreviation }}</a><br>
-                                        {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
-                                        {{ element.turn.room.short_str }}
-
-                                    </td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            {% if room.equipment %}
-                <div>
-                    <h2>Material:</h2>
-                    <div style="min-width: 500px">
-                        {{ room.equipment|linebreaks }}
-                    </div>
-                </div>
-            {% endif %}
-            {% if room.features.exists %}
-                <div style="flex-grow: 2">
-                    <h2>Considerações:</h2>
-                    <div style="display: flex; flex-wrap: wrap;">
-                        {% for feature in room.features.all %}
-                            <div class="room-feature">
-                                <img src="{{ feature.icon.url }}" width="64px" height="64px">
-                                <span>{{ feature.name }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
+                    {% if element %}
+                      <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
+                          rowspan="{{ element.rowspan }}">
+                        <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
+                          {{ element.turn.turn.class_instance.parent.abbreviation }}</a><br>
+                        {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
+                        {{ element.turn.room.short_str }}
+                      </td>
+                    {% else %}
+                      <td></td>
+                    {% endif %}
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
         </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Material</h2></div>
+          <div class="pane-content">
+            {{ room.equipment|linebreaks }}
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            <div>
+              <h3>Piso:</h3>
+              {{ room.floor }}
+            </div>
+            <div>
+              <h3>Aberta:</h3>
+              {% if room.unlocked == True %}
+                <span style="color: green">Sim</span>
+              {% elif room.unlocked == False %}
+                <span style="color: red">Não</span>
+              {% else %}
+                <span style="color: #baa135">Desconhecido</span>
+              {% endif %}
+            </div>
+            <div>
+              <h3>Capacidade:</h3>
+              {% if room.capacity %}
+                {{ room.capacity }}
+              {% else %}
+                <span style="color: #baa135">Desconhecida</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Localização</h2></div>
+          <div class="pane-content">
+            <div style="flex-basis: 475px">
+              {% if building.map %}
+              {% else %}
+                Planta em falta
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Considerações</h2></div>
+          <div class="pane-content">
+            <div style="display: flex; flex-wrap: wrap;">
+              {% for feature in room.features.all %}
+                <div class="room-feature">
+                  <img src="{{ feature.icon.url }}" width="64px" height="64px">
+                  <span>{{ feature.name }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
 {% endblock %}

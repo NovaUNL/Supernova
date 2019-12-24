@@ -1,121 +1,329 @@
-{% extends 'supernova/content_only_formatted.html' %}
+{% extends 'supernova/two_columns.html' %}
 {% load static %}
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'supernova/index.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'news/news.css' %}"/>
-  <style>
-    .meals td {
-      text-align: center;
-    }
-
-    .meals td:nth-child(2) {
-      text-align: left;
-    }
-
-    .meals tr:nth-child(odd) {
-      background-color: #eee;
-    }
-
-    .meals thead {
-      font-weight: bold;
-      background-color: #ddd;
-      line-height: 120%;
-    }
-
-    .meals .cal-green {
-      background-color: #beeabd;
-    }
-
-    .meals .cal-yellow {
-      background-color: #e0eaaa;
-    }
-
-    .meals .cal-red {
-      background-color: #eac4b8;
-    }
-  </style>
+  <link rel="stylesheet" type="text/css" href="{% static 'supernova/overrides.css' %}"/>
 {% endblock %}
 
-{% block content %}
-  <div class="high-res-only">
-    <h1 style="margin-bottom: 5px;">Bem vindo ao Supernova</h1>
-    <span>{{ catchphrase }}</span>
-  </div>
-  <div class="flex-wrapper" style="margin-top: 10px; flex-direction: row">
-    <div class="flex-wrapper vertical">
-      <h2>O que é o Supernova</h2>
-      <p>O Supernova (ex Kleep) é uma tentativa por parte de um estudante para extender o nosso amado CLIP.</p>
-      <p>
-        Dados os ultimos problemas com o sistema informático, optou-se por disponibilizar a informação presente no CLIP.
-        Podes ler mais sobre isso <a href="https://claudiop.com/2019/11/03/Supernova-being-opened.html">aqui</a>.
-      </p>
-      <p>Sendo a informação presente no CLIP confidencial a estudantes, este mirror exige uma conta e uma prova de
-        identidade, a qual pode ser obtida com recurso ao email do campus.</p>
-      <p>Duvidas: cad.pereira -at- campus.fct.unl.pt ou discord de MiEI.</p>
-      {#      <h2>Próximos eventos</h2>#}
-      {#      <h3>Competição de plágio</h3>#}
-      {#      <p>5 Março 2018, 16:00, Edifício VII, Auditorio 1C</p>#}
-      {#      <h3>Workshop de bio-electro-mecano-informática para engenheiros civis</h3>#}
-      {#      <p>6 Março 2018, 14:00, Edifício IX, Sala 123</p>#}
-      {#      <h3>Formação em ocultação de telemóveis aplicada a aulas de Física</h3>#}
-      {#      <p>5 Março 2018, 11:00, Edifício I, maioritariamente na rua!</p>#}
-
-      <h2>{{ meal_name }} na <a>cantina</a> a {{ meal_date }}</h2>
-      <table class="meals">
-        <thead>
-        <td></td>
-        <td>Nome</td>
-        <td>Glic.</td>
-        <td>Lip.</td>
-        <td>Prot.</td>
-        <td>KCal</td>
-        </thead>
-        {% for item in meal_items %}
-          <tr>
-            <td>
-              {% if item.0 == 1 %}
-              {% elif item.0 == 2 %}
-                <i class="fas fa-drumstick-bite"></i>
-              {% elif item.0 == 3 %}
-                <i class="fas fa-fish"></i>
-              {% elif item.0 == 4 %}
-                <i class="fas fa-leaf"></i>
-              {% else %}
-              {% endif %}
-            </td>
-            <td>{{ item.1 }}</td>
-            <td>{{ item.2 }}</td>
-            <td>{{ item.3 }}</td>
-            <td>{{ item.4 }}</td>
-            {% if item.5 < 800 %}
-              <td class="cal-green">{{ item.5 }}</td>
-            {% elif item.5 < 1000 %}
-              <td class="cal-yellow">{{ item.5 }}</td>
-            {% else %}
-              <td class="cal-red">{{ item.5 }}</td>
-            {% endif %}
-          </tr>
-        {% endfor %}
-      </table>
-    </div>
-    <div class="flex-wrapper vertical">
-      <a href="{% url 'news_index' %}"><h2>Últimas notícias</h2></a>
-      <div class="news-list">
-        {% for news_item in news %}
-          <div class="news-list-item">
-            <div class="news-list-item-image" style="background-image: url('{% get_media_prefix %}{{ news_item.cover_img }}')"></div>
-            <div>
-              <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
-              {% if news_item.author %}
-                <p>Por <a href="{% url 'profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
-                  {{ news_item.datetime }}</p>
-              {% else %}
-                <p><a href="{{ news_item.source }}">Fonte</a>, {{ news_item.datetime.date }}</p>
-              {% endif %}
+{% block content_wrapper %}
+  <div id="particles"></div>
+  <div class="row padded" style="flex-wrap: nowrap">
+    <div class="col main">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Notícias</h2>
+        </div>
+        <div class="pane-content news">
+          {% for news_item in news %}
+            <div class="news-list-item">
+              <img src="{% get_media_prefix %}{{ news_item.cover_img }}" alt="{{ news_item.title }}">
+              <div>
+                <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
+                {% if news_item.author %}
+                  <span>Por <a href="{% url 'profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
+                    {{ news_item.datetime }}</span>
+                {% else %}
+                  <span><a href="{{ news_item.source }}">Fonte</a>, {{ news_item.datetime.date }}</span>
+                {% endif %}
+              </div>
             </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="flex-pane grow">
+          <div class="pane-title bg-grad">
+            <h2>Atividade</h2>
           </div>
-        {% endfor %}
+          <div class="pane-content">
+            TODO
+          </div>
+        </div>
+        <div class="flex-pane grow">
+          <div class="pane-title bg-grad"><h2>Alterações</h2></div>
+          <div class="pane-content">
+            TODO
+          </div>
+        </div>
+        <div class="flex-pane grow">
+          <div class="pane-title bg-grad">
+            <h2>Salas <b>possívelmente</b> vazias</h2>
+          </div>
+          <div class="pane-content">
+            TODO
+          </div>
+        </div>
+        <div class="flex-pane grow">
+          <div class="pane-title bg-grad"><h2>Eventos</h2></div>
+          <div class="pane-content">
+            TODO
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Transportes</h2>
+        </div>
+        <div class="pane-content">
+          <div class="pt-line bus">
+            <span class="number">123</span>
+            <span class="time">12:34</span>
+            <span class="direction">Cacilhas</span>
+          </div>
+          <div class="pt-line bus">
+            <span class="number">321</span>
+            <span class="time">32:10</span>
+            <span class="direction">T. Argolas</span>
+          </div>
+          <div class="pt-line metro">
+            <span class="number">3</span>
+            <span class="time">32:10</span>
+            <span class="direction">Cacilhas</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Cantina</h2>
+        </div>
+        <div class="pane-content meals">
+          <span>{{ meal_name }} a {{ meal_date }}</span>
+          {% for item in meal_items %}
+            <div>
+              {% if item.0 == 1 %}
+                <img src="{% static 'services/soup.svg' %}">
+              {% elif item.0 == 2 %}
+                <img src="{% static 'services/meat.svg' %}">
+              {% elif item.0 == 3 %}
+                <img src="{% static 'services/fish.svg' %}">
+              {% elif item.0 == 4 %}
+                <img src="{% static 'services/veg.svg' %}">
+              {% else %}
+              {% endif %}
+              {{ item.1 }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Meteorologia</h2>
+        </div>
+        <div class="pane-content" id="weather" style="height: 100%; overflow-x: hidden">
+          <svg id="chart" width="380" height="200"></svg>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Fala connosco</h2>
+        </div>
+        <div class="pane-content" style="display: flex; justify-content: space-between; filter: grayscale(50%);">
+          <a href="https://riot.im/app/#/group/+novasupernova:matrix.org">
+            <img src="{% static 'supernova/images/third-party/riot.svg' %}" alt="" width="64px" height="64px">
+          </a>
+          <a href="https://t.me/novasupernova">
+            <img src="{% static 'supernova/images/third-party/telegram.svg' %}" alt="telegram" width="64px" height="64px">
+          </a>
+          <a href="https://discord.gg/cSu8uEG">
+            <img src="{% static 'supernova/images/third-party/discord.svg' %}" alt="discord" width="64px" height="64px">
+          </a>
+          <a href="https://gitlab.com/claudiop/Supernova/issues">
+            <img src="{% static 'supernova/images/third-party/gitlab.svg' %}" alt="gitlab" width="64px" height="64px">
+          </a>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>BOINC</h2>
+        </div>
+        <div class="pane-content">
+          <span>Equipa <a href="https://www.boincstats.com/stats/-1/team/detail/2068385380/overview">NOVA Lisboa</a></span>
+          <table>
+            <thead>
+            <tr>
+              <th></th>
+              <th>Utilizador</th>
+              <th>Última semana</th>
+            </tr>
+            </thead>
+            <thead>
+            <tr>
+              <th></th>
+              <th>Projeto</th>
+              <th>Última semana</th>
+            </tr>
+            </thead>
+          </table>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+      particlesJS.load('particles', "{% static 'supernova/particles.json' %}", function () {
+          console.log('callback - particles.js config loaded');
+      });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@5.14.2/dist/d3.min.js"
+          integrity="sha256-M2M+sgC2bZ4r73FO1LV5JmHiS5COwEb2Uqw7EbsHmBY=" crossorigin="anonymous"></script>
+  <script>
+      d3.json("./data.json").then(d => chart(d));
+
+      function chart(data) {
+
+          // var keys = data.columns.slice(1);
+          var keys = ["min", "max", "hr"];
+
+          var parseTime = d3.utcParse("%Y-%m-%dT%H"),
+              formatDate = d3.timeFormat("%H"),
+              bisectDate = d3.bisector(d => d.date).left,
+              formatValue = d3.format(",.0f");
+
+          data.forEach(function (d) {
+              d.date = parseTime(d.date);
+              return d;
+          });
+
+          var svg = d3.select("#chart"),
+              margin = {top: 15, right: 35, bottom: 15, left: 35},
+              width = +svg.attr("width") - margin.left - margin.right,
+              height = +svg.attr("height") - margin.top - margin.bottom;
+
+          var x = d3.scaleTime()
+              .rangeRound([margin.left, width - margin.right])
+              .domain(d3.extent(data, d => d.date));
+
+          var y = d3.scaleLinear()
+              .rangeRound([height - margin.bottom, margin.top]);
+
+          var z = d3.scaleOrdinal(["#002b8f", "#990011", "#515967"]);
+
+          var line = d3.line()
+              .curve(d3.curveCardinal)
+              .x(d => x(d.date))
+              .y(d => y(d.val));
+
+          svg.append("g")
+              .attr("class", "x-axis")
+              .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+              .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H")));
+
+          svg.append("g")
+              .attr("class", "y-axis")
+              .attr("transform", "translate(" + margin.left + ",0)");
+
+          var focus = svg.append("g")
+              .attr("class", "focus")
+              .style("display", "none");
+
+
+          var overlay = svg.append("rect")
+              .attr("class", "overlay")
+              .attr("x", margin.left)
+              .attr("width", width - margin.right - margin.left)
+              .attr("height", height)
+
+          // update(d3.select('#selectbox').property('value'), 0);
+          update(0);
+
+          function update(speed) {
+
+              var copy = keys;
+
+              var metrics = copy.map(function (id) {
+                  return {
+                      id: id,
+                      values: data.map(d => {
+                          return {date: d.date, val: +d[id]}
+                      })
+                  };
+              });
+
+              y.domain([
+                  d3.min(metrics[0].values, d => d.val - 1),
+                  d3.max(metrics[1].values, d => d.val + 1)
+              ]).nice();
+
+              svg.selectAll(".y-axis").transition()
+                  .call(d3.axisLeft(y).tickSize(-width + margin.right + margin.left));
+
+              var metric = svg.selectAll(".cities").data(metrics);
+
+              metric.enter().insert("g", ".focus").append("path")
+                  .attr("class", "line cities").style("stroke", d => z(d.id)).merge(metric)
+                  .transition().attr("d", d => line(d.values));
+
+              tooltip(copy);
+          }
+
+          function tooltip(copy) {
+
+              var labels = focus.selectAll(".lineHoverText")
+                  .data(copy)
+
+              labels.enter().append("text")
+                  .attr("class", "lineHoverText")
+                  .style("fill", d => z(d))
+                  .attr("text-anchor", "start")
+                  .attr("font-size", 12)
+                  .attr("dy", (_, i) => 1 + i * 2 + "em")
+                  .merge(labels);
+
+              var circles = focus.selectAll(".hoverCircle")
+                  .data(copy)
+
+              circles.enter().append("circle")
+                  .attr("class", "hoverCircle")
+                  .style("fill", d => z(d))
+                  .attr("r", 2.5)
+                  .merge(circles);
+
+              svg.selectAll(".overlay")
+                  .on("mouseover", function () {
+                      focus.style("display", null);
+                  })
+                  .on("mouseout", function () {
+                      focus.style("display", "none");
+                  })
+                  .on("mousemove", mousemove);
+
+              function mousemove() {
+
+                  var x0 = x.invert(d3.mouse(this)[0]),
+                      i = bisectDate(data, x0, 1),
+                      d0 = data[i - 1],
+                      d1 = data[i],
+                      d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+                  focus.select(".lineHover")
+                      .attr("transform", "translate(" + x(d.date) + "," + height + ")");
+
+                  focus.select(".lineHoverDate")
+                      .attr("transform",
+                          "translate(" + x(d.date) + "," + (height + margin.bottom) + ")")
+                      .text(formatDate(d.date));
+
+                  focus.selectAll(".hoverCircle")
+                      .attr("cy", e => y(d[e]))
+                      .attr("cx", x(d.date));
+
+                  focus.selectAll(".lineHoverText")
+                      .attr("transform",
+                          "translate(" + (x(d.date)) + "," + height / 2.5 + ")")
+                      .text(e => ['min', 'max'].includes(e) ? e + " " + formatValue(d[e]) + "º" : e + ":" + formatValue(d[e]));
+
+                  x(d.date) > (width - width / 4)
+                      ? focus.selectAll("text.lineHoverText")
+                          .attr("text-anchor", "end")
+                          .attr("dx", -10)
+                      : focus.selectAll("text.lineHoverText")
+                          .attr("text-anchor", "start")
+                          .attr("dx", 10)
+              }
+          }
+      }
+  </script>
 {% endblock %}

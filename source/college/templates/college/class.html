@@ -1,27 +1,49 @@
-{% extends 'supernova/content_navigation_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
-{% block head %}
-{% endblock %}
 
-{% block content-top %}
-  <nav id="top-container">
-    <a class="menu-entry" href="{% url 'synopses:class' class_obj.id %}">Síntese</a>
-  </nav>
-{% endblock %}
-
-{% block content %}
-  <h1>{{ class_obj.name }}</h1>
-  <h3>Departamento de {{ department.name }}</h3>
-  <h2>Descrição:</h2>
-  <p>{{ class_obj.description }}</p>
-  <h2>Programa curricular actual:</h2>
-  <p>TODO</p>
-
-  <span class="menu-entry" style="font-size: 1.2em; font-weight: bold;">Instâncias:</span>
-  <ul>
-    {% for instance in instances %}
-      <li><a class="menu-entry" href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a></li>
-    {% endfor %}
-  </ul>
+{% block content_wrapper %}
+  <div class="col main">
+    <div class="header-decorator">
+      <h1>{{ class_obj.name }}</h1>
+    </div>
+    <div class="row padded">
+      <div class="col big">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+          <div class="pane-content">
+            {{ class_obj.description }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Atual plano curricular</h2></div>
+          <div class="pane-content">
+            TODO
+          </div>
+        </div>
+      </div>
+      <div class="col small">
+        {% include 'college/class_navigation.html' %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            <b>Departamento</b>:
+            <a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Edições</h2></div>
+          <div class="pane-content">
+            <ul>
+              {% for instance in instances %}
+                <li>
+                  <a class="menu-entry" href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

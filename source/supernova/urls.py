@@ -30,10 +30,7 @@ urlpatterns = [
     # User views
     path('perfil/<str:nickname>/', users.profile_view, name='profile'),
     path('perfil/<str:nickname>/horario/', users.user_schedule_view, name='profile_schedule'),
-    path('perfil/<str:nickname>/agregar/', users.user_clip_crawler_view, name='profile_crawler'),
     path('perfil/<str:nickname>/definicoes/', users.user_profile_settings_view, name='profile_settings'),
-    path('perfil/<str:nickname>/social/', users.user_profile_social_view, name='profile_social'),
-    path('perfil/<str:nickname>/password/', users.user_profile_password_view, name='profile_password'),
     path('criar/', users.registration_view, name='registration'),
     path('confirmar/', users.registration_validation_view, name='registration_validation'),
     path('entrar/', users.login_view, name='login'),

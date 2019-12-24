@@ -1,4 +1,4 @@
-{% extends 'supernova/content_navigation_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 {% block head %}
@@ -11,40 +11,43 @@
   {% include 'users/profile_navigation.html' %}
 {% endblock %}
 
-{% block content %}
-  <h1><i class="far fa-clock"></i> Horário de {{ user.get_full_name }}</h1>
-  <div style="overflow-x: scroll;">
-    <table class="schedule" cellpadding="0" cellspacing="0" width="100%">
-      <tr>
-        <th>Hora</th>
-        <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
-        <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
-        <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
-        <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
-        <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
-      </tr>
-      {% for row in schedule %}
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Horário de {{ user.get_full_name }}</h1>
+    </div>
+    <div class="col padded">
+      <table class="schedule" cellpadding="0" cellspacing="0" width="100%">
         <tr>
-          <td>{{ row.0|safe }}</td>
-          {% for element in row.1 %}
-
-            {% if element %}
-              <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
-                  rowspan="{{ element.rowspan }}">
-                <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
-                  {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
-                  {{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}<br></a>
-                {% if element.turn.room %}
-                  <a href="{% url 'college:room' element.turn.room.id %}">
-                    {{ element.turn.room.short_str }}</a>
-                {% endif %}
-              </td>
-            {% else %}
-              <td></td>
-            {% endif %}
-          {% endfor %}
+          <th>Hora</th>
+          <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
+          <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
+          <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
+          <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
+          <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
         </tr>
-      {% endfor %}
-    </table>
+        {% for row in schedule %}
+          <tr>
+            <td>{{ row.0|safe }}</td>
+            {% for element in row.1 %}
+              {% if element %}
+                <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
+                    rowspan="{{ element.rowspan }}">
+                  <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
+                    {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
+                    {{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}<br></a>
+                  {% if element.turn.room %}
+                    <a href="{% url 'college:room' element.turn.room.id %}">
+                      {{ element.turn.room.short_str }}</a>
+                  {% endif %}
+                </td>
+              {% else %}
+                <td></td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
   </div>
 {% endblock %}

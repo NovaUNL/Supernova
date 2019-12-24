@@ -1,59 +1,61 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
-{% block head %}
-  <style>
-    table tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-  </style>
-{% endblock %}
-
-{% block content-top %}
-  <nav id="top-container">
-    {% include 'college/class_navigation.html' %}
-  </nav>
-{% endblock %}
-
-{% block content %}
-  {% include 'college/class_decorator.html' %}
-  <div class="content-formatter">
-    <h2>Ficheiros</h2>
-    <div class="flex-wrapper">
-      <table>
-        <thead style="font-weight: bold; background-color: #ccc">
-        <td>Nome</td>
-        <td>Identificador</td>
-        <td>Numero</td>
-        </thead>
-        {% for enrollment in instance.enrollments.all %}
-          <tr>
-            <td>
-              <a href="{% url 'profile' enrollment.student.user.nickname %}">{{enrollment.student.clip_student.name}}</a>
-            </td>
-            <td>
-              {{enrollment.student.abbreviation}}
-            </td>
-            <td>
-              {{enrollment.student.number}}
-            </td>
-          </tr>
-        {% endfor %}
-        {% for enrollment in instance.clip_class_instance.enrollments.all %}
-          <tr>
-            <td>
-              {{enrollment.student.name}}
-            </td>
-            <td>
-              {{enrollment.student.abbreviation}}
-            </td>
-            <td>
-              {{enrollment.student.iid}}
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
+{% block content_wrapper %}
+  <div class="col main">
+    <div class="header-decorator">
+      <h1>{{ parent_class.name }}, <span style="display: inline-block">{{ instance.occasion }}</span></h1>
+    </div>
+    <div class="row padded" style="flex-wrap: nowrap">
+      <div class="col main">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Inscritos</h2></div>
+          <div class="pane-content">
+            <table>
+              <thead style="font-weight: bold; background-color: #ccc">
+              <td>Nome</td>
+              <td>Identificador</td>
+              <td>Numero</td>
+              </thead>
+              {% for enrollment in instance.enrollments.all %}
+                <tr>
+                  <td>
+                    <a href="{% url 'profile' enrollment.student.user.nickname %}">{{ enrollment.student.clip_student.name }}</a>
+                  </td>
+                  <td>{{ enrollment.student.abbreviation }}</td>
+                  <td>{{ enrollment.student.number }}</td>
+                </tr>
+              {% endfor %}
+              {% for enrollment in instance.clip_class_instance.enrollments.all %}
+                <tr>
+                  <td>{{ enrollment.student.name }}</td>
+                  <td>{{ enrollment.student.abbreviation }}</td>
+                  <td>{{ enrollment.student.iid }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        {% include 'college/class_navigation.html' %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Edições</h2></div>
+          <div class="pane-content">
+            <ul>
+              {% for other_instance in instance.parent.instances.all|dictsort:'year' %}
+                {% if instance == other_instance %}
+                  <li>{{ other_instance.occasion }}</li>
+                {% else %}
+                  <li><a href="{% url 'college:class_instance_enrolled' instance.id %}">{{ other_instance.occasion }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

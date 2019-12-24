@@ -1,32 +1,43 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
 {% endblock %}
 
-{% block content %}
-    <div class="content-formatter">
-        <h1><i class="fas fa-book"></i> {{ topic.name }}</h1>
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>{{ topic.name }}</h1>
         <h3>{{ subarea.name }}, {{ area.name }}</h3>
-        <ul id="content-list">
-            {% for section in sections %}
-                <li><a href="{% url 'synopses:topic_section' topic.id section.id %}">{{ section.name }}</a></li>
-            {% endfor %}
-        </ul>
+      </div>
     </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <ul id="content-list">
+            {% for section in sections %}
+              <li><a href="{% url 'synopses:topic_section' topic.id section.id %}">{{ section.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
-{% block content-bottom %}
-    <nav id="bot-container" class="float-right">
-        <a class="menu-entry selected">Contribuir:</a>
-        {% if user.is_authenticated %}
-            <a class="menu-entry" href="{% url 'synopses:section_create' topic.id %}">Criar secção</a>
-            <a class="menu-entry" href="{% url 'synopses:topic_manage' topic.id %}">Gerir secções</a>
-            <a class="menu-entry" href="{% url 'synopses:topic_edit' topic.id %}">Editar</a>
-        {% else %}
-            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>
-        {% endif %}
-    </nav>
-{% endblock %}
+{#{% block content-bottom %}#}
+{#    <nav id="bot-container" class="float-right">#}
+{#        <a class="menu-entry selected">Contribuir:</a>#}
+{#        {% if user.is_authenticated %}#}
+{#            <a class="menu-entry" href="{% url 'synopses:section_create' topic.id %}">Criar secção</a>#}
+{#            <a class="menu-entry" href="{% url 'synopses:topic_manage' topic.id %}">Gerir secções</a>#}
+{#            <a class="menu-entry" href="{% url 'synopses:topic_edit' topic.id %}">Editar</a>#}
+{#        {% else %}#}
+{#            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>#}
+{#        {% endif %}#}
+{#    </nav>#}
+{#{% endblock %}#}

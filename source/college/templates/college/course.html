@@ -1,4 +1,4 @@
-{% extends 'supernova/content_navigation_formatted.html' %}
+{% extends 'supernova/two_columns.html' %}
 {% load static %}
 {% block head %}
   <style>
@@ -11,7 +11,6 @@
 
     .flex-wrapper > div {
       margin: 10px 20px 10px 20px;
-
     }
 
     .degree {
@@ -32,49 +31,65 @@
 
     .info-entry {
       margin-left: 20px;
-      width: 100%;
       display: block;
       text-align: right;
     }
   </style>
 {% endblock %}
 
-{% block content %}
-  <h1><i class="fas fa-graduation-cap"></i> {{ course }}</h1>
-  {% if course.department is None %}
-    <h3 style="margin-left: 20px">Sem departamento associado</h3>
-  {% else %}
-    <h3 style="margin-left: 20px">
-      <a href="{% url 'college:department' course.department.id %}">Departamento de {{ course.department }}</a>
-    </h3>
-  {% endif %}
-  <div class="flex-wrapper">
-    <div style="min-width: 60%; flex-grow: 4;">
-      <h2>Descrição</h2>
+
+{#{% block content %}#}
+{#  <h1><i class="fas fa-graduation-cap"></i> {{ course }}</h1>#}
+{#  {% if course.department is None %}#}
+{#    <h3 style="margin-left: 20px">Sem departamento associado</h3>#}
+{#  {% else %}#}
+{#    <h3 style="margin-left: 20px">#}
+{#      <a href="{% url 'college:department' course.department.id %}">Departamento de {{ course.department }}</a>#}
+{#    </h3>#}
+{#  {% endif %}#}
+
+{% block main_col %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+    <div class="pane-content">
       <p>{{ course.description }}</p>
-      <h2>Estrutura curricular</h2>
     </div>
-    <div id="info-div">
-      <h2 style="text-align: left;">Informação</h2>
-      <div style="margin-left: 20px">
-        <h3>Concelho pedagógico:</h3>
-        <span class="info-entry">TODO</span>
-        <h3>Núcleo de estudantes:</h3>
-        <span class="info-entry">TODO</span>
-        <h3>Comissão de Praxe:</h3>
-        <span class="info-entry">TODO</span>
-        <h3>Caloiros:</h3>
-        <span class="info-entry">{{ new_students_count }}</span>
-        <h3>Alunos inscritos:</h3>
-        <span class="info-entry">{{ student_count }}</span>
-        <h3>Média dos alunos:</h3>
-        <span class="info-entry">TODO</span>
-      </div>
+  </div>
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Estrutura Curricular</h2></div>
+    <div class="pane-content">
+      <p>{{ course.description }}</p>
     </div>
   </div>
 {% endblock %}
 
-{% block navigation %}
-  <a class="menu-entry" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a>
-  <a class="menu-entry" href="{% url 'college:course_students' course.id %}">Alunos</a>
+
+{% block secondary_col %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Navegação</h2></div>
+    <div class="pane-content">
+      <ul>
+        <li><a class="menu-entry" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a></li>
+        <li><a class="menu-entry" href="{% url 'college:course_students' course.id %}">Alunos</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Informação</h2></div>
+    <div class="pane-content">
+      <h3>Concelho pedagógico:</h3>
+      <span class="info-entry">TODO</span>
+      <h3>Núcleo de estudantes:</h3>
+      <span class="info-entry">TODO</span>
+      <h3>Comissão de Praxe:</h3>
+      <span class="info-entry">TODO</span>
+      <h3>Caloiros:</h3>
+      <span class="info-entry">{{ new_students_count }}</span>
+      <h3>Alunos inscritos:</h3>
+      <span class="info-entry">{{ student_count }}</span>
+      <h3>Média dos alunos:</h3>
+      <span class="info-entry">TODO</span>
+    </div>
+  </div>
 {% endblock %}
+

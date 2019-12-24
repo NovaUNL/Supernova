@@ -152,7 +152,10 @@ def user_schedule_view(request, nickname):
 @login_required
 def user_profile_settings_view(request, nickname):
     context = build_base_context(request)
-    user = m.User.objects.get(id=request.user.id)
+    requester: m.User = request.user
+    user = get_object_or_404(m.User, nickname=nickname)
+    if requester != user:
+        raise Exception("TODO make a proper error message")
     if request.method == 'POST':
         form = forms.AccountSettingsForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
@@ -169,63 +172,5 @@ def user_profile_settings_view(request, nickname):
     context['page'] = 'profile_settings'
     context['title'] = 'Definições da conta'
     context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Dados pessoais", 'url': reverse('profile_settings', args=[nickname])}]
+                          {'name': "Definições da conta", 'url': reverse('profile_settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)
-
-
-@login_required
-def user_profile_social_view(request, nickname):
-    context = build_base_context(request)
-    user = m.User.objects.get(id=request.user.id)
-    if request.method == 'POST':
-        form = forms.PasswordChangeForm(data=request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            context['password_change_form'] = form
-    else:
-        context['password_change_form'] = forms.PasswordChangeForm()
-
-    context['page'] = 'profile_social'
-    context['title'] = 'Redes sociais'
-    context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Redes sociais", 'url': reverse('profile_social', args=[nickname])}]
-    return render(request, 'users/profile_social_networks.html', context)
-
-
-@login_required
-def user_profile_password_view(request, nickname):
-    context = build_base_context(request)
-    user = m.User.objects.get(id=request.user.id)
-    if request.method == 'POST':
-        form = forms.PasswordChangeForm(data=request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            context['password_change_form'] = form
-    else:
-        context['password_change_form'] = forms.PasswordChangeForm()
-
-    context['page'] = 'profile_password'
-    context['title'] = 'Alteração de palavra-passe'
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Alterar palavra passe", 'url': reverse('profile_password', args=[nickname])}]
-    return render(request, 'users/profile_password_change.html', context)
-
-
-@login_required
-def user_clip_crawler_view(request, nickname):
-    user = m.User.objects.get(id=request.user.id)
-    context = build_base_context(request)
-    context['page'] = 'profile_crawler'
-    context['title'] = "Definições da conta"
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Agregar CLIP", 'url': reverse('profile_crawler', args=[nickname])}]
-    if request.method == 'POST':
-        pass
-    context['clip_login_form'] = forms.ClipLoginForm()
-
-    return render(request, 'users/profile_crawler.html', context)

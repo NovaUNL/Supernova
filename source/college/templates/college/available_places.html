@@ -1,62 +1,77 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 {% block head %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
 {% endblock %}
 
-{% block content-top %}
-    {% include 'college/campus_navigation.html' %}
-{% endblock %}
 
-{% block content %}
-    <div class="content-formatter">
-        <h1>Espaços disponíveis</h1>
-        <h2>Previsão para {{ date }}</h2>
-        {% if weekend %}
-            <span style="font-size: 2em">
-            Em dias de fim-de-semana apenas o edifício VII se encontra aberto.<br>
-            É ainda possível entrares no edifício do teu departamento mediante utilização do
-            cartão de estudante nas portas automáticas.
-        </span>
-        {% else %}
-            {% for building in turns %}
-                <h2><a href="{% url 'college:building' building.0.id %}">{{ building.0 }}</a></h2>
-                <div class="schedule_wrapper">
-                    <table class="building_schedule_map">
-                        <tr>
-                            <th>Sala:</th>
-                            <th colspan="2">8-9h</th>
-                            <th colspan="2">9-10h</th>
-                            <th colspan="2">10-11h</th>
-                            <th colspan="2">11-12h</th>
-                            <th colspan="2">12-13h</th>
-                            <th colspan="2">13-14h</th>
-                            <th colspan="2">14-15h</th>
-                            <th colspan="2">15-16h</th>
-                            <th colspan="2">16-17h</th>
-                            <th colspan="2">17-18h</th>
-                            <th colspan="2">18-19h</th>
-                            <th colspan="2">19-20h</th>
-                        </tr>
-                        {% for room in building.1 %}
-                            <tr>
-                                <th><a href="{% url 'college:room' room.0.id %}">{{ room.0.name }}</a></th>
-                                {% for turn in room.1 %}
-                                    {% if turn %}
-                                        <td class="busy_time_slot"></td>
-                                    {% elif turn == False %}
-                                        <td class="empty_time_slot"></td>
-                                    {% else %}
-                                        <td class="unknown_time_slot"></td>
-                                    {% endif %}
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            {% endfor %}
-        {% endif %}
+{% block content_wrapper %}
+
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Espaços disponíveis</h1>
+      <span>Previsão para {{ date }}</span>
     </div>
+    <div class="col padded">
+      {% if weekend %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"></div>
+          <div class="pane-content">
+              Em dias de fim-de-semana apenas o edifício VII se encontra aberto.<br>
+              É ainda possível entrares no edifício do teu departamento mediante utilização do
+              cartão de estudante nas portas automáticas.
+          </div>
+        </div>
+      {% else %}
+        {% for building in turns %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              {% block title %}
+                <h2><a href="{% url 'college:building' building.0.id %}">{{ building.0 }}</a></h2>
+              {% endblock %}
+            </div>
+            <div class="pane-content">
+              {% block content %}
+                <div class="schedule_wrapper">
+                  <table class="building_schedule_map">
+                    <tr>
+                      <th>Sala:</th>
+                      <th colspan="2">8-9h</th>
+                      <th colspan="2">9-10h</th>
+                      <th colspan="2">10-11h</th>
+                      <th colspan="2">11-12h</th>
+                      <th colspan="2">12-13h</th>
+                      <th colspan="2">13-14h</th>
+                      <th colspan="2">14-15h</th>
+                      <th colspan="2">15-16h</th>
+                      <th colspan="2">16-17h</th>
+                      <th colspan="2">17-18h</th>
+                      <th colspan="2">18-19h</th>
+                      <th colspan="2">19-20h</th>
+                    </tr>
+                    {% for room in building.1 %}
+                      <tr>
+                        <th><a href="{% url 'college:room' room.0.id %}">{{ room.0.name }}</a></th>
+                        {% for turn in room.1 %}
+                          {% if turn %}
+                            <td class="busy_time_slot"></td>
+                          {% elif turn == False %}
+                            <td class="empty_time_slot"></td>
+                          {% else %}
+                            <td class="unknown_time_slot"></td>
+                          {% endif %}
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+                  </table>
+                </div>
+              {% endblock %}
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

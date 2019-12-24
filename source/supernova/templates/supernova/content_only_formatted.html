@@ -1,10 +1,16 @@
 {% extends 'supernova/base.html' %}
 
 {% block content_wrapper %}
-  <div id="content-wrapper">
-    <div class="content-formatter">
-      {% block content %}
-      {% endblock %}
+  <div class="col main padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        {% block title %}
+        {% endblock %}
+      </div>
+      <div class="pane-content">
+        {% block content %}
+        {% endblock %}
+      </div>
     </div>
   </div>
 {% endblock %}

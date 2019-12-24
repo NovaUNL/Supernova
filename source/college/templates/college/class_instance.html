@@ -1,4 +1,4 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
@@ -6,61 +6,87 @@
   <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
 {% endblock %}
 
-{% block content-top %}
-  <nav id="top-container">
-    {% include 'college/class_navigation.html' %}
-  </nav>
-{% endblock %}
-
-{% block content %}
-  {% include 'college/class_decorator.html' %}
-  <div class="content-formatter">
-    <span style="color: red;">A informação extraida do CLIP. Não é garantido que esteja correta ou atualizada.</span>
-    {% if instance.clip_class_instance.description_pt is not none %}
-      <h2>Descrição</h2>
-      <p>{{ instance.clip_class_instance.description_pt|safe }}</p>
-    {% endif %}
-    {% if instance.clip_class_instance.evaluation_methods_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('evaluation-content');">Avaliação</a></h2>
-      <div id="evaluation-content" class="hidden">
-        <p>{{ instance.clip_class_instance.evaluation_methods_pt|safe }}</p>
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>{{ parent_class.name }}, <span style="display: inline-block">{{ instance.occasion }}</span></h1>
+    </div>
+    <div class="row padded" style="flex-wrap: nowrap">
+      <div class="col main">
+        <span style="color: red; margin-left: 20px">A informação é extraida do CLIP. Não é garantido que esteja correta ou atualizada.</span>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.description_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Avaliação</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.evaluation_methods_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Objetivos</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.objectives_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Programa</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.program_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Requisitos</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.requirements_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Métodos de ensino</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.teaching_methods_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Horário de atendimento</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.assistance_pt|safe }}
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Bibliografia</h2></div>
+          <div class="pane-content">
+            {{ instance.clip_class_instance.bibliography_pt|safe }}
+          </div>
+        </div>
       </div>
-    {% endif %}
-    {% if instance.clip_class_instance.description_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('requirements-content');">Objetivos</a></h2>
-      <div id="requirements-content" class="hidden">
-        <p>{{ instance.clip_class_instance.objectives_pt|safe }}</p>
+      <div class="col">
+        {% include 'college/class_navigation.html' %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            <b>Departamento</b>:
+            <a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Edições</h2></div>
+          <div class="pane-content">
+            <ul>
+              {% for other_instance in instance.parent.instances.all|dictsort:'year' %}
+                {% if instance == other_instance %}
+                  <li>{{ other_instance.occasion }}</li>
+                {% else %}
+                  <li><a href="{% url 'college:class_instance' instance.id %}">{{ other_instance.occasion }}</a></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
-    {% endif %}
-    {% if instance.clip_class_instance.program_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('program-content');">Programa</a></h2>
-      <div id="program-content" class="hidden">
-        <p>{{ instance.clip_class_instance.program_pt|safe }}</p>
-      </div>
-    {% endif %}
-    {% if instance.clip_class_instance.requirements_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('requirements-content');">Requisitos</a></h2>
-      <div id="requirements-content" class="hidden">
-        <p>{{ instance.clip_class_instance.requirements_pt|safe }}</p>
-      </div>
-    {% endif %}
-    {% if instance.clip_class_instance.teaching_methods_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('description-content');">Métodos de ensino</a></h2>
-      <div id="description-content" class="hidden">
-        <p>{{ instance.clip_class_instance.teaching_methods_pt|safe }}</p>
-      </div>
-    {% endif %}
-    {% if instance.clip_class_instance.assistance_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('assistance-content');">Horário de atendimento</a></h2>
-      <div id="assistance-content" class="hidden">
-        <p>{{ instance.clip_class_instance.assistance_pt|safe }}</p>
-      </div>
-    {% endif %}
-    {% if instance.clip_class_instance.bibliography_pt is not none %}
-      <h2><a href="javascript:toggleVisibility('bibliography-content');">Bibliografia</a></h2>
-      <div id="bibliography-content" class="hidden">
-        <p>{{ instance.clip_class_instance.bibliography_pt|safe }}</p>
-      </div>
-    {% endif %}
+    </div>
   </div>
 {% endblock %}

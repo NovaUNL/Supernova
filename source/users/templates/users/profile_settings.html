@@ -1,4 +1,4 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
@@ -6,109 +6,111 @@
   {{ block.super }}
   <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
   <script type="text/javascript" src="{% static 'users/socialNetworks.js' %}"></script>
-  <style>
-    #social-network-list {
-      font-size: 1.5em;
-    }
 
-    #social-network-list > li {
-      margin-bottom: 10px;
-    }
-  </style>
   <link rel="stylesheet" type="text/css" href="{% static 'users/profile.css' %}"/>
 {% endblock %}
 
-{% block content-top %}
-  {% include 'users/profile_navigation.html' %}
-{% endblock %}
-
-{% block content %}
-  <div class="content-formatter">
-    <h1><i class="fas fa-cogs"></i> Definições de {{ user }}</h1>
-    <div class="settings">
-      <form action="{% url 'profile_settings' user.nickname %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <h2><i class="fas fa-user"></i> Informação pessoal</h2>
-        {{ settings_form.errors }}
-        <div class="flex-wrapper">
-          <div style="flex-basis: 500px;">
-            <i class="far fa-image"></i> {{ settings_form.picture.label }}<br>
-            {% if user.picture %}
-              <img src="{% get_media_prefix %}{{ user.picture }}"
-                   style="max-width: 500px; max-height: 300px;"><br>
-            {% endif %}
-            Alterar foto: {{ settings_form.picture }}
-          </div>
-          <span class="flex-line-break"></span>
-          <div style="flex-basis: 200px;">
-            <i class="fas fa-user-secret"></i> {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
-          </div>
-          <div style="flex-basis: 200px;">
-            <i class="fas fa-home"></i> {{ settings_form.residence.label }}: {{ settings_form.residence }}
-          </div>
-          <div style="flex-basis: 250px;">
-            <i class="fas fa-birthday-cake"></i> {{ settings_form.birth_date.label }}:<br>{{ settings_form.birth_date }}
-          </div>
-          <div>
-            <i class="fas fa-link"></i> {{ settings_form.webpage.label }}:<br>{{ settings_form.webpage }}
-          </div>
-          <span class="flex-line-break"></span>
-          <div><i class="fas fa-mars"></i> {{ settings_form.gender.1 }} </div>
-          <div><i class="fas fa-venus"></i> {{ settings_form.gender.2 }} </div>
-        </div>
-        <h2><i class="fas fa-eye"></i> Visibilidade do perfil</h2>
-        <div style="float: left;">Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>
-        <div class="hint" style="float:left">
-          <button>Ver níveis de visibilidade</button>
-          <ul class="hint-hidden">
-            <li>Um perfil <b>oculto</b> é invisível para toda a gente.</li>
-            <li>Um perfil <b>limitado</b> mostra alguma informação a outros utilizadores.</li>
-            <li>Um perfil para <b>utilizadores</b> mostra tudo o que fizeres a outros utilizadores.</li>
-            <li>Um perfil <b>misto</b> permite aos utilizadores ver tudo, e aos visitantes ver alguma
-              informação.
-            </li>
-            <li>Um perfil <b>público</b> permite a toda a gente, visitantes e utilizadores, ver tudo o
-              que fizeres.
-            </li>
-          </ul>
-        </div>
-        <span class="clearfix"></span>
-        <h2><i class="fas fa-check"></i> Aplicar</h2>
-        <div class="flex-wrapper" style="justify-content: space-between">
-          <span>{{ settings_form.password.label }}: {{ settings_form.password }}</span>
-          <input type="submit" value="Aplicar alterações">
-        </div>
-      </form>
+{% block content_wrapper %}
+  <div class="col main profile">
+    <div class="header-decorator">
+      <h1>Definições de {{ user.nickname }}</h1>
     </div>
-    <hr>
-    <h2><i class="fas fa-globe"></i> Redes sociais</h2>
-    <div class="settings">
-      <ul id="social-network-list">
-      </ul>
-      <select id="network">
-        {% for network in social_networks %}
-          <option value="{{ network.0 }}" selected="">{{ network.1 }}</option>
-        {% endfor %}
-      </select>
-      <input id="network-link" type="text" placeholder="Endreço do perfil">
-      <input type="button" value="Adicionar" onclick="addNetwork()">
-    </div>
-    <script>
-        let apiURL = "{% url 'social_networks' user.nickname %}";
-        populateSocialNetworks(apiURL, edit = true);
-    </script>
-    <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
-    <hr>
-    <h2><i class="fas fa-key"></i> Alterar palavra-passe</h2>
-    <div class="settings flex-wrapper" style="justify-content: space-between">
-      <div class="flex-wrapper">
-        <div> {{ password_change_form.password.label }}{{ password_change_form.password }}</div>
-        <div>
-          {{ password_change_form.password_confirmation.label }}{{ password_change_form.password_confirmation }}</div>
-        <div> {{ password_change_form.old_password.label }}{{ password_change_form.old_password }}</div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Informação pessoal</h2></div>
+        <div class="pane-content">
+          <form action="{% url 'profile_settings' user.nickname %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ settings_form.errors }}
+            <div class="flex-wrapper">
+              <div style="flex-basis: 500px;">
+                {{ settings_form.picture.label }}<br>
+                {% if user.picture %}
+                  <img src="{% get_media_prefix %}{{ user.picture }}"
+                       style="max-width: 500px; max-height: 300px;"><br>
+                {% endif %}
+                Alterar foto: {{ settings_form.picture }}
+              </div>
+              <span class="flex-line-break"></span>
+              <div style="flex-basis: 200px;">
+                {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
+              </div>
+              <div style="flex-basis: 200px;">
+                {{ settings_form.residence.label }}: {{ settings_form.residence }}
+              </div>
+              <div style="flex-basis: 250px;">
+                {{ settings_form.birth_date.label }}:<br>{{ settings_form.birth_date }}
+              </div>
+              <div>
+                {{ settings_form.webpage.label }}:<br>{{ settings_form.webpage }}
+              </div>
+              <span class="flex-line-break"></span>
+              <div>{{ settings_form.gender.1 }} </div>
+              <div>{{ settings_form.gender.2 }} </div>
+            </div>
+            <input type="submit" value="Aplicar alterações">
+          </form>
+        </div>
       </div>
-      <input type="submit" value="Alterar palavra-passe">
+
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Privacidade</h2></div>
+        <div class="pane-content">
+          <div style="float: left;">Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>
+          <div class="hint" style="float:left">
+            <button>Ver níveis de visibilidade</button>
+            <ul class="hint-hidden">
+              <li>Um perfil <b>oculto</b> é invisível para toda a gente.</li>
+              <li>Um perfil <b>limitado</b> mostra alguma informação a outros utilizadores.</li>
+              <li>Um perfil para <b>utilizadores</b> mostra tudo o que fizeres a outros utilizadores.</li>
+              <li>Um perfil <b>misto</b> permite aos utilizadores ver tudo, e aos visitantes ver alguma
+                informação.
+              </li>
+              <li>Um perfil <b>público</b> permite a toda a gente, visitantes e utilizadores, ver tudo o
+                que fizeres.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Redes sociais</h2></div>
+        <div class="pane-content">
+          <div class="settings">
+            <ul id="social-network-list">
+            </ul>
+            <select id="network">
+              {% for network in social_networks %}
+                <option value="{{ network.0 }}" selected="">{{ network.1 }}</option>
+              {% endfor %}
+            </select>
+            <input id="network-link" type="text" placeholder="Endreço do perfil">
+            <input type="button" value="Adicionar" onclick="addNetwork()">
+          </div>
+          <script>
+              let apiURL = "{% url 'social_networks' user.nickname %}";
+              populateSocialNetworks(apiURL, edit = true);
+          </script>
+          <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
+        </div>
+      </div>
+
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Alterar palavra-passe</h2></div>
+        <div class="pane-content">
+          <div class="settings flex-wrapper">
+            <div class="flex-wrapper">
+              <div> {{ password_change_form.password.label }}{{ password_change_form.password }}</div>
+              <div>
+                {{ password_change_form.password_confirmation.label }}{{ password_change_form.password_confirmation }}</div>
+              <div> {{ password_change_form.old_password.label }}{{ password_change_form.old_password }}</div>
+            </div>
+            <input type="submit" value="Alterar palavra-passe">
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
   </div>
 {% endblock %}

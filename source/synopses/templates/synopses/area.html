@@ -1,54 +1,65 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
-    <style>
-        .flex-wrapper > div {
-            margin: 10px 20px;
-            flex-basis: 475px;
-        }
+  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+  <style>
+    .flex-wrapper > div {
+      margin: 10px 20px;
+      flex-basis: 475px;
+    }
 
-        #content-title-decorator {
-        {% if  area.img_url %}
-            background-image: url("{{ area.img_url}}");
-        {% endif %}
-        }
-    </style>
+    .header-decorator {
+      {% if area.img_url %}background-image: url("{{ area.img_url}}"){% endif %}
+    }
+
+    .flex-grid-item {
+      background-size: cover;
+      background-position: center
+    }
+  </style>
 {% endblock %}
 
-{% block content %}
-    <div id="content-title-decorator">
-        <span class="clearfix"></span>
-        <h1><i class="fas fa-book"></i> {{ area.name }}</h1>
+{% block content_wrapper %}
+  <div class="col main">
+    <div class="content-title-decorator">
+      <h1>{{ area.name }}</h1>
     </div>
-    <div class="content-formatter">
-        <div class="flex-wrapper">
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Categorias</h2></div>
+        <div class="pane-content">
+          <div class="flex-wrapper">
             {% for subarea in area.subareas.all %}
-                <a href="{% url 'synopses:subarea' subarea.id %}">
-                    {% if subarea.img_url %}
-                        <div class="flex-grid-item"
-                             style="background-image: url({{ subarea.img_url }}); background-size: cover; background-position: center">
-                    {% else %}
-                        <div class="flex-grid-item">
-                    {% endif %}
-                    <span class="flex-grid-item-top">{{ subarea.name }}</span>
-                    <span class="flex-grid-item-bottom">{{ subarea.topics.count }} tópico(s)</span>
-                    </div>
-                </a>
+              <a href="{% url 'synopses:subarea' subarea.id %}">
+                {% if subarea.img_url %}
+                  <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }})">
+                {% else %}
+                  <div class="flex-grid-item">
+                {% endif %}
+                <span class="flex-grid-item-top">{{ subarea.name }}</span>
+                <span class="flex-grid-item-bottom">{{ subarea.topics.count }} tópico(s)</span>
+                </div>
+              </a>
             {% endfor %}
+            {% if not area.subareas.exists %}
+              <h2>Categoria sem subcategorias.</h2>
+            {% endif %}
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 {% endblock %}
 
-{% block content-bottom %}
-    <nav id="bot-container" class="float-right">
-        <a class="menu-entry selected">Contribuir:</a>
-        {% if user.is_authenticated %}
-            <a class="menu-entry" href="{% url 'synopses:subarea_create' area.id %}">Criar categoria</a>
-        {% else %}
-            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>
-        {% endif %}
-    </nav>
-{% endblock %}
+{#{% block content-bottom %}#}
+{#    <nav id="bot-container" class="float-right">#}
+{#        <a class="menu-entry selected">Contribuir:</a>#}
+{#        {% if user.is_authenticated %}#}
+{#            <a class="menu-entry" href="{% url 'synopses:subarea_create' area.id %}">Criar categoria</a>#}
+{#        {% else %}#}
+{#            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>#}
+{#        {% endif %}#}
+{#    </nav>#}
+{#{% endblock %}#}

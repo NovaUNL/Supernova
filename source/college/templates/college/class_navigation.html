@@ -4,30 +4,36 @@
 {% url 'college:class_instance_files' instance.id as files_url %}
 {% url 'synopses:class' instance.parent.id as synopsis_url %}
 
-{% if info_url == request.path %}
-    <a class="menu-entry selected">Info</a>
-{% else %}
-    <a class="menu-entry" href="{{ info_url }}">Info</a>
-{% endif %}
-{% if turns_url in request.path %}
-    <a class="menu-entry selected">Turnos</a>
-{% else %}
-    <a class="menu-entry" href="{{ turns_url }}">Turnos</a>
-{% endif %}
-{% if enrolled_url in request.path %}
-  <a class="menu-entry selected">Inscritos</a>
-{% else %}
-    <a class="menu-entry" href="{{ enrolled_url }}">Inscritos</a>
-{% endif %}
-{% if files_url in request.path %}
-    <a class="menu-entry selected">Ficheiros</a>
-{% else %}
-    <a class="menu-entry" href="{{ files_url }}">Ficheiros</a>
-{% endif %}
-{#<a class="menu-entry">Sumários</a>#}
-{#<a class="menu-entry">Notas</a>#}
-{% if synopsis_url in request.path %}
-    <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
-{% else %}
-    <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
-{% endif %}
+
+<div class="flex-pane">
+  <div class="pane-title bg-grad"><h2>Conteúdo</h2></div>
+  <div class="pane-content">
+    {% if info_url == request.path %}
+      <a class="menu-entry selected">Info</a>
+    {% else %}
+      <a class="menu-entry" href="{{ info_url }}">Info</a>
+    {% endif %}
+    {% if turns_url in request.path %}
+      <a class="menu-entry selected">Turnos</a>
+    {% else %}
+      <a class="menu-entry" href="{{ turns_url }}">Turnos</a>
+    {% endif %}
+    {% if enrolled_url in request.path %}
+      <a class="menu-entry selected">Inscritos</a>
+    {% else %}
+      <a class="menu-entry" href="{{ enrolled_url }}">Inscritos</a>
+    {% endif %}
+    {% if files_url in request.path %}
+      <a class="menu-entry selected">Ficheiros</a>
+    {% else %}
+      <a class="menu-entry" href="{{ files_url }}">Ficheiros</a>
+    {% endif %}
+    {#<a class="menu-entry">Sumários</a>#}
+    {#<a class="menu-entry">Notas</a>#}
+    {% if synopsis_url in request.path %}
+      <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
+    {% else %}
+      <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
+    {% endif %}
+  </div>
+</div>

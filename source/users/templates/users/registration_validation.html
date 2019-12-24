@@ -1,37 +1,17 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/content_only_formatted.html' %}
 
-{% load static %}
-{% block head %}
-{% endblock %}
-
-
-{% block content-top %}
-  <nav id="top-container">
-    <a class="menu-entry" href="{% url 'registration' %}">Criar conta</a>
-    <a class="menu-entry" href="{% url 'login' %}">Autenticação</a>
-  </nav>
-{% endblock %}
-
+{% block title %}<h2>Validar registo</h2>{% endblock %}
 {% block content %}
-  <div class="content-formatter">
-    <h1><i class="fas fa-user-plus"></i> Validar registo</h1>
-    <div style="margin-left: 10px">
-      <p>
-        Procura no teu email por um link de validação.<br>
-        Se vires o email mas o link não for visivel podes inserir aqui o token recebido:
-      </p>
-      <div id="content_form">
-        <form method="get" action="{{ request.get_full_path }}">
-          {{ form.as_p }}
-          <input type="submit" value="Validar registo">
-        </form>
-      </div>
+  <div style="margin-left: 10px">
+    <p>
+      Procura no teu email por um link de validação.<br>
+      Se vires o email mas o link não for visivel podes inserir aqui o token recebido:
+    </p>
+    <div id="content_form">
+      <form method="get" action="{{ request.get_full_path }}">
+        {{ form.as_p }}
+        <input type="submit" value="Validar registo">
+      </form>
     </div>
   </div>
-{% endblock %}
-
-
-{% block navigation %}
-  <a class="menu-entry" href="{% url 'login' %}">Autenticação</a>
-  <a class="menu-entry selected">Criar conta</a>
 {% endblock %}

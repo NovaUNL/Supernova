@@ -1,25 +1,9 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 {% block head %}
-{% endblock %}
-
-
-{% block content-top %}
-  <nav id="top-container">
-    <a class="menu-entry selected">Criar conta</a>
-    <a class="menu-entry" href="{% url 'login' %}">Autenticação</a>
-  </nav>
-{% endblock %}
-
-{% block content %}
+  {{ block.super }}
   <style>
-    #help-panel {
-      flex-basis: 300px;
-      flex-grow: 1;
-      margin-right: 10px;
-    }
-
     #form-fields {
       flex-basis: 600px;
       flex-grow: 5;
@@ -41,6 +25,87 @@
       float: right;
     }
   </style>
+{% endblock %}
+
+
+{% block content_wrapper %}
+
+  <div class="col main" style="padding: 10px">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Informação dramática</h2></div>
+      <div class="pane-content">
+        Este serviço <s>felizmente</s> <b style="color: red">NÃO</b> é o CLIP. Apesar de fazer muito do que o CLIP faz
+        por ti, estás numa plataforma diferente.<br>
+        Não és obrigado a registar-te com a password do CLIP, até porque <b>não se reutilizam passwords</b>.<br><br>
+        Lê os termos de serviço e a <a href="{% url 'privacy' %}">politica de privacidade</a> antes de te
+        registares.<br>
+        (Resumidamente: Esta plataforma não tem propósito comercial nem te vai vender a alma, mas não somos responsáveis
+        se te roubarem o queijo do frigorífico).<br>
+        Se não concordas ou o que querias mesmo era ter o CLIP bonito, espreita a aplicação do NEEC.<br><br>
+        Como somos especiais de corrida precisamos de 3 identificadores teus:
+        <ul>
+          <li>Um <b>utilizador</b> que vais utilizar para entrar na tua conta.</li>
+          <li>Uma <b>alcunha</b> (opcional) que ser visível aos restantes. Se deixada em branco será substituida pelo
+            <b>utilizador</b>.
+          </li>
+          <li>O teu <b>identificador</b> do CLIP (ex. c.pereira).</li>
+        </ul>
+        Tens ainda que utilizar o teu email do campus. Para já só são aceites <code>@campus.fct.unl.pt</code>.
+      </div>
+    </div>
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Criar conta</h2></div>
+      <div class="pane-content">
+        {% if not enabled %}
+          <span style="font-weight: bold; font-size: 1.5em; color: red;">Os registos encontram-se desactivados!</span>
+        {% endif %}
+        <form method="post" action="{{ request.get_full_path }}" style="justify-content: left">
+          {% csrf_token %}
+          <div class="flex-wrapper" id="form-fields">
+            {{ creation_form.non_field_errors }}
+            <div>
+              {{ creation_form.username.label }}<br>
+              {{ creation_form.username }}
+              {{ creation_form.username.errors }}
+            </div>
+            <div>
+              {{ creation_form.nickname.label }} (Opcional)<br>
+              {{ creation_form.nickname }}
+              {{ creation_form.nickname.errors }}
+            </div>
+            <div>
+              {{ creation_form.clip_identifier.label }}<br>
+              {{ creation_form.clip_identifier }}
+              {{ creation_form.clip_identifier.errors }}
+            </div>
+            <div>
+              {{ creation_form.email.label }}<br>
+              {{ creation_form.email }}
+              {{ creation_form.email.errors }}
+            </div>
+            <div>
+              {{ creation_form.password.label }}<br>
+              {{ creation_form.password }}
+              {{ creation_form.password.errors }}
+            </div>
+            <div>
+              {{ creation_form.password_confirmation.label }}<br>
+              {{ creation_form.password_confirmation }}
+              {{ creation_form.password_confirmation.errors }}
+            </div>
+            <div style="flex-basis: 500px">
+              {{ creation_form.captcha.label }}<br>
+              {{ creation_form.captcha }}
+              {{ creation_form.captcha.errors }}
+            </div>
+          </div>
+          <input type="submit" value="Registar" {% if not enabled %}disabled{% endif %}>
+        </form>
+        <span class="clearfix"></span>
+      </div>
+    </div>
+  </div>
+  </div>
   <script>
       let emailModified = false;
 
@@ -50,63 +115,4 @@
           element.value = student.value + "@campus.fct.unl.pt"
       }
   </script>
-
-  <div class="content-formatter">
-    <h1><i class="fas fa-user-plus"></i> Criar conta</h1>
-    {% if not enabled %}
-      <span style="font-weight: bold; font-size: 1.5em; color: red;">Os registos encontram-se desactivados!</span>
-    {% endif %}
-    <form method="post" action="{{ request.get_full_path }}" style="justify-content: left">
-      {% csrf_token %}
-      <div class="flex-wrapper" style="justify-content: space-between">
-        <div id="help-panel">
-          <p>O <b>utilizador</b> é utilizado para te autenticares.</p>
-          <p>A <b>alcunha</b> identifica-te perante os restantes. Caso fique em branco é substituida pelo <b>utilizador</b>.<br>
-            A <b>alcunha</b> é posteriormente alteravel.</p>
-          <p>O <b>identificador</b> é a tua credencial do CLIP (ex. c.pereira).</p>
-          <p>A <b>password</b>, <b style="color: red">NÃO</b> tem de ser a do CLIP.</p>
-        </div>
-        <div class="flex-wrapper" id="form-fields">
-          {{ creation_form.non_field_errors }}
-          <div>
-            {{ creation_form.username.label }}<br>
-            {{ creation_form.username }}
-            {{ creation_form.username.errors }}
-          </div>
-          <div>
-            {{ creation_form.nickname.label }} (Opcional)<br>
-            {{ creation_form.nickname }}
-            {{ creation_form.nickname.errors }}
-          </div>
-          <div>
-            {{ creation_form.clip_identifier.label }}<br>
-            {{ creation_form.clip_identifier }}
-            {{ creation_form.clip_identifier.errors }}
-          </div>
-          <div>
-            {{ creation_form.email.label }}<br>
-            {{ creation_form.email }}
-            {{ creation_form.email.errors }}
-          </div>
-          <div>
-            {{ creation_form.password.label }}<br>
-            {{ creation_form.password }}
-            {{ creation_form.password.errors }}
-          </div>
-          <div>
-            {{ creation_form.password_confirmation.label }}<br>
-            {{ creation_form.password_confirmation }}
-            {{ creation_form.password_confirmation.errors }}
-          </div>
-          <div style="flex-basis: 500px">
-            {{ creation_form.captcha.label }}<br>
-            {{ creation_form.captcha }}
-            {{ creation_form.captcha.errors }}
-          </div>
-        </div>
-      </div>
-      <input type="submit" value="Registar" {% if not enabled %}disabled{% endif %}>
-    </form>
-    <span class="clearfix"></span>
-  </div>
 {% endblock %}

@@ -11,7 +11,7 @@ from news.models import NewsItem
 def index(request):
     context = build_base_context(request)
     context['title'] = "Mais do que arame torcido"
-    context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:5]
+    context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:6]
     context['changelog'] = Changelog.objects.order_by('date').reverse()[0:3]
     context['catchphrase'] = random.choice(Catchphrase.objects.all())
     context['meal_items'], context['meal_date'], time = get_next_meal_items()

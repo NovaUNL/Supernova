@@ -1,70 +1,76 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 {% load static %}
 {% block head %}
-    <style>
-        .flex-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-        }
+  <style>
+    .flex-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+    }
 
-        .flex-wrapper > div {
-            margin: 10px 20px 10px 20px;
-        }
+    .flex-wrapper > div {
+      margin: 10px 20px 10px 20px;
+    }
 
-        tr:nth-of-type(odd) {
-            background-color: #eee;
-        }
-    </style>
+    tr:nth-of-type(odd) {
+      background-color: #333;
+    }
+  </style>
 {% endblock %}
 
-{% block content %}
+{% block content_wrapper %}
+  <div class="col main" style="padding: 10px">
+
     <h1><i class="fas fa-graduation-cap"></i> Alunos de {{ course }}</h1>
-    <h3 style="margin-left: 20px">Departamento de {{ course.department }}</h3>
-    <div>
-        <h2>Estudantes registados:</h2>
+    {% if course.department %}
+      <h3 style="margin-left: 20px">Departamento de
+        <a href="{% url 'college:department' course.department.id %}">{{ course.department }}</a>
+      </h3>
+    {% endif %}
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Estudantes</h2></div>
+      <div class="pane-content">
         <table>
+          <tr>
+            <th>Numero</th>
+            <th>Nome</th>
+            <th>Matriculas</th>
+            <th>ECTS</th>
+            <th>Perfil</th>
+          </tr>
+          {% for student in students %}
             <tr>
-                <th>Numero</th>
-                <th>Nome</th>
-                <th>Matriculas</th>
-                <th>ECTS</th>
-                <th>Perfil</th>
+              <td>{{ student.number }}</td>
+              <td>{{ student.user.get_full_name }}</td>
+              <td>TODO</td>
+              <td>TODO</td>
+              <td><a href="{% url 'profile' student.user.nickname %}">Perfil</a></td>
             </tr>
-            {% for student in students %}
-                <tr>
-                    <td>{{ student.number }}</td>
-                    <td>{{ student.user.get_full_name }}</td>
-                    <td>TODO</td>
-                    <td>TODO</td>
-                    <td><a href="{% url 'profile' student.user.nickname %}">Perfil</a></td>
-                </tr>
-            {% endfor %}
+          {% endfor %}
         </table>
+      </div>
     </div>
-    <div>
-        <h2>Estudantes não registados:</h2>
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Estudantes não registados</h2></div>
+      <div class="pane-content">
         <table>
+          <tr>
+            <th>Numero</th>
+            <th>Nome</th>
+            <th>Matriculas</th>
+            <th>ECTS</th>
+          </tr>
+          {% for student in unregistered_students %}
             <tr>
-                <th>Numero</th>
-                <th>Nome</th>
-                <th>Matriculas</th>
-                <th>ECTS</th>
+              <td>{{ student.iid }}</td>
+              <td>{{ student.name }}</td>
+              <td>TODO</td>
+              <td>TODO</td>
             </tr>
-            {% for student in unregistered_students %}
-                <tr>
-                    <td>{{ student.iid }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>TODO</td>
-                    <td>TODO</td>
-                </tr>
-            {% endfor %}
+          {% endfor %}
         </table>
+      </div>
     </div>
-{% endblock %}
-
-{% block navigation %}
-    <a class="menu-entry" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a>
-    <a class="menu-entry selected">Alunos</a>
+  </div>
 {% endblock %}

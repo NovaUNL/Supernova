@@ -1,33 +1,29 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
-          integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
-          crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
-            integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
-            crossorigin=""></script>
-    <script src="{% static 'college/map/fct.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'college/map/map.css' %}"/>
-    <script src="{% static 'college/map/map.js' %}"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+        crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+          integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
+          crossorigin=""></script>
+  <script src="{% static 'college/map/fct.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/map/map.css' %}"/>
+  <script src="{% static 'college/map/map.js' %}"></script>
 {% endblock %}
 
-{% block content-top %}
-    {% include 'college/campus_navigation.html' %}
-{% endblock %}
-
-{% block content %}
-    <div id="campus-map" class="map"></div>
-    <script>initCampusMap();</script><!--TODO figure why this doesn't work in an onLoad attribute-->
-{% endblock %}
-
-{% block content-bottom %}
-    <ul class="caption">
-        <li><span style="background-color: #8Af" class="place"></span> Edifício letivo</li>
-        <li><span style="background-color: #999" class="place"></span> Hangar</li>
-        <li><span style="background-color: #7d9" class="place"></span> Serviço</li>
-        <li><span style="background-color: #ffb366" class="place"></span> Lazer</li>
-        <li><span style="background-color: #fff" class="place"></span> Outros</li>
+{% block content_wrapper %}
+  <div id="campus-map" class="map col"></div>
+  <script>initCampusMap();</script>
+  <div class="col" style="flex-basis: 200px">
+    <ul class="caption" style="font-weight: bold">
+      <li><span style="background-color: #8Af" class="place"></span> Edifício letivo</li>
+      <li><span style="background-color: #999" class="place"></span> Hangar</li>
+      <li><span style="background-color: #7d9" class="place"></span> Serviço</li>
+      <li><span style="background-color: #ffb366" class="place"></span> Lazer</li>
+      <li><span style="background-color: #fff" class="place"></span> Outros</li>
     </ul>
+  </div>
 {% endblock %}
+

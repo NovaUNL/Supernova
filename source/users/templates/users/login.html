@@ -1,17 +1,17 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 {% block head %}
   <style>
     #login-form {
-      max-width: 400px;
+      display: flex;
+      flex-direction: column;
     }
 
     #login-form input[type=text], #login-form input[type=password] {
       height: 30px;
-      width: 100%;
       margin-bottom: 10px;
-
+      flex-grow: 1;
     }
 
     #login-form input[type=submit] {
@@ -21,28 +21,38 @@
   </style>
 {% endblock %}
 
-{% block content-top %}
-  <nav id="top-container">
-    <a class="menu-entry" href="{% url 'registration' %}">Criar conta</a>
-    <a class="menu-entry selected">Autenticação</a>
-  </nav>
-{% endblock %}
-
-{% block content %}
-  <div class="content-formatter">
-    <h1><i class="fas fa-key"></i> Autenticação</h1>
-    <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
-    <form id="login-form" method="post" action="{{ request.get_full_path }}">
-      {% csrf_token %}
-      <div>{{ login_form.username.errors }}<br>
-        {{ login_form.username.label }}<br>
-        {{ login_form.username }}
+{% block content_wrapper %}
+  <div class="col" style="padding: 10px">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Autenticação</h2></div>
+      <div class="pane-content">
+        <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
+        <form id="login-form" method="post" action="{{ request.get_full_path }}">
+          {% csrf_token %}
+          {{ login_form.username.errors }}<br>
+          {{ login_form.username.label }}<br>
+          {{ login_form.username }}
+          {{ login_form.password.errors }}<br>
+          {{ login_form.password.label }}<br>
+          {{ login_form.password }}
+          <input type="submit" value="Entrar">
+        </form>
       </div>
-      <div> {{ login_form.password.errors }}<br>
-        {{ login_form.password.label }}<br>
-        {{ login_form.password }}
+    </div>
+  </div>
+  <div class="col" style="padding: 10px">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Sem conta?</h2></div>
+      <div class="pane-content">
+        Podes criar uma <a href="{% url 'registration' %}">aqui</a>.
       </div>
-      <input type="submit" value="Entrar">
-    </form>
+    </div>
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Não consigo entrar!</h2></div>
+      <div class="pane-content">
+        Pois... isso parece ser um problema.<br>
+        Contacta-nos, nós ajudamos-te.
+      </div>
+    </div>
   </div>
 {% endblock %}

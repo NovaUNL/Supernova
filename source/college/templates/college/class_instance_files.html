@@ -1,48 +1,62 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
-  <style>
-    table tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
-  </style>
 {% endblock %}
 
-{% block content-top %}
-  <nav id="top-container">
-    {% include 'college/class_navigation.html' %}
-  </nav>
-{% endblock %}
-
-{% block content %}
-  {% include 'college/class_decorator.html' %}
-  <div class="content-formatter">
-    <h2>Ficheiros</h2>
-    <div class="flex-wrapper">
-      <table>
-        <thead style="font-weight: bold; background-color: #ccc">
-        <td>Nome</td>
-        <td>Data</td>
-        <td>Criador</td>
-        <td>Dimensão (KB)</td>
-        </thead>
-        {% for instance_file in instance_files %}
-          <tr>
-            <td>
-              <a href="{% url 'college:class_instance_file_download' instance.id instance_file.file.hash %}">
-                {{ instance_file.file.name }}
-              </a>
-            </td>
-            <td>{{ instance_file.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</td>
-            <td>{{ instance_file.uploader }}</td>
-            <td>{% widthratio instance_file.file.size 1024 1 %}</td>
-          </tr>
-        {% endfor %}
-      </table>
+{% block content_wrapper %}
+  <div class="col main">
+    <div class="header-decorator">
+      <h1>{{ parent_class.name }}, <span style="display: inline-block">{{ instance.occasion }}</span></h1>
+    </div>
+    <div class="row padded" style="flex-wrap: nowrap">
+      <div class="col main">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Ficheiros</h2></div>
+          <div class="pane-content">
+            <table>
+              <thead style="font-weight: bold; background-color: #ccc">
+              <td>Nome</td>
+              <td>Data</td>
+              <td>Criador</td>
+              <td>Dimensão (KB)</td>
+              </thead>
+              {% for instance_file in instance_files %}
+                <tr>
+                  <td>
+                    <a href="{% url 'college:class_instance_file_download' instance.id instance_file.file.hash %}">
+                      {{ instance_file.file.name }}
+                    </a>
+                  </td>
+                  <td>{{ instance_file.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</td>
+                  <td>{{ instance_file.uploader }}</td>
+                  <td>{% widthratio instance_file.file.size 1024 1 %}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        {% include 'college/class_navigation.html' %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Edições</h2></div>
+          <div class="pane-content">
+            <ul>
+              {% for other_instance in instance.parent.instances.all|dictsort:'year' %}
+                {% if instance == other_instance %}
+                  <li>{{ other_instance.occasion }}</li>
+                {% else %}
+                  <li><a href="{% url 'college:class_instance_files' instance.id %}">{{ other_instance.occasion }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

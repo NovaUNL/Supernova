@@ -1,171 +1,112 @@
-{% extends 'supernova/content_navigation_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
-{% block head %}
-  {{ block.super }}
-  <script type="text/javascript" src="{% static 'users/socialNetworks.js' %}"></script>
-  <style>
-    .students {
-      background-color: #dddddd;
-      border-radius: 5px;
-    }
-
-    .students div {
-      padding: 5px;
-      color: #666;
-    }
-
-    .students div:first-child {
-      border: solid 2px #dddddd;
-      background-color: white;
-      border-radius: 5px;
-      color: black !important;
-    }
-  </style>
-{% endblock %}
-
-{% block content-top %}
-  {% include 'users/profile_navigation.html' %}
-{% endblock %}
-
-{% block content %}
-  <h1><i class="fas fa-user-circle"></i> {{ profile_user.get_full_name }}</h1>
-  <div class="flex-wrapper">
-    {% if profile_user.picture %}
-      <div class="flex-box">
-        <h2><i class="fas fa-image"></i> Foto</h2>
-        <img src="{% get_media_prefix %}{{ profile_user.picture }}" style="max-width: 200px; max-height: 150px;">
-        <br>
-      </div>
-    {% endif %}
-    <div class="flex-box">
-      <h2><i class="fas fa-id-card"></i> Sobre</h2>
-      <div class="students">
-        <div>
-          <b>CLIP ID: </b>{{ primary_student.abbreviation }}<br>
-          <b>Numero: </b>{{ primary_student.number }}<br>
-          <b>Curso: </b>
-          <a href="{% url 'college:course' primary_student.course.id %}">
-            {{ primary_student.course.abbreviation }}
-          </a>
-        </div>
-        {% for student in secondary_students.all %}
-          <div>
-            <b>Numero: </b>{{ student.number }}<br>
-            <b>Curso: </b>
-            <a href="{% url 'college:course' student.course.id %}">
-              {{ student.course.abbreviation }}
-            </a>
-          </div>
-        {% endfor %}
-      </div>
-      {% if profile_user.residence %}
-        <b>Residência:</b> {{ profile_user.residence }}<br>
-      {% endif %}
-      <b>Ultima atividade:</b> 5 horas atrás<br>
-      {% if profile_user.webpage %}
-        <b>Página:</b> <a href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a><br>
-      {% endif %}
-    </div>
-    {% if current_class_instances.exists %}
-      <div class="flex-box">
-        <h2><i class="fas fa-graduation-cap"></i> Inscrito a</h2>
+{% block content_wrapper %}
+  <div class="col main profile">
+    <div class="header-decorator">
+      <div class="header-decorator-options">
         <ul>
-          {% for instance in current_class_instances %}
-            <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
-          {% endfor %}
+          <li>
+            <a href="{% url 'profile_settings' profile_user.nickname %}">Definições</a>
+          </li>
         </ul>
       </div>
-    {% endif %}
-    {% if profile_user.social_networks.exists %}
-      <div id="social" class="flex-box">
-        <h2><i class="fas fa-globe"></i> Social</h2>
-        <ul id="social-network-list"></ul>
-      </div>
-    {% endif %}
-    {% if profile_user.badges.exists %}
-      <div class="flex-box">
-        <h2><i class="fas fa-trophy"></i> Conquistas</h2>
-        {% for badge in profile_user.badges.all %}
-          <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
-        {% endfor %}
-      </div>
-    {% endif %}
-    <!--<div id="record" class="flex-box">
-      <h2><i class="fas fa-comment-alt"></i> Cadastro (placeholder)</h2>
-      <table>
-        <tr>
-          <td>Sínteses</td>
-          <td class="like">15 <i class="far fa-thumbs-up"></i></td>
-          <td><span class="likebar"
-                    style="background: linear-gradient(to right, #2fa40c 88%,#ff0000 88%);"></span></td>
-          <td class="dislike">2 <i class="far fa-thumbs-down"></i></td>
-          <td class="favorite">5 <i class="far fa-heart"></i></td>
-        </tr>
-        <tr>
-          <td>Artigos</td>
-          <td class="like">3 <i class="far fa-thumbs-up"></i></td>
-          <td><span class="likebar"
-                    style="background: linear-gradient(to right, #2fa40c 75%,#ff0000 75%);"></span></td>
-          <td class="dislike">1 <i class="far fa-thumbs-down"></i></td>
-          <td class="favorite">2 <i class="far fa-heart"></i></td>
-        </tr>
-        <tr>
-          <td>Noticias</td>
-          <td class="like">5 <i class="far fa-thumbs-up"></i></td>
-          <td><span class="likebar"
-                    style="background: linear-gradient(to right, #2fa40c 50%,#ff0000 50%);"></span></td>
-          <td class="dislike">5 <i class="far fa-thumbs-down"></i></td>
-          <td class="favorite">1 <i class="far fa-heart"></i></td>
-        </tr>
-        <tr>
-          <td>Vendedor</td>
-          <td class="like">1 <i class="far fa-thumbs-up"></i></td>
-          <td><span class="likebar"
-                    style="background: linear-gradient(to right, #2fa40c 100%,#ff0000 100%);"></span></td>
-          <td class="dislike">0 <i class="far fa-thumbs-down"></i></td>
-        </tr>
-      </table>
+      <h1>
+        {% if profile_user.picture %}
+          <img src="{% get_media_prefix %}{{ profile_user.picture }}">
+        {% else %}
+          <img src="{% static 'supernova/user.svg' %}">
+        {% endif %}
+        {{ profile_user.get_full_name }}
+      </h1>
     </div>
-    <div class="flex-box">
-      <h2><i class="fas fa-fire"></i> Muro da fama (placeholder)</h2>
-      <table>
-        <tr class="wall-item">
-          <td class="news">Noticia</td>
-          <td><a href="#">Estudantes recuperam 35€</a></td>
-          <td>
-            <span class="like">3 <i class="far fa-thumbs-up"></i></span>
-            <span class="dislike">1 <i class="far fa-thumbs-down"></i></span>
-            <span class="favorite">2 <i class="far fa-heart"></i></span>
-          </td>
-        </tr>
-        <tr class="wall-item">
-          <td class="article">Artigo</td>
-          <td><a href="#">Professores chocados. Clique para descubrir o que ...</a></td>
-          <td>
-            <span class="like">2 <i class="far fa-thumbs-up"></i></span>
-            <span class="dislike">4 <i class="far fa-thumbs-down"></i></span>
-            <span class="favorite">1 <i class="far fa-heart"></i></span>
-          </td>
-        </tr>
-      </table>
-    </div>-->
-    {% if profile_user.groups.exists %}
-      <div class="flex-box">
-        <h2><i class="fas fa-users"></i> Grupos</h2>
-        {% for group in profile_user.group_set.all %}
-          <a href="{% url 'group' group.id %}">
-                        <span class="group" style="background-size: cover;background-image: url(
-                            {% get_media_prefix %}{{ group.image }}">
-                            {{ group.abbreviation }}
-                        </span></a>
-        {% endfor %}
+    <div class="row padded">
+      {% if profile_user.groups.exists %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Grupos</h2></div>
+          <div class="pane-content">
+            {% for group in profile_user.group_set.all %}
+              <a href="{% url 'group' group.id %}">
+                <span class="group" style="background-image: url({% get_media_prefix %}{{ group.image }}">
+                  {{ group.abbreviation }}</span></a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Sobre</h2></div>
+        <div class="pane-content">
+          <div class="students">
+            <div>
+              <b>CLIP ID: </b>{{ primary_student.abbreviation }}<br>
+              <b>Numero: </b>{{ primary_student.number }}<br>
+              <b>Curso: </b>
+              <a href="{% url 'college:course' primary_student.course.id %}">
+                {{ primary_student.course.abbreviation }}
+              </a>
+            </div>
+            {% for student in secondary_students.all %}
+              <div>
+                <b>Numero: </b>{{ student.number }}<br>
+                <b>Curso: </b>
+                <a href="{% url 'college:course' student.course.id %}">
+                  {{ student.course.abbreviation }}
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+          {% if profile_user.residence %}
+            <b>Residência:</b> {{ profile_user.residence }}<br>
+          {% endif %}
+          <b>Ultima atividade:</b> TODO<br>
+          {% if profile_user.webpage %}
+            <b>Página:</b> <a href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a><br>
+          {% endif %}
+        </div>
       </div>
-    {% endif %}
-    <script>
-        let apiURL = "{% url 'social_networks' profile_user.nickname %}";
-        populateSocialNetworks(apiURL);
-    </script>
+      {% if current_class_instances.exists %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Inscrições</h2>
+          </div>
+          <div class="pane-content">
+            <ul>
+              {% for instance in current_class_instances %}
+                <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+      {% if profile_user.badges.exists %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Conquistas</h2>
+          </div>
+          <div class="pane-content">
+            <ul>
+              {% for badge in profile_user.badges.all %}
+                <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+      {% if profile_user.social_networks.exists %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Social</h2>
+          </div>
+          <div class="pane-content">
+            <ul id="social-network-list">
+              {% for social_network in profile_user.social_networks.all %}
+                <li>{{ social_network }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+    </div>
   </div>
 {% endblock %}

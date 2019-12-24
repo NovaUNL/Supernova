@@ -125,7 +125,7 @@ let initTransportationMap = function (element) {
     let map = svgPanZoom(element, {
         zoomEnabled: true,
         controlIconsEnabled: true,
-        minZoom: 2,
+        minZoom: 1,
         maxZoom: 5,
         zoomScaleSensitivity: 1.5,
         center: 1

@@ -1,0 +1,478 @@
+@import "variables.sass"
+
+html, body
+  height: 100%
+  margin: 0
+  font-family: 'Open Sans', sans-serif
+
+body
+  display: flex
+  flex-direction: column
+  background-color: $color-primary-0
+  color: $color-primary-1
+
+a
+  color: $link-color
+  text-decoration: none
+
+h1
+  margin: 10px 0
+
+h2
+  margin: 8px 0
+
+h3
+  margin: 5px 0
+
+#top-wrapper, #main-wrapper, #content-wrapper
+  display: flex
+  flex-direction: row
+
+
+#top-wrapper
+  height: 60px
+  align-items: center
+  border-bottom: 2px solid $color-primary-2
+  color: white
+
+  > div
+    display: flex
+    justify-content: space-between
+    flex-grow: 1
+    height: 100%
+
+    .slogan
+      align-self: flex-end
+      left: -140px
+      position: relative
+      color: $whitish
+
+    .right
+      display: flex
+
+      a
+        color: $color-primary-1
+        text-decoration: none
+        font-weight: bold
+        font-size: 18px
+
+      .pic
+        vertical-align: middle
+        display: inline-block
+        width: 42px
+        height: 42px
+        clip-path: circle(21px at center)
+        background-size: cover
+        background-position: center
+        background-image: url("/static/supernova/user.svg")
+        margin-right: 10px
+
+
+  //img
+  //  width: 42px
+  //  height: 42px
+  //  clip-path: circle(21px at center)
+
+  .login, .logout
+    background-color: $red
+    height: 100%
+    width: 50px
+    display: flex
+    justify-content: center
+
+    img
+      width: 24px
+      height: 24px
+      align-self: center
+
+  .login
+    background-color: $green
+
+#search
+  display: flex
+
+  label
+    background: transparent url("./search.png")
+    background-size: cover
+    width: 32px
+    height: 32px
+    margin-left: 5px
+    margin-right: 10px
+    display: inline-block
+
+  input[type=search]
+    max-width: 0
+    width: 250px
+    overflow-x: hidden
+    transition: 0.5s
+    border: 0
+    border-radius: 5px
+    padding: 0
+    background-color: $color-primary-0
+    color: $color-primary-1
+    font-weight: bold
+    font-size: 22px
+    line-height: 30px
+
+  input[type=submit]
+    border: none
+    background: transparent url("./search.png")
+    background-size: cover
+    padding: 0 10px
+    margin-left: 5px
+    margin-right: 10px
+    width: 32px
+    height: 32px
+    display: none
+
+#search-toggler
+  display: none
+
+#search-toggler:checked
+  ~ label
+    display: none
+
+  ~ input[type=search]
+    max-width: 250px
+    border: 2px solid $color-primary-2
+
+  ~ input[type=submit]
+    display: inline-block
+
+#main-wrapper
+  flex-grow: 1
+
+#nav-wrapper
+  background-color: $color-primary-0
+  width: 200px
+  color: $color-primary-2
+  box-shadow: 2px 2px 5px $color-primary-3
+  position: relative
+  z-index: 2
+
+  a
+    text-decoration: none
+    color: $color-primary-1
+
+  ul
+    list-style: none
+    background-color: $color-primary-0
+    border-left: solid 2px $highlight
+    padding-left: 0
+    overflow: hidden
+
+  > ul
+    padding-left: 0
+    background-color: unset
+    border-left: none
+
+
+  li
+    padding: 10px
+    font-weight: bold
+    background-color: $color-primary-0
+
+  > li
+    background-color: unset
+
+  input[type=checkbox]
+    display: none
+
+  li.collapse ul
+    visibility: hidden
+    opacity: 0
+    max-height: 0
+    transition: all 0.5s
+
+  label
+    position: relative
+    display: block
+    width: 100%
+    cursor: pointer
+    line-height: 32px
+
+  .collapse > label::after
+    content: "\25b6"
+    position: absolute
+    top: 0
+    right: 0
+    transition: all 0.5s
+
+  li.collapse input:checked ~ ul
+    visibility: visible
+    opacity: 1
+    max-height: 900px
+
+  li.collapse input:checked ~ label::after
+    transform: rotate(90deg)
+
+  li.active
+    background-color: $color-primary-1
+
+    a
+      color: $color-primary-0
+
+#logo
+  padding: 10px
+
+  img
+    max-height: 60px
+    max-width: 100%
+
+#user
+  display: flex
+  align-items: center
+  background-color: darken($color-primary-0, 5)
+  height: 100%
+
+  .name
+    font-weight: 700
+    font-size: 16px
+    padding: 10px
+
+.bg-grad
+  background: radial-gradient(ellipse at top, $color-primary-0, transparent), radial-gradient(ellipse at bottom, $color-primary-2, transparent)
+  background-attachment: fixed
+
+#content-wrapper
+  flex-flow: nowrap
+  flex-grow: 1
+
+.col
+  display: flex
+  flex-flow: column
+  flex-grow: 1
+
+  &.padded
+    padding: 10px
+
+  &.nogrow
+    flex-grow: 0
+
+.flex-pane
+  border-radius: 5px
+  background-color: transparentize($color-primary-3, 0.5)
+  margin: 10px
+  box-shadow: 2px 2px 5px $color-primary-4
+
+.row
+  display: flex
+  flex-flow: row
+  flex-wrap: wrap
+
+  >.grow
+    flex-grow: 1
+
+  &.padded
+    padding: 10px
+
+  > .flex-pane
+    flex-basis: 300px
+
+  >.small
+    flex-basis: 300px
+
+  >.medium
+    flex-basis: 500px
+
+  >.big
+    flex-basis: 600px
+
+  >.full
+    flex-basis: 100%
+
+
+.pane-title
+  border-bottom: 2px solid $color-primary-1
+  padding: 5px 10px
+  border-top-left-radius: 5px
+  border-top-right-radius: 5px
+  color: $color-primary-1
+  text-shadow: 0px -1px 0px $color-primary-0
+
+  a
+    color: mix($link-color, $color-primary-1)
+
+  h2
+    margin: 0
+    font-family: 'Merriweather', serif
+
+.pane-content
+  padding: 5px 10px
+  line-height: 1.5
+  font-size: 16px
+  color: $color-primary-1
+
+#particles
+  z-index: -1
+  left: 0
+  right: 0
+  top: 0
+  bottom: 0
+  position: fixed
+
+
+#breadcrumbs
+  font-size: 1.0em
+  font-weight: bold
+  overflow: hidden
+  border-bottom: 2px solid $color-primary-2
+  box-shadow: 0 3px 5px $color-primary-3
+
+  a
+    text-decoration: none
+    outline: none
+    display: block
+    float: left
+    line-height: 37px
+    padding: 0 10px 0 30px
+    position: relative
+    background-color: $color-primary-0
+
+  a:first-child
+    padding-left: 20px
+
+  a:after
+    box-shadow: 2px -2px 0 2px rgba(0, 0, 0, 0.4), 3px -3px 0 2px rgba(255, 255, 255, 0.1)
+    content: ''
+    position: absolute
+    top: 0
+    right: -18px
+    width: 36px
+    height: 36px
+    transform: scale(0.707) rotate(45deg)
+    z-index: 1
+    border-radius: 0 5px 0 50px
+    background: $color-primary-0
+
+/* Middle content/side styles */
+//#top-container, #bot-container
+//  display: flex
+//  list-style: none
+//  margin: 0
+//  padding: 0
+//
+//  > a
+//    display: inline-block
+//    padding: 8px 20px
+//    font-weight: bold
+//    border-bottom: 0
+//    background-color: #eee
+//    font-size: 1.2em
+//    color: #999
+//
+//  > a:hover
+//    background-color: #cfd8de
+//
+//  a.selected
+//    background-color: #aaa
+//    color: white
+//
+//  a:first-child
+//    border-left: 2px solid #b7ccb1
+//
+//  .float-right
+//    float: right
+//    margin-right: 10px
+
+//
+//#top-container
+//  > a
+//    border-right: 2px solid #cdcdcd
+//    border-top: 2px solid #cdcdcd
+//
+//  a:first-child
+//    border-top-left-radius: 10px
+//
+//  a:last-child
+//    border-top-right-radius: 10px
+//
+//#bot-container
+//  > a
+//    border-right: 2px solid $color-primary-0
+//    border-bottom: 2px solid $color-primary-0
+
+.caption
+  list-style: none
+  display: flex
+  flex-direction: column
+  margin: 0
+  padding: 0
+
+  > li
+    //border-bottom: 2px solid #b7ccb1
+    display: inline-block
+    padding: 4px 15px
+
+//li:first-child
+//  border-left: 2px solid #b7ccb1
+//
+//> li:last-child
+//  border-right: 2px solid #b7ccb1
+
+//#bot-container, .caption
+  //> li:first-child, a:first-child
+  //  border-bottom-left-radius: 10px
+  //
+  //> li:last-child, a:last-child
+  //  border-bottom-right-radius: 10px
+
+/* Content decorator styles */
+
+
+.header-decorator
+  min-height: 150px
+  background-color: transparentize($color-primary-3, 0.5)
+  background-size: cover
+  background-position: center
+  position: relative
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: center
+  padding: 10px
+
+  h1
+    color: $whitish
+    font-size: 3em
+    text-shadow: black 0 0 5px
+    padding: 20px
+    display: inline
+
+    > img
+      width: 100px
+      height: 100px
+      clip-path: circle(50px at center)
+      vertical-align: middle
+      padding: 0 10px
+
+
+  h1 a
+    color: white
+
+  h3
+    font-size: 2em
+    text-shadow: black 0 0 3px
+    margin-left: 50px
+    color: white
+
+  h3 a
+    color: white
+
+.header-decorator-options
+  position: absolute
+  right: 0
+  top: 0
+  padding: 5px
+  border-bottom-left-radius: 5px
+  border-left: 2px solid $color-primary-3
+  border-bottom: 2px solid $color-primary-3
+  background-color: $color-primary-0
+  font-weight: bold
+
+  a
+    color: $color-primary-1
+
+.disabled
+  color: $color-primary-4 !important
+  text-decoration: line-through

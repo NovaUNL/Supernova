@@ -1,26 +1,23 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/base.html' %}
+
 {% load static %}
+
 {% block head %}
-    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.3/dist/svg-pan-zoom.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'college/map/map.css' %}"/>
-    <script src="{% static 'college/map/map.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.3/dist/svg-pan-zoom.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'college/map/map.css' %}"/>
+  <script src="{% static 'college/map/map.js' %}"></script>
 {% endblock %}
 
-
-{% block content-top %}
-    {% include 'college/campus_navigation.html' %}
-{% endblock %}
-
-{% block content %}
-    <object class="map" type="image/svg+xml" data="{% static 'college/map/transportation.minimal.svg' %}"
-            onload="initTransportationMap(this)" style="width: 100%">
-        O teu navegador não suporta uma <a href="https://pt.wikipedia.org/wiki/SVG">tecnologia com 20 anos</a>...<br>
-        Parece uma boa altura para <a href="https://www.mozilla.org/pt-PT/firefox/">mudar</a>!
-    </object>
-{% endblock %}
-
-{% block content-bottom %}
-    <ul class="caption">
+{% block content_wrapper %}
+  <div class="row" style="flex-grow: 1">
+    <div class="col" style="min-width: 300px">
+      <object class="map" type="image/svg+xml" data="{% static 'college/map/transportation.minimal.svg' %}"
+              onload="initTransportationMap(this)">
+        O teu navegador não suporta SVG!
+      </object>
+    </div>
+    <div class="col small nogrow">
+      <ul class="caption">
         <li><span class="MTS"></span>MTS</li>
         <li><span class="FER"></span>Fertagus</li>
         <li><span class="TST"></span>TST</li>
@@ -29,5 +26,7 @@
         <li><span class="SFT"></span>SulFertagus</li>
         <li><span class="CP"></span>CP</li>
         <li><span class="TCB"></span>TCB</li>
-    </ul>
+      </ul>
+    </div>
+  </div>
 {% endblock %}
