@@ -123,8 +123,8 @@ class RegistrationForm(forms.ModelForm):
         if not pattern.match(email):
             raise forms.ValidationError("Formato inválido de email.")
         prefix, suffix = email.split('@')
-        if 'unl.pt' not in suffix:
-            raise forms.ValidationError("Email não pertencente ao campus")
+        if 'campus.fct.unl.pt' not in suffix:
+            raise forms.ValidationError("Só são aceites emails @campus.fct.unl.pt")
         if student_id != prefix:
             raise forms.ValidationError("Este email não parece pertencer ao identificador indicado.")
 
