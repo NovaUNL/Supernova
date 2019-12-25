@@ -31,8 +31,11 @@ def pre_register(request, data: users.Registration):
     username = data.username
     nickname = data.nickname
     clip_id = data.clip_identifier
-    if username != clip_id and clip.Student.objects.filter(abbreviation=username).exclude(
-            id=data.clip_identifier).exists():
+
+    if username != clip_id and clip.Student.objects\
+            .filter(abbreviation=username)\
+            .exclude(abbreviation=clip_id)\
+            .exists():
         raise InvalidUsername(f'The username {username} matches a CLIP ID.')
 
     if users.User.objects.filter(Q(username=username) | Q(username=nickname) | Q(nickname=nickname)).exists():
