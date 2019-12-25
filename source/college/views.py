@@ -302,13 +302,20 @@ def course_students_view(request, course_id):
 
     context['course'] = course
     context['students'] = course.students.order_by('number').all()
-    context['unregistered_students'] = clip.Student.objects \
-        .filter(course=course.clip_course, student=None) \
-        .order_by('internal_id')
+    # context['unregistered_students'] = clip.Student.objects \
+    #     .filter(courses__=course.clip_course, student=None) \
+    #     .order_by('internal_id')
+
+    if department is None:
+        department_name = "Desconhecido"
+        department_url = "#"
+    else:
+        department_name = str(department)
+        department_url = reverse('college:department', args=[department.id])
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
-        {'name': department, 'url': reverse('college:department', args=[department.id])},
+        {'name': department_name, 'url': department_url},
         {'name': course, 'url': reverse('college:course', args=[course_id])},
         {'name': 'Alunos', 'url': reverse('college:course_students', args=[course_id])}]
     return render(request, 'college/course_students.html', context)
