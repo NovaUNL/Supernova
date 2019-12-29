@@ -13,3 +13,5 @@ _static
 _templates
 */static/
 dev/
+data/
+conf/

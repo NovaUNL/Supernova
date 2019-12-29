@@ -1,37 +1,15 @@
-# Use a clean Arch Linux base install as the parent of this image 
-# This is good for development, but might not fit production
-FROM archlinux/base
+FROM python:3.8-buster
 
-LABEL maintainer="Cláudio Pereira <development@claudiop.com>"
+LABEL maintainer="Cláudio Pereira <supernova@claudiop.com>"
 
-# Install required system packages.
-# gcc:         GCC (required to compile uwsgi)
-# python:      Pretty much everything
-# python-pip:  Dependencies
-# sqlite:      Read vulnerability database
-# gdal:        Geographical extensions
-# git:         Server version determination
-# After finished, 
-RUN pacman -Sy gcc python python-pip sqlite gdal git --noconfirm --noprogressbar --cachedir /tmp
+COPY . /
+RUN apt update \
+&& apt install  -y --no-install-recommends git sqlite libgdal20 \
+&& pip install --no-cache-dir --trusted-host pypi.python.org -r /pip-packages \
+&& rm -rf /var/lib/apt/lists/* /pip-packages \
+&& apt remove -y gcc
 
-# Install pip packages
-COPY pip-packages /usr/src/
-RUN pip install --no-cache-dir --trusted-host pypi.python.org -r /usr/src/pip-packages  && rm /usr/src/pip-packages
-
-# Uninstall compiler & dependencies. Cleanup cleanup cache, doc's, man entries and unused locales.
-RUN pacman -Rns gcc --noconfirm --noprogressbar
-
-# Put the source in place
-COPY source /supernova/source
-# Tag exports
-VOLUME  ["/supernova/config", "/srv/http/supernova"]
-# Change directory into it
-WORKDIR /supernova
-# Expose the uwsgi port
+VOLUME  ["/conf", "/http"]
+WORKDIR /source
 EXPOSE 1893
-
-ENV SN_CONFIG /supernova/config/settings.json
-ENV PYTHONUNBUFFERED 1
-
-# Execute uwsgi daemon once this container runs
-ENTRYPOINT ["uwsgi", "config/uwsgi.ini"]
+ENTRYPOINT ["uwsgi", "/conf/uwsgi.ini"]

@@ -1,0 +1,99 @@
+version: '3.7'
+services:
+  supernova:
+    container_name: sn_django
+    image: supernova
+    ports:
+      - "127.0.0.1:1893:1893"
+    environment:
+      SN_CONFIG: /conf/settings.json
+    volumes:
+      - /supernova/http:/http:rw
+    restart: unless-stopped
+
+  nginx:
+    container_name: sn_nginx
+    image: nginx
+    ports:
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+    volumes:
+      - /supernova/http:/http:ro
+      - /nginx/conf:/etc/nginx:ro
+      - /letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
+
+  postgres:
+    container_name: sn_postgres
+    image: "mdillon/postgis:11"
+    environment:
+      POSTGRES_DB: supernova
+      POSTGRES_USER: supernova
+      POSTGRES_PASSWORD: changeme
+    networks:
+      default:
+        aliases:
+          - postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - /postgres/conf:/etc/postgresql:ro
+      - /postgres/data:/var/lib/postgresql/data:rw
+    restart: unless-stopped
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+
+  redis:
+    container_name: sn_redis
+    image: "redis:5"
+    networks:
+      default:
+        aliases:
+          - redis
+    restart: unless-stopped
+
+  elastic:
+    container_name: sn_elastic
+    image: "elasticsearch:7.5.1"
+    environment:
+      - node.name=sn_elastic_1
+      - cluster.name=supernova-cluster
+      - discovery.seed_hosts=elastic
+      - cluster.initial_master_nodes=elastic
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    volumes:
+      - /elastic/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - /elastic/conf/jvm.options:/usr/share/elasticsearch/config/jvm.options:ro
+      - elastic_data:/usr/share/elasticsearch/data:rw
+    networks:
+      default:
+        aliases:
+          - elastic
+          - elasticsearch
+    ports:
+      - "127.0.0.1:9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+
+  logstash:
+    container_name: sn_logstash
+    image: "logstash:7.5.1"
+    volumes:
+      - ./conf/logstash:/usr/share/logstash/config:ro
+    entrypoint: logstash -f /usr/share/logstash/config/logstash.conf
+    networks:
+      default:
+        aliases:
+          - logstash
+    restart: unless-stopped
+
+volumes:
+  elastic_data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge

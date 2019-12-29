@@ -1,0 +1,126 @@
+version: '3.7'
+services:
+  supernova:
+    container_name: sn_django
+    image: supernova-dev
+    ports:
+      - "127.0.0.1:1893:1893"
+    environment:
+      SN_CONFIG: /conf/settings-dev.json
+    volumes:
+      - ./source:/source:ro
+      - ./conf:/conf:ro
+      - ./data/http:/http:rw
+    restart: unless-stopped
+
+  nginx:
+    container_name: sn_nginx
+    image: nginx
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./conf/nginx:/etc/nginx:ro
+      - ./data/http:/http:ro
+    restart: unless-stopped
+
+  postgres:
+    container_name: sn_postgres
+    image: "mdillon/postgis:11"
+    environment:
+      POSTGRES_DB: supernova
+      POSTGRES_USER: supernova
+      POSTGRES_PASSWORD: changeme
+    networks:
+      default:
+        aliases:
+          - postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./conf/postgres:/etc/postgresql:ro
+      - ./data/postgres:/var/lib/postgresql/data:rw
+    restart: unless-stopped
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+
+  redis:
+    container_name: sn_redis
+    image: "redis:5"
+    networks:
+      default:
+        aliases:
+          - redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    restart: unless-stopped
+
+  elastic:
+    container_name: sn_elastic
+    image: "elasticsearch:7.5.1"
+    environment:
+      - node.name=sn_elastic_1
+      - cluster.name=supernova-cluster
+      - discovery.seed_hosts=elastic
+      - cluster.initial_master_nodes=elastic
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    volumes:
+      - ./conf/elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./conf/elastic/jvm.options:/usr/share/elasticsearch/config/jvm.options:ro
+      - elastic_data:/usr/share/elasticsearch/data:rw
+    networks:
+      default:
+        aliases:
+          - elastic
+          - elasticsearch
+    ports:
+      - "127.0.0.1:9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+
+  logstash:
+    container_name: sn_logstash
+    image: "logstash:7.5.1"
+    volumes:
+      - ./conf/logstash:/usr/share/logstash/config:ro
+    entrypoint: logstash -f /usr/share/logstash/config/logstash.conf
+    networks:
+      default:
+        aliases:
+          - logstash
+    ports:
+      - "127.0.0.1:5959:5959"
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: sn_pgadmin
+    image: "dpage/pgadmin4"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@supernova"
+      PGADMIN_DEFAULT_PASSWORD: "changeme"
+    ports:
+      - "127.0.0.1:81:80"
+    restart: unless-stopped
+
+  kibana:
+    container_name: sn_kibana
+    image: "kibana:7.5.1"
+    volumes:
+      - ./conf/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "127.0.0.1:82:5601"
+    restart: unless-stopped
+
+volumes:
+  elastic_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge
