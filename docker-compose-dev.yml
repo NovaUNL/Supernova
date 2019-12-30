@@ -57,11 +57,6 @@ services:
     container_name: sn_elastic
     image: "elasticsearch:7.5.1"
     environment:
-      - node.name=sn_elastic_1
-      - cluster.name=supernova-cluster
-      - discovery.seed_hosts=elastic
-      - cluster.initial_master_nodes=elastic
-      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
     volumes:
       - ./conf/elastic/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
