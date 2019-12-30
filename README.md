@@ -39,12 +39,12 @@ No clue it this runs on non-Linux systems, it should mostly work but you are on 
 
  (these do **not** persist on reboot, if your system becomes troublesome rebooting might help)
 
-5 Create a configuration file for supernova
+6 Create a configuration file for supernova
    > $ cp ./conf/settings.example.json ./conf/settings-dev.json
    
    (Edit the new file in case you need CLIPy or email functionality)
 
-6 The moment of truth
+7 The moment of truth
    > \# docker-compose -f docker-compose-dev.yml up
 
 After a few seconds you should be left with the following services running:
@@ -62,6 +62,31 @@ After a few seconds you should be left with the following services running:
 
 The default user is `supernova`, email `admin@supernova` and password `changeme`.
 
-To stop docker compose press `ctrl + c` in the execution terminal.
 
-Now you only need data. To continue...
+While the CLIP data is read-only and unmanaged by supernova, you need to instantiate the CLIPy tables as they are expected to exist. To create them fire up a python3 terminal inside the django container:
+```
+# docker exec -it sn_django bash
+$ python3
+```
+You need to let the crawler taste the database. It will instantiate every missing table. 
+```python
+from CLIPy import CacheStorage
+storage = CacheStorage.postgresql('supernova', 'changeme', 'supernova')
+```
+
+Close the python interpreter (`ctrl + c` should do).  
+Now you need to tell supernova to instantiate its tables.
+```
+python3 manage.py makemigrations
+python3 manage.py migrate
+```
+
+And finally, you need to create a user and add at least one catchphrase/slogan
+```
+python3 manage.py createsuperuser
+python3 manage.py addcatchphrase "The awesome system"
+```
+
+By now supernova is running. With the default settings supernova is only accessible in the loopback network interface.
+
+To stop docker compose press `ctrl + c` in the execution terminal.
