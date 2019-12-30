@@ -21,3 +21,4 @@ beautifulsoup4
 django-elasticsearch-dsl
 elasticsearch-dsl>=7.0.0,<8.0.0
 python-logstash
+django-crontab

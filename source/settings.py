@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'analytical',
     'leaflet',
     'markdownx',
+    'django_elasticsearch_dsl',
+    'django_crontab',
     'clip',
     'supernova.apps.SupernovaConfig',
     'users',
@@ -206,11 +208,13 @@ DEBUG = False
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 VULNERABILITY_CHECKING = False
-LOG_PATH = "../supernova.log"
 
 assert 'SN_CONFIG' in os.environ
 CONFIG_PATH = os.environ['SN_CONFIG']
 assert os.path.isfile(CONFIG_PATH)
+
+ABS_CONFIG_PATH = os.path.abspath(CONFIG_PATH)
+CRONTAB_COMMAND_PREFIX = "SN_CONFIG=%s" % ABS_CONFIG_PATH
 
 with open(CONFIG_PATH) as file:
     locals().update(json.load(file))
