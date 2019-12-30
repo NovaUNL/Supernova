@@ -1,0 +1,33 @@
+{
+  "SECRET_KEY": "abcdefghijklmnopqrstuvxyz1234567890!#$%&/()=?»,.-",
+  "DATABASES": {
+    "default": {
+      "ENGINE": "django.contrib.gis.db.backends.postgis",
+      "NAME": "supernova",
+      "USER": "supernova",
+      "PASSWORD": "changeme",
+      "HOST": "postgres",
+      "PORT": "5432"
+    }
+  },
+  "CLIP_USERNAME": "changeme",
+  "CLIP_PASSWORD": "changeme",
+  "EMAIL_SERVER": "changeme",
+  "EMAIL_ACCOUNT": "changeme",
+  "EMAIL_PASSWORD": "changeme",
+  "EMAIL_SUFFIX": "@campus.fct.unl.pt",
+  "ALLOWED_HOSTS": [
+    "127.0.0.1",
+    "localhost"
+  ],
+  "REGISTRATIONS_ENABLED": true,
+  "VULNERABILITY_CHECKING": false,
+  "LOG_PATH": "/var/log/supernova.log",
+  "DEBUG": true,
+  "MEDIA_ROOT": "/http/media/",
+  "ELASTICSEARCH_DSL": {
+    "default": {
+      "hosts": "elastic:9200"
+    }
+  }
+}
