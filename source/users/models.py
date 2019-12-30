@@ -1,17 +1,15 @@
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
 
-from clip import models as clip
-
 
 def user_profile_pic_path(user, filename):
     return f'u/{user.id}/pic.{filename.split(".")[-1]}'
 
 
 class User(AbstractUser):
-    nickname = djm.CharField(null=True, max_length=20, verbose_name='Alcunha')
+    nickname = djm.CharField(null=False, max_length=20, unique=True, verbose_name='Alcunha')
     birth_date = djm.DateField(null=True, verbose_name='Nascimento')
-    last_activity = djm.DateTimeField()
+    last_activity = djm.DateTimeField(auto_now_add=True)
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
     picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
     webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
@@ -20,6 +18,8 @@ class User(AbstractUser):
         on_delete=djm.PROTECT,
         null=True, blank=True,
         related_name="_user")
+
+    REQUIRED_FIELDS = ['email', 'nickname']
 
     HIDDEN = 0  # No profile at all
     LIMITED = 1  # Show limited information, only to users
