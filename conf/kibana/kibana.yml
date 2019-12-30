@@ -1,6 +1,6 @@
 server.name: "Supernova"
 server.port: 5601
-server.host: "localhost"
+server.host: "0"
 elasticsearch.hosts: ["http://elastic:9200"]
 logging.quiet: true
 telemetry.enabled: false
