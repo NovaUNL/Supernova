@@ -1,81 +1,76 @@
 @import "variables.sass"
 
-html, body
-  height: 100%
-  margin: 0
-  font-family: 'Open Sans', sans-serif
-
-body
-  display: flex
-  flex-direction: column
-  background-color: $color-primary-0
-  color: $color-primary-1
-
-a
-  color: $link-color
-  text-decoration: none
-
-h1
-  margin: 10px 0
-
-h2
-  margin: 8px 0
-
-h3
-  margin: 5px 0
-
-#top-wrapper, #main-wrapper, #content-wrapper
-  display: flex
-  flex-direction: row
-
 
 #top-wrapper
-  height: 60px
-  align-items: center
   border-bottom: 2px solid $color-primary-2
   color: white
+  display: flex
 
-  > div
-    display: flex
-    justify-content: space-between
-    flex-grow: 1
+#top-main
+  flex-grow: 1
+  display: flex
+  min-height: $top-height
+  justify-content: space-between
+  flex-wrap: nowrap
+
+  @media #{$lowmidres}
+    flex-wrap: wrap
+
+#top-main-left
+  display: flex
+
+
+#top-main-right
+  display: flex
+
+  a
+    color: $color-primary-1
+    text-decoration: none
+    font-weight: bold
+    font-size: 18px
+
+#hamburger
+  display: flex
+  align-items: center
+  padding: 5px 10px
+
+
+#logo
+  display: flex
+  padding: 5px
+
+  img
     height: 100%
 
-    .slogan
-      align-self: flex-end
-      left: -140px
-      position: relative
-      color: $whitish
+.user
+  display: flex
+  align-items: center
+  background-color: darken($color-primary-0, 5)
+  height: 100%
+  white-space: nowrap
+  justify-content: space-between
 
-    .right
-      display: flex
+  &.lowres
+    align-items: stretch
 
-      a
-        color: $color-primary-1
-        text-decoration: none
-        font-weight: bold
-        font-size: 18px
+  .pic
+    vertical-align: middle
+    display: inline-block
+    width: 42px
+    height: 42px
+    clip-path: circle(21px at center)
+    background-size: cover
+    background-position: center
+    background-image: url("./images/user.svg")
+    margin-right: 10px
 
-      .pic
-        vertical-align: middle
-        display: inline-block
-        width: 42px
-        height: 42px
-        clip-path: circle(21px at center)
-        background-size: cover
-        background-position: center
-        background-image: url("/static/supernova/user.svg")
-        margin-right: 10px
-
-
-  //img
-  //  width: 42px
-  //  height: 42px
-  //  clip-path: circle(21px at center)
+  .name
+    font-weight: 700
+    font-size: 16px
+    padding: 10px
 
   .login, .logout
     background-color: $red
-    height: 100%
     width: 50px
     display: flex
     justify-content: center
@@ -85,15 +80,36 @@ h3
       height: 24px
       align-self: center
 
+
+  &.midhighres
+    .login, .logout
+      height: 100%
+
   .login
     background-color: $green
 
+#slogan-pos
+  width: 0
+  height: 0
+  left: -80px
+  position: relative
+  align-self: flex-end
+
+#slogan
+  position: absolute
+  left: 0
+  bottom: 0
+  color: $whitish
+  white-space: nowrap
+
+
 #search
   display: flex
+  align-items: center
 
   label
-    background: transparent url("./search.png")
-    background-size: cover
+    background: transparent url("./images/search.svg") no-repeat center
+    background-size: contain
     width: 32px
     height: 32px
     margin-left: 5px
@@ -102,7 +118,6 @@ h3
 
   input[type=search]
     max-width: 0
-    width: 250px
     overflow-x: hidden
     transition: 0.5s
     border: 0
@@ -116,8 +131,8 @@ h3
 
   input[type=submit]
     border: none
-    background: transparent url("./search.png")
-    background-size: cover
+    background: transparent url("./images/search.svg") no-repeat center
+    background-size: contain
     padding: 0 10px
     margin-left: 5px
     margin-right: 10px
@@ -130,7 +145,11 @@ h3
 
 #search-toggler:checked
   ~ label
-    display: none
+    width: 24px
+    height: 24px
+    background: transparent url("./images/right.svg") no-repeat center
+    background-size: cover
+
 
   ~ input[type=search]
     max-width: 250px
@@ -140,15 +159,32 @@ h3
     display: inline-block
 
 #main-wrapper
+  display: flex
   flex-grow: 1
+  width: 100%
 
-#nav-wrapper
+  @media #{$lowmidres}
+    overflow: auto
+
+#nav-column
   background-color: $color-primary-0
-  width: 200px
-  color: $color-primary-2
-  box-shadow: 2px 2px 5px $color-primary-3
-  position: relative
-  z-index: 2
+  height: 100%
+
+  @media #{$lowres}
+    display: none
+    position: fixed
+    z-index: 9999
+    top: $top-height
+    bottom: 0
+    left: 0
+    right: 0
+    overflow-y: auto
+
+  @media #{$midhighres}
+    width: 200px
+    position: relative
+    z-index: 2
+    box-shadow: 2px 2px 5px $color-primary-3
 
   a
     text-decoration: none
@@ -212,112 +248,30 @@ h3
     a
       color: $color-primary-0
 
-#logo
-  padding: 10px
-
-  img
-    max-height: 60px
-    max-width: 100%
-
-#user
-  display: flex
-  align-items: center
-  background-color: darken($color-primary-0, 5)
-  height: 100%
-
-  .name
-    font-weight: 700
-    font-size: 16px
-    padding: 10px
-
 .bg-grad
   background: radial-gradient(ellipse at top, $color-primary-0, transparent), radial-gradient(ellipse at bottom, $color-primary-2, transparent)
   background-attachment: fixed
 
-#content-wrapper
-  flex-flow: nowrap
-  flex-grow: 1
-
-.col
+#content-column
   display: flex
   flex-flow: column
+  //flex-flow: nowrap
   flex-grow: 1
 
-  &.padded
-    padding: 10px
-
-  &.nogrow
-    flex-grow: 0
-
-.flex-pane
-  border-radius: 5px
-  background-color: transparentize($color-primary-3, 0.5)
-  margin: 10px
-  box-shadow: 2px 2px 5px $color-primary-4
-
-.row
-  display: flex
-  flex-flow: row
-  flex-wrap: wrap
-
-  >.grow
-    flex-grow: 1
-
-  &.padded
-    padding: 10px
-
-  > .flex-pane
-    flex-basis: 300px
-
-  >.small
-    flex-basis: 300px
-
-  >.medium
-    flex-basis: 500px
-
-  >.big
-    flex-basis: 600px
-
-  >.full
-    flex-basis: 100%
-
-
-.pane-title
-  border-bottom: 2px solid $color-primary-1
-  padding: 5px 10px
-  border-top-left-radius: 5px
-  border-top-right-radius: 5px
-  color: $color-primary-1
-  text-shadow: 0px -1px 0px $color-primary-0
-
-  a
-    color: mix($link-color, $color-primary-1)
-
-  h2
-    margin: 0
-    font-family: 'Merriweather', serif
-
-.pane-content
-  padding: 5px 10px
-  line-height: 1.5
-  font-size: 16px
-  color: $color-primary-1
-
-#particles
-  z-index: -1
-  left: 0
-  right: 0
-  top: 0
-  bottom: 0
-  position: fixed
+  @media #{$lowmidres}
+    overflow: auto
+    scroll-snap-type: x mandatory
+    height: 100%
 
 
 #breadcrumbs
   font-size: 1.0em
   font-weight: bold
-  overflow: hidden
   border-bottom: 2px solid $color-primary-2
   box-shadow: 0 3px 5px $color-primary-3
+
+  @media #{$lowmidres}
+    display: none
 
   a
     text-decoration: none
@@ -345,52 +299,77 @@ h3
     border-radius: 0 5px 0 50px
     background: $color-primary-0
 
-/* Middle content/side styles */
-//#top-container, #bot-container
-//  display: flex
-//  list-style: none
-//  margin: 0
-//  padding: 0
-//
-//  > a
-//    display: inline-block
-//    padding: 8px 20px
-//    font-weight: bold
-//    border-bottom: 0
-//    background-color: #eee
-//    font-size: 1.2em
-//    color: #999
-//
-//  > a:hover
-//    background-color: #cfd8de
-//
-//  a.selected
-//    background-color: #aaa
-//    color: white
-//
-//  a:first-child
-//    border-left: 2px solid #b7ccb1
-//
-//  .float-right
-//    float: right
-//    margin-right: 10px
+.col
+  display: flex
+  flex-flow: column
+  flex-grow: 1
 
-//
-//#top-container
-//  > a
-//    border-right: 2px solid #cdcdcd
-//    border-top: 2px solid #cdcdcd
-//
-//  a:first-child
-//    border-top-left-radius: 10px
-//
-//  a:last-child
-//    border-top-right-radius: 10px
-//
-//#bot-container
-//  > a
-//    border-right: 2px solid $color-primary-0
-//    border-bottom: 2px solid $color-primary-0
+  &.padded
+    padding: 10px
+
+  &.nogrow
+    flex-grow: 0
+
+.flex-pane
+  border-radius: 5px
+  background-color: transparentize($color-primary-3, 0.5)
+  margin: 10px
+  box-shadow: 2px 2px 5px $color-primary-4
+
+  @media #{$lowres}
+    width: calc(100vw - 15px)
+
+  @media #{$lowmidres}
+    scroll-snap-align: start
+    scroll-padding: 10px 0 0 10px
+
+.row
+  display: flex
+  flex-flow: row
+  flex-wrap: wrap
+
+  > .grow
+    flex-grow: 1
+
+  &.padded
+    padding: 10px
+
+  > .flex-pane
+    min-width: $small-pane-width
+
+  > .small
+    flex-basis: $small-pane-width
+
+  > .medium
+    flex-basis: $medium-pane-width
+
+  > .big
+    flex-basis: $big-pane-width
+
+  > .full
+    flex-basis: 100%
+
+
+.pane-title
+  border-bottom: 2px solid $color-primary-1
+  padding: 5px 10px
+  border-top-left-radius: 5px
+  border-top-right-radius: 5px
+  color: $color-primary-1
+  text-shadow: 0px -1px 0px $color-primary-0
+
+  a
+    color: mix($link-color, $color-primary-1)
+
+  h2
+    margin: 0
+    font-family: 'Merriweather', serif
+
+.pane-content
+  padding: 5px 10px
+  line-height: 1.5
+  font-size: 16px
+  color: $color-primary-1
 
 .caption
   list-style: none
@@ -400,26 +379,10 @@ h3
   padding: 0
 
   > li
-    //border-bottom: 2px solid #b7ccb1
     display: inline-block
     padding: 4px 15px
 
-//li:first-child
-//  border-left: 2px solid #b7ccb1
-//
-//> li:last-child
-//  border-right: 2px solid #b7ccb1
-
-//#bot-container, .caption
-  //> li:first-child, a:first-child
-  //  border-bottom-left-radius: 10px
-  //
-  //> li:last-child, a:last-child
-  //  border-bottom-right-radius: 10px
-
 /* Content decorator styles */
-
-
 .header-decorator
   min-height: 150px
   background-color: transparentize($color-primary-3, 0.5)
@@ -473,6 +436,10 @@ h3
   a
     color: $color-primary-1
 
-.disabled
-  color: $color-primary-4 !important
-  text-decoration: line-through
+#particles
+  z-index: -1
+  left: 0
+  right: 0
+  top: 0
+  bottom: 0
+  position: fixed

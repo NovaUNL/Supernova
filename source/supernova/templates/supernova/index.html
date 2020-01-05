@@ -1,14 +1,10 @@
 {% extends 'supernova/two_columns.html' %}
 {% load static %}
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'supernova/index.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'supernova/overrides.css' %}"/>
-{% endblock %}
 
 {% block content_wrapper %}
   <div id="particles"></div>
-  <div class="row padded" style="flex-wrap: nowrap">
-    <div class="col main">
+  <div class="row padded nowrap">
+    <div class="col">
       <div class="flex-pane">
         <div class="pane-title bg-grad">
           <h2>Notícias</h2>
@@ -31,7 +27,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="flex-pane grow">
+        <div class="flex-pane grow small">
           <div class="pane-title bg-grad">
             <h2>Atividade</h2>
           </div>
@@ -39,13 +35,13 @@
             TODO
           </div>
         </div>
-        <div class="flex-pane grow">
+        <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Alterações</h2></div>
           <div class="pane-content">
             TODO
           </div>
         </div>
-        <div class="flex-pane grow">
+        <div class="flex-pane grow small">
           <div class="pane-title bg-grad">
             <h2>Salas <b>possívelmente</b> vazias</h2>
           </div>
@@ -53,7 +49,7 @@
             TODO
           </div>
         </div>
-        <div class="flex-pane grow">
+        <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Eventos</h2></div>
           <div class="pane-content">
             TODO
@@ -61,7 +57,7 @@
         </div>
       </div>
     </div>
-    <div class="col">
+    <div class="col medium">
       <div class="flex-pane">
         <div class="pane-title bg-grad">
           <h2>Transportes</h2>
@@ -111,8 +107,8 @@
         <div class="pane-title bg-grad">
           <h2>Meteorologia</h2>
         </div>
-        <div class="pane-content" id="weather" style="height: 100%; overflow-x: hidden">
-          <svg id="chart" width="380" height="200"></svg>
+        <div class="pane-content" id="weather" style="height: 100%; overflow: hidden">
+          <svg id="chart" width="320" height="180"></svg>
         </div>
       </div>
       <div class="flex-pane">

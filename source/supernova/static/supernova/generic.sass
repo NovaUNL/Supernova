@@ -1,6 +1,56 @@
 @import "variables"
 
+html, body
+  height: 100%
+  margin: 0
+  font-family: 'Open Sans', sans-serif
 
+body
+  display: flex
+  flex-direction: column
+  background-color: $color-primary-0
+  color: $color-primary-1
+  overflow-x: hidden
+//overflow-y: auto
+
+a
+  color: $link-color
+  text-decoration: none
+
+h1
+  margin: 10px 0
+
+h2
+  margin: 8px 0
+
+h3
+  margin: 5px 0
+
+.nowrap
+  flex-wrap: nowrap !important
+
+.disabled
+  color: $color-primary-4 !important
+  text-decoration: line-through
+
+.hidden
+  display: none !important
+
+@media #{$lowres}
+  .midhighres
+    display: none !important
+
+@media #{$highres}
+  .lowmidres
+    display: none !important
+
+@media #{$lowmidres}
+  .highres
+    display: none !important
+
+@media #{$midhighres}
+  .lowres
+    display: none !important
 
 .flex-wrapper
   display: flex
@@ -57,11 +107,6 @@
 .generic-button
   background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%)
   border: 2px solid #dddddd
-
-.captcha
-  padding: 0 !important
-  margin: 0
-  vertical-align: middle
 
 .generic-button
   display: inline-block

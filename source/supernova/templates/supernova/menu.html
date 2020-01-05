@@ -1,3 +1,4 @@
+{% load static %}
 {% url 'college:courses' as courses %}
 {% url 'college:departments' as departments %}
 {% url 'college:index' as college %}
@@ -6,8 +7,29 @@
 {% url 'college:buildings' as buildings %}
 {% url 'college:available_places' as places %}
 {% url 'college:map' as map %}
-{#{% with name="World" %}  #}
 
+<div class="lowres">
+  <div class="user lowres">
+    {% if user.is_authenticated %}
+      <a class="name" href="{% url 'profile' user.nickname %}">
+        {% if user.picture %}
+          <span class="pic" style="background-image: url('{% get_media_prefix %}{{ user.picture }}')"></span>
+        {% else %}
+          <span class="pic"></span>
+        {% endif %}
+        {{ user.nickname }}
+      </a>
+      <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
+        <img alt="logout" src="{% static 'supernova/images/logout.svg' %}">
+      </a>
+    {% else %}
+      <a class="name">Não autenticado</a>
+      <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
+        <img alt="login" src="{% static 'supernova/images/login.svg' %}">
+      </a>
+    {% endif %}
+  </div>
+</div>
 <ul>
   {% if user.is_authenticated %}
     {% url 'profile' user.nickname as profile %}
@@ -94,7 +116,7 @@
         <li class="collapse">
           <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
           <ul>
-            <li class="active"><a href="#">Palestras</a></li>
+            <li><a href="#">Palestras</a></li>
             <li><a href="#">Workshops</a></li>
             <li><a href="#">Festas</a></li>
             <li><a href="#">Competições</a></li>

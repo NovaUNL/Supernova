@@ -12,60 +12,60 @@
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" type="text/css" href="{% static 'supernova/layout.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'supernova/ui.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'supernova/overrides.css' %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static 'supernova/style.css' %}"/>
   <script src="{% static 'supernova/script.js' %}"></script>
   {% block head %}
   {% endblock %}
 </head>
 <body>
 <nav id="top-wrapper" class="bg-grad">
-  <a id="logo" href="/">
-    <img src="{% static 'supernova/images/logo.svg' %}">
-  </a>
-  <div>
-    <span class="slogan">{{ catchphrase }}</span>
-    <div class="right">
-      <div style="display: flex; align-items: center;">
-        <div id="search">
-          <input type="checkbox" id="search-toggler">
-          <label for="search-toggler"></label>
-          <input type="search" class="search-bar">
-          <input type="submit" value="">
-        </div>
+  <div id="top-main">
+    <div id="top-main-left">
+      <a id="hamburger" class="lowres" href="javascript: toggleMenu()">
+        <img alt="menu" src="{% static 'supernova/images/menu.svg' %}">
+      </a>
+      <a id="logo" href="/">
+        <img src="{% static 'supernova/images/logo.svg' %}">
+      </a>
+      <div id="slogan-pos" class="highres">
+        <span id="slogan">{{ catchphrase }}</span>
+      </div>
+    </div>
+    <div id="top-main-right">
+      <div id="search">
+        <input type="checkbox" id="search-toggler">
+        <label for="search-toggler"></label>
+        <input type="search" class="search-bar">
+        <input type="submit" value="">
+      </div>
+      <div class="user midhighres">
         {% if user.is_authenticated %}
-          <div id="user" style="">
-            <a class="name" href="{% url 'profile' user.nickname %}">
-              {% if user.picture %}
-                <span class="pic"
-                      style="background-image: url('{% get_media_prefix %}{{ user.picture }}')"></span>
-              {% else %}
-                <span class="pic"></span>
-              {% endif %}
-              {{ user.nickname }}
-            </a>
-          </div>
-          </div>
+          <a class="name" href="{% url 'profile' user.nickname %}">
+            {% if user.picture %}
+              <span class="pic" style="background-image: url('{% get_media_prefix %}{{ user.picture }}')"></span>
+            {% else %}
+              <span class="pic"></span>
+            {% endif %}
+            {{ user.nickname }}
+          </a>
           <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
-            <img src="{% static 'supernova/logout.svg' %}">
+            <img src="{% static 'supernova/images/logout.svg' %}">
           </a>
         {% else %}
-          <div id="user" style="">
-            <a class="name">Não autenticado</a>
-          </div>
-          </div>
+          <a class="name">Não autenticado</a>
           <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
-            <img src="{% static 'supernova/login.svg' %}">
+            <img src="{% static 'supernova/images/login.svg' %}">
           </a>
         {% endif %}
+      </div>
+    </div>
   </div>
 </nav>
 <div id="main-wrapper">
-  <nav id="nav-wrapper" class="bg-grad">
+  <nav id="nav-column" class="bg-grad">
     {% include 'supernova/menu.html' %}
   </nav>
-  <div style="display: flex; flex-direction: column; flex-grow: 1">
+  <div id="content-column">
     {% if sub_nav is not None %}
       <nav id="breadcrumbs">
         {% for element in sub_nav %}
@@ -73,28 +73,9 @@
         {% endfor %}
       </nav>
     {% endif %}
-    <div id="content-wrapper">
-      {% block content_wrapper %}
-      {% endblock %}
-    </div>
+    {% block content_wrapper %}
+    {% endblock %}
   </div>
 </div>
-{#<div id="overlay">#}
-{#  <div id="overlay-prompt">#}
-{#    <a id="overlay-close-button" href="javascript:overlayClose();">X</a>#}
-{#    {% if login_form is not None %}#}
-{#      <h2>Autenticação</h2>#}
-{#      <form method="post" action="{% url 'login' %}?next={{ request.get_full_path }}">#}
-{#        {% csrf_token %}#}
-{#        {{ login_form.username.label }} {{ login_form.username.errors }}<br>#}
-{#        {{ login_form.username }}<br><br>#}
-{#        {{ login_form.password.label }} {{ login_form.password.errors }}<br>#}
-{#        {{ login_form.password }}#}
-{#        <input type="submit" value="Entrar"><br><br>#}
-{#      </form>#}
-{#    {% endif %}#}
-{#    <a href="{% url 'registration' %}">Criar</a>#}
-{#  </div>#}
-{#</div>#}
 </body>
 </html>
