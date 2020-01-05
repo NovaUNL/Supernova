@@ -1,4 +1,4 @@
-CLIP-Crawler
+CLIP-Crawler==0.7.*
 Pillow
 Pygments
 psycopg2-binary
