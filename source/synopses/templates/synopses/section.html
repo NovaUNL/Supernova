@@ -4,163 +4,175 @@
 
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
-  <link type="text/css" rel="stylesheet" href="{% static 'supernova/prism.css' %}">
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
   <script src="{% static 'prism.js' %}"></script>
-  <script type="text/javascript" async
-          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-  <style>
-    .flex-wrapper > div ul {
-      padding: 0;
-      margin: 0;
-      list-style: none;
-    }
-
-    .flex-wrapper > div {
-      min-width: 300px;
-      margin-right: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"
+        integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq"
+        crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"
+          integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz"
+          crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"
+          integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
+          crossorigin="anonymous"
+          onload="renderMathInElement(document.body);"></script>
 {% endblock %}
 
 {% block content %}
   <div class="col">
     <div class="header-decorator">
-      <h1>{{ section.name }}</h1>
-      {% if synopsis_class %}
-        <h3><a href="{% url 'synopses:class' synopsis_class.id %}">Síntese de {{ synopsis_class.name }}</a></h3>
-      {% else %}
-        {% if topic %}
-          <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
+      <div class="header-decorator-options">
+        <ul>
+          <li>
+            <a href="{% url 'synopses:section_edit' topic.id section.id %}">Editar</a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h1>{{ section.name }}</h1>
+        {% if synopsis_class %}
+          <h3><a href="{% url 'synopses:class' synopsis_class.id %}">Síntese de {{ synopsis_class.name }}</a></h3>
+        {% else %}
+          {% if topic %}
+            <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
+          {% endif %}
         {% endif %}
-      {% endif %}
+      </div>
     </div>
-    <div class="col padded">
+    <div class="row padded nowrap">
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
         <div class="pane-content">
-           {% if section.requirements.exists %}
-      <div>
-        <h3>Necessitas de entender:</h3>
-        {% for requirement in section.requirements.all %}
-          <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>;
-        {% endfor %}
-      </div>
-    {% endif %}
-    <hr>
-    <div class="clearfix" style="font-family: sans-serif;">{{ section.content|safe }}</div>
-    <hr>
-    <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-      {% if topic %}
-        {% if previous_section %}
-          <a class="generic-button" href="{% url 'synopses:topic_section' topic.id previous_section.id %}">
-            <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
-          </a>
-        {% endif %}
-        <a style="padding: 0;"></a>
-        {% if next_section %}
-          <a class="generic-button" href="{% url 'synopses:topic_section' topic.id next_section.id %}">
-            Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
-          </a>
-        {% endif %}
-      {% elif synopsis_class %}
-        {% if previous_section %}
-          <a class="generic-button"
-             href="{% url 'synopses:class_section' synopsis_class.id previous_section.id %}">
-            <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
-          </a>
-        {% endif %}
-        <a style="padding: 0;"></a>
-        {% if next_section %}
-          <a class="generic-button"
-             href="{% url 'synopses:class_section' synopsis_class.id next_section.id %}">
-            Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
-          </a>
-        {% endif %}
-      {% endif %}
-    </nav>
-    <div class="flex-wrapper">
-      <div>
-        <h3>Autores:</h3>
-        <ul style="">
-          {% for log in author_log %}
-            <li><a href="{% url 'profile' log.author.nickname %}">{{ log.author.get_full_name }}</a></li>
-          {% endfor %}
-        </ul>
-      </div>
-      {% if section.sources.exists %}
-        <div style="min-width: 300px">
-          <h3>Fontes:</h3>
-          <ul>
-            {% for source in section.sources.all %}
-              <li>
-                {% if source.url %}
-                  <a href="{{ source.url }}">{{ source.title }}</a>
-                {% else %}
-                  {{ source.title }}
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-      {% if section.resources.exists %}
-        <div style="min-width: 200px">
-          <h3>Recursos:</h3>
-          <ul>
-            {% for resource in section.resources.all %}
-              <li>
-                {% if resource.webpage %}
-                  <a href="{{ resource.webpage }}">{{ resource.name }}</a>
-                {% elif resource.document %}
-                  <a href="{% url 'document' resource.document.id %}">{{ resource.name }}</a>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-      {% if section.class_sections.exists %}
-        <div>
-          <h3>Cadeiras:</h3>
-          <ul>
-            {% for class_section in section.class_sections.all %}
-              <li>
-                <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
-                  {{ class_section.corresponding_class.name }}
+          {% if section.requirements.exists %}
+            <div>
+              <h3>Necessitas de entender:</h3>
+              {% for requirement in section.requirements.all %}
+                <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>;
+              {% endfor %}
+            </div>
+          {% endif %}
+          <hr>
+          <div id="content" style="font-family: sans-serif;">{{ section.content|safe }}</div>
+          <hr>
+          <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            {% if topic %}
+              {% if previous_section %}
+                <a class="generic-button" href="{% url 'synopses:topic_section' topic.id previous_section.id %}">
+                  <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
                 </a>
-              </li>
-            {% endfor %}
-          </ul>
+              {% endif %}
+              <a style="padding: 0;"></a>
+              {% if next_section %}
+                <a class="generic-button" href="{% url 'synopses:topic_section' topic.id next_section.id %}">
+                  Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
+                </a>
+              {% endif %}
+            {% elif synopsis_class %}
+              {% if previous_section %}
+                <a class="generic-button"
+                   href="{% url 'synopses:class_section' synopsis_class.id previous_section.id %}">
+                  <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
+                </a>
+              {% endif %}
+              <a style="padding: 0;"></a>
+              {% if next_section %}
+                <a class="generic-button"
+                   href="{% url 'synopses:class_section' synopsis_class.id next_section.id %}">
+                  Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
+                </a>
+              {% endif %}
+            {% endif %}
+          </nav>
         </div>
-      {% endif %}
-      <div>
-        <h3>Tópicos:</h3>
-        <ul>
-          {% for topic in section.topics.all %}
-            <li>
-              <a href="{% url 'synopses:topic' topic.id %}">
-                {{ topic.name }}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
       </div>
-    </div>
+      <div class="col medium">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Tópicos</h2>
+          </div>
+          <div class="pane-content">
+            <ul>
+              {% for topic in section.topics.all %}
+                <li>
+                  <a href="{% url 'synopses:topic' topic.id %}">
+                    {{ topic.name }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Autores</h2>
+          </div>
+          <div class="pane-content">
+            <ul>
+              {% for log in author_log %}
+                <li><a href="{% url 'profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% if section.sources.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Fontes</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for source in section.sources.all %}
+                  <li>
+                    {% if source.url %}
+                      <a href="{{ source.url }}">{{ source.title }}</a>
+                    {% else %}
+                      {{ source.title }}
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+        {% if section.resources.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Recursos</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for resource in section.resources.all %}
+                  <li>
+                    {% if resource.webpage %}
+                      <a href="{{ resource.webpage }}">{{ resource.name }}</a>
+                    {% elif resource.document %}
+                      <a href="{% url 'document' resource.document.id %}">{{ resource.name }}</a>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+        {% if section.class_sections.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Unidades curriculares</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for class_section in section.class_sections.all %}
+                  <li>
+                    <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
+                      {{ class_section.corresponding_class.name }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
 {% endblock %}
-
-{#{% block content-bottom %}#}
-{#  {% if topic %}#}
-{#    <nav id="bot-container" class="float-right">#}
-{#      <a class="menu-entry selected">Contribuir:</a>#}
-{#      {% if user.is_authenticated %}#}
-{#        <a class="menu-entry" href="{% url 'synopses:section_edit' topic.id section.id %}">Editar</a>#}
-{#      {% else %}#}
-{#        <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>#}
-{#      {% endif %}#}
-{#    </nav>#}
-{#  {% endif %}#}
-{#{% endblock %}#}
