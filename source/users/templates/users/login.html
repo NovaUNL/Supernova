@@ -1,57 +1,46 @@
 {% extends 'supernova/base.html' %}
 
-{% load static %}
 {% block head %}
   <style>
-    #login-form {
-      display: flex;
-      flex-direction: column;
-    }
-
     #login-form input[type=text], #login-form input[type=password] {
-      height: 30px;
       margin-bottom: 10px;
-      flex-grow: 1;
-    }
-
-    #login-form input[type=submit] {
-      height: 35px;
-      width: 100%;
     }
   </style>
 {% endblock %}
 
 {% block content_wrapper %}
-  <div class="col" style="padding: 10px">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Autenticação</h2></div>
-      <div class="pane-content">
-        <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
-        <form id="login-form" method="post" action="{{ request.get_full_path }}">
-          {% csrf_token %}
-          {{ login_form.username.errors }}<br>
-          {{ login_form.username.label }}<br>
-          {{ login_form.username }}
-          {{ login_form.password.errors }}<br>
-          {{ login_form.password.label }}<br>
-          {{ login_form.password }}
-          <input type="submit" value="Entrar">
-        </form>
+  <div class="row padded">
+    <div class="col nogrow">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Autenticação</h2></div>
+        <div class="pane-content">
+          <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
+          <form id="login-form" class="col" method="post" action="{{ request.get_full_path }}">
+            {% csrf_token %}
+            {{ login_form.username.errors }}<br>
+            {{ login_form.username.label }}<br>
+            {{ login_form.username }}
+            {{ login_form.password.errors }}<br>
+            {{ login_form.password.label }}<br>
+            {{ login_form.password }}<br>
+            <input type="submit" value="Entrar">
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col" style="padding: 10px">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Sem conta?</h2></div>
-      <div class="pane-content">
-        Podes criar uma <a href="{% url 'registration' %}">aqui</a>.
+    <div class="col nogrow">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Sem conta?</h2></div>
+        <div class="pane-content">
+          Podes criar uma <a href="{% url 'registration' %}">aqui</a>.
+        </div>
       </div>
-    </div>
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Não consigo entrar!</h2></div>
-      <div class="pane-content">
-        Pois... isso parece ser um problema.<br>
-        Contacta-nos, nós ajudamos-te.
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Não consigo entrar!</h2></div>
+        <div class="pane-content">
+          Pois... isso parece ser um problema.<br>
+          Contacta-nos, nós ajudamos-te.
+        </div>
       </div>
     </div>
   </div>
