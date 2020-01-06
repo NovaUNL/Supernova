@@ -24,7 +24,7 @@
       <div class="header-decorator-options">
         <ul>
           <li>
-            <a href="{% url 'synopses:section_edit' topic.id section.id %}">Editar</a>
+            <a href="{% url 'synopses:section_edit' section.id %}">Editar</a>
           </li>
         </ul>
       </div>
@@ -40,100 +40,72 @@
       </div>
     </div>
     <div class="row padded nowrap">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
-        <div class="pane-content">
-          {% if section.requirements.exists %}
-            <div>
-              <h3>Necessitas de entender:</h3>
-              {% for requirement in section.requirements.all %}
-                <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>;
-              {% endfor %}
-            </div>
-          {% endif %}
-          <hr>
-          <div id="content" style="font-family: sans-serif;">{{ section.content|safe }}</div>
-          <hr>
-          <nav id="section-navigation" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-            {% if topic %}
-              {% if previous_section %}
-                <a class="generic-button" href="{% url 'synopses:topic_section' topic.id previous_section.id %}">
-                  <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
-                </a>
-              {% endif %}
-              <a style="padding: 0;"></a>
-              {% if next_section %}
-                <a class="generic-button" href="{% url 'synopses:topic_section' topic.id next_section.id %}">
-                  Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
-                </a>
-              {% endif %}
-            {% elif synopsis_class %}
-              {% if previous_section %}
-                <a class="generic-button"
-                   href="{% url 'synopses:class_section' synopsis_class.id previous_section.id %}">
-                  <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}
-                </a>
-              {% endif %}
-              <a style="padding: 0;"></a>
-              {% if next_section %}
-                <a class="generic-button"
-                   href="{% url 'synopses:class_section' synopsis_class.id next_section.id %}">
-                  Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>
-                </a>
-              {% endif %}
-            {% endif %}
-          </nav>
-        </div>
-      </div>
-      <div class="col medium">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
-            <h2>Tópicos</h2>
-          </div>
-          <div class="pane-content">
-            <ul>
-              {% for topic in section.topics.all %}
-                <li>
-                  <a href="{% url 'synopses:topic' topic.id %}">
-                    {{ topic.name }}
-                  </a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
-            <h2>Autores</h2>
-          </div>
-          <div class="pane-content">
-            <ul>
-              {% for log in author_log %}
-                <li><a href="{% url 'profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-        {% if section.sources.exists %}
+      <div class="col grow">
+        {% if section.content %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
-              <h2>Fontes</h2>
+              <h2>Conteúdo</h2>
+            </div>
+            <div class="pane-content">
+              {{ section.content|safe }}
+            </div>
+          </div>
+        {% endif %}
+        {% if section.children.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Subsecções</h2>
             </div>
             <div class="pane-content">
               <ul>
-                {% for source in section.sources.all %}
+                {% for child in section.children.all %}
                   <li>
-                    {% if source.url %}
-                      <a href="{{ source.url }}">{{ source.title }}</a>
-                    {% else %}
-                      {{ source.title }}
-                    {% endif %}
+                    <a href="{% url 'synopses:subsection' section.id child.id %}">{{ child.name }}</a>
                   </li>
                 {% endfor %}
               </ul>
             </div>
           </div>
         {% endif %}
+      </div>
+      <div class="col medium">
+        {% if section.requirements.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Requisitos</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for topic in section.topics.all %}
+                  <li>
+                    <a href="{% url 'synopses:topic' topic.id %}">
+                      {{ topic.name }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Parentes</h2>
+          </div>
+          <div class="pane-content">
+            <ul>
+              {% if section.subarea %}
+                <li>
+                  <a href="{% url 'synopses:subarea' section.subarea.id %}">{{ section.subarea.name }}</a>
+                </li>
+              {% endif %}
+              {% for parent in section.parents.all %}
+                <li>
+                  <a href="{% url 'synopses:section' parent.id %}">{{ parent.name }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
         {% if section.resources.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
@@ -172,7 +144,70 @@
             </div>
           </div>
         {% endif %}
+        {% if author_log.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Autores</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for log in author_log %}
+                  <li><a href="{% url 'profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+        {% if section.sources.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Fontes</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for source in section.sources.all %}
+                  <li>
+                    {% if source.url %}
+                      <a href="{{ source.url }}">{{ source.title }}</a>
+                    {% else %}
+                      {{ source.title }}
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
 {% endblock %}
+
+{#TODO re-add#}
+{#{% if topic %}#}
+{#  {% if previous_section %}#}
+{#    <a class="generic-button" href="{% url 'synopses:topic_section' topic.id previous_section.id %}">#}
+{#      <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}#}
+{#    </a>#}
+{#  {% endif %}#}
+{#  <a style="padding: 0;"></a>#}
+{#  {% if next_section %}#}
+{#    <a class="generic-button" href="{% url 'synopses:topic_section' topic.id next_section.id %}">#}
+{#      Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>#}
+{#    </a>#}
+{#  {% endif %}#}
+{#{% elif synopsis_class %}#}
+{#  {% if previous_section %}#}
+{#    <a class="generic-button"#}
+{#       href="{% url 'synopses:class_section' synopsis_class.id previous_section.id %}">#}
+{#      <i class="fas fa-angle-double-left"></i> Anterior: {{ previous_section.name }}#}
+{#    </a>#}
+{#  {% endif %}#}
+{#  <a style="padding: 0;"></a>#}
+{#  {% if next_section %}#}
+{#    <a class="generic-button"#}
+{#       href="{% url 'synopses:class_section' synopsis_class.id next_section.id %}">#}
+{#      Seguinte: {{ next_section.name }} <i class="fas fa-angle-double-right"></i>#}
+{#    </a>#}
+{#  {% endif %}#}
+{#{% endif %}#}

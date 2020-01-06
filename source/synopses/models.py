@@ -40,7 +40,7 @@ class Subarea(djm.Model):
         return self.name
 
 
-class Topic(djm.Model):
+class Topic(djm.Model):  # TODO DELETE
     name = djm.CharField(verbose_name='nome', max_length=128)
     index = djm.IntegerField()
     subarea = djm.ForeignKey(Subarea, on_delete=djm.PROTECT, verbose_name='subarea', related_name='topics')
@@ -56,15 +56,35 @@ class Topic(djm.Model):
 
 class Section(djm.Model):
     name = djm.CharField(verbose_name='nome', max_length=128)
-    content = RichTextUploadingField(verbose_name='conteúdo', config_name='complex')
+    content = RichTextUploadingField(null=True, blank=True, verbose_name='conteúdo', config_name='complex')
     topics = djm.ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
-    requirements = djm.ManyToManyField('Section', verbose_name='requisitos')
+    subarea = djm.ForeignKey(Subarea, null=True, blank=True, on_delete=djm.PROTECT, verbose_name='subarea')
+    parents = djm.ManyToManyField(
+        'self',
+        through='SectionSubsection',
+        symmetrical=False,
+        related_name='children',
+        verbose_name='parents')
+    requirements = djm.ManyToManyField(
+        'self',
+        blank=True,
+        related_name='required_by',
+        verbose_name='requisitos',
+        symmetrical=False)
 
     class Meta:
         ordering = ('name',)
 
     def __str__(self):
         return self.name
+
+    def content_reduce(self):
+        """
+        Detects the absence of content and nullifies the field in that case.
+        """
+        # TODO, do this properly
+        if self.content is not None and len(self.content) < 10:
+            self.content = None
 
 
 class ClassSection(djm.Model):
@@ -90,6 +110,19 @@ class SectionTopic(djm.Model):
 
     def __str__(self):
         return f'{self.section} linked to {self.topic} ({self.index}).'
+
+
+class SectionSubsection(djm.Model):
+    section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='parents_intermediary')
+    parent = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='children_intermediary')
+    index = djm.IntegerField()
+
+    class Meta:
+        ordering = ('parent', 'index',)
+        unique_together = [('section', 'parent'), ('index', 'parent')]
+
+    def __str__(self):
+        return f'{self.parent} -({self.index})-> {self.section}.'
 
 
 class SectionLog(djm.Model):

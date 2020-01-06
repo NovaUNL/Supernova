@@ -1,76 +1,77 @@
-{% extends 'supernova/content_only.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
-{% block head %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-{% endblock head %}
-
-{% block content %}
-    <div class="content-formatter">
-        <h1><i class="fas fa-book"></i> {{ title }}</h1>
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        <h2>{{ title }}</h2>
+      </div>
+      <div class="pane-content">
         <form method="post" action="{{ action_page }}">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            {{ form.as_p }}
-            {% if sources_formset %}
-                <h3>Fontes:</h3>
-                {{ sources_formset.management_form }}
-                {{ sources_formset.non_form_errors }}
-                <table>
-                    {% for subform in sources_formset.forms %}
-                        {% if subform.non_field_errors %}
-                            <tr>{{ subform.non_field_errors }}</tr>
-                        {% endif %}
-                        <tr>
-                            {{ subform.id }}
-                            <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
-                            <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
-                            {% if subform.instance.pk %}
-                                <td>Apagar: {{ subform.DELETE }}</td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
-            {% if resources_formset %}
-                <h3>Recursos:</h3>
-                {{ resources_formset.management_form }}
-                {{ resources_formset.non_form_errors }}
-                <table>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Tipo</th>
-                        <th>Página</th>
-                        <th></th>
-                        <th>Documento</th>
-                    </tr>
-                    {% for subform in resources_formset.forms %}
-                        {% if subform.non_field_errors %}
-                            <tr>
-                                <td colspan="5"><span style="color: red;">{{ subform.non_field_errors }}</span></td>
-                            </tr>
-                        {% endif %}
-                        <tr>
-                            {{ subform.id }}
-                            <td><span style="color:red;">{{ subform.name.errors }}</span>{{ subform.name }}</td>
-                            <td>
-                                <span style="color:red;">{{ subform.resource_type.errors }}</span>
-                                {{ subform.resource_type }}
-                            </td>
-                            <td><span style="color: red;">{{ subform.webpage.errors }}</span>{{ subform.webpage }}</td>
-                            <td>←<b> ou </b>→</td>
-                            <td><span style="color:red;">{{ subform.document.errors }}</span>{{ subform.document }}</td>
-                            {% if subform.instance.pk %}
-                                <td>Apagar: {{ subform.DELETE }}</td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
-            <input type="submit" value="{{ action_name }}"/>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          {{ form.as_p }}
+          {% if sources_formset %}
+            <h3>Fontes:</h3>
+            {{ sources_formset.management_form }}
+            {{ sources_formset.non_form_errors }}
+            <table>
+              {% for subform in sources_formset.forms %}
+                {% if subform.non_field_errors %}
+                  <tr>{{ subform.non_field_errors }}</tr>
+                {% endif %}
+                <tr>
+                  {{ subform.id }}
+                  <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
+                  <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
+                  {% if subform.instance.pk %}
+                    <td>Apagar: {{ subform.DELETE }}</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+          {% if resources_formset %}
+            <h3>Recursos:</h3>
+            {{ resources_formset.management_form }}
+            {{ resources_formset.non_form_errors }}
+            <table>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Página</th>
+                <th></th>
+                <th>Documento</th>
+              </tr>
+              {% for subform in resources_formset.forms %}
+                {% if subform.non_field_errors %}
+                  <tr>
+                    <td colspan="5"><span style="color: red;">{{ subform.non_field_errors }}</span></td>
+                  </tr>
+                {% endif %}
+                <tr>
+                  {{ subform.id }}
+                  <td><span style="color:red;">{{ subform.name.errors }}</span>{{ subform.name }}</td>
+                  <td>
+                    <span style="color:red;">{{ subform.resource_type.errors }}</span>
+                    {{ subform.resource_type }}
+                  </td>
+                  <td><span style="color: red;">{{ subform.webpage.errors }}</span>{{ subform.webpage }}</td>
+                  <td>←<b> ou </b>→</td>
+                  <td><span style="color:red;">{{ subform.document.errors }}</span>{{ subform.document }}</td>
+                  {% if subform.instance.pk %}
+                    <td>Apagar: {{ subform.DELETE }}</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+          <input type="submit" value="{{ action_name }}"/>
+          {{ form.media }}
         </form>
+      </div>
     </div>
-    <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
-    {{ form.media }}
+  </div>
 {% endblock %}

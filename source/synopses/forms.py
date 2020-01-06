@@ -25,29 +25,35 @@ class SubareaForm(djf.ModelForm):
         }
 
 
-class TopicForm(djf.ModelForm):
-    # TODO after field (ordering)
+class SubareaSectionForm(djf.ModelForm):
     class Meta:
-        model = synopsis.Topic
-        fields = ('subarea', 'name')
+        model = synopsis.Section
+        fields = ('name', 'content', 'subarea', 'requirements')
         widgets = {
             'name': djf.TextInput(),
-            'subarea': autocomplete.ModelSelect2(url='synopses:subarea_ac')
-        }
+            'subarea': djf.HiddenInput(),
+            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
 
 
-class SectionForm(djf.ModelForm):
+class SectionChildForm(djf.ModelForm):
+    class Meta:
+        model = synopsis.Section
+        fields = ('name', 'content', 'parents', 'requirements')
+        widgets = {
+            'name': djf.TextInput(),
+            'parents': djf.HiddenInput(),
+            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
+
+
+class SectionEditForm(djf.ModelForm):
     after = djf.ChoiceField(label='Após:', required=True)
-    requirements = djf.ModelMultipleChoiceField(
-        widget=autocomplete.Select2Multiple(url='synopses:section_ac'),
-        queryset=synopsis.Section.objects.all(),
-        required=False)
 
     class Meta:
         model = synopsis.Section
-        fields = ('name', 'content', 'requirements')
+        fields = ('name', 'content', 'parents', 'requirements')
         widgets = {
-            'name': djf.TextInput()}
+            'name': djf.TextInput(),
+            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
 
     def clean_after(self):
         after = self.cleaned_data['after']

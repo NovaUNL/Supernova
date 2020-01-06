@@ -7,10 +7,10 @@ from django.urls import reverse
 
 from college.models import Class
 from supernova.views import build_base_context
-from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet, SectionResourcesFormSet
-
+# from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet, SectionResourcesFormSet
+from synopses import forms as f
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
-    SectionLog, ClassSection
+    SectionLog, ClassSection, SectionSubsection
 
 
 def areas_view(request):
@@ -50,12 +50,12 @@ def subarea_create_view(request, area_id):
     area = get_object_or_404(Area, id=area_id)
 
     if request.method == 'POST':
-        form = SubareaForm(data=request.POST)
+        form = f.SubareaForm(data=request.POST)
         if form.is_valid():
             new_subarea = form.save()
             return HttpResponseRedirect(reverse('synopses:subarea', args=[new_subarea.id]))
     else:
-        form = SubareaForm(initial={'area': area})
+        form = f.SubareaForm(initial={'area': area})
         form.fields['area'].widget = HiddenInput()
 
     context = build_base_context(request)
@@ -76,12 +76,12 @@ def subarea_edit_view(request, subarea_id):
     area = subarea.area
 
     if request.method == 'POST':
-        form = SubareaForm(data=request.POST, instance=subarea)
+        form = f.SubareaForm(data=request.POST, instance=subarea)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('synopses:subarea', args=[subarea_id]))
     else:
-        form = SubareaForm(instance=subarea)
+        form = f.SubareaForm(instance=subarea)
 
     context = build_base_context(request)
     context['title'] = 'Editar categoria "%s"' % subarea.name
@@ -95,7 +95,111 @@ def subarea_edit_view(request, subarea_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-def topic_view(request, topic_id):
+@login_required
+def subarea_section_create_view(request, subarea_id):
+    subarea = get_object_or_404(Subarea, id=subarea_id)
+    area = subarea.area
+
+    if request.method == 'POST':
+        form = f.SubareaSectionForm(data=request.POST)
+        valid = form.is_valid()
+        if valid:
+            section = form.save(commit=False)
+            if section.subarea != subarea:
+                form.add_error('subarea', 'Subarea mismatch')
+                valid = False
+            if valid:
+                section = form.save(commit=False)
+                section.content_reduce()
+                section.save()
+                return HttpResponseRedirect(reverse('synopses:subarea_section', args=[subarea_id, section.id]))
+    else:
+        form = f.SubareaSectionForm(initial={'subarea': subarea})
+
+    context = build_base_context(request)
+    context['title'] = 'Criar secção em "%s"' % subarea.name
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subarea_section_create', args=[subarea_id])
+    context['action_name'] = 'Criar'
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea_id])},
+                          {'name': 'Criar secção', 'url': '#'}]
+    return render(request, 'synopses/generic_form.html', context)
+
+
+def subarea_section_view(request, subarea_id, section_id):
+    context = build_base_context(request)
+    subarea = get_object_or_404(Subarea, id=subarea_id)
+    area = subarea.area
+    section = get_object_or_404(Section, id=section_id)
+    context['section'] = section
+    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea_id])},
+                          {'name': section.name, 'url': '#'}]
+    return render(request, 'synopses/section.html', context)
+
+
+def section_view(request, section_id):
+    context = build_base_context(request)
+    section = get_object_or_404(Section, id=section_id)
+    context['section'] = section
+    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': section.name, 'url': '#'}]
+    return render(request, 'synopses/section.html', context)
+
+
+def subsection_view(request, parent_id, child_id):
+    context = build_base_context(request)
+    parent = get_object_or_404(Section, id=parent_id)
+    child = get_object_or_404(Section, id=child_id)
+    context['section'] = child
+    context['author_log'] = child.sectionlog_set.distinct('author')
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': parent.name, 'url': reverse('synopses:section', args=[parent_id])},
+                          {'name': child.name, 'url': '#'}]
+    return render(request, 'synopses/section.html', context)
+
+
+@login_required
+def subsection_create_view(request, section_id):
+    parent = get_object_or_404(Section, id=section_id)
+
+    if request.method == 'POST':
+        form = f.SectionChildForm(data=request.POST)
+        valid = form.is_valid()
+        if valid:
+            section = form.save(commit=False)
+            if parent not in section.parents:
+                form.add_error('parents', 'Parent mismatch')
+                valid = False
+            if valid:
+                section = form.save(commit=False)
+                section.content_reduce()
+                section.save()
+                return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
+    else:
+        form = f.SectionChildForm(initial={'parents': [parent]})
+        # form = f.SectionChildForm()
+        # form.fields['subarea'].widget = HiddenInput()
+
+    context = build_base_context(request)
+    context['title'] = 'Criar secção em "%s"' % parent.name
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subsection_create', args=[section_id])
+    context['action_name'] = 'Criar'
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': parent.name, 'url': reverse('synopses:subsection', args=[section_id])},
+                          {'name': 'Criar secção', 'url': '#'}]
+    return render(request, 'synopses/generic_form.html', context)
+
+
+def d_topic_view(request, topic_id):
     context = build_base_context(request)
     topic = get_object_or_404(Topic, id=topic_id)
     subarea = topic.subarea
@@ -113,125 +217,6 @@ def topic_view(request, topic_id):
 
 
 @login_required
-def topic_create_view(request, subarea_id):
-    subarea = get_object_or_404(Subarea, id=subarea_id)
-
-    if request.method == 'POST':
-        form = TopicForm(data=request.POST)
-        if form.is_valid():
-            topic = form.save(commit=False)
-            # TODO 'after' field instead of playing the *guess the index* game
-            if topic.subarea.topics.exists():
-                topic.index = topic.subarea.topics.order_by('index').last().index + 1
-            else:
-                topic.index = 0
-            topic.save()
-            return HttpResponseRedirect(reverse('synopses:topic', args=[topic.id]))
-    else:
-        form = TopicForm(initial={'subarea': subarea})
-        form.fields['subarea'].widget = HiddenInput()
-
-    context = build_base_context(request)
-    context['title'] = 'Criar tópico em "%s"' % subarea.name
-    context['form'] = form
-    context['action_page'] = reverse('synopses:topic_create', args=[subarea_id])
-    context['action_name'] = 'Criar'
-    return render(request, 'synopses/generic_form.html', context)
-
-
-@login_required
-def topic_edit_view(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    subarea = topic.subarea
-    area = subarea.area
-
-    if request.method == 'POST':
-        form = TopicForm(data=request.POST, instance=topic)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
-    else:
-        form = TopicForm(instance=topic)
-
-    context = build_base_context(request)
-    context['title'] = 'Editar tópico "%s"' % topic.name
-    context['form'] = form
-    context['action_page'] = reverse('synopses:topic_edit', args=[topic_id])
-    context['action_name'] = 'Aplicar alterações'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': 'Editar', 'url': reverse('synopses:topic_edit', args=[topic_id])}]
-    return render(request, 'synopses/generic_form.html', context)
-
-
-@login_required
-def topic_manage_sections_view(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    subarea = topic.subarea
-    area = subarea.area
-    context = build_base_context(request)
-    context['title'] = 'Editar secções em "%s"' % topic.name
-    context['topic'] = topic
-    context['subarea'] = subarea
-    context['area'] = area
-    context['topic'] = topic
-    context['action_page'] = reverse('synopses:topic_manage', args=[topic_id])
-    context['action_name'] = 'Aplicar alterações'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': 'Secções', 'url': reverse('synopses:topic_manage', args=[topic_id])}]
-    return render(request, 'synopses/topic_management.html', context)
-
-
-def section_view(request, section_id):
-    context = build_base_context(request)
-    section = get_object_or_404(Section, id=section_id)
-    context['section'] = section
-    context['author_log'] = section.sectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': section.name, 'url': '#'}]
-    return render(request, 'synopses/section.html', context)
-
-
-def topic_section_view(request, topic_id, section_id):
-    context = build_base_context(request)
-    topic = get_object_or_404(Topic, id=topic_id)
-    section = get_object_or_404(Section, id=section_id)
-    if section not in topic.sections.all():  # If this section doesn't belong to the topic, redirect to topic
-        return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
-    subarea = topic.subarea
-    area = subarea.area
-
-    # Get sections of this topic, take the one indexed before and the one after.
-    section_topic_relation = SectionTopic.objects.filter(topic=topic, section=section).first()
-    prev_section = SectionTopic.objects.filter(
-        topic=topic, index__lt=section_topic_relation.index).order_by('index').last()
-    next_section = SectionTopic.objects.filter(
-        topic=topic, index__gt=section_topic_relation.index).order_by('index').first()
-    if prev_section:
-        context['previous_section'] = prev_section.section
-    if next_section:
-        context['next_section'] = next_section.section
-
-    context['title'] = topic.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
-    context['section'] = section
-    context['author_log'] = section.sectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': section.name, 'url': reverse('synopses:topic_section', args=[topic_id, section_id])}]
-    return render(request, 'synopses/section.html', context)
-
-
-@login_required
 def section_create_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     context = build_base_context(request)
@@ -240,10 +225,10 @@ def section_create_view(request, topic_id):
                                          Section.objects.filter(topic=topic)
                                          .order_by('sectiontopic__index').all()))
     if request.method == 'POST':
-        section_form = SectionForm(data=request.POST)
+        section_form = f.SectionEditForm(data=request.POST)
         section_form.fields['after'].choices = choices
-        sources_formset = SectionSourcesFormSet(request.POST, prefix="sources")
-        resources_formset = SectionResourcesFormSet(request.POST, prefix="resources")
+        sources_formset = f.SectionSourcesFormSet(request.POST, prefix="sources")
+        resources_formset = f.SectionResourcesFormSet(request.POST, prefix="resources")
         if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
             # Obtain the requested index
             if section_form.cleaned_data['after'] == 0:
@@ -280,10 +265,10 @@ def section_create_view(request, topic_id):
             return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
     else:
         # This is a request for the creation form. Fill the possible choices
-        section_form = SectionForm(initial={'after': choices[-1][0]})
+        section_form = f.SectionEditForm(initial={'after': choices[-1][0]})
         section_form.fields['after'].choices = choices
-        sources_formset = SectionSourcesFormSet(prefix="sources")
-        resources_formset = SectionResourcesFormSet(prefix="resources")
+        sources_formset = f.SectionSourcesFormSet(prefix="sources")
+        resources_formset = f.SectionResourcesFormSet(prefix="resources")
 
     subarea = topic.subarea
     area = subarea.area
@@ -305,48 +290,21 @@ def section_create_view(request, topic_id):
 
 
 @login_required
-def section_edit_view(request, topic_id, section_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    section = get_object_or_404(Section, id=section_id)
-    # If this section does not exist within this topic, redirect to the topic page
-    if not SectionTopic.objects.filter(section=section, topic=topic).exists():
-        return HttpResponseRedirect(reverse('synopses:topic', args=[topic_id]))
-    section_topic_rel = SectionTopic.objects.get(section=section, topic=topic)
+def section_edit_view(request, section_id):
+    parent = get_object_or_404(Section, id=section_id)
     context = build_base_context(request)
-    # Choices (for the 'after' field) are at the topic start, or after any section other than this one
-    choices = [(0, 'Início')]
-    for other_section in Section.objects.filter(topic=topic).order_by('sectiontopic__index').all():
-        if other_section == section:
-            continue
-        choices += ((other_section.id, other_section.name),)
 
     if request.method == 'POST':
-        section_form = SectionForm(data=request.POST, instance=section)
-        sources_formset = SectionSourcesFormSet(
-            request.POST, instance=section, prefix="sources", queryset=section.sources.all())
-        resources_formset = SectionResourcesFormSet(request.POST, instance=section, prefix="resources")
-        section_form.fields['after'].choices = choices
+        section_form = f.SectionEditForm(data=request.POST, instance=parent)
+        sources_formset = f.SectionSourcesFormSet(
+            request.POST, instance=parent, prefix="sources", queryset=parent.sources.all())
+        resources_formset = f.SectionResourcesFormSet(request.POST, instance=parent, prefix="resources")
         if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
-            if section_form.cleaned_data['after'] == 0:
-                index = 1
-            else:
-                index = SectionTopic.objects.get(topic=topic, section_id=section_form.cleaned_data['after']).index + 1
-
-            # Avoid index collisions. If the wanted index is taken by some other section
-            if SectionTopic.objects.filter(topic=topic, index=index).exclude(section=section).exists():
-                # Then increment the index of every section with an index >= the desired one.
-                for entry in SectionTopic.objects.filter(topic=topic, index__gte=index) \
-                        .order_by('index').reverse().all():
-                    entry.index += 1
-                    entry.save()
-            section_topic_rel.index = index
-            section_topic_rel.save()
-
             # If the section content changed then log the change to prevent vandalism and allow reversion.
-            if section.content != section_form.cleaned_data['content']:
-                log = SectionLog(author=request.user, section=section, previous_content=section.content)
+            if parent.content != section_form.cleaned_data['content']:
+                log = SectionLog(author=request.user, section=parent, previous_content=parent.content)
                 log.save()
-            section = section_form.save()
+            parent = section_form.save()
 
             # Process the sources subform
             sources = sources_formset.save(commit=False)
@@ -355,7 +313,7 @@ def section_edit_view(request, topic_id, section_id):
                 source.delete()
             # Add new objects
             for source in sources:
-                source.section = section
+                source.section = parent
                 source.save()
 
             # Process the resources subform
@@ -368,35 +326,22 @@ def section_edit_view(request, topic_id, section_id):
                 resource.save()
 
             # Redirect user to the updated section
-            return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
+            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id]))
     else:
-        # Get the section which is indexed before this one
-        prev_topic_section = SectionTopic.objects.filter(
-            topic=topic, index__lt=section_topic_rel.index).order_by('index').last()
-        # If it exists mark it in the previous section field (0 means no section, at the start).
-        prev_section_id = prev_topic_section.section.id if prev_topic_section else 0
-        section_form = SectionForm(instance=section, initial={'after': prev_section_id})
-        sources_formset = SectionSourcesFormSet(instance=section, prefix="sources")
-        resources_formset = SectionResourcesFormSet(instance=section, prefix="resources")
-        section_form.fields['after'].choices = choices
+        section_form = f.SectionEditForm(instance=parent)
+        sources_formset = f.SectionSourcesFormSet(instance=parent, prefix="sources")
+        resources_formset = f.SectionResourcesFormSet(instance=parent, prefix="resources")
 
-    subarea = topic.subarea
-    area = subarea.area
-    context['title'] = 'Editar %s' % section.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
+    context['title'] = 'Editar %s' % parent.name
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['resources_formset'] = resources_formset
-    context['action_page'] = reverse('synopses:section_edit', args=[topic_id, section_id])
+    context['action_page'] = reverse('synopses:section_edit', args=[section_id])
     context['action_name'] = 'Editar'
 
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': section.name, 'url': reverse('synopses:topic_section', args=[topic_id, section_id])},
+                          {'name': '...', 'url': '#'},
+                          {'name': parent.name, 'url': reverse('synopses:section', args=[section_id])},
                           {'name': 'Editar'}]
     return render(request, 'synopses/generic_form.html', context)
 

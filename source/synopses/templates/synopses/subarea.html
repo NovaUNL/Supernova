@@ -3,10 +3,10 @@
 {% load static %}
 
 {% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+{#  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>#}
   <style>
     {% if  area.img_url %}
-      #content-title-decorator {
+      .header-decorator {
         background-image: url("{{ subarea.img_url}}");
       }
     {% endif %}
@@ -16,6 +16,12 @@
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'synopses:subarea_section_create' subarea.id %}">Criar nova secção</a></li>
+          <li><a href="{% url 'synopses:subarea_edit' subarea.id %}">Editar</a></li>
+        </ul>
+      </div>
       <div>
         <h1>{{ subarea.name }}</h1>
         <h3><a href="{% url 'synopses:area' area.id %}">{{ area }}</a></h3>
@@ -25,6 +31,18 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Descrição</h2></div>
         <div class="pane-content">{{ subarea.description|safe }}</div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Secções</h2></div>
+        <div class="pane-content">
+          <ul id="content-list">
+            {% for section in subarea.section_set.all %}
+              <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.name }}</a>
+                (? secções)
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Tópicos</h2></div>
@@ -41,16 +59,3 @@
     </div>
   </div>
 {% endblock %}
-
-
-{#{% block content-bottom %}#}
-{#    <nav id="bot-container" class="float-right">#}
-{#        <a class="menu-entry selected">Contribuir:</a>#}
-{#        {% if user.is_authenticated %}#}
-{#            <a class="menu-entry" href="{% url 'synopses:topic_create' subarea.id %}">Criar novo tópico</a>#}
-{#            <a class="menu-entry" href="{% url 'synopses:subarea_edit' subarea.id %}">Editar</a>#}
-{#        {% else %}#}
-{#            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>#}
-{#        {% endif %}#}
-{#    </nav>#}
-{#{% endblock %}#}
