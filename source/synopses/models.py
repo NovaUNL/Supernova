@@ -63,6 +63,7 @@ class Section(djm.Model):
         'self',
         through='SectionSubsection',
         symmetrical=False,
+        blank=True,
         related_name='children',
         verbose_name='parents')
     requirements = djm.ManyToManyField(
@@ -85,6 +86,9 @@ class Section(djm.Model):
         # TODO, do this properly
         if self.content is not None and len(self.content) < 10:
             self.content = None
+
+    def most_recent_edit(self, editor):
+        return SectionLog.objects.get(section=self, author=editor).order_by('timestamp')
 
 
 class ClassSection(djm.Model):
@@ -115,7 +119,7 @@ class SectionTopic(djm.Model):
 class SectionSubsection(djm.Model):
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='parents_intermediary')
     parent = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='children_intermediary')
-    index = djm.IntegerField()
+    index = djm.IntegerField(null=False)
 
     class Meta:
         ordering = ('parent', 'index',)
@@ -123,6 +127,12 @@ class SectionSubsection(djm.Model):
 
     def __str__(self):
         return f'{self.parent} -({self.index})-> {self.section}.'
+
+    def save(self, **kwargs):
+        if self.index is None:
+            assigned_indexes = SectionSubsection.objects.filter(parent=self.parent).values('index')
+            self.index = len(assigned_indexes)
+        djm.Model.save(self)
 
 
 class SectionLog(djm.Model):

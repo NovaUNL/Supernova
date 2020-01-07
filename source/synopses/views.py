@@ -148,6 +148,7 @@ def section_view(request, section_id):
     context['section'] = section
     context['author_log'] = section.sectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
                           {'name': section.name, 'url': '#'}]
     return render(request, 'synopses/section.html', context)
 
@@ -256,7 +257,7 @@ def section_create_view(request, topic_id):
             section_log.save()
 
             # Process the sources subform
-            sources = sources_formset.save(commit=False)
+            sources = sources_formset.save()
             for source in sources:
                 source.section = section
                 source.save()
@@ -291,33 +292,42 @@ def section_create_view(request, topic_id):
 
 @login_required
 def section_edit_view(request, section_id):
-    parent = get_object_or_404(Section, id=section_id)
+    section = get_object_or_404(Section, id=section_id)
     context = build_base_context(request)
 
     if request.method == 'POST':
-        section_form = f.SectionEditForm(data=request.POST, instance=parent)
+        section_form = f.SectionEditForm(data=request.POST, instance=section)
         sources_formset = f.SectionSourcesFormSet(
-            request.POST, instance=parent, prefix="sources", queryset=parent.sources.all())
-        resources_formset = f.SectionResourcesFormSet(request.POST, instance=parent, prefix="resources")
+            request.POST, instance=section, prefix="sources", queryset=section.sources.all())
+        resources_formset = f.SectionResourcesFormSet(request.POST, instance=section, prefix="resources")
         if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
             # If the section content changed then log the change to prevent vandalism and allow reversion.
-            if parent.content != section_form.cleaned_data['content']:
-                log = SectionLog(author=request.user, section=parent, previous_content=parent.content)
+            if section.content != section_form.cleaned_data['content']:
+                log = SectionLog(author=request.user, section=section, previous_content=section.content)
                 log.save()
-            parent = section_form.save()
+            section = section_form.save(commit=False)
+            section.save()
+
+            # Child-Parent M2M needs to be done this way due to the non-null index
+            # PS: SectionSubsection's save is overridden
+            for parent in section_form.cleaned_data['parents']:
+                if not SectionSubsection.objects.filter(section=section, parent=parent).exists():
+                    SectionSubsection(section=section, parent=parent).save()
+
+            section_form.save_m2m()
 
             # Process the sources subform
-            sources = sources_formset.save(commit=False)
+            sources = sources_formset.save()
             # Delete any tagged object
             for source in sources_formset.deleted_objects:
                 source.delete()
             # Add new objects
             for source in sources:
-                source.section = parent
+                source.section = section
                 source.save()
 
             # Process the resources subform
-            resources = resources_formset.save(commit=False)
+            resources = resources_formset.save()
             # Delete any tagged object
             for resource in resources_formset.deleted_objects:
                 resource.delete()
@@ -326,13 +336,13 @@ def section_edit_view(request, section_id):
                 resource.save()
 
             # Redirect user to the updated section
-            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id]))
+            return HttpResponseRedirect(reverse('synopses:section', args=[section.id]))
     else:
-        section_form = f.SectionEditForm(instance=parent)
-        sources_formset = f.SectionSourcesFormSet(instance=parent, prefix="sources")
-        resources_formset = f.SectionResourcesFormSet(instance=parent, prefix="resources")
+        section_form = f.SectionEditForm(instance=section)
+        sources_formset = f.SectionSourcesFormSet(instance=section, prefix="sources")
+        resources_formset = f.SectionResourcesFormSet(instance=section, prefix="resources")
 
-    context['title'] = 'Editar %s' % parent.name
+    context['title'] = 'Editar %s' % section.name
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['resources_formset'] = resources_formset
@@ -341,7 +351,7 @@ def section_edit_view(request, section_id):
 
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': parent.name, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': section.name, 'url': reverse('synopses:section', args=[section_id])},
                           {'name': 'Editar'}]
     return render(request, 'synopses/generic_form.html', context)
 

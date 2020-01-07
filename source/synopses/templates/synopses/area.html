@@ -10,9 +10,11 @@
       flex-basis: 475px;
     }
 
-    .header-decorator {
-      {% if area.img_url %}background-image: url("{{ area.img_url}}"){% endif %}
-    }
+    {% if area.img_url %}
+      .header-decorator:after {
+        background-image: url("{{ area.img_url}}")
+      }
+    {% endif %}
 
     .flex-grid-item {
       background-size: cover;

@@ -46,14 +46,15 @@ class SectionChildForm(djf.ModelForm):
 
 
 class SectionEditForm(djf.ModelForm):
-    after = djf.ChoiceField(label='Após:', required=True)
 
     class Meta:
         model = synopsis.Section
-        fields = ('name', 'content', 'parents', 'requirements')
+        fields = ('name', 'content', 'subarea', 'parents', 'requirements')
         widgets = {
             'name': djf.TextInput(),
-            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
+            'subarea': autocomplete.ModelSelect2(url='synopses:subarea_ac'),
+            'requirements': autocomplete.Select2Multiple(url='synopses:section_ac'),
+            'parents': autocomplete.Select2Multiple(url='synopses:section_ac')}
 
     def clean_after(self):
         after = self.cleaned_data['after']

@@ -3,10 +3,9 @@
 {% load static %}
 
 {% block head %}
-{#  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>#}
   <style>
     {% if  area.img_url %}
-      .header-decorator {
+      .header-decorator:after {
         background-image: url("{{ subarea.img_url}}");
       }
     {% endif %}
@@ -38,7 +37,7 @@
           <ul id="content-list">
             {% for section in subarea.section_set.all %}
               <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.name }}</a>
-                (? secções)
+                ({{ section.children.count }} secções)
               </li>
             {% endfor %}
           </ul>
