@@ -18,7 +18,7 @@ class CanteenSpider(scrapy.Spider):
     ]
 
     allowed_domains = [
-        'https://sas.unl.pt'
+        'sas.unl.pt'
     ]
 
     def parse(self, response):
@@ -61,7 +61,7 @@ class CanteenSpider(scrapy.Spider):
                             item_type=meal_item_type,
                         )
                     else:
-                        print("Phuck")
+                        print("Wrong number of columns found") # TODO log this
 
 
 def meal_name_to_int(name):
@@ -80,14 +80,14 @@ known_fish = {'peixe', 'pescada', 'bacalhau', 'filetes', 'atum', 'solha', 'doura
 def meal_item_str_type_to_int(type_str, name):
     name = name.lower()
     if type_str == 'Sopa':
-        return 1
+        return 0
     elif type_str == 'Veg.':
-        return 4
+        return 3
     elif type_str == 'Prato':
         for item in known_meat:
             if item in name:
-                return 2
+                return 1
         for item in known_fish:
             if item in name:
-                return 3
-    return 5
+                return 2
+    return 4

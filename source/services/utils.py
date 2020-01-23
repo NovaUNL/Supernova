@@ -7,7 +7,7 @@ def get_next_meal_items(service=None):
     now = datetime.now()
     if now.time().hour >= 21:  # Consider next day if dinner is over
         now = now + timedelta(hours=3)
-    time = 3
+    time = 2  # Lunch
     if now.weekday() == 5:  # Sunday
         day_offset = 2
     elif now.weekday() == 6:  # Saturday
@@ -15,7 +15,7 @@ def get_next_meal_items(service=None):
     else:
         day_offset = 0
         if now.time().hour >= 15:
-            time += 2
+            time = 4  # Dinner
 
     meal_date = (now + timedelta(days=day_offset)).date()
     if service is None:

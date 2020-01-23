@@ -49,22 +49,22 @@ class MenuDish(djm.Model):
 
 
 MEAL_TIME = (
-    (1, "Pequeno-almoço"),
-    (2, "Lanche da manhã"),
-    (3, "Almoço"),
-    (4, "Lanche da tarde"),
-    (5, "Jantar"),
+    (0, "Pequeno-almoço"),
+    (1, "Lanche da manhã"),
+    (2, "Almoço"),
+    (3, "Lanche da tarde"),
+    (4, "Jantar"),
 )
 
 MEAL_PART_TYPE = (
-    (1, "Sopa"),
-    (2, "Carne"),
-    (3, "Peixe"),
-    (4, "Vegetariano"),
-    (5, "Prato"),
-    (6, "Sobremesa"),
-    (7, "Bebida"),
-    (8, "Menu"),
+    (0, "Sopa"),
+    (1, "Carne"),
+    (2, "Peixe"),
+    (3, "Vegetariano"),
+    (4, "Prato"),
+    (5, "Sobremesa"),
+    (6, "Bebida"),
+    (7, "Menu"),
 )
 
 

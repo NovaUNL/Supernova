@@ -85,7 +85,7 @@
           <h2>Cantina</h2>
         </div>
         <div class="pane-content meals">
-          <span>{{ meal_name }} a {{ meal_date }}</span>
+          <span>{{ meal_name }} a {{ meal_date }}:</span>
           {% for item in meal_items %}
             <div>
               {% if item.0 == 1 %}
@@ -97,6 +97,7 @@
               {% elif item.0 == 4 %}
                 <img src="{% static 'services/veg.svg' %}">
               {% else %}
+                <img src="{% static 'supernova/images/unknown.svg' %}">
               {% endif %}
               {{ item.1 }}
             </div>
