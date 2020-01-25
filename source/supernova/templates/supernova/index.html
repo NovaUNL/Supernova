@@ -14,7 +14,7 @@
             <div class="news-list-item">
               <img src="{% get_media_prefix %}{{ news_item.cover_img }}" alt="{{ news_item.title }}">
               <div>
-                <a href="{% url 'news_item' news_item.id %}"><h3>{{ news_item.title }}</h3></a>
+                <h3><a href="{% url 'news_item' news_item.id %}">{{ news_item.title }}</a></h3>
                 {% if news_item.author %}
                   <span>Por <a href="{% url 'profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
                     {{ news_item.datetime }}</span>
@@ -32,13 +32,13 @@
             <h2>Atividade</h2>
           </div>
           <div class="pane-content">
-            TODO
+            <img src="{% static 'construction.png' %}" width="300px">
           </div>
         </div>
         <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Alterações</h2></div>
           <div class="pane-content">
-            TODO
+            <img src="{% static 'construction.png' %}" width="300px">
           </div>
         </div>
         <div class="flex-pane grow small">
@@ -46,13 +46,13 @@
             <h2>Salas <b>possívelmente</b> vazias</h2>
           </div>
           <div class="pane-content">
-            TODO
+            <img src="{% static 'construction.png' %}" width="300px">
           </div>
         </div>
         <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Eventos</h2></div>
           <div class="pane-content">
-            TODO
+            <img src="{% static 'construction.png' %}" width="300px">
           </div>
         </div>
       </div>
@@ -88,13 +88,13 @@
           <span>{{ meal_name }} a {{ meal_date }}:</span>
           {% for item in meal_items %}
             <div>
-              {% if item.0 == 1 %}
+              {% if item.0 == 0 %}
                 <img src="{% static 'services/soup.svg' %}">
-              {% elif item.0 == 2 %}
+              {% elif item.0 == 1 %}
                 <img src="{% static 'services/meat.svg' %}">
-              {% elif item.0 == 3 %}
+              {% elif item.0 == 2 %}
                 <img src="{% static 'services/fish.svg' %}">
-              {% elif item.0 == 4 %}
+              {% elif item.0 == 3 %}
                 <img src="{% static 'services/veg.svg' %}">
               {% else %}
                 <img src="{% static 'supernova/images/unknown.svg' %}">
@@ -102,6 +102,7 @@
               {{ item.1 }}
             </div>
           {% endfor %}
+          <span style="float: right; font-size: 10px">Dados cedidos por <a href="https://sas.unl.pt/alimentacao/cantina-da-faculdade-de-ciencias-e-tecnologia-fct/">SAS NOVA</a></span>
         </div>
       </div>
       <div class="flex-pane">
@@ -110,7 +111,52 @@
         </div>
         <div class="pane-content" id="weather" style="height: 100%; overflow: hidden">
           <svg id="chart" width="320" height="180"></svg>
-          <span style="float: right">Dados cedidos por <a href="https://www.ipma.pt/pt/index.html">IPMA</a></span>
+          <span style="float: right; font-size: 10px">Dados cedidos por <a href="https://www.ipma.pt/pt/index.html">IPMA</a></span>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>BOINC (<a href="https://www.boincstats.com/stats/-1/team/detail/2068385380/overview">NOVA Lisboa</a>)</h2>
+        </div>
+        <div class="pane-content boinc">
+          <table>
+            <thead>
+            <tr>
+              <td></td>
+              <th>Utilizador</th>
+              <th>Última semana</th>
+            </tr>
+            </thead>
+            {% for user in boinc_users %}
+              <tr>
+                {% if forloop.counter == 1 %}
+                  <td><img src="{% static 'score/first.svg' %}"></td>
+                {% elif forloop.counter == 2 %}
+                  <td><img src="{% static 'score/second.svg' %}"></td>
+                {% elif forloop.counter == 3 %}
+                  <td><img src="{% static 'score/third.svg' %}"></td>
+                {% else %}
+                  <td></td>
+                {% endif %}
+                <td>{{ user.name }}</td>
+                <td>{{ user.weekly }}</td>
+              </tr>
+            {% endfor %}
+            <thead>
+            <tr>
+              <td></td>
+              <th>Projeto</th>
+              <th>Última semana</th>
+            </tr>
+            {% for project in boinc_projects %}
+              <tr>
+                <td></td>
+                <td>{{ project.name }}</td>
+                <td>{{ project.weekly }}</td>
+              </tr>
+            {% endfor %}
+            </thead>
+          </table>
         </div>
       </div>
       <div class="flex-pane">
@@ -132,35 +178,11 @@
           </a>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
-          <h2>BOINC</h2>
-        </div>
-        <div class="pane-content">
-          <span>Equipa <a href="https://www.boincstats.com/stats/-1/team/detail/2068385380/overview">NOVA Lisboa</a></span>
-          <table>
-            <thead>
-            <tr>
-              <th></th>
-              <th>Utilizador</th>
-              <th>Última semana</th>
-            </tr>
-            </thead>
-            <thead>
-            <tr>
-              <th></th>
-              <th>Projeto</th>
-              <th>Última semana</th>
-            </tr>
-            </thead>
-          </table>
-        </div>
-      </div>
     </div>
   </div>
 
   <script>
-      particlesJS.load('particles', "{% static 'supernova/particles.json' %}", function (){});
+      particlesJS.load('particles', "{% static 'supernova/particles.json' %}");
   </script>
   <script src="https://cdn.jsdelivr.net/npm/d3@5.14.2/dist/d3.min.js"
           integrity="sha256-M2M+sgC2bZ4r73FO1LV5JmHiS5COwEb2Uqw7EbsHmBY="

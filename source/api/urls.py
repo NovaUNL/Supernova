@@ -21,6 +21,8 @@ urlpatterns = [
     path('menus/', views.services.Menus.as_view()),
     path('weather/', views.third_party.weather),
     path('weather/chart/', views.third_party.weather_chart),
+    path('boinc/users/', views.third_party.boinc_users),
+    path('boinc/projects/', views.third_party.boinc_projects),
     # Store
     path('store/', views.store.Store.as_view()),
     # Synopses
