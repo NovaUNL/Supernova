@@ -110,6 +110,7 @@
         </div>
         <div class="pane-content" id="weather" style="height: 100%; overflow: hidden">
           <svg id="chart" width="320" height="180"></svg>
+          <span style="float: right">Dados cedidos por <a href="https://www.ipma.pt/pt/index.html">IPMA</a></span>
         </div>
       </div>
       <div class="flex-pane">
@@ -159,168 +160,10 @@
   </div>
 
   <script>
-      particlesJS.load('particles', "{% static 'supernova/particles.json' %}", function () {
-          console.log('callback - particles.js config loaded');
-      });
+      particlesJS.load('particles', "{% static 'supernova/particles.json' %}", function (){});
   </script>
-
   <script src="https://cdn.jsdelivr.net/npm/d3@5.14.2/dist/d3.min.js"
-          integrity="sha256-M2M+sgC2bZ4r73FO1LV5JmHiS5COwEb2Uqw7EbsHmBY=" crossorigin="anonymous"></script>
-  <script>
-      d3.json("./data.json").then(d => chart(d));
-
-      function chart(data) {
-
-          // var keys = data.columns.slice(1);
-          var keys = ["min", "max", "hr"];
-
-          var parseTime = d3.utcParse("%Y-%m-%dT%H"),
-              formatDate = d3.timeFormat("%H"),
-              bisectDate = d3.bisector(d => d.date).left,
-              formatValue = d3.format(",.0f");
-
-          data.forEach(function (d) {
-              d.date = parseTime(d.date);
-              return d;
-          });
-
-          var svg = d3.select("#chart"),
-              margin = {top: 15, right: 35, bottom: 15, left: 35},
-              width = +svg.attr("width") - margin.left - margin.right,
-              height = +svg.attr("height") - margin.top - margin.bottom;
-
-          var x = d3.scaleTime()
-              .rangeRound([margin.left, width - margin.right])
-              .domain(d3.extent(data, d => d.date));
-
-          var y = d3.scaleLinear()
-              .rangeRound([height - margin.bottom, margin.top]);
-
-          var z = d3.scaleOrdinal(["#002b8f", "#990011", "#515967"]);
-
-          var line = d3.line()
-              .curve(d3.curveCardinal)
-              .x(d => x(d.date))
-              .y(d => y(d.val));
-
-          svg.append("g")
-              .attr("class", "x-axis")
-              .attr("transform", "translate(0," + (height - margin.bottom) + ")")
-              .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H")));
-
-          svg.append("g")
-              .attr("class", "y-axis")
-              .attr("transform", "translate(" + margin.left + ",0)");
-
-          var focus = svg.append("g")
-              .attr("class", "focus")
-              .style("display", "none");
-
-
-          var overlay = svg.append("rect")
-              .attr("class", "overlay")
-              .attr("x", margin.left)
-              .attr("width", width - margin.right - margin.left)
-              .attr("height", height)
-
-          // update(d3.select('#selectbox').property('value'), 0);
-          update(0);
-
-          function update(speed) {
-
-              var copy = keys;
-
-              var metrics = copy.map(function (id) {
-                  return {
-                      id: id,
-                      values: data.map(d => {
-                          return {date: d.date, val: +d[id]}
-                      })
-                  };
-              });
-
-              y.domain([
-                  d3.min(metrics[0].values, d => d.val - 1),
-                  d3.max(metrics[1].values, d => d.val + 1)
-              ]).nice();
-
-              svg.selectAll(".y-axis").transition()
-                  .call(d3.axisLeft(y).tickSize(-width + margin.right + margin.left));
-
-              var metric = svg.selectAll(".cities").data(metrics);
-
-              metric.enter().insert("g", ".focus").append("path")
-                  .attr("class", "line cities").style("stroke", d => z(d.id)).merge(metric)
-                  .transition().attr("d", d => line(d.values));
-
-              tooltip(copy);
-          }
-
-          function tooltip(copy) {
-
-              var labels = focus.selectAll(".lineHoverText")
-                  .data(copy)
-
-              labels.enter().append("text")
-                  .attr("class", "lineHoverText")
-                  .style("fill", d => z(d))
-                  .attr("text-anchor", "start")
-                  .attr("font-size", 12)
-                  .attr("dy", (_, i) => 1 + i * 2 + "em")
-                  .merge(labels);
-
-              var circles = focus.selectAll(".hoverCircle")
-                  .data(copy)
-
-              circles.enter().append("circle")
-                  .attr("class", "hoverCircle")
-                  .style("fill", d => z(d))
-                  .attr("r", 2.5)
-                  .merge(circles);
-
-              svg.selectAll(".overlay")
-                  .on("mouseover", function () {
-                      focus.style("display", null);
-                  })
-                  .on("mouseout", function () {
-                      focus.style("display", "none");
-                  })
-                  .on("mousemove", mousemove);
-
-              function mousemove() {
-
-                  var x0 = x.invert(d3.mouse(this)[0]),
-                      i = bisectDate(data, x0, 1),
-                      d0 = data[i - 1],
-                      d1 = data[i],
-                      d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-
-                  focus.select(".lineHover")
-                      .attr("transform", "translate(" + x(d.date) + "," + height + ")");
-
-                  focus.select(".lineHoverDate")
-                      .attr("transform",
-                          "translate(" + x(d.date) + "," + (height + margin.bottom) + ")")
-                      .text(formatDate(d.date));
-
-                  focus.selectAll(".hoverCircle")
-                      .attr("cy", e => y(d[e]))
-                      .attr("cx", x(d.date));
-
-                  focus.selectAll(".lineHoverText")
-                      .attr("transform",
-                          "translate(" + (x(d.date)) + "," + height / 2.5 + ")")
-                      .text(e => ['min', 'max'].includes(e) ? e + " " + formatValue(d[e]) + "º" : e + ":" + formatValue(d[e]));
-
-                  x(d.date) > (width - width / 4)
-                      ? focus.selectAll("text.lineHoverText")
-                          .attr("text-anchor", "end")
-                          .attr("dx", -10)
-                      : focus.selectAll("text.lineHoverText")
-                          .attr("text-anchor", "start")
-                          .attr("dx", 10)
-              }
-          }
-      }
-  </script>
+          integrity="sha256-M2M+sgC2bZ4r73FO1LV5JmHiS5COwEb2Uqw7EbsHmBY="
+          crossorigin="anonymous"></script>
+  <script src="{% static "services/weather.js" %}"></script>
 {% endblock %}

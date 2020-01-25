@@ -19,6 +19,8 @@ urlpatterns = [
     path('services/', views.services.ServiceList.as_view()),
     path('bars/', views.services.BarList.as_view()),
     path('menus/', views.services.Menus.as_view()),
+    path('weather/', views.third_party.weather),
+    path('weather/chart/', views.third_party.weather_chart),
     # Store
     path('store/', views.store.Store.as_view()),
     # Synopses
