@@ -63,21 +63,21 @@
           <h2>Transportes</h2>
         </div>
         <div class="pane-content">
-          <div class="pt-line bus">
-            <span class="number">123</span>
-            <span class="time">12:34</span>
-            <span class="direction">Cacilhas</span>
-          </div>
-          <div class="pt-line bus">
-            <span class="number">321</span>
-            <span class="time">32:10</span>
-            <span class="direction">T. Argolas</span>
-          </div>
-          <div class="pt-line metro">
-            <span class="number">3</span>
-            <span class="time">32:10</span>
-            <span class="direction">Cacilhas</span>
-          </div>
+          {% for departure in departures %}
+            {% if departure.name == '3' %}
+              <div class="pt-line metro">
+                <span class="number">{{departure.name}}</span>
+                <span class="time">{{departure.time}}</span>
+                <span class="direction">{{departure.destination}}</span>
+              </div>
+            {% else %}
+              <div class="pt-line bus">
+                <span class="number">{{departure.name}}</span>
+                <span class="time">{{departure.time}}</span>
+                <span class="direction">{{departure.destination}}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
       </div>
       <div class="flex-pane">
