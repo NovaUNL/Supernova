@@ -1,17 +1,18 @@
-{% extends 'supernova/content_only_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
-{% load static %}
-
-{% block title %}<h2>Cursos</h2>{% endblock %}
-{% block content %}
-  {% for degree in degrees %}
-    <h2>{{ degree.0 }}</h2>
-    <div>
-      {% for course in degree.1 %}
-        <div style="padding-left: 10px">
-          <h3><a href="{% url 'college:course' course.id %}"><span>{{ course.name }}</span></a></h3>
+{% block content_wrapper %}
+  <div class="col main">
+    {% for degree in degrees %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>{{ degree.0 }}</h2></div>
+        <div class="pane-content">
+          {% for course in degree.1 %}
+            <div style="padding-left: 10px">
+              <h3><a href="{% url 'college:course' course.id %}"><span>{{ course.name }}</span></a></h3>
+            </div>
+          {% endfor %}
         </div>
-      {% endfor %}
-    </div>
-  {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
