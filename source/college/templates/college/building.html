@@ -14,7 +14,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
   {% if  building.picture %}
     <style>
-      .header-decorator {
+      .header-decorator:after {
         background-image: url("{{ building.picture.url }}");
       }
     </style>
@@ -23,7 +23,7 @@
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="content-title-decorator">
+    <div class="header-decorator">
       <h1>{{ building.name }}</h1>
     </div>
     <div class="row padded">

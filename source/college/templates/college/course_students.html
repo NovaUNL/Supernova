@@ -22,7 +22,7 @@
 {% block content_wrapper %}
   <div class="col main" style="padding: 10px">
 
-    <h1><i class="fas fa-graduation-cap"></i> Alunos de {{ course }}</h1>
+    <h1>Alunos de {{ course }}</h1>
     {% if course.department %}
       <h3 style="margin-left: 20px">Departamento de
         <a href="{% url 'college:department' course.department.id %}">{{ course.department }}</a>

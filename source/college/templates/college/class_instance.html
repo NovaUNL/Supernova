@@ -1,11 +1,5 @@
 {% extends 'supernova/base.html' %}
 
-{% load static %}
-
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
-{% endblock %}
-
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
@@ -63,7 +57,7 @@
           </div>
         </div>
       </div>
-      <div class="col">
+      <div class="col nogrow noshrink">
         {% include 'college/class_navigation.html' %}
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Informação</h2></div>
@@ -72,20 +66,7 @@
             <a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a>
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Edições</h2></div>
-          <div class="pane-content">
-            <ul>
-              {% for other_instance in instance.parent.instances.all|dictsort:'year' %}
-                {% if instance == other_instance %}
-                  <li>{{ other_instance.occasion }}</li>
-                {% else %}
-                  <li><a href="{% url 'college:class_instance' instance.id %}">{{ other_instance.occasion }}</a></li>
-                {% endif %}
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
+        {% include 'college/class_editions.html' %}
       </div>
     </div>
   </div>

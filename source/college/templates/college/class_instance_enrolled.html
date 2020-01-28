@@ -38,23 +38,9 @@
           </div>
         </div>
       </div>
-      <div class="col">
+      <div class="col nogrow noshrink">
         {% include 'college/class_navigation.html' %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Edições</h2></div>
-          <div class="pane-content">
-            <ul>
-              {% for other_instance in instance.parent.instances.all|dictsort:'year' %}
-                {% if instance == other_instance %}
-                  <li>{{ other_instance.occasion }}</li>
-                {% else %}
-                  <li><a href="{% url 'college:class_instance_enrolled' instance.id %}">{{ other_instance.occasion }}</a>
-                  </li>
-                {% endif %}
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
+        {% include 'college/class_editions.html' %}
       </div>
     </div>
   </div>
