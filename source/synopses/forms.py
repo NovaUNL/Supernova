@@ -38,10 +38,9 @@ class SubareaSectionForm(djf.ModelForm):
 class SectionChildForm(djf.ModelForm):
     class Meta:
         model = synopsis.Section
-        fields = ('name', 'content', 'parents', 'requirements')
+        fields = ('name', 'content', 'requirements')
         widgets = {
             'name': djf.TextInput(),
-            'parents': djf.HiddenInput(),
             'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
 
 

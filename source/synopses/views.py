@@ -1,5 +1,5 @@
 from dal import autocomplete
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -11,7 +11,11 @@ from supernova.views import build_base_context
 from synopses import forms as f
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection, SectionSubsection
+from users.models import User
 
+
+def can_edit(user: User):
+    return user.is_superuser
 
 def areas_view(request):
     context = build_base_context(request)
@@ -45,7 +49,7 @@ def subarea_view(request, subarea_id):
     return render(request, 'synopses/subarea.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def subarea_create_view(request, area_id):
     area = get_object_or_404(Area, id=area_id)
 
@@ -70,7 +74,7 @@ def subarea_create_view(request, area_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def subarea_edit_view(request, subarea_id):
     subarea = get_object_or_404(Subarea, id=subarea_id)
     area = subarea.area
@@ -95,7 +99,7 @@ def subarea_edit_view(request, subarea_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def subarea_section_create_view(request, subarea_id):
     subarea = get_object_or_404(Subarea, id=subarea_id)
     area = subarea.area
@@ -166,27 +170,18 @@ def subsection_view(request, parent_id, child_id):
     return render(request, 'synopses/section.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def subsection_create_view(request, section_id):
     parent = get_object_or_404(Section, id=section_id)
-
     if request.method == 'POST':
         form = f.SectionChildForm(data=request.POST)
         valid = form.is_valid()
         if valid:
-            section = form.save(commit=False)
-            if parent not in section.parents:
-                form.add_error('parents', 'Parent mismatch')
-                valid = False
-            if valid:
-                section = form.save(commit=False)
-                section.content_reduce()
-                section.save()
-                return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
+            section = form.save()
+            SectionSubsection(section=section, parent=parent).save()
+            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
     else:
-        form = f.SectionChildForm(initial={'parents': [parent]})
-        # form = f.SectionChildForm()
-        # form.fields['subarea'].widget = HiddenInput()
+        form = f.SectionChildForm()
 
     context = build_base_context(request)
     context['title'] = 'Criar secção em "%s"' % parent.name
@@ -195,7 +190,7 @@ def subsection_create_view(request, section_id):
     context['action_name'] = 'Criar'
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': parent.name, 'url': reverse('synopses:subsection', args=[section_id])},
+                          {'name': parent.name, 'url': reverse('synopses:section', args=[section_id])},
                           {'name': 'Criar secção', 'url': '#'}]
     return render(request, 'synopses/generic_form.html', context)
 
@@ -217,7 +212,7 @@ def d_topic_view(request, topic_id):
     return render(request, 'synopses/topic.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def section_create_view(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     context = build_base_context(request)
@@ -290,7 +285,7 @@ def section_create_view(request, topic_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def section_edit_view(request, section_id):
     section = get_object_or_404(Section, id=section_id)
     context = build_base_context(request)
@@ -368,7 +363,7 @@ def class_sections_view(request, class_id):
     return render(request, 'synopses/class_sections.html', context)
 
 
-@login_required
+@user_passes_test(can_edit)
 def class_manage_sections_view(request, class_id):
     class_ = get_object_or_404(Class, id=class_id)
     context = build_base_context(request)
