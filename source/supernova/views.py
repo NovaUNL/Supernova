@@ -38,25 +38,14 @@ def index(request):
             if now < departure_time:
                 departure['datetime'] = today + timedelta(hours=departure_time.hour, minutes=departure_time.minute)
             else:
-                departure['datetime'] = today + timedelta(days=1, hours=departure_time.hour, minutes=departure_time.minute)
+                departure['datetime'] = today + timedelta(days=1, hours=departure_time.hour,
+                                                          minutes=departure_time.minute)
         departures.sort(key=lambda departure: departure['datetime'])
+        departures = departures[:5]
         cache.set('departures', departures, timeout=60)
-    context['departures'] = departures[:5]
+    context['departures'] = departures
 
     return render(request, 'supernova/index.html', context)
-
-
-def about(request):
-    context = build_base_context(request)
-    context['title'] = "Sobre"
-    context['version'] = VERSION
-    return render(request, 'supernova/about.html', context)
-
-
-def privacy(request):
-    context = build_base_context(request)
-    context['title'] = "Política de privacidade"
-    return render(request, 'supernova/privacy.html', context)
 
 
 def build_base_context(request):

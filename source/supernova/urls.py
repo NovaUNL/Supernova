@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.flatpages import views as flatpages
 from django.urls import path, include
 
 import college.views as college
@@ -20,9 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Generic views
     path('', views.index, name='index'),
-    path('sobre/', views.about, name='about'),
-    path('pedinchar/', views.beg, name='beg'),
-    path('privacidade/', views.privacy, name='privacy'),
     # College views
     path('faculdade/', include('college.urls')),
     # Services views
@@ -64,6 +62,10 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     url(r'^markdownx/', include('markdownx.urls')),
+    path('sobre/', flatpages.flatpage, {'url': '/sobre/'}, name='about'),
+    path('privacidade/', flatpages.flatpage, {'url': '/privacidade/'}, name='privacy'),
+    path('faq/', flatpages.flatpage, {'url': '/faq/'}, name='faq'),
+    path('termos/', flatpages.flatpage, {'url': '/termos/'}, name='terms'),
 ]
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

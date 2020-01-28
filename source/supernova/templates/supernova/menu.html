@@ -73,7 +73,7 @@
           </li>
         {% else %}
           <li class="collapse">
-            <input type="checkbox" id="m21"/><label for="m21"><a href="#">Campus</a></label>
+            <input type="checkbox" id="m21"/><label for="m21">Campus</label>
             <ul>
               <li><a href="#">Serviços</a></li>
               <li><a href="{{ map }}">Mapa</a></li>
@@ -103,7 +103,7 @@
         <li><a href="{{ courses }}">Cursos</a></li>
         <li><a href="{{ departments }}">Departamentos</a></li>
         <li class="collapse">
-          <input type="checkbox" id="m21"/><label for="m21"><a href="#">Campus</a></label>
+          <input type="checkbox" id="m21"/><label for="m21">Campus</label>
           <ul>
             <li><a href="#">Serviços</a></li>
             <li><a href="{{ map }}">Mapa</a></li>
@@ -138,8 +138,8 @@
     <input type="checkbox" id="m4"/><label for="m4">Supernova</label>
     <ul>
       <li><a href="{% url 'about' %}">Sobre</a></li>
-      <li><a href="#">Perguntas frequentes</a></li>
-      <li><a href="#">Termos de utilização</a></li>
+      <li><a href="{% url 'faq' %}">Perguntas frequentes</a></li>
+      <li><a href="{% url 'terms' %}">Termos de utilização</a></li>
       <li><a href="{% url 'privacy' %}">Politica de privacidade</a></li>
       <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>
     </ul>

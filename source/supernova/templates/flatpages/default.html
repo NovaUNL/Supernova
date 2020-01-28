@@ -1,0 +1,14 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="col main padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        <h2>{{ flatpage.title }}</h2>
+      </div>
+      <div class="pane-content">
+        {{ flatpage.content }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
