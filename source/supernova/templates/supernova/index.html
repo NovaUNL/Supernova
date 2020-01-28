@@ -28,9 +28,7 @@
       </div>
       <div class="row">
         <div class="flex-pane grow small">
-          <div class="pane-title bg-grad">
-            <h2>Atividade</h2>
-          </div>
+          <div class="pane-title bg-grad"><h2>Atividade</h2></div>
           <div class="pane-content">
             <img src="{% static 'construction.png' %}" width="300px">
           </div>
@@ -42,11 +40,15 @@
           </div>
         </div>
         <div class="flex-pane grow small">
-          <div class="pane-title bg-grad">
-            <h2>Salas <b>possívelmente</b> vazias</h2>
-          </div>
+          <div class="pane-title bg-grad"><h2>Salas <b>talvez</b> vazias</h2></div>
           <div class="pane-content">
-            <img src="{% static 'construction.png' %}" width="300px">
+            <div class="pane-content room-list">
+              {% for room in free_rooms %}
+                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
+                  {{ room }}
+                </a>
+              {% endfor %}
+            </div>
           </div>
         </div>
         <div class="flex-pane grow small">
@@ -66,15 +68,15 @@
           {% for departure in departures %}
             {% if departure.name == '3' %}
               <div class="pt-line metro">
-                <span class="number">{{departure.name}}</span>
-                <span class="time">{{departure.time}}</span>
-                <span class="direction">{{departure.destination}}</span>
+                <span class="number">{{ departure.name }}</span>
+                <span class="time">{{ departure.time }}</span>
+                <span class="direction">{{ departure.destination }}</span>
               </div>
             {% else %}
               <div class="pt-line bus">
-                <span class="number">{{departure.name}}</span>
-                <span class="time">{{departure.time}}</span>
-                <span class="direction">{{departure.destination}}</span>
+                <span class="number">{{ departure.name }}</span>
+                <span class="time">{{ departure.time }}</span>
+                <span class="direction">{{ departure.destination }}</span>
               </div>
             {% endif %}
           {% endfor %}
