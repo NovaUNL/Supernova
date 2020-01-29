@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'exercises',
     'api',
     'django_extensions',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'supernova.urls'
@@ -213,6 +215,9 @@ DEBUG = False
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 VULNERABILITY_CHECKING = False
+
+INTERNAL_IPS = ['127.0.0.1',]
+
 
 assert 'SN_CONFIG' in os.environ
 CONFIG_PATH = os.environ['SN_CONFIG']
