@@ -6,8 +6,9 @@ def build_schedule(turn_instances: [TurnInstance]):
     unsortable = []  # Instances without schedule information
     end = 8 * 60  # Last turn added, to crop the end of the schedule. Starts as 8AM when there are no turns
     for turn_instance in turn_instances:  # Fetch every turn of this class instance
-        if hasattr(turn_instance, 'weekday') and hasattr(turn_instance, 'start') and \
-                hasattr(turn_instance, 'duration'):
+        if hasattr(turn_instance, 'weekday') and turn_instance.weekday is not None \
+                and hasattr(turn_instance, 'start') and turn_instance.start is not None \
+                and hasattr(turn_instance, 'duration'):
             week[turn_instance.weekday].append(turn_instance)
             end = max(end, turn_instance.start + turn_instance.duration)
         else:  # Otherwise it's an unsortable turn instance
@@ -101,8 +102,8 @@ def build_schedule(turn_instances: [TurnInstance]):
     # For every relevant row (ignore empty rows at the start/end)
     for row in rows[empty_rows_start:(-empty_rows_end if empty_rows_end > 0 else None)]:
         # TODO take that HTML out of here. Does not belong here
-        result.append((f'{initial_time//6}:{initial_time%6}0 '
-                       f'<span class="end-time">{(initial_time+3)//6}:{(initial_time+3)%6}0</span>', row))
+        result.append((f'{initial_time // 6}:{initial_time % 6}0 '
+                       f'<span class="end-time">{(initial_time + 3) // 6}:{(initial_time + 3) % 6}0</span>', row))
         initial_time += 3
     return weekday_colspans, result, unsortable
 
