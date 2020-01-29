@@ -12,7 +12,11 @@ def weather(request):
 
 @api_view(['GET'])
 def weather_chart(request):
-    return Response(get_weather()['hours'])
+    weather = get_weather()
+    if 'hours' in weather:
+        return Response(weather['hours'])
+
+    return Response({'error': 'unable to fetch the weather at this time'})
 
 
 @api_view(['GET'])
