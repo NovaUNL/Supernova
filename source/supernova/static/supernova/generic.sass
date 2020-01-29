@@ -34,6 +34,26 @@ input[type=text], input[type=password], input[type=search], input[type=url], inp
   font-size: 22px
   line-height: 30px
 
+blockquote
+  background: $color-primary-0
+  border-left: 10px solid #ccc
+  margin: 1.5em 10px
+  padding: 0.5em 10px
+  quotes: "\201C""\201D""\2018""\2019"
+  color: $whitish
+
+blockquote:before
+  color: #ccc
+  content: open-quote
+  font-size: 4em
+  line-height: 0.1em
+  margin-right: 0.25em
+  vertical-align: -0.4em
+
+blockquote p
+  display: inline
+
+
 .nowrap
   flex-wrap: nowrap !important
 
@@ -121,3 +141,7 @@ input[type=text], input[type=password], input[type=search], input[type=url], inp
   border-radius: 5px
   padding: 5px 10px
   font-weight: bold
+
+.marker
+  color: $whitish
+  background-color: #333300
