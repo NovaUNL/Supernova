@@ -65,6 +65,8 @@ def __simplify_destination_name(name):
         return 'Monte Caparica, Fomega'
     elif name.startswith('Lis'):
         return 'Lisboa (Pça Espanha)'
+    elif name.startswith('Ch '):
+        return 'Charneca da Caparica'
     return name
 
 
