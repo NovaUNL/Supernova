@@ -35,12 +35,7 @@ urlpatterns = [
     path('entrar/', users.login_view, name='login'),
     path('sair/', users.logout_view, name='logout'),
     # Group views
-    path('grupos/', groups.groups_view, name='groups'),
-    path('grupo/<str:group_id>/', groups.group_view, name='group'),
-    path('grupo/<str:group_id>/documentos/', groups.documents_view, name='group_documents'),
-    path('grupo/<str:group_id>/anuncios/', groups.announcements_view, name='group_announcements'),
-    path('grupo/anuncio/<str:announcement_id>/', groups.announcement_view, name='group_announcement'),
-    path('grupo/<str:group_id>/contactar/', groups.contact_view, name='group_contact'),
+    path('grupos/', include('groups.urls')),
     # Events views
     path('eventos/', events.index, name='events'),
     path('evento/<str:event_id>/', events.event, name='event'),

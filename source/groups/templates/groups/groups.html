@@ -1,74 +1,100 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'supernova/content_only_formatted.html' %}
 
 {% load static %}
 
 {% block head %}
-    <style>
+  <style>
     .flex-grid-item {
-        background-size: contain;
+      background-size: contain;
+      background-repeat: no-repeat;
     }
-    </style>
+  </style>
 {% endblock %}
 
-{% block content-top %}
-    <nav id="top-container">
-        <a class="menu-entry selected">Filtrar:</a>
-        {% for type in group_types %}
-            {% if type_filter == type.0 %}
-                <a class="menu-entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>
-            {% else %}
-                <a class="menu-entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>
-            {% endif %}
-        {% endfor %}
-    </nav>
-{% endblock %}
+
+{% block title %}<h2>Grupos</h2>{% endblock %}
 
 {% block content %}
-    <div class="content-formatter">
-        <h1><i class="fas fa-users"></i> Grupos</h1>
-        <div class="flex-wrapper">
-            {% for group in groups %}
-                {% if not type_filter or group.type == type_filter %}
-                    <a href="{% url 'group' group.id %}">
-                        <div class="flex-grid-item"
-                             style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
-                            <div class="flex-grid-item-top">
-                                {% if group.abbreviation %}
-                                    <span>{{ group.abbreviation }}</span>
-                                {% else %}
-                                    <span>{{ group.name }}</span>
-                                {% endif %}
-                            </div>
-                            <div class="flex-grid-item-bottom">
-                                {% if group.non_member_permission < group.OPEN %}
-                                    <i class="fas fa-lock"></i>
-                                {% else %}
-                                    <i class="fas fa-lock-open"></i>
-                                {% endif %}&nbsp;
-                                <i class="fas fa-user-times"></i>{{ group.members.count }}
-                                <i class="fas fa-star"></i> 0
-                            </div>
-                        </div>
-                    </a>
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
+  <div class="flex-wrapper">
+    {% for group in groups %}
+      {% if not type_filter or group.type == type_filter %}
+        <a href="{% url 'groups:group' group.abbreviation %}">
+          <div class="flex-grid-item"
+               style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
+            <div class="flex-grid-item-top">
+            <span>{{ group.name }}</span>
+            </div>
+            <div class="flex-grid-item-bottom">
+              {% if group.non_member_permission < group.OPEN %}
+              {% else %}
+              {% endif %}
+              {{ group.members.count }}
+            </div>
+          </div>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
 {% endblock %}
 
-{% block navigation %}
-    {% if type_filter %}
-        <a class="menu-entry" href=".">Todos os grupos</a>
-    {% else %}
-        <a class="menu-entry selected">Todos os grupos</a>
-    {% endif %}
-    <br><br>
-    <span style="font-size: 1.2em; font-weight: bold;">Filtro:</span>
-    {% for type in group_types %}
-        {% if type_filter == type.0 %}
-            <a class="menu-entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>
-        {% else %}
-            <a class="menu-entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>
-        {% endif %}
-    {% endfor %}
-{% endblock %}
+
+{#{% block content-top %}#}
+{#  <nav id="top-container">#}
+{#    <a class="menu-entry selected">Filtrar:</a>#}
+{#    {% for type in group_types %}#}
+{#      {% if type_filter == type.0 %}#}
+{#        <a class="menu-entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
+{#      {% else %}#}
+{#        <a class="menu-entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
+{#      {% endif %}#}
+{#    {% endfor %}#}
+{#  </nav>#}
+{#{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#  <div class="content-formatter">#}
+{#    <h1><i class="fas fa-users"></i> Grupos</h1>#}
+{#    <div class="flex-wrapper">#}
+{#      {% for group in groups %}#}
+{#        {% if not type_filter or group.type == type_filter %}#}
+{#          <a href="{% url 'group' group.id %}">#}
+{#            <div class="flex-grid-item"#}
+{#                 style="background-image: url('{% get_media_prefix %}{{ group.image }}')">#}
+{#              <div class="flex-grid-item-top">#}
+{#                {% if group.abbreviation %}#}
+{#                  <span>{{ group.abbreviation }}</span>#}
+{#                {% else %}#}
+{#                  <span>{{ group.name }}</span>#}
+{#                {% endif %}#}
+{#              </div>#}
+{#              <div class="flex-grid-item-bottom">#}
+{#                {% if group.non_member_permission < group.OPEN %}#}
+{#                {% else %}#}
+{#                {% endif %}&nbsp;#}
+{#                {{ group.members.count }}#}
+{#                0#}
+{#              </div>#}
+{#            </div>#}
+{#          </a>#}
+{#        {% endif %}#}
+{#      {% endfor %}#}
+{#    </div>#}
+{#  </div>#}
+{#{% endblock %}#}
+{##}
+{#{% block navigation %}#}
+{#  {% if type_filter %}#}
+{#    <a class="menu-entry" href=".">Todos os grupos</a>#}
+{#  {% else %}#}
+{#    <a class="menu-entry selected">Todos os grupos</a>#}
+{#  {% endif %}#}
+{#  <br><br>#}
+{#  <span style="font-size: 1.2em; font-weight: bold;">Filtro:</span>#}
+{#  {% for type in group_types %}#}
+{#    {% if type_filter == type.0 %}#}
+{#      <a class="menu-entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
+{#    {% else %}#}
+{#      <a class="menu-entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
+{#    {% endif %}#}
+{#  {% endfor %}#}
+{#{% endblock %}#}

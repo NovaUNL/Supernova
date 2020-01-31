@@ -1,37 +1,44 @@
-{% if page == 'group' %}
-    <a class="menu-entry selected">Página inícial</a>
-{% else %}
-    <a class="menu-entry" href="{% url 'group' group.id %}">Página inícial</a>
-{% endif %}
-{% if page == 'group_anouncements' %}
-    <a class="menu-entry selected">Anúncios</a>
-{% else %}
-    <a class="menu-entry" href="{% url 'group_announcements' group.id %}">Anúncios</a>
-{% endif %}
-{#{% if page == 'group_schedule' %}#}
-{#    <a class="menu-entry selected">Horário</a>#}
-{#{% else %}#}
-{#    <a class="menu-entry">Horário</a>#}
-{#{% endif %}#}
-{#{% if page == 'group_calendar' %}#}
-{#    <a class="menu-entry selected">Calendário</a>#}
-{#{% else %}#}
-{#    <a class="menu-entry">Calendário</a>#}
-{#{% endif %}#}
-{% if page == 'group_documents' %}
-    <a class="menu-entry selected">Documentos</a>
-{% elif group.document_set.count > 0 %}
-    <a class="menu-entry" href="{% url 'group_documents' group.id %}">Documentos</a>
-{% endif %}
-{% if group.public_members %}
-    {% if page == 'group_members' %}
-        <a class="menu-entry selected">Membros</a>
-    {% else %}
-        <a class="menu-entry">Membros</a>
-    {% endif %}
-{% endif %}
-{% if page == 'group_contact' %}
-    <a class="menu-entry selected">Contactar</a>
-{% else %}
-    <a class="menu-entry" href="{% url 'group_contact' group.id %}">Contactar</a>
-{% endif %}
+{% url 'groups:group' group.abbreviation  as main_url %}
+{% url 'groups:announcement' group.abbreviation  as announcements_url %}
+{% url 'groups:documents' group.abbreviation  as documents_url %}
+{% url 'groups:group' group.abbreviation  as members_url %}
+{% url 'groups:contact' group.abbreviation  as contact_url %}
+
+<div class="flex-pane">
+  <div class="pane-title bg-grad"><h2>Páginas</h2></div>
+  <div class="pane-content">
+    <ul class="menu">
+      {% if request.path == main_url %}
+        <li>Página principal</li>
+      {% else %}
+        <li><a href="{{ main_url }}">Página principal</a></li>
+      {% endif %}
+
+      {% if request.path == announcements_url %}
+        <li>Anúncios</li>
+      {% else %}
+        <li><a href="{{ announcements_url }}">Anúncios</a></li>
+      {% endif %}
+
+      {% if request.path == documents_url %}
+        <li>Documentos</li>
+      {% else %}
+        <li><a href="{{ members_url }}">Documentos</a></li>
+      {% endif %}
+
+      {% if request.path == members_url %}
+        <li>Membros</li>
+      {% else %}
+        <li><a href="{{ members_url }}">Membros</a></li>
+      {% endif %}
+
+      {% if request.path == contact_url %}
+        <li>Contactar</li>
+      {% else %}
+        <li><a href="{{ contact_url }}">Contactar</a></li>
+      {% endif %}
+
+      {# TODO - Schedule, Calendar#}
+    </ul>
+  </div>
+</div>

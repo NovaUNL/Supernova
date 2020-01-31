@@ -1,84 +1,77 @@
-{% extends 'supernova/content_navigation.html' %}
-
-{% load static %}
+{% extends 'supernova/base.html' %}
 
 {% block head %}
-    <style>
-        .flex-wrapper > div {
-            margin: 10px 20px;
-            flex-basis: 475px;
-        }
+  <style>
+    {% if  group.image.url %}
+      .header-decorator:after {
+        background-image: url("{{ group.image.url}}");
+        background-size: contain;
+        background-position: right;
+      }
+    {% endif %}
+  </style>
 
-        #content-title-decorator {
-        {% if  group.image.url %}
-            background-image: url("{{ group.image.url }}");
-        {% endif %}
-        }
-    </style>
 {% endblock %}
 
-{% block content-top %}
-    <nav id="top-container">
-        {% include 'groups/navigation.html' %}
-    </nav>
-{% endblock %}
-
-{% block content %}
-    <div id="content-title-decorator">
-        <span class="clearfix"></span>
-        <h1><i class="fas fa-users"></i> {{ group.name }}</h1>
-        {% if group.abbreviation %}<h3>Abreviado {{ group.abbreviation }}</h3>{% endif %}
+{% block content_wrapper %}
+  <div class="col main">
+    <div class="header-decorator">
+      <div>
+        <h1>{{ group.name }}</h1>
+        {% if group.abbreviation %}<h3>@{{ group.abbreviation }}</h3>{% endif %}
+      </div>
     </div>
-    <div class="content-formatter">
-        <div class="flex-wrapper">
-            <div style="margin-right: 50px">
-                <h2>Foto:</h2>
-                <img src="{% get_media_prefix %}{{ group.image }}" style="max-width: 400px; max-height: 300px">
-            </div>
-            {% if group.location %}
-                <div style="margin-right: 50px">
-                    <h2>Localização:</h2>
-                    <img src="#" width="450px" height="400px">
-                </div>
-            {% endif %}
-            <div style="flex-basis: 300px">
-                <h2>Informação:</h2>
-                <h3>Descrição:</h3>
-                {{ group.description }}
-                {% if group.location %}
-                    <h3>Localização:</h3>
-                    {{ group.location }}
-                {% endif %}
-            </div>
-            <div style="width:100%;">
-                <h2>Atividade recente</h2>
-                {% for announcement in announcements %}
-                    <a href="{% url 'group_announcement' announcement.id %}">{{ announcement.title }}</a> em
-                    {{ announcement.datetime }}
-                {% endfor %}
-            </div>
+    <div class="row padded" style="flex-wrap: nowrap">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Quem somos</h2></div>
+          <div class="pane-content" style="flex-basis: 100px; flex-shrink: 100">
+            <p>{{ group.description }}</p>
+          </div>
         </div>
-    </div>
-{% endblock %}
-
-{% block content-bottom %}
-    <nav id="bot-container">
-        <a class="menu-entry"> Subscrever</a>
-        {% if group.non_member_permission <= group.CLOSED_PRIVATE %}
-            <a class="menu-entry selected"><i class="fas fa-lock"></i> Admissão por convite</a>
-        {% elif group.non_member_permission == group.OPEN %}
-            <a class="menu-entry"><i class="fas fa-lock-open"></i> Entrar</a>
-        {% else %}
-            <a class="menu-entry"><i class="fas fa-lock-open"></i> Solicitar admissão</a>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Atividade</h2></div>
+          <div class="pane-content">
+            {% for announcement in announcements %}
+              <a href="{% url 'groups:announcement' announcement.id %}">{{ announcement.title }}</a> em
+              {{ announcement.datetime }}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col nogrow noshrink">
+        {% include 'groups/navigation.html' %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            <ul>
+              <li>Membros: 123</li>
+              <li>Admissões: Por convite</li>
+            </ul>
+          </div>
+        </div>
+        {% if group.location or 1 %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Localização</h2></div>
+            <div class="pane-content">
+              {{ group.location }}
+            </div>
+          </div>
         {% endif %}
-    </nav>
-{% endblock %}
-
-{% block navigation %}
-    {% include 'groups/navigation.html' %}
-{% endblock %}
-{% block side_extra %}
-    <div id="side-extra">
-        <a class="menu-entry">Gestão</a>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Administração</h2></div>
+          <div class="pane-content">
+            <a class="menu-entry"> Subscrever</a>
+            {% if group.non_member_permission <= group.CLOSED_PRIVATE %}
+              <a class="menu-entry selected">Admissão por convite</a>
+            {% elif group.non_member_permission == group.OPEN %}
+              <a class="menu-entry">Entrar</a>
+            {% else %}
+              <a class="menu-entry">Solicitar admissão</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 {% endblock %}
