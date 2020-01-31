@@ -1,13 +1,7 @@
 {% extends 'supernova/base.html' %}
 {% load static %}
 {% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
   <style>
-    .flex-wrapper > div {
-      margin: 10px 20px 10px 20px;
-    }
-
     .room-feature {
       font-weight: bold;
       background-color: #FAFAFA;
@@ -34,45 +28,11 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Horário</h2></div>
           <div class="pane-content">
-            <table class="schedule" cellpadding="0" cellspacing="0" width="700px">
-              <tr>
-                <th>Hora</th>
-                <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
-                <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
-                <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
-                <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
-                <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
-              </tr>
-              {% for row in schedule %}
-                <tr>
-                  <td>{{ row.0|safe }}</td>
-                  {% for element in row.1 %}
-
-                    {% if element %}
-                      <td class='turn turn-{{ element.turn.turn.turn_type.name|lower }}'
-                          rowspan="{{ element.rowspan }}">
-                        <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
-                          {{ element.turn.turn.class_instance.parent.abbreviation }}</a><br>
-                        {{ element.turn.turn.turn_type|upper }}{{ element.turn.turn.number }}<br>
-                        {{ element.turn.room.short_str }}
-                      </td>
-                    {% else %}
-                      <td></td>
-                    {% endif %}
-                  {% endfor %}
-                </tr>
-              {% endfor %}
-            </table>
-          </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Material</h2></div>
-          <div class="pane-content">
-            {{ room.equipment|linebreaks }}
+            {% include 'college/schedule.html' %}
           </div>
         </div>
       </div>
-      <div class="col">
+      <div class="col nogrow noshrink">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Informação</h2></div>
           <div class="pane-content">
@@ -122,6 +82,12 @@
                 </div>
               {% endfor %}
             </div>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Material</h2></div>
+          <div class="pane-content">
+            {{ room.equipment|linebreaks }}
           </div>
         </div>
       </div>

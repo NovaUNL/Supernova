@@ -3,8 +3,6 @@
 {% load static %}
 
 {% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'college/college.css' %}"/>
-  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
   <style>
     .flex-wrapper {
       align-items: start;
@@ -36,63 +34,31 @@
       <div class="col main">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Turnos</h2></div>
-          <div class="pane-content">
-
-            <div class="flex-wrapper">
-              {% for turn in turns %}
-                <div class="turn-list turn-{{ turn.type_abbreviation|lower }}" href="#">
-                  <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
-                    {{ turn.type_abbreviation }}{{ turn.number }}
-                  </a>
-                  <div style="display: inline-block;">
-                    {% for instance in turn.instances.all %}
-                      <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
-                      {% if instance.room %}
-                        <a style="border-bottom: 1px solid black"
-                           href="{% url 'college:room' instance.room.id %}">
-                          {{ instance.room.schedule_str }}
-                        </a><br>
-                      {% endif %}
-                    {% endfor %}
-                  </div>
+          <div class="pane-content flex-wrapper">
+            {% for turn in turns %}
+              <div class="turn-list turn-{{ turn.type_abbreviation|lower }}" href="#">
+                <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
+                  {{ turn.type_abbreviation }}{{ turn.number }}
+                </a>
+                <div style="display: inline-block;">
+                  {% for instance in turn.instances.all %}
+                    <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
+                    {% if instance.room %}
+                      <a style="border-bottom: 1px solid black"
+                         href="{% url 'college:room' instance.room.id %}">
+                        {{ instance.room.schedule_str }}
+                      </a><br>
+                    {% endif %}
+                  {% endfor %}
                 </div>
-              {% endfor %}
-            </div>
+              </div>
+            {% endfor %}
           </div>
         </div>
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Horário</h2></div>
           <div class="pane-content" style="overflow-x: auto;">
-            <table cellpadding="0" cellspacing="0" class="schedule">
-              <tr>
-                <th>Hora</th>
-                <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
-                <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
-                <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
-                <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
-                <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
-              </tr>
-              {% for row in schedule %}
-                <tr>
-                  <td>{{ row.0|safe }}</td>
-                  {% for element in row.1 %}
-                    {% if element %}
-                      <td class='turn turn-{{ element.turn.turn.type_abbreviation|lower }}'
-                          rowspan="{{ element.rowspan }}">
-                        {{ element.turn.turn.class_instance.parent.abbreviation }}<br>
-                        {{ element.turn.turn.type_abbreviation|upper }}{{ element.turn.turn.number }}<br>
-                        {% if element.turn.room %}
-                          <a href="{% url 'college:room' element.turn.room.id %}">
-                            {{ element.turn.room.short_str }}</a>
-                        {% endif %}
-                      </td>
-                    {% else %}
-                      <td></td>
-                    {% endif %}
-                  {% endfor %}
-                </tr>
-              {% endfor %}
-            </table>
+            {% include 'college/schedule.html' %}
           </div>
         </div>
       </div>

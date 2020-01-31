@@ -1,14 +1,6 @@
 {% extends 'supernova/base.html' %}
 
-{% load static %}
-{% block head %}
-  {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="{% static 'college/schedule.css' %}"/>
-{% endblock %}
-
-
 {% block content_wrapper %}
-
   <div class="col">
     <div class="header-decorator">
       <h1>Espaços disponíveis</h1>
@@ -19,9 +11,9 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"></div>
           <div class="pane-content">
-              Em dias de fim-de-semana apenas o edifício VII se encontra aberto.<br>
-              É ainda possível entrares no edifício do teu departamento mediante utilização do
-              cartão de estudante nas portas automáticas.
+            Em dias de fim-de-semana apenas o edifício VII se encontra aberto.<br>
+            É ainda possível entrares no edifício do teu departamento mediante utilização do
+            cartão de estudante nas portas automáticas.
           </div>
         </div>
       {% else %}

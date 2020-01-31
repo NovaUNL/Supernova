@@ -1,0 +1,34 @@
+<table class="schedule">
+  <tr>
+    <th>Hora</th>
+    <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
+    <th colspan="{{ weekday_spans.1 }}">Terça-feira</th>
+    <th colspan="{{ weekday_spans.2 }}">Quarta-feira</th>
+    <th colspan="{{ weekday_spans.3 }}">Quinta-feira</th>
+    <th colspan="{{ weekday_spans.4 }}">Sexta-feira</th>
+  </tr>
+  {% for row in schedule %}
+    <tr>
+      <td>{{ row.0|safe }}</td>
+      {% for element in row.1 %}
+        {% if element %}
+          <td class="turn-container turn-{{ element.turn.turn.type_abbreviation|lower }}"
+              rowspan="{{ element.rowspan }}">
+            <div class="turn-info">
+              <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
+                {{ element.turn.turn.class_instance.parent.abbreviation }}
+              </a>
+              <span>{{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}</span>
+              {% if element.turn.room %}
+                <a href="{% url 'college:room' element.turn.room.id %}">
+                  {{ element.turn.room.short_str }}</a>
+              {% endif %}
+            </div>
+          </td>
+        {% else %}
+          <td></td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+</table>

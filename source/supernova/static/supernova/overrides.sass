@@ -156,13 +156,6 @@
       font-size: 1.1em
       font-weight: bold
 
-
-.turn-t
-  background-color: #97d5ff !important
-
-.turn-p
-  background-color: #acff70 !important
-
 .room-type-1
   box-shadow: inset 0 0 3px #ccb3ff
   border: 2px solid #a28fcc !important
@@ -192,14 +185,12 @@
   box-shadow: inset 0 0 3px #b3fff9
   border: 2px solid #8fccc7 !important
 
-
 #campus-map
-    height: 400px
+  height: 400px
 
 .type-and-room-list
-    flex-basis: unset !important
-    margin-right: 20px
-
+  flex-basis: unset !important
+  margin-right: 20px
 
 .room-list
   list-style: none
@@ -218,3 +209,106 @@
     border: 2px solid #aaa
     color: #666
     background: #f4f4f4
+
+.schedule
+  min-width: 100%
+  height: 100%
+  border: none
+  border-spacing: 0
+
+  td
+    //height: 100% !important
+    min-width: 50px
+    padding: 0
+
+  tr:first-child
+    //background-color: #8b9e9d !important
+    background-color: $color-primary-0 !important
+    color: $whitish
+
+  th
+    border: 2px solid $color-primary-4
+    border-right: 0
+
+  th:first-child
+    border-left: 0
+
+  td:first-child
+    width: 50px
+    font-weight: bold
+    background-color: $color-primary-3
+    color: $whitish
+    line-height: 15px
+    text-align: right
+    border-bottom: 2px solid #8b9e9d
+
+  tr:nth-of-type(odd)
+    background-color: $color-primary-3
+
+.turn-container
+  border: 1px solid $color-primary-0
+  background-color: $color-primary-2
+
+.turn-t
+  background-color: $theoretical-turn !important
+
+.turn-p
+  background-color: $practical-turn !important
+
+.turn-tp
+  background-color: $theoretical-practical-turn !important
+
+.turn-info
+  color: $whitish
+  display: flex
+  flex-direction: column
+  text-align: center
+  font-weight: bold
+
+  > a:first-child
+    padding: 2px
+    color: $link-color
+    font-size: 1.2em
+
+.end-time
+  font-size: 0.7em
+
+.empty_time_slot
+  background-color: #2fa40c
+
+.busy_time_slot
+  background-color: #c90014
+
+.unknown_time_slot
+  background-color: #c9b616
+
+.schedule_wrapper
+  overflow-x: auto
+
+.building_schedule_map
+  border-spacing: 0
+
+  td, th
+    margin: 0
+    border-bottom: 2px solid black
+    white-space: nowrap
+    border-top-width: 0
+    min-width: 25px
+
+  th
+    border-left: 2px solid white
+
+  td:nth-of-type(odd)
+    border-left: 2px solid #ffffff
+    border-right: 2px dotted #666666
+
+  tr:first-child
+    background-color: #ccc !important
+
+  th:first-child
+    background-color: #777 !important
+    color: white !important
+    font-size: 1.2em
+
+  th:first-child a
+    color: white !important
