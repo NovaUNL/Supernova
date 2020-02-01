@@ -3,7 +3,7 @@ import random
 from itertools import chain
 
 from django.core.cache import cache
-from django.db.models import Q, Sum, F
+from django.db.models import Q, F
 from django.shortcuts import render
 
 from scrapper.boinc import boincstats
@@ -62,10 +62,14 @@ def index(request):
 
 
 def build_base_context(request):
+    catchphrases = cache.get('catchphrases')
+    if catchphrases is None:
+        catchphrases = list(Catchphrase.objects.all())
+        cache.set('catchphrases', list(Catchphrase.objects.all()), timeout=3600 * 24)
     result = {
         'disable_auth': False,
         'sub_nav': None,
-        'catchphrase': random.choice(Catchphrase.objects.all())
+        'catchphrase': random.choice(catchphrases)
     }
     if not request.user.is_authenticated:
         result['login_form'] = LoginForm()
