@@ -1,45 +1,48 @@
-{% extends 'supernova/content_only_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
-{% block content %}
-  <style>
-    .flex-wrapper {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-  </style>
-  <h1>Professor {{ teacher.name }}</h1>
-  <div class="flex-wrapper">
-    <div>
-      ???
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>{{ teacher.name }}</h1>
     </div>
-    <div>
-      <h2>Departamentos</h2>
-      <ul>
-        {% for department in teacher.departments.all %}
-          <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div style="margin-right: 50px">
-      <h2>Cadeiras</h2>
-      <ul style="list-style: none; padding-left: 10px;">
-        {% for instance in class_instances %}
-          <li>
-            <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}({{ instance.occasion }})</a>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <div>
-      <h2>Horario<sup style="color: red">*</sup></h2>
-      <div style="overflow-x: auto;">
-        {% include 'college/schedule.html' %}
+    <div class="row padded">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Horario</h2></div>
+          <div class="pane-content">
+            <div style="overflow-x: auto;">
+              {% include 'college/schedule.html' %}
+            </div>
+            <b style="color: #850000"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
+              Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.
+            </b>
+          </div>
+        </div>
       </div>
-      <b style="color: red"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
-        Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.</b>
+      <div class="col nogrow noshrink">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Departamentos</h2></div>
+          <div class="pane-content">
+            <ul class="menu">
+              {% for department in teacher.departments.all %}
+                <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
+          <div class="pane-content">
+            <ul class="menu">
+              {% for instance in class_instances %}
+                <li>
+                  <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

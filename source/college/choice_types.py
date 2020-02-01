@@ -17,6 +17,8 @@ class Period:
         (FOURTH_TRIMESTER, '4º trimestre'),
     )
 
+    SHORT_CHOICES = ('', 'S1', 'S2', 'T1', 'T2', 'T3', 'T4')
+
 
 class TurnType:
     THEORETICAL = 1
