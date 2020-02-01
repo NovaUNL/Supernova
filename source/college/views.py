@@ -3,12 +3,13 @@ from datetime import datetime
 import CLIPy
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
+from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.vary import vary_on_cookie
 
 import settings
-from clip import models as clip
 from college.choice_types import Degree, RoomType
 from college import models as m
 from college import schedules
@@ -163,9 +164,18 @@ def class_instance_view(request, instance_id):
     return render(request, 'college/class_instance.html', context)
 
 
+@cache_page(3600 * 24)
+@cache_control(max_age=3600 * 24)
+@vary_on_cookie
 def class_instance_turns_view(request, instance_id):
     context = build_base_context(request)
-    instance = get_object_or_404(m.ClassInstance, id=instance_id)
+    try:
+        instance = m.ClassInstance.objects \
+            .prefetch_related('turns__instances__room__building') \
+            .select_related('parent', 'parent__department') \
+            .get(id=instance_id)
+    except m.ClassInstance.DoesNotExist:
+        raise Http404("Class instance not found")
     parent_class = instance.parent
     department = parent_class.department
     context['page'] = 'instance_turns'
@@ -175,8 +185,9 @@ def class_instance_turns_view(request, instance_id):
     context['instance'] = instance
     occasion = instance.occasion()
     context['occasion'] = occasion
-    context['turns'] = instance.turns.order_by('turn_type', 'number')
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(instance.turns.all())
+    context['turns'] = instance.turns.order_by('turn_type', 'number').prefetch_related('instances__room__building')
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(
+        instance.turns.all())
 
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
