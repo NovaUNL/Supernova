@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import CLIPy
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -9,8 +10,8 @@ from django.urls import reverse
 import settings
 from clip import models as clip
 from college.choice_types import Degree, RoomType
-from college import models as m, schedules
-from college.schedules import build_schedule, build_turns_schedule
+from college import models as m
+from college import schedules
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.views import build_base_context
 
@@ -131,6 +132,28 @@ def class_instance_view(request, instance_id):
     occasion = instance.occasion()
     context['occasion'] = occasion
 
+    clip_class = parent_class.clip_class
+    clip_class_id = clip_class.iid
+    department_id = clip_class.department.id
+    period_type = None
+    if instance.period == 1:
+        period_type = 'a'
+    elif instance.period <= 3:
+        period_type = 's'
+    elif instance.period <= 7:
+        period_type = 't'
+    else:
+        # log.error()
+        pass
+    if period_type is not None:
+        context['clip_url'] = CLIPy.urls.CLASS.format(
+            institution=97747,
+            class_id=clip_class_id,
+            department=department_id,
+            year=instance.year,
+            period=instance.period,
+            period_type=period_type)
+
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
@@ -153,7 +176,7 @@ def class_instance_turns_view(request, instance_id):
     occasion = instance.occasion()
     context['occasion'] = occasion
     context['turns'] = instance.turns.order_by('turn_type', 'number')
-    context['weekday_spans'], context['schedule'], context['unsortable'] = build_turns_schedule(instance.turns.all())
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(instance.turns.all())
 
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
@@ -225,7 +248,7 @@ def class_instance_file_download(request, instance_id, file_hash):
     if file is None:
         pass
     response = HttpResponse()
-    response['X-Accel-Redirect'] = f'/clip/{file_hash}'
+    response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
     response['Content-Disposition'] = f'attachment; filename="{file.name}"'
     return response
 
@@ -388,7 +411,7 @@ def room_view(request, room_id):
     context['room'] = room
     turn_instances = room.turn_instances \
         .filter(turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
-    context['weekday_spans'], context['schedule'], context['unsortable'] = build_schedule(turn_instances)
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
     return render(request, 'college/room.html', context)
 
 
@@ -429,48 +452,12 @@ def available_places_view(request):
     date = datetime.now().date()
     context['date'] = date
 
-    if date.isoweekday() > 7:
+    if date.isoweekday() >= 5:
         context['weekend'] = True
         return render(request, 'college/available_places.html', context)
 
     context['weekend'] = False
-    building_turns = []
-    for building in m.Building.objects.order_by('id').all():
-        rooms = []
-        for room in m.Room.objects.filter(building=building).all():
-            time_slots = []
-            time = 8 * 60  # Start at 8 AM
-            empty_state = False if room.type == RoomType.CLASSROOM or room.unlocked else None
-            for turn in m.TurnInstance.objects.filter(
-                    room=room,
-                    weekday=datetime.now().weekday(),
-                    turn__class_instance__period=COLLEGE_PERIOD,
-                    turn__class_instance__year=COLLEGE_YEAR).order_by('start').all():
-                if turn.start < time:
-                    if turn.start + turn.duration > time:
-                        busy_slots = int((turn.start - time + turn.duration) / 30)
-                        time = turn.start + turn.duration
-                    else:
-                        continue
-                else:
-                    empty_slots = int((turn.start - time) / 30)
-                    busy_slots = int(turn.duration / 30)
-                    time = turn.start + turn.duration
-
-                    for _ in range(empty_slots):
-                        time_slots.append(empty_state)  # False stands for empty
-                if time > 20 * 60:  # Past 8PM, remove additional slots
-                    busy_slots -= int((time - (20 * 60)) / 30)
-                for _ in range(busy_slots):
-                    time_slots.append(True)  # True stands for busy
-            for _ in range(time, 20 * 60, 30):
-                time_slots.append(empty_state)
-            rooms.append((room, time_slots))
-        if len(rooms) > 0:
-            building_turns.append((building, rooms))
-
-    context['turns'] = building_turns
-
+    context['turns'] = schedules.build_occupation_table(COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday())
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},

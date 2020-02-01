@@ -1,7 +1,8 @@
-from college.models import Turn, TurnInstance
+from college import models as college
+from college.choice_types import RoomType
 
 
-def build_schedule(turn_instances: [TurnInstance]):
+def build_schedule(turn_instances: [college.TurnInstance]):
     week = [[], [], [], [], []]  # Monday-Friday turn instances
     unsortable = []  # Instances without schedule information
     end = 8 * 60  # Last turn added, to crop the end of the schedule. Starts as 8AM when there are no turns
@@ -27,8 +28,8 @@ def build_schedule(turn_instances: [TurnInstance]):
             for column in f_day:  # Iterate through existing columns
                 has_space = True  # Whether this column had space to allocate the turn
                 for allocated_turn in column:  # For every turn already in the column
-                    allocated_turn: TurnInstance = allocated_turn
-                    turn_instance: TurnInstance = turn_instance
+                    allocated_turn: college.TurnInstance = allocated_turn
+                    turn_instance: college.TurnInstance = turn_instance
                     # If one of them intersect this one, then this column is no good, skip it
                     # TODO check only against the last added turn, if one intersects, that would be the one
                     if turn_instance.intersects(allocated_turn):
@@ -108,10 +109,73 @@ def build_schedule(turn_instances: [TurnInstance]):
     return weekday_colspans, result, unsortable
 
 
-def build_turns_schedule(turns: [Turn]):
+def build_turns_schedule(turns: [college.Turn]):
     turn_instances = []
     for turn in turns:  # Fetch every turn of this class instance
         for turn_instance in turn.instances.all():  # Fetch every instance of this turn
             turn_instances.append(turn_instance)
 
     return build_schedule(turn_instances)
+
+
+def build_occupation_table(period, year, weekday):
+    # {building: {room: [time slot occupation]}}
+    start_time = 8 * 60  # Start at 08:00
+    end_time = 20 * 60  # End at 20:00
+    slots = (end_time - start_time) // 30
+    building_room_timeslots = dict()
+    turn_instances = college.TurnInstance.objects \
+        .select_related('room', 'room__building') \
+        .order_by('room__building', 'room', 'start') \
+        .filter(weekday=weekday,
+                start__lt=end_time,
+                turn__class_instance__period=period,
+                turn__class_instance__year=year) \
+        .exclude(room=None).all()
+
+    current_room = None
+    room_slots = None
+    for turn_instance in turn_instances:
+        if turn_instance.room != current_room:
+            if current_room is None or turn_instance.room.building != current_room.building:
+                building_dict = dict()
+                building_room_timeslots[turn_instance.room.building] = building_dict
+            else:
+                building_dict = building_room_timeslots[current_room.building]
+
+            current_room = turn_instance.room
+            empty_state = False if current_room == RoomType.CLASSROOM or current_room.unlocked else None
+            room_slots = slots * [empty_state]
+            building_dict[current_room] = room_slots
+
+        # Fill the corresponding slots for this turn instance
+        if turn_instance.start < start_time:
+            if turn_instance.start + turn_instance.duration > start_time:
+                busy_slots = (turn_instance.start - start_time + turn_instance.duration) // 30
+                room_slots[:busy_slots] = busy_slots * [True]
+            else:
+                continue
+        else:
+            start_slot = (turn_instance.start - start_time) // 30
+            if turn_instance.start + turn_instance.duration > end_time:
+                relevant_duration = end_time - turn_instance.start
+            else:
+                relevant_duration = turn_instance.duration
+            busy_slots = relevant_duration // 30
+            room_slots[start_slot:start_slot + busy_slots] = busy_slots * [True]
+
+    # Fetch remaining rooms (without classes associated)
+    rooms = college.Room.objects \
+        .select_related('building') \
+        .order_by('building') \
+        .exclude(extinguished=True).all()
+    for room in rooms:
+        empty_state = False if room == RoomType.CLASSROOM or room.unlocked else None
+        if room.building in building_room_timeslots:
+            building_dict = building_room_timeslots[room.building]
+            if room in building_dict:
+                continue
+            building_dict[room] = slots * [empty_state]
+        else:
+            building_room_timeslots[room.building] = {room: slots * [empty_state]}
+    return building_room_timeslots

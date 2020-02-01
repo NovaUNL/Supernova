@@ -3,8 +3,10 @@
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
-      <h1>Espaços disponíveis</h1>
-      <span>Previsão para {{ date }}</span>
+      <div>
+        <h1>Espaços disponíveis</h1>
+        <h4>Previsão para {{ date }}</h4>
+      </div>
     </div>
     <div class="col padded">
       {% if weekend %}
@@ -17,11 +19,11 @@
           </div>
         </div>
       {% else %}
-        {% for building in turns %}
+        {% for building, rooms in turns.items %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
               {% block title %}
-                <h2><a href="{% url 'college:building' building.0.id %}">{{ building.0 }}</a></h2>
+                <h2><a href="{% url 'college:building' building.id %}">{{ building }}</a></h2>
               {% endblock %}
             </div>
             <div class="pane-content">
@@ -43,10 +45,10 @@
                       <th colspan="2">18-19h</th>
                       <th colspan="2">19-20h</th>
                     </tr>
-                    {% for room in building.1 %}
+                    {% for room, turns in rooms.items %}
                       <tr>
-                        <th><a href="{% url 'college:room' room.0.id %}">{{ room.0.name }}</a></th>
-                        {% for turn in room.1 %}
+                        <th><a href="{% url 'college:room' room.id %}">{{ room.name }}</a></th>
+                        {% for turn in turns %}
                           {% if turn %}
                             <td class="busy_time_slot"></td>
                           {% elif turn == False %}
