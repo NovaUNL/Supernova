@@ -6,7 +6,7 @@
         {% if instance == other_instance %}
           <li>{{ other_instance.occasion }}</li>
         {% else %}
-          <li><a href="{% url 'college:class_instance_files' other_instance.id %}">{{ other_instance.occasion }}</a>
+          <li><a href="{% url 'college:class_instance' other_instance.id %}">{{ other_instance.occasion }}</a>
           </li>
         {% endif %}
       {% endfor %}
