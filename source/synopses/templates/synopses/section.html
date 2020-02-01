@@ -151,7 +151,7 @@
             <div class="pane-content">
               <ul>
                 {% for log in author_log %}
-                  <li><a href="{% url 'profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
+                  <li><a href="{% url 'users:profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
                 {% endfor %}
               </ul>
             </div>

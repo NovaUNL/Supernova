@@ -8,9 +8,9 @@
     <hr>
     <div>
         Criado em {{ document.creation }} {% if document.author_user %}por
-        <a href="{% url 'user' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
+        <a href="{% url 'users:profile' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
         {% if document.author_group %}em nome do grupo
-            <a href="{% url 'group' document.author_group.id %}">{{ document.author_group }}</a>{% endif %}
+            <a href="{% url 'groups:group' document.author_group.id %}">{{ document.author_group }}</a>{% endif %}
         {% if document.last_edition %}<br>Última edição em {{ document.last_edition }} por
             {{ document.last_editor }}{% endif %}
     </div>

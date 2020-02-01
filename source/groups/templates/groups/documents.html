@@ -7,12 +7,12 @@
   {% if page == 'group' %}
     <a class="menu-entry selected">Página inícial</a>
   {% else %}
-    <a class="menu-entry" href="{% url 'group' group.id %}">Página inícial</a>
+    <a class="menu-entry" href="{% url 'groups:group' group.id %}">Página inícial</a>
   {% endif %}
     {% if page == 'group_anouncements' %}
       <a class="menu-entry selected">Anúncios</a>
     {% else %}
-      <a class="menu-entry" href="{% url 'group_announcements' group.id %}">Anúncios</a>
+      <a class="menu-entry" href="{% url 'groups:announcements' group.id %}">Anúncios</a>
     {% endif %}
     {#{% if page == 'group_schedule' %}#}
     {#    <a class="menu-entry selected">Horário</a>#}
@@ -27,10 +27,10 @@
     {% if page == 'group_documents' %}
       <a class="menu-entry selected">Documentos</a>
     {% elif group.document_set.count > 0 %}
-      <a class="menu-entry" href="{% url 'group_documents' group.id %}">Documentos</a>
+      <a class="menu-entry" href="{% url 'groups:documents' group.id %}">Documentos</a>
     {% endif %}
     {% if group.public_members %}
-      {% if page == 'group_members' %}
+      {% if page == 'groups:members' %}
         <a class="menu-entry selected">Membros</a>
       {% else %}
         <a class="menu-entry">Membros</a>
@@ -39,7 +39,7 @@
     {% if page == 'group_contact' %}
       <a class="menu-entry selected">Contactar</a>
     {% else %}
-      <a class="menu-entry" href="{% url 'group_contact' group.id %}">Contactar</a>
+      <a class="menu-entry" href="{% url 'groups:contact' group.id %}">Contactar</a>
     {% endif %}
   </nav>
 {% endblock %}
@@ -59,7 +59,7 @@
             <div style="width: 100%">
                 <h2><a href="{% url 'document' document.id %}">{{ document.title }}</a></h2>
                 <span>Criado em {{ document.creation }} {% if document.author_user %}por
-                    <a href="{% url 'user' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
+                    <a href="{% url 'users:profile' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
                     {% if document.last_edition %}<br>Última edição em {{ document.last_edition }} por
                         {{ document.last_editor }}{% endif %}</span>
             </div>

@@ -7,71 +7,111 @@
 {% url 'college:buildings' as buildings %}
 {% url 'college:available_places' as places %}
 {% url 'college:map' as map %}
+{% url 'synopses:areas' as synopses %}
+{% url 'about' as about %}
+{% url 'faq' as faq %}
+{% url 'privacy' as privacy %}
+{% url 'terms' as terms %}
 
-<div class="lowres">
-  <div class="user lowres">
-    {% if user.is_authenticated %}
-      <a class="name" href="{% url 'profile' user.nickname %}">
-        {% if user.picture %}
-          <span class="pic" style="background-image: url('{% get_media_prefix %}{{ user.picture }}')"></span>
-        {% else %}
-          <span class="pic"></span>
-        {% endif %}
-        {{ user.nickname }}
-      </a>
-      <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
-        <img alt="logout" src="{% static 'supernova/images/logout.svg' %}">
-      </a>
-    {% else %}
-      <a class="name">Não autenticado</a>
-      <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
-        <img alt="login" src="{% static 'supernova/images/login.svg' %}">
-      </a>
-    {% endif %}
+{% spaceless %}
+  <div class="lowres">
+    <div class="user lowres">
+      {% if user.is_authenticated %}
+        <a class="name" href="{% url 'users:profile' user.nickname %}">
+          {% if user.picture %}
+            <span class="pic" style="background-image: url('{% get_media_prefix %}{{ user.picture }}')"></span>
+          {% else %}
+            <span class="pic"></span>
+          {% endif %}
+          {{ user.nickname }}
+        </a>
+        <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
+          <img alt="logout" src="{% static 'supernova/images/logout.svg' %}">
+        </a>
+      {% else %}
+        <a class="name">Não autenticado</a>
+        <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
+          <img alt="login" src="{% static 'supernova/images/login.svg' %}">
+        </a>
+      {% endif %}
+    </div>
   </div>
-</div>
-<ul>
-  {% if user.is_authenticated %}
-    {% url 'profile' user.nickname as profile %}
-    {% url 'profile_schedule' user.nickname as schedule %}
-    {% url 'profile_settings' user.nickname as settings %}
-    <li class="collapse">
-      <input type="checkbox" id="m1"/><label for="m1">Aluno</label>
-      <ul>
-        <li {% if profile == request.path %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
-        <li {% if schedule in request.path %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
-        <li><a href="#">Curso</a></li>
-        <li><a href="#">Avaliações</a></li>
-        <li><a href="#">Calendario</a></li>
-        <li {% if settings in request.path %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
-      </ul>
-    </li>
-  {% else %}
-    <li><a href="{% url 'login' %}">Aluno</a></li>
-  {% endif %}
-  {% if college in request.path %}
-    <li>
-      <label>Faculdade</label>
-      <ul>
-        <li {% if courses in request.path %}class="active"{% endif %}><a href="{{ courses }}">Cursos</a></li>
-        <li {% if departments in request.path %}class="active"{% endif %}><a href="{{ departments }}">Departamentos</a>
-        </li>
-        {% if campus in request.path %}
-          <li>
-            <label>Campus</label>
+  <ul>
+    {% if user.is_authenticated %}
+      {% url 'users:profile' user.nickname as profile %}
+      {% url 'users:schedule' user.nickname as schedule %}
+      {% url 'users:settings' user.nickname as settings %}
+      <li class="collapse">
+        <input type="checkbox" id="m1"/><label for="m1">Aluno</label>
+        <ul>
+          <li {% if profile == request.path %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
+          <li {% if schedule in request.path %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
+          <li><a href="#">Curso</a></li>
+          <li><a href="#">Avaliações</a></li>
+          <li><a href="#">Calendario</a></li>
+          <li {% if settings in request.path %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
+        </ul>
+      </li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Aluno</a></li>
+    {% endif %}
+
+
+
+    {% if college in request.path %}
+      <li>
+        <label>Faculdade</label>
+        <ul>
+          <li {% if courses in request.path %}class="active"{% endif %}><a href="{{ courses }}">Cursos</a></li>
+          <li {% if departments in request.path %}class="active"{% endif %}>
+            <a href="{{ departments }}">Departamentos</a>
+          </li>
+          {% if campus in request.path %}
+            <li>
+              <label>Campus</label>
+              <ul>
+                <li><a href="#">Serviços</a></li>
+                <li {% if map in request.path %}class="active"{% endif %}><a href="{{ map }}">Mapa</a></li>
+                <li {% if transportation in request.path %}class="active"{% endif %}>
+                  <a href="{{ transportation }}">Transportes</a>
+                </li>
+                <li {% if buildings in request.path %}class="active"{% endif %}>
+                  <a href="{% url 'college:buildings' %}">Edifícios</a>
+                </li>
+                <li {% if places in request.path %}class="active"{% endif %}><a href="{{ places }}">Espaços</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li class="collapse">
+              <input type="checkbox" id="m21"/><label for="m21">Campus</label>
+              <ul>
+                <li><a href="#">Serviços</a></li>
+                <li><a href="{{ map }}">Mapa</a></li>
+                <li><a href="{{ transportation }}">Transportes</a></li>
+                <li><a href="{{ buildings }}">Edifícios</a></li>
+                <li><a href="{{ places }}">Espaços</a></li>
+              </ul>
+            </li>
+          {% endif %}
+          <li><a href="{% url 'news_index' %}">Noticias</a></li>
+          <li class="collapse">
+            <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
             <ul>
-              <li><a href="#">Serviços</a></li>
-              <li {% if map in request.path %}class="active"{% endif %}><a href="{{ map }}">Mapa</a></li>
-              <li {% if transportation in request.path %}class="active"{% endif %}>
-                <a href="{{ transportation }}">Transportes</a>
-              </li>
-              <li {% if buildings in request.path %}class="active"{% endif %}>
-                <a href="{% url 'college:buildings' %}">Edifícios</a>
-              </li>
-              <li {% if places in request.path %}class="active"{% endif %}><a href="{{ places }}">Espaços</a></li>
+              <li><a href="#">Palestras</a></li>
+              <li><a href="#">Workshops</a></li>
+              <li><a href="#">Festas</a></li>
+              <li><a href="#">Competições</a></li>
             </ul>
           </li>
-        {% else %}
+          <li><a href="#">Perdidos</a></li>
+        </ul>
+      </li>
+    {% else %}
+      <li class="collapse">
+        <input type="checkbox" id="m2"/><label for="m2">Faculdade</label>
+        <ul>
+          <li><a href="{{ courses }}">Cursos</a></li>
+          <li><a href="{{ departments }}">Departamentos</a></li>
           <li class="collapse">
             <input type="checkbox" id="m21"/><label for="m21">Campus</label>
             <ul>
@@ -82,66 +122,41 @@
               <li><a href="{{ places }}">Espaços</a></li>
             </ul>
           </li>
-        {% endif %}
-        <li><a href="{% url 'news_index' %}">Noticias</a></li>
-        <li class="collapse">
-          <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
-          <ul>
-            <li><a href="#">Palestras</a></li>
-            <li><a href="#">Workshops</a></li>
-            <li><a href="#">Festas</a></li>
-            <li><a href="#">Competições</a></li>
-          </ul>
-        </li>
-        <li><a href="#">Perdidos</a></li>
-      </ul>
-    </li>
-  {% else %}
-    <li class="collapse">
-      <input type="checkbox" id="m2"/><label for="m2">Faculdade</label>
+          <li><a href="{% url 'news_index' %}">Noticias</a></li>
+          <li class="collapse">
+            <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
+            <ul>
+              <li><a href="#">Palestras</a></li>
+              <li><a href="#">Workshops</a></li>
+              <li><a href="#">Festas</a></li>
+              <li><a href="#">Competições</a></li>
+            </ul>
+          </li>
+          <li><a href="#">Perdidos</a></li>
+        </ul>
+      </li>
+    {% endif %}
+
+    <li {% if synopses not in request.path %}class="collapse"{% endif %}>
+      <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
       <ul>
-        <li><a href="{{ courses }}">Cursos</a></li>
-        <li><a href="{{ departments }}">Departamentos</a></li>
-        <li class="collapse">
-          <input type="checkbox" id="m21"/><label for="m21">Campus</label>
-          <ul>
-            <li><a href="#">Serviços</a></li>
-            <li><a href="{{ map }}">Mapa</a></li>
-            <li><a href="{% url 'college:transportation' %}">Transportes</a></li>
-            <li><a href="{% url 'college:buildings' %}">Edifícios</a></li>
-            <li><a href="{% url 'college:available_places' %}">Espaços</a></li>
-          </ul>
+        <li {% if synopses in request.path %}class="active"{% endif %}><a href="{% url 'synopses:areas' %}">Sinteses</a>
         </li>
-        <li><a href="{% url 'news_index' %}">Noticias</a></li>
-        <li class="collapse">
-          <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
-          <ul>
-            <li><a href="#">Palestras</a></li>
-            <li><a href="#">Workshops</a></li>
-            <li><a href="#">Festas</a></li>
-            <li><a href="#">Competições</a></li>
-          </ul>
-        </li>
-        <li><a href="#">Perdidos</a></li>
+        <li><a href="#">Exercicios</a></li>
+        <li><a href="#">Ajuda-me</a></li>
       </ul>
     </li>
-  {% endif %}
-  <li class="collapse">
-    <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
-    <ul>
-      <li><a href="{% url 'synopses:areas' %}">Sinteses</a></li>
-      <li><a href="#">Exercicios</a></li>
-      <li><a href="#">Ajuda-me</a></li>
-    </ul>
-  </li>
-  <li class="collapse">
-    <input type="checkbox" id="m4"/><label for="m4">Supernova</label>
-    <ul>
-      <li><a href="{% url 'about' %}">Sobre</a></li>
-      <li><a href="{% url 'faq' %}">Perguntas frequentes</a></li>
-      <li><a href="{% url 'terms' %}">Termos de utilização</a></li>
-      <li><a href="{% url 'privacy' %}">Politica de privacidade</a></li>
-      <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>
-    </ul>
-  </li>
-</ul>
+
+    <li {% if request.path != about and request.path != faq and request.path != terms and request.path != privacy %}class="collapse"{% endif %}>
+      <input type="checkbox" id="m4"/><label for="m4">Supernova</label>
+      <ul>
+        <li {% if request.path == about %}class="active"{% endif %}><a href="{{ about }}">Sobre</a></li>
+        <li {% if request.path == faq %}class="active"{% endif %}><a href="{{ faq }}">Perguntas frequentes</a></li>
+        <li {% if request.path == terms %}class="active"{% endif %}><a href="{{ terms }}">Termos de utilização</a></li>
+        <li {% if request.path == privacy %}class="active"{% endif %}><a href="{{ privacy }}">Politica de
+          privacidade</a></li>
+        <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>
+      </ul>
+    </li>
+  </ul>
+{% endspaceless %}

@@ -17,7 +17,7 @@ def login_view(request):
     context['disable_auth'] = True  # Disable auth overlay
 
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('profile', args=[request.user]))
+        return HttpResponseRedirect(reverse('users:profile', args=[request.user]))
 
     if request.method == 'POST':
         form = forms.LoginForm(data=request.POST)
@@ -26,7 +26,7 @@ def login_view(request):
             login(request, user)
 
             if user.last_login is None:
-                return HttpResponseRedirect(reverse('profile_settings', args=[user.username]))
+                return HttpResponseRedirect(reverse('users:profile', args=[user.username]))
 
             if 'next' in request.GET:
                 return HttpResponseRedirect(request.GET['next'])
@@ -47,7 +47,7 @@ def logout_view(request):
 
 def registration_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('profile', args=[request.user.nickname]))
+        return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
 
     context = build_base_context(request)
     context['title'] = "Criar conta"
@@ -74,7 +74,7 @@ def registration_view(request):
 
 def registration_validation_view(request):
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('profile', args=[request.user.nickname]))
+        return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
 
     context = build_base_context(request)
     if request.method == 'POST':
@@ -98,7 +98,7 @@ def registration_validation_view(request):
             try:
                 user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
                 login(request, user)
-                return HttpResponseRedirect(reverse('profile', args=[user.nickname]))
+                return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
             except exceptions.AccountExists as e:
                 form.add_error(None, str(e))
             except exceptions.ExpiredRegistration as e:
@@ -123,7 +123,7 @@ def profile_view(request, nickname):
     context['profile_user'] = user
     context['primary_student'] = user.primary_student
     context['secondary_students'] = user.students.exclude(id=user.primary_student.id) if user.primary_student else None
-    context['sub_nav'] = [{'name': page_name, 'url': reverse('profile', args=[nickname])}]
+    context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
     context['current_class_instances'] = ClassInstance.objects.filter(student=user.primary_student, year=2020, period=2)
     return render(request, 'users/profile.html', context)
 
@@ -136,12 +136,12 @@ def user_schedule_view(request, nickname):
     if user.students.exists():
         student = user.primary_student
     else:
-        return HttpResponseRedirect(reverse('profile', args=[nickname]))
+        return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
     context['page'] = 'profile_schedule'
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [
-        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-        {'name': "Horário", 'url': reverse('profile_schedule', args=[nickname])}]
+        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
     turns = student.turns.filter(
         class_instance__year=settings.COLLEGE_YEAR,
         class_instance__period=settings.COLLEGE_PERIOD).all()
@@ -160,7 +160,7 @@ def user_profile_settings_view(request, nickname):
         form = forms.AccountSettingsForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('profile', args=[nickname]))
+            return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
         else:
             context['settings_form'] = form
     else:
@@ -171,6 +171,6 @@ def user_profile_settings_view(request, nickname):
 
     context['page'] = 'profile_settings'
     context['title'] = 'Definições da conta'
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('profile', args=[nickname])},
-                          {'name': "Definições da conta", 'url': reverse('profile_settings', args=[nickname])}]
+    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+                          {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)

@@ -21,7 +21,7 @@
               {% for enrollment in instance.enrollments.all %}
                 <tr>
                   <td>
-                    <a href="{% url 'profile' enrollment.student.user.nickname %}">{{ enrollment.student.clip_student.name }}</a>
+                    <a href="{% url 'users:profile' enrollment.student.user.nickname %}">{{ enrollment.student.clip_student.name }}</a>
                   </td>
                   <td>{{ enrollment.student.abbreviation }}</td>
                   <td>{{ enrollment.student.number }}</td>

@@ -19,7 +19,7 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Informação pessoal</h2></div>
         <div class="pane-content">
-          <form action="{% url 'profile_settings' user.nickname %}" method="post" enctype="multipart/form-data">
+          <form action="{% url 'users:settings' user.nickname %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ settings_form.errors }}
             <div class="flex-wrapper">

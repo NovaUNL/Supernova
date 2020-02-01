@@ -40,7 +40,7 @@
       </div>
       <div class="user midhighres">
         {% if user.is_authenticated %}
-          <a class="name" href="{% url 'profile' user.nickname %}">
+          <a class="name" href="{% url 'users:profile' user.nickname %}">
             {% if user.picture %}
               <span class="pic" style="background-image: url('{% get_media_prefix %}{{ user.picture }}')"></span>
             {% else %}

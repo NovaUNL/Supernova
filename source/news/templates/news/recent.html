@@ -14,7 +14,7 @@
           <div>
             <span>{{ news_item.summary }}</span>
             {% if news_item.author %}
-              <span>Por <a href="{% url 'profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
+              <span>Por <a href="{% url 'users:profile' news_item.author.nickname %}"> {{ news_item.author.nickname }}</a>,
                 {{ news_item.datetime }}</span>
             {% else %}
               <span><a href="{{ news_item.source }}">Fonte</a>, {{ news_item.datetime.date }}</span>

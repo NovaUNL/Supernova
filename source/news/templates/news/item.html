@@ -18,9 +18,9 @@
         href="{{ news_item.source }}">fonte</a>), datada de {{ news_item.datetime.date }}</span>
     <br>
   {% else %}
-    <span>Submetida por <a href="{% url 'profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}</span><br>
+    <span>Submetida por <a href="{% url 'users:profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}</span><br>
   {% endif %}
   {% if news_item.edited %}
-    <span>Última edição por <a href="{% url 'profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})</span>
+    <span>Última edição por <a href="{% url 'users:profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})</span>
   {% endif %}
 {% endblock %}

@@ -45,7 +45,7 @@
               <td>{{ student.user.get_full_name }}</td>
               <td>TODO</td>
               <td>TODO</td>
-              <td><a href="{% url 'profile' student.user.nickname %}">Perfil</a></td>
+              <td><a href="{% url 'users:profile' student.user.nickname %}">Perfil</a></td>
             </tr>
           {% endfor %}
         </table>

@@ -7,7 +7,7 @@
     <p>{{ announcement.announcement }}</p>
     <hr>
     Colocado ás {{ announcement.datetime }} por
-    <a href="{% url 'profile' announcement.announcer.nickname %}">{{ announcement.announcer.name }}</a>
+    <a href="{% url 'users:profile' announcement.announcer.nickname %}">{{ announcement.announcer.name }}</a>
 {% endblock %}
 
 {% block navigation %}

@@ -5,14 +5,11 @@ from django.contrib import admin
 from django.contrib.flatpages import views as flatpages
 from django.urls import path, include
 
-import college.views as college
 import users.views as users
-import groups.views as groups
 import events.views as events
 import feedback.views as feedback
 import documents.views as documents
 import news.views as news
-import api.urls
 from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
@@ -27,9 +24,7 @@ urlpatterns = [
     # Services views
     path('servicos/', include('services.urls')),
     # User views
-    path('perfil/<str:nickname>/', users.profile_view, name='profile'),
-    path('perfil/<str:nickname>/horario/', users.user_schedule_view, name='profile_schedule'),
-    path('perfil/<str:nickname>/definicoes/', users.user_profile_settings_view, name='profile_settings'),
+    path('u/', include('users.urls')),
     path('criar/', users.registration_view, name='registration'),
     path('confirmar/', users.registration_validation_view, name='registration_validation'),
     path('entrar/', users.login_view, name='login'),
@@ -48,12 +43,12 @@ urlpatterns = [
     path('noticias/', news.index, name='news_index'),
     path('noticia/<str:news_item_id>/', news.item, name='news_item'),
     # Synopses views
-    url(r'^sinteses/', include('synopses.urls')),
-    url(r'^exercicios/', include('exercises.urls')),
-    url(r'^loja/', include('store.urls')),
+    path('sinteses/', include('synopses.urls')),
+    path('exercicios/', include('exercises.urls')),
+    path('loja/', include('store.urls')),
     # REST API views
-    url(r'^api/', include(api.urls)),
-    url(r'^api-auth/', include('rest_framework.urls')),
+    path('api/', include('api.urls')),
+    path('api-auth/', include('rest_framework.urls')),
     # Utils
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
@@ -63,8 +58,9 @@ urlpatterns = [
     path('faq/', flatpages.flatpage, {'url': '/faq/'}, name='faq'),
     path('termos/', flatpages.flatpage, {'url': '/termos/'}, name='terms'),
 ]
+
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
     urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
+                      path('__debug__/', include(debug_toolbar.urls)),
+                  ] + urlpatterns
