@@ -25,25 +25,47 @@
     <div class="header-decorator">
       <h1>{{ building.name }}</h1>
     </div>
-    <div class="row padded">
-      <div class="flex-pane big">
-        <div class="pane-title bg-grad"><h2>Localização</h2></div>
-        <div class="pane-content">{% leaflet_map "campus-map" callback="initBuildingMap" %}</div>
-      </div>
-      <div class="flex-pane big">
-        <div class="pane-title bg-grad"><h2>Planta</h2></div>
-        <div class="pane-content">
-          {% if building.map %}
-          {% else %}
-            Sem planta.
-          {% endif %}
+    <div class="row padded nowrap">
+      <div class="col">
+        <div class="row">
+          <div class="flex-pane grow">
+            <div class="pane-title bg-grad"><h2>Localização</h2></div>
+            <div class="pane-content">{% leaflet_map "campus-map" callback="initBuildingMap" %}</div>
+          </div>
+          <div class="flex-pane grow">
+            <div class="pane-title bg-grad"><h2>Planta</h2></div>
+            <div class="pane-content">
+              {% if building.map %}
+              {% else %}
+                Sem planta.
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% for type in rooms %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>{{ type.0 }}</h2></div>
+            <div class="pane-content room-list">
+              {% for room in type.1 %}
+                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
+                  {{ room.name }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Ocupação</h2></div>
+          <div class="pane-content">
+            {% include 'college/occupation_table.html' %}
+          </div>
         </div>
       </div>
-      <div class="col">
+      <div class="col nogrow noshrink">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Departamentos</h2></div>
           <div class="pane-content">
-            <ul style="list-style: none; padding-left: 20px;">
+            <ul class="menu">
               {% for department in departments.all %}
                 <li><a href="{% url 'college:department' department.id %}">{{ department.name }}</a></li>
               {% endfor %}
@@ -58,20 +80,6 @@
             </ul>
           </div>
         </div>
-      </div>
-      <div class="row full">
-        {% for type in rooms %}
-          <div class="flex-pane type-and-room-list">
-            <div class="pane-title bg-grad"><h2>{{ type.0 }}:</h2></div>
-            <div class="pane-content room-list">
-              {% for room in type.1 %}
-                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
-                  {{ room.name }}
-                </a>
-              {% endfor %}
-            </div>
-          </div>
-        {% endfor %}
       </div>
     </div>
   </div>

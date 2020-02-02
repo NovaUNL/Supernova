@@ -175,3 +175,56 @@ def build_occupation_table(period, year, weekday):
         else:
             building_room_timeslots[room.building] = {room: slots * [empty_state]}
     return building_room_timeslots
+
+
+def build_building_occupation_table(period, year, weekday, building):
+    start_time = 8 * 60  # Start at 08:00
+    end_time = 20 * 60  # End at 20:00
+    slots = (end_time - start_time) // 30
+    room_timeslots = dict()
+    turn_instances = college.TurnInstance.objects \
+        .select_related('room', 'room__building') \
+        .order_by('room', 'start') \
+        .filter(weekday=weekday,
+                start__lt=end_time,
+                turn__class_instance__period=period,
+                turn__class_instance__year=year,
+                room__building=building) \
+        .exclude(room=None).all()
+
+    current_room = None
+    room_slots = None
+    for turn_instance in turn_instances:
+        if turn_instance.room != current_room:
+            current_room = turn_instance.room
+            empty_state = False if current_room == RoomType.CLASSROOM or current_room.unlocked else None
+            room_slots = slots * [empty_state]
+            room_timeslots[current_room] = room_slots
+
+        # Fill the corresponding slots for this turn instance
+        if turn_instance.start < start_time:
+            if turn_instance.start + turn_instance.duration > start_time:
+                busy_slots = (turn_instance.start - start_time + turn_instance.duration) // 30
+                room_slots[:busy_slots] = busy_slots * [True]
+            else:
+                continue
+        else:
+            start_slot = (turn_instance.start - start_time) // 30
+            if turn_instance.start + turn_instance.duration > end_time:
+                relevant_duration = end_time - turn_instance.start
+            else:
+                relevant_duration = turn_instance.duration
+            busy_slots = relevant_duration // 30
+            room_slots[start_slot:start_slot + busy_slots] = busy_slots * [True]
+
+    # # Fetch remaining rooms (without classes associated)
+    # rooms = college.Room.objects \
+    #     .select_related('building') \
+    #     .filter(building=building) \
+    #     .exclude(extinguished=True).all()
+    # for room in rooms:
+    #     empty_state = False if room == RoomType.CLASSROOM or room.unlocked else None
+    #     if room in room_timeslots:
+    #         continue
+    #     room_timeslots[room] = slots * [empty_state]
+    return room_timeslots

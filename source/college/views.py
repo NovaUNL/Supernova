@@ -399,6 +399,8 @@ def building_view(request, building_id):
     context['rooms'] = sorted(rooms_by_type.items(), key=lambda t: t[0])
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = m.Department.objects.order_by('name').filter(building=building)
+    context['room_occupation'] = schedules.build_building_occupation_table(
+        COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday(), building)
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
@@ -468,7 +470,7 @@ def available_places_view(request):
         return render(request, 'college/available_places.html', context)
 
     context['weekend'] = False
-    context['turns'] = schedules.build_occupation_table(COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday())
+    context['occupation'] = schedules.build_occupation_table(COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday())
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},

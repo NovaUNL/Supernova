@@ -19,7 +19,7 @@
           </div>
         </div>
       {% else %}
-        {% for building, rooms in turns.items %}
+        {% for building, room_occupation in occupation.items %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
               {% block title %}
@@ -27,41 +27,7 @@
               {% endblock %}
             </div>
             <div class="pane-content">
-              {% block content %}
-                <div class="schedule_wrapper">
-                  <table class="building_schedule_map">
-                    <tr>
-                      <th>Sala:</th>
-                      <th colspan="2">8-9h</th>
-                      <th colspan="2">9-10h</th>
-                      <th colspan="2">10-11h</th>
-                      <th colspan="2">11-12h</th>
-                      <th colspan="2">12-13h</th>
-                      <th colspan="2">13-14h</th>
-                      <th colspan="2">14-15h</th>
-                      <th colspan="2">15-16h</th>
-                      <th colspan="2">16-17h</th>
-                      <th colspan="2">17-18h</th>
-                      <th colspan="2">18-19h</th>
-                      <th colspan="2">19-20h</th>
-                    </tr>
-                    {% for room, turns in rooms.items %}
-                      <tr>
-                        <th><a href="{% url 'college:room' room.id %}">{{ room.name }}</a></th>
-                        {% for turn in turns %}
-                          {% if turn %}
-                            <td class="busy_time_slot"></td>
-                          {% elif turn == False %}
-                            <td class="empty_time_slot"></td>
-                          {% else %}
-                            <td class="unknown_time_slot"></td>
-                          {% endif %}
-                        {% endfor %}
-                      </tr>
-                    {% endfor %}
-                  </table>
-                </div>
-              {% endblock %}
+              {% include 'college/occupation_table.html' %}
             </div>
           </div>
         {% endfor %}
