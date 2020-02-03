@@ -40,8 +40,7 @@ urlpatterns = [
     # Documents views
     path('documento/<int:document_id>/', documents.document, name='document'),
     # News views
-    path('noticias/', news.index, name='news_index'),
-    path('noticia/<str:news_item_id>/', news.item, name='news_item'),
+    path('noticias/', include('news.urls')),
     # Synopses views
     path('sinteses/', include('synopses.urls')),
     path('exercicios/', include('exercises.urls')),

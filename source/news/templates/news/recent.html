@@ -7,7 +7,7 @@
     {% for news_item in news %}
       <div class="flex-pane">
         <div class="pane-title bg-grad">
-          <h2><a href="{% url 'news_item' news_item.id %}">{{ news_item.title }}</a></h2>
+          <h2><a href="{% url 'news:item' news_item.id %}">{{ news_item.title }}</a></h2>
         </div>
         <div class="pane-content news-list-item">
           <img src="{% get_media_prefix %}{{ news_item.cover_img }}" alt="{{ news_item.title }}">
