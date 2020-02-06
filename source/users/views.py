@@ -1,5 +1,6 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -7,6 +8,7 @@ from django.urls import reverse
 import settings
 from college.models import ClassInstance, Enrollment
 from . import models as m, exceptions, forms, registrations
+from college import models as college
 from college import schedules
 from supernova.views import build_base_context
 
@@ -48,7 +50,6 @@ def logout_view(request):
 def registration_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
-
     context = build_base_context(request)
     context['title'] = "Criar conta"
     context['disable_auth'] = True  # Disable auth overlay
@@ -114,38 +115,65 @@ def registration_validation_view(request):
 
 
 def profile_view(request, nickname):
-    # TODO visibility
-    user = get_object_or_404(m.User, nickname=nickname)
+    # TODO visibility & change 0 bellow to access level
+    context = cache.get(f'profile_{nickname}_{0}_context')
+    if context is not None:
+        return render(request, 'users/profile.html', context)
+
+    user = get_object_or_404(
+        m.User.objects
+            .select_related('primary_student__course')
+            .prefetch_related('students', 'memberships', 'social_networks', 'badges'),
+        nickname=nickname)
     context = build_base_context(request)
     page_name = f"Perfil de {user.get_full_name()}"
     context['page'] = 'profile'
     context['title'] = page_name
     context['profile_user'] = user
-    context['primary_student'] = user.primary_student
-    context['secondary_students'] = user.students.exclude(id=user.primary_student.id) if user.primary_student else None
+    if user.primary_student:
+        student = user.primary_student
+        context['primary_student'] = student
+        turn_instances = college.TurnInstance.objects \
+            .select_related('turn__class_instance__parent') \
+            .prefetch_related('room__building') \
+            .filter(turn__student=student,
+                    turn__class_instance__year=settings.COLLEGE_YEAR,
+                    turn__class_instance__period=settings.COLLEGE_PERIOD)
+        context['weekday_spans'], context['schedule'], context['unsortable'] = \
+            schedules.build_schedule(turn_instances)
+
+        context['current_class_instances'] = ClassInstance.objects \
+            .select_related('parent') \
+            .filter(student=user.primary_student,
+                    year=settings.COLLEGE_YEAR,
+                    period=settings.COLLEGE_PERIOD)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
-    context['current_class_instances'] = ClassInstance.objects.filter(student=user.primary_student, year=2020, period=2)
+    cache.set(f'profile_{nickname}_{0}_context', context, timeout=3600)
     return render(request, 'users/profile.html', context)
 
 
 @login_required
 def user_schedule_view(request, nickname):
     context = build_base_context(request)
-    user = get_object_or_404(m.User, id=request.user.id)
+    user = get_object_or_404(m.User.objects.select_related('primary_student'), id=request.user.id)
 
-    if user.students.exists():
-        student = user.primary_student
-    else:
+    if user.primary_student is None:
         return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
+    student = user.primary_student
+
     context['page'] = 'profile_schedule'
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [
         {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
-    turns = student.turns.filter(
-        class_instance__year=settings.COLLEGE_YEAR,
-        class_instance__period=settings.COLLEGE_PERIOD).all()
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
+
+    turn_instances = college.TurnInstance.objects \
+        .select_related('turn__class_instance__parent') \
+        .prefetch_related('room__building') \
+        .filter(turn__student=student,
+                turn__class_instance__year=settings.COLLEGE_YEAR,
+                turn__class_instance__period=settings.COLLEGE_PERIOD)
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
     return render(request, 'users/profile_schedule.html', context)
 
 
@@ -171,6 +199,7 @@ def user_profile_settings_view(request, nickname):
 
     context['page'] = 'profile_settings'
     context['title'] = 'Definições da conta'
-    context['sub_nav'] = [{'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
-                          {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
+    context['sub_nav'] = [
+        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)
