@@ -16,24 +16,12 @@
         {% if profile_user.picture %}
           <img src="{% get_media_prefix %}{{ profile_user.picture }}">
         {% else %}
-          <img src="{% static 'supernova/user.svg' %}">
+          <img src="{% static 'supernova/images/user.svg' %}">
         {% endif %}
         {{ profile_user.get_full_name }}
       </h1>
     </div>
     <div class="row padded">
-      {% if profile_user.groups.exists %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Grupos</h2></div>
-          <div class="pane-content">
-            {% for group in profile_user.group_set.all %}
-              <a href="{% url 'group' group.id %}">
-                <span class="group" style="background-image: url({% get_media_prefix %}{{ group.image }}">
-                  {{ group.abbreviation }}</span></a>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Sobre</h2></div>
         <div class="pane-content">
@@ -46,14 +34,16 @@
                 {{ primary_student.course.abbreviation }}
               </a>
             </div>
-            {% for student in secondary_students.all %}
-              <div>
-                <b>Numero: </b>{{ student.number }}<br>
-                <b>Curso: </b>
-                <a href="{% url 'college:course' student.course.id %}">
-                  {{ student.course.abbreviation }}
-                </a>
-              </div>
+            {% for student in profile_user.students.all %}
+              {% if student != primary_student %}
+                <div>
+                  <b>Numero: </b>{{ student.number }}<br>
+                  <b>Curso: </b>
+                  <a href="{% url 'college:course' student.course.id %}">
+                    {{ student.course.abbreviation }}
+                  </a>
+                </div>
+              {% endif %}
             {% endfor %}
           </div>
           {% if profile_user.residence %}
@@ -65,20 +55,32 @@
           {% endif %}
         </div>
       </div>
-      {% if current_class_instances.exists %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
-            <h2>Inscrições</h2>
+      <div class="col">
+        {% if current_class_instances.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Inscrições</h2>
+            </div>
+            <div class="pane-content">
+              <ul class="menu">
+                {% for instance in current_class_instances %}
+                  <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
-          <div class="pane-content">
-            <ul>
-              {% for instance in current_class_instances %}
-                <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
-              {% endfor %}
-            </ul>
+        {% endif %}
+        {% if schedule %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Horário</h2>
+            </div>
+            <div class="pane-content">
+              {% include 'college/schedule.html' %}
+            </div>
           </div>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
       {% if profile_user.badges.exists %}
         <div class="flex-pane">
           <div class="pane-title bg-grad">
@@ -99,11 +101,23 @@
             <h2>Social</h2>
           </div>
           <div class="pane-content">
-            <ul id="social-network-list">
+            <ul id="social-network-list" class="menu">
               {% for social_network in profile_user.social_networks.all %}
-                <li>{{ social_network }}</li>
+                <li><a href="{{ social_network.profile }} ">{{ social_network.network_str }}</a></li>
               {% endfor %}
             </ul>
+          </div>
+        </div>
+      {% endif %}
+      {% if profile_user.memberships.exists %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Grupos</h2></div>
+          <div class="pane-content">
+            {% for group in profile_user.memberships.all %}
+              <a href="{% url 'groups:index' group.id %}">
+                <span class="group" style="background-image: url({% get_media_prefix %}{{ group.image }}">
+                  {{ group.abbreviation }}</span></a>
+            {% endfor %}
           </div>
         </div>
       {% endif %}

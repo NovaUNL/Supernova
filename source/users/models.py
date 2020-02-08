@@ -103,6 +103,9 @@ class SocialNetworkAccount(djm.Model):
     def __str__(self):
         return f'{self.SOCIAL_NETWORK_CHOICES[self.network][1]}: {self.profile} ({self.user})'
 
+    def network_str(self):
+        return self.SOCIAL_NETWORK_CHOICES[self.network][1]
+
     class Meta:
         unique_together = ['user', 'network', 'profile']
 
