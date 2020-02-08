@@ -52,8 +52,8 @@
           <li {% if settings in request.path %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
         </ul>
       </li>
-          {% else %}
-            <li><a href="{% url 'login' %}">Aluno</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}">Aluno</a></li>
     {% endif %}
 
 
@@ -137,6 +137,13 @@
       </li>
     {% endif %}
 
+    <li class="collapse">
+      <input type="checkbox" id="m5"/><label for="m5">Grupos</label>
+      <ul>
+        <li><a href="{% url 'groups:index' %}">Estudantis</a></li>
+      </ul>
+    </li>
+
     <li {% if synopses not in request.path %}class="collapse"{% endif %}>
       <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
       <ul>
@@ -159,4 +166,22 @@
       </ul>
     </li>
   </ul>
+  <div id="nav-end">
+    <div class="repo-star-widget">
+      <a class="btn" href="https://gitlab.com/claudiop/Supernova" target="_blank" rel="noopener">
+        <span>Fixinhos no </span>
+        <img class="icon" aria-hidden="true" src="{% static 'supernova/images/third-party/gitlab.svg' %}">
+      </a>
+      <a id="gitlab-count" class="count" href="https://gitlab.com/claudiop/Supernova/-/starrers" target="_blank" rel="noopener">?</a>
+    </div>
+    <div class="repo-star-widget">
+      <a class="btn" href="https://github.com/claudioap/Supernova" target="_blank" rel="noopener">
+        <span>Fixinhos no </span>
+        <img class="icon" aria-hidden="true" src="{% static 'supernova/images/third-party/github_white.svg' %}">
+      </a>
+      <a id="github-count" class="count" href="https://github.com/claudioap/Supernova/stargazers" target="_blank" rel="noopener">?</a>
+    </div>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt">
+      <img id="license-img" src="{% static 'supernova/images/ccsabync.svg' %}"></a>
+  </div>
 {% endspaceless %}

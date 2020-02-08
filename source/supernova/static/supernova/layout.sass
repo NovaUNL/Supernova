@@ -246,6 +246,71 @@
     a
       color: $color-primary-3
 
+#nav-column
+  display: flex
+  flex-direction: column
+
+#nav-end
+  margin-top: auto
+  display: flex
+  flex-direction: column
+  flex-wrap: nowrap
+  padding: 10px
+
+
+.repo-star-widget
+  display: inline-block
+  overflow: hidden
+  font-family: Segoe UI, Helvetica, Arial, sans-serif
+  font-size: 0
+  white-space: nowrap
+  margin-bottom: 10px
+
+  .btn, .count
+    position: relative
+    display: inline-block
+    height: 14px
+    padding: 2px 5px
+    font-size: 11px
+    font-weight: 600
+    line-height: 14px
+    vertical-align: bottom
+    cursor: pointer
+    user-select: none
+    background-repeat: repeat-x
+    background-position: -1px -1px
+    border: 1px solid
+
+  .btn
+    border-radius: .25em
+    background-color: $color-primary-3
+    background-image: linear-gradient(180deg, #2f363d, $color-primary-3 90%)
+    border-color: rgba(27, 31, 35, .2)
+
+  .btn:focus, .btn:hover
+    background-color: #1b1f23
+    background-image: linear-gradient(180deg, #2b3137, #1b1f23 90%)
+    background-position: -0.5em
+    border-color: rgba(27, 31, 35, .5)
+
+  .icon
+    display: inline-block
+    vertical-align: text-top
+    margin-left: 2px
+    width: 14px
+    height: 14px
+
+  .count
+    border-left: 0
+    border-radius: 0 .25em .25em 0
+    color: #fafbfc
+    background-color: #1b1f23
+    border-color: #1b1f23
+    border-color: rgba(27, 31, 35, .2)
+
+#license-img
+  max-width: 100%
+
 .bg-grad
   background: radial-gradient(ellipse at top, $color-primary-0, transparent), radial-gradient(ellipse at bottom, $color-primary-2, transparent)
   background-attachment: fixed
