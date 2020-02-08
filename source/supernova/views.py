@@ -9,7 +9,6 @@ from django.shortcuts import render
 from scrapper.boinc import boincstats
 from scrapper.transportation import mts, tst
 from services.utils import get_next_meal_items
-from users.forms import LoginForm
 from supernova.models import Changelog, Catchphrase
 from news.models import NewsItem
 from college import models as college
@@ -71,6 +70,4 @@ def build_base_context(request):
         'sub_nav': None,
         'catchphrase': random.choice(catchphrases)
     }
-    if not request.user.is_authenticated:
-        result['login_form'] = LoginForm()
     return result
