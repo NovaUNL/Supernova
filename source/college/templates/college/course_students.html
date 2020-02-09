@@ -14,60 +14,45 @@
     }
 
     tr:nth-of-type(odd) {
-      background-color: #333;
+      background-color: #232b33;
     }
   </style>
 {% endblock %}
 
 {% block content_wrapper %}
-  <div class="col main" style="padding: 10px">
-
-    <h1>Alunos de {{ course }}</h1>
-    {% if course.department %}
-      <h3 style="margin-left: 20px">Departamento de
-        <a href="{% url 'college:department' course.department.id %}">{{ course.department }}</a>
-      </h3>
-    {% endif %}
+  <div class="col padded">
     <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Estudantes</h2></div>
+      <div class="pane-title bg-grad"><h2>Estudantes de {{ course }}</h2></div>
       <div class="pane-content">
         <table>
           <tr>
             <th>Numero</th>
             <th>Nome</th>
+            <th>Desde</th>
+            <th>Até</th>
             <th>Matriculas</th>
             <th>ECTS</th>
-            <th>Perfil</th>
           </tr>
           {% for student in students %}
-            <tr>
-              <td>{{ student.number }}</td>
-              <td>{{ student.user.get_full_name }}</td>
-              <td>TODO</td>
-              <td>TODO</td>
-              <td><a href="{% url 'users:profile' student.user.nickname %}">Perfil</a></td>
-            </tr>
-          {% endfor %}
-        </table>
-      </div>
-    </div>
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Estudantes não registados</h2></div>
-      <div class="pane-content">
-        <table>
-          <tr>
-            <th>Numero</th>
-            <th>Nome</th>
-            <th>Matriculas</th>
-            <th>ECTS</th>
-          </tr>
-          {% for student in unregistered_students %}
-            <tr>
-              <td>{{ student.iid }}</td>
-              <td>{{ student.name }}</td>
-              <td>TODO</td>
-              <td>TODO</td>
-            </tr>
+            {% if student.user_id %}
+              <tr>
+                <td>{{ student.number }}</td>
+                <td><a href="{% url 'users:profile' student.user.nickname %}">{{ student.user.get_full_name }}</a></td>
+                <td>{{ student.first_year|add:"-1" }}</td>
+                <td>{{ student.last_year }}</td>
+                <td>TODO</td>
+                <td>TODO</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td>{{ student.number }}</td>
+                <td>{{ student.clip_student.name }}</td>
+                <td>{{ student.first_year|add:"-1" }}</td>
+                <td>{{ student.last_year }}</td>
+                <td>TODO</td>
+                <td>TODO</td>
+              </tr>
+            {% endif %}
           {% endfor %}
         </table>
       </div>

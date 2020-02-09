@@ -284,6 +284,8 @@ def area_view(request, area_id):
     return render(request, 'college/area.html', context)
 
 
+@cache_page(3600 * 24)
+@cache_control(max_age=3600 * 24)
 def courses_view(request):
     context = build_base_context(request)
     context['title'] = "Cursos"
@@ -302,13 +304,16 @@ def courses_view(request):
     return render(request, 'college/courses.html', context)
 
 
+@cache_page(3600 * 24)
+@cache_control(max_age=3600 * 24)
 def course_view(request, course_id):
     course = get_object_or_404(m.Course, id=course_id)
     context = build_base_context(request)
     department = course.department
     context['title'] = str(course)
     context['course'] = course
-    context['student_count'] = course.students.filter(last_year=settings.COLLEGE_YEAR).count()
+    context['student_count'] = course.students.filter().count()
+    context['active_student_count'] = course.students.filter(last_year=settings.COLLEGE_YEAR).count()
     context['new_students_count'] = \
         course.students \
             .filter(first_year=settings.COLLEGE_YEAR, last_year=settings.COLLEGE_YEAR) \
@@ -327,18 +332,17 @@ def course_view(request, course_id):
     return render(request, 'college/course.html', context)
 
 
+@cache_page(3600 * 24)
+@cache_control(max_age=3600 * 24)
 @login_required
 def course_students_view(request, course_id):
-    course = get_object_or_404(m.Course, id=course_id)
+    course = get_object_or_404(m.Course.objects, id=course_id)
     context = build_base_context(request)
     department = course.department
     context['title'] = 'Alunos de %s' % course
 
     context['course'] = course
-    context['students'] = course.students.order_by('number').all()
-    # context['unregistered_students'] = clip.Student.objects \
-    #     .filter(courses__=course.clip_course, student=None) \
-    #     .order_by('internal_id')
+    context['students'] = course.students.select_related('user', 'clip_student').order_by('number').all()
 
     if department is None:
         department_name = "Desconhecido"
