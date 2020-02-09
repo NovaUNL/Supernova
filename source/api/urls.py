@@ -23,6 +23,8 @@ urlpatterns = [
     path('weather/chart/', views.third_party.weather_chart),
     path('boinc/users/', views.third_party.boinc_users),
     path('boinc/projects/', views.third_party.boinc_projects),
+    path('stars/gitlab/', views.third_party.gitlab_stars),
+    path('stars/github/', views.third_party.github_stars),
     # Store
     path('store/', views.store.Store.as_view()),
     # Synopses
