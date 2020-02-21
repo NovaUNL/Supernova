@@ -2,7 +2,7 @@
 
 {% load static %}
 {% block content %}
-    <h1><i class="fas fa-shopping-cart"></i> Loja</h1>
+    <h1>Loja</h1>
     <div class="flex-wrapper">
         {% for item in items %}
             <a href="{% url 'store:item' item.id %}">

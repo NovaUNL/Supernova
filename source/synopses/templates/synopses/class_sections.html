@@ -1,27 +1,29 @@
 {% extends 'supernova/base.html' %}
 
-{% load static %}
-
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
-{% endblock %}
-
 {% block content_wrapper %}
   <div class="header-decorator">
-    <h1><i class="fas fa-book"></i> Síntese de
-      <a href="{% url 'college:class' synopsis_class.id %}">{{ synopsis_class.name }}</a></h1>
-    <h3>Departamento de {{ synopsis_class.department.name }}</h3>
+    <div>
+      <h1>Síntese de <a href="{% url 'college:class' synopsis_class.id %}">{{ synopsis_class.name }}</a></h1>
+      <h3>Departamento de {{ synopsis_class.department.name }}</h3>
+    </div>
   </div>
-  <div class="row padded">
-    {% if not sections.exists %}
-      Esta cadeira não tem conteudo na tua sintese.<br>
-      Se já existir conteudo, podes adiciona-lo.
-    {% endif %}
-    <ul id="content-list">
-      {% for section in sections %}
-        <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a></li>
-      {% endfor %}
-    </ul>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        <h2>Conteúdos</h2>
+      </div>
+      <div class="pane-content">
+        {% if not sections.exists %}
+          Esta cadeira não tem conteudo na tua sintese.<br>
+          Se já existir conteudo, podes adiciona-lo.
+        {% endif %}
+        <ul class="menu">
+          {% for section in sections %}
+            <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
   </div>
 {% endblock %}
 

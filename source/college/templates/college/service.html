@@ -20,9 +20,8 @@
 {% endblock %}
 
 {% block content %}
-    <h1>{% if service.bar %}<i class="fas fa-utensils"></i>{% else %}
-        <i class="fas fa-shopping-bag"></i>{% endif %} {{ service.name }}</h1>
-    <h2 style="margin-left: 10px"><i class="fas fa-map-marker"></i> {{ building.name }}</h2>
+    <h1>{{ service.name }}</h1>
+    <h2 style="margin-left: 10px">{{ building.name }}</h2>
     <div class="flex-wrapper">
         <div><h2>Localização</h2><br><img src="#" width="450px" height="400px"></div>
         {% if service.bar %}

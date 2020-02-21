@@ -13,7 +13,7 @@
   </style>
 {% endblock %}
 {% block content_wrapper %}
-  <div class="col main">
+  <div class="col">
     <div class="header-decorator">
       <h1>
         {{ room }},
@@ -23,8 +23,8 @@
         <h3>{{ room.description }}</h3>
       {% endif %}
     </div>
-    <div class="row padded" style="flex-wrap: nowrap">
-      <div class="col main">
+    <div class="row nowrap padded">
+      <div class="col">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Horário</h2></div>
           <div class="pane-content">

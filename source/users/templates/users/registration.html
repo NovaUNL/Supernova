@@ -1,8 +1,6 @@
 {% extends 'supernova/base.html' %}
 
-{% load static %}
 {% block head %}
-  {{ block.super }}
   <style>
     #form-fields {
       flex-basis: 600px;
@@ -23,6 +21,7 @@
       height: 35px;
       width: 100px;
       float: right;
+      margin-bottom: 10px;
     }
   </style>
 {% endblock %}
@@ -30,7 +29,7 @@
 
 {% block content_wrapper %}
 
-  <div class="col main" style="padding: 10px">
+  <div class="col padded">
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>Informação dramática</h2></div>
       <div class="pane-content">

@@ -1,7 +1,7 @@
 {% extends 'exercises/submit.html' %}
 
 {% block content %}
-    <h1><i class="fas fa-pencil-alt"></i> {{ title }}</h1>
+    <h1>{{ title }}</h1>
     <form method="post" action="{{ action_page }}">
         {% csrf_token %}
         {{ exercise_form.non_field_errors }}

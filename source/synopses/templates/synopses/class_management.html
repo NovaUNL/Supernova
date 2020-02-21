@@ -13,7 +13,7 @@
 
 {% block content %}
     {% csrf_token %}
-    <h1><i class="fas fa-book"></i> Gerir secções de {{ synopsis_class.name }}</h1>
+    <h1>Gerir secções de {{ synopsis_class.name }}</h1>
     <ul id="sortable-list"></ul>
     <script>
         let list = document.getElementById("sortable-list");

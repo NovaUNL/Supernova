@@ -3,9 +3,12 @@
 {% load static %}
 
 {% block content_wrapper %}
-  <div class="col main">
+  <div class="col">
     <div class="header-decorator">
-      <h1>{{ class_obj.name }}</h1>
+      <div>
+        <h1>{{ class_obj.name }}</h1>
+        <h3><a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a></h3>
+      </div>
     </div>
     <div class="row padded">
       <div class="col big">
@@ -23,13 +26,6 @@
         </div>
       </div>
       <div class="col nogrow">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
-          <div class="pane-content">
-            <b>Departamento</b>:
-            <a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a>
-          </div>
-        </div>
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Edições</h2></div>
           <div class="pane-content">
