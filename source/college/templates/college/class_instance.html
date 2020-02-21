@@ -2,12 +2,9 @@
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <h1>{{ parent_class.name }}, <span style="display: inline-block">{{ instance.occasion }}</span></h1>
-    </div>
-    <div class="row padded" style="flex-wrap: nowrap">
-      <div class="col main">
-        <span style="color: red; margin-left: 20px">A informação é extraida do CLIP. Não é garantido que esteja correta ou atualizada.</span>
+    {% include 'college/class_decorator.html' %}
+    <div class="row nowrap padded">
+      <div class="col">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Descrição</h2></div>
           <div class="pane-content">

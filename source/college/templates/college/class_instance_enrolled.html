@@ -3,12 +3,10 @@
 {% load static %}
 
 {% block content_wrapper %}
-  <div class="col main">
-    <div class="header-decorator">
-      <h1>{{ parent_class.name }}, <span style="display: inline-block">{{ instance.occasion }}</span></h1>
-    </div>
-    <div class="row padded" style="flex-wrap: nowrap">
-      <div class="col main">
+  <div class="col">
+    {% include 'college/class_decorator.html' %}
+    <div class="row nowrap padded">
+      <div class="col">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Inscritos</h2></div>
           <div class="pane-content">
