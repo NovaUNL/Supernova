@@ -1,56 +1,74 @@
-{% extends 'supernova/content_only_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
-{% load static %}
-{% block head %}
-{% endblock %}
-
-{% block content %}
-  <style>
-    .flex-wrapper {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-  </style>
-  <h1>Departamento de {{ department.name }}</h1>
-  <div class="flex-wrapper">
-    <div style="flex-basis: 500px">
-      <h2>Informação</h2>
-      <div style="margin-left: 10px;">
-        <h3>Localização:</h3>
-        <a style="margin-left: 10px"
-           href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
-        {#        <h3>Descrição:</h3>#}
-        {#        {{ department.description }}#}
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <h1>Departamento de {{ department.name }}</h1>
+  </div>
+  <div class="row nowrap padded">
+    <div class="col nogrow noshrink">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Informação</h2>
+        </div>
+        <div class="pane-content">
+          <h3>Descrição:</h3>
+          <div style="margin-left: 5px">
+            {% if department.description %}
+              {{ department.description }}
+            {% else %}
+              Este departamento não tem uma descrição associada
+            {% endif %}
+          </div>
+          <h3>Localização:</h3>
+          <a style="margin-left: 5px"
+             href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
+        </div>
       </div>
-      <h2>Cursos</h2>
-      <div style="margin-left: 10px">
-        {% for degree in courses %}
-          <h3 class="degree">{{ degree.0 }}</h3>
-          <ul style="list-style: none; padding-left: 10px;">
-            {% for course in degree.1 %}
-              <li><a class="course" href="{% url 'college:course' course.id %}">{{ course }}</a></li>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Cursos</h2>
+        </div>
+        <div class="pane-content">
+          {% for degree in courses %}
+            <h3 class="degree">{{ degree.0 }}:</h3>
+            <ul class="menu" style="margin-left: 5px">
+              {% for course in degree.1 %}
+                <li><a class="course" href="{% url 'college:course' course.id %}">{{ course }}</a></li>
+              {% endfor %}
+            </ul>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Cadeiras</h2>
+        </div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for class in classes %}
+              <li>
+                <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
+              </li>
             {% endfor %}
           </ul>
-        {% endfor %}
+        </div>
       </div>
-      <h2>Professores</h2>
-      <ul>
-        {% for teacher in teachers %}
-          <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
-        {% endfor %}
-      </ul>
     </div>
-    <div style="margin-right: 50px">
-      <h2>Cadeiras</h2>
-      <ul style="list-style: none; padding-left: 10px;">
-        {% for class in classes %}
-          <li>
-            <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
-          </li>
-        {% endfor %}
-      </ul>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Professores</h2>
+        </div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for teacher in teachers %}
+              <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
