@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -10,12 +11,51 @@ from supernova.views import build_base_context
 
 def index_view(request):
     context = build_base_context(request)
-    if 'filtro' in request.GET:
-        context['type_filter'] = int(request.GET['filtro'])
     context['title'] = "Grupos"
+    context['pcode'] = "g"
     context['groups'] = Group.objects.all()
-    context['group_types'] = Group.GROUP_TYPES
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')}]
+    return render(request, 'groups/groups.html', context)
+
+
+def institutional_view(request):
+    context = build_base_context(request)
+    context['title'] = "Grupos"
+    context['pcode'] = "g_inst"
+    context['groups'] = Group.objects.filter(
+        Q(type=Group.ACADEMIC_ASSOCIATION) | Q(type=Group.INSTITUTIONAL)).all()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          {'name': 'Institucionais', 'url': reverse('groups:institutional')}]
+    return render(request, 'groups/groups.html', context)
+
+
+def nuclei_view(request):
+    context = build_base_context(request)
+    context['title'] = "Grupos"
+    context['pcode'] = "g_nucl"
+    context['groups'] = Group.objects.filter(type=Group.NUCLEI).all()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          {'name': 'Núcleos', 'url': reverse('groups:nuclei')}]
+    return render(request, 'groups/groups.html', context)
+
+
+def pedagogic_view(request):
+    context = build_base_context(request)
+    context['title'] = "Grupos"
+    context['pcode'] = "g_ped"
+    context['groups'] = Group.objects.filter(type=Group.PEDAGOGIC).all()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          {'name': 'Pedagogicos', 'url': reverse('groups:pedagogic')}]
+    return render(request, 'groups/groups.html', context)
+
+
+def communities_view(request):
+    context = build_base_context(request)
+    context['title'] = "Grupos"
+    context['pcode'] = "g_com"
+    context['groups'] = Group.objects.filter(type=Group.COMMUNITY).all()
+    context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          {'name': 'Comunidades', 'url': reverse('groups:communities')}]
     return render(request, 'groups/groups.html', context)
 
 
@@ -24,9 +64,10 @@ def group_view(request, group_abbr):
     context = build_base_context(request)
     context['title'] = group.name
     context['group'] = group
-    context['page'] = 'group'
+    context['pcode'], nav_type = resolve_group_type(group)
     context['announcements'] = Announcement.objects.filter(group=group).order_by('datetime').reverse()[:5]
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          nav_type,
                           {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])}]
     return render(request, 'groups/group.html', context)
 
@@ -36,9 +77,10 @@ def announcements_view(request, group_id):
     context = build_base_context(request)
     context['title'] = f'Anúncios de {group.name}'
     context['group'] = group
-    context['page'] = 'group_anouncements'
+    context['pcode'], nav_type = resolve_group_type(group)
     context['announcements'] = Announcement.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          nav_type,
                           {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_id])},
                           {'name': 'Anúncios', 'url': reverse('group_announcement', args=[group_id])}]
     return render(request, 'groups/announcements.html', context)
@@ -51,9 +93,10 @@ def announcement_view(request, announcement_id):
     context['title'] = announcement.title
     context['group'] = group
     context['announcement'] = announcement
-    context['page'] = 'group_anouncement'
+    context['pcode'], nav_type = resolve_group_type(group)
     context['announcements'] = Announcement.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          nav_type,
                           {'name': group.abbreviation, 'url': reverse('groups:group', args=[group.id])},
                           {'name': 'Anúncios', 'url': reverse('group_announcements', args=[group.id])},
                           {'name': announcement.title, 'url': reverse('group_announcements', args=[group.id])}]
@@ -65,9 +108,10 @@ def documents_view(request, group_id):
     context = build_base_context(request)
     context['title'] = f'Documentos de {group.name}'
     context['group'] = group
-    context['page'] = 'group_documents'
+    context['pcode'], nav_type = resolve_group_type(group)
     context['documents'] = Document.objects.filter(author_group=group).all()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          nav_type,
                           {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_id])},
                           {'name': 'Documentos', 'url': reverse('group_documents', args=[group_id])}]
     return render(request, 'groups/documents.html', context)
@@ -79,10 +123,27 @@ def contact_view(request, group_id):
     context = build_base_context(request)
     context['title'] = f'Contactar {group.name}'
     context['group'] = group
-    context['page'] = 'group_contact'
+    context['pcode'], nav_type = resolve_group_type(group)
     context['conversations'] = GroupExternalConversation.objects.filter(
         group=group, creator=request.user).order_by('date').reverse()
     context['sub_nav'] = [{'name': 'Grupos', 'url': reverse('groups:index')},
+                          nav_type,
                           {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_id])},
                           {'name': 'Contactar', 'url': reverse('group_contact', args=[group_id])}]
     return render(request, 'groups/conversations.html', context)
+
+
+def resolve_group_type(group):
+    code = Group.GROUP_CODES[group.type]
+    pcode = f'g_{code}'
+    if code == 'inst':
+        nav = {'name': 'Institucionais', 'url': reverse('groups:institutional')}
+    elif code == 'nucl':
+        nav = {'name': 'Núcleos', 'url': reverse('groups:nuclei')}
+    elif code == 'ped':
+        nav = {'name': 'Pedagogicos', 'url': reverse('groups:pedagogic')}
+    elif code == 'com':
+        nav = {'name': 'Comunidades', 'url': reverse('groups:communities')}
+    else:
+        nav = {'name': '?', 'url': '#'}
+    return pcode, nav

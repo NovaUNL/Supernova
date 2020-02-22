@@ -18,13 +18,13 @@ class Group(djm.Model):
     abbreviation = djm.CharField(max_length=64, null=True, blank=True)
     name = djm.CharField(max_length=65)
     description = djm.TextField()
-    members = djm.ManyToManyField(User, through='GroupMember')
+    members = djm.ManyToManyField(User, through='GroupMember', related_name='memberships')
     roles = djm.ManyToManyField(Role, through='GroupRole')
     place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True)
     image = djm.ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
 
     INSTITUTIONAL = 0
-    STUDENTS_ASSOCIATION = 1
+    NUCLEI = 1
     ACADEMIC_ASSOCIATION = 2
     PEDAGOGIC = 3
     PRAXIS = 4
@@ -32,12 +32,13 @@ class Group(djm.Model):
 
     GROUP_TYPES = (
         (INSTITUTIONAL, 'Intitucional'),
-        (STUDENTS_ASSOCIATION, 'Núcleo'),
+        (NUCLEI, 'Núcleo'),
         (ACADEMIC_ASSOCIATION, 'Associação'),
         (PEDAGOGIC, 'Pedagógico'),
         (PRAXIS, 'CoPe'),
         (COMMUNITY, 'Comunidade'),
     )
+    GROUP_CODES = ['inst', 'nucl', 'inst', 'ped', '_', 'com']
 
     type = djm.IntegerField(choices=GROUP_TYPES)
 

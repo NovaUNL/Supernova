@@ -1,4 +1,5 @@
 {% load static %}
+{% load strutils %}
 {% url 'college:courses' as courses %}
 {% url 'college:departments' as departments %}
 {% url 'college:index' as college %}
@@ -8,6 +9,14 @@
 {% url 'college:available_places' as places %}
 {% url 'college:map' as map %}
 {% url 'synopses:areas' as synopses %}
+{% url 'exercises:index' as exercises %}
+
+{% url 'groups:institutional' as groups_institutional %}
+{% url 'groups:nuclei'  as groups_nuclei %}
+{% url 'groups:pedagogic' as groups_pedagogic %}
+{% url 'groups:communities' as groups_communities %}
+
+
 {% url 'about' as about %}
 {% url 'faq' as faq %}
 {% url 'privacy' as privacy %}
@@ -137,19 +146,42 @@
       </li>
     {% endif %}
 
-    <li class="collapse">
-      <input type="checkbox" id="m5"/><label for="m5">Grupos</label>
-      <ul>
-        <li><a href="{% url 'groups:index' %}">Estudantis</a></li>
-      </ul>
-    </li>
+    {% if pcode|startswith:'g' %}
+      <li>
+        <input type="checkbox" id="m5"/><label for="m5">Entidades</label>
+        <ul>
+          <li {% if pcode|startswith:'g_inst' %}class="active"{% endif %}>
+            <a href="{{ groups_institutional }}">Institucionais</a>
+          </li>
+          <li {% if pcode|startswith:'g_nucl' %}class="active"{% endif %}>
+            <a href="{{ groups_nuclei }}">Núcleos</a>
+          </li>
+          <li {% if pcode|startswith:'g_ped' %}class="active"{% endif %}>
+            <a href="{{ groups_pedagogic }}">Pedagógicos</a>
+          </li>
+          <li {% if pcode|startswith:'g_com' %}class="active"{% endif %}>
+            <a href="{{ groups_communities }}">Comunidades</a>
+          </li>
+        </ul>
+      </li>
+    {% else %}
+      <li class="collapse">
+        <input type="checkbox" id="m5"/><label for="m5">Entidades</label>
+        <ul>
+          <li><a  href="{{ groups_nuclei }}">Núcleos</a></li>
+          <li><a href="{{ groups_pedagogic }}">Pedagógicos</a></li>
+          <li><a href="{{ groups_institutional }}">Institucionais</a></li>
+          <li><a href="{{ groups_communities }}">Comunidades</a></li>
+        </ul>
+      </li>
+    {% endif %}
 
     <li {% if synopses not in request.path %}class="collapse"{% endif %}>
       <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
       <ul>
         <li {% if synopses in request.path %}class="active"{% endif %}><a href="{% url 'synopses:areas' %}">Sinteses</a>
         </li>
-        <li><a href="#">Exercicios</a></li>
+        <li><a href="{{ exercises }}">Exercicios</a></li>
         <li><a href="#">Ajuda-me</a></li>
       </ul>
     </li>
