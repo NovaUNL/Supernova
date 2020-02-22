@@ -22,13 +22,16 @@
           <div class="flex-grid-item"
                style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
             <div class="flex-grid-item-top">
-            <span>{{ group.name }}</span>
+              <span>{{ group.name }}</span>
             </div>
             <div class="flex-grid-item-bottom">
+              <div>
+                <img src="{% static 'supernova/images/users.svg' %}">
+                {{ group.members.count }}
+              </div>
               {% if group.non_member_permission < group.OPEN %}
-              {% else %}
+                <img src="{% static 'supernova/images/locked.svg' %}">
               {% endif %}
-              {{ group.members.count }}
             </div>
           </div>
         </a>

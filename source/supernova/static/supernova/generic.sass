@@ -107,9 +107,6 @@ blockquote p
 .shown
   display: block
 
-.flex-grid-item-bottom
-  width: 100%
-
 .flex-box
   border-radius: 5px
   padding: 10px 20px
@@ -125,12 +122,19 @@ blockquote p
   color: white
   border: 2px solid #666
 
-.flex-grid-item-top
-  background-color: rgba(170, 170, 170, 0.5)
+.flex-grid-item-top, .flex-grid-item-bottom
+  background-color: transparentize($color-primary-1, 0.3)
   text-shadow: 0 0 2px black
 
 .flex-grid-item-bottom
-  background-color: rgba(170, 170, 170, 0.5)
+  display: flex
+  flex-direction: row
+  justify-content: space-evenly
+  align-items: center
+
+  img
+    max-height: 18px
+    vertical-align: middle
 
 .generic-button
   background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%)
