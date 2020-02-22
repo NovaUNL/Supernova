@@ -64,10 +64,10 @@ def build_base_context(request):
     catchphrases = cache.get('catchphrases')
     if catchphrases is None:
         catchphrases = list(Catchphrase.objects.all())
-        cache.set('catchphrases', list(Catchphrase.objects.all()), timeout=3600 * 24)
-    result = {
+        cache.set('catchphrases', catchphrases, timeout=3600 * 24)
+    base_context = {
         'disable_auth': False,
         'sub_nav': None,
         'catchphrase': random.choice(catchphrases)
     }
-    return result
+    return base_context
