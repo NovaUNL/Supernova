@@ -81,46 +81,51 @@
           </div>
         {% endif %}
       </div>
-      {% if profile_user.badges.exists %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
-            <h2>Conquistas</h2>
+
+      <div class="col">
+        {% if profile_user.badges.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Conquistas</h2>
+            </div>
+            <div class="pane-content">
+              <ul>
+                {% for badge in profile_user.badges.all %}
+                  <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
-          <div class="pane-content">
-            <ul>
-              {% for badge in profile_user.badges.all %}
-                <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
-              {% endfor %}
-            </ul>
+        {% endif %}
+        {% if profile_user.social_networks.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Social</h2>
+            </div>
+            <div class="pane-content">
+              <ul id="social-network-list" class="menu">
+                {% for social_network in profile_user.social_networks.all %}
+                  <li><a href="{{ social_network.profile }} ">{{ social_network.network_str }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
-        </div>
-      {% endif %}
-      {% if profile_user.social_networks.exists %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
-            <h2>Social</h2>
-          </div>
-          <div class="pane-content">
-            <ul id="social-network-list" class="menu">
-              {% for social_network in profile_user.social_networks.all %}
-                <li><a href="{{ social_network.profile }} ">{{ social_network.network_str }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      {% endif %}
-      {% if profile_user.memberships.exists %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Grupos</h2></div>
-          <div class="pane-content">
-            {% for group in profile_user.memberships.all %}
-              <a href="{% url 'groups:index' group.id %}">
+        {% endif %}
+        {% if profile_user.memberships.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Grupos</h2></div>
+            <div class="pane-content">
+              {% for group in profile_user.memberships.all %}
+                <a href="{% url 'groups:group' group.abbreviation %}">
                 <span class="group" style="background-image: url({% get_media_prefix %}{{ group.image }}">
-                  {{ group.abbreviation }}</span></a>
-            {% endfor %}
+                  {{ group.abbreviation }}
+                </span>
+                </a>
+              {% endfor %}
+            </div>
           </div>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
   </div>
 {% endblock %}
