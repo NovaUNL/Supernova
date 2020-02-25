@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
@@ -7,6 +8,8 @@ from chat.models import GroupExternalConversation
 from documents.models import Document
 from groups.models import Group, Announcement
 from supernova.views import build_base_context
+from groups import models as m
+from groups import forms as f
 
 
 def index_view(request):
@@ -112,7 +115,7 @@ def announcement_view(request, announcement_id):
 
 
 def documents_view(request, group_abbr):
-    group = get_object_or_404(Group, id=group_abbr)
+    group = get_object_or_404(Group, abbreviation=group_abbr)
     context = build_base_context(request)
     context['title'] = f'Documentos de {group.name}'
     context['group'] = group
@@ -127,9 +130,28 @@ def documents_view(request, group_abbr):
     return render(request, 'groups/documents.html', context)
 
 
+def members_view(request, group_abbr):
+    group = get_object_or_404(
+        Group.objects.prefetch_related('member_roles__member', 'member_roles__role'),
+        abbreviation=group_abbr)
+    context = build_base_context(request)
+    context['title'] = f'Membros de {group.name}'
+    context['group'] = group
+    # context['membership' = g
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_memb'
+    context['documents'] = Document.objects.filter(author_group=group).all()
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Membros', 'url': reverse('groups:members', args=[group_abbr])}]
+    return render(request, 'groups/members.html', context)
+
+
 @login_required
 def contact_view(request, group_abbr):
-    group = get_object_or_404(Group, id=group_abbr)
+    group = get_object_or_404(Group, abbreviation=group_abbr)
     context = build_base_context(request)
     context['title'] = f'Contactar {group.name}'
     context['group'] = group
@@ -143,6 +165,80 @@ def contact_view(request, group_abbr):
         {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Contactar', 'url': reverse('groups:contact', args=[group_abbr])}]
     return render(request, 'groups/conversations.html', context)
+
+
+@login_required
+def roles_view(request, group_abbr):
+    group = get_object_or_404(Group, abbreviation=group_abbr)
+    context = build_base_context(request)
+    context['title'] = f'Gerir cargos de {group.name}'
+    context['group'] = group
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_roles'
+    context['role'] = f.RoleForm()
+
+    if request.method == 'POST':
+        role_formset = f.RolesFormSet(
+            request.POST,
+            instance=group,
+            prefix="roles",
+            queryset=group.roles)
+        membership_formset = f.GroupMembershipFormSet(
+            request.POST,
+            instance=group,
+            prefix="membership",
+            queryset=group.member_roles)
+        if role_formset.is_valid():
+            roles = role_formset.save(commit=False)
+            # Delete any tagged object
+            for role in role_formset.deleted_objects:
+                # TODO check if the user can delete this role
+                role.delete()
+            # Add new objects
+            for role in roles:
+                # TODO check if the user can create this role
+                role.save()
+
+        if membership_formset.is_valid():
+            membership = membership_formset.save(commit=False)
+            # Delete any tagged object
+            for association in membership_formset.deleted_objects:
+                # TODO check if the user can delete this role
+                association.delete()
+            # Add new objects
+            for association in membership:
+                # TODO check if the user can create this role
+                association.save()
+    else:
+        role_formset = f.RolesFormSet(
+            instance=group,
+            prefix="roles",
+            queryset=group.roles)
+
+        membership_formset = f.GroupMembershipFormSet(
+            instance=group,
+            prefix="membership",
+            queryset=group.member_roles)
+
+    context['role_formset'] = role_formset
+    context['membership_formset'] = membership_formset
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Cargos', 'url': reverse('groups:contact', args=[group_abbr])}]
+    return render(request, 'groups/roles.html', context)
+
+
+class GroupRolesAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        group = self.forwarded.get('group', None)
+        if group is None or group == '':
+            return []
+        qs = m.Role.objects.filter(group=group).all()
+        if self.q:
+            qs = qs.filter(name__contains=self.q)
+        return qs
 
 
 def resolve_group_type(group):

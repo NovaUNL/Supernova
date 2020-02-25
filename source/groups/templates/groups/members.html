@@ -1,0 +1,44 @@
+{% extends 'supernova/base.html' %}
+
+{% block head %}
+  <style>
+    {% if  group.image.url %}
+      .header-decorator:after {
+        background-image: url("{{ group.image.url}}");
+        background-size: contain;
+        background-position: right;
+      }
+    {% endif %}
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>{{ group.name }}</h1>
+        {% if group.abbreviation %}<h3>@{{ group.abbreviation }}</h3>{% endif %}
+      </div>
+    </div>
+    <div class="row nowrap padded">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Membros</h2></div>
+          <div class="pane-content">
+            <ul >
+              {% for association in group.member_roles.all %}
+                <li>
+                  <a href="{% url 'users:profile' association.member.nickname %}">{{ association.member.get_full_name }}</a>,
+                  enquanto {{ association.role.name }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col nogrow noshrink">
+        {% include 'groups/navigation.html' %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
