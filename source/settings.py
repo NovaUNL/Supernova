@@ -99,12 +99,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
 
@@ -228,8 +224,7 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 VULNERABILITY_CHECKING = False
 
-INTERNAL_IPS = ['127.0.0.1',]
-
+INTERNAL_IPS = ['127.0.0.1', ]
 
 assert 'SN_CONFIG' in os.environ
 CONFIG_PATH = os.environ['SN_CONFIG']
@@ -244,26 +239,3 @@ with open(CONFIG_PATH) as file:
 if DEBUG:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': LOG_PATH,
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': True,
-        },
-    },
-}

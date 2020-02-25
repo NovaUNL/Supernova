@@ -22,7 +22,6 @@
   ],
   "REGISTRATIONS_ENABLED": true,
   "VULNERABILITY_CHECKING": false,
-  "LOG_PATH": "/var/log/supernova.log",
   "DEBUG": true,
   "MEDIA_ROOT": "/http/media/",
   "ELASTICSEARCH_DSL": {
