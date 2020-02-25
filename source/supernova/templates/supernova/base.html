@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+  {% analytical_head_top %}
   <meta charset="UTF-8">
   <title>Supernova - {{ title }}</title>
   <link rel="icon" href="{% static 'supernova/images/favicon.png' %}" type="image/x-icon"/>
@@ -16,8 +17,10 @@
   <script src="{% static 'supernova/script.js' %}"></script>
   {% block head %}
   {% endblock %}
+  {% analytical_head_bottom %}
 </head>
 <body>
+{% analytical_body_top %}
 <nav id="top-wrapper" class="bg-grad">
   <div id="top-main">
     <div id="top-main-left">
@@ -77,5 +80,6 @@
     {% endblock %}
   </div>
 </div>
+{% analytical_body_bottom %}
 </body>
 </html>
