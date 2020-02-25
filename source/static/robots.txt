@@ -1,0 +1,8 @@
+User-agent: *
+Disallow:
+
+Crawl-delay: 10
+Disallow: /admin/
+Disallow: /api/
+Disallow: /u/
+Disallow: /entrar
