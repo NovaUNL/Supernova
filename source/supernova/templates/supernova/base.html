@@ -7,14 +7,11 @@
   <meta charset="UTF-8">
   <title>Supernova - {{ title }}</title>
   <link rel="icon" href="{% static 'supernova/images/favicon.png' %}" type="image/x-icon"/>
-  <link
-      href="https://fonts.googleapis.com/css?family=Lato|Merriweather|Open+Sans&display=swap"
-      rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato|Merriweather|Open+Sans&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="stylesheet" type="text/css" href="{% static 'supernova/style.css' %}"/>
-  <script src="{% static 'supernova/script.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+  <script src="{% static 'js/script.js' %}"></script>
   {% block head %}
   {% endblock %}
   {% analytical_head_bottom %}
@@ -25,10 +22,10 @@
   <div id="top-main">
     <div id="top-main-left">
       <a id="hamburger" class="lowres" href="javascript: toggleMenu()">
-        <img alt="menu" src="{% static 'supernova/images/menu.svg' %}">
+        <img alt="menu" src="{% static 'img/icons/menu.svg' %}">
       </a>
       <a id="logo" href="/">
-        <img src="{% static 'supernova/images/logo.svg' %}">
+        <img src="{% static 'img/logo.svg' %}">
       </a>
       <div id="slogan-pos" class="highres">
         <span id="slogan">{{ catchphrase }}</span>
@@ -52,12 +49,12 @@
             {{ user.nickname }}
           </a>
           <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
-            <img src="{% static 'supernova/images/logout.svg' %}">
+            <img src="{% static 'img/icons/logout.svg' %}">
           </a>
         {% else %}
           <a class="name">Não autenticado</a>
           <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
-            <img src="{% static 'supernova/images/login.svg' %}">
+            <img src="{% static 'img/icons/login.svg' %}">
           </a>
         {% endif %}
       </div>

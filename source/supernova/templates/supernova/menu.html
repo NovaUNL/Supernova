@@ -35,12 +35,12 @@
           {{ user.nickname }}
         </a>
         <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
-          <img alt="logout" src="{% static 'supernova/images/logout.svg' %}">
+          <img alt="logout" src="{% static 'img/icons/logout.svg' %}">
         </a>
       {% else %}
         <a class="name">Não autenticado</a>
         <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
-          <img alt="login" src="{% static 'supernova/images/login.svg' %}">
+          <img alt="login" src="{% static 'img/icons/login.svg' %}">
         </a>
       {% endif %}
     </div>
@@ -202,18 +202,18 @@
     <div class="repo-star-widget">
       <a class="btn" href="https://gitlab.com/claudiop/Supernova" target="_blank" rel="noopener">
         <span>Fixinhos no </span>
-        <img class="icon" aria-hidden="true" src="{% static 'supernova/images/third-party/gitlab.svg' %}">
+        <img class="icon" aria-hidden="true" src="{% static 'img/third-party/gitlab.svg' %}">
       </a>
       <a id="gitlab-count" class="count" href="https://gitlab.com/claudiop/Supernova/-/starrers" target="_blank" rel="noopener">?</a>
     </div>
     <div class="repo-star-widget">
       <a class="btn" href="https://github.com/claudioap/Supernova" target="_blank" rel="noopener">
         <span>Fixinhos no </span>
-        <img class="icon" aria-hidden="true" src="{% static 'supernova/images/third-party/github_white.svg' %}">
+        <img class="icon" aria-hidden="true" src="{% static 'img/third-party/github_white.svg' %}">
       </a>
       <a id="github-count" class="count" href="https://github.com/claudioap/Supernova/stargazers" target="_blank" rel="noopener">?</a>
     </div>
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt">
-      <img id="license-img" src="{% static 'supernova/images/ccsabync.svg' %}"></a>
+      <img id="license-img" src="{% static 'img/ccsabync.svg' %}"></a>
   </div>
 {% endspaceless %}

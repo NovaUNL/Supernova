@@ -30,13 +30,13 @@
         <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Atividade</h2></div>
           <div class="pane-content">
-            <img src="{% static 'construction.png' %}" width="300px">
+            <img src="{% static 'img/construction.png' %}" width="300px">
           </div>
         </div>
         <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Alterações</h2></div>
           <div class="pane-content">
-            <img src="{% static 'construction.png' %}" width="300px">
+            <img src="{% static 'img/construction.png' %}" width="300px">
           </div>
         </div>
         <div class="flex-pane grow small">
@@ -54,7 +54,7 @@
         <div class="flex-pane grow small">
           <div class="pane-title bg-grad"><h2>Eventos</h2></div>
           <div class="pane-content">
-            <img src="{% static 'construction.png' %}" width="300px">
+            <img src="{% static 'img/construction.png' %}" width="300px">
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@
               {% elif item.0 == 3 %}
                 <img src="{% static 'services/veg.svg' %}">
               {% else %}
-                <img src="{% static 'supernova/images/unknown.svg' %}">
+                <img src="{% static 'img/icons/unknown.svg' %}">
               {% endif %}
               {{ item.1 }}
             </div>
@@ -132,11 +132,11 @@
             {% for user in boinc_users %}
               <tr>
                 {% if forloop.counter == 1 %}
-                  <td><img src="{% static 'score/first.svg' %}"></td>
+                  <td><img src="{% static 'img/icons/first.svg' %}"></td>
                 {% elif forloop.counter == 2 %}
-                  <td><img src="{% static 'score/second.svg' %}"></td>
+                  <td><img src="{% static 'img/icons/second.svg' %}"></td>
                 {% elif forloop.counter == 3 %}
-                  <td><img src="{% static 'score/third.svg' %}"></td>
+                  <td><img src="{% static 'img/icons/third.svg' %}"></td>
                 {% else %}
                   <td></td>
                 {% endif %}
@@ -167,16 +167,16 @@
         </div>
         <div class="pane-content" style="display: flex; justify-content: space-between; filter: grayscale(50%);">
           <a href="https://riot.im/app/#/group/+novasupernova:matrix.org">
-            <img src="{% static 'supernova/images/third-party/riot.svg' %}" alt="" width="64px" height="64px">
+            <img src="{% static 'img/third-party/riot.svg' %}" alt="" width="64px" height="64px">
           </a>
           <a href="https://t.me/novasupernova">
-            <img src="{% static 'supernova/images/third-party/telegram.svg' %}" alt="telegram" width="64px" height="64px">
+            <img src="{% static 'img/third-party/telegram.svg' %}" alt="telegram" width="64px" height="64px">
           </a>
           <a href="https://discord.gg/cSu8uEG">
-            <img src="{% static 'supernova/images/third-party/discord.svg' %}" alt="discord" width="64px" height="64px">
+            <img src="{% static 'img/third-party/discord.svg' %}" alt="discord" width="64px" height="64px">
           </a>
           <a href="https://gitlab.com/claudiop/Supernova/issues">
-            <img src="{% static 'supernova/images/third-party/gitlab.svg' %}" alt="gitlab" width="64px" height="64px">
+            <img src="{% static 'img/third-party/gitlab.svg' %}" alt="gitlab" width="64px" height="64px">
           </a>
         </div>
       </div>
@@ -184,7 +184,7 @@
   </div>
 
   <script>
-      particlesJS.load('particles', "{% static 'supernova/particles.json' %}");
+      particlesJS.load('particles', "{% static 'particles.json' %}");
   </script>
   <script src="https://cdn.jsdelivr.net/npm/d3@5.14.2/dist/d3.min.js"
           integrity="sha256-M2M+sgC2bZ4r73FO1LV5JmHiS5COwEb2Uqw7EbsHmBY="
