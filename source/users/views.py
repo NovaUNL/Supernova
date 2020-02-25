@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
@@ -203,3 +204,14 @@ def user_profile_settings_view(request, nickname):
         {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)
+
+
+class NicknameAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.User.objects.all()
+        if self.q:
+            if len(self.q) < 5:
+                return []
+            return qs.filter(nickname__contains=self.q)
+        else:
+            return []
