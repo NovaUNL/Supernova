@@ -14,7 +14,6 @@ _build
 _static
 _templates
 .sass-cache
-*/static/
 dev/
 data/
 log/
