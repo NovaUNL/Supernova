@@ -32,22 +32,6 @@ def index(request):
     boinc_projects = boincstats.get_team_projects(2068385380)
     boinc_projects.sort(key=lambda x: -x['weekly'])
     context['boinc_projects'] = boinc_projects[:3]
-    departures = cache.get('departures')
-    if departures is None:
-        departures = list(chain(mts.get_departure_times(), tst.get_departure_times()))
-        curr_time = now.time()
-        for departure in departures:
-            departure_time = departure['time']
-            if curr_time < departure_time:
-                departure['datetime'] = midnight + timedelta(
-                    hours=departure_time.hour, minutes=departure_time.minute)
-            else:
-                departure['datetime'] = midnight + timedelta(
-                    days=1, hours=departure_time.hour, minutes=departure_time.minute)
-        departures.sort(key=lambda departure: departure['datetime'])
-        departures = departures[:5]
-        cache.set('departures', departures, timeout=60 * 10)
-    context['departures'] = departures
 
     context['free_rooms'] = college.Room.objects \
         .annotate(turn_instances__end=F('turn_instances__start') + F('turn_instances__duration')) \
