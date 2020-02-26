@@ -15,9 +15,15 @@ simply refer to it as Supernova, though they're bread and butter and in the futu
 
 .. toctree::
    :maxdepth: 1
-   :caption: Individual apps
+   :caption: Apps
 
    modules
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Information
+
+   roadmap
 
 Future
 ------

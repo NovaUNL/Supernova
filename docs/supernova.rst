@@ -7,7 +7,7 @@ Submodules
 ----------
 
 supernova.models module
--------------------
+-----------------------
 
 .. automodule:: supernova.models
     :members:
@@ -15,16 +15,16 @@ supernova.models module
     :show-inheritance:
 
 supernova.settings module
----------------------
+-------------------------
 
-.. automodule:: supernova.settings
+.. automodule:: settings
     :members:
     :undoc-members:
     :show-inheritance:
 
 
 supernova.utils module
-------------------
+----------------------
 
 .. automodule:: supernova.utils
     :members:
@@ -32,7 +32,7 @@ supernova.utils module
     :show-inheritance:
 
 supernova.views module
-------------------
+----------------------
 
 .. automodule:: supernova.views
     :members:
