@@ -1,48 +1,47 @@
 Roadmap
 =======
 | These are just ideas. Some might never be done at all.
-| They're separated mostly based on relevance.
+| Some can be found as issues in the `code repository <https://gitlab.com/claudiop/Supernova/issues>`_.
 
 Next few months
 ---------------
-* :doc:`exercises`
+* :doc:`../apps/exercises`
     * Synopses integration
     * User-based custom generation (based on enrollments)
     * User Q&A (stack exchange alike)
-* :doc:`feedback`
-    * Accept ideas
-    * Receive private contact
-* :doc:`planet` implementation
-* :doc:`chat`
+* :doc:`../apps/feedback`
+    * Accept new ideas for Supernova
+    * Track issues with UNL itself (eg. x users spent y daily votes to have the ed. II door fixed)
+* Properly consider :doc:`../apps/planet` and either implement it or scrap it.
+* :doc:`../apps/chat`
     * User-user private messages
     * User-group private messages
 * Group schedules
-* :doc:`events`
+* :doc:`../apps/events`
     * Generic calendar
     * Generation
     * Notification
     * User preferences
-* Meals
+* Meals and campus services
+
     * Static information that is rarely changed (such as prices)
-    * Crowd-sourced daily information
-* :doc:`news` items
-    * Crawl NOVA pages
+* :doc:`../apps/news`
     * User submitted content
-* Build a FAQ
-* Server (depending on the hardware needs)
-    * Status page
-    * Page caching
-    * Rate limit
 * Maps
-    * Improve viewers
-    * Add geospatial information to places
-* :doc:`api`
-    * Unbreak whatever is broken
-    * Implement stuff required to make reasonably good native applications
+
+    * Add geospatial information such as building blueprints (stalled with bureaucracy)
+* :doc:`../apps/api`
+    * Expose interfaces required to make native applications
 * Moderation
+
     * User roles
     * Account suspension
-* Global search feature
+* Content search
+* Infrastructure
+
+    * Some worker that handles server outages and updates gracefully
+    * Status page
+    * Rate limit (we need to see if this is that important)
 
 Hopefully before the sun engulfs us
 -----------------------------------
@@ -50,18 +49,21 @@ Hopefully before the sun engulfs us
 * Campus routing
 * Achievement system
 * Karma point system
-* Stores
-    * Classified items store
-    * Finish group store to be operable without using the admin panel
+* Stores (eg. for the students association to "sell" shirts)
+
+    * Classified items store (possibly a bad idea)
+
 * User real-time chat
-* Transportation calculation (maybe interface with some other service)
+* Transportation calculation (partially implemented, can be improved)
 * Lost & Found app
-* Campus gallery, maybe with panoramas, to make future caloiros go wowowow
+* Campus gallery, maybe with panoramas, something cool to impress future caloiros.
 * Recommend places for studying based on position
 * Add loggers everywhere
+
     * Abuse detection
     * Vandalism reversion
     * Banhammer employment
+
 * Proper SMTP support and email notifications
 * Custom news feed based on preferences
 * Ignore lists (avoid dumping unwanted subjects or other users content onto a user)
@@ -71,20 +73,14 @@ Awaiting on CLIPy
 These are important tasks which require further progress on the CLIPy backend before getting implemented by Supernova:
 
 * Grades
-* CLIP documents
-    * Index document store
-    * Cache locally and serve them
-* Course curricular plans
+* Course curricular plans (probably unreliable, already attempted)
 * Class
-    * Summaries
-    * Calendars
-    * Schedule changes notifications
-* Information updates
-    * Changes recording
-    * Selective updates (eg. just a class instance)
-    * Cron-based updates
 
-Want to help?
--------------
-| Lets avoid duplicated work.
-| Do tell what you want to work on and you'll get your name attached to it!
+  * Summaries
+  * Calendars
+  * Schedule changes
+
+* Information updates
+
+  * Changes recording
+  * Selective updates (eg. just a class instance)

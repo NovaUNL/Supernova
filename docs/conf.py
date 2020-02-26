@@ -25,11 +25,11 @@ django.setup()
 # -- Project information -----------------------------------------------------
 
 project = 'Supernova'
-copyright = '2018-2019, Cláudio Pereira (https://claudiop.com)'
+copyright = '2018-2020, Cláudio Pereira (https://claudiop.com)'
 author = 'Cláudio Pereira'
 
 # The short X.Y version
-version = '0.0'
+version = ''
 # The full version, including alpha/beta/rc tags
 release = ''
 
