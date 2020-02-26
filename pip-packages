@@ -23,3 +23,6 @@ elasticsearch-dsl>=7.0.0,<8.0.0
 python-logstash
 django-debug-toolbar
 django-redis
+django-crontab
+Sphinx
+sphinx-rtd-theme

@@ -16,8 +16,9 @@ import os
 import sys
 
 import django
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../source'))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+os.environ.setdefault("SN_CONFIG", "../conf/settings-local.json")
 django.setup()
 
 
@@ -28,7 +29,7 @@ copyright = '2018-2019, Cláudio Pereira (https://claudiop.com)'
 author = 'Cláudio Pereira'
 
 # The short X.Y version
-version = ''
+version = '0.0'
 # The full version, including alpha/beta/rc tags
 release = ''
 
