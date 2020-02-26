@@ -1,13 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
-from itertools import chain
 
 from django.core.cache import cache
 from django.db.models import Q, F
 from django.shortcuts import render
 
 from scrapper.boinc import boincstats
-from scrapper.transportation import mts, tst
 from services.utils import get_next_meal_items
 from supernova.models import Changelog, Catchphrase
 from news.models import NewsItem
