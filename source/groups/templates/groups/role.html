@@ -1,0 +1,180 @@
+{% extends 'supernova/base.html' %}
+{% block head %}
+  <style>
+    {% if  group.image.url %}
+      .header-decorator:after {
+        background-image: url("{{ group.image.url}}");
+        background-size: contain;
+        background-position: right;
+      }
+    {% endif %}
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>Cargos de {{ group.name }}</h1>
+        {% if group.abbreviation %}<h3>@{{ group.abbreviation }}</h3>{% endif %}
+      </div>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          {% if role %}
+            <h2>Editar o cargo {{ role.name }}</h2>
+          {% else %}
+            <h2>Criar cargo</h2>
+          {% endif %}
+        </div>
+        <div class="pane-content">
+          <form method="post" action="{% url 'groups:role' group.abbreviation role_id %}">
+            {% csrf_token %}
+            <div class="form-block">
+              <h3>Informação</h3>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Nome do cargo</h4>
+                </div>
+                <div>{{ form.name }}</div>
+              </div>
+            </div>
+            <hr>
+            <div class="form-block">
+              <h3>Permissões</h3>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Administrator</h4>
+                  {{ form.is_admin }}
+                </div>
+                <div class="form-row-description">
+                  Um administrador não tem qualquer restrição, podendo tomar qualquer ação pelo grupo.
+                  Idealmente é uma permissão que apenas um individuo tem.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Modificar cargos</h4>
+                  {{ form.can_modify_roles }}
+                </div>
+                <div class="form-row-description">
+                  Esta permissão permite criar ou alterar os cargos existentes.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Atribuir cargos</h4>
+                  {{ form.can_assign_roles }}
+                </div>
+                <div class="form-row-description">
+                  Permite a atribuição de cargos a qualquer utilizador, desde que, os cargos atribuidos tenham
+                  sempre tantas ou menos permissões do que a união de cargos do atribuidor.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Anunciar</h4>
+                  {{ form.can_announce }}
+                </div>
+                <div class="form-row-description">
+                  Permite publicar anúncios em nome do grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Ler conversas</h4>
+                  {{ form.can_read_conversations }}
+                </div>
+                <div class="form-row-description">
+                  Permite a leitura das conversas entre utilizadores externos e o grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Escrever em conversas</h4>
+                  {{ form.can_write_conversations }}
+                </div>
+                <div class="form-row-description">
+                  Permite a escrita em conversas entre utilizadores externos e o grupo.
+                  Não surte efeito se o utilizador não tiver permissão de leitura.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Ler conversas internas</h4>
+                  {{ form.can_read_internal_conversations }}
+                </div>
+                <div class="form-row-description">
+                  Permite a leitura das conversas internas ao grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Escrever em conversas internas</h4>
+                  {{ form.can_write_internal_conversations }}
+                </div>
+                <div class="form-row-description">
+                  Permite a escrita emconversas internas ao grupo.
+                  Não surte efeito se o utilizador não tiver permissão de leitura.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Produzir documentos públicos</h4>
+                  {{ form.can_write_public_documents }}
+                </div>
+                <div class="form-row-description">
+                  Permite a produção ou modificação dos documentos públicamente consultaveis do grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Ler documentos privados</h4>
+                  {{ form.can_read_internal_documents }}
+                </div>
+                <div class="form-row-description">
+                  Permite a visualização dos documentos privados do grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Produzir documentos privados</h4>
+                  {{ form.can_write_internal_documents }}
+                </div>
+                <div class="form-row-description">
+                  Permite a produção ou modificação dos documentos privados do grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Gerir calendarização</h4>
+                  {{ form.can_change_schedule }}
+                </div>
+                <div class="form-row-description">
+                  Permite alterar os horários do grupo e marcar eventos.
+                </div>
+              </div>
+            </div>
+            {% if role %}
+              <input class="btn" type="submit" value="Atualizar"/>
+            {% else %}
+              <input class="btn" type="submit" value="Criar"/>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,5 +1,6 @@
 {% extends 'supernova/base.html' %}
 
+{% load static %}
 {% block head %}
   <style>
     {% if  group.image.url %}
@@ -10,16 +11,22 @@
       }
     {% endif %}
 
+    table {
+      overflow-x: scroll;
+      min-width: 100%;
+    }
+
     th {
       background-color: #333740;
+      padding: 2px;
     }
 
     td {
       text-align: center;
     }
 
-    input[type=text] {
-      width: 150px;
+    td img {
+      width: 24px;
     }
   </style>
 {% endblock %}
@@ -32,78 +39,124 @@
         {% if group.abbreviation %}<h3>@{{ group.abbreviation }}</h3>{% endif %}
       </div>
     </div>
-    <div class="row nowrap padded">
-      <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Cargos</h2></div>
-          <div class="pane-content">
-            <form method="post" action="{% url 'groups:roles' group.abbreviation %}">
-              {% csrf_token %}
-              {{ role_formset.management_form }}
-              <table>
+    <div class="col nowrap padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Cargos</h2></div>
+        <div class="pane-content">
+          <div style="overflow: auto">
+            <table>
+              <tr>
+                <th rowspan="2">Nome</th>
+                <th colspan="2">Cargos</th>
+                <th rowspan="2">Anuncia</th>
+                <th colspan="2">Chat</th>
+                <th colspan="2">Chat Interno</th>
+                <th colspan="3">Documentos</th>
+                <th rowspan="2">Edita horários</th>
+              </tr>
+              <tr>
+                <th>Modifica</th>
+                <th>Atribui</th>
+                <th>Lê</th>
+                <th>Escreve</th>
+                <th>Lê</th>
+                <th>Escreve</th>
+                <th>Lê privados</th>
+                <th>Escreve privados</th>
+                <th>Escreve públicos</th>
+              </tr>
+              {% for role in group.roles.all %}
                 <tr>
-                  <th rowspan="2">Nome</th>
-                  <th rowspan="2">Administrador</th>
-                  <th rowspan="2">Anuncia</th>
-                  <th colspan="2">Cargos</th>
-                  <th colspan="2">Conversações</th>
-                  <th colspan="2">Internas</th>
-                  <th colspan="3">Documentos</th>
-                  <th rowspan="2">Apagar</th>
+                  {% if can_edit %}
+                    <th><a href="{% url 'groups:role' group.abbreviation role.id %}">{{ role.name }}</a></th>
+                  {% else %}
+                    <th>{{ role.name }}</th>
+                  {% endif %}
+                  {% if role.can_modify_roles or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_assign_roles or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_announce or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_read_conversations or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_write_conversations or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_read_internal_conversations or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_write_internal_conversations or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_read_internal_documents or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_write_internal_documents or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_write_public_documents or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
+                  {% if role.can_change_schedules or role.is_admin %}
+                    <td><img alt="Sim" src="{% static 'img/icons/check.svg' %}"></td>
+                  {% else %}
+                    <td><img alt="Não" src="{% static 'img/icons/cross.svg' %}"></td>
+                  {% endif %}
                 </tr>
-                <tr>
-                  <th>Modifica</th>
-                  <th>Atribui</th>
-                  <th>Lê</th>
-                  <th>Escreve</th>
-                  <th>Lê</th>
-                  <th>Escreve</th>
-                  <th>Lê privados</th>
-                  <th>Escreve privados</th>
-                  <th>Escreve públicos</th>
-                </tr>
-                {% for form in role_formset %}
-                  {% for error in form.non_field_errors %}
-                    <tr>
-                      <td colspan="12">
-                        {{ error }}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                  {% for error in form.errors %}
-                    <tr>
-                      <td colspan="12">
-                        {{ error }}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                  <tr>
-                    {{ form.id }}
-                    <td>{{ form.name }}</td>
-                    <td>{{ form.is_admin }}</td>
-                    <td>{{ form.can_modify_roles }}</td>
-                    <td>{{ form.can_assign_roles }}</td>
-                    <td>{{ form.can_announce }}</td>
-                    <td>{{ form.can_read_conversations }}</td>
-                    <td>{{ form.can_write_conversations }}</td>
-                    <td>{{ form.can_read_internal_conversations }}</td>
-                    <td>{{ form.can_write_internal_conversations }}</td>
-                    <td>{{ form.can_read_internal_documents }}</td>
-                    <td>{{ form.can_write_internal_documents }}</td>
-                    <td>{{ form.can_write_public_documents }}</td>
-                    <td>{{ form.DELETE }}</td>
-                  </tr>
-                {% endfor %}
-              </table>
-              {{ membership_formset.as_p }}
-              {{ membership_formset.media }}
-              <input style="float: right" type="submit" value="Atualizar"/>
-            </form>
+              {% endfor %}
+            </table>
           </div>
         </div>
       </div>
-      <div class="col nogrow noshrink">
-        {% include 'groups/navigation.html' %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Afiliações</h2></div>
+        <div class="pane-content">
+          <form>
+            {{ membership_formset.management_form }}
+            <table>
+              <thead>
+              <th>Membro</th>
+              <th>Cargo</th>
+              <th>Desassociar</th>
+              </thead>
+              {% for form in membership_formset %}
+                <tr>
+                  <td>{{ form.member }}</td>
+                  <td>{{ form.role }}</td>
+                  {% if form.instance %}
+                    <td><a href="#{{ form.instance.member.nickname }}">Desassociar</a></td>{# TODO #}
+                  {% endif %}
+                </tr>
+              {% endfor %}
+              {{ membership_formset.media }}
+            </table>
+          </form>
+        </div>
       </div>
     </div>
   </div>
