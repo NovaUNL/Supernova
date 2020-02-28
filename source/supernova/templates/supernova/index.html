@@ -69,7 +69,12 @@
           </div>
           <div class="flex-pane grow small">
             <div class="pane-title bg-grad"><h2>Alterações</h2></div>
-            <div class="pane-content construction"></div>
+            <div class="pane-content">
+              {% for entry in changelog %}
+                <h3>{{ entry.title }}</h3>
+                {{ entry.content_html | safe }}
+              {% endfor %}
+            </div>
           </div>
         </div>
       </div>

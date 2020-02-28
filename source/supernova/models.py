@@ -1,14 +1,19 @@
 from django.db import models as djm
-from ckeditor.fields import RichTextField
+from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 
 
 class Changelog(djm.Model):
     title = djm.TextField(max_length=100)
-    content = RichTextField()
+    content = MarkdownxField()
     date = djm.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+    @property
+    def content_html(self):
+        return markdownify(self.content)
 
 
 class Catchphrase(djm.Model):
