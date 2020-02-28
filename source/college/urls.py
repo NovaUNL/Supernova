@@ -31,5 +31,6 @@ urlpatterns = [
     path('curso/<int:course_id>/', views.course_view, name='course'),
     path('curso/<int:course_id>/alunos/', views.course_students_view, name='course_students'),
     path('curso/<int:course_id>/programa/', views.course_curriculum_view, name='course_curriculum'),
-    path('ac/class/', views.ClassAutocomplete.as_view(), name='class_ac'),
+    path('ac/class', views.ClassAutocomplete.as_view(), name='class_ac'),
+    path('ac/place', views.PlaceAutocomplete.as_view(), name='place_ac'),
 ]

@@ -168,6 +168,39 @@ def contact_view(request, group_abbr):
 
 
 @login_required
+def settings_view(request, group_abbr):
+    group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    context = build_base_context(request)
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_settings'
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Definições', 'url': reverse('groups:settings', args=[group_abbr])}]
+
+    permission_flags = permissions.get_user_group_permissions(request.user, group)
+    if not (permission_flags & permissions.IS_ADMIN):
+        context['title'] = context['msg_title'] = 'Insuficiência de permissões'
+        context['msg_content'] = 'O seu utilizador não tem permissões suficientes para mudar as definições do grupo.'
+        return render(request, 'supernova/message.html', context)
+
+    context['title'] = f'Definições de {group.name}'
+    context['group'] = group
+
+    if request.method == 'POST':
+        group_form = f.GroupForm(group, request.POST, instance=group)
+        if group_form.is_valid():
+            group_form.save()
+            return redirect('groups:group', group_abbr=group_abbr)
+    else:
+        group_form = f.GroupForm(group, instance=group)
+
+    context['group_form'] = group_form
+    return render(request, 'groups/settings.html', context)
+
+
+@login_required
 def roles_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     context = build_base_context(request)
@@ -188,15 +221,13 @@ def roles_view(request, group_abbr):
     context['title'] = f'Gerir cargos de {group.name}'
     context['group'] = group
     context['can_edit'] = permission_flags & permissions.CAN_MODIFY_ROLES
-
     if request.method == 'POST':
         membership_formset = f.GroupMembershipFormSet(
             request.POST,
             instance=group,
-            prefix="membership",
             queryset=group.member_roles)
-
         if membership_formset.is_valid():
+            # TODO forbid assignment of roles more permissive than the issuer has
             membership = membership_formset.save(commit=False)
             # Delete any tagged object
             for association in membership_formset.deleted_objects:
@@ -207,7 +238,6 @@ def roles_view(request, group_abbr):
     else:
         membership_formset = f.GroupMembershipFormSet(
             instance=group,
-            prefix="membership",
             queryset=group.member_roles)
 
     context['membership_formset'] = membership_formset
@@ -241,7 +271,7 @@ def role_view(request, group_abbr, role_id):
             form = f.RoleForm(request.POST)
             if form.is_valid():
                 form.save()
-                redirect('groups:roles', group_abbr=group_abbr)
+                return redirect('groups:roles', group_abbr=group_abbr)
         else:
             form = f.RoleForm()
             context['sub_nav'].append({'name': "Criar cargo", 'url': reverse('groups:role', args=[group_abbr, 0])})
@@ -251,7 +281,7 @@ def role_view(request, group_abbr, role_id):
             form = f.RoleForm(request.POST, instance=role)
             if form.is_valid():
                 form.save()
-                redirect('groups:roles', group_abbr=group_abbr)
+                return redirect('groups:roles', group_abbr=group_abbr)
         else:
             form = f.RoleForm(instance=role)
 

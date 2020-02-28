@@ -1,0 +1,89 @@
+{% extends 'supernova/base.html' %}
+{% block head %}
+  <style>
+    {% if  group.image.url %}
+      .header-decorator:after {
+        background-image: url("{{ group.image.url}}");
+        background-size: contain;
+        background-position: right;
+      }
+    {% endif %}
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>Definições de {{ group.name }}</h1>
+        <h3>@{{ group.abbreviation }}</h3>
+      </div>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Definições</h2></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'groups:settings' group.abbreviation %}">
+            {% csrf_token %}
+            {{ group_form.errors }}
+            <div class="form-block">
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Imagem</h4>
+                </div>
+                {{ group_form.image }}
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Descrição do grupo</h4>
+                </div>
+                <div class="form-row-description">
+                  {{ group_form.description }}
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Localização do grupo</h4>
+                  {{ group_form.place }}
+                </div>
+                <div class="form-row-description">
+                  Local a ser considerado a sede do grupo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Abertura</h4>
+                  {{ group_form.outsiders_openness }}
+                </div>
+                <div class="form-row-description">
+                  Capacidade dos utilizadores externos ao grupo de ganharem conhecimento e aderirem ao grupo.
+                  <ul>
+                    <li><b>Secreto</b>: O grupo não está listado em público.</li>
+                    <li><b>Fechado</b>: O grupo pode adicionar membros, os utilizadores não podem pedir.</li>
+                    <li><b>Convite</b>: Qualquer um pode pedir admissão.</li>
+                    <li><b>Aberto</b>: Qualquer um pode aderir ao grupo por iniciativa própria.</li>
+                  </ul>
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Cargo por defeito</h4>
+                  {{ group_form.default_role }}
+                </div>
+                <div class="form-row-description">
+                  Cargo a atribuir a novos membros que sejam resultado de auto-admissões.
+                </div>
+              </div>
+            </div>
+            <input class="ui-btn end" type="submit" value="Guardar"/>
+            {{ group_form.media }}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

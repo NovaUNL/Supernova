@@ -1,5 +1,6 @@
 from django.db import models as djm
 from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 
 from college.choice_types import WEEKDAY_CHOICES
 from college.models import Place
@@ -25,7 +26,7 @@ class Group(djm.Model):
     #: The members that are part of this group (belong to it).
     members = djm.ManyToManyField(User, through='Membership', related_name='memberships')
     #: The subscribers of this group (do not necessarily belong to it).
-    subscribers = djm.ManyToManyField(User, related_name='group_subscriptions')
+    subscribers = djm.ManyToManyField(User, blank=True, related_name='group_subscriptions')
     #: The place where this group is headquartered and commonly found.
     place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True)
     #: An image that presents this group.
@@ -79,6 +80,9 @@ class Group(djm.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def description_html(self):
+        return markdownify(self.description)
 
 class Role(djm.Model):
     """

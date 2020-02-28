@@ -488,3 +488,11 @@ class ClassAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__startswith=self.q)
         return qs
+
+
+class PlaceAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Place.objects.all()
+        if self.q:
+            qs = qs.filter(name__startswith=self.q)
+        return qs

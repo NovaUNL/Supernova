@@ -14,9 +14,10 @@ urlpatterns = [
     path('<str:group_abbr>/documentos/', views.documents_view, name='documents'),
     path('<str:group_abbr>/anuncios/', views.announcements_view, name='announcements'),
     path('<str:group_abbr>/membros/', views.members_view, name='members'),
+    path('<str:group_abbr>/definicoes/', views.settings_view, name='settings'),
     path('<str:group_abbr>/cargos/', views.roles_view, name='roles'),
     path('<str:group_abbr>/cargo/<int:role_id>', views.role_view, name='role'),
     path('anuncio/<str:announcement_id>/', views.announcement_view, name='announcement'),
     path('<str:group_abbr>/contactar/', views.contact_view, name='contact'),
-    path('group_role_ac', views.GroupRolesAutocomplete.as_view(), name='group_role_ac'),
+    path('ac/group_role', views.GroupRolesAutocomplete.as_view(), name='group_role_ac'),
 ]

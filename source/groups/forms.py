@@ -4,6 +4,21 @@ from groups import models as m
 from supernova.widgets import SliderInput
 
 
+class GroupForm(djf.ModelForm):
+    def __init__(self, group, *args, **kwargs):
+        super(GroupForm, self).__init__(*args, **kwargs)
+        self.fields['default_role'].queryset = group.roles
+
+    class Meta:
+        model = m.Group
+        fields = ('abbreviation', 'description', 'image', 'outsiders_openness', 'default_role', 'place')
+        exclude = ('abbreviation',)
+        widgets = {
+            'place': autocomplete.ModelSelect2(url='college:place_ac')
+        }
+
+
+# TODO audit the usage of this
 class RoleForm(djf.ModelForm):
     class Meta:
         model = m.Role
@@ -24,6 +39,7 @@ class RoleForm(djf.ModelForm):
             'can_change_schedule': SliderInput()}
 
 
+# TODO audit the usage of this
 class MembershipForm(djf.ModelForm):
     class Meta:
         model = m.Membership
@@ -33,4 +49,6 @@ class MembershipForm(djf.ModelForm):
             'role': autocomplete.ModelSelect2(url='groups:group_role_ac', forward=['group'])}
 
 
+# TODO figure how to limit a form field queryset through this
+# to prevent attacks such as asking for a role from other group
 GroupMembershipFormSet = djf.inlineformset_factory(m.Group, m.Membership, extra=3, form=MembershipForm)
