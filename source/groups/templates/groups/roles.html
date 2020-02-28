@@ -42,7 +42,7 @@
     <div class="col nowrap padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Cargos</h2></div>
-        <div class="pane-content">
+        <div class="pane-content col">
           <div style="overflow: auto">
             <table>
               <tr>
@@ -131,12 +131,13 @@
               {% endfor %}
             </table>
           </div>
+          <a class="ui-btn end" href="{% url 'groups:role' group.abbreviation 0 %}">Criar</a>
         </div>
       </div>
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Afiliações</h2></div>
         <div class="pane-content">
-          <form>
+          <form class="col" method="post" action="{% url 'groups:roles' group.abbreviation %}">
             {{ membership_formset.management_form }}
             <table>
               <thead>
@@ -146,15 +147,17 @@
               </thead>
               {% for form in membership_formset %}
                 <tr>
+                  {{ form.group }}
                   <td>{{ form.member }}</td>
                   <td>{{ form.role }}</td>
-                  {% if form.instance %}
+                  {% if form.instance.id %}
                     <td><a href="#{{ form.instance.member.nickname }}">Desassociar</a></td>{# TODO #}
                   {% endif %}
                 </tr>
               {% endfor %}
               {{ membership_formset.media }}
             </table>
+            <input class="ui-btn end" type="submit" value="Guardar">
           </form>
         </div>
       </div>

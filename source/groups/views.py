@@ -187,6 +187,7 @@ def roles_view(request, group_abbr):
 
     context['title'] = f'Gerir cargos de {group.name}'
     context['group'] = group
+    context['can_edit'] = permission_flags & permissions.CAN_MODIFY_ROLES
 
     if request.method == 'POST':
         membership_formset = f.GroupMembershipFormSet(

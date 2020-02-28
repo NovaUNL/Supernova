@@ -29,7 +29,7 @@
           {% endif %}
         </div>
         <div class="pane-content">
-          <form method="post" action="{% url 'groups:role' group.abbreviation role_id %}">
+          <form class="col" method="post" action="{% url 'groups:role' group.abbreviation role_id %}">
             {% csrf_token %}
             <div class="form-block">
               <h3>Informação</h3>
@@ -168,9 +168,9 @@
               </div>
             </div>
             {% if role %}
-              <input class="btn" type="submit" value="Atualizar"/>
+              <input class="ui-btn end" type="submit" value="Atualizar"/>
             {% else %}
-              <input class="btn" type="submit" value="Criar"/>
+              <input class="ui-btn end" type="submit" value="Criar"/>
             {% endif %}
           </form>
         </div>
