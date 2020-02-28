@@ -18,7 +18,6 @@ def transportation_upcoming(request):
         try:
             now = datetime.now()
             midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-            minutes = (now - midnight).seconds // 60
             departures = list(chain(mts.get_departure_times(), tst.get_departure_times()))
             curr_time = now.time()
             for departure in departures:
