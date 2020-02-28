@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django.db import models as djm
@@ -9,6 +10,8 @@ from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from users.models import User
 from . import choice_types as ctypes
 
+
+logger = logging.getLogger(__name__)
 
 class Student(djm.Model):
     user = djm.ForeignKey(User, null=True, on_delete=djm.CASCADE, related_name='students')
@@ -35,8 +38,19 @@ class Student(djm.Model):
     def update_yearspan(self):
         years = list(self.class_instances.distinct('year').values_list('year', flat=True))
         if len(years) > 0:
-            self.first_year = min(years)
-            self.last_year = max(years)
+            first_year = min(years)
+            last_year = max(years)
+            changed = False
+            if first_year != self.first_year:
+                logger.warning(f'First year changed from {self.first_year} to {first_year}')
+                self.first_year = first_year
+                changed = True
+            if last_year != self.last_year:
+                logger.warning(f'Last year changed from {self.last_year} to {last_year}')
+                self.last_year = last_year
+                changed = True
+            if changed:
+                self.save()
 
 
 class Area(djm.Model):
@@ -126,13 +140,13 @@ class Room(Place):
         # unique_together = ('name', 'building', 'type') inheritance forbids this
 
     def __str__(self):
-        return f'{ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
+        return f'{self.building.abbreviation} {self.name}'
 
     def long__str(self):
-        return f'{self.building}, {ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
+        return f'{self.building}, {ctypes.RoomType.CHOICES[self.type - 1][1]} {self.name}'
 
     def schedule_str(self):
-        return f'Ed {self.building.abbreviation}, {ctypes.RoomType.CHOICES[self.type-1][1]} {self.name}'
+        return f'Ed {self.building.abbreviation}, {ctypes.RoomType.CHOICES[self.type - 1][1]} {self.name}'
 
 
 class Course(djm.Model):
@@ -208,7 +222,10 @@ class ClassInstance(djm.Model):
         return f"{self.parent.abbreviation}, {self.period} de {self.year}"
 
     def occasion(self):
-        return f'{ctypes.Period.CHOICES[self.period-1][1]}, {self.year-1}/{self.year}'
+        return f'{ctypes.Period.CHOICES[self.period - 1][1]}, {self.year - 1}/{self.year}'
+
+    def short_occasion(self):
+        return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
 
 
 class Enrollment(djm.Model):
