@@ -1,15 +1,30 @@
-{% extends 'supernova/content_only.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
-{% block content %}
-    <h1>{{ announcement.title }}</h1>
-    <p>{{ announcement.announcement }}</p>
-    <hr>
-    Colocado ás {{ announcement.datetime }} por
-    <a href="{% url 'users:profile' announcement.announcer.nickname %}">{{ announcement.announcer.name }}</a>
-{% endblock %}
-
-{% block navigation %}
-    {% include 'groups/navigation.html' %}
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>Anúncios por {{ group.name }}</h1>
+        <h3>@{{ group.abbreviation }}</h3>
+      </div>
+    </div>
+    <div class="row nowrap padded">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>{{ announcement.title }}</h2></div>
+          <div class="pane-content">
+            {{ announcement.content_html|safe }}
+            <hr>
+            Colocado em {{ announcement.datetime }} por
+            <a href="{% url 'users:profile' announcement.author.nickname %}">{{ announcement.author.get_full_name }}</a>
+          </div>
+        </div>
+      </div>
+      <div class="col nogrow noshrink">
+        {% include 'groups/navigation.html' %}
+      </div>
+    </div>
+  </div>
 {% endblock %}

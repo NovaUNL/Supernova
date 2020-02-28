@@ -23,7 +23,7 @@ def roles_combined(roles):
     permissions = 0
     for role in roles:
         if role.is_admin:
-            permissions = 11111111111
+            permissions = (1 << 12) - 1
         if role.can_modify_roles:
             permissions = permissions | CAN_MODIFY_ROLES
         if role.can_assign_roles:

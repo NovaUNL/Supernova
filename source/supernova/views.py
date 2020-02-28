@@ -10,6 +10,7 @@ from services.utils import get_next_meal_items
 from supernova.models import Changelog, Catchphrase
 from news.models import NewsItem
 from college import models as college
+from groups import models as groups
 
 
 def index(request):
@@ -39,6 +40,10 @@ def index(request):
         .exclude(Q(turn_instances__start__lt=minutes) & Q(turn_instances__end__gt=minutes)) \
         .distinct('building__abbreviation', 'name')
 
+    context['activities'] = groups.Activity.objects \
+                                .select_related('group', 'announcement') \
+                                .order_by('datetime') \
+                                .reverse()[:5]
     return render(request, 'supernova/index.html', context)
 
 

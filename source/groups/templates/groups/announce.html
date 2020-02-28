@@ -1,0 +1,58 @@
+{% extends 'supernova/base.html' %}
+{% block head %}
+  <style>
+    {% if  group.image.url %}
+      .header-decorator:after {
+        background-image: url("{{ group.image.url}}");
+        background-size: contain;
+        background-position: right;
+      }
+    {% endif %}
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>Anúnciar em {{ group.name }}</h1>
+        <h3>@{{ group.abbreviation }}</h3>
+      </div>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Anúnciar</h2></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'groups:announce' group.abbreviation %}">
+            {% csrf_token %}
+            {{ form.errors }}
+            <div class="form-block">
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Título</h4>
+                </div>
+                {{ form.title }}
+                <div class="form-row-description">
+                  Descrição <b>curta e clara</b> o suficiente para dar a entender do que se trata o conteúdo.<br>
+                  Poderá constar em locais espacialmente limitados (como numa notificação).
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Conteúdo</h4>
+                </div>
+                <div class="form-row-description">
+                  Informação anúnciar, verbosa se necessário.
+                </div>
+                {{ form.content }}
+              </div>
+            </div>
+            <input class="ui-btn end" type="submit" value="Guardar"/>
+            {{ form.media }}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

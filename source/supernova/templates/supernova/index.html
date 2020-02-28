@@ -27,34 +27,53 @@
         </div>
       </div>
       <div class="row">
-        <div class="flex-pane grow small">
-          <div class="pane-title bg-grad"><h2>Atividade</h2></div>
-          <div class="pane-content">
-            <img src="{% static 'img/construction.png' %}" width="300px">
-          </div>
-        </div>
-        <div class="flex-pane grow small">
-          <div class="pane-title bg-grad"><h2>Alterações</h2></div>
-          <div class="pane-content">
-            <img src="{% static 'img/construction.png' %}" width="300px">
-          </div>
-        </div>
-        <div class="flex-pane grow small">
-          <div class="pane-title bg-grad"><h2>Salas <b>talvez</b> vazias</h2></div>
-          <div class="pane-content">
-            <div class="pane-content room-list">
-              {% for room in free_rooms %}
-                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
-                  {{ room }}
-                </a>
+        <div class="col noshrink">
+          <div class="flex-pane grow small">
+            <div class="pane-title bg-grad"><h2>Atividade</h2></div>
+            <div class="pane-content">
+              {% for activity in activities %}
+                {% if activity.announcement %}
+                  <div>
+                    <a href="{% url 'groups:announcement' activity.group.abbreviation activity.id %}">
+                      <h4>{{ activity.announcement.title }}</h4>
+                    </a>
+                  </div>
+                  <div>
+                    <span class="ui-tag green">Anúncio</span> Por
+                    <a href="{% url 'groups:group' activity.group.abbreviation %}">@{{ activity.group.abbreviation }}</a>,
+                    {{ activity.datetime|date:'Y/m/d H:i' }}
+                  </div>
+                {% else %}
+                  {{ activity }}
+                {% endif %}
               {% endfor %}
             </div>
           </div>
+          <div class="flex-pane grow small">
+            <div class="pane-title bg-grad"><h2>Eventos</h2></div>
+            <div class="pane-content">
+              <img src="{% static 'img/construction.png' %}" width="300px">
+            </div>
+          </div>
         </div>
-        <div class="flex-pane grow small">
-          <div class="pane-title bg-grad"><h2>Eventos</h2></div>
-          <div class="pane-content">
-            <img src="{% static 'img/construction.png' %}" width="300px">
+        <div class="col noshrink">
+          <div class="flex-pane grow small">
+            <div class="pane-title bg-grad"><h2>Salas <b>talvez</b> vazias</h2></div>
+            <div class="pane-content">
+              <div class="pane-content room-list">
+                {% for room in free_rooms %}
+                  <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
+                    {{ room }}
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="flex-pane grow small">
+            <div class="pane-title bg-grad"><h2>Alterações</h2></div>
+            <div class="pane-content">
+              <img src="{% static 'img/construction.png' %}" width="300px">
+            </div>
           </div>
         </div>
       </div>
@@ -65,7 +84,7 @@
           <h2>Transportes</h2>
         </div>
         <div id="transportation-widget" class="pane-content">
-          <img class="spinner" src="{% static 'img/spinner.svg'%}">
+          <img class="spinner" src="{% static 'img/spinner.svg' %}">
         </div>
       </div>
       <div class="flex-pane">

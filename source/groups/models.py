@@ -84,6 +84,7 @@ class Group(djm.Model):
     def description_html(self):
         return markdownify(self.description)
 
+
 class Role(djm.Model):
     """
     | A role is both a title for users within a group and a set of permissions within that same group.
@@ -159,6 +160,10 @@ class Announcement(Activity):
 
     def __str__(self):
         return self.title
+
+    @property
+    def content_html(self):
+        return markdownify(self.content)
 
 
 class ScheduleEntry(djm.Model):

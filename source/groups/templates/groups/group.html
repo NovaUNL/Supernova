@@ -31,9 +31,19 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Atividade</h2></div>
           <div class="pane-content">
-            {% for announcement in announcements %}
-              <a href="{% url 'groups:announcement' announcement.id %}">{{ announcement.title }}</a> em
-              {{ announcement.datetime }}
+            {% if not activities.exists %}
+              Este grupo é tímido. Nunca participou... :(
+            {% endif %}
+            {% for activity in activities %}
+              {% if activity.announcement %}
+                {{ activity.datetime|date:'Y/m/d H:i' }}:
+                <a href="{% url 'groups:announcement' group.abbreviation activity.id %}">
+                  {{ activity.announcement.title }}
+                </a>
+                <span class="ui-tag green">Anúncio</span>
+              {% else %}
+                {{ activity }}
+              {% endif %}
             {% endfor %}
           </div>
         </div>
@@ -45,6 +55,7 @@
           <div class="pane-content">
             <ul>
               <li>Membros: {{ group.members.count }}</li>
+              <li>Fundação: ???</li>
               <li>
                 {% if group.outsiders_openness <= group.CLOSED_PRIVATE %}
                   Admissão por convite
@@ -72,7 +83,9 @@
               {% if group.outsiders_openness <= group.CLOSED %}
                 <li><a>Solicitar admissão</a></li>
               {% endif %}
+              <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>
               <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>
+              <li><a href="#">Alterar horários</a></li>
               <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>
             </ul>
           </div>

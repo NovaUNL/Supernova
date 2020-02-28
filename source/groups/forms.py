@@ -11,8 +11,7 @@ class GroupForm(djf.ModelForm):
 
     class Meta:
         model = m.Group
-        fields = ('abbreviation', 'description', 'image', 'outsiders_openness', 'default_role', 'place')
-        exclude = ('abbreviation',)
+        fields = ('description', 'image', 'outsiders_openness', 'default_role', 'place')
         widgets = {
             'place': autocomplete.ModelSelect2(url='college:place_ac')
         }
@@ -52,3 +51,9 @@ class MembershipForm(djf.ModelForm):
 # TODO figure how to limit a form field queryset through this
 # to prevent attacks such as asking for a role from other group
 GroupMembershipFormSet = djf.inlineformset_factory(m.Group, m.Membership, extra=3, form=MembershipForm)
+
+
+class AnnounceForm(djf.ModelForm):
+    class Meta:
+        model = m.Announcement
+        fields = ('title', 'content')

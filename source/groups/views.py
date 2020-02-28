@@ -69,10 +69,10 @@ def communities_view(request):
 def group_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     context = build_base_context(request)
-    context['title'] = m.Group.name
+    context['title'] = group.name
     context['group'] = group
     context['pcode'], nav_type = resolve_group_type(group)
-    context['announcements'] = m.Announcement.objects.filter(group=group).order_by('datetime').reverse()[:5]
+    context['activities'] = m.Activity.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
@@ -87,6 +87,7 @@ def announcements_view(request, group_abbr):
     context['group'] = group
     context['pcode'], nav_type = resolve_group_type(group)
     context['announcements'] = m.Announcement.objects.filter(group=group).order_by('datetime').reverse()
+    print(context['announcements'])
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
@@ -95,8 +96,8 @@ def announcements_view(request, group_abbr):
     return render(request, 'groups/announcements.html', context)
 
 
-def announcement_view(request, announcement_id):
-    announcement = get_object_or_404(m.Announcement, id=announcement_id)
+def announcement_view(request, group_abbr, announcement_id):
+    announcement = get_object_or_404(m.Announcement, id=announcement_id, group__abbreviation=group_abbr)
     group = announcement.group
     context = build_base_context(request)
     context['title'] = announcement.title
@@ -112,6 +113,42 @@ def announcement_view(request, announcement_id):
         {'name': 'Anúncios', 'url': reverse('groups:announcements', args=[group.id])},
         {'name': announcement.title, 'url': reverse('groups:announcement', args=[group.id, announcement.id])}]
     return render(request, 'groups/announcement.html', context)
+
+
+@login_required
+def announce_view(request, group_abbr):
+    group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    context = build_base_context(request)
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_announce'
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Anunciar', 'url': reverse('groups:announce', args=[group_abbr])}]
+
+    permission_flags = permissions.get_user_group_permissions(request.user, group)
+    if not (permission_flags & permissions.CAN_ANNOUNCE):
+        context['title'] = context['msg_title'] = 'Insuficiência de permissões'
+        context['msg_content'] = 'O seu utilizador não tem permissões suficientes para anúnciar pelo grupo.'
+        return render(request, 'supernova/message.html', context)
+
+    context['title'] = f'Anúnciar por {group.name}'
+    context['group'] = group
+
+    if request.method == 'POST':
+        form = f.AnnounceForm(request.POST)
+        if form.is_valid():
+            announcement = form.save(commit=False)
+            announcement.group = group
+            announcement.author = request.user
+            announcement.save()
+            return redirect('groups:announcement', group_abbr=group_abbr, announcement_id=announcement.id)
+    else:
+        form = f.AnnounceForm()
+
+    context['form'] = form
+    return render(request, 'groups/announce.html', context)
 
 
 def documents_view(request, group_abbr):
