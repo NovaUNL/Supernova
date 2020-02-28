@@ -76,7 +76,7 @@ def group_view(request, group_abbr):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': m.Group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])}]
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])}]
     return render(request, 'groups/group.html', context)
 
 
@@ -90,7 +90,7 @@ def announcements_view(request, group_abbr):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': m.Group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Anúncios', 'url': reverse('groups:announcements', args=[group_abbr])}]
     return render(request, 'groups/announcements.html', context)
 
@@ -108,7 +108,7 @@ def announcement_view(request, announcement_id):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': m.Group.abbreviation, 'url': reverse('groups:group', args=[group.id])},
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group.id])},
         {'name': 'Anúncios', 'url': reverse('groups:announcements', args=[group.id])},
         {'name': announcement.title, 'url': reverse('groups:announcement', args=[group.id, announcement.id])}]
     return render(request, 'groups/announcement.html', context)
@@ -125,7 +125,7 @@ def documents_view(request, group_abbr):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': m.Group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Documentos', 'url': reverse('groups:documents', args=[group_abbr])}]
     return render(request, 'groups/documents.html', context)
 
@@ -144,7 +144,7 @@ def members_view(request, group_abbr):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': m.Group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Membros', 'url': reverse('groups:members', args=[group_abbr])}]
     return render(request, 'groups/members.html', context)
 
@@ -162,7 +162,7 @@ def contact_view(request, group_abbr):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': m.Group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Contactar', 'url': reverse('groups:contact', args=[group_abbr])}]
     return render(request, 'groups/conversations.html', context)
 
