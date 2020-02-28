@@ -26,11 +26,11 @@
             </div>
             <div class="flex-grid-item-bottom">
               <div>
-                <img src="{% static 'supernova/images/users.svg' %}">
+                <img src="{% static 'img/icons/users.svg' %}">
                 {{ group.members.count }}
               </div>
               {% if group.non_member_permission < group.OPEN %}
-                <img src="{% static 'supernova/images/locked.svg' %}">
+                <img src="{% static 'img/icons/locked.svg' %}">
               {% endif %}
             </div>
           </div>
@@ -39,65 +39,3 @@
     {% endfor %}
   </div>
 {% endblock %}
-
-
-{#{% block content-top %}#}
-{#  <nav id="top-container">#}
-{#    <a class="menu-entry selected">Filtrar:</a>#}
-{#    {% for type in group_types %}#}
-{#      {% if type_filter == type.0 %}#}
-{#        <a class="menu-entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
-{#      {% else %}#}
-{#        <a class="menu-entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
-{#      {% endif %}#}
-{#    {% endfor %}#}
-{#  </nav>#}
-{#{% endblock %}#}
-{##}
-{#{% block content %}#}
-{#  <div class="content-formatter">#}
-{#    <h1><i class="fas fa-users"></i> Grupos</h1>#}
-{#    <div class="flex-wrapper">#}
-{#      {% for group in groups %}#}
-{#        {% if not type_filter or group.type == type_filter %}#}
-{#          <a href="{% url 'group' group.id %}">#}
-{#            <div class="flex-grid-item"#}
-{#                 style="background-image: url('{% get_media_prefix %}{{ group.image }}')">#}
-{#              <div class="flex-grid-item-top">#}
-{#                {% if group.abbreviation %}#}
-{#                  <span>{{ group.abbreviation }}</span>#}
-{#                {% else %}#}
-{#                  <span>{{ group.name }}</span>#}
-{#                {% endif %}#}
-{#              </div>#}
-{#              <div class="flex-grid-item-bottom">#}
-{#                {% if group.non_member_permission < group.OPEN %}#}
-{#                {% else %}#}
-{#                {% endif %}&nbsp;#}
-{#                {{ group.members.count }}#}
-{#                0#}
-{#              </div>#}
-{#            </div>#}
-{#          </a>#}
-{#        {% endif %}#}
-{#      {% endfor %}#}
-{#    </div>#}
-{#  </div>#}
-{#{% endblock %}#}
-{##}
-{#{% block navigation %}#}
-{#  {% if type_filter %}#}
-{#    <a class="menu-entry" href=".">Todos os grupos</a>#}
-{#  {% else %}#}
-{#    <a class="menu-entry selected">Todos os grupos</a>#}
-{#  {% endif %}#}
-{#  <br><br>#}
-{#  <span style="font-size: 1.2em; font-weight: bold;">Filtro:</span>#}
-{#  {% for type in group_types %}#}
-{#    {% if type_filter == type.0 %}#}
-{#      <a class="menu-entry selected" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
-{#    {% else %}#}
-{#      <a class="menu-entry" href="?filtro={{ type.0 }}">{{ type.1 }}</a>#}
-{#    {% endif %}#}
-{#  {% endfor %}#}
-{#{% endblock %}#}

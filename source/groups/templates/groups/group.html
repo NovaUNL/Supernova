@@ -10,7 +10,6 @@
       }
     {% endif %}
   </style>
-
 {% endblock %}
 
 {% block content_wrapper %}
@@ -18,7 +17,7 @@
     <div class="header-decorator">
       <div>
         <h1>{{ group.name }}</h1>
-        {% if group.abbreviation %}<h3>@{{ group.abbreviation }}</h3>{% endif %}
+        <h3>@{{ group.abbreviation }}</h3>
       </div>
     </div>
     <div class="row nowrap padded">
@@ -26,7 +25,7 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Quem somos</h2></div>
           <div class="pane-content" style="flex-basis: 100px; flex-shrink: 100">
-            <p>{{ group.description }}</p>
+            <p>{{ group.description_html | safe }}</p>
           </div>
         </div>
         <div class="flex-pane">
@@ -42,33 +41,40 @@
       <div class="col nogrow noshrink">
         {% include 'groups/navigation.html' %}
         <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-title bg-grad"><h2>Sobre</h2></div>
           <div class="pane-content">
             <ul>
-              <li>Membros: 123</li>
-              <li>Admissões: Por convite</li>
+              <li>Membros: {{ group.members.count }}</li>
+              <li>
+                {% if group.outsiders_openness <= group.CLOSED_PRIVATE %}
+                  Admissão por convite
+                {% elif group.outsiders_openness == group.OPEN %}
+                  <a>Entrar</a>
+                {% else %}
+                  Admissão por convite
+                {% endif %}
+              </li>
+              <li>
+                {% if group.location %}
+                  {{ group.location }}
+                {% else %}
+                  Sem localização associada
+                {% endif %}
+              </li>
             </ul>
           </div>
         </div>
-        {% if group.location or 1 %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Localização</h2></div>
-            <div class="pane-content">
-              {{ group.location }}
-            </div>
-          </div>
-        {% endif %}
         <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Administração</h2></div>
+          <div class="pane-title bg-grad"><h2>Ações</h2></div>
           <div class="pane-content">
-            <a class="menu-entry"> Subscrever</a>
-            {% if group.non_member_permission <= group.CLOSED_PRIVATE %}
-              <a class="menu-entry selected">Admissão por convite</a>
-            {% elif group.non_member_permission == group.OPEN %}
-              <a class="menu-entry">Entrar</a>
-            {% else %}
-              <a class="menu-entry">Solicitar admissão</a>
-            {% endif %}
+            <ul class="menu">
+              <li><a> Subscrever</a></li>
+              {% if group.outsiders_openness <= group.CLOSED %}
+                <li><a>Solicitar admissão</a></li>
+              {% endif %}
+              <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>
+              <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>
+            </ul>
           </div>
         </div>
       </div>
