@@ -23,7 +23,7 @@
     <span style="font-weight: bold">Adicionar: </span>
     <select name="section" required id="id_area" data-autocomplete-light-url="/sinteses/ac/section/"
             data-autocomplete-light-function="select2" onchange="newItem(this);"></select>
-    <a class="generic-button save-button" href="javascript:save(sorter, '/api/synopses/topic/{{ topic.id}}/');">Guardar</a>
+    <a class="ui-btn save-button" href="javascript:save(sorter, '/api/synopses/topic/{{ topic.id}}/');">Guardar</a>
     <br><span>Psst: Arrastar para reordenar</span>
     <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
     <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
