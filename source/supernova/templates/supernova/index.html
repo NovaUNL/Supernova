@@ -7,7 +7,7 @@
     <div class="col">
       <div class="flex-pane">
         <div class="pane-title bg-grad">
-          <h2>Notícias</h2>
+          <h2><a href="{% url 'news:index' %}">Notícias</a></h2>
         </div>
         <div class="pane-content news">
           {% for news_item in news %}
@@ -26,9 +26,9 @@
           {% endfor %}
         </div>
       </div>
-      <div class="row">
-        <div class="col noshrink">
-          <div class="flex-pane grow small">
+      <div class="row grow">
+        <div class="col grow noshrink">
+          <div class="flex-pane grow">
             <div class="pane-title bg-grad"><h2>Atividade</h2></div>
             <div class="pane-content">
               {% for activity in activities %}
@@ -49,25 +49,25 @@
               {% endfor %}
             </div>
           </div>
-          <div class="flex-pane grow small">
+          <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Eventos</h2></div>
             <div class="pane-content construction"></div>
           </div>
         </div>
-        <div class="col noshrink">
-          <div class="flex-pane grow small">
-            <div class="pane-title bg-grad"><h2>Salas <b>talvez</b> vazias</h2></div>
-            <div class="pane-content">
-              <div class="pane-content room-list">
-                {% for room in free_rooms %}
-                  <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
-                    {{ room }}
-                  </a>
-                {% endfor %}
-              </div>
+        <div class="col noshrink" style="max-width: 500px">
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2><a href="{% url 'college:available_places' %}">Salas <b>talvez</b> vazias</a></h2>
+            </div>
+            <div class="pane-content room-list">
+              {% for room in free_rooms %}
+                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
+                  {{ room }}
+                </a>
+              {% endfor %}
             </div>
           </div>
-          <div class="flex-pane grow small">
+          <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Alterações</h2></div>
             <div class="pane-content">
               {% for entry in changelog %}
