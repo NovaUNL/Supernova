@@ -19,66 +19,197 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Informação pessoal</h2></div>
         <div class="pane-content">
-          <form action="{% url 'users:settings' user.nickname %}" method="post" enctype="multipart/form-data">
+          <form class="col" action="{% url 'users:settings' user.nickname %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ settings_form.errors }}
-            <div class="flex-wrapper">
-              <div style="flex-basis: 500px;">
-                {{ settings_form.picture.label }}<br>
-                {% if user.picture %}
-                  <img src="{% get_media_prefix %}{{ user.picture }}"
-                       style="max-width: 500px; max-height: 300px;"><br>
-                {% endif %}
-                Alterar foto: {{ settings_form.picture }}
+            <div class="form-block">
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Alcunha (Opcional)</h4>
+                  {{ settings_form.nickname }}
+                </div>
+                <div class="form-row-description">
+                  Um identificador da tua conta para os restantes utilizadores.<br>
+                  Pode ou não ser o nome de utilizador da conta.
+                  Não pode conter espaços ou carateres especiais.
+                  Só pode ser alterada uma vez a cada 6 meses.
+                </div>
               </div>
-              <span class="flex-line-break"></span>
-              <div style="flex-basis: 200px;">
-                {{ settings_form.nickname.label }}: {{ settings_form.nickname }}
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Foto (Opcional)</h4>
+                </div>
+                <div class="form-row-description">
+                  Uma imagem do teu agrado, preferêncialmente tua, que aches que te representa ou torna
+                  identificavel perante os restantes.
+                </div>
+                <div style="display: flex">
+                  {% if user.picture %}
+                    <div style="margin-right: 10px">
+                      Fotografia atual:<br>
+                      <img alt="Fotografia de perfil" src="{% get_media_prefix %}{{ user.picture }}"
+                           style="max-width: 500px; max-height: 300px;">
+                    </div>
+                  {% endif %}
+                  {{ settings_form.picture }}
+                </div>
               </div>
-              <div style="flex-basis: 200px;">
-                {{ settings_form.residence.label }}: {{ settings_form.residence }}
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Sobre mim (Opcional)</h4>
+                </div>
+                <div class="form-row-description">
+                  Um texto que te descreva. Podes utilizar markdown na escrita.<br>
+                  Não podes colocar links externos nem conteúdo de legalidade dúbia.
+                </div>
+                {{ settings_form.about }}
               </div>
-              <div style="flex-basis: 250px;">
-                {{ settings_form.birth_date.label }}:<br>{{ settings_form.birth_date }}
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Residência (Opcional)</h4>
+                  {{ settings_form.residence }}
+                </div>
+                <div class="form-row-description">
+                  O teu local de habitação, com a especificidade que quiseres. (tanto "Lisboa" como "Cova da Piedade,
+                  Almada" está bom).<br>
+                  Não sejas demasiado especifico sob pena de ganhares amigos novos à porta.
+                </div>
               </div>
-              <div>
-                {{ settings_form.webpage.label }}:<br>{{ settings_form.webpage }}
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Página Web (Opcional)</h4>
+                  {{ settings_form.webpage }}
+                </div>
+                <div class="form-row-description">
+                  A tua página pessoal na internet.
+                  É uma pagina do teu controlo, não uma rede social ou site de apostas em que participas.<br>
+                  É mandatório que respeite a lei (p.ex RGPD).
+                </div>
               </div>
-              <span class="flex-line-break"></span>
-              <div>{{ settings_form.gender.1 }} </div>
-              <div>{{ settings_form.gender.2 }} </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Data de nascimento (Opcional)</h4>
+                  <div>{{ settings_form.birth_date }}</div>
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Genero (Opcional)</h4>
+                  <div>
+                    {{ settings_form.gender.0 }}
+                    {{ settings_form.gender.1 }}
+                    {{ settings_form.gender.2 }}
+                    {{ settings_form.gender.3 }}
+                  </div>
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade do perfil</h4>
+                  {{ settings_form.profile_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode abrir a tua página de perfil.<br>
+                  Por si só, esta permissão apenas revela o teu nome completo.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade de descritivos</h4>
+                  {{ settings_form.info_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode ver o teu painel de informação.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade da auto-descrição</h4>
+                  {{ settings_form.about_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode ver a tua auto-descrição.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade das redes sociais</h4>
+                  {{ settings_form.social_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode ver as tuas redes sociais.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade das filiações</h4>
+                  {{ settings_form.groups_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode ver os grupos dos quais fazes parte.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade das inscrições</h4>
+                  {{ settings_form.enrollments_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode ver as tuas inscrições.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Visibilidade do horário</h4>
+                  {{ settings_form.schedule_visibility }}
+                </div>
+                <div class="form-row-description">
+                  Indica quem é que pode ver o teu horário. Afetado pela permissão anterior.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Mudar palavra-passe (Opcional)</h4>
+                  <div>Nova: {{ settings_form.new_password }}
+                    Confirmação: {{ settings_form.new_password_confirmation }}</div>
+                </div>
+                <div class="form-row-description">Preenche caso queiras alterar a tua palavra-passe.</div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Palavra-passe atual</h4>
+                  {{ settings_form.old_password }}
+                </div>
+                <div class="form-row-description">
+                  Insere a tua palavra-passe para confirmares que és tu quem está a fazer as alterações.
+                </div>
+              </div>
             </div>
-            <input type="submit" value="Aplicar alterações">
+            <input class="ui-btn end" type="submit" value="Guardar">
+            {{ settings_form.media }}
           </form>
         </div>
       </div>
 
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Privacidade</h2></div>
-        <div class="pane-content">
-          <div style="float: left;">Visibilidade do perfil: {{ settings_form.profile_visibility }}</div>
-          <div class="hint" style="float:left">
-            <button>Ver níveis de visibilidade</button>
-            <ul class="hint-hidden">
-              <li>Um perfil <b>oculto</b> é invisível para toda a gente.</li>
-              <li>Um perfil <b>limitado</b> mostra alguma informação a outros utilizadores.</li>
-              <li>Um perfil para <b>utilizadores</b> mostra tudo o que fizeres a outros utilizadores.</li>
-              <li>Um perfil <b>misto</b> permite aos utilizadores ver tudo, e aos visitantes ver alguma
-                informação.
-              </li>
-              <li>Um perfil <b>público</b> permite a toda a gente, visitantes e utilizadores, ver tudo o
-                que fizeres.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Redes sociais</h2></div>
         <div class="pane-content">
-          <div class="settings">
+          <div>
             <ul id="social-network-list">
             </ul>
             <select id="network">
@@ -87,28 +218,16 @@
               {% endfor %}
             </select>
             <input id="network-link" type="text" placeholder="Endreço do perfil">
-            <input type="button" value="Adicionar" onclick="addNetwork()">
+            <input type="button" value="Adicionar" onclick="addNetwork()"><br>
+            Entra em contacto connosco caso aches que falta alguma plataforma que queiras adicionar.<br>
+            Tem em conta que não vamos adicionar plataformas parasiticas cujo modelo de negócio seja o comércio de dados
+            privados.
           </div>
           <script>
               let apiURL = "{% url 'social_networks' user.nickname %}";
               populateSocialNetworks(apiURL, edit = true);
           </script>
           <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
-        </div>
-      </div>
-
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Alterar palavra-passe</h2></div>
-        <div class="pane-content">
-          <div class="settings flex-wrapper">
-            <div class="flex-wrapper">
-              <div> {{ password_change_form.password.label }}{{ password_change_form.password }}</div>
-              <div>
-                {{ password_change_form.password_confirmation.label }}{{ password_change_form.password_confirmation }}</div>
-              <div> {{ password_change_form.old_password.label }}{{ password_change_form.old_password }}</div>
-            </div>
-            <input type="submit" value="Alterar palavra-passe">
-          </div>
         </div>
       </div>
     </div>

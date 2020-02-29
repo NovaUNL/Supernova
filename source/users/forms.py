@@ -1,5 +1,6 @@
 import hashlib
 import re
+from datetime import datetime
 
 from captcha.fields import CaptchaField
 from django import forms
@@ -11,6 +12,8 @@ from college.models import Student
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.utils import password_strength, correlated
 from users.models import User, Registration, VulnerableHash
+
+NICKNAME_EXP = re.compile('^[\da-zA-Z-_.]+$')
 
 default_errors = {
     'required': 'Este campo é obrigatório',
@@ -77,24 +80,10 @@ class RegistrationForm(forms.ModelForm):
         }
 
     def clean_password(self):
-        password = self.cleaned_data["password"]
-        if correlated(self.data['username'], password, threshold=0.3):  # TODO magic number to settings
-            raise forms.ValidationError("Password demasiado similar à credencial")
-
-        if correlated(self.data['nickname'], password, threshold=0.3):
-            raise forms.ValidationError("Password demasiado similar à alcunha")
-
-        if password_strength(password) < 5:
-            raise forms.ValidationError("A password é demasiado fraca. "
-                                        "Mistura maiusculas, minusculas, numeros e pontuação.")
-        if len(password) < 7:
-            raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
-
-        if VULNERABILITY_CHECKING:
-            sha1 = hashlib.sha1(password.encode()).hexdigest().upper()  # Produces clean SHA1 of the password
-            if VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
-                # Refuse the vulnerable password and tell user about it
-                raise forms.ValidationError('Password vulneravel. Espreita a FAQ.')
+        password = clean_password(
+            self.cleaned_data["username"],
+            self.cleaned_data["nickname"],
+            self.cleaned_data["password"])
         return password
 
     def clean_password_confirmation(self):
@@ -147,6 +136,10 @@ class RegistrationForm(forms.ModelForm):
         if nickname is None or nickname == '':
             nickname = self.data["username"]
         users = User.objects.filter(nickname=nickname)
+
+        if not NICKNAME_EXP.fullmatch(nickname):
+            raise forms.ValidationError("Foram utilizados carateres especiais.")
+
         if users.exists():
             raise forms.ValidationError(f"Já existe um utilizador com a alcunha {nickname}.")
         return nickname
@@ -185,63 +178,101 @@ class RegistrationValidationForm(forms.ModelForm):
 
 
 class AccountSettingsForm(forms.ModelForm):
-    password = forms.CharField(label='Palavra-passe atual (confirmação)', widget=forms.PasswordInput(),
-                               required=True, error_messages=default_errors)
+    new_password = forms.CharField(widget=forms.PasswordInput(), required=False, error_messages=default_errors)
+    new_password_confirmation = forms.CharField(widget=forms.PasswordInput(), required=False,
+                                                error_messages=default_errors)
+    old_password = forms.CharField(widget=forms.PasswordInput(), required=True, error_messages=default_errors)
 
     class Meta:
         model = User
-        fields = ('nickname', 'birth_date', 'residence', 'profile_visibility', 'gender', 'picture', 'webpage')
+        fields = ('nickname', 'birth_date', 'residence', 'gender', 'picture', 'webpage', 'about',
+                  'profile_visibility', 'info_visibility', 'about_visibility', 'social_visibility', 'groups_visibility',
+                  'enrollments_visibility', 'schedule_visibility')
         widgets = {
-            'nickname': forms.TextInput(),
-            'residence': forms.TextInput(),
-            'webpage': forms.TextInput(),
             'gender': forms.RadioSelect(),
             'picture': forms.FileInput(),
-            'birth_date': forms.SelectDateWidget(years=range(1950, 2000))
+            'birth_date': forms.SelectDateWidget(years=range(1950, 2005))
         }
 
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        # TODO
-        return password
+    def clean_nickname(self):
+        nickname = self.cleaned_data["nickname"]
+        if self.instance.nickname == nickname:
+            return nickname
 
+        days_since_change = (datetime.now().date() - self.instance.last_nickname_change).days
+        if days_since_change < 180:
+            raise forms.ValidationError(f"Mudou a sua alcunha há menos de 6 meses (passaram {days_since_change} dias)")
 
-class PasswordChangeForm(forms.Form):
-    password = forms.CharField(label='Nova palavra-passe', widget=forms.PasswordInput(), required=False,
-                               error_messages=default_errors)
-    password_confirmation = forms.CharField(label='Confirmação', widget=forms.PasswordInput(), required=False,
-                                            error_messages=default_errors)
-
-    old_password = forms.CharField(label='Palavra-passe atual', widget=forms.PasswordInput(), required=True,
-                                   error_messages=default_errors)
+        if not NICKNAME_EXP.fullmatch(nickname):
+            raise forms.ValidationError("Foram utilizados carateres especiais.")
+        return nickname
 
     def clean_old_password(self):
-        pass  # TODO
+        if 'old_password' not in self.cleaned_data or self.cleaned_data['old_password'] == '':
+            raise forms.ValidationError("A palavra-passe antiga ficou por preencher.")
+        if not self.instance.check_password(self.data["old_password"]):
+            raise forms.ValidationError("A palavra-passe está incorreta.")
 
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        if len(password) < 7:
-            raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
+    def clean_new_password(self):
+        if 'new_password' not in self.cleaned_data:
+            return None
+        password = self.cleaned_data['new_password']
+        if password == '':
+            return None
 
-        if password_strength(password) < 5:
-            raise forms.ValidationError("A password é demasiado fraca. "
-                                        "Mistura maiusculas, minusculas, numeros e pontuação.")
+        password = clean_password(
+            self.instance.username,
+            self.instance.nickname,
+            self.cleaned_data["new_password"])
         return password
 
-    def clean_password_confirmation(self):
-        password_confirmation = self.cleaned_data["password_confirmation"]
-        if self.cleaned_data["password"] != password_confirmation:
-            raise forms.ValidationError("As palavas-passe não coincidem.")
-        return password_confirmation
+    def clean_new_password_confirmation(self):
+        if "new_password" not in self.cleaned_data:
+            if "new_password_confirmation" not in self.cleaned_data:
+                raise forms.ValidationError("O campo de nova palavra-passe ficou por preencher.")
+            return None
+
+        if "new_password_confirmation" not in self.cleaned_data:
+            raise forms.ValidationError("Não foi inserida a palava-passe de confirmação.")
+
+        confirmation = self.cleaned_data["new_password_confirmation"]
+        if confirmation == '':
+            return None
+        return confirmation
+
+    def clean(self):
+        if 'new_password' in self.cleaned_data:
+            if 'new_password_confirmation' in self.cleaned_data:
+                new = self.data["new_password"]
+                confirmation = self.data["new_password_confirmation"]
+                if new != confirmation:
+                    raise forms.ValidationError("As nova palavra-passe não coincide com a confirmação.")
+                else:
+                    return self.cleaned_data
+            else:
+                raise forms.ValidationError("A confirmação da nova palava-passe ficou por preencher.")
+
+        if 'new_password_confirmation' in self.cleaned_data:
+            raise forms.ValidationError("Foi inserida uma nova palavra-passe mas apenas na confirmação")
+        return self.cleaned_data
 
 
-class ClipLoginForm(forms.Form):
-    username = forms.CharField(label='CLIP ID', max_length=100, required=True)
-    password = forms.CharField(label='Palavra passe', widget=forms.PasswordInput(), required=True)
+def clean_password(username, nickname, password):
+    if correlated(username, password, threshold=0.3):  # TODO magic number to settings
+        raise forms.ValidationError("Password demasiado similar à credencial")
 
-    error_messages = {'invalid_login': "Combinação inválida!"}
+    if correlated(nickname, password, threshold=0.3):
+        raise forms.ValidationError("Password demasiado similar à alcunha")
 
-    def __init__(self, request=None, *args, **kwargs):
-        self.request = request
-        self.user_cache = None
-        super().__init__(*args, **kwargs)
+    if password_strength(password) < 5:
+        raise forms.ValidationError("A password é demasiado fraca. "
+                                    "Mistura maiusculas, minusculas, numeros e pontuação.")
+    if len(password) < 7:
+        raise forms.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
+
+    if VULNERABILITY_CHECKING:
+        sha1 = hashlib.sha1(password.encode()).hexdigest().upper()  # Produces clean SHA1 of the password
+        if VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
+            # Refuse the vulnerable password and tell user about it
+            raise forms.ValidationError('Password vulneravel. Espreita a FAQ.')
+    return password

@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 import settings
-from college.models import ClassInstance, Enrollment
+from college.models import ClassInstance
 from . import models as m, exceptions, forms, registrations
 from college import models as college
 from college import schedules
@@ -188,16 +188,15 @@ def user_profile_settings_view(request, nickname):
     if request.method == 'POST':
         form = forms.AccountSettingsForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
+            user = form.save()
+            if 'new_password' in form:
+                user.set_password(form.cleaned_data['new_password'])
+            return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
         else:
             context['settings_form'] = form
     else:
         context['settings_form'] = forms.AccountSettingsForm(instance=user)
-
-    context['password_change_form'] = forms.PasswordChangeForm()
     context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
-
     context['page'] = 'profile_settings'
     context['title'] = 'Definições da conta'
     context['sub_nav'] = [

@@ -1,5 +1,9 @@
+from datetime import datetime
+
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
+from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 
 
 def user_profile_pic_path(user, filename):
@@ -8,6 +12,7 @@ def user_profile_pic_path(user, filename):
 
 class User(AbstractUser):
     nickname = djm.CharField(null=False, max_length=20, unique=True, verbose_name='Alcunha')
+    last_nickname_change = djm.DateField(default=datetime(2000, 1, 1).date())
     birth_date = djm.DateField(null=True, verbose_name='Nascimento')
     last_activity = djm.DateTimeField(auto_now_add=True)
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
@@ -21,29 +26,38 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['email', 'nickname']
 
-    HIDDEN = 0  # No profile at all
-    LIMITED = 1  # Show limited information, only to users
-    USERS = 2  # Show full profile, only to users
-    MIXED = 3  # Show limited information to visitors, full to users
-    PUBLIC = 4  # Show everything to everyone
-
+    NOBODY = 0
+    FRIENDS = 1
+    USERS = 2
+    EVERYBODY = 3
     PROFILE_VISIBILITY_CHOICES = (
-        (HIDDEN, 'Oculto'),
-        (LIMITED, 'Limitado'),
+        (NOBODY, 'Ninguém'),
+        (FRIENDS, 'Amigos'),
         (USERS, 'Utilizadores'),
-        (MIXED, 'Misto'),
-        (PUBLIC, 'Público'),
-    )
+        (EVERYBODY, 'Todos'))
     profile_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    info_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    about_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    social_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    groups_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    enrollments_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
+    schedule_visibility = djm.IntegerField(choices=PROFILE_VISIBILITY_CHOICES, default=0)
 
     MALE = 0
     FEMALE = 1
+    OTHER = 2
 
     GENDER_CHOICES = (
         (MALE, 'Homem'),
-        (FEMALE, 'Mulher')
+        (FEMALE, 'Mulher'),
+        (OTHER, 'Outro')
     )
     gender = djm.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
+    about = MarkdownxField(blank=True, null=True)
+
+    @property
+    def about_html(self):
+        return markdownify(self.about)
 
     def update_primary(self):
         primary = None
