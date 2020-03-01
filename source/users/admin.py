@@ -1,8 +1,9 @@
 from django.contrib import admin
-from users.models import Badge, UserBadge, User, SocialNetworkAccount, Registration
+from users import models as m
 
-admin.site.register(User)
-admin.site.register(Badge)
-admin.site.register(UserBadge)
-admin.site.register(SocialNetworkAccount)
-admin.site.register(Registration)
+admin.site.register(m.User)
+admin.site.register(m.Badge)
+admin.site.register(m.UserBadge)
+admin.site.register(m.SocialNetworkAccount)
+admin.site.register(m.Registration)
+admin.site.register(m.Invite)

@@ -1,0 +1,20 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Convites emitidos por {{ user.get_full_name }}</h1>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Convites</h2></div>
+        <div class="pane-content col">
+          {% for invite in profile_user.invites.all %}
+            {{ invite }}
+          {% endfor %}
+          <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">Criar novo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

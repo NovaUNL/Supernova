@@ -1,0 +1,26 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Convites emitidos por {{ user.get_full_name }}</h1>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Criar convite</h2></div>
+        <div class="pane-content col">
+          <p>
+            Confirmo que estou a par dos atuais <a href="{% url 'terms' %}">termos de serviço</a> e que me
+            responsabilizo, dentro do razoável, pelo individuo que vou convidar.<br>
+            Entendo que vai ficar registado algures que fui eu quem gerou este convite, e que se o mesmo acabar a ser
+            utilizado para finalidades nefárias me vai ser pedida uma justificação, sendo que se desencantar uma boa
+            justificação me serão puxadas as orelhas e que caso contrario serei banido.
+          </p>
+          <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">
+            Prometo ser bem comportad(o/a)
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

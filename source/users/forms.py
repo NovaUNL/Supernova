@@ -2,7 +2,6 @@ import hashlib
 import re
 from datetime import datetime
 
-from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
@@ -11,7 +10,7 @@ import clip.models as clip
 from college.models import Student
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.utils import password_strength, correlated
-from users.models import User, Registration, VulnerableHash
+from users import models as m
 
 NICKNAME_EXP = re.compile('^[\da-zA-Z-_.]+$')
 
@@ -64,14 +63,15 @@ class RegistrationForm(forms.ModelForm):
         widget=forms.PasswordInput(),
         required=True,
         error_messages=default_errors)
-    captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
+    # captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
     clip_identifier = forms.CharField(
         label='Identificador (ex. c.pereira)',
         widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
     nickname = forms.CharField(label='Alcunha', widget=forms.TextInput(), required=False)
+    invite = forms.CharField(required=True)
 
     class Meta:
-        model = Registration
+        model = m.Registration
         fields = ('nickname', 'username', 'password', 'email', 'clip_identifier')
         widgets = {
             'username': forms.TextInput(),
@@ -84,7 +84,7 @@ class RegistrationForm(forms.ModelForm):
             self.cleaned_data["username"],
             self.cleaned_data["nickname"],
             self.cleaned_data["password"])
-        return password
+        return make_password(password)
 
     def clean_password_confirmation(self):
         confirmation = self.cleaned_data["password_confirmation"]
@@ -99,10 +99,6 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError(f"O aluno {student_id} não foi encontrado.")
         if Student.objects.filter(abbreviation=student_id, user__isnull=False).exists():
             raise forms.ValidationError(f"O aluno {student_id} já está registado.")
-
-        # student = student.first()
-        # # Delete any existing registration attempt for this student
-        # Registration.objects.filter(student=student).delete()
         return student_id
 
     def clean_email(self):
@@ -117,32 +113,32 @@ class RegistrationForm(forms.ModelForm):
         if student_id != prefix:
             raise forms.ValidationError("Este email não parece pertencer ao identificador indicado.")
 
-        if User.objects.filter(email=email).exists():
+        if m.User.objects.filter(email=email).exists():
             raise forms.ValidationError("Já existe uma conta registada com o email fornecido.")
         return email
 
     def clean_username(self):
         username = self.cleaned_data["username"]
-        users = User.objects.filter(username=username)
+        users = m.User.objects.filter(username=username)
         if users.exists():
             raise forms.ValidationError(f"Já existe um utilizador com a credencial {username}.")
-        users = User.objects.filter(nickname=username)
+        users = m.User.objects.filter(nickname=username)
         if users.exists():
             raise forms.ValidationError(f"Existe um utilizador cuja alcunha é a tua credencial. Escolhe outra.")
         return username
 
-    def clean_nickname(self):
-        nickname = self.cleaned_data["nickname"]
-        if nickname is None or nickname == '':
-            nickname = self.data["username"]
-        users = User.objects.filter(nickname=nickname)
-
-        if not NICKNAME_EXP.fullmatch(nickname):
-            raise forms.ValidationError("Foram utilizados carateres especiais.")
-
-        if users.exists():
-            raise forms.ValidationError(f"Já existe um utilizador com a alcunha {nickname}.")
-        return nickname
+    def clean_invite(self):
+        if 'invite' not in self.cleaned_data or self.cleaned_data['invite'].strip() == '':
+            raise forms.ValidationError("O código de convite não foi preenchido.")
+        token = self.cleaned_data["invite"]
+        invite = m.Invite.objects.filter(token=token).first()
+        if invite is None:
+            raise forms.ValidationError("Convite inexistente.")
+        if invite.revoked:
+            raise forms.ValidationError("Convite anulado.")
+        if invite.registration:
+            raise forms.ValidationError("Convite já utilizado.")
+        return invite
 
     def clean(self):
         if 'clip_identifier' in self.cleaned_data and 'email' in self.cleaned_data:
@@ -151,8 +147,6 @@ class RegistrationForm(forms.ModelForm):
             prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
             if prefix_owner is not None and email_prefix != clip_identifier:
                 raise forms.ValidationError("O email utilizado pertence a outro estudante.")
-        if 'password' in self.cleaned_data:  # Hash the password using Django's prefered hasher.
-            self.cleaned_data['password'] = make_password(self.cleaned_data['password'])
         return self.cleaned_data
 
 
@@ -161,7 +155,7 @@ class RegistrationValidationForm(forms.ModelForm):
     token = forms.CharField(label='Código', max_length=REGISTRATIONS_TOKEN_LENGTH)
 
     class Meta:
-        model = Registration
+        model = m.Registration
         fields = ['email', 'token']
 
     def clean_token(self):
@@ -184,7 +178,7 @@ class AccountSettingsForm(forms.ModelForm):
     old_password = forms.CharField(widget=forms.PasswordInput(), required=True, error_messages=default_errors)
 
     class Meta:
-        model = User
+        model = m.User
         fields = ('nickname', 'birth_date', 'residence', 'gender', 'picture', 'webpage', 'about',
                   'profile_visibility', 'info_visibility', 'about_visibility', 'social_visibility', 'groups_visibility',
                   'enrollments_visibility', 'schedule_visibility')
@@ -272,7 +266,7 @@ def clean_password(username, nickname, password):
 
     if VULNERABILITY_CHECKING:
         sha1 = hashlib.sha1(password.encode()).hexdigest().upper()  # Produces clean SHA1 of the password
-        if VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
+        if m.VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
             # Refuse the vulnerable password and tell user about it
             raise forms.ValidationError('Password vulneravel. Espreita a FAQ.')
     return password

@@ -59,8 +59,11 @@ def registration_view(request):
         form = forms.RegistrationForm(data=request.POST)
         if form.is_valid():
             registration = form.save(commit=False)
+            invite = form.cleaned_data['invite']
             try:
                 registrations.pre_register(request, registration)
+                invite.registration = registration
+                invite.save()
                 return HttpResponseRedirect(reverse('registration_validation'))
             except exceptions.InvalidUsername as e:
                 form.add_error(None, str(e))
@@ -99,6 +102,10 @@ def registration_validation_view(request):
         if form.is_valid():
             try:
                 user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
+                invite = registration.invite_set.first()
+                if invite:
+                    invite.resulting_user = user
+                    invite.save()
                 login(request, user)
                 return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
             except exceptions.AccountExists as e:
@@ -128,7 +135,6 @@ def profile_view(request, nickname):
         nickname=nickname)
     context = build_base_context(request)
     page_name = f"Perfil de {user.get_full_name()}"
-    context['page'] = 'profile'
     context['title'] = page_name
     context['profile_user'] = user
     if user.primary_student:
@@ -203,6 +209,28 @@ def user_profile_settings_view(request, nickname):
         {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
     return render(request, 'users/profile_settings.html', context)
+
+
+@login_required
+def invites_view(request, nickname):
+    user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
+    context = build_base_context(request)
+    context['title'] = f"Convites emitidos por {user.get_full_name()}"
+    context['profile_user'] = user
+    context['sub_nav'] = [{'name': user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+                          {'name': 'Convites', 'url': reverse('users:invites', args=[nickname])}]
+    return render(request, 'users/invites.html', context)
+
+
+@login_required
+def create_invite_view(request, nickname):
+    user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
+    context = build_base_context(request)
+    context['title'] = f"Convites emitidos por {user.get_full_name()}"
+    context['profile_user'] = user
+    context['sub_nav'] = [{'name': user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+                          {'name': 'Convites', 'url': reverse('users:invites', args=[nickname])}]
+    return render(request, 'users/invite_new.html', context)
 
 
 class NicknameAutocomplete(autocomplete.Select2QuerySetView):

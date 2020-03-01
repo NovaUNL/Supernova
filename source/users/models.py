@@ -145,3 +145,24 @@ class VulnerableHash(djm.Model):
         # TODO figure how to assign to a database
         managed = False
         db_table = 'Hashes'
+
+
+class Invite(djm.Model):
+    """A invite issued by an used to allow other :py:class:`User` to register"""
+    #: The :py:class:`User` that issued the invite
+    issuer = djm.ForeignKey(User, on_delete=djm.PROTECT, related_name='invites')
+    #: The token that is used to activate the invite
+    token = djm.CharField(max_length=16, unique=True)
+    #: Date on which the invite was created
+    created = djm.DateTimeField(auto_now_add=True)
+    #: Date after which the invite is no longer valid
+    expiration = djm.DateTimeField()
+    #: :py:class:`Registration` that used the invite
+    registration = djm.ForeignKey(Registration, null=True, blank=True, on_delete=djm.SET_NULL)
+    #: :py:class:`User` that resulted from the usage of this invite
+    resulting_user = djm.OneToOneField(User, null=True, blank=True, on_delete=djm.SET_NULL)
+    #: Whether the invite got revoked
+    revoked = djm.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.issuer.nickname}:{self.token}"
