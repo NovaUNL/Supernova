@@ -17,10 +17,3 @@ class BarList(APIView):
         serializer = serializers.ServiceWithBuildingSerializer(
             services.Service.objects.filter(bar__isnull=False).all(), many=True)
         return Response(serializer.data)
-
-
-class Menus(APIView):
-    def get(self, request, format=None):
-        serializer = serializers.BarListMenusSerializer(
-            services.Service.objects.filter(restaurant=True).all(), many=True)
-        return Response(serializer.data)

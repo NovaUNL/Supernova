@@ -1,10 +1,22 @@
 from django.contrib import admin
 
-from services.models import Service, MenuDish, Dish, Product, ProductCategory, ServiceProduct
+from services import models as m
+from services import forms as f
 
-admin.site.register(Service)
-admin.site.register(MenuDish)
-admin.site.register(Dish)
-admin.site.register(Product)
-admin.site.register(ProductCategory)
-admin.site.register(ServiceProduct)
+
+class ServiceScheduleInline(admin.TabularInline):
+    model = m.ServiceScheduleEntry
+
+
+class ProductInline(admin.TabularInline):
+    model = m.Product
+
+
+class ServiceAdmin(admin.ModelAdmin):
+    form = f.ServiceForm
+    inlines = [ServiceScheduleInline, ProductInline]
+
+
+admin.site.register(m.Service, ServiceAdmin)
+admin.site.register(m.Product)
+admin.site.register(m.ProductCategory)

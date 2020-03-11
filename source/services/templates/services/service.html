@@ -1,0 +1,52 @@
+{% extends 'supernova/base.html' %}
+
+{% block head %}
+  <style>
+    .left {
+      text-align: left;
+    }
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>{{ service.name }}</h1>
+    </div>
+    <div class="row padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Horário</h2></div>
+        <div class="pane-content">
+          <table style="min-width: 100%">
+            <tr class="left">
+              <th></th>
+              <th>Abertura</th>
+              <th>Fecho</th>
+            </tr>
+            {% for entry in service.schedule.all %}
+              <tr>
+                <td>{{ entry.get_weekday_display }}</td>
+                <td>{{ entry.start }}</td>
+                <td>{{ entry.end }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Ementa</h2></div>
+        <div class="pane-content">
+          <table style="min-width: 100%">
+            <tr class="left">
+            </tr>
+            {% for entry in service.meal_items.all %}
+              <tr>
+                <td>{{ entry }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

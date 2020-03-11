@@ -16,7 +16,7 @@ from college import schedules
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.views import build_base_context
 
-from services.models import Service, MenuDish
+from services.models import Service
 
 
 def index_view(request):
@@ -430,33 +430,6 @@ def room_view(request, room_id):
         .filter(turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
     return render(request, 'college/room.html', context)
-
-
-def service_view(request, service_id):
-    service = get_object_or_404(Service, id=service_id)
-    building = service.place.building
-    context = build_base_context(request)
-    context['title'] = service.name
-    is_bar = hasattr(service, 'bar')
-    context['is_bar'] = is_bar
-    if is_bar:
-        menu = []
-        # TODO today filter
-        for menu_item in MenuDish.objects.filter(service=service).all():
-            price = menu_item.price
-            if price > 0:
-                menu.append((menu_item.item, menu_item.price_str()))
-            else:
-                menu.append((menu_item.item, None))
-        context['menu'] = menu
-    context['building'] = building
-    context['service'] = service
-    context['sub_nav'] = [
-        {'name': 'Faculdade', 'url': reverse('college:index')},
-        {'name': 'Campus', 'url': reverse('college:campus')},
-        {'name': building.name, 'url': reverse('college:building', args=[building.id])},
-        {'name': service.name, 'url': reverse('college:service', args=[service_id])}]
-    return render(request, 'college/service.html', context)
 
 
 def available_places_view(request):

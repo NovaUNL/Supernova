@@ -5,5 +5,6 @@ from . import views
 app_name = 'services'
 
 urlpatterns = [
-    path('cantina/', views.canteen_view, name='canteen'),
+    path('', views.services_view, name='services'),
+    path('servico/<str:service_abbr>', views.service_view, name='service'),
 ]

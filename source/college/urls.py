@@ -12,7 +12,6 @@ urlpatterns = [
     path('campus/disponivel/', views.available_places_view, name='available_places'),
     path('campus/edificios/', views.buildings_view, name='buildings'),
     path('campus/edificio/<int:building_id>/', views.building_view, name='building'),
-    path('campus/servico/<int:service_id>/', views.service_view, name='service'),
     path('departamentos/', views.departments_view, name='departments'),
     path('departamento/<int:department_id>/', views.department_view, name='department'),
     path('professor/<int:teacher_id>', views.teacher_view, name='teacher'),
