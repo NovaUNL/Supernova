@@ -9,9 +9,26 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Convites</h2></div>
         <div class="pane-content col">
-          {% for invite in profile_user.invites.all %}
-            {{ invite }}
-          {% endfor %}
+          <table style="min-width: 100%">
+            <tr>
+              <th>Convite</th>
+              <th>Gerado a</th>
+              <th>Data de validade</th>
+              <th>Link</th>
+            </tr>
+            {% for invite in profile_user.invites.all %}
+              <tr>
+                <td>{{ invite.token }}</td>
+                <td>De {{ invite.created }}</td>
+                {% if invite.registration %}
+                  <td colspan="2">Utilizado</td>
+                {% else %}
+                  <td>Até {{ invite.expiration }}</td>
+                  <td><a href="{% url 'registration' %}?t={{ invite.token }}">Link de registo</a></td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </table>
           <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">Criar novo</a>
         </div>
       </div>

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from dal import autocomplete
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -51,7 +53,9 @@ def logout_view(request):
 def registration_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
+
     context = build_base_context(request)
+
     context['title'] = "Criar conta"
     context['disable_auth'] = True  # Disable auth overlay
     context['enabled'] = settings.REGISTRATIONS_ENABLED
@@ -73,7 +77,21 @@ def registration_view(request):
                 form.add_error(None, str(e))
         context['creation_form'] = form
     else:
-        context['creation_form'] = forms.RegistrationForm()
+        if 't' in request.GET:
+            invite_token = request.GET['t']
+            form = forms.RegistrationForm(initial={'invite': invite_token})
+            invites = m.Invite.objects.filter(token=invite_token)
+            if invites.exists():
+                invite = invites.first()
+                if invite.registration is not None:
+                    context['invite_used'] = True
+                elif invite.expiration is None or invite.expiration < datetime.now(timezone.utc):
+                    context['invite_expired'] = True
+            else:
+                context['invite_unknown'] = True
+        else:
+            form = forms.RegistrationForm()
+        context['creation_form'] = form
     return render(request, 'users/registration.html', context)
 
 
@@ -225,6 +243,11 @@ def invites_view(request, nickname):
 @login_required
 def create_invite_view(request, nickname):
     user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
+    if 'confirmed' in request.GET and request.GET['confirmed'] == 'true':
+        token = registrations.generate_token(10)
+        m.Invite(issuer=user, token=token, expiration=(datetime.now() + timedelta(days=2))).save()
+        return HttpResponseRedirect(reverse('users:invites', args=[request.user]))
+
     context = build_base_context(request)
     context['title'] = f"Convites emitidos por {user.get_full_name()}"
     context['profile_user'] = user
