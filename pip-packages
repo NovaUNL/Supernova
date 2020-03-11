@@ -5,7 +5,7 @@ psycopg2-binary
 uWSGI
 Django==2.2
 django-analytical
-django-autocomplete-light
+django-autocomplete-light==3.5.0
 django-ckeditor
 django-extensions
 django-simple-captcha
