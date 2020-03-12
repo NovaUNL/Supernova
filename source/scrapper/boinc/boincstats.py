@@ -17,7 +17,7 @@ def get_team_users(team_id):
         if len(tds) != 12:
             continue
         _, _, _, _, username, points, daily, weekly, monthly, _, _, options = tds
-        identifier = int(options.find('input', {'name':"id[]"}).attrs['value'])
+        identifier = int(options.find('input', {'name': "id[]"}).attrs['value'])
         users.append({
             'identifier': identifier,
             'name': username.text,
@@ -45,8 +45,11 @@ def get_team_projects(team_id):
         name, points, share, today, daily, weekly, monthly, _, _, _, _, _, _ = tds
         if name.text == 'BOINC combined':
             continue
+        name = name.text
+        if name == 'World Community Grid':
+            name = 'WCG'
         projects.append({
-            'name': name.text,
+            'name': name,
             'points': int(float(points.text.replace(',', ''))),
             'share': int(float(share.text.replace(',', ''))),
             'today': int(float(today.text.replace(',', ''))),
