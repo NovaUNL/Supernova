@@ -289,6 +289,7 @@ def area_view(request, area_id):
 
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
+@vary_on_cookie
 def courses_view(request):
     context = build_base_context(request)
     context['title'] = "Cursos"
@@ -309,6 +310,7 @@ def courses_view(request):
 
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
+@vary_on_cookie
 def course_view(request, course_id):
     course = get_object_or_404(m.Course, id=course_id)
     context = build_base_context(request)
@@ -337,6 +339,7 @@ def course_view(request, course_id):
 
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
+@vary_on_cookie
 @login_required
 def course_students_view(request, course_id):
     course = get_object_or_404(m.Course.objects, id=course_id)
