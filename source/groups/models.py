@@ -8,7 +8,7 @@ from users.models import User
 
 
 def group_profile_pic_path(group, filename):
-    return f'g/{group.id}/pic.{filename.split(".")[-1]}'
+    return f'g/{group.id}/pic.{filename.split(".")[-1].lower()}'
 
 
 class Group(djm.Model):

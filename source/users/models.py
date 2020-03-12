@@ -7,7 +7,7 @@ from markdownx.utils import markdownify
 
 
 def user_profile_pic_path(user, filename):
-    return f'u/{user.id}/pic.{filename.split(".")[-1]}'
+    return f'u/{user.id}/pic.{filename.split(".")[-1].lower()}'
 
 
 class User(AbstractUser):

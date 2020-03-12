@@ -7,7 +7,7 @@ from users import models as users
 
 
 def area_pic_path(area, filename):
-    return f's/a/{area.id}/pic.{filename.split(".")[-1]}'
+    return f's/a/{area.id}/pic.{filename.split(".")[-1].lower()}'
 
 
 class Area(djm.Model):
@@ -23,7 +23,7 @@ class Area(djm.Model):
 
 
 def subarea_pic_path(subarea, filename):
-    return f's/sa/{subarea.id}/pic.{filename.split(".")[-1]}'
+    return f's/sa/{subarea.id}/pic.{filename.split(".")[-1].lower()}'
 
 
 class Subarea(djm.Model):

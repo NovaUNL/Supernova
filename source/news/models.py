@@ -10,7 +10,7 @@ class NewsTag(djm.Model):
     name = djm.CharField(max_length=32)
 
 def news_item_picture(news_item, filename):
-    return f'news/{news_item.id}/pic.{filename.split(".")[-1]}'
+    return f'news/{news_item.id}/pic.{filename.split(".")[-1].lower()}'
 
 class NewsItem(djm.Model):
     title = djm.CharField(max_length=256)
