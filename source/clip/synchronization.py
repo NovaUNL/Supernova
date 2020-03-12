@@ -1,7 +1,7 @@
 import re
 from datetime import date
 
-from . import models as m
+from college import models as m
 from clip import models as clip
 
 import logging
@@ -198,6 +198,21 @@ def turn_instances(turn: m.Turn):
                 room=room)
             turn_instance.save()
             logger.info(f'Created turn instance {turn_instance}.')
+
+
+def students():
+    # missing = clip.Student.objects.filter(student=None).all()
+    # missing = clip.Student.objects.filter(student__first_year=None).all()
+    # for student in missing:
+    #     print(student)
+    #     try:
+    #         create_student(student)
+    #     except Exception:
+    #         pass
+
+    missing = m.Student.objects.filter(first_year=None).all()
+    for student in missing:
+        student.update_yearspan()
 
 
 def create_student(clip_student: clip.Student) -> m.Student:

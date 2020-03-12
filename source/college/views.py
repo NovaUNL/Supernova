@@ -133,27 +133,27 @@ def class_instance_view(request, instance_id):
     occasion = instance.occasion()
     context['occasion'] = occasion
 
-    clip_class = parent_class.clip_class
-    clip_class_id = clip_class.iid
-    department_id = clip_class.department.id
-    period_type = None
-    if instance.period == 1:
-        period_type = 'a'
-    elif instance.period <= 3:
-        period_type = 's'
-    elif instance.period <= 7:
-        period_type = 't'
-    else:
-        # log.error()
-        pass
-    if period_type is not None:
-        context['clip_url'] = CLIPy.urls.CLASS.format(
-            institution=97747,
-            class_id=clip_class_id,
-            department=department_id,
-            year=instance.year,
-            period=instance.period,
-            period_type=period_type)
+    # clip_class = parent_class.clip_class
+    # clip_class_id = clip_class.iid
+    # department_id = clip_class.department.id
+    # period_type = None
+    # if instance.period == 1:
+    #     period_type = 'a'
+    # elif instance.period <= 3:
+    #     period_type = 's'
+    # elif instance.period <= 7:
+    #     period_type = 't'
+    # else:
+    #     # log.error()
+    #     pass
+    # if period_type is not None:
+    #     context['clip_url'] = CLIPy.urls.CLASS.format(
+    #         institution=97747,
+    #         class_id=clip_class_id,
+    #         department=department_id,
+    #         year=instance.year,
+    #         period=instance.period,
+    #         period_type=period_type)
 
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
@@ -238,7 +238,8 @@ def class_instance_files_view(request, instance_id):
     context['instance'] = instance
     occasion = instance.occasion()
     context['occasion'] = occasion
-    context['instance_files'] = instance.clip_class_instance.instance_files.order_by('upload_datetime')
+    # FIXME port from old CLIP models
+    # context['instance_files'] = instance.clip_class_instance.instance_files.order_by('upload_datetime')
 
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
@@ -253,15 +254,17 @@ def class_instance_files_view(request, instance_id):
 
 @login_required
 def class_instance_file_download(request, instance_id, file_hash):
+    # FIXME port from old CLIP models
     class_instance = get_object_or_404(m.ClassInstance, id=instance_id)
-    clip_instance = class_instance.clip_class_instance
-    file = clip_instance.files.filter(hash=file_hash).first()
-    if file is None:
-        pass
-    response = HttpResponse()
-    response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
-    response['Content-Disposition'] = f'attachment; filename="{file.name}"'
-    return response
+    # clip_instance = class_instance.clip_class_instance
+    # file = clip_instance.files.filter(hash=file_hash).first()
+    # if file is None:
+    #     pass
+    # response = HttpResponse()
+    # response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
+    # response['Content-Disposition'] = f'attachment; filename="{file.name}"'
+    # return response
+    return None
 
 
 def areas_view(request):
@@ -342,7 +345,7 @@ def course_students_view(request, course_id):
     context['title'] = 'Alunos de %s' % course
 
     context['course'] = course
-    context['students'] = course.students.select_related('user', 'clip_student').order_by('number').all()
+    context['students'] = course.students.select_related('user').order_by('number').all()
 
     if department is None:
         department_name = "Desconhecido"

@@ -5,30 +5,55 @@ from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.contrib.postgres import fields as pgm
 from django.core.serializers.json import DjangoJSONEncoder
-from clip import models as clip
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from users.models import User
 from . import choice_types as ctypes
 
-
 logger = logging.getLogger(__name__)
 
-class Student(djm.Model):
+
+class Importable(djm.Model):
+    """Objects which were imported from other supernova-alike systems trough some driver."""
+    #: The ID for this object in an external system
+    external_id = djm.IntegerField(null=True, blank=True)
+    #: The item internal ID its origin. Usually the same as external_id
+    iid = djm.CharField(null=True, blank=True, max_length=64)
+    #: The last time this object was updated from its external source
+    external_update = djm.DateTimeField(null=True, blank=True)
+    #: Whether this object should be updated
+    frozen = djm.BooleanField(default=False)
+    #: Equivalence to other imported object
+    same_as = djm.ForeignKey('self', null=True, blank=True, on_delete=djm.SET_NULL)
+    #: Flag telling that this object was possibly deleted yet it is unsure
+    disappeared = djm.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+
+class Student(Importable):
+    """The student vertent"""
+    #: User this student is associated with
     user = djm.ForeignKey(User, null=True, on_delete=djm.CASCADE, related_name='students')
+    #: The public number which identifies this student
     number = djm.IntegerField(null=True, blank=True)
+    #: The public textual abbreviation which identifies this student
     abbreviation = djm.CharField(null=True, blank=True, max_length=64)
+    #: This student's course
     course = djm.ForeignKey('Course', on_delete=djm.PROTECT, related_name='students', null=True, blank=True)
+    #: Turns this student is enrolled to
     turns = djm.ManyToManyField('Turn', through='TurnStudents')
+    #: Classes this student is enrolled to
     class_instances = djm.ManyToManyField('ClassInstance', through='Enrollment')
-    first_year = djm.IntegerField(null=True, blank=True)
-    last_year = djm.IntegerField(null=True, blank=True)
-    confirmed = djm.BooleanField(default=False)
+    #: Grade this student obtained upon finishing his course
     graduation_grade = djm.IntegerField(null=True, blank=True, default=None)
-    clip_student = djm.OneToOneField(clip.Student, on_delete=djm.PROTECT, related_name='student')
+    #: Cache field which stores the first year on which this student was seen as active
+    first_year = djm.IntegerField(null=True, blank=True)
+    #: Cache field which stores the last year on which this student was seen as active
+    last_year = djm.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ['number']
-        unique_together = ('user', 'clip_student')
 
     def __str__(self):
         if self.user:
@@ -53,29 +78,21 @@ class Student(djm.Model):
                 self.save()
 
 
-class Area(djm.Model):
-    name = djm.CharField(max_length=200, unique=True)
-    description = djm.TextField(max_length=4096, null=True, blank=True)
-    courses = djm.ManyToManyField('Course', through='CourseArea')
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
 def building_pic_path(building, filename):
-    return f'c/b/{building.id}/pic.{filename.split(".")[-1]}'
+    return f'c/b/{building.id}/pic.{filename.split(".")[-1].lower()}'
 
 
-class Building(djm.Model):
+class Building(Importable):
+    """A physical building withing the campus"""
+    #: Full name
     name = djm.CharField(max_length=32, unique=True)
+    #: Abbreviated name
     abbreviation = djm.CharField(max_length=16, unique=True, null=True)
+    #: Tag in the campus map
     map_tag = djm.CharField(max_length=20, unique=True)
+    #: Geographical center
     location = gis.PointField(geography=True, null=True)
-    clip_building = djm.OneToOneField(clip.Building, null=True, blank=True, on_delete=djm.PROTECT)
-    map = djm.URLField(null=True, blank=True, default=None)
+    #:  Picture illustrating this building
     picture = djm.ImageField(upload_to=building_pic_path, null=True, blank=True)
 
     class Meta:
@@ -86,15 +103,20 @@ class Building(djm.Model):
 
 
 def department_pic_path(department, filename):
-    return f'c/d/{department.id}/pic.{filename.split(".")[-1]}'
+    return f'c/d/{department.id}/pic.{filename.split(".")[-1].lower()}'
 
 
-class Department(djm.Model):
+class Department(Importable):
+    """An (official) department"""
+    #: Full name of the department
     name = djm.CharField(max_length=128)
+    #: Verbose description of the department role and activities.
     description = djm.TextField(max_length=4096, null=True, blank=True)
+    #: Headquarters building
     building = djm.ForeignKey(Building, on_delete=djm.PROTECT, null=True, blank=True, related_name='departments')
-    clip_department = djm.OneToOneField(clip.Department, on_delete=djm.PROTECT)
+    #: Flag telling whether the department still exists
     extinguished = djm.BooleanField(default=True)
+    #: Picture illustrating this department
     picture = djm.ImageField(upload_to=department_pic_path, null=True, blank=True)
 
     class Meta:
@@ -104,12 +126,26 @@ class Department(djm.Model):
         return self.name
 
 
+def place_pic_path(room, filename):
+    return f'c/b/{room.id}/pic.{filename.split(".")[-1].lower()}'
+
+
 class Place(djm.Model):
+    """A generic geographical place"""
+    #: Name of the place
     name = djm.CharField(max_length=128)
+    #: Building it is located at
     building = djm.ForeignKey(Building, null=True, blank=True, on_delete=djm.PROTECT, related_name='places')
+    #: Building floor where it is located
     floor = djm.IntegerField(default=0)
+    #: Whether it is unlocked to unidentified personnel.
     unlocked = djm.NullBooleanField(null=True, default=None)
+    #: Geographic location of the place
     location = gis.PointField(geography=True, null=True, blank=True)
+    #: List of features associated with this place (risk of explosion, special clothing, ...)
+    features = djm.ManyToManyField('PlaceFeature', blank=True)
+    #: Picture illustrating this place
+    picture = djm.ImageField(upload_to=place_pic_path, null=True, blank=True)
 
     def __str__(self):
         return f'{self.name} ({self.building})'
@@ -118,22 +154,35 @@ class Place(djm.Model):
         return f"{self.name} ({self.building.abbreviation})"
 
 
-def room_pic_path(room, filename):
-    return f'c/b/{room.id}/pic.{filename.split(".")[-1]}'
+def feature_pic_path(feature, filename):
+    return f'c/f/{feature.id}.{filename.split(".")[-1].lower()}'
 
 
-class Room(Place):
+class PlaceFeature(djm.Model):
+    name = djm.CharField(max_length=100)
+    description = djm.TextField()
+    icon = djm.FileField(upload_to=feature_pic_path)
+
+    def __str__(self):
+        return self.name
+
+
+class Room(Place, Importable):
+    """A physical room within the campus"""
+    #: Department that manages this room
     department = djm.ForeignKey(Department, on_delete=djm.PROTECT, related_name='rooms', null=True, blank=True)
+    #: Person capacity
     capacity = djm.IntegerField(null=True, blank=True)
+    #: The door number (ignoring the floor number)
     door_number = djm.IntegerField(null=True, blank=True)
-    clip_room = djm.OneToOneField(clip.Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='room')
-
+    #: Type of room (enumeration)
     type = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
+    #: Verbose description for this room
     description = djm.TextField(max_length=2048, null=True, blank=True)
+    #: Verbose description of equipment in this room
     equipment = djm.TextField(max_length=2048, null=True, blank=True)
-    features = djm.ManyToManyField('Feature', blank=True)
+    #: Whether the room still exists as referred to by this object
     extinguished = djm.BooleanField(default=False)
-    picture = djm.ImageField(upload_to=room_pic_path, null=True, blank=True)
 
     class Meta:
         ordering = ('floor', 'door_number', 'name')
@@ -149,17 +198,24 @@ class Room(Place):
         return f'Ed {self.building.abbreviation}, {ctypes.RoomType.CHOICES[self.type - 1][1]} {self.name}'
 
 
-class Course(djm.Model):
+class Course(Importable):
+    """A course which is associated with a recognizable degree."""
+    #: Course name
     name = djm.CharField(max_length=256)
-    description = djm.TextField(max_length=4096, null=True, blank=True)
-    degree = djm.IntegerField(choices=ctypes.Degree.CHOICES)
+    #: Abbreviation of the course name
     abbreviation = djm.CharField(max_length=128, null=True, blank=True)
+    #: Description of the course
+    description = djm.TextField(max_length=4096, null=True, blank=True)
+    #: Conferred degree
+    degree = djm.IntegerField(choices=ctypes.Degree.CHOICES)
+    #: Whether the course is actively happening
     active = djm.BooleanField(default=False)
-    clip_course = djm.OneToOneField(clip.Course, on_delete=djm.PROTECT)
+    #: Department that manages this course
     department = djm.ForeignKey('Department', null=True, blank=True, on_delete=djm.PROTECT, related_name='courses')
-    areas = djm.ManyToManyField(Area, through='CourseArea')
+    #: URL to this course's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
-    curriculum_classes = djm.ManyToManyField('Class', through='Curriculum')
+    #: Areas where this course is inserted
+    areas = djm.ManyToManyField('Area', through='CourseArea')
 
     class Meta:
         ordering = ['name']
@@ -168,22 +224,19 @@ class Course(djm.Model):
         return f'{ctypes.Degree.name(self.degree)} em {self.name}'
 
 
-class CourseArea(djm.Model):
-    area = djm.ForeignKey(Area, on_delete=djm.PROTECT)
-    course = djm.ForeignKey(Course, on_delete=djm.PROTECT)
-
-    def __str__(self):
-        return f'{self.course} -> {self.area}'
-
-
-class Class(djm.Model):
+class Class(Importable):
+    """A class with is taught, usually once or twice a year. Abstract concept without temporal presence"""
+    #: Name of the class
     name = djm.CharField(max_length=256)
+    #: Abbreviation for this class
     abbreviation = djm.CharField(max_length=16, default='---')
+    #: Verbose description of the class
     description = djm.TextField(max_length=1024, null=True, blank=True)
-    credits = djm.IntegerField(null=True, blank=True)  # 2 credits = 1 ECTS
+    #: ECTS awarded by this class (2 credits = 1 ECTS)
+    credits = djm.IntegerField(null=True, blank=True)
+    #: Department that lectures this class
     department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
-    clip_class = djm.OneToOneField(clip.Class, on_delete=djm.PROTECT, related_name='related_class')
-    courses = djm.ManyToManyField(Course, through='Curriculum')
+    #: Whether this class still exists
     extinguished = djm.BooleanField(default=False)
 
     class Meta:
@@ -194,25 +247,17 @@ class Class(djm.Model):
         return self.name
 
 
-class Curriculum(djm.Model):
-    course = djm.ForeignKey(Course, on_delete=djm.CASCADE)
-    corresponding_class = djm.ForeignKey(Class, on_delete=djm.PROTECT)  # Guess I can't simply call it 'class'
-    period_type = djm.CharField(max_length=1, null=True, blank=True)  # 's' => semester, 't' => trimester, 'a' => anual
-    period = djm.IntegerField(null=True, blank=True)
-    year = djm.IntegerField()
-    required = djm.BooleanField()
-
-    class Meta:
-        ordering = ['year', 'period_type', 'period']
-        unique_together = ['course', 'corresponding_class']
-
-
-class ClassInstance(djm.Model):
+class ClassInstance(Importable):
+    """An instance of a class with an associated point in time"""
+    #: Class this refers to
     parent = djm.ForeignKey(Class, on_delete=djm.PROTECT, related_name='instances')
+    #: Period this happened on (enumeration)
     period = djm.IntegerField(choices=ctypes.Period.CHOICES)
+    #: Year of lecturing
     year = djm.IntegerField()
-    clip_class_instance = djm.OneToOneField(clip.ClassInstance, on_delete=djm.PROTECT, related_name='class_instance')
+    #: Enrolled students
     students = djm.ManyToManyField(Student, through='Enrollment')
+    #: Misc information associated to this class
     information = pgm.JSONField(encoder=DjangoJSONEncoder)
 
     class Meta:
@@ -228,25 +273,34 @@ class ClassInstance(djm.Model):
         return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
 
 
-class Enrollment(djm.Model):
+class Enrollment(Importable):
+    """An enrollment of a student to a class"""
+    #: Enrolled student
     student = djm.ForeignKey(Student, on_delete=djm.CASCADE, related_name='enrollments')
+    #: Class of enrollment
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='enrollments')
-    # u => unknown, r => reproved, n => approved@normal, e => approved@exam, s => approved@special
+    #: u => unknown, r => reproved, n => approved@normal, e => approved@exam, s => approved@special
     result = djm.CharField(default='u', max_length=1)
+    #: Conclusion grade
     grade = djm.FloatField(null=True, blank=True)
-    clip_enrollment = djm.OneToOneField(clip.Enrollment, on_delete=djm.PROTECT)
 
     class Meta:
         unique_together = ['student', 'class_instance']
 
 
-class Turn(djm.Model):
+class Turn(Importable):
+    """Abstract concept of a turn, without temporal presence"""
+    #: Class that this turn lectured
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='turns')  # Eg: Analysis
-    turn_type = djm.IntegerField(choices=ctypes.TurnType.CHOICES)  # Theoretical
+    #: Type of turn (enumeration)
+    turn_type = djm.IntegerField(choices=ctypes.TurnType.CHOICES)  # Theoretical, Practical, ...
+    #: Turn index
     number = djm.IntegerField()  # 1
-    clip_turn = djm.OneToOneField(clip.Turn, on_delete=djm.CASCADE, related_name='turn')
+    #: Required attendance
     required = djm.BooleanField(default=True)  # Optional attendance
+    #: Enrolled students
     students = djm.ManyToManyField(Student, through='TurnStudents')
+    #: Associated teachers
     teachers = djm.ManyToManyField('Teacher', related_name='turns')
 
     class Meta:
@@ -270,16 +324,20 @@ class TurnStudents(djm.Model):
         return f'{self.student} enrolled to turn {self.turn}'
 
 
-class TurnInstance(djm.Model):
+class TurnInstance(Importable):
+    """A physical presence of a Turn"""
+    #:
     turn = djm.ForeignKey(Turn, on_delete=djm.CASCADE, related_name='instances')  # Eg: Theoretical 1
-    # TODO change to CASCADE *AFTER* the crawler is changed to update turn instances without deleting the previous ones
-    clip_turn_instance = djm.OneToOneField(clip.TurnInstance, on_delete=djm.CASCADE, related_name='turn_instance')
-    recurring = djm.BooleanField(default=True)  # Always happens at the given day, hour and lasts for k minutes
-    # Whether this is a recurring turn
+    #: | Whether this is a recurring turn
+    #: | Recurring turns always happen at a given weekday and hour, lasting for k minutes
+    recurring = djm.BooleanField(default=True)
+    #: Weekday this happens on, with the index 0 being Monday
     weekday = djm.IntegerField(null=True, blank=True, choices=ctypes.WEEKDAY_CHOICES)  # 0 - Monday
-    start = djm.IntegerField(null=True, blank=True)  # 8*60+30 = 8:30 AM
-    duration = djm.IntegerField(null=True, blank=True)  # 60 minutes
-    # --------------
+    #: Temporal offset in minutes from the midnight until the start of this turn (8*60+30 = 8:30 AM)
+    start = djm.IntegerField(null=True, blank=True)
+    #: Duration in minutes
+    duration = djm.IntegerField(null=True, blank=True)
+    # Room where the turn instance happens
     room = djm.ForeignKey(Room, on_delete=djm.PROTECT, null=True, blank=True, related_name='turn_instances')
 
     class Meta:
@@ -316,15 +374,13 @@ class TurnInstance(djm.Model):
         return "%02d:%02d" % (minutes // 60, minutes % 60)
 
 
-class Teacher(djm.Model):
+class Teacher(Importable):
     """
     | A person who teaches.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
-    iid = djm.IntegerField()
+    #: Full teacher name
     name = djm.TextField(max_length=100)
-    # This isn't really a M2M, but the crawler tables are unmodifiable
-    clip_teachers = djm.ManyToManyField(clip.Teacher)
     #: Departments this teacher has worked for
     departments = djm.ManyToManyField(Department, related_name="teachers")
 
@@ -332,49 +388,88 @@ class Teacher(djm.Model):
         return f"{self.name} ({self.iid})"
 
 
-class File(djm.Model):
+def file_upload_path(file, _):
+    return f'file/{file.hash}'
+
+
+class File(Importable):
+    """A file attachment which was shared to a class"""
+    #: File name
     name = djm.CharField(null=True, max_length=256)
+    #: Type of file being shared
     type = djm.IntegerField(db_column='file_type', choices=ctypes.FileType.CHOICES)
+    #: File size in (kilo)?bytes
     size = djm.IntegerField()
+    #: File SHA1 hash
     hash = djm.CharField(max_length=40, null=True)
-    location = djm.TextField(null=True)
-    mime = djm.TextField(null=True)
-    clip_file = djm.ForeignKey(clip.File, on_delete=djm.CASCADE)
-    class_instances = djm.ManyToManyField(ClassInstance, through='ClassInstanceFile')
-
-
-class ClassInstanceFile(djm.Model):
-    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
-    file = djm.ForeignKey(File, on_delete=djm.PROTECT, db_column='file_id')
-    upload_datetime = djm.DateTimeField()
-    uploader = djm.CharField(max_length=100)
+    #: File location within the filesystem
+    location = djm.CharField(null=True, max_length=256)
+    #: File mimetype
+    mime = djm.CharField(null=True, max_length=256)
+    #: Class instance where this size is featured
+    class_instance = djm.ForeignKey(ClassInstance, null=True, on_delete=djm.SET_NULL)
+    #: Datetime on which this file got uploaded
+    upload_datetime = djm.DateTimeField(auto_now_add=True)
+    #: User who uploaded the file
+    uploader = djm.ForeignKey(User, null=True, blank=True, on_delete=djm.SET_NULL)
+    #: Uploader name fallback (due to imports who cannot be resolved to a user)
+    uploader_teacher = djm.ForeignKey(Teacher, null=True, blank=True, on_delete=djm.SET_NULL)
 
 
 class ClassEvaluation(djm.Model):
+    """Evaluation occurrence associated with a class"""
+    #: Class for which this evaluation stands
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
+    #: Evaluation date
     datetime = djm.DateTimeField()
+    #: Type of evaluation
     type = djm.IntegerField(db_column='evaluation_type', choices=ctypes.EvaluationType.CHOICES)
 
 
-class ClassInstanceMessages(djm.Model):
+class ClassInstanceAnnouncement(Importable):
+    """Announcement which was broadcast to a class"""
+    #: Class instance where the broadcast occurred
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
-    teacher = djm.ForeignKey(Teacher, on_delete=djm.PROTECT, db_column='teacher_id')
+    #: User who broadcasted the message
+    user = djm.ForeignKey(User, on_delete=djm.PROTECT, db_column='teacher_id')
+    #: Message title
     title = djm.CharField(max_length=256)
+    #: Message content
     message = djm.TextField()
-    upload_datetime = djm.DateTimeField()
-    uploader = djm.CharField(max_length=128)
+    #: Datetime of the announcement
     datetime = djm.DateTimeField()
-    clip_message = djm.ForeignKey(clip.ClassInstanceMessages, on_delete=djm.CASCADE)
 
 
-def feature_pic_path(feature, filename):
-    return f'c/f/{feature.id}.{filename.split(".")[-1]}'
+class Area(djm.Model):
+    # TODO think about this properly
+    name = djm.CharField(max_length=200, unique=True)
+    description = djm.TextField(max_length=4096, null=True, blank=True)
+    courses = djm.ManyToManyField('Course', through='CourseArea')
 
-
-class Feature(djm.Model):
-    name = djm.CharField(max_length=100)
-    description = djm.TextField()
-    icon = djm.FileField(upload_to=feature_pic_path)
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name
+
+
+class CourseArea(djm.Model):
+    area = djm.ForeignKey(Area, on_delete=djm.PROTECT)
+    course = djm.ForeignKey(Course, on_delete=djm.PROTECT)
+
+    def __str__(self):
+        return f'{self.course} -> {self.area}'
+
+
+class Curriculum(djm.Model):
+    # TODO redo this. Ain't going to work like this.
+    course = djm.ForeignKey(Course, on_delete=djm.CASCADE)
+    corresponding_class = djm.ForeignKey(Class, on_delete=djm.PROTECT)  # Guess I can't simply call it 'class'
+    period_type = djm.CharField(max_length=1, null=True, blank=True)  # 's' => semester, 't' => trimester, 'a' => anual
+    period = djm.IntegerField(null=True, blank=True)
+    year = djm.IntegerField()
+    required = djm.BooleanField()
+
+    class Meta:
+        ordering = ['year', 'period_type', 'period']
+        unique_together = ['course', 'corresponding_class']
