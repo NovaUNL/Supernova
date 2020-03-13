@@ -1,7 +1,7 @@
+from django.conf import settings
 from django.db import models as djm
 
 from groups.models import Group
-from users.models import User
 
 
 class Sellable:
@@ -30,7 +30,7 @@ class ClassifiedItem(Sellable, djm.Model):
     name = djm.CharField(max_length=128)
     description = djm.TextField()
     price = djm.IntegerField()
-    seller = djm.ForeignKey(User, on_delete=djm.CASCADE)
+    seller = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE)
 
     class Meta:
         unique_together = ['name', 'seller']

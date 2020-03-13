@@ -1,9 +1,9 @@
+from django.conf import settings
 from django.db import models as djm
 from ckeditor_uploader.fields import RichTextUploadingField
 
 from college import models as college
 from documents import models as documents
-from users import models as users
 
 
 def area_pic_path(area, filename):
@@ -136,7 +136,7 @@ class SectionSubsection(djm.Model):
 
 
 class SectionLog(djm.Model):
-    author = djm.ForeignKey(users.User, null=True, blank=True, on_delete=djm.SET_NULL)
+    author = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE)
     timestamp = djm.DateTimeField(auto_now_add=True)
     previous_content = djm.TextField(blank=True, null=True)  # TODO Change to diff

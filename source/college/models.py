@@ -1,12 +1,12 @@
 import logging
 from datetime import datetime
 
+from django.conf import settings
 from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.contrib.postgres import fields as pgm
 from django.core.serializers.json import DjangoJSONEncoder
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
-from users.models import User
 from . import choice_types as ctypes
 
 logger = logging.getLogger(__name__)
@@ -32,11 +32,14 @@ class Importable(djm.Model):
 
 
 class Student(Importable):
-    """The student vertent"""
+    """
+    | A student instance.
+    | Each user can have multiple instances if the user enrolled multiple times to multiple courses.
+    """
     #: User this student is associated with
-    user = djm.ForeignKey(User, null=True, on_delete=djm.CASCADE, related_name='students')
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.CASCADE, related_name='students')
     #: The public number which identifies this student
-    number = djm.IntegerField(null=True, blank=True)
+    number = djm.IntegerField(null=True, blank=True, unique=True)
     #: The public textual abbreviation which identifies this student
     abbreviation = djm.CharField(null=True, blank=True, max_length=64)
     #: This student's course
@@ -411,7 +414,7 @@ class File(Importable):
     #: Datetime on which this file got uploaded
     upload_datetime = djm.DateTimeField(auto_now_add=True)
     #: User who uploaded the file
-    uploader = djm.ForeignKey(User, null=True, blank=True, on_delete=djm.SET_NULL)
+    uploader = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
     #: Uploader name fallback (due to imports who cannot be resolved to a user)
     uploader_teacher = djm.ForeignKey(Teacher, null=True, blank=True, on_delete=djm.SET_NULL)
 
@@ -431,7 +434,7 @@ class ClassInstanceAnnouncement(Importable):
     #: Class instance where the broadcast occurred
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
     #: User who broadcasted the message
-    user = djm.ForeignKey(User, on_delete=djm.PROTECT, db_column='teacher_id')
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.PROTECT)
     #: Message title
     title = djm.CharField(max_length=256)
     #: Message content

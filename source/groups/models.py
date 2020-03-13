@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.db import models as djm
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
 from college.choice_types import WEEKDAY_CHOICES
 from college.models import Place
-from users.models import User
 
 
 def group_profile_pic_path(group, filename):
@@ -17,16 +17,16 @@ class Group(djm.Model):
       students nuclei, working group, ...
     | Groups are meant to be self-administered with each user having one :py:class:`Role`,
     """
-    #: A short texual identifier.
+    #: A short textual identifier.
     abbreviation = djm.CharField(max_length=64, null=True, blank=True)
     #: The group's full name.
     name = djm.CharField(max_length=65)
     #: A description that defines the group.
     description = MarkdownxField(blank=True, null=True)
     #: The members that are part of this group (belong to it).
-    members = djm.ManyToManyField(User, through='Membership', related_name='memberships')
+    members = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='memberships')
     #: The subscribers of this group (do not necessarily belong to it).
-    subscribers = djm.ManyToManyField(User, blank=True, related_name='group_subscriptions')
+    subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='group_subscriptions')
     #: The place where this group is headquartered and commonly found.
     place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True)
     #: An image that presents this group.
@@ -127,7 +127,7 @@ class Membership(djm.Model):
     #: :py:class:`Group` referred to by this membership
     group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='member_roles')
     #: :py:class:`users.models.User` referred to by this membership
-    member = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='group_roles')
+    member = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='group_roles')
     #: :py:class:`Role` conferred
     role = djm.ForeignKey(Role, on_delete=djm.PROTECT)
 
@@ -143,7 +143,7 @@ class Activity(djm.Model):
     #: :py:class:`Group` that had this activity
     group = djm.ForeignKey(Group, on_delete=djm.CASCADE)
     #: :py:class:`users.models.User` that triggered the activity.
-    author = djm.ForeignKey(User, on_delete=djm.PROTECT)
+    author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)
     #: Datetime at which the trigger happened
     datetime = djm.DateTimeField(auto_now_add=True)
 

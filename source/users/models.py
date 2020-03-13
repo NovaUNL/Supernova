@@ -18,11 +18,6 @@ class User(AbstractUser):
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
     picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
     webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
-    primary_student = djm.ForeignKey(
-        'college.Student',
-        on_delete=djm.PROTECT,
-        null=True, blank=True,
-        related_name="_user")
 
     REQUIRED_FIELDS = ['email', 'nickname']
 

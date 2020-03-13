@@ -1,16 +1,16 @@
+from django.conf import settings
 from django.db import models as djm
 from groups.models import Group
-from users.models import User
 
 
 class Conversation(djm.Model):
-    creator = djm.ForeignKey(User, on_delete=djm.PROTECT, related_name='creator')
+    creator = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT, related_name='creator')
     date = djm.DateField(auto_now_add=True)
-    users = djm.ManyToManyField(User, through='ConversationUser')
+    users = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationUser')
 
 
 class Message(djm.Model):
-    author = djm.ForeignKey(User, on_delete=djm.PROTECT)  # TODO consider user deletion
+    author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)  # TODO consider user deletion
     datetime = djm.DateTimeField(auto_now_add=True)
     content = djm.TextField()
     conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
@@ -22,7 +22,7 @@ class Message(djm.Model):
 # A user relation to a conversation
 class ConversationUser(djm.Model):
     conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
-    user = djm.ForeignKey(User, on_delete=djm.PROTECT)  # TODO consider user deletion
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)  # TODO consider user deletion
     last_read_message = djm.ForeignKey(Message, null=True, blank=True, on_delete=djm.PROTECT)
 
 

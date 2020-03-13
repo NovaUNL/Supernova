@@ -1,10 +1,10 @@
 from ckeditor.fields import RichTextField
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models as djm
 
 from college.models import Class
 from synopses.models import Section
-from users.models import User
 
 
 class Exercise(djm.Model):
@@ -22,7 +22,11 @@ class Exercise(djm.Model):
 
     introduction = RichTextField(null=True, blank=False, verbose_name='introduction')  #: Optional question introduction
     #: The :py:class:`users.models.User` which uploaded this exercise
-    author = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL, related_name='contributed_exercises')
+    author = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=djm.SET_NULL,
+        related_name='contributed_exercises')
     #: Creation datetime
     datetime = djm.DateTimeField(auto_now_add=True)
     #: Exercise type
@@ -79,7 +83,7 @@ class UserExerciseLog:
     )
 
     #: :py:class:`users.models.User` which attempted to solve this exercise
-    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL, related_name='exercises')
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.SET_NULL, related_name='exercises')
     #: :py:class:`users.models.Exercise` being attempted
     exercise = djm.ForeignKey(Exercise, on_delete=djm.CASCADE, related_name='users')
     #: Attempt result
@@ -95,7 +99,11 @@ class WrongAnswerReport:
     An user submitted report of an exercise which has a wrong answer.
     """
     #: :py:class:`users.models.User` reporter
-    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL, related_name='wrong_answer_reports')
+    user = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=djm.SET_NULL,
+        related_name='wrong_answer_reports')
     #: :py:class:`Exercise` being reported
     exercise = djm.ForeignKey(Exercise, on_delete=djm.CASCADE, related_name='wrong_answer_reports')
     #: The issue

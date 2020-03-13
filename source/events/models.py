@@ -1,9 +1,10 @@
 from datetime import date
+
+from django.conf import settings
 from django.db import models as djm
 
 from college.models import Place, TurnInstance
 from groups.models import Group
-from users.models import User
 
 
 class Event(djm.Model):
@@ -11,7 +12,7 @@ class Event(djm.Model):
     end_datetime = djm.DateTimeField()
     announce_date = djm.DateField(default=date.today)
     place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL)
-    users = djm.ManyToManyField(User, through='EventUser')
+    users = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='EventUser')
 
     def __str__(self):
         return f'from {self.datetime_to_eventtime(self.start_datetime)} ' \
@@ -35,7 +36,7 @@ class Event(djm.Model):
 
 class EventUser(djm.Model):
     event = djm.ForeignKey(Event, on_delete=djm.CASCADE)
-    user = djm.ForeignKey(User, on_delete=djm.CASCADE)
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE)
 
 
 class TurnEvent(Event):

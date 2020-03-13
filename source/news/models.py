@@ -1,16 +1,17 @@
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.db import models as djm
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
-
-from users.models import User
 
 
 class NewsTag(djm.Model):
     name = djm.CharField(max_length=32)
 
+
 def news_item_picture(news_item, filename):
     return f'news/{news_item.id}/pic.{filename.split(".")[-1].lower()}'
+
 
 class NewsItem(djm.Model):
     title = djm.CharField(max_length=256)
@@ -20,8 +21,18 @@ class NewsItem(djm.Model):
     edited = djm.BooleanField(default=False)
     edit_note = djm.CharField(null=True, blank=True, default=None, max_length=256)
     edit_datetime = djm.DateTimeField(null=True, blank=True, default=None)
-    author = djm.ForeignKey(User, blank=True, null=True, on_delete=djm.SET_NULL, related_name='author')
-    edit_author = djm.ForeignKey(User, null=True, blank=True, on_delete=djm.SET_NULL, related_name='edit_author')
+    author = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=djm.SET_NULL,
+        related_name='author')
+    edit_author = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=djm.SET_NULL,
+        related_name='edit_author')
     tags = djm.ManyToManyField(NewsTag, blank=True)
     source = djm.URLField(null=True, blank=True, max_length=256)
     cover_img = djm.ImageField(null=True, blank=True, max_length=256, upload_to=news_item_picture)
@@ -63,5 +74,5 @@ class NewsVote(djm.Model):
         (CLICKBAIT, 'clickbait')
     )
     news_item = djm.ForeignKey(NewsItem, on_delete=djm.CASCADE)
-    user = djm.ForeignKey(User, null=True, on_delete=djm.SET_NULL)
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.SET_NULL)
     vote_type = djm.IntegerField(choices=VOTE_TYPE_CHOICES)
