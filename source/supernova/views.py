@@ -53,6 +53,8 @@ def build_base_context(request):
     catchphrases = cache.get('catchphrases')
     if catchphrases is None:
         catchphrases = list(Catchphrase.objects.all())
+        if len(catchphrases) == 0:
+            catchphrases = ['']
         cache.set('catchphrases', catchphrases, timeout=3600 * 24)
     base_context = {
         'disable_auth': False,
