@@ -5,14 +5,14 @@ from datetime import datetime
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
+from django.db.models import Q
 
-import clip.models as clip
-from college.models import Student
+from college import models as college
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.utils import password_strength, correlated
 from users import models as m
 
-NICKNAME_EXP = re.compile('^[\da-zA-Z-_.]+$')
+IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
 
 default_errors = {
     'required': 'Este campo é obrigatório',
@@ -64,7 +64,7 @@ class RegistrationForm(forms.ModelForm):
         required=True,
         error_messages=default_errors)
     # captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
-    clip_identifier = forms.CharField(
+    student = forms.CharField(
         label='Identificador (ex. c.pereira)',
         widget=forms.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
     nickname = forms.CharField(label='Alcunha', widget=forms.TextInput(), required=False)
@@ -72,7 +72,7 @@ class RegistrationForm(forms.ModelForm):
 
     class Meta:
         model = m.Registration
-        fields = ('nickname', 'username', 'password', 'email', 'clip_identifier')
+        fields = ('nickname', 'username', 'password', 'email', 'student')
         widgets = {
             'username': forms.TextInput(),
             'email': forms.TextInput(attrs={'onChange': 'emailModified=true;'}),
@@ -80,11 +80,7 @@ class RegistrationForm(forms.ModelForm):
         }
 
     def clean_password(self):
-        password = clean_password(
-            self.cleaned_data["username"],
-            self.cleaned_data["nickname"],
-            self.cleaned_data["password"])
-        return make_password(password)
+        return make_password(self.cleaned_data["password"])
 
     def clean_password_confirmation(self):
         confirmation = self.cleaned_data["password_confirmation"]
@@ -92,19 +88,19 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError("As palavas-passe não coincidem.")
         return confirmation
 
-    def clean_clip_identifier(self):
-        student_id: str = self.cleaned_data["clip_identifier"].strip()
-        student = clip.Student.objects.filter(abbreviation=student_id)
-        if not student.exists():
+    def clean_student(self):
+        student_id: str = self.cleaned_data["student"].strip()
+        students = college.Student.objects.filter(abbreviation=student_id).all()
+        if not students.exists():
             raise forms.ValidationError(f"O aluno {student_id} não foi encontrado.")
-        if Student.objects.filter(abbreviation=student_id, user__isnull=False).exists():
+        elif students.filter(user__isnull=False).exists():
             raise forms.ValidationError(f"O aluno {student_id} já está registado.")
         return student_id
 
     def clean_email(self):
         pattern = re.compile(r'^[\w\d.\-_+]+@[\w\d\-_]+(.[\w\d]+)*(\.\w{2,})$')
         email = self.cleaned_data["email"]
-        student_id = self.data["clip_identifier"]
+        student_id = self.data["student"]
         if not pattern.match(email):
             raise forms.ValidationError("Formato inválido de email.")
         prefix, suffix = email.split('@')
@@ -118,14 +114,28 @@ class RegistrationForm(forms.ModelForm):
         return email
 
     def clean_username(self):
-        username = self.cleaned_data["username"]
+        username = self.cleaned_data.get("username")
+        if not IDENTIFIER_EXP.fullmatch(username):
+            raise forms.ValidationError(f"O nome de utilizador '{username}' é invalido.")
         users = m.User.objects.filter(username=username)
         if users.exists():
-            raise forms.ValidationError(f"Já existe um utilizador com a credencial {username}.")
+            raise forms.ValidationError(f"Já existe um utilizador com o nome de utilizador '{username}'.")
         users = m.User.objects.filter(nickname=username)
         if users.exists():
-            raise forms.ValidationError(f"Existe um utilizador cuja alcunha é a tua credencial. Escolhe outra.")
+            raise forms.ValidationError(f"Já existe um utilizador com a alcunha '{username}'")
         return username
+
+    def clean_nickname(self):
+        nickname = self.cleaned_data.get("nickname")
+        if not IDENTIFIER_EXP.fullmatch(nickname):
+            raise forms.ValidationError(f"A alcunha '{nickname}' é invalida.")
+        users = m.User.objects.filter(Q(nickname=nickname))
+        if users.exists():
+            raise forms.ValidationError(f"Já existe um utilizador com o nome de utilizador '{nickname}'.")
+        users = m.User.objects.filter(Q(nickname=nickname))
+        if users.exists():
+            raise forms.ValidationError(f"Já existe um utilizador com a alcunha '{nickname}'")
+        return nickname
 
     def clean_invite(self):
         if 'invite' not in self.cleaned_data or self.cleaned_data['invite'].strip() == '':
@@ -138,15 +148,33 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Convite anulado.")
         if invite.registration:
             raise forms.ValidationError("Convite já utilizado.")
+        if invite.expiration.replace(tzinfo=None) < datetime.now():
+            raise forms.ValidationError("Convite caducado.")
         return invite
 
     def clean(self):
-        if 'clip_identifier' in self.cleaned_data and 'email' in self.cleaned_data:
-            email_prefix = self.cleaned_data["email"].split('@')[0]
-            clip_identifier = self.cleaned_data["clip_identifier"]
-            prefix_owner = clip.Student.objects.filter(abbreviation=email_prefix).first()
-            if prefix_owner is not None and email_prefix != clip_identifier:
+        if not ({'student', 'email', 'username', 'nickname'} <= set(self.cleaned_data)):
+            raise forms.ValidationError("Alguns dos campos contem erros")
+
+        student_abbreviation = self.cleaned_data.get("student")
+        email_prefix = self.cleaned_data.get("email").split('@')[0]
+        nickname = self.cleaned_data.get("nickname")
+        username = self.cleaned_data.get("username")
+
+        if student_abbreviation != email_prefix:
+            raise forms.ValidationError("Suspeitamos que este email não pertence a este identificador.")
+
+        matching_students = college.Student.objects \
+            .filter(Q(abbreviation=email_prefix) | Q(abbreviation=nickname) | Q(abbreviation=username)) \
+            .all()
+
+        for student in matching_students:
+            if student.user is not None or student.abbreviation != email_prefix:
                 raise forms.ValidationError("O email utilizado pertence a outro estudante.")
+        enforce_password_policy(
+            self.cleaned_data["username"],
+            self.cleaned_data["nickname"],
+            self.data["password"])
         return self.cleaned_data
 
 
@@ -197,7 +225,7 @@ class AccountSettingsForm(forms.ModelForm):
         if days_since_change < 180:
             raise forms.ValidationError(f"Mudou a sua alcunha há menos de 6 meses (passaram {days_since_change} dias)")
 
-        if not NICKNAME_EXP.fullmatch(nickname):
+        if not IDENTIFIER_EXP.fullmatch(nickname):
             raise forms.ValidationError("Foram utilizados carateres especiais.")
         return nickname
 
@@ -213,12 +241,7 @@ class AccountSettingsForm(forms.ModelForm):
         password = self.cleaned_data['new_password']
         if password == '':
             return None
-
-        password = clean_password(
-            self.instance.username,
-            self.instance.nickname,
-            self.cleaned_data["new_password"])
-        return password
+        return self.cleaned_data["new_password"]
 
     def clean_new_password_confirmation(self):
         if "new_password" not in self.cleaned_data:
@@ -248,10 +271,15 @@ class AccountSettingsForm(forms.ModelForm):
 
         if 'new_password_confirmation' in self.cleaned_data:
             raise forms.ValidationError("Foi inserida uma nova palavra-passe mas apenas na confirmação")
+        if self.cleaned_data["new_password"] is not None:
+            enforce_password_policy(
+                self.instance.username,
+                self.instance.nickname,
+                self.cleaned_data["new_password"])
         return self.cleaned_data
 
 
-def clean_password(username, nickname, password):
+def enforce_password_policy(username, nickname, password):
     if correlated(username, password, threshold=0.3):  # TODO magic number to settings
         raise forms.ValidationError("Password demasiado similar à credencial")
 
@@ -269,4 +297,3 @@ def clean_password(username, nickname, password):
         if m.VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
             # Refuse the vulnerable password and tell user about it
             raise forms.ValidationError('Password vulneravel. Espreita a FAQ.')
-    return password

@@ -54,19 +54,6 @@ class User(AbstractUser):
     def about_html(self):
         return markdownify(self.about)
 
-    def update_primary(self):
-        primary = None
-        last_year = 0
-        for student in self.students.all():
-            if student.last_year is not None and student.last_year > last_year:
-                last_year = student.last_year
-                primary = student
-        if primary is not None:
-            self.primary_student = primary
-            name = primary.clip_student.name
-            if name is not None:
-                self.first_name, self.last_name = name.split(' ', 1)
-
 
 class Badge(djm.Model):
     name = djm.CharField(max_length=32, unique=True)
@@ -123,14 +110,14 @@ class Registration(djm.Model):
     email = djm.EmailField()
     username = djm.CharField(verbose_name='utilizador', max_length=128)
     nickname = djm.CharField(verbose_name='alcunha', max_length=128)
-    clip_identifier = djm.CharField(max_length=128)
+    student = djm.CharField(max_length=128)
     password = djm.CharField(verbose_name='palavra-passe', max_length=128)
     creation = djm.DateTimeField(auto_now_add=True)
     token = djm.CharField(max_length=16)
     failed_attempts = djm.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.username}/{self.nickname}/{self.clip_identifier} -{self.email}"
+        return f"{self.username}/{self.nickname}/{self.student} -{self.email}"
 
 
 class VulnerableHash(djm.Model):
@@ -153,7 +140,8 @@ class Invite(djm.Model):
     #: Date after which the invite is no longer valid
     expiration = djm.DateTimeField()
     #: :py:class:`Registration` that used the invite
-    registration = djm.ForeignKey(Registration, null=True, blank=True, on_delete=djm.SET_NULL)
+    # FIXME Invite rendered useless if another registration conflicts with this one before it is confirmed.
+    registration = djm.ForeignKey(Registration, null=True, blank=True, on_delete=djm.SET_NULL, related_name='invites')
     #: :py:class:`User` that resulted from the usage of this invite
     resulting_user = djm.OneToOneField(User, null=True, blank=True, on_delete=djm.SET_NULL)
     #: Whether the invite got revoked

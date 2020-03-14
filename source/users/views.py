@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 import settings
-from college.models import ClassInstance
 from . import models as m, exceptions, forms, registrations
 from college import models as college
 from college import schedules
@@ -19,7 +18,6 @@ from supernova.views import build_base_context
 def login_view(request):
     context = build_base_context(request)
     context['title'] = "Autenticação"
-    context['disable_auth'] = True  # Disable auth overlay
 
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('users:profile', args=[request.user]))
@@ -51,23 +49,29 @@ def logout_view(request):
 
 
 def registration_view(request):
+    # Redirect logged users to their profiles
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
 
     context = build_base_context(request)
-
     context['title'] = "Criar conta"
-    context['disable_auth'] = True  # Disable auth overlay
     context['enabled'] = settings.REGISTRATIONS_ENABLED
     if request.method == 'POST':
+        # This is a registration request, validate it
         form = forms.RegistrationForm(data=request.POST)
-        if form.is_valid():
+        valid = form.is_valid()
+        if valid:
             registration = form.save(commit=False)
             invite = form.cleaned_data['invite']
             try:
-                registrations.pre_register(request, registration)
-                invite.registration = registration
-                invite.save()
+                token = registrations.generate_token(settings.REGISTRATIONS_TOKEN_LENGTH)
+                registration.token = token
+                registration.save()
+                try:
+                    registrations.email_confirmation(request, registration)
+                    invite.registration = registration
+                finally:
+                    invite.save()
                 return HttpResponseRedirect(reverse('registration_validation'))
             except exceptions.InvalidUsername as e:
                 form.add_error(None, str(e))
@@ -77,9 +81,12 @@ def registration_view(request):
                 form.add_error(None, str(e))
         context['creation_form'] = form
     else:
+        # Return the registration form
         if 't' in request.GET:
+            # If an invite token is in the querystring, populate the form with it
             invite_token = request.GET['t']
             form = forms.RegistrationForm(initial={'invite': invite_token})
+            # But warn if the invite token is not valid
             invites = m.Invite.objects.filter(token=invite_token)
             if invites.exists():
                 invite = invites.first()
@@ -96,6 +103,7 @@ def registration_view(request):
 
 
 def registration_validation_view(request):
+    # Redirect logged users to their profiles
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
 
@@ -107,33 +115,33 @@ def registration_validation_view(request):
     else:
         data = None
 
-    if data is not None:
+    if data is None:
+        form = forms.RegistrationValidationForm()
+    else:
         if 'token' in data and 'email' in data:
             registration = m.Registration.objects \
                 .order_by('creation') \
                 .filter(email=data['email'], token=data['token']) \
                 .first()
             form = forms.RegistrationValidationForm(instance=registration, data=data)
+            if form.is_valid():
+                try:
+                    user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
+                    invite = registration.invites.first()
+                    if invite:
+                        invite.resulting_user = user
+                        invite.save()
+                    login(request, user)
+                    return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
+                except exceptions.AccountExists as e:
+                    form.add_error(None, str(e))
+                except exceptions.ExpiredRegistration as e:
+                    form.add_error(None, str(e))
+                except exceptions.InvalidToken as e:
+                    form.add_error(None, str(e))
         else:
             form = forms.RegistrationValidationForm(data=data)
-
-        if form.is_valid():
-            try:
-                user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
-                invite = registration.invite_set.first()
-                if invite:
-                    invite.resulting_user = user
-                    invite.save()
-                login(request, user)
-                return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
-            except exceptions.AccountExists as e:
-                form.add_error(None, str(e))
-            except exceptions.ExpiredRegistration as e:
-                form.add_error(None, str(e))
-            except exceptions.InvalidToken as e:
-                form.add_error(None, str(e))
-    else:
-        form = forms.RegistrationValidationForm()
+            form.is_valid()  # Trigger the cleanup
 
     context['form'] = form
     context['title'] = "Validar registo"
@@ -167,7 +175,7 @@ def profile_view(request, nickname):
         context['weekday_spans'], context['schedule'], context['unsortable'] = \
             schedules.build_schedule(turn_instances)
 
-        context['current_class_instances'] = ClassInstance.objects \
+        context['current_class_instances'] = college.ClassInstance.objects \
             .select_related('parent') \
             .filter(student=user.primary_student,
                     year=settings.COLLEGE_YEAR,

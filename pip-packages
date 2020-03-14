@@ -26,3 +26,4 @@ django-redis
 django-crontab
 Sphinx
 sphinx-rtd-theme
+Jinja2

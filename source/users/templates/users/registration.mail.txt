@@ -1,0 +1,4 @@
+Olá. Penso que tentaste criar uma conta no Supernova. Se não foste tu então podes ignorar este email.
+Para concluires o registo acede a {{ link }}.
+Alternativamente vai manualmente a {{ manual_link }} e insere o código {{ token }}.
+Este código só é valido na próxima hora.
