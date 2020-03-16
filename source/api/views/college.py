@@ -1,9 +1,14 @@
+from django.db.models import F
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import settings
 from api.serializers import college as serializers
 
 from college import models as college
+from users import models as users
+from users.utils import get_students
 
 
 class BuildingList(APIView):
@@ -42,4 +47,21 @@ class CourseDetailed(APIView):
 class ClassDetailed(APIView):
     def get(self, request, pk, format=None):
         serializer = serializers.CourseSerializer(college.Class.objects.get(id=pk))
+        return Response(serializer.data)
+
+
+class UserTurnInstances(APIView):
+    def get(self, request, nickname, format=None):
+        user = get_object_or_404(users.User.objects.prefetch_related('students'), nickname=nickname)
+        primary_students, _ = get_students(user)
+
+        turn_instances = college.TurnInstance.objects \
+            .select_related('turn__class_instance__parent') \
+            .prefetch_related('room__building') \
+            .filter(turn__student__in=primary_students,
+                    turn__class_instance__year=settings.COLLEGE_YEAR,
+                    turn__class_instance__period=settings.COLLEGE_PERIOD) \
+            .annotate(end=F('start') - F('duration')) \
+            .all()
+        serializer = serializers.ScheduleSerializer(turn_instances, many=True)
         return Response(serializer.data)
