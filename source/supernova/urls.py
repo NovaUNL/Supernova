@@ -9,7 +9,6 @@ import users.views as users
 import events.views as events
 import feedback.views as feedback
 import documents.views as documents
-import news.views as news
 from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
