@@ -212,6 +212,16 @@ def user_schedule_view(request, nickname):
 
 
 @login_required
+def user_calendar_view(request, nickname):
+    context = build_base_context(request)
+    user = get_object_or_404(m.User.objects, nickname=nickname)
+    context['profile_user'] = user
+    context['page'] = 'profile_cal'
+    context['title'] = "Calendário de " + nickname
+    return render(request, 'users/calendar.html', context)
+
+
+@login_required
 def user_profile_settings_view(request, nickname):
     context = build_base_context(request)
     requester: m.User = request.user
