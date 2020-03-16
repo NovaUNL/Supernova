@@ -17,10 +17,14 @@
           <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
           <form id="login-form" class="col" method="post" action="{{ request.get_full_path }}">
             {% csrf_token %}
-            {{ login_form.username.errors }}<br>
+            {% if login_form.username.errors %}
+              {{ login_form.username.errors }}<br>
+            {% endif %}
             {{ login_form.username.label }}<br>
             {{ login_form.username }}
-            {{ login_form.password.errors }}<br>
+            {% if login_form.password.errors %}
+              {{ login_form.password.errors }}<br>
+            {% endif %}
             {{ login_form.password.label }}<br>
             {{ login_form.password }}<br>
             <input type="submit" value="Entrar">
