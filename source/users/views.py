@@ -13,6 +13,7 @@ from . import models as m, exceptions, forms, registrations
 from college import models as college
 from college import schedules
 from supernova.views import build_base_context
+from .utils import get_students
 
 
 def login_view(request):
@@ -155,31 +156,28 @@ def profile_view(request, nickname):
         return render(request, 'users/profile.html', context)
 
     user = get_object_or_404(
-        m.User.objects
-            .select_related('primary_student__course')
-            .prefetch_related('students', 'memberships', 'social_networks', 'badges'),
+        m.User.objects.prefetch_related('students__course', 'memberships', 'social_networks', 'badges'),
         nickname=nickname)
     context = build_base_context(request)
     page_name = f"Perfil de {user.get_full_name()}"
     context['title'] = page_name
     context['profile_user'] = user
-    if user.primary_student:
-        student = user.primary_student
-        context['primary_student'] = student
-        turn_instances = college.TurnInstance.objects \
-            .select_related('turn__class_instance__parent') \
-            .prefetch_related('room__building') \
-            .filter(turn__student=student,
-                    turn__class_instance__year=settings.COLLEGE_YEAR,
-                    turn__class_instance__period=settings.COLLEGE_PERIOD)
-        context['weekday_spans'], context['schedule'], context['unsortable'] = \
-            schedules.build_schedule(turn_instances)
+    primary_students, context['secondary_students'] = get_students(user)
+    context['primary_students'] = primary_students
+    turn_instances = college.TurnInstance.objects \
+        .select_related('turn__class_instance__parent') \
+        .prefetch_related('room__building') \
+        .filter(turn__student__in=primary_students,
+                turn__class_instance__year=settings.COLLEGE_YEAR,
+                turn__class_instance__period=settings.COLLEGE_PERIOD)
+    context['weekday_spans'], context['schedule'], context['unsortable'] = \
+        schedules.build_schedule(turn_instances)
 
-        context['current_class_instances'] = college.ClassInstance.objects \
-            .select_related('parent') \
-            .filter(student=user.primary_student,
-                    year=settings.COLLEGE_YEAR,
-                    period=settings.COLLEGE_PERIOD)
+    context['current_class_instances'] = college.ClassInstance.objects \
+        .select_related('parent') \
+        .filter(student__in=primary_students,
+                year=settings.COLLEGE_YEAR,
+                period=settings.COLLEGE_PERIOD)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
     cache.set(f'profile_{nickname}_{0}_context', context, timeout=3600)
     return render(request, 'users/profile.html', context)
@@ -188,11 +186,14 @@ def profile_view(request, nickname):
 @login_required
 def user_schedule_view(request, nickname):
     context = build_base_context(request)
-    user = get_object_or_404(m.User.objects.select_related('primary_student'), id=request.user.id)
+    if nickname == request.user.nickname:
+        user = request.user
+    else:
+        user = get_object_or_404(m.User.objects.prefetch_related('students'), nickname=nickname)
 
-    if user.primary_student is None:
+    primary_students, _ = get_students(user)
+    if len(primary_students) == 0:
         return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
-    student = user.primary_student
 
     context['page'] = 'profile_schedule'
     context['title'] = "Horário de " + nickname
@@ -203,7 +204,7 @@ def user_schedule_view(request, nickname):
     turn_instances = college.TurnInstance.objects \
         .select_related('turn__class_instance__parent') \
         .prefetch_related('room__building') \
-        .filter(turn__student=student,
+        .filter(turn__student__in=primary_students,
                 turn__class_instance__year=settings.COLLEGE_YEAR,
                 turn__class_instance__period=settings.COLLEGE_PERIOD)
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)

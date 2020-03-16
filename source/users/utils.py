@@ -1,5 +1,7 @@
 import re
 
+import settings
+
 NETWORK_PROFILE_URL_REGEX = [
     re.compile(r'(http[s]?://)?(www\.)?gitlab\.com/(?P<username>\w+)[/]?$'),
     re.compile(r'(http[s]?://)?(www\.)?github\.com/(?P<username>\w+)[/]?$'),
@@ -36,6 +38,14 @@ NETWORK_URLS = [
     "https://imdb.com/user/{}"
 ]
 
+def get_students(user):
+    primary_students, secondary_students = [], []
+    for student in user.students.all():
+        if student.last_year >= settings.COLLEGE_YEAR:
+            primary_students.append(student)
+        else:
+            secondary_students.append(student)
+    return primary_students, secondary_students
 
 def get_network_identifier(network: int, link: str):
     if network >= len(NETWORK_PROFILE_URL_REGEX):

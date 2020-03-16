@@ -28,15 +28,17 @@
           <div class="pane-title bg-grad"><h2>Informação</h2></div>
           <div class="pane-content">
             <div class="students">
-              <div>
-                <b>CLIP ID: </b>{{ primary_student.abbreviation }}<br>
-                <b>Numero: </b>{{ primary_student.number }}<br>
-                <b>Curso: </b>
-                <a href="{% url 'college:course' primary_student.course.id %}">
-                  {{ primary_student.course.abbreviation }}
-                </a>
-              </div>
-              {% for student in profile_user.students.all %}
+              {% for student in primary_students %}
+                <div>
+                  <b>CLIP ID: </b>{{ student.abbreviation }}<br>
+                  <b>Numero: </b>{{ student.number }}<br>
+                  <b>Curso: </b>
+                  <a href="{% url 'college:course' student.course.id %}">
+                    {{ student.course.abbreviation }}
+                  </a>
+                </div>
+              {% endfor %}
+              {% for student in secondary_students %}
                 {% if student != primary_student %}
                   <div>
                     <b>Numero: </b>{{ student.number }}<br>
