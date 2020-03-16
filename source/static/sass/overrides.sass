@@ -311,3 +311,25 @@
 
   th:first-child a
     color: white !important
+
+#calendar
+  //TODO https://github.com/nhn/tui.calendar/issues/268
+  min-height: calc(100% - 5px)
+
+#cal-range-label
+  color: $whitish
+  font-size: 32px
+
+#cal-ctls .ui-btn
+  min-height: 32px
+  min-width: 32px
+  background-size: contain
+  background-repeat: no-repeat
+  &.hid
+    visibility: hidden
+
+#cal-next
+  background: url("/static/img/icons/arrow-right.svg")
+
+#cal-prev
+  background: url("/static/img/icons/arrow-left.svg")
