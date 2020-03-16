@@ -312,6 +312,7 @@ class Turn(Importable):
     def __str__(self):
         return f"{self.class_instance} {ctypes.TurnType.abbreviation(self.turn_type)}{self.number}"
 
+    @property
     def type_abbreviation(self):
         return ctypes.TurnType.abbreviation(self.turn_type)
 
