@@ -29,7 +29,7 @@ class TurnType:
     FIELD_WORK = 6
     CHOICES = (
         (THEORETICAL, 'Teórico'),
-        (PRACTICAL, 'Teórico'),
+        (PRACTICAL, 'Prático'),
         (PRACTICAL_THEORETICAL, 'Teórico-pratico'),
         (SEMINAR, 'Seminário'),
         (TUTORIAL_ORIENTATION, 'Orientação tutorial'),
