@@ -207,7 +207,7 @@ class SchedulePeriodic(ScheduleEntry):
     weekday = djm.IntegerField(choices=WEEKDAY_CHOICES)
     #: The time at which the event occurs.
     time = djm.TimeField()
-    #: The predicted duration of these recurring events
+    #: The predicted duration of these recurring timeline
     duration = djm.IntegerField()
     #: The date on which this scheduling was defined to start
     start_date = djm.DateField()
@@ -272,6 +272,83 @@ class ScheduleRevoke(Activity):
 
     def __str__(self):
         return f"Cancelamento de {self.entry}"
+
+
+class Event(djm.Model):
+    """
+    While a ScheduleEntry represents a casual event, part of the regular routine, mostly focused towards group members
+    which are assumed to attend by default; an Event is assumed as something that stands off, to which many users do
+    not want to attend, can have an associated cost and tends to be open towards outsiders.
+    """
+    #: A short title that identifies the event
+    title = djm.CharField(max_length=200)
+    #: A textual description of the event
+    description = MarkdownxField()
+    #: Date on which the event happens
+    start_date = djm.DateField()
+    #: Expected duration for the event
+    duration = djm.IntegerField(null=True, blank=True)
+    #: Location where the event happens
+    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL)
+    #: Limit of persons in this event
+    capacity = djm.IntegerField(null=True, blank=True)
+    #: | Flag telling that this is the official enrollment platform for the event
+    #: | This essentially means that constraints must be enforced.
+    enroll_here = djm.BooleanField(default=True)
+    #: Cost in cents
+    cost = djm.IntegerField()
+
+    #: An event that does not fit into any other category
+    GENERIC = 0
+    #: An event where people talk about something to an audience
+    TALK = 1
+    #: An event where something is taught to its attendees
+    WORKSHOP = 2
+    #: An event which where attendees celebrate
+    PARTY = 3
+    #: An event where a competition takes place
+    CONTEST = 4
+    #: An event where an exposition takes place
+    FAIR = 5
+    #: An event which serves to aggregate people with a certain background
+    MEETING = 6
+    #: Enumeration with the possible types of event
+    CHOICES = (
+        (GENERIC, 'Genérico'),
+        (TALK, 'Palestra'),
+        (WORKSHOP, 'Workshop'),
+        (PARTY, 'Festa'),
+        (CONTEST, 'Concurso'),
+        (FAIR, 'Feira'),
+        (MEETING, 'Encontro'),
+    )
+
+    #: The type of this event (enumeration)
+    type = djm.IntegerField(choices=CHOICES)
+    #: Users who are going to this event (and are confirmed)
+    attendees = djm.ManyToManyField(settings.AUTH_USER_MODEL, related_name='attended_events')
+    #: Users who desire to go to this event and await for approval or vacancies
+    queued = djm.ManyToManyField(settings.AUTH_USER_MODEL, related_name='queued_events', through='EventUserQueue')
+    #: Users who want to receive information about changes to this event
+    subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, related_name='event_subscription')
+
+
+class EventAnnouncement(Activity):
+    """An activity log to signal event announcements."""
+    #: The event being announced
+    event = djm.OneToOneField(Event, on_delete=djm.CASCADE)
+
+
+class EventUserQueue(djm.Model):
+    """A queue of users desiring to attend an event"""
+    #: Event being queued for
+    event = djm.ForeignKey(Event, on_delete=djm.CASCADE, related_name='queue_positions')
+    #: Queued user
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='event_queue_positions')
+    #: Time at which the user entered the queue
+    timestamp = djm.DateTimeField(auto_now_add=True)
+    #: Flag that signals users as missing the event fee payment
+    awaiting_payment = djm.BooleanField(default=True)
 
 
 class Gallery(djm.Model):

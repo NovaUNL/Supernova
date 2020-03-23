@@ -6,7 +6,6 @@ from django.contrib.flatpages import views as flatpages
 from django.urls import path, include
 
 import users.views as users
-import events.views as events
 import feedback.views as feedback
 import documents.views as documents
 from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
@@ -30,9 +29,6 @@ urlpatterns = [
     path('sair/', users.logout_view, name='logout'),
     # Group views
     path('grupos/', include('groups.urls')),
-    # Events views
-    path('eventos/', events.index, name='events'),
-    path('evento/<str:event_id>/', events.event, name='event'),
     # Feedback views
     path('feedback/', feedback.feedback_list, name='feedback'),
     path('feedback/<int:idea_id>/', feedback.idea, name='feedback_idea'),
