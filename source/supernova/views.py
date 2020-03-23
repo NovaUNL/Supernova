@@ -43,7 +43,7 @@ def index(request):
         10)
 
     context['activities'] = groups.Activity.objects \
-                                .select_related('group', 'announcement') \
+                                .select_related('group') \
                                 .order_by('datetime') \
                                 .reverse()[:5]
     return render(request, 'supernova/index.html', context)

@@ -1,5 +1,6 @@
 {% extends 'supernova/two_columns.html' %}
 {% load static %}
+{% load misc %}
 
 {% block content_wrapper %}
   <div id="particles"></div>
@@ -32,20 +33,21 @@
             <div class="pane-title bg-grad"><h2>Atividade</h2></div>
             <div class="pane-content">
               {% for activity in activities %}
-                {% if activity.announcement %}
-                  <div>
-                    <a href="{% url 'groups:announcement' activity.group.abbreviation activity.id %}">
-                      <h4>{{ activity.announcement.title }}</h4>
-                    </a>
-                  </div>
-                  <div>
-                    <span class="ui-tag green">Anúncio</span> Por
-                    <a href="{% url 'groups:group' activity.group.abbreviation %}">@{{ activity.group.abbreviation }}</a>,
-                    {{ activity.datetime|date:'Y/m/d H:i' }}
-                  </div>
-                {% else %}
-                  {{ activity }}
-                {% endif %}
+                {% if not forloop.first %}<hr>{% endif %}
+                <div>
+                  {% with activity.link_to as link %}
+                    {% if link %}
+                      <a href="{{ link }}"><h4>{{ activity.title }}</h4></a>
+                    {% else %}
+                      {{ activity.title }}
+                    {% endif %}
+                  {% endwith %}
+                </div>
+                <div>
+                  <span class="ui-tag {{ activity | class_name | lower }}"></span> Por
+                  <a href="{% url 'groups:group' activity.group.abbreviation %}">@{{ activity.group.abbreviation }}</a>,
+                  {{ activity.datetime|date:'d/m/Y H:i' }}
+                </div>
               {% endfor %}
             </div>
           </div>
