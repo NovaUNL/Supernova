@@ -1,7 +1,8 @@
 from dal import autocomplete
 from django import forms as djf
 from groups import models as m
-from supernova.widgets import SliderInput
+from supernova.fields import NativeSplitDateTimeField
+from supernova.widgets import SliderInput, NativeTimeInput
 
 
 class GroupForm(djf.ModelForm):
@@ -57,3 +58,32 @@ class AnnounceForm(djf.ModelForm):
     class Meta:
         model = m.Announcement
         fields = ('title', 'content')
+
+
+class ScheduleOnceForm(djf.ModelForm):
+    datetime = NativeSplitDateTimeField()
+
+    class Meta:
+        model = m.ScheduleOnce
+        fields = ('title', 'datetime', 'duration')
+        widgets = {'duration': djf.NumberInput(attrs={'min': 0, 'max': 24 * 60, 'size': 3})}
+
+
+GroupScheduleOnceFormset = djf.inlineformset_factory(m.Group, m.ScheduleOnce, extra=1, form=ScheduleOnceForm)
+
+
+class SchedulePeriodicForm(djf.ModelForm):
+    start_date = NativeSplitDateTimeField()
+    end_date = NativeSplitDateTimeField()
+
+    class Meta:
+        model = m.SchedulePeriodic
+        fields = ('title', 'weekday', 'time', 'duration', 'start_date', 'end_date')
+        widgets = {
+            'time': NativeTimeInput(),
+            'duration': djf.NumberInput(attrs={'min': 0, 'max': 24 * 60, 'size': 3})
+        }
+
+
+GroupSchedulePeriodicFormset = djf.inlineformset_factory(m.Group, m.SchedulePeriodic, extra=1,
+                                                         form=SchedulePeriodicForm)

@@ -85,7 +85,7 @@
               {% endif %}
               <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>
               <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>
-              <li><a href="#">Alterar horários</a></li>
+              <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>
               <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>
             </ul>
           </div>

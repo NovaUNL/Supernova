@@ -169,7 +169,7 @@ class Announcement(Activity):
 class ScheduleEntry(djm.Model):
     """Base entry in this :py:class:`Group` 's activity schedule."""
     #: :py:class:`Group` with this entry
-    group = djm.ForeignKey(Group, on_delete=djm.CASCADE)
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='schedule_entries')
     #: (Optional) Title for the entry
     title = djm.CharField(max_length=128, blank=True, null=True)
     #: Whether the entry occurrence scheduling is cancelled
@@ -188,10 +188,12 @@ class SchedulePeriodic(ScheduleEntry):
     """Represents a periodic entry in this group's activity schedule. This entry happens weekly."""
     #: The weekday on which this event is set to happen
     weekday = djm.IntegerField(choices=WEEKDAY_CHOICES)
+    #: The time at which the event occurs.
+    time = djm.TimeField()
     #: The predicted duration of these recurring events
     duration = djm.IntegerField()
     #: The date on which this scheduling was defined to start
-    start_date = djm.DateField(auto_now_add=True)
+    start_date = djm.DateField()
     #: The date on which this scheduling lost its validity
     end_date = djm.DateField(blank=True, null=True, default=None)
 

@@ -1,5 +1,6 @@
-from django.forms import CheckboxInput, Widget
-from django.forms.widgets import boolean_check
+from django.forms import Widget
+from django.forms.utils import to_current_timezone
+from django.forms.widgets import boolean_check, MultiWidget, DateInput, TimeInput
 
 
 class SliderInput(Widget):
@@ -41,3 +42,35 @@ class SliderInput(Widget):
         # HTML checkboxes don't appear in POST data if not checked, so it's
         # never known if the value is actually omitted.
         return False
+
+
+class NativeDateInput(DateInput):
+    input_type = 'date'
+
+
+class NativeTimeInput(TimeInput):
+    input_type = 'time'
+
+
+class NativeSplitDateTimeWidget(MultiWidget):
+    supports_microseconds = False
+    template_name = 'django/forms/widgets/splitdatetime.html'
+
+    def __init__(self, attrs=None, date_format=None, time_format=None, date_attrs=None, time_attrs=None):
+        widgets = (
+            NativeDateInput(
+                attrs=attrs if date_attrs is None else date_attrs,
+                format=date_format,
+            ),
+            NativeTimeInput(
+                attrs=attrs if time_attrs is None else time_attrs,
+                format=time_format,
+            ),
+        )
+        super().__init__(widgets)
+
+    def decompress(self, value):
+        if value:
+            value = to_current_timezone(value)
+            return [value.date(), value.time()]
+        return [None, None]

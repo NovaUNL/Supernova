@@ -329,6 +329,61 @@ def role_view(request, group_abbr, role_id):
     return render(request, 'groups/role.html', context)
 
 
+@login_required
+def schedule_view(request, group_abbr):
+    group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    context = build_base_context(request)
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_cal_man'
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Agenda', 'url': reverse('groups:schedule', args=[group_abbr])}]
+
+    permission_flags = permissions.get_user_group_permissions(request.user, group)
+    if not permission_flags & permissions.CAN_CHANGE_SCHEDULE:
+        context['title'] = context['msg_title'] = 'Insuficiência de permissões'
+        context['msg_content'] = 'O seu utilizador não tem permissões suficientes para alterar a agenda do grupo.'
+        return render(request, 'supernova/message.html', context)
+
+    context['group'] = group
+    # schedule_entries = m.ScheduleEntry.objects\
+    #     .select_related('scheduleonce', 'scheduleperiodic')\
+    #     .filter(group=group).all()
+    once_schedule_entries = m.ScheduleOnce.objects.filter(group=group)
+    periodic_schedule_entries = m.SchedulePeriodic.objects.filter(group=group)
+    context['once_entries'] = once_schedule_entries
+    context['periodic_entries'] = periodic_schedule_entries
+
+    # Show empty forms by default
+    once_form = f.ScheduleOnceForm()
+    periodic_form = f.SchedulePeriodicForm()
+    if 'type' in request.GET:
+        rtype = request.GET['type']
+        if rtype == "periodic" and request.method == 'POST':
+            filled_form = f.SchedulePeriodicForm(request.POST)
+            if filled_form.is_valid():
+                entry = filled_form.save(commit=False)
+                entry.group = group
+                entry.save()
+            else:
+                periodic_form = filled_form  # Replace empty form with filled form with form filled with errors
+        elif rtype == "once" and request.method == 'POST':
+            filled_form = f.ScheduleOnceForm(request.POST)
+            if filled_form.is_valid():
+                entry = filled_form.save(commit=False)
+                entry.group = group
+                entry.save()
+            else:
+                once_form = filled_form  # Replace empty form with form filled with errors
+
+    context['once_form'] = once_form
+    context['periodic_form'] = periodic_form
+
+    return render(request, 'groups/schedule.html', context)
+
+
 class GroupRolesAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         group = self.forwarded.get('group', None)

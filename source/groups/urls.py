@@ -19,6 +19,7 @@ urlpatterns = [
     path('<str:group_abbr>/cargo/<int:role_id>', views.role_view, name='role'),
     path('<str:group_abbr>/anunciar/', views.announce_view, name='announce'),
     path('<str:group_abbr>/anuncio/<str:announcement_id>/', views.announcement_view, name='announcement'),
+    path('<str:group_abbr>/agenda/', views.schedule_view, name='schedule'),
     path('<str:group_abbr>/contactar/', views.contact_view, name='contact'),
     path('ac/group_role', views.GroupRolesAutocomplete.as_view(), name='group_role_ac'),
 ]
