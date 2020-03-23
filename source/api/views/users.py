@@ -12,9 +12,12 @@ from rest_framework.views import APIView
 import settings
 from api.serializers import users as serializers
 from api import permissions
+from api.schedule_utils import get_weekday_occurrences, append_turn_instances, append_schedule_entries, \
+    append_periodic_schedule_entries_in_extension
 from users.utils import get_network_identifier, get_students
 from users import models as users
 from college import models as college
+from groups import models as groups
 
 
 class ProfileDetailed(APIView):
@@ -28,25 +31,8 @@ class ProfileDetailed(APIView):
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 @permission_classes((permissions.SelfOnly,))
 def user_schedule(_, nickname, from_date, to_date):
-    try:
-        from_date = datetime.strptime(from_date, '%Y-%m-%d')
-        to_date = datetime.strptime(to_date, '%Y-%m-%d')
-    except ValueError:
-        raise ValidationError(detail="Bad date range")
-    if to_date < from_date:
-        raise ValidationError(detail="Range goes back in time")
-
-    delta: timedelta = to_date - from_date
-    if delta.days > 31:
-        raise ValidationError(detail="Range exceeds limit")
-
-    weekday_occurrences = {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: []}
-    day = from_date
-    for _ in range(delta.days):
-        weekday_occurrences[day.weekday()].append(day)
-        day = day + timedelta(days=1)
-
-    user = get_object_or_404(users.User.objects.prefetch_related('students'), nickname=nickname)
+    weekday_occurrences = get_weekday_occurrences(from_date, to_date)
+    user = get_object_or_404(users.User.objects.prefetch_related('students', 'memberships'), nickname=nickname)
     primary_students, _ = get_students(user)
 
     turn_instances = college.TurnInstance.objects \
@@ -57,25 +43,16 @@ def user_schedule(_, nickname, from_date, to_date):
                 turn__class_instance__period=settings.COLLEGE_PERIOD) \
         .annotate(end=F('start') - F('duration')) \
         .all()
-    turn_instance_occurrences = []
-    for instance in turn_instances:
-        instance: college.TurnInstance
-        start_delta = timedelta(minutes=instance.start)
-        duration_delta = timedelta(minutes=instance.duration)
-        title = f'{instance.turn.class_instance.parent.abbreviation} {instance.turn.get_turn_type_display()}'
+    schedule_entries = []
 
-        for day in weekday_occurrences[instance.weekday]:
-            start = day + start_delta
-            end = start + duration_delta
-            turn_instance_occurrences.append({
-                'id': f"A{datetime.strftime(start, '%y%m%d')}{instance.id}",
-                'type': instance.turn.type_abbreviation,
-                'title': title,
-                'start': start,
-                'end': end
-            })
-    turn_instance_occurrences = sorted(turn_instance_occurrences, key=lambda occurrence: occurrence['start'])
-    return Response(turn_instance_occurrences)
+    append_turn_instances(schedule_entries, turn_instances, weekday_occurrences)
+    user_groups = user.memberships.all()
+    once_schedule_entries = groups.ScheduleOnce.objects.filter(group__in=user_groups)
+    periodic_schedule_entries = groups.SchedulePeriodic.objects.filter(group__in=user_groups)
+    append_schedule_entries(schedule_entries, once_schedule_entries)
+    append_periodic_schedule_entries_in_extension(schedule_entries, periodic_schedule_entries, weekday_occurrences)
+    schedule_entries = sorted(schedule_entries, key=lambda occurrence: occurrence['start'])
+    return Response(schedule_entries)
 
 
 class UserSocialNetworks(APIView):
