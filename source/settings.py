@@ -2,8 +2,6 @@ import json
 import os
 import subprocess
 
-from django.urls import reverse
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Application definition
@@ -28,7 +26,6 @@ INSTALLED_APPS = [
     'markdownx',
     'django_elasticsearch_dsl',
     'django_crontab',
-    'clip',
     'supernova.apps.SupernovaConfig',
     'users',
     'groups',
@@ -44,8 +41,10 @@ INSTALLED_APPS = [
     'documents',
     'exercises',
     'api',
+    'clip',
     'django_extensions',
     'debug_toolbar',
+    'polymorphic',
 ]
 
 MIDDLEWARE = [

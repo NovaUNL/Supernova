@@ -24,6 +24,7 @@ python-logstash
 django-debug-toolbar
 django-redis
 django-crontab
+django-polymorphic
 Sphinx
 sphinx-rtd-theme
 Jinja2

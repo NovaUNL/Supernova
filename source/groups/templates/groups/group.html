@@ -1,6 +1,7 @@
 {% extends 'supernova/base.html' %}
 
 {% load static %}
+{% load misc %}
 
 {% block head %}
   <style>
@@ -38,17 +39,21 @@
             {% if not activities.exists %}
               Este grupo é tímido. Nunca participou... :(
             {% endif %}
-            {% for activity in activities %}
-              {% if activity.announcement %}
-                {{ activity.datetime|date:'Y/m/d H:i' }}:
-                <a href="{% url 'groups:announcement' group.abbreviation activity.id %}">
-                  {{ activity.announcement.title }}
-                </a>
-                <span class="ui-tag green">Anúncio</span>
-              {% else %}
-                {{ activity }}
-              {% endif %}
-            {% endfor %}
+            <ul>
+              {% for activity in activities %}
+                <li>
+                  {{ activity.datetime|date:'Y/m/d H:i' }}:
+                  {% with activity.link_to as link %}
+                    {% if link %}
+                      <a href="{{ link }}">{{ activity }}</a>
+                    {% else %}
+                      {{ activity }}
+                    {% endif %}
+                  {% endwith %}
+                  <span class="ui-tag {{ activity | class_name | lower }}"></span>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
         </div>
         <div class="flex-pane">

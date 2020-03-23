@@ -1,7 +1,11 @@
+from datetime import datetime, time
+
 from django.conf import settings
 from django.db import models as djm
+from django.urls import reverse
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from polymorphic.models import PolymorphicModel
 
 from college.choice_types import WEEKDAY_CHOICES
 from college.models import Place
@@ -135,7 +139,7 @@ class Membership(djm.Model):
         return f'{self.member.nickname} -> {self.role} -> {self.group}'
 
 
-class Activity(djm.Model):
+class Activity(PolymorphicModel):
     """
     | An activity is an action taken by a group at a given point in time. These end up building an activity log which
       is meant to be used as a feed
@@ -149,6 +153,9 @@ class Activity(djm.Model):
 
     def __str__(self):
         return f'{self.datetime}({self.author})'
+
+    class Meta:
+        verbose_name_plural = "activities"
 
 
 class Announcement(Activity):
@@ -165,8 +172,12 @@ class Announcement(Activity):
     def content_html(self):
         return markdownify(self.content)
 
+    @property
+    def link_to(self):
+        return reverse('groups:announcement', args=[self.group, self.id])
 
-class ScheduleEntry(djm.Model):
+
+class ScheduleEntry(PolymorphicModel):
     """Base entry in this :py:class:`Group` 's activity schedule."""
     #: :py:class:`Group` with this entry
     group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='schedule_entries')
@@ -175,6 +186,9 @@ class ScheduleEntry(djm.Model):
     #: Whether the entry occurrence scheduling is cancelled
     revoked = djm.BooleanField(default=False)
 
+    class Meta:
+        verbose_name_plural = 'schedule entries'
+
 
 class ScheduleOnce(ScheduleEntry):
     """Represents a one-time entry in this :py:class:`Group` 's activity schedule."""
@@ -182,6 +196,9 @@ class ScheduleOnce(ScheduleEntry):
     datetime = djm.DateTimeField()
     #: The predicted duration of this event interval
     duration = djm.IntegerField()
+
+    def __str__(self):
+        return f"{self.title}, dia {datetime.strftime(self.datetime, '%d/%m/%Y %H:%M')}"
 
 
 class SchedulePeriodic(ScheduleEntry):
@@ -197,20 +214,17 @@ class SchedulePeriodic(ScheduleEntry):
     #: The date on which this scheduling lost its validity
     end_date = djm.DateField(blank=True, null=True, default=None)
 
+    def __str__(self):
+        return f"{self.title}, {self.get_weekday_display()} ás {time.strftime(self.time, '%H:%M')}"
 
-class ScheduleRevoke(Activity):
-    """ An activity log entry to signal that a :py:class:`ScheduleEntry` has been permanently revoked."""
-    #: (Optional) Description for this schedule update
-    description = djm.CharField(max_length=256, blank=True, null=True)
-    #: The :py:class:`ScheduleEntry` that this update refers to
-    entry = djm.ForeignKey(ScheduleEntry, on_delete=djm.CASCADE, related_name='revocation')
-    #: The :py:class:`ScheduleEntry` that replaces the revoked entry
-    replacement = djm.ForeignKey(
-        ScheduleEntry,
-        on_delete=djm.SET_NULL,
-        blank=True,
-        null=True,
-        related_name='replaced_revoked_entries')
+
+class ScheduleCreation(Activity):
+    """An activity log entry to signal that a :py:class:`ScheduleEntry` has been created."""
+    #: The :py:class:`ScheduleEntry` that this creation refers to
+    entry = djm.OneToOneField(ScheduleEntry, on_delete=djm.CASCADE, related_name='creation')
+
+    def __str__(self):
+        return f"Agendamento: {self.entry}"
 
 
 class ScheduleSuspension(Activity):
@@ -230,6 +244,30 @@ class ScheduleSuspension(Activity):
         blank=True,
         null=True,
         related_name='replaced_suspended_entries')
+
+    def __str__(self):
+        if self.replacement is None:
+            return f"Suspensas as actividades de {self.entry} entre {self.start_date} e {self.end_date}"
+        else:
+            return f"Alterações nas actividades de {self.entry.title} entre {self.start_date} e {self.end_date}."
+
+
+class ScheduleRevoke(Activity):
+    """ An activity log entry to signal that a :py:class:`ScheduleEntry` has been permanently revoked."""
+    #: (Optional) Description for this schedule update
+    description = djm.CharField(max_length=256, blank=True, null=True)
+    #: The :py:class:`ScheduleEntry` that this update refers to
+    entry = djm.OneToOneField(ScheduleEntry, on_delete=djm.CASCADE, related_name='revocation')
+    #: The :py:class:`ScheduleEntry` that replaces the revoked entry
+    replacement = djm.ForeignKey(
+        ScheduleEntry,
+        on_delete=djm.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='replaced_revoked_entries')
+
+    def __str__(self):
+        return f"Cancelamento de {self.entry}"
 
 
 class Gallery(djm.Model):

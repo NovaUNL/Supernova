@@ -325,6 +325,7 @@
   min-width: 32px
   background-size: contain
   background-repeat: no-repeat
+
   &.hid
     visibility: hidden
 
@@ -333,3 +334,18 @@
 
 #cal-prev
   background: url("/static/img/icons/arrow-left.svg")
+
+
+.ui-tag
+
+  &.schedulecreation
+    background-color: darkred
+
+  &.schedulecreation:before
+    content: "Agenda"
+
+  &.announcement
+    background-color: darkgreen
+
+  &.announcement:before
+    content: "Anúncio"
