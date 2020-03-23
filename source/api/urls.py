@@ -12,6 +12,7 @@ urlpatterns = [
     path('class/<int:pk>/', views.college.ClassDetailed.as_view()),
     # Groups
     path('groups/', views.groups.GroupList.as_view()),
+    path('groups/<str:abbr>/schedule/<str:from_date>/<str:to_date>', views.groups.group_schedule, name='group_schedule'),
     # News
     path('news/', views.news.NewsList.as_view()),
     path('news/<int:pk>/', views.news.News.as_view()),

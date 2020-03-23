@@ -4,7 +4,7 @@ let calendarPageLim = 4;
 let calendarDate;
 
 
-let themeConfig = {
+const themeConfig = {
     'common.border': '1px solid #e5e5e5',
     'common.backgroundColor': 'white',
     'common.holiday.color': '#ff4040',
@@ -112,8 +112,66 @@ let themeConfig = {
     'week.dayGridSchedule.marginLeft': '8px',
     'week.dayGridSchedule.marginRight': '8px'
 };
+const templates = {
+    // popupDetailDate: function (isAllDay, start, end) {
+    //     var isSameDate = moment(start).isSame(end);
+    //     var endFormat = (isSameDate ? '' : 'DD-MM') + 'hh:mm';
+    //
+    //     if (isAllDay) {
+    //         return moment(start).format('DD-MM') + (isSameDate ? '' : ' - ' + moment(end).format('DD-MM'));
+    //     }
+    //
+    //     return (moment(start).format('DD-MM hh:mm a') + ' - ' + moment(end).format(endFormat));
+    // },
+    timegridDisplayPrimaryTime: function (time) {
+        return time.hour + ':' + ('' + time.minutes).padStart(2, '0');
+    }
+};
+const calendars = [
+    {
+        id: 'T',
+        name: 'Teóricas',
+        color: '#ffffff',
+        bgColor: '#bbdc00',
+        dragBgColor: '#00a9ff',
+        borderColor: '#00a9ff'
+    },
+    {
+        id: 'P',
+        name: 'Teorico-Práticas',
+        color: '#ffffff',
+        bgColor: '#ffbb3b',
+        dragBgColor: '#ffbb3b',
+        borderColor: '#ffbb3b'
+    },
+    {
+        id: 'TP',
+        name: 'Práticas',
+        color: '#ffffff',
+        bgColor: '#bbdc00',
+        dragBgColor: '#bbdc00',
+        borderColor: '#bbdc00'
+    },
+    {
+        id: 'GO',
+        name: 'Eventos grupos',
+        color: '#ffffff',
+        bgColor: '#bbdc00',
+        dragBgColor: '#bbdc00',
+        borderColor: '#bbdc00'
+    },
+    {
+        id: 'GP',
+        name: 'Funcionamento grupos',
+        color: '#ffffff',
+        bgColor: '#bbdc00',
+        dragBgColor: '#bbdc00',
+        borderColor: '#bbdc00'
+    },
+];
+const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 
-function loadCalendar(element, url, start, duration) {
+function loadCalendar(element, url, start, duration, view) {
     let end = start.addDays(duration);
     let startDateStr = start.toISOString().split('T')[0];
     let endDateStr = end.toISOString().split('T')[0];
@@ -126,49 +184,25 @@ function loadCalendar(element, url, start, duration) {
             calendar = new tui.Calendar('#calendar', {
                 usageStatistics: false,
                 isReadOnly: true,
-                defaultView: 'week',
+                defaultView: view,
                 taskView: 'task',
                 scheduleView: ['time'],
                 disableClick: true,
                 disableDblClick: true,
-                calendars: [
-                    {
-                        id: 'T',
-                        name: 'Teóricas',
-                        color: '#ffffff',
-                        bgColor: '#bbdc00',
-                        dragBgColor: '#00a9ff',
-                        borderColor: '#00a9ff'
-                    },
-                    {
-                        id: 'P',
-                        name: 'Teorico-Práticas',
-                        color: '#ffffff',
-                        bgColor: '#ffbb3b',
-                        dragBgColor: '#ffbb3b',
-                        borderColor: '#ffbb3b'
-                    },
-                    {
-                        id: 'TP',
-                        name: 'Práticas',
-                        color: '#ffffff',
-                        bgColor: '#bbdc00',
-                        dragBgColor: '#bbdc00',
-                        borderColor: '#bbdc00'
-                    },
-                ],
+                calendars: calendars,
                 theme: themeConfig,
-                template: {
-                    timegridDisplayPrimaryTime: function (time) {
-                        return time.hour + ':' + ('' + time.minutes).padStart(2, '0');
-                    }
-                },
+                template: templates,
+                useDetailPopup: true,
                 week: {
-                    daynames: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+                    daynames: dayNames,
                     startDayOfWeek: start.getUTCDay(),
                     narrowWeekend: true,
                     hourStart: 7,
                     hourEnd: 20,
+                },
+                month: {
+                    daynames: dayNames,
+                    visibleWeeksCount: 4,
                 }
             });
             calendar.date = start;
@@ -220,12 +254,14 @@ function calendarPrev() {
     updateDateRangeLabel(calendar.date.addDays(calendarPage * 7), calendar.date.addDays(calendarPage * 7 + 7));
 }
 
-function dateToSlashSeparatedStr(date){
+function dateToSlashSeparatedStr(date) {
     let dateStr = date.toISOString().split('T')[0];
     return dateStr.split('-').join('/')
 }
 
 function updateDateRangeLabel(start, end) {
     let elem = document.getElementById('cal-range-label');
-    elem.innerText = dateToSlashSeparatedStr(start) + ' - ' + dateToSlashSeparatedStr(end);
+    if (elem != null) {
+        elem.innerText = dateToSlashSeparatedStr(start) + ' - ' + dateToSlashSeparatedStr(end);
+    }
 }
