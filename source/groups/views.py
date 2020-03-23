@@ -87,7 +87,6 @@ def announcements_view(request, group_abbr):
     context['group'] = group
     context['pcode'], nav_type = resolve_group_type(group)
     context['announcements'] = m.Announcement.objects.filter(group=group).order_by('datetime').reverse()
-    print(context['announcements'])
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
@@ -348,9 +347,6 @@ def schedule_view(request, group_abbr):
         return render(request, 'supernova/message.html', context)
 
     context['group'] = group
-    # schedule_entries = m.ScheduleEntry.objects\
-    #     .select_related('scheduleonce', 'scheduleperiodic')\
-    #     .filter(group=group).all()
     once_schedule_entries = m.ScheduleOnce.objects.filter(group=group)
     periodic_schedule_entries = m.SchedulePeriodic.objects.filter(group=group)
     context['once_entries'] = once_schedule_entries
@@ -367,6 +363,7 @@ def schedule_view(request, group_abbr):
                 entry = filled_form.save(commit=False)
                 entry.group = group
                 entry.save()
+                m.ScheduleCreation.objects.create(group=group, author=request.user, entry=entry)
             else:
                 periodic_form = filled_form  # Replace empty form with filled form with form filled with errors
         elif rtype == "once" and request.method == 'POST':
@@ -375,6 +372,7 @@ def schedule_view(request, group_abbr):
                 entry = filled_form.save(commit=False)
                 entry.group = group
                 entry.save()
+                m.ScheduleCreation.objects.create(group=group, author=request.user, entry=entry)
             else:
                 once_form = filled_form  # Replace empty form with form filled with errors
 

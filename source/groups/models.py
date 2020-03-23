@@ -174,7 +174,7 @@ class Announcement(Activity):
 
     @property
     def link_to(self):
-        return reverse('groups:announcement', args=[self.group, self.id])
+        return reverse('groups:announcement', args=[self.group.abbreviation, self.id])
 
 
 class ScheduleEntry(PolymorphicModel):
@@ -225,6 +225,10 @@ class ScheduleCreation(Activity):
 
     def __str__(self):
         return f"Agendamento: {self.entry}"
+
+    @property
+    def title(self):
+        return str(self.entry)
 
 
 class ScheduleSuspension(Activity):
