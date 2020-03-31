@@ -10,15 +10,13 @@
       "PORT": "5432"
     }
   },
-  "CLIP_USERNAME": "changeme",
-  "CLIP_PASSWORD": "changeme",
-  "EMAIL_SERVER": "changeme",
-  "EMAIL_ACCOUNT": "changeme",
-  "EMAIL_PASSWORD": "changeme",
-  "EMAIL_SUFFIX": "@campus.fct.unl.pt",
+  "EMAIL_HOST": "changeme",
+  "EMAIL_HOST_PASSWORD": "changeme",
+  "EMAIL_USER": "changeme",
+  "EMAIL_PORT": 587,
+  "CAMPUS_EMAIL_SUFFIX": "changeme",
   "ALLOWED_HOSTS": [
-    "127.0.0.1",
-    "localhost"
+    "*"
   ],
   "REGISTRATIONS_ENABLED": true,
   "VULNERABILITY_CHECKING": false,
