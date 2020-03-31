@@ -11,6 +11,7 @@ from college import models as college
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.utils import password_strength, correlated
 from users import models as m
+from settings import CAMPUS_EMAIL_SUFFIX
 
 IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
 
@@ -104,8 +105,8 @@ class RegistrationForm(forms.ModelForm):
         if not pattern.match(email):
             raise forms.ValidationError("Formato inválido de email.")
         prefix, suffix = email.split('@')
-        if 'campus.fct.unl.pt' not in suffix:
-            raise forms.ValidationError("Só são aceites emails @campus.fct.unl.pt")
+        if CAMPUS_EMAIL_SUFFIX not in suffix:
+            raise forms.ValidationError(f"Só são aceites emails {CAMPUS_EMAIL_SUFFIX}")
         if student_id != prefix:
             raise forms.ValidationError("Este email não parece pertencer ao identificador indicado.")
 

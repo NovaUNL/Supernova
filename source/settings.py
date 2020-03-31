@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'services',
     'store',
     'chat',
-    'events',
     'feedback',
     'planet',
     'documents',
@@ -222,6 +221,7 @@ DEBUG = False
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 VULNERABILITY_CHECKING = False
+CAMPUS_EMAIL_SUFFIX = ''
 
 INTERNAL_IPS = ['127.0.0.1', ]
 
