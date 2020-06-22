@@ -9,14 +9,14 @@
   display: flex
   flex-wrap: nowrap
   margin-bottom: 5px
-  color: $whitish
+  color: var(--text-hc)
 
   span
     display: inline-block
     padding: 5px
     font-weight: 700
-    border: 2px solid $color-primary-3
-    background-color: $color-primary-0
+    border: 2px solid var(--primary-3)
+    background-color: var(--primary-2)
     margin: 0
 
   .number
@@ -33,10 +33,10 @@
     flex-grow: 1
 
 .pt-line.bus .number
-  background-color: $blue
+  background-color: var(--blue)
 
 .pt-line.metro .number
-  background-color: $green
+  background-color: var(--green)
   padding-left: 25px
 
 .pane-content.news
@@ -47,7 +47,7 @@
   display: flex
   flex-direction: row
   margin: 5px
-  background-color: $color-primary-0
+  background-color: var(--primary-2)
   flex-basis: 500px
   min-width: 300px
   flex-grow: 1
@@ -55,7 +55,7 @@
   border-radius: 4px
 
   h3 > a
-    color: $whitish
+    color: var(--text-hc)
 
   img
     max-width: 100px
@@ -77,34 +77,34 @@
 
 .profile
   .students
-    color: $color-primary-3
-    background-color: $color-primary-1
+    color: var(--primary-3)
+    background-color: var(--primary-0)
     border-radius: 5px
 
     div
       padding: 5px
 
     div:first-child
-      border: solid 2px $color-primary-2
-      background-color: $color-primary-0
+      border: solid 2px var(--primary-1)
+      background-color: var(--primary-2)
       border-radius: 5px
-      color: $color-primary-1 !important
+      color: var(--primary-0) !important
 
   .group
     display: block
     max-height: 50px
-    border: 2px solid $color-primary-2
+    border: 2px solid var(--primary-1)
     border-radius: 5px
     padding-left: 5px
     background-color: black
     background-position: right
     background-size: contain
     background-repeat: no-repeat
-    box-shadow: 0 0 5px $color-primary-4
+    box-shadow: 0 0 5px var(--primary-4)
     font-weight: bold
     font-size: 2em
-    text-shadow: 0 0 2px $color-primary-2
-    color: $color-primary-2
+    text-shadow: 0 0 2px var(--primary-1)
+    color: var(--primary-1)
 
 .meals
   > span
@@ -114,7 +114,7 @@
     display: block
 
   > div
-    border-top: 2px solid $color-primary-2
+    border-top: 2px solid var(--primary-1)
     padding: 5px 0
 
   img
@@ -149,7 +149,7 @@
 .boinc
   th
     text-align: left
-    color: $whitish
+    color: var(--text-hc)
 
   img
     width: 20px
@@ -167,32 +167,32 @@
       font-weight: bold
 
 .room-type-1
-  box-shadow: 0 0 2px $room-type-1-color
-  border: 2px solid $room-type-1-shadow !important
+  box-shadow: 0 0 2px var(--room-type-1)
+  border: 2px solid var(--room-type-1-shadow) !important
 
 .room-type-2
-  box-shadow: 0 0 2px $room-type-2-color
-  border: 2px solid $room-type-2-shadow !important
+  box-shadow: 0 0 2px var(--room-type-2)
+  border: 2px solid var(--room-type-2-shadow) !important
 
 .room-type-3
-  box-shadow: 0 0 2px $room-type-3-color
-  border: 2px solid $room-type-3-shadow !important
+  box-shadow: 0 0 2px var(--room-type-3)
+  border: 2px solid var(--room-type-3-shadow) !important
 
 .room-type-4
-  box-shadow: 0 0 2px $room-type-4-color
-  border: 2px solid $room-type-4-shadow !important
+  box-shadow: 0 0 2px var(--room-type-4)
+  border: 2px solid var(--room-type-4-shadow) !important
 
 .room-type-5
-  box-shadow: 0 0 2px $room-type-5-color
-  border: 2px solid $room-type-5-shadow !important
+  box-shadow: 0 0 2px var(--room-type-5)
+  border: 2px solid var(--room-type-5-shadow) !important
 
 .room-type-6
-  box-shadow: 0 0 3px $room-type-6-color
-  border: 2px solid $room-type-6-shadow !important
+  box-shadow: 0 0 2px var(--room-type-6)
+  border: 2px solid var(--room-type-6-shadow) !important
 
 .room-type-7
-  box-shadow: 0 0 3px $room-type-7-color
-  border: 2px solid $room-type-7-shadow !important
+  box-shadow: 0 0 2px var(--room-type-7)
+  border: 2px solid var(--room-type-7-shadow) !important
 
 #campus-map
   height: 400px
@@ -209,8 +209,8 @@
     margin: 5px 5px
     border-radius: 5px
     border: 2px solid #aaa
-    color: $whitish
-    background: $color-primary-3
+    color: var(--text-hc)
+    background: var(--primary-3)
 
 .schedule
   min-width: 100%
@@ -222,11 +222,11 @@
     padding: 0
 
   tr:first-child
-    background-color: $color-primary-0 !important
-    color: $whitish
+    background-color: var(--primary-2) !important
+    color: var(--text-hc)
 
   th
-    border: 2px solid $color-primary-4
+    border: 2px solid var(--primary-4)
     border-right: 0
 
   th:first-child
@@ -235,30 +235,30 @@
   td:first-child
     width: 50px
     font-weight: bold
-    background-color: $color-primary-3
-    color: $whitish
+    background-color: var(--primary-3)
+    color: var(--text-hc)
     line-height: 15px
     text-align: right
     border-bottom: 2px solid #8b9e9d
 
   tr:nth-of-type(odd)
-    background-color: $color-primary-3
+    background-color: var(--primary-3)
 
 .turn-container
-  border: 1px solid $color-primary-0
-  background-color: $color-primary-2
+  border: 1px solid var(--primary-2)
+  background-color: var(--primary-1)
 
 .turn-t
-  background-color: $theoretical-turn !important
+  background-color: var(--theoretical-turn) !important
 
 .turn-p
-  background-color: $practical-turn !important
+  background-color: var(--practical-turn) !important
 
 .turn-tp
-  background-color: $theoretical-practical-turn !important
+  background-color: var(--theoretical-practical-turn) !important
 
 .turn-info
-  color: $whitish
+  color: var(--text-hc)
   display: flex
   flex-direction: column
   text-align: center
@@ -266,7 +266,7 @@
 
   > a:first-child
     padding: 2px
-    color: $link-color
+    color: var(--link)
     font-size: 1.2em
 
 .end-time
@@ -317,7 +317,7 @@
   min-height: calc(100% - 5px)
 
 #cal-range-label
-  color: $whitish
+  color: var(--text-hc)
   font-size: 32px
 
 #cal-ctls .ui-btn
@@ -339,13 +339,13 @@
 .ui-tag
 
   &.schedulecreation
-    background-color: darkred
+    background-color: var(--red)
 
   &.schedulecreation:before
     content: "Agenda"
 
   &.announcement
-    background-color: darkgreen
+    background-color: var(--green)
 
   &.announcement:before
     content: "Anúncio"

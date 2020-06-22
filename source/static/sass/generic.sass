@@ -8,12 +8,12 @@ html, body
 body
   display: flex
   flex-direction: column
-  background-color: $color-primary-0
-  color: $color-primary-1
+  background-color: var(--bg)
+  color: var(--text)
   overflow-x: hidden
 
 a
-  color: $link-color
+  color: var(--link)
   text-decoration: none
 
 h1
@@ -35,29 +35,29 @@ input[type=url],
 input[type=button],
 input[type=submit],
 .ui-btn
-  border: 1px solid $color-primary-2
+  border: 1px solid var(--primary-1)
   border-radius: 5px
   padding: 0 10px
-  background-color: $color-primary-0
-  color: $color-primary-1
+  background-color: var(--primary-2)
+  color: var(--primary-0)
   font-size: 22px
   line-height: 30px
-  box-shadow: $color-primary-3 0 0 5px
+  box-shadow: var(--primary-3) 0 0 5px
 
 textarea
-  background-color: $color-primary-0
-  color: $color-primary-1
-  border: 1px solid $color-primary-2
+  background-color: var(--primary-3)
+  color: var(--primary-0)
+  border: 1px solid var(--primary-1)
   border-radius: 5px
 
 
 blockquote
-  background: $color-primary-0
+  background: var(--primary-2)
   border-left: 10px solid #ccc
   margin: 1.5em 10px
   padding: 0.5em 10px
   quotes: "\201C""\201D""\2018""\2019"
-  color: $whitish
+  color: var(--text-hc)
 
 blockquote:before
   color: #ccc
@@ -75,7 +75,7 @@ blockquote p
   flex-wrap: nowrap !important
 
 .disabled
-  color: $color-primary-4 !important
+  color: var(--primary-4) !important
   text-decoration: line-through
 
 .hidden
@@ -140,7 +140,7 @@ blockquote p
   border: 2px solid #666
 
 .flex-grid-item-top, .flex-grid-item-bottom
-  background-color: transparentize($color-primary-1, 0.3)
+  background-color: rgba(var(--primary-0), 0.3)
   text-shadow: 0 0 2px black
 
 .flex-grid-item-bottom
@@ -155,7 +155,7 @@ blockquote p
 
 
 .marker
-  color: $whitish
+  color: var(--text-hc)
   background-color: #333300
 
 
@@ -164,15 +164,15 @@ blockquote p
   margin: auto
 
 form hr
-  color: $color-primary-0
+  color: var(--primary-2)
   margin: 0
 
 .form-row
   padding: 10px
 
 .form-row:hover
-  color: $whitish
-  background-color: $color-primary-3
+  color: var(--text-hc)
+  background-color: var(--primary-3)
 
 .form-row-top
   display: flex
