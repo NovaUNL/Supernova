@@ -2,6 +2,7 @@ from itertools import chain
 from datetime import datetime, timedelta
 
 from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -63,12 +64,14 @@ def boinc_projects(request):
 
 
 @api_view(['GET'])
-def gitlab_stars(request):
-    response = gitlab.get_repo_stars()
+@cache_page(3600)
+def github_stars(request):
+    response = github.get_repo_stars()
     return Response(response)
 
 
 @api_view(['GET'])
-def github_stars(request):
-    response = github.get_repo_stars()
+@cache_page(3600)
+def gitlab_stars(request):
+    response = gitlab.get_repo_stars()
     return Response(response)
