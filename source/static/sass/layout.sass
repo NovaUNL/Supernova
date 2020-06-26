@@ -2,7 +2,7 @@
 
 
 #top-wrapper
-  border-bottom: 2px solid var(--primary-1)
+  border-bottom: 2px solid var(--primary1)
   color: var(--text-alt)
   display: flex
 
@@ -43,7 +43,7 @@
 .user
   display: flex
   align-items: center
-  background-color: var(--primary-2)
+  background-color: var(--primary2)
   //darken(, 5) TODO
   height: 100%
   white-space: nowrap
@@ -148,7 +148,7 @@
 
   ~ input[type=search]
     max-width: 250px
-    border: 2px solid var(--primary-1)
+    border: 2px solid var(--primary1)
 
   ~ input[type=submit]
     display: inline-block
@@ -162,7 +162,6 @@
     overflow: auto
 
 #nav-column
-  //background-color: var(--primary-0)
   height: 100%
   color: var(--text-alt-hc)
   display: flex
@@ -182,7 +181,7 @@
     width: 200px
     position: relative
     z-index: 2
-    box-shadow: 2px 2px 5px var(--primary-3)
+    box-shadow: 2px 2px 5px var(--shadow)
 
   a
     text-decoration: none
@@ -190,7 +189,6 @@
 
   ul
     list-style: none
-    //background-color: var(--primary-0)
     border-left: solid 2px var(--highlight)
     padding-left: 0
     overflow: hidden
@@ -204,7 +202,6 @@
   li
     padding: 10px
     font-weight: bold
-  //background-color: var(--primary-0)
 
   > li
     background-color: unset
@@ -241,7 +238,7 @@
     transform: rotate(90deg)
 
   li.active
-    background-color: var(--primary-1)
+    background-color: var(--primary0)
 
     a
       color: var(--text-alt-hc)
@@ -257,7 +254,7 @@
   max-width: 100%
 
 .bg-grad
-  background: radial-gradient(ellipse at top, var(--primary-2), transparent), radial-gradient(ellipse at bottom, var(--primary-1), transparent)
+  background: radial-gradient(ellipse at top left, var(--grad1), var(--grad3)), radial-gradient(ellipse at top right, var(--grad2), var(--grad3))
   background-attachment: fixed
 
 #content-column
@@ -275,15 +272,15 @@
 #breadcrumbs
   font-size: 1.0em
   font-weight: bold
-  border-bottom: 2px solid var(--primary-1)
-  box-shadow: 0 3px 5px var(--primary-3)
-  background-color: var(--primary-2)
+  border-bottom: 2px solid var(--primary1)
+  box-shadow: 0 3px 5px var(--shadow)
+  background-color: var(--primary2)
 
   @media #{$lowmidres}
     display: none
 
   a
-    color: var(--text)
+    color: var(--text-alt)
     text-decoration: none
     outline: none
     display: block
@@ -291,7 +288,7 @@
     line-height: 37px
     padding: 0 10px 0 30px
     position: relative
-    background-color: var(--primary-2)
+    background-color: var(--primary2)
 
   a:first-child
     padding-left: 20px
@@ -307,14 +304,14 @@
     transform: scale(0.707) rotate(45deg)
     z-index: 1
     border-radius: 0 5px 0 50px
-    background: var(--primary-2)
+    background: var(--primary2)
 
   a:hover
     color: var(--link)
-    background-color: var(--primary-1)
+    background-color: var(--primary1)
 
   a:hover:after
-    background: var(--primary-1)
+    background: var(--primary1)
 
 
 .col
@@ -335,7 +332,7 @@
   border-radius: 5px
   background-color: var(--pane-bg)
   margin: 10px
-  box-shadow: 2px 2px 5px var(--primary-4)
+  box-shadow: 1px 1px 5px var(--shadow)
 
   @media #{$lowres}
     width: calc(100vw - 15px)
@@ -373,12 +370,13 @@
 
 
 .pane-title
-  border-bottom: 2px solid var(--primary-0)
+  border-bottom: 2px solid var(--primary0)
   padding: 5px 10px
   border-top-left-radius: 5px
   border-top-right-radius: 5px
   color: var(--pane-title)
-  text-shadow: 0px -1px 0px var(--primary-2)
+  background-color: var(--pane-title-bg)
+  text-shadow: 0px -1px 0px var(--primary2), 0px 0px 5px var(--primary2)
 
   a
     color: var(--pane-title-link)
@@ -440,7 +438,7 @@
   h1
     color: var(--text-hc)
     font-size: 3em
-    text-shadow: black 0 0 5px
+    text-shadow: var(--primary4) 0 0 5px
     display: inline
 
     > img
@@ -456,7 +454,7 @@
   h3
     color: var(--text-hc)
     font-size: 2em
-    text-shadow: black 0 0 3px
+    text-shadow: var(--primary4) 0 0 3px
 
   h3 a
     color: var(--text-hc)
@@ -466,9 +464,9 @@
   right: 0
   top: 0
   border-bottom-left-radius: 5px
-  border-left: 2px solid var(--primary-3)
-  border-bottom: 2px solid var(--primary-3)
-  background-color: var(--primary-2)
+  border-left: 2px solid var(--primary3)
+  border-bottom: 2px solid var(--primary3)
+  background-color: var(--primary2)
   font-weight: bold
 
   a
@@ -482,7 +480,7 @@
   li
     display: inline-block
     padding: 5px 10px
-    border-right: 2px solid var(--primary-1)
+    border-right: 2px solid var(--primary1)
 
   li:last-child
     border-right: 0

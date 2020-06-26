@@ -15,8 +15,8 @@
     display: inline-block
     padding: 5px
     font-weight: 700
-    border: 2px solid var(--primary-3)
-    background-color: var(--primary-2)
+    border: 2px solid var(--primary3)
+    background-color: var(--primary2)
     margin: 0
 
   .number
@@ -47,12 +47,10 @@
   display: flex
   flex-direction: row
   margin: 5px
-  background-color: var(--primary-2)
   flex-basis: 500px
   min-width: 300px
   flex-grow: 1
   padding: 5px 10px
-  border-radius: 4px
 
   h3 > a
     color: var(--text-hc)
@@ -77,44 +75,44 @@
 
 .profile
   .students
-    color: var(--primary-3)
-    background-color: var(--primary-0)
+    color: var(--primary3)
+    background-color: var(--primary0)
     border-radius: 5px
 
     div
       padding: 5px
 
     div:first-child
-      border: solid 2px var(--primary-1)
-      background-color: var(--primary-2)
+      border: solid 2px var(--primary1)
+      background-color: var(--primary2)
       border-radius: 5px
-      color: var(--primary-0) !important
+      color: var(--primary0) !important
 
   .group
     display: block
     max-height: 50px
-    border: 2px solid var(--primary-1)
+    border: 2px solid var(--primary1)
     border-radius: 5px
     padding-left: 5px
     background-color: black
     background-position: right
     background-size: contain
     background-repeat: no-repeat
-    box-shadow: 0 0 5px var(--primary-4)
+    box-shadow: 0 0 5px var(--primary4)
     font-weight: bold
     font-size: 2em
-    text-shadow: 0 0 2px var(--primary-1)
-    color: var(--primary-1)
+    text-shadow: 0 0 2px var(--primary1)
+    color: var(--primary1)
 
 .meals
-  > span
+  > span:first-child
     font-weight: bold
     padding-bottom: 10px
     font-size: 1.1em
     display: block
 
   > div
-    border-top: 2px solid var(--primary-1)
+    border-top: 2px solid var(--primary1)
     padding: 5px 0
 
   img
@@ -128,17 +126,14 @@
   .y-axis path
     display: none
 
-
   .line
     fill: none
     stroke-width: 1.5px
     opacity: .75
 
-
   .overlay
     fill: none
     pointer-events: all
-
 
   .lineHoverText
     filter: brightness(300%) saturate(120%)
@@ -205,12 +200,12 @@
     display: inline-block
     font-size: 1.2em
     font-weight: bold
-    padding: 5px 10px
+    padding: 3px 6px
     margin: 5px 5px
     border-radius: 5px
     border: 2px solid #aaa
     color: var(--text-hc)
-    background: var(--primary-3)
+    background: var(--input-dark)
 
 .schedule
   min-width: 100%
@@ -222,11 +217,11 @@
     padding: 0
 
   tr:first-child
-    background-color: var(--primary-2) !important
+    background-color: var(--primary2) !important
     color: var(--text-hc)
 
   th
-    border: 2px solid var(--primary-4)
+    border: 2px solid var(--primary4)
     border-right: 0
 
   th:first-child
@@ -235,18 +230,18 @@
   td:first-child
     width: 50px
     font-weight: bold
-    background-color: var(--primary-3)
+    background-color: var(--primary3)
     color: var(--text-hc)
     line-height: 15px
     text-align: right
     border-bottom: 2px solid #8b9e9d
 
   tr:nth-of-type(odd)
-    background-color: var(--primary-3)
+    background-color: var(--primary3)
 
 .turn-container
-  border: 1px solid var(--primary-2)
-  background-color: var(--primary-1)
+  border: 1px solid var(--primary2)
+  background-color: var(--primary1)
 
 .turn-t
   background-color: var(--theoretical-turn) !important
