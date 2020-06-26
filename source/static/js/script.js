@@ -39,19 +39,28 @@ function loadTransportation(element, url) {
         });
 }
 
-
 Date.prototype.addDays = function (days) {
     let date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);
     return date;
 };
 
+function delChildren(elem) {
+    while (elem.firstChild) {
+        elem.removeChild(elem.firstChild);
+    }
+}
+
+
+const themes = ["Quasar", "Tokamak", "Nebula"];
+
 function showThemePicker() {
-    let themes = ["Quasar", "Tokamak", "Nebula"];
-    let cuts = [
+    const cuts = [
         "0 0, 20% 0, 40% 100%, 0 100%",
         "20% 0, 50% 0, 75% 100%, 39.5% 100%",
         "50% 0, 100% 0, 100% 100%, 75% 100%"];
+    let overlay = document.getElementById("overlay");
+    delChildren(overlay);
     let container = document.createElement("div");
     container.style.position = "relative";
     container.style.marginTop = "10px";
@@ -82,11 +91,12 @@ function showThemePicker() {
                 btn.onmouseover = function (e) {
                     showThemePreview(e)
                 };
+                btn.onclick = function (e) {
+                    setTheme(e)
+                };
             }
             picker.appendChild(btn);
         }
-        contentContainer.appendChild(picker);
-
         contentContainer.appendChild(contentSpan);
         contentContainer.appendChild(picker);
         themeDiv.appendChild(titleContainer);
@@ -103,10 +113,34 @@ function showThemePicker() {
         themeWrapper.appendChild(themeDiv);
         container.appendChild(themeWrapper);
     }
-    document.getElementById("overlays").appendChild(container);
+    overlay.appendChild(container);
+    overlay.style.display = "inherit";
 }
 
 function showThemePreview(e) {
     let theme = e.target.value.toLowerCase();
     document.body.setAttribute("data-theme", theme);
+}
+
+function setTheme(e) {
+    let theme = e.target.value.toLowerCase();
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("theme", theme);
+        document.getElementById("overlay").style.display = "none";
+    } else {
+        alert("O navegador está a bloquear o armazenamento.");
+    }
+}
+
+function loadTheme() {
+    if (typeof(Storage) !== "undefined") {
+        let theme = localStorage.getItem("theme");
+        if (theme == null) {
+            showThemePicker();
+        } else {
+            document.body.setAttribute("data-theme", theme);
+        }
+    } else {
+        console.log("O navegador está a bloquear o armazenamento.");
+    }
 }
