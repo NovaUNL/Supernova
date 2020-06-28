@@ -8,6 +8,7 @@
 {% url 'college:buildings' as buildings %}
 {% url 'college:available_places' as places %}
 {% url 'college:map' as map %}
+{% url 'services:services' as services %}
 {% url 'synopses:areas' as synopses %}
 {% url 'exercises:index' as exercises %}
 
@@ -49,6 +50,7 @@
     {% if user.is_authenticated %}
       {% url 'users:profile' user.nickname as profile %}
       {% url 'users:schedule' user.nickname as schedule %}
+      {% url 'users:calendar' user.nickname as calendar %}
       {% url 'users:settings' user.nickname as settings %}
       <li class="collapse">
         <input type="checkbox" id="m1"/><label for="m1">Aluno</label>
@@ -57,15 +59,13 @@
           <li {% if schedule in request.path %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
           <li><a href="#">Curso</a></li>
           <li><a href="#">Avaliações</a></li>
-          <li><a href="#">Calendario</a></li>
+          <li {% if calendar in request.path %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
           <li {% if settings in request.path %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
         </ul>
       </li>
     {% else %}
       <li><a href="{% url 'login' %}">Aluno</a></li>
     {% endif %}
-
-
 
     {% if college in request.path %}
       <li>
@@ -79,7 +79,7 @@
             <li>
               <label>Campus</label>
               <ul>
-                <li><a href="#">Serviços</a></li>
+                <li {% if services in request.path %}class="active"{% endif %}><a href="{{ services }}">Serviços</a></li>
                 <li {% if map in request.path %}class="active"{% endif %}><a href="{{ map }}">Mapa</a></li>
                 <li {% if transportation in request.path %}class="active"{% endif %}>
                   <a href="{{ transportation }}">Transportes</a>
@@ -94,7 +94,7 @@
             <li class="collapse">
               <input type="checkbox" id="m21"/><label for="m21">Campus</label>
               <ul>
-                <li><a href="#">Serviços</a></li>
+                <li><a href="{{ services }}">Serviços</a></li>
                 <li><a href="{{ map }}">Mapa</a></li>
                 <li><a href="{{ transportation }}">Transportes</a></li>
                 <li><a href="{{ buildings }}">Edifícios</a></li>
@@ -124,7 +124,7 @@
           <li class="collapse">
             <input type="checkbox" id="m21"/><label for="m21">Campus</label>
             <ul>
-              <li><a href="#">Serviços</a></li>
+              <li><a href="{{ services }}">Serviços</a></li>
               <li><a href="{{ map }}">Mapa</a></li>
               <li><a href="{{ transportation }}">Transportes</a></li>
               <li><a href="{{ buildings }}">Edifícios</a></li>
