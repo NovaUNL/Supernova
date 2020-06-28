@@ -39,7 +39,7 @@
                     {% if link %}
                       <a href="{{ link }}"><h4>{{ activity.title }}</h4></a>
                     {% else %}
-                      {{ activity.title }}
+                      <h4>{{ activity.title }}</h4>
                     {% endif %}
                   {% endwith %}
                 </div>
@@ -94,7 +94,7 @@
         <div class="pane-title bg-grad">
           <h2><a href="{% url 'services:service' "cantina" %}">Cantina</a></h2>
         </div>
-        <div class="pane-content meals">
+        <div class="pane-content meals" style="height: 100%; overflow: hidden">
           <span>{{ meal_name }} a {{ meal_date }}:</span>
           {% for item in meal_items %}
             <div>
@@ -112,7 +112,10 @@
               {{ item.1 }}
             </div>
           {% endfor %}
-          <span style="float: right; font-size: 10px">Dados cedidos por <a href="https://sas.unl.pt/alimentacao/cantina-da-faculdade-de-ciencias-e-tecnologia-fct/">SAS NOVA</a></span>
+          {% if meal_items|length == 0 %}
+            <div>Sem informação</div>
+          {% endif %}
+          <span style="float: right; font-size: 10px">Informação obtida de <a href="https://sas.unl.pt/alimentacao/cantina-da-faculdade-de-ciencias-e-tecnologia-fct/">SAS NOVA</a></span>
         </div>
       </div>
       <div class="flex-pane">
