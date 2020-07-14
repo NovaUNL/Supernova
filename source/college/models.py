@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 
 class Importable(djm.Model):
     """Objects which were imported from other supernova-alike systems trough some driver."""
-    #: The ID for this object in an external system
-    external_id = djm.IntegerField(null=True, blank=True)
-    #: The item internal ID its origin. Usually the same as external_id
+    #: The ID for this object in an external system (its primary key)
+    external_id = djm.IntegerField(null=True, blank=True, unique=True)
+    #: The item internal ID its origin (not in the driver).
+    # Usually the same as external_id, but for some things can be something else
     iid = djm.CharField(null=True, blank=True, max_length=64)
     #: The last time this object was updated from its external source
     external_update = djm.DateTimeField(null=True, blank=True)
@@ -397,21 +398,28 @@ def file_upload_path(file, _):
 
 
 class File(Importable):
-    """A file attachment which was shared to a class"""
-    #: File name
-    name = djm.CharField(null=True, max_length=256)
-    #: Type of file being shared
-    type = djm.IntegerField(db_column='file_type', choices=ctypes.FileType.CHOICES)
+    """A file in the filesystem"""
     #: File size in (kilo)?bytes
     size = djm.IntegerField()
     #: File SHA1 hash
     hash = djm.CharField(max_length=40, null=True)
-    #: File location within the filesystem
-    location = djm.CharField(null=True, max_length=256)
     #: File mimetype
     mime = djm.CharField(null=True, max_length=256)
+
+    def __str__(self):
+        return self.hash
+
+
+class ClassFile(Importable):
+    """A file attachment which was shared to a class"""
     #: Class instance where this size is featured
-    class_instance = djm.ForeignKey(ClassInstance, null=True, on_delete=djm.SET_NULL)
+    file = djm.ForeignKey(File, on_delete=djm.PROTECT)
+    #: File name
+    name = djm.CharField(null=True, max_length=256)
+    #: Class instance where this size is featured
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, related_name='files')
+    #: Type of file being shared
+    type = djm.IntegerField(choices=ctypes.FileType.CHOICES)
     #: Datetime on which this file got uploaded
     upload_datetime = djm.DateTimeField(auto_now_add=True)
     #: User who uploaded the file
