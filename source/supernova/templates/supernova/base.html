@@ -24,7 +24,8 @@
         <img alt="menu" src="{% static 'img/icons/menu.svg' %}">
       </a>
       <a id="logo" href="/">
-        <img src="{% static 'img/logo.svg' %}">
+        <img class="dark-only" src="{% static 'img/logo.svg' %}">
+        <img class="light-only" src="{% static 'img/logo-alt.svg' %}">
       </a>
       <div id="slogan-pos" class="highres">
         <span id="slogan">{{ catchphrase }}</span>

@@ -1,10 +1,11 @@
 @import "variables.sass"
 
-
 #top-wrapper
   border-bottom: 2px solid var(--primary1)
   color: var(--text-alt)
   display: flex
+  position: relative
+  z-index: 3
 
 #top-main
   flex-grow: 1
@@ -39,6 +40,14 @@
 
   img
     height: 100%
+    display: none
+
+    [data-theme="quasar"] &.light-only
+      display: block
+    [data-theme="tokamak"], [data-theme="nebula"]
+      &.dark-only
+        display: block
+
 
 .user
   display: flex
