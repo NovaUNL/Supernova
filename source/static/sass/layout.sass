@@ -44,9 +44,9 @@
 
     [data-theme="quasar"] &.light-only
       display: block
-    [data-theme="tokamak"], [data-theme="nebula"]
-      &.dark-only
-        display: block
+
+    [data-theme="tokamak"] &.dark-only, [data-theme="nebula"] &.dark-only
+      display: block
 
 
 .user
@@ -447,7 +447,7 @@
   h1
     color: var(--text-hc)
     font-size: 3em
-    text-shadow: var(--primary4) 0 0 5px
+    text-shadow: var(--header-bg) 0 0 5px
     display: inline
 
     > img
@@ -463,7 +463,7 @@
   h3
     color: var(--text-hc)
     font-size: 2em
-    text-shadow: var(--primary4) 0 0 3px
+    text-shadow: var(--header-bg) 0 0 3px
 
   h3 a
     color: var(--text-hc)
