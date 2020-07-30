@@ -1,4 +1,4 @@
-@import "variables.sass"
+@import "variables"
 
 #top-wrapper
   border-bottom: 2px solid var(--primary1)
@@ -48,7 +48,6 @@
     [data-theme="tokamak"] &.dark-only, [data-theme="nebula"] &.dark-only
       display: block
 
-
 .user
   display: flex
   align-items: center
@@ -87,7 +86,6 @@
       width: 24px
       height: 24px
       align-self: center
-
 
   &.midhighres
     .login, .logout
@@ -153,7 +151,6 @@
     height: 24px
     background: transparent url("../img/icons/right.svg") no-repeat center
     background-size: cover
-
 
   ~ input[type=search]
     max-width: 250px
@@ -277,7 +274,6 @@
     scroll-snap-type: x mandatory
     height: 100%
 
-
 #breadcrumbs
   font-size: 1.0em
   font-weight: bold
@@ -316,12 +312,11 @@
     background: var(--primary2)
 
   a:hover
-    color: var(--link)
+    color: var(--text-link)
     background-color: var(--primary1)
 
   a:hover:after
     background: var(--primary1)
-
 
 .col
   display: flex
@@ -376,7 +371,6 @@
 
   > .full
     flex-basis: 100%
-
 
 .pane-title
   border-bottom: 2px solid var(--primary0)
