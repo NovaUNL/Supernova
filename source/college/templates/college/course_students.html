@@ -1,30 +1,12 @@
 {% extends 'supernova/base.html' %}
 {% load static %}
-{% block head %}
-  <style>
-    .flex-wrapper {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-
-    .flex-wrapper > div {
-      margin: 10px 20px 10px 20px;
-    }
-
-    tr:nth-of-type(odd) {
-      background-color: #232b33;
-    }
-  </style>
-{% endblock %}
 
 {% block content_wrapper %}
   <div class="col padded">
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>Estudantes de {{ course }}</h2></div>
       <div class="pane-content">
-        <table>
+        <table class="stylized">
           <tr>
             <th>Numero</th>
             <th>Nome</th>
