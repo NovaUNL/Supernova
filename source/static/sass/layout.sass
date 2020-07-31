@@ -1,7 +1,7 @@
 @import "variables"
 
 #top-wrapper
-  border-bottom: 2px solid var(--primary1)
+  border-bottom: 2px solid var(--primary1-alt)
   color: var(--text-alt)
   display: flex
   position: relative
@@ -51,8 +51,7 @@
 .user
   display: flex
   align-items: center
-  background-color: var(--primary2)
-  //darken(, 5) TODO
+  background-color: var(--primary2-alt)
   height: 100%
   white-space: nowrap
   justify-content: space-between
@@ -154,7 +153,7 @@
 
   ~ input[type=search]
     max-width: 250px
-    border: 2px solid var(--primary1)
+    border: 2px solid var(--primary1-alt)
 
   ~ input[type=submit]
     display: inline-block
@@ -244,7 +243,7 @@
     transform: rotate(90deg)
 
   li.active
-    background-color: var(--primary0)
+    background-color: var(--primary0-alt)
 
     a
       color: var(--text-alt-hc)
@@ -277,9 +276,9 @@
 #breadcrumbs
   font-size: 1.0em
   font-weight: bold
-  border-bottom: 2px solid var(--primary1)
+  border-bottom: 2px solid var(--primary1-alt)
   box-shadow: 0 3px 5px var(--shadow)
-  background-color: var(--primary2)
+  background-color: var(--primary2-alt)
 
   @media #{$lowmidres}
     display: none
@@ -293,7 +292,7 @@
     line-height: 37px
     padding: 0 10px 0 30px
     position: relative
-    background-color: var(--primary2)
+    background-color: var(--primary2-alt)
 
   a:first-child
     padding-left: 20px
@@ -309,14 +308,14 @@
     transform: scale(0.707) rotate(45deg)
     z-index: 1
     border-radius: 0 5px 0 50px
-    background: var(--primary2)
+    background: var(--primary2-alt)
 
   a:hover
     color: var(--text-link)
-    background-color: var(--primary1)
+    background-color: var(--primary1-alt)
 
   a:hover:after
-    background: var(--primary1)
+    background: var(--primary1-alt)
 
 .col
   display: flex
@@ -373,13 +372,13 @@
     flex-basis: 100%
 
 .pane-title
-  border-bottom: 2px solid var(--primary0)
+  border-bottom: 2px solid var(--primary0-alt)
   padding: 5px 10px
   border-top-left-radius: 5px
   border-top-right-radius: 5px
   color: var(--pane-title)
   background-color: var(--pane-title-bg)
-  text-shadow: 0px -1px 0px var(--primary2), 0px 0px 5px var(--primary2)
+  text-shadow: 0px -1px 0px var(--primary2-alt), 0px 0px 5px var(--primary2-alt)
 
   a
     color: var(--pane-title-link)
