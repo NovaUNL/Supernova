@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db.models import Q, F
 from django.shortcuts import render
 
+import settings
 from scrapper.boinc import boincstats
 from services.utils import get_next_meal_items
 from supernova.models import Changelog, Catchphrase
@@ -46,6 +47,10 @@ def index(request):
                                 .select_related('group') \
                                 .order_by('datetime') \
                                 .reverse()[:5]
+    context['matrix_url'] = settings.MATRIX_URL
+    context['mastodon_url'] = settings.MASTODON_URL
+    context['telegram_url'] = settings.TELEGRAM_URL
+    context['gitlab_url'] = settings.GITLAB_URL
     return render(request, 'supernova/index.html', context)
 
 
