@@ -80,6 +80,8 @@ class Group(djm.Model):
 
     #: | Numeric flag that toggles the visibility and entrance acceptability of this group
     outsiders_openness = djm.IntegerField(choices=OPENNESS_CHOICES, default=SECRET)
+    #: | Whether the group really is the group
+    official = djm.BooleanField(default=False)
 
     def __str__(self):
         return self.name

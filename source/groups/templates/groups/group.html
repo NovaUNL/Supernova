@@ -5,7 +5,7 @@
 
 {% block head %}
   <style>
-    {% if  group.image.url %}
+    {% if  group.image %}
       .header-decorator:after {
         background-image: url("{{ group.image.url}}");
         background-size: contain;
@@ -22,6 +22,9 @@
     <div class="header-decorator">
       <div>
         <h1>{{ group.name }}</h1>
+        {% if not group.official %}
+          <span style="float: right">(<img src="{% static 'img/icons/warning.svg' %}" height="16px"> Não oficial)</span>
+        {% endif %}
         <h3>@{{ group.abbreviation }}</h3>
       </div>
     </div>

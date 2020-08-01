@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
   <style>
     .flex-grid-item {
       background-size: contain;
@@ -19,13 +20,17 @@
     {% for group in groups %}
       {% if not type_filter or group.type == type_filter %}
         <a href="{% url 'groups:group' group.abbreviation %}">
-          <div class="flex-grid-item"
-               style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
+          <div class="flex-grid-item" style="background-image: url('{% get_media_prefix %}{{ group.image }}')">
             <div class="flex-grid-item-top">
               <span>{{ group.name }}</span>
             </div>
             <div class="flex-grid-item-bottom">
-              <div>
+              {% if not group.official %}
+                <div aria-label="Sem presença oficial." data-balloon-pos="up">
+                  <img src="{% static 'img/icons/warning.svg' %}">
+                </div>
+              {% endif %}
+              <div aria-label="Membros" data-balloon-pos="up">
                 <img src="{% static 'img/icons/users.svg' %}">
                 {{ group.members.count }}
               </div>
