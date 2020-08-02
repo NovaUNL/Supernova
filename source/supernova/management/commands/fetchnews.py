@@ -13,5 +13,5 @@ class Command(BaseCommand):
         crawler_settings.setmodule(settings)
         process = CrawlerProcess(crawler_settings)
 
-        process.crawl(NewsItemSpider)
+        process.crawl(NewsItemSpider, days=180)
         process.start()

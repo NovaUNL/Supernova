@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 
 from bs4 import BeautifulSoup
+from django.utils.timezone import make_aware
 from scrapy import Request
 
 from scrapper.news.items import NewsItemItem
 import scrapy
 import html2text
+import logging as log
 
 mdconverter = html2text.HTML2Text()
 
@@ -73,29 +75,37 @@ class NewsItemSpider(scrapy.Spider):
                     continue
                 yield response.follow(link, self.parse_news)
 
-        for link in response.css('div.item-list ul.pager a::attr(href)'):
-            if 'fct.unl.pt/noticias' in response.url:
-                yield response.follow(link, self.parse_month)
+        for link in response.xpath('//ul[@class="views-summary"]//a[contains(@href, "/noticias/arquivo/")]/@href'):
+            yield response.follow(link, self.parse_month)
 
     def parse_news(self, response):
-        for link in response.css('div.views-row a::attr(href)'):
-            if 'fct.unl.pt/noticias' in response.url:
+        for link in response.xpath('//div[@class="views-field-title"]//a/@href').getall():
+            if link.endswith('.pdf') or '/en/' in response.url:
+                continue
+            try:
                 yield response.follow(link, self.parse_newsitem)
+            except ValueError:
+                log.warning("Bad news URL %s" % link.root)
 
     def parse_newsitem(self, response):
-        # lang = 'en' if '/en/' in response.url else 'pt'
-        if '/en/' in response.url:
-            return
         soup = BeautifulSoup(response.text, 'html.parser')
         item = NewsItemItem()
-        item['title'] = response.css('h1.page-titles::text').get().strip()
+        if (title := response.css('h1.page-titles::text').get()) is not None:
+            item['title'] = title.strip()
+        else:
+            log.warning("%s is not a news item" % response.url)
+            return
 
         date_elem = soup.find('p', class_='noticia-data')
+        if not hasattr(date_elem, "parent"):
+            log.warning("Skipped %s" % response.url)
+            return
         content_elem = date_elem.parent
-        item['datetime'] = datetime.strptime(date_elem.text.strip(), '%d-%m-%Y')
+        item['datetime'] = make_aware(datetime.strptime(date_elem.text.strip(), '%d-%m-%Y'))
         content = str(content_elem.find('div', class_="noticia-corpo"))
-        content = mdconverter.handle(content)
+        content = mdconverter.handle(content).strip()
         item['content'] = content
+        item['html'] = response.text
         item['source'] = response.url
         img_elem = content_elem.find('img', class_="imagem-noticia")
         if img_elem is None:
