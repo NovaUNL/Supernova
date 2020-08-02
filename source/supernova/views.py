@@ -33,15 +33,14 @@ def index(request):
     boinc_projects.sort(key=lambda x: -x['weekly'])
     context['boinc_projects'] = boinc_projects[:3]
 
-    context['free_rooms'] = random.sample(
-        set(college.Room.objects
-            .annotate(turn_instances__end=F('turn_instances__start') + F('turn_instances__duration'))
-            .filter(unlocked=True)
-            .select_related('building')
-            .order_by('building__abbreviation', 'name')
-            .exclude(Q(turn_instances__start__lt=minutes) & Q(turn_instances__end__gt=minutes))
-            .distinct('building__abbreviation', 'name')),
-        10)
+    free_rooms = college.Room.objects \
+        .annotate(turn_instances__end=F('turn_instances__start') + F('turn_instances__duration')) \
+        .filter(unlocked=True) \
+        .select_related('building') \
+        .order_by('building__abbreviation', 'name') \
+        .exclude(Q(turn_instances__start__lt=minutes) & Q(turn_instances__end__gt=minutes)) \
+        .distinct('building__abbreviation', 'name')
+    context['free_rooms'] = random.sample(set(free_rooms), min(10, len(free_rooms))) if len(free_rooms) > 0 else []
 
     context['activities'] = groups.Activity.objects \
                                 .select_related('group') \
