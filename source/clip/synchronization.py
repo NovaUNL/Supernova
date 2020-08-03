@@ -228,13 +228,13 @@ def sync_class_instance(external_id, class_=None, recurse=False):
     # TODO sync other info
 
     # ---------  Related ---------
-    # sync_class_instance_files(external_id, class_inst=obj)
-
     turns = obj.turns.exclude(external_id=None).all()
     _related(turns, upstream['turns'], sync_turn, m.Turn, recurse, class_inst=obj)
     enrollments = obj.enrollments.exclude(external_id=None).all()
     _related(enrollments, upstream['enrollments'], sync_enrollment, m.Enrollment, recurse, class_inst=obj)
     _related(turns, upstream['turns'], sync_turn, m.Turn, recurse, class_inst=obj)
+
+    sync_class_instance_files(external_id, class_inst=obj)  # Must happen after the turn sync to have the teachers known
     # TODO
     # evaluations = obj.enrollments.exclude(external_id=None).all()
     # _related(evaluations, upstream['evaluations'], sync_evaluation, m.ClassEvaluation, recurse, class_inst=obj)
@@ -256,47 +256,64 @@ def sync_class_instance_files(external_id, class_inst=None):
 
     upstream = {entry['hash']: entry for entry in upstream}
     upstream_ids = set(upstream.keys())
-    downstream_ids = {ifile.file.hash for ifile in class_inst.files.all()}
+    downstream_files = {ifile.file.hash: ifile for ifile in class_inst.files.all()}
+    downstream_ids = set(downstream_files.keys())
     new = upstream_ids.difference(downstream_ids)
     removed = downstream_ids.difference(upstream_ids)
+    mirrored = downstream_ids.intersection(upstream_ids)
+    teachers = {teacher.name: teacher for teacher in m.Teacher.objects.filter(turns__class_instance=class_inst).all()}
 
-    if len(new) > 0:
-        teachers = {
-            teacher.name: teacher
-            for teacher in m.Teacher.objects.filter(turns__class_instance=class_inst).all()}
+    for hash in mirrored:
+        upsteam_info = upstream[hash]
+        downstream_file: m.ClassFile = downstream_files[hash]
+        changed = False
+        if downstream_file.name != (name := upsteam_info['name']):
+            logger.warning(f"{downstream_file} name changed to {name}")
+            downstream_file.name = name
+            changed = True
+        upstream_date = make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']))
+        if downstream_file.upload_datetime != upstream_date:
+            logger.warning(f"{downstream_file} upload date changed "
+                           f"from {downstream_file.upload_datetime} to {upstream_date}")
+            downstream_file.upload_datetime = upstream_date
+            changed = True
 
-    for ifile in class_inst.files.all():
-        if ifile.file.external_id in removed:
-            logger.warning(f"File {ifile} removed from {class_inst}")
-            ifile.delete()
+        uploader_teacher = _closest_teacher(teachers, upsteam_info['uploader'])
+        if downstream_file.uploader_teacher != uploader_teacher:
+            logger.warning(f"{downstream_file.uploader_teacher} changed to {uploader_teacher}")
+            downstream_file.uploader_teacher = uploader_teacher
+            changed = True
+        if changed:
+            downstream_file.save()
+
+    for ifile in class_inst.files.filter(file__hash__in=removed):
+        logger.warning(f"File {ifile} removed from {class_inst}")
+        ifile.delete()
+        continue
+
     for hash in new:
-        new_file = upstream[hash]
-        uploader_teacher = None
-        max_correlation = 0
-        upstream_name = new_file['uploader']
-        for name, teacher in teachers.items():
-            c = correlation(upstream_name, name)
-            if c > max_correlation:
-                uploader_teacher = teacher
-                max_correlation = c
+        upsteam_info = upstream[hash]
+        uploader_teacher = _closest_teacher(teachers, upsteam_info['uploader'])
 
         try:
-            file = m.File.objects.get(hash=new_file['hash'])
+            file = m.File.objects.get(hash=upsteam_info['hash'])
         except ObjectDoesNotExist:
             file = m.File.objects.create(
-                size=new_file['size'],
-                hash=new_file['hash'],
-                mime=new_file['mime'],
-                external_id=new_file['id'],  # Obs: Files are being identified by hash, so there might be ignored IDs
-                iid=new_file['id'])
+                size=upsteam_info['size'],
+                hash=upsteam_info['hash'],
+                mime=upsteam_info['mime'],
+                external_id=upsteam_info['id'],
+                # Obs: Files are being identified by hash, so there might be ignored IDs
+                iid=upsteam_info['id'])
             logger.info(f"File {file} created")
 
         if not m.ClassFile.objects.filter(file=file, class_instance=class_inst).exists():
             m.ClassFile.objects.create(
                 file=file,
                 class_instance=class_inst,
-                type=new_file['type'],
-                upload_datetime=datetime.fromisoformat(new_file['upload_datetime']),
+                type=upsteam_info['type'],
+                name=upsteam_info['name'],
+                upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime'])),
                 uploader_teacher=uploader_teacher)
             logger.info(f"File {file} added to class {class_inst}")
 
@@ -561,3 +578,20 @@ def _related(children, clip_children_ids, related_func, related_type, recurse, *
         logger.warning(f"{disappeared_obj} disappeared.")
     disappeared.update(disappeared=True, external_update=make_aware(datetime.now()))
     related_type.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
+
+
+def _closest_teacher(teachers, name):
+    """
+    Finds the teacher in a dict {name: teacher} whose the name is the closest to the provided parameter
+    :param teachers: Teacher dict
+    :param name: Name to find
+    :return: Closest match
+    """
+    uploader_teacher = None
+    max_correlation = 0
+    for teacher_name, teacher in teachers.items():
+        c = correlation(name, teacher_name)
+        if c > max_correlation:
+            uploader_teacher = teacher
+            max_correlation = c
+    return uploader_teacher
