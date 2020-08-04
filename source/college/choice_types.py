@@ -116,7 +116,7 @@ class FileType:
         (EXAM, 'Exame'),
         (TEST, 'Teste'),
         (SUPPORT, 'Suporte'),
-        (OTHERS, None),
+        (OTHERS, 'Outros'),
     )
 
 
