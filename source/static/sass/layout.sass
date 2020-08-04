@@ -338,10 +338,10 @@
   box-shadow: 1px 1px 5px var(--shadow)
 
   @media #{$lowres}
-    width: calc(100vw - 15px)
+    width: calc(100vw - 20px)
 
   @media #{$lowmidres}
-    scroll-snap-align: start
+    scroll-snap-align: center
     scroll-padding: 10px 0 0 10px
 
 .row
@@ -355,6 +355,9 @@
 
   &.padded
     padding: 10px
+
+    @media #{$lowres}
+      padding: 0
 
   > .flex-pane
     min-width: $small-pane-width
