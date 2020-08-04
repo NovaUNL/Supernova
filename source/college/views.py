@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import CLIPy
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
@@ -231,17 +230,14 @@ def class_instance_files_view(request, instance_id):
 
 @login_required
 def class_instance_file_download(request, instance_id, file_hash):
-    # FIXME port from old CLIP models
-    class_instance = get_object_or_404(m.ClassInstance, id=instance_id)
-    # clip_instance = class_instance.clip_class_instance
-    # file = clip_instance.files.filter(hash=file_hash).first()
-    # if file is None:
-    #     pass
-    # response = HttpResponse()
-    # response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
-    # response['Content-Disposition'] = f'attachment; filename="{file.name}"'
-    # return response
-    return None
+    class_file = get_object_or_404(
+        m.ClassFile.objects.prefetch_related('file'),
+        class_instance__id=instance_id,
+        file__hash=file_hash)
+    response = HttpResponse()
+    response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
+    response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
+    return response
 
 
 def areas_view(request):
