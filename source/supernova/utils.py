@@ -41,7 +41,7 @@ def correlated(a: str, b: str, threshold=0.5):
     :param threshold: Minimum correlation
     :return: Related
     """
-    return SequenceMatcher(a, b).ratio() > threshold
+    return SequenceMatcher(None, a, b).ratio() > threshold
 
 
 def correlation(a: str, b: str):  # TODO redundant, merge with above
@@ -51,4 +51,4 @@ def correlation(a: str, b: str):  # TODO redundant, merge with above
     :param b: Second string
     :return: Correlation ratio
     """
-    return SequenceMatcher(a, b).ratio()
+    return SequenceMatcher(None, a, b).ratio()
