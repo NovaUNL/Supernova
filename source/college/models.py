@@ -6,6 +6,8 @@ from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.contrib.postgres import fields as pgm
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
+
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from . import choice_types as ctypes
 
@@ -392,9 +394,19 @@ class Teacher(Importable):
     def __str__(self):
         return f"{self.name} ({self.iid})"
 
+    @property
+    def short_name(self):
+        name_parts = self.name.split(" ")
+        return "%s %s" % (name_parts[0], name_parts[-1]) if len(name_parts) > 1 else self.name
+
 
 def file_upload_path(file, _):
     return f'file/{file.hash}'
+
+
+PREVIEWABLE_MIMES = {
+    'application/pdf',
+}
 
 
 class File(Importable):
@@ -409,6 +421,10 @@ class File(Importable):
     def __str__(self):
         return self.hash
 
+    @property
+    def can_preview(self):
+        return self.mime in PREVIEWABLE_MIMES
+
 
 class ClassFile(Importable):
     """A file attachment which was shared to a class"""
@@ -421,7 +437,7 @@ class ClassFile(Importable):
     #: Type of file being shared
     type = djm.IntegerField(choices=ctypes.FileType.CHOICES)
     #: Datetime on which this file got uploaded
-    upload_datetime = djm.DateTimeField(auto_now_add=True)
+    upload_datetime = djm.DateTimeField(default=timezone.now)
     #: User who uploaded the file
     uploader = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
     #: Uploader name fallback (due to imports who cannot be resolved to a user)

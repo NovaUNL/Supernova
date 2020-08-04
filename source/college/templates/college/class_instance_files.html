@@ -2,6 +2,18 @@
 
 {% load static %}
 
+{% block head %}
+  <style>
+    .dllink > span {
+      background-image: url("{% static 'img/icons/download.svg' %}");
+    }
+
+    .viewlink > span {
+      background-image: url("{% static 'img/icons/magnify.svg' %}");
+    }
+  </style>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="col">
     {% include 'college/class_decorator.html' %}
@@ -10,26 +22,47 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Ficheiros</h2></div>
           <div class="pane-content">
-            <table>
-              <thead style="font-weight: bold; background-color: #ccc">
-              <td>Nome</td>
-              <td>Data</td>
-              <td>Criador</td>
-              <td>Dimensão (KB)</td>
-              </thead>
-              {% for instance_file in instance_files %}
-                <tr>
-                  <td>
-                    <a href="{% url 'college:class_instance_file_download' instance.id instance_file.file.hash %}">
-                      {{ instance_file.file.name }}
+            <div class="file-list">
+              {% for ifile in instance_files %}
+                <div class="file">
+                  <div class="file-body">
+                    <h4><a>{{ ifile.name }}</a></h4>
+                    <span>
+                      ({% if ifile.file.size < 1024 %}{{ ifile.file.size }} Bytes
+                       {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
+                       {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
+                    </span>
+                    <div class="info">
+                      {% if ifile.type %} <span class="ui-tag">{{ ifile.get_type_display }}</span>{% endif %}
+                      {% if ifile.uploader %}
+                        Por <span>{{ ifile.uploader.name }}</span>
+                      {% elif ifile.uploader_teacher %}
+                        Por <span>{{ ifile.uploader_teacher.short_name }}</span>
+                      {% endif %}
+                      em <span>{{ ifile.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</span>
+                    </div>
+                    <div class="preview"></div>
+                    <span class="clearfix"></span>
+                  </div>
+                  <div class="actions">
+                    {% if ifile.file.can_preview %}
+                      <a class="viewlink highres"
+                         onclick='showFilePreview(
+                             this,
+                             "{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}",
+                             "{{ ifile.file.mime }}");'>
+                        <span></span>
+                      </a>
+                    {% endif %}
+                    <a class="dllink"
+                       href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">
+                      <span></span>
                     </a>
-                  </td>
-                  <td>{{ instance_file.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</td>
-                  <td>{{ instance_file.uploader }}</td>
-                  <td>{% widthratio instance_file.file.size 1024 1 %}</td>
-                </tr>
+                  </div>
+
+                </div>
               {% endfor %}
-            </table>
+            </div>
           </div>
         </div>
       </div>

@@ -133,28 +133,6 @@ def class_instance_view(request, instance_id):
     occasion = instance.occasion()
     context['occasion'] = occasion
 
-    # clip_class = parent_class.clip_class
-    # clip_class_id = clip_class.iid
-    # department_id = clip_class.department.id
-    # period_type = None
-    # if instance.period == 1:
-    #     period_type = 'a'
-    # elif instance.period <= 3:
-    #     period_type = 's'
-    # elif instance.period <= 7:
-    #     period_type = 't'
-    # else:
-    #     # log.error()
-    #     pass
-    # if period_type is not None:
-    #     context['clip_url'] = CLIPy.urls.CLASS.format(
-    #         institution=97747,
-    #         class_id=clip_class_id,
-    #         department=department_id,
-    #         year=instance.year,
-    #         period=instance.period,
-    #         period_type=period_type)
-
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
@@ -238,8 +216,7 @@ def class_instance_files_view(request, instance_id):
     context['instance'] = instance
     occasion = instance.occasion()
     context['occasion'] = occasion
-    # FIXME port from old CLIP models
-    # context['instance_files'] = instance.clip_class_instance.instance_files.order_by('upload_datetime')
+    context['instance_files'] = instance.files.order_by('upload_datetime').reverse()
 
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},

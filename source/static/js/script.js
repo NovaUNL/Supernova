@@ -124,7 +124,7 @@ function showThemePreview(e) {
 
 function setTheme(e) {
     let theme = e.target.value.toLowerCase();
-    if (typeof(Storage) !== "undefined") {
+    if (typeof (Storage) !== "undefined") {
         localStorage.setItem("theme", theme);
         document.getElementById("overlay").style.display = "none";
     } else {
@@ -133,7 +133,7 @@ function setTheme(e) {
 }
 
 function loadTheme() {
-    if (typeof(Storage) !== "undefined") {
+    if (typeof (Storage) !== "undefined") {
         let theme = localStorage.getItem("theme");
         if (theme == null) {
             showThemePicker();
@@ -143,4 +143,36 @@ function loadTheme() {
     } else {
         console.log("O navegador está a bloquear o armazenamento.");
     }
+}
+
+function showFilePreview(elem, src, mime) {
+    let previewElem = elem.parentNode.parentNode.querySelector(".preview");
+    delChildren(previewElem);
+    let container;
+    switch (mime.split('/')[0]) {
+        case "text":
+            container = document.createElement("div");
+            break;
+        case "application":
+            if (mime === "application/pdf") {
+                container = document.createElement("embed");
+                container.src = src;
+                container.type = mime;
+            }
+            break;
+        case "image":
+            container = document.createElement("img");
+            container.src = src;
+            break;
+        case "video":
+            container = document.createElement("video");
+            container.src = src;
+            break;
+        case "audio":
+            container = document.createElement("audio");
+            container.src = src;
+            break;
+    }
+    previewElem.appendChild(container);
+    elem.style.display = "none";
 }

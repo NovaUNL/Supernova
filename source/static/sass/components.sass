@@ -56,7 +56,7 @@
   border-radius: 3px
   color: var(--text-alt-hc)
   font-weight: bold
-  background-color: white
+  background-color: var(--primary4)
   min-width: 10px
   margin: 1px 0
   box-shadow: 1px 1px 3px var(--primary3)
@@ -111,3 +111,50 @@
     background-color: var(--primary1-alt)
     border-color: #1b1f23
     border-color: rgba(27, 31, 35, .2)
+
+.file-list
+  display: flex
+  flex-direction: column
+  align-content: stretch
+
+  .file
+    flex-grow: 1
+    display: flex
+    border: 2px solid var(--primary4)
+    border-radius: 5px
+    background-color: var(--primary1)
+    justify-content: space-between
+    margin-bottom: 10px
+
+    h4
+      display: inline
+
+  .file-body
+    padding: 2px 5px
+    flex-grow: 1
+
+  .actions
+    display: flex
+
+    > a
+      display: flex
+      align-items: center
+      padding: 5px
+      background-color: var(--primary2)
+      border-left: 1px solid var(--primary4)
+
+      > span
+        display: block
+        width: 32px
+        height: 32px
+        background-repeat: no-repeat
+        background-position: center
+        background-size: contain
+
+  .preview
+    display: flex
+    align-content: stretch
+
+    embed
+      min-height: 80vh
+      width: 100%
