@@ -6,9 +6,6 @@ from services import models as m
 
 
 def services_view(request):
-    context = build_base_context(request)
-    context['title'] = "Serviços no campus"
-
     services = m.Service.objects.order_by('type').all()
     services_by_type = dict()
     for service in services:
@@ -16,8 +13,11 @@ def services_view(request):
             services_by_type[service.type].append(service)
         else:
             services_by_type[service.type] = [service, ]
-    context['services_by_type'] = services_by_type
 
+    context = build_base_context(request)
+    context['pcode'] = "c_campus_services"
+    context['title'] = "Serviços no campus"
+    context['services_by_type'] = services_by_type
     context['sub_nav'] = [
         {'name': 'Serviços', 'url': reverse('services:services')}]
     return render(request, 'services/services.html', context)
@@ -26,9 +26,9 @@ def services_view(request):
 def service_view(request, service_abbr):
     service = get_object_or_404(m.Service, abbreviation=service_abbr)
     context = build_base_context(request)
+    context['pcode'] = "c_campus_service"
     context['title'] = f"Serviço {service.name}"
     context['service'] = service
-
     context['sub_nav'] = [
         {'name': 'Serviços', 'url': reverse('services:services')},
         {'name': service.name, 'url': reverse('services:service', args=[service_abbr])}]

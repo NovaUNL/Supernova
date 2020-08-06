@@ -159,6 +159,7 @@ def profile_view(request, nickname):
         m.User.objects.prefetch_related('students__course', 'memberships', 'social_networks', 'badges'),
         nickname=nickname)
     context = build_base_context(request)
+    context['pcode'] = "u_profile"
     page_name = f"Perfil de {user.get_full_name()}"
     context['title'] = page_name
     context['profile_user'] = user
@@ -195,7 +196,7 @@ def user_schedule_view(request, nickname):
     if len(primary_students) == 0:
         return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
 
-    context['page'] = 'profile_schedule'
+    context['pcode'] = "u_schedule"
     context['title'] = "Horário de " + nickname
     context['sub_nav'] = [
         {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
@@ -216,16 +217,16 @@ def user_calendar_view(request, nickname):
     context = build_base_context(request)
     user = get_object_or_404(m.User.objects, nickname=nickname)
     context['profile_user'] = user
-    context['page'] = 'profile_cal'
+    context['pcode'] = "u_calendar"
     context['title'] = "Calendário de " + nickname
     return render(request, 'users/calendar.html', context)
 
 
 @login_required
 def user_profile_settings_view(request, nickname):
-    context = build_base_context(request)
-    requester: m.User = request.user
     user = get_object_or_404(m.User, nickname=nickname)
+    requester: m.User = request.user
+    context = build_base_context(request)
     if requester != user:
         raise Exception("TODO make a proper error message")
     if request.method == 'POST':
@@ -240,7 +241,7 @@ def user_profile_settings_view(request, nickname):
     else:
         context['settings_form'] = forms.AccountSettingsForm(instance=user)
     context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
-    context['page'] = 'profile_settings'
+    context['pcode'] = 'u_settings'
     context['title'] = 'Definições da conta'
     context['sub_nav'] = [
         {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
@@ -252,6 +253,7 @@ def user_profile_settings_view(request, nickname):
 def invites_view(request, nickname):
     user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
     context = build_base_context(request)
+    context['pcode'] = "u_invites"
     context['title'] = f"Convites emitidos por {user.get_full_name()}"
     context['profile_user'] = user
     context['sub_nav'] = [{'name': user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
@@ -268,6 +270,7 @@ def create_invite_view(request, nickname):
         return HttpResponseRedirect(reverse('users:invites', args=[request.user]))
 
     context = build_base_context(request)
+    context['pcode'] = "u_invites"
     context['title'] = f"Convites emitidos por {user.get_full_name()}"
     context['profile_user'] = user
     context['sub_nav'] = [{'name': user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},

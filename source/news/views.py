@@ -6,6 +6,7 @@ from news.models import NewsItem
 
 def index(request):
     context = build_base_context(request)
+    context['pcode'] = 'c_news'
     context['title'] = 'Notícias'
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:10]
     context['sub_nav'] = [{'name': 'Noticias', 'url': reverse('news:index')}]
@@ -13,9 +14,10 @@ def index(request):
 
 
 def item(request, news_item_id):
-    context = build_base_context(request)
     news_item = get_object_or_404(NewsItem, id=news_item_id)
-    context['page'] = 'instance_turns'
+    news_item = get_object_or_404(NewsItem, id=news_item_id)
+    context = build_base_context(request)
+    context['pcode'] = 'c_news_item'
     context['title'] = 'Notícia:' + news_item.title
     if len(news_item.title) > 50:
         short_title = news_item.title[:50] + " ..."
