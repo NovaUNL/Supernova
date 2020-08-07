@@ -1,27 +1,5 @@
 {% load static %}
 {% load strutils %}
-{% url 'college:courses' as courses %}
-{% url 'college:departments' as departments %}
-{% url 'college:index' as college %}
-{% url 'college:campus' as campus %}
-{% url 'college:transportation' as transportation %}
-{% url 'college:buildings' as buildings %}
-{% url 'college:available_places' as places %}
-{% url 'college:map' as map %}
-{% url 'services:services' as services %}
-{% url 'synopses:areas' as synopses %}
-{% url 'exercises:index' as exercises %}
-
-{% url 'groups:institutional' as groups_institutional %}
-{% url 'groups:nuclei'  as groups_nuclei %}
-{% url 'groups:pedagogic' as groups_pedagogic %}
-{% url 'groups:communities' as groups_communities %}
-
-
-{% url 'about' as about %}
-{% url 'faq' as faq %}
-{% url 'privacy' as privacy %}
-{% url 'terms' as terms %}
 
 {% spaceless %}
   <div class="lowres">
@@ -48,49 +26,56 @@
   </div>
   <ul>
     {% if user.is_authenticated %}
-      {% url 'users:profile' user.nickname as profile %}
-      {% url 'users:schedule' user.nickname as schedule %}
-      {% url 'users:calendar' user.nickname as calendar %}
-      {% url 'users:settings' user.nickname as settings %}
-      <li class="collapse">
-        <input type="checkbox" id="m1"/><label for="m1">Aluno</label>
-        <ul>
-          <li {% if profile == request.path %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
-          <li {% if schedule in request.path %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
-          <li><a href="#">Curso</a></li>
-          <li><a href="#">Avaliações</a></li>
-          <li {% if calendar in request.path %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
-          <li {% if settings in request.path %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
-        </ul>
-      </li>
-    {% else %}
-      <li><a href="{% url 'login' %}">Aluno</a></li>
+      {% if user.is_student %}
+        {% url 'users:profile' user.nickname as profile %}
+        {% url 'users:schedule' user.nickname as schedule %}
+        {% url 'users:calendar' user.nickname as calendar %}
+        {% url 'users:settings' user.nickname as settings %}
+        <li class="collapse">
+          <input type="checkbox" id="m1"/><label for="m1">Aluno</label>
+          <ul>
+            <li {% if pcode == 'u_profile' %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
+            <li {% if pcode == 'u_schedule' %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
+            <li><a href="#">Curso</a></li>
+            <li><a href="#">Avaliações</a></li>
+            <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
+            <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
+          </ul>
+        </li>
+      {% endif %}
+      {% if user.is_teacher %}
+        {# TODO #}
+      {% endif %}
     {% endif %}
 
-    {% if college in request.path %}
+    {% url 'college:courses' as courses %}
+    {% url 'college:departments' as departments %}
+    {% url 'college:index' as college %}
+    {% url 'college:campus' as campus %}
+    {% url 'college:transportation' as transportation %}
+    {% url 'college:buildings' as buildings %}
+    {% url 'college:available_places' as places %}
+    {% url 'college:map' as map %}
+    {% url 'services:services' as services %}
+    {% url 'news:index' as news %}
+    {% if pcode|startswith:'c' %}
       <li>
         <label>Faculdade</label>
         <ul>
-          <li {% if courses in request.path %}class="active"{% endif %}><a href="{{ courses }}">Cursos</a></li>
-          <li {% if departments in request.path %}class="active"{% endif %}>
-            <a href="{{ departments }}">Departamentos</a>
-          </li>
-          {% if campus in request.path %}
+          <li {% if pcode|startswith:'c_course' %}class="active"{% endif %}><a href="{{ courses }}">Cursos</a></li>
+          <li {% if pcode|startswith:'c_department' %}class="active"{% endif %}><a href="{{ departments }}">Departamentos</a></li>
+          {% if pcode|startswith:'c_campus' %}
             <li>
               <label>Campus</label>
               <ul>
-                <li {% if services in request.path %}class="active"{% endif %}><a href="{{ services }}">Serviços</a></li>
-                <li {% if map in request.path %}class="active"{% endif %}><a href="{{ map }}">Mapa</a></li>
-                <li {% if transportation in request.path %}class="active"{% endif %}>
-                  <a href="{{ transportation }}">Transportes</a>
-                </li>
-                <li {% if buildings in request.path %}class="active"{% endif %}>
-                  <a href="{% url 'college:buildings' %}">Edifícios</a>
-                </li>
-                <li {% if places in request.path %}class="active"{% endif %}><a href="{{ places }}">Espaços</a></li>
+                <li {% if pcode|startswith:'c_campus_service' %}class="active"{% endif %}><a href="{{ services }}">Serviços</a></li>
+                <li {% if pcode == 'c_campus_map' %}class="active"{% endif %}><a href="{{ map }}">Mapa</a></li>
+                <li {% if pcode == 'c_campus_tranportation' %}class="active"{% endif %}><a href="{{ transportation }}">Transportes</a></li>
+                <li {% if pcode|startswith:'c_campus_building' %}class="active"{% endif %}><a href="{% url 'college:buildings' %}">Edifícios</a></li>
+                <li {% if pcode == 'c_campus_places' %}class="active"{% endif %}><a href="{{ places }}">Espaços</a></li>
               </ul>
             </li>
-          {% else %}
+          {% else %}{# Submenu is inactive #}
             <li class="collapse">
               <input type="checkbox" id="m21"/><label for="m21">Campus</label>
               <ul>
@@ -102,8 +87,8 @@
               </ul>
             </li>
           {% endif %}
-          <li><a href="{% url 'news:index' %}">Noticias</a></li>
-          <li class="collapse">
+          <li {% if pcode|startswith:'c_news' %}class="active"{% endif %}><a href="{{ news }}">Noticias</a></li>
+          <li class="collapse">{# TODO #}
             <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
             <ul>
               <li><a href="#">Palestras</a></li>
@@ -131,7 +116,7 @@
               <li><a href="{{ places }}">Espaços</a></li>
             </ul>
           </li>
-          <li><a href="{% url 'news:index' %}">Noticias</a></li>
+          <li><a href="{{ news }}">Noticias</a></li>
           <li class="collapse">
             <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
             <ul>
@@ -146,58 +131,47 @@
       </li>
     {% endif %}
 
-    {% if pcode|startswith:'g' %}
-      <li>
-        <input type="checkbox" id="m5"/><label for="m5">Entidades</label>
-        <ul>
-          <li {% if pcode|startswith:'g_inst' %}class="active"{% endif %}>
-            <a href="{{ groups_institutional }}">Institucionais</a>
-          </li>
-          <li {% if pcode|startswith:'g_nucl' %}class="active"{% endif %}>
-            <a href="{{ groups_nuclei }}">Núcleos</a>
-          </li>
-          <li {% if pcode|startswith:'g_ped' %}class="active"{% endif %}>
-            <a href="{{ groups_pedagogic }}">Pedagógicos</a>
-          </li>
-          <li {% if pcode|startswith:'g_com' %}class="active"{% endif %}>
-            <a href="{{ groups_communities }}">Comunidades</a>
-          </li>
-        </ul>
-      </li>
-    {% else %}
-      <li class="collapse">
-        <input type="checkbox" id="m5"/><label for="m5">Entidades</label>
-        <ul>
-          <li><a href="{{ groups_nuclei }}">Núcleos</a></li>
-          <li><a href="{{ groups_pedagogic }}">Pedagógicos</a></li>
-          <li><a href="{{ groups_institutional }}">Institucionais</a></li>
-          <li><a href="{{ groups_communities }}">Comunidades</a></li>
-        </ul>
-      </li>
-    {% endif %}
-
-    <li {% if synopses not in request.path %}class="collapse"{% endif %}>
-      <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
+    {% url 'groups:institutional' as groups_institutional %}
+    {% url 'groups:nuclei'  as groups_nuclei %}
+    {% url 'groups:pedagogic' as groups_pedagogic %}
+    {% url 'groups:communities' as groups_communities %}
+    <li {% if not pcode|startswith:'g' %}class="collapse"{% endif %}>
+      <input type="checkbox" id="m5"/><label for="m5">Entidades</label>
       <ul>
-        <li {% if synopses in request.path %}class="active"{% endif %}><a href="{% url 'synopses:areas' %}">Sinteses</a>
-        </li>
-        <li><a href="{{ exercises }}">Exercicios</a></li>
-        <li><a href="#">Ajuda-me</a></li>
+        <li {% if pcode|startswith:'g_inst' %}class="active"{% endif %}><a href="{{ groups_institutional }}">Institucionais</a></li>
+        <li {% if pcode|startswith:'g_nucl' %}class="active"{% endif %}><a href="{{ groups_nuclei }}">Núcleos</a></li>
+        <li {% if pcode|startswith:'g_ped' %}class="active"{% endif %}><a href="{{ groups_pedagogic }}">Pedagógicos</a></li>
+        <li {% if pcode|startswith:'g_com' %}class="active"{% endif %}><a href="{{ groups_communities }}">Comunidades</a></li>
       </ul>
     </li>
 
+    {% url 'synopses:areas' as synopses %}
+    {% url 'exercises:index' as exercises %}
+    <li {% if not pcode|startswith:'l' %}class="collapse"{% endif %}>
+      <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
+      <ul>
+        <li {% if pcode|startswith:'l_synops' %}class="active"{% endif %}><a href="{{ synopses }}">Sinteses</a></li>
+        <li {% if pcode|startswith:'l_exercises' %}class="active"{% endif %}><a href="{{ exercises }}">Exercicios</a></li>
+        <li><a href="#">Dúvidas</a></li>
+      </ul>
+    </li>
+
+    {% url 'about' as about %}
+    {% url 'faq' as faq %}
+    {% url 'privacy' as privacy %}
+    {% url 'terms' as terms %}
     <li {% if request.path != about and request.path != faq and request.path != terms and request.path != privacy %}class="collapse"{% endif %}>
       <input type="checkbox" id="m4"/><label for="m4">Supernova</label>
       <ul>
         <li {% if request.path == about %}class="active"{% endif %}><a href="{{ about }}">Sobre</a></li>
         <li {% if request.path == faq %}class="active"{% endif %}><a href="{{ faq }}">Perguntas frequentes</a></li>
         <li {% if request.path == terms %}class="active"{% endif %}><a href="{{ terms }}">Termos de utilização</a></li>
-        <li {% if request.path == privacy %}class="active"{% endif %}><a href="{{ privacy }}">Politica de
-          privacidade</a></li>
+        <li {% if request.path == privacy %}class="active"{% endif %}><a href="{{ privacy }}">Politica de privacidade</a></li>
         <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>
       </ul>
     </li>
   </ul>
+
   <div id="nav-end" class="midhighres">
     <div class="tiny-btn-widget">
       <a class="tiny-btn" href="javascript:showThemePicker();">
@@ -219,7 +193,6 @@
       </a>
       <a id="github-count" class="star-count" href="https://github.com/claudioap/Supernova/stargazers" target="_blank" rel="noopener">?</a>
     </div>
-    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt">
-      <img id="license-img" src="{% static 'img/ccsabync.svg' %}"></a>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt"><img id="license-img" src="{% static 'img/ccsabync.svg' %}"></a>
   </div>
 {% endspaceless %}
