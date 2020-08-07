@@ -257,27 +257,6 @@ def class_instance_file_download(request, instance_id, file_hash):
     response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
     return response
 
-
-def areas_view(request):  # TODO Deprecate?
-    context = build_base_context(request)
-    context['title'] = 'Areas de estudo'
-    context['areas'] = m.Area.objects.order_by('name').all()
-    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('college:areas')}]
-    return render(request, 'college/areas.html', context)
-
-
-def area_view(request, area_id):  # TODO Deprecate?
-    area = get_object_or_404(m.Area, id=area_id)
-    context = build_base_context(request)
-    context['title'] = 'Area de ' + area.name
-    context['area'] = area
-    context['courses'] = m.Course.objects.filter(area=area).order_by('degree_id').all()
-    # context['degrees'] = Degree.objects.filter(course__area=area).all()  # FIXME
-    context['sub_nav'] = [{'name': 'Areas de estudo', 'url': reverse('college:areas')},
-                          {'name': area.name, 'url': reverse('college:area', args=[area_id])}]
-    return render(request, 'college/area.html', context)
-
-
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
