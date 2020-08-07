@@ -58,7 +58,7 @@ class Section(djm.Model):
     name = djm.CharField(verbose_name='nome', max_length=128)
     content = RichTextUploadingField(null=True, blank=True, verbose_name='conteúdo', config_name='complex')
     topics = djm.ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
-    subarea = djm.ForeignKey(Subarea, null=True, blank=True, on_delete=djm.PROTECT, verbose_name='subarea')
+    subarea = djm.ForeignKey(Subarea, null=True, blank=True, on_delete=djm.PROTECT, verbose_name='subarea', related_name='sections')
     parents = djm.ManyToManyField(
         'self',
         through='SectionSubsection',
@@ -92,7 +92,7 @@ class Section(djm.Model):
 
 
 class ClassSection(djm.Model):
-    corresponding_class = djm.ForeignKey(college.Class, on_delete=djm.PROTECT)
+    corresponding_class = djm.ForeignKey(college.Class, on_delete=djm.PROTECT, related_name='synopsis_sections')
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='class_sections')
     index = djm.IntegerField()
 

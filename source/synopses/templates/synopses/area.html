@@ -33,7 +33,7 @@
         <div class="pane-title bg-grad"><h2>Categorias</h2></div>
         <div class="pane-content">
           <div class="flex-wrapper">
-            {% for subarea in area.subareas.all %}
+            {% for subarea in subareas %}
               <a href="{% url 'synopses:subarea' subarea.id %}">
                 {% if subarea.img_url %}
                   <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }})">
@@ -41,7 +41,7 @@
                   <div class="flex-grid-item">
                 {% endif %}
                 <span class="flex-grid-item-top">{{ subarea.name }}</span>
-                <span class="flex-grid-item-bottom">{{ subarea.topics.count }} tópico(s)</span>
+                <span class="flex-grid-item-bottom">{{ subarea.topic_count }} tópico(s)</span>
                 </div>
               </a>
             {% endfor %}

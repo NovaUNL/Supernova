@@ -35,9 +35,9 @@
         <div class="pane-title bg-grad"><h2>Secções</h2></div>
         <div class="pane-content">
           <ul id="content-list">
-            {% for section in subarea.section_set.all %}
+            {% for section in sections %}
               <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.name }}</a>
-                ({{ section.children.count }} secções)
+                <span class="highres">({{ section.children_count }} subsecções)</span>
               </li>
             {% endfor %}
           </ul>

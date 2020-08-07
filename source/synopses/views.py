@@ -1,5 +1,6 @@
 from dal import autocomplete
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Count
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -7,7 +8,6 @@ from django.urls import reverse
 
 from college.models import Class
 from supernova.views import build_base_context
-# from synopses.forms import SectionForm, TopicForm, SubareaForm, SectionSourcesFormSet, SectionResourcesFormSet
 from synopses import forms as f
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection, SectionSubsection
@@ -22,29 +22,44 @@ def areas_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_synops'
     context['title'] = 'Sínteses - Areas de estudo'
-    context['areas'] = Area.objects.all()
-    context['class_synopses'] = ClassSection.objects.distinct('corresponding_class').all()
+    context['areas'] = Area.objects.prefetch_related('subareas').all()
+    context['classes'] = \
+        Class.objects \
+            .select_related('department') \
+            .annotate(section_count=Count('synopsis_sections')) \
+            .filter(section_count__gt=0) \
+            .order_by('section_count') \
+            .reverse()
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')}]
     return render(request, 'synopses/areas.html', context)
 
 
 def area_view(request, area_id):
-    area = get_object_or_404(Area, id=area_id)
+    area = get_object_or_404(
+        Area.objects,
+        id=area_id)
+    subareas = area.subareas.annotate(topic_count=Count('topics'))
+
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_area'
     context['title'] = 'Sínteses - Categorias de %s' % area.name
     context['area'] = area
+    context['subareas'] = subareas
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area_id])}]
     return render(request, 'synopses/area.html', context)
 
 
 def subarea_view(request, subarea_id):
-    subarea = get_object_or_404(Subarea, id=subarea_id)
+    subarea = get_object_or_404(
+        Subarea.objects.select_related('area'),
+        id=subarea_id)
     area = subarea.area
+    sections = subarea.sections.annotate(children_count=Count('children'))
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_subarea'
     context['title'] = 'Sínteses - %s (%s)' % (subarea.name, area.name)
+    context['sections'] = sections
     context['subarea'] = subarea
     context['area'] = area
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
