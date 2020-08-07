@@ -131,23 +131,20 @@ def class_instance_view(request, instance_id):
             .prefetch_related('parent__instances')
             .select_related('parent__department'),
         id=instance_id)
-    parent_class = instance.parent
-    department = parent_class.department
-    occasion = instance.occasion()
+    parent = instance.parent
+    department = parent.department
 
     context = build_base_context(request)
     context['pcode'] = "c_class_instance"
     context['title'] = str(instance)
     context['department'] = department
-    context['parent_class'] = parent_class
     context['instance'] = instance
-    context['occasion'] = occasion
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])}]
+        {'name': parent.name, 'url': reverse('college:class', args=[parent.id])},
+        {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance_id])}]
     return render(request, 'college/class_instance.html', context)
 
 
@@ -161,17 +158,14 @@ def class_instance_turns_view(request, instance_id):
             .prefetch_related('turns__instances__room__building')
             .select_related('parent__department'),
         id=instance_id)
-    parent_class = instance.parent
-    department = parent_class.department
-    occasion = instance.occasion()
+    parent = instance.parent
+    department = parent.department
 
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_turns"
     context['title'] = str(instance)
     context['department'] = department
-    context['parent_class'] = parent_class
     context['instance'] = instance
-    context['occasion'] = occasion
     turns = instance.turns.order_by('turn_type', 'number').prefetch_related('instances__room__building').all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
     context['turns'] = turns
@@ -179,8 +173,8 @@ def class_instance_turns_view(request, instance_id):
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])},
+        {'name': parent.name, 'url': reverse('college:class', args=[parent.id])},
+        {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance_id])},
         {'name': 'Horário', 'url': request.get_raw_uri()}
     ]
     return render(request, 'college/class_instance_turns.html', context)
@@ -192,24 +186,21 @@ def class_instance_enrolled_view(request, instance_id):
         m.ClassInstance.objects.select_related('parent__department'),
         id=instance_id)
     enrollments = instance.enrollments.select_related('student__user').all()
-    parent_class = instance.parent
-    department = parent_class.department
-    occasion = instance.occasion()
+    parent = instance.parent
+    department = parent.department
 
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_enrolled"
     context['title'] = str(instance)
     context['department'] = department
-    context['parent_class'] = parent_class
     context['instance'] = instance
-    context['occasion'] = occasion
     context['enrollments'] = enrollments
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])},
+        {'name': parent.name, 'url': reverse('college:class', args=[parent.id])},
+        {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance_id])},
         {'name': 'Inscritos', 'url': request.get_raw_uri()}
     ]
     return render(request, 'college/class_instance_enrolled.html', context)
@@ -220,17 +211,13 @@ def class_instance_files_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent__department'),
         id=instance_id)
-    parent_class = instance.parent
-    department = parent_class.department
-    occasion = instance.occasion()
+    parent = instance.parent
+    department = parent.department
 
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_files"
     context['title'] = str(instance)
-    context['department'] = department
-    context['parent_class'] = parent_class
     context['instance'] = instance
-    context['occasion'] = occasion
     context['instance_files'] = instance.files\
         .select_related('file', 'uploader_teacher')\
         .order_by('upload_datetime')\
@@ -239,8 +226,8 @@ def class_instance_files_view(request, instance_id):
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
         {'name': department.name, 'url': reverse('college:department', args=[department.id])},
-        {'name': parent_class.name, 'url': reverse('college:class', args=[parent_class.id])},
-        {'name': occasion, 'url': reverse('college:class_instance', args=[instance_id])},
+        {'name': parent.name, 'url': reverse('college:class', args=[parent.id])},
+        {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance_id])},
         {'name': 'Ficheiros', 'url': request.get_raw_uri()}
     ]
     return render(request, 'college/class_instance_files.html', context)
@@ -296,7 +283,7 @@ def course_view(request, course_id):
     context['pcode'] = "c_course"
     context['title'] = str(course)
     context['course'] = course
-    context['student_count'] = course.students.filter().count()
+    context['student_count'] = course.students.count()
     context['active_student_count'] = course.students.filter(last_year=settings.COLLEGE_YEAR).count()
     context['new_students_count'] = \
         course.students \

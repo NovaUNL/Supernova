@@ -272,9 +272,11 @@ class ClassInstance(Importable):
     def __str__(self):
         return f"{self.parent.abbreviation}, {self.period} de {self.year}"
 
+    @property
     def occasion(self):
         return f'{ctypes.Period.CHOICES[self.period - 1][1]}, {self.year - 1}/{self.year}'
 
+    @property
     def short_occasion(self):
         return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
 
