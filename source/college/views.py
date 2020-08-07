@@ -126,7 +126,11 @@ def class_view(request, class_id):
 
 
 def class_instance_view(request, instance_id):
-    instance = get_object_or_404(m.ClassInstance, id=instance_id)
+    instance = get_object_or_404(
+        m.ClassInstance.objects
+            .prefetch_related('parent__instances')
+            .select_related('parent__department'),
+        id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
     occasion = instance.occasion()
@@ -151,13 +155,12 @@ def class_instance_view(request, instance_id):
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
 def class_instance_turns_view(request, instance_id):
-    try:  # TODO proper get_or_404
-        instance = m.ClassInstance.objects \
-            .prefetch_related('turns__instances__room__building') \
-            .select_related('parent', 'parent__department') \
-            .get(id=instance_id)
-    except m.ClassInstance.DoesNotExist:
-        raise Http404("Class instance not found")
+    # TODO optimize queries (4 duplicated in the schedule building)
+    instance = get_object_or_404(
+        m.ClassInstance.objects
+            .prefetch_related('turns__instances__room__building')
+            .select_related('parent__department'),
+        id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
     occasion = instance.occasion()
@@ -169,9 +172,9 @@ def class_instance_turns_view(request, instance_id):
     context['parent_class'] = parent_class
     context['instance'] = instance
     context['occasion'] = occasion
-    context['turns'] = instance.turns.order_by('turn_type', 'number').prefetch_related('instances__room__building')
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(
-        instance.turns.all())
+    turns = instance.turns.order_by('turn_type', 'number').prefetch_related('instances__room__building').all()
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
+    context['turns'] = turns
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
@@ -185,7 +188,10 @@ def class_instance_turns_view(request, instance_id):
 
 @login_required
 def class_instance_enrolled_view(request, instance_id):
-    instance = get_object_or_404(m.ClassInstance, id=instance_id)
+    instance = get_object_or_404(
+        m.ClassInstance.objects.select_related('parent__department'),
+        id=instance_id)
+    enrollments = instance.enrollments.select_related('student__user').all()
     parent_class = instance.parent
     department = parent_class.department
     occasion = instance.occasion()
@@ -197,6 +203,7 @@ def class_instance_enrolled_view(request, instance_id):
     context['parent_class'] = parent_class
     context['instance'] = instance
     context['occasion'] = occasion
+    context['enrollments'] = enrollments
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
@@ -210,7 +217,9 @@ def class_instance_enrolled_view(request, instance_id):
 
 @login_required
 def class_instance_files_view(request, instance_id):
-    instance = get_object_or_404(m.ClassInstance, id=instance_id)
+    instance = get_object_or_404(
+        m.ClassInstance.objects.select_related('parent__department'),
+        id=instance_id)
     parent_class = instance.parent
     department = parent_class.department
     occasion = instance.occasion()
@@ -222,7 +231,10 @@ def class_instance_files_view(request, instance_id):
     context['parent_class'] = parent_class
     context['instance'] = instance
     context['occasion'] = occasion
-    context['instance_files'] = instance.files.order_by('upload_datetime').reverse()
+    context['instance_files'] = instance.files\
+        .select_related('file', 'uploader_teacher')\
+        .order_by('upload_datetime')\
+        .reverse()
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
