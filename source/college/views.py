@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from dal import autocomplete
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
@@ -86,6 +86,7 @@ def department_view(request, department_id):
     return render(request, 'college/department.html', context)
 
 
+@permission_required('users.full_student_access')
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher, id=teacher_id)
     context = build_base_context(request)
@@ -151,6 +152,7 @@ def class_instance_view(request, instance_id):
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
+@permission_required('users.full_student_access')
 def class_instance_turns_view(request, instance_id):
     # TODO optimize queries (4 duplicated in the schedule building)
     instance = get_object_or_404(
@@ -180,7 +182,7 @@ def class_instance_turns_view(request, instance_id):
     return render(request, 'college/class_instance_turns.html', context)
 
 
-@login_required
+@permission_required('users.full_student_access')
 def class_instance_enrolled_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent__department'),
@@ -206,7 +208,7 @@ def class_instance_enrolled_view(request, instance_id):
     return render(request, 'college/class_instance_enrolled.html', context)
 
 
-@login_required
+@permission_required('users.full_student_access')
 def class_instance_files_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent__department'),
@@ -218,9 +220,9 @@ def class_instance_files_view(request, instance_id):
     context['pcode'] = "c_class_instance_files"
     context['title'] = str(instance)
     context['instance'] = instance
-    context['instance_files'] = instance.files\
-        .select_related('file', 'uploader_teacher')\
-        .order_by('upload_datetime')\
+    context['instance_files'] = instance.files \
+        .select_related('file', 'uploader_teacher') \
+        .order_by('upload_datetime') \
         .reverse()
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
@@ -233,7 +235,7 @@ def class_instance_files_view(request, instance_id):
     return render(request, 'college/class_instance_files.html', context)
 
 
-@login_required
+@permission_required('users.full_student_access')
 def class_instance_file_download(request, instance_id, file_hash):
     class_file = get_object_or_404(
         m.ClassFile.objects.prefetch_related('file'),
@@ -243,6 +245,7 @@ def class_instance_file_download(request, instance_id, file_hash):
     response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
     response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
     return response
+
 
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
@@ -300,7 +303,7 @@ def course_view(request, course_id):
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
-@login_required
+@permission_required('users.full_student_access')
 def course_students_view(request, course_id):
     course = get_object_or_404(m.Course.objects, id=course_id)
     department = course.department
@@ -401,6 +404,7 @@ def room_view(request, room_id):
     return render(request, 'college/room.html', context)
 
 
+@permission_required('users.full_student_access')
 def available_places_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_campus_places"

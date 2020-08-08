@@ -62,11 +62,15 @@
           <h2>Professores</h2>
         </div>
         <div class="pane-content">
-          <ul class="menu">
-            {% for teacher in teachers %}
-              <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
-            {% endfor %}
-          </ul>
+          {% if perms.users.full_student_access %}
+            <ul class="menu">
+              {% for teacher in teachers %}
+                <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+              A consulta de docentes está restrita a alunos e docentes.
+          {% endif %}
         </div>
       </div>
     </div>

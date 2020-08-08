@@ -13,7 +13,7 @@ def user_profile_pic_path(user, filename):
 class User(AbstractUser):
     nickname = djm.CharField(null=False, max_length=20, unique=True, verbose_name='Alcunha')
     last_nickname_change = djm.DateField(default=datetime(2000, 1, 1).date())
-    birth_date = djm.DateField(null=True, verbose_name='Nascimento')
+    birth_date = djm.DateField(null=True, blank=True, verbose_name='Nascimento')
     last_activity = djm.DateTimeField(auto_now_add=True)
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
     picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
@@ -49,10 +49,16 @@ class User(AbstractUser):
     )
     gender = djm.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
     about = MarkdownxField(blank=True, null=True)
+    # Cached fields
+    is_student = djm.BooleanField(default=False)
+    is_teacher = djm.BooleanField(default=False)
 
     @property
     def about_html(self):
         return markdownify(self.about)
+
+    class Meta:
+        permissions = [('full_student_access', 'Can browse the system as if it was the university one')]
 
 
 class Badge(djm.Model):

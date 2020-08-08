@@ -29,13 +29,17 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Edições</h2></div>
           <div class="pane-content">
-            <ul class="menu">
-              {% for instance in instances %}
-                <li>
-                  <a href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a>
-                </li>
-              {% endfor %}
-            </ul>
+            {% if perms.users.full_student_access %}
+              <ul class="menu">
+                {% for instance in instances %}
+                  <li>
+                    <a href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              A consulta de edições está restrita a alunos e docentes.
+            {% endif %}
           </div>
         </div>
       </div>
