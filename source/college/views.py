@@ -62,13 +62,16 @@ def departments_view(request):
 
 
 def department_view(request, department_id):
-    department = get_object_or_404(m.Department, id=department_id)
-    degrees = sorted(map(lambda degree: degree[0],
-                         set(m.Course.objects.filter(department=department).values_list('degree'))))
+    department = get_object_or_404(
+        m.Department.objects,
+        id=department_id)
+    # FIXME this could be a single query instead of 5-6
+    degrees = map(
+        lambda degree: degree[0],
+        m.Course.objects.filter(department=department).order_by('degree').values_list('degree').distinct())
     courses_by_degree = list(
         map(lambda degree:
-            (Degree.name(degree),
-             m.Course.objects.filter(department=department, degree=degree).all()),
+            (Degree.name(degree), m.Course.objects.filter(department=department, degree=degree).all()),
             degrees))
 
     context = build_base_context(request)
@@ -77,8 +80,10 @@ def department_view(request, department_id):
     context['department'] = department
     context['courses'] = courses_by_degree
     context['classes'] = department.classes.filter(extinguished=False).order_by('name').all()
-    context['teachers'] = department.teachers.filter(turns__class_instance__year__gt=2015).distinct().order_by(
-        'name')  # FIXME
+    # FIXME
+    context['teachers'] = department.teachers \
+        .filter(turns__class_instance__year__gt=2015) \
+        .distinct().order_by('name')
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')},
@@ -110,7 +115,11 @@ def teacher_view(request, teacher_id):
 
 
 def class_view(request, class_id):
-    class_ = get_object_or_404(m.Class, id=class_id)
+    class_ = get_object_or_404(
+        m.Class.objects
+            .select_related('department')
+            .prefetch_related('instances'),
+        id=class_id)
     context = build_base_context(request)
     department = class_.department
     context['pcode'] = "c_class"
@@ -126,6 +135,7 @@ def class_view(request, class_id):
     return render(request, 'college/class.html', context)
 
 
+@permission_required('users.full_student_access')
 def class_instance_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects
@@ -251,6 +261,7 @@ def class_instance_file_download(request, instance_id, file_hash):
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
 def courses_view(request):
+    # FIXME this could be a single query instead of a dozen
     degrees = sorted(map(lambda degree: degree[0],
                          set(m.Course.objects.filter(active=True).values_list('degree'))))
     courses_by_degree = list(
@@ -360,7 +371,10 @@ def buildings_view(request):
 
 
 def building_view(request, building_id):
-    building = get_object_or_404(m.Building, id=building_id)
+    # TODO This view can probably be optimized
+    building = get_object_or_404(
+        m.Building.objects.prefetch_related('departments'),
+        id=building_id)
     rooms = m.Room.objects.filter(building=building).order_by('type', 'name', 'door_number').all()
     rooms_by_type = {}
     for room in rooms:
@@ -373,7 +387,7 @@ def building_view(request, building_id):
     context['title'] = building.name
     context['rooms'] = sorted(rooms_by_type.items(), key=lambda t: t[0])
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
-    context['departments'] = m.Department.objects.order_by('name').filter(building=building)
+    context['departments'] = building.departments
     context['room_occupation'] = schedules.build_building_occupation_table(
         COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday(), building)
     context['sub_nav'] = [
