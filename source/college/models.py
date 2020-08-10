@@ -431,7 +431,7 @@ class File(Importable):
 class ClassFile(Importable):
     """A file attachment which was shared to a class"""
     #: Class instance where this size is featured
-    file = djm.ForeignKey(File, on_delete=djm.PROTECT)
+    file = djm.ForeignKey(File, on_delete=djm.PROTECT, related_name='class_files')
     #: File name
     name = djm.CharField(null=True, max_length=256)
     #: Class instance where this size is featured
@@ -441,9 +441,14 @@ class ClassFile(Importable):
     #: Datetime on which this file got uploaded
     upload_datetime = djm.DateTimeField(default=timezone.now)
     #: User who uploaded the file
-    uploader = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
+    uploader = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=djm.SET_NULL,
+        related_name='class_files')
     #: Uploader name fallback (due to imports who cannot be resolved to a user)
-    uploader_teacher = djm.ForeignKey(Teacher, null=True, blank=True, on_delete=djm.SET_NULL)
+    uploader_teacher = djm.ForeignKey(Teacher, null=True, blank=True, on_delete=djm.SET_NULL,
+                                      related_name='class_files')
 
 
 class ClassEvaluation(djm.Model):
@@ -459,9 +464,12 @@ class ClassEvaluation(djm.Model):
 class ClassInstanceAnnouncement(Importable):
     """Announcement which was broadcast to a class"""
     #: Class instance where the broadcast occurred
-    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, related_name='announcements')
     #: User who broadcasted the message
-    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.PROTECT)
+    user = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, on_delete=djm.PROTECT,
+        related_name='class_announcements')
     #: Message title
     title = djm.CharField(max_length=256)
     #: Message content

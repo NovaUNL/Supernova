@@ -18,7 +18,7 @@ class Service(djm.Model):
     #: Shortened version of the name
     abbreviation = djm.CharField(max_length=64)
     #: Place where the main instance of this service is
-    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL)
+    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL, related_name='services')
     #: Tag that represents this service in the campus map.
     map_tag = djm.CharField(max_length=15)
     #: Picture that represents this service
