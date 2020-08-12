@@ -9,7 +9,6 @@ class StudentClipStudentAdmin(admin.ModelAdmin):
 
 admin.site.register(m.Building, LeafletGeoAdmin)
 admin.site.register(m.Course)
-admin.site.register(m.CourseArea)
 admin.site.register(m.Curriculum)
 admin.site.register(m.Class)
 admin.site.register(m.ClassInstance)

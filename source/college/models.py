@@ -220,8 +220,6 @@ class Course(Importable):
     department = djm.ForeignKey('Department', null=True, blank=True, on_delete=djm.PROTECT, related_name='courses')
     #: URL to this course's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
-    #: Areas where this course is inserted
-    areas = djm.ManyToManyField('Area', through='CourseArea')
 
     class Meta:
         ordering = ['name']
@@ -476,27 +474,6 @@ class ClassInstanceAnnouncement(Importable):
     message = djm.TextField()
     #: Datetime of the announcement
     datetime = djm.DateTimeField()
-
-
-class Area(djm.Model):
-    # TODO think about this properly
-    name = djm.CharField(max_length=200, unique=True)
-    description = djm.TextField(max_length=4096, null=True, blank=True)
-    courses = djm.ManyToManyField('Course', through='CourseArea')
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
-class CourseArea(djm.Model):
-    area = djm.ForeignKey(Area, on_delete=djm.PROTECT)
-    course = djm.ForeignKey(Course, on_delete=djm.PROTECT)
-
-    def __str__(self):
-        return f'{self.course} -> {self.area}'
 
 
 class Curriculum(djm.Model):

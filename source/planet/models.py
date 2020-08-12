@@ -2,15 +2,13 @@ from django.conf import settings
 from django.db import models as djm
 from django.utils import timezone
 
-from college.models import Area
-
 
 class Post(djm.Model):
     name = djm.CharField(max_length=256)
     content = djm.TextField()
     author = djm.ManyToManyField(settings.AUTH_USER_MODEL)
     timestamp = djm.DateTimeField(default=timezone.now)
-    areas = djm.ManyToManyField(Area)
+    # areas = djm.ManyToManyField(Area)
 
     class Meta:
         unique_together = ['name', 'content']
