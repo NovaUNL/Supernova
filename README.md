@@ -62,18 +62,6 @@ After a few seconds you should be left with the following services running:
 
 The default user is `supernova`, email `admin@supernova` and password `changeme`.
 
-
-While the CLIP data is read-only and unmanaged by supernova, you need to instantiate the CLIPy tables as they are expected to exist. To create them fire up a python3 terminal inside the django container:
-```
-# docker exec -it sn_django bash
-$ python3
-```
-You need to let the crawler taste the database. It will instantiate every missing table. 
-```python
-from CLIPy import CacheStorage
-storage = CacheStorage.postgresql('supernova', 'changeme', 'supernova')
-```
-
 Close the python interpreter (`ctrl + c` should do).  
 Now you need to tell supernova to instantiate its tables.
 ```
