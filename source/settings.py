@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -196,8 +197,13 @@ REGISTRATIONS_TOKEN_LENGTH = 6
 
 AUTH_USER_MODEL = 'users.User'
 
-COLLEGE_YEAR = 2020  # TODO deduce me PS: 2018 = 2017/2018
-COLLEGE_PERIOD = 2  # TODO deduce me
+_now = datetime.now()
+if _now.month > 7:
+    COLLEGE_YEAR = _now.year
+    COLLEGE_PERIOD = 3
+else:
+    COLLEGE_YEAR = _now.year + 1
+    COLLEGE_PERIOD = 2
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -217,7 +223,7 @@ LEAFLET_CONFIG = {
     'RESET_VIEW': False,
 }
 
-DEBUG = False
+DEBUG = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 VULNERABILITY_CHECKING = False
@@ -231,6 +237,16 @@ assert os.path.isfile(CONFIG_PATH)
 
 ABS_CONFIG_PATH = os.path.abspath(CONFIG_PATH)
 CRONTAB_COMMAND_PREFIX = "SN_CONFIG=%s" % ABS_CONFIG_PATH
+
+CLIPY = {
+    'host': "clipy:5000",
+    'institution': 12345
+}
+
+MATRIX_URL = "https://app.element.io/#/room/#room:matrix.example.com"
+MASTODON_URL = "https://example.com/@supernova"
+GITLAB_URL = "https://gitlab.com/claudiop/Supernova/issues"
+TELEGRAM_URL = "https://t.me/example"
 
 with open(CONFIG_PATH) as file:
     locals().update(json.load(file))
