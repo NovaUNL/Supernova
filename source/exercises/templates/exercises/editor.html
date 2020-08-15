@@ -1,0 +1,34 @@
+{% extends 'supernova/base.html' %}
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'exercises/style.css' %}"/>
+  <script src="{% static 'exercises/script.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>Submeter Exercício</h1>
+      </div>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Tipo de exercício pretendido</h2></div>
+        <div class="pane-content">
+          <h3>Exercicio</h3>
+          <div id="exercise-editor">
+            <div id="exercise"></div>
+            <h3>Resultado</h3><input type="button" onclick="previewExercise()" value="Recarregar">
+            <div id="exercise-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+      appendExercisePicker(document.getElementById("exercise"));
+  </script>
+{% endblock %}
