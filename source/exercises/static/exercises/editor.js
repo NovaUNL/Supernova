@@ -32,12 +32,12 @@ function moveExercisePicker(picker) {
     let parent = picker.parentNode;
     parent.removeChild(picker);
     // If this is not the exercise root move to the end
-    if (document.getElementById("exercise") !== parent) {
+    if (document.getElementById("exercise-editor") !== parent) {
         parent.appendChild(picker);
     }
 }
 
-function appendWriteQuestion(elem) {
+function appendWriteQuestion(elem, enunciationVal, answerVal) {
     let exercisePart = document.createElement('div');
     exercisePart.classList.add('exercise', 'write');
     let closeBtn = document.createElement('span');
@@ -57,9 +57,13 @@ function appendWriteQuestion(elem) {
     let answer = document.createElement('textarea');
     exercisePart.appendChild(answer);
     elem.appendChild(exercisePart);
+    if (enunciationVal !== undefined) {
+        enunciation.value = enunciationVal;
+        answer.value = answerVal;
+    }
 }
 
-function appendSelectQuestion(elem) {
+function appendSelectQuestion(elem, enunciationVal, candidates, answerIndex) {
     let exercisePart = document.createElement('div');
     exercisePart.classList.add('exercise', 'select');
     exercisePart.dataset.answers = '0';
@@ -84,6 +88,7 @@ function appendSelectQuestion(elem) {
     exercisePart.appendChild(correctAnswer);
     elem.appendChild(exercisePart);
 
+
     addAnswer.onclick = function () {
         let answerCount = parseInt(exercisePart.dataset.answers);
         exercisePart.dataset.answers = (answerCount + 1).toString();
@@ -99,12 +104,24 @@ function appendSelectQuestion(elem) {
         option.value = answerCount.toString();
         option.innerText = "Alinea " + letter;
         correctAnswer.appendChild(option)
+
+        if (candidates !== undefined) {
+            newAnswer.value = candidates[answerCount];
+        }
     };
-    addAnswer.click();
-    addAnswer.click();
+
+    if (enunciationVal !== undefined) {
+        enunciation.value = enunciationVal;
+        for (let i = 0; i < candidates.length; i++)
+            addAnswer.click();
+        correctAnswer.selectedIndex = answerIndex;
+    } else {
+        addAnswer.click();
+        addAnswer.click();
+    }
 }
 
-function appendGroupQuestion(elem) {
+function appendGroupQuestion(elem, enunciationVal) {
     let exercisePart = document.createElement('div');
     exercisePart.classList.add('exercise', 'group');
     let closeBtn = document.createElement('span');
@@ -126,10 +143,13 @@ function appendGroupQuestion(elem) {
     appendExercisePicker(subExercises);
     exercisePart.appendChild(subExercises);
     elem.appendChild(exercisePart);
+    if (enunciationVal !== undefined)
+        enunciation.value = enunciationVal;
+    return subExercises;
 }
 
 function deleteQuestion(elem) {
-    let root = document.getElementById("exercise");
+    let root = document.getElementById("exercise-editor");
     if (elem.parentNode === root) {
         appendExercisePicker(root);
     }
@@ -147,7 +167,7 @@ function extractSubProblem(node) {
     } else if (node.classList.contains("select")) {
         let enunciation = node.querySelector("textarea").value;
         let candidates = [].slice.call(
-            document.getElementById("exercise").querySelectorAll("input")
+            document.getElementById("exercise-editor").querySelectorAll("input")
         ).map(x => x.value);
         let answerSelector = node.querySelector("select");
         let answerIndex = parseInt(answerSelector.options[answerSelector.selectedIndex].value);
@@ -156,8 +176,7 @@ function extractSubProblem(node) {
 }
 
 function previewExercise() {
-    let exercise = extractSubProblem(document.getElementById("exercise").querySelector(".exercise"));
-    console.log(exercise);
+    let exercise = extractSubProblem(document.getElementById("exercise-editor").querySelector(".exercise"));
     let root = document.getElementById("exercise-preview");
     delChildren(root);
     previewSubExercise(exercise, root, "1");
@@ -203,3 +222,45 @@ function previewSubExercise(exercise, root, prefix) {
             break;
     }
 }
+
+function loadNode(root, exercise) {
+    switch (exercise.type) {
+        case "group":
+            let subproblemNode = appendGroupQuestion(root, exercise.enunciation);
+            for (let subproblem of exercise.subproblems) {
+                loadNode(subproblemNode, subproblem);
+            }
+            moveExercisePicker(subproblemNode.querySelector('.subexercises-options'));
+            break;
+        case "write":
+            appendWriteQuestion(root, exercise.enunciation, exercise.answer);
+            break;
+        case "select":
+            appendSelectQuestion(root, exercise.enunciation, exercise.candidates, exercise.answerIndex);
+            break;
+    }
+}
+
+(load = function () {
+    let editor = document.getElementById("exercise-editor");
+    let form = document.querySelector("form");
+    let dataField = document.getElementById("exercise").querySelector('input[type="hidden"]');
+    if (dataField.value === "null") {
+        appendExercisePicker(editor);
+    } else {
+        loadNode(editor, JSON.parse(dataField.value));
+        previewExercise();
+    }
+    let submissionCleanup = function (e) {
+        if (e.preventDefault) e.preventDefault();
+        dataField.value = JSON.stringify(
+            extractSubProblem(document.getElementById("exercise-editor").querySelector(".exercise")));
+        return false;
+    }
+
+    if (form.attachEvent) {
+        form.attachEvent("submit", submissionCleanup);
+    } else {
+        form.addEventListener("submit", submissionCleanup);
+    }
+})();
