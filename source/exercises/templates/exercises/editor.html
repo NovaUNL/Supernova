@@ -1,11 +1,6 @@
 {% extends 'supernova/base.html' %}
 {% load static %}
 
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'exercises/style.css' %}"/>
-  <script src="{% static 'exercises/script.js' %}"></script>
-{% endblock %}
-
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
@@ -15,20 +10,51 @@
     </div>
     <div class="col padded">
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Tipo de exercício pretendido</h2></div>
+        <div class="pane-title bg-grad"></div>
         <div class="pane-content">
-          <h3>Exercicio</h3>
-          <div id="exercise-editor">
-            <div id="exercise"></div>
-            <h3>Resultado</h3><input type="button" onclick="previewExercise()" value="Recarregar">
-            <div id="exercise-preview"></div>
-          </div>
+          <form class="col" method="post" action="{{ action_page }}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="form-block">
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h3>Exercício</h3>
+                </div>
+                {{ form.content }}
+              </div>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Fonte (Opcional)</h4>
+                  {{ form.source }}
+                </div>
+                <div class="form-row-description">
+                  Um descritivo da origem deste exercício.
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Endreço fonte (Opcional)</h4>
+                  {{ form.source_url }}
+                </div>
+                <div class="form-row-description">
+                  O URL (público) da origem deste exercício.
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Seccções</h4>
+                  {{ form.synopses_sections }}
+                </div>
+                <div class="form-row-description">
+                  As secções de sintese das quais este exercicio faz parte.
+                </div>
+              </div>
+            </div>
+            <input class="ui-btn end" type="submit" value="Submeter"/>
+            {{ form.media }}
+          </form>
         </div>
       </div>
     </div>
   </div>
-
-  <script>
-      appendExercisePicker(document.getElementById("exercise"));
-  </script>
 {% endblock %}

@@ -8,7 +8,7 @@
     border: 1px solid black;
     border-radius: 5px;
     align-self: end;
-    padding: 5px 10px;
+    padding: 3px 10px;
 }
 
 .exercise-delete:after {

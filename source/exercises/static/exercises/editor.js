@@ -167,7 +167,7 @@ function extractSubProblem(node) {
     } else if (node.classList.contains("select")) {
         let enunciation = node.querySelector("textarea").value;
         let candidates = [].slice.call(
-            document.getElementById("exercise-editor").querySelectorAll("input")
+            document.getElementById("exercise-editor").querySelectorAll("input[type='text']")
         ).map(x => x.value);
         let answerSelector = node.querySelector("select");
         let answerIndex = parseInt(answerSelector.options[answerSelector.selectedIndex].value);
@@ -177,10 +177,13 @@ function extractSubProblem(node) {
 
 function previewExercise() {
     let exercise = extractSubProblem(document.getElementById("exercise-editor").querySelector(".exercise"));
-    let root = document.getElementById("exercise-preview");
-    delChildren(root);
+    let root = document.createElement('div');
+    root.id = "exercise-preview";
+    let popup = window.open("", "Exercício", "width=800,height=640");
     previewSubExercise(exercise, root, "1");
+    popup.document.querySelector('body').appendChild(root);
 }
+
 
 function previewSubExercise(exercise, root, prefix) {
     let title = document.createElement('h3');
@@ -192,7 +195,7 @@ function previewSubExercise(exercise, root, prefix) {
     switch (exercise.type) {
         case "group":
             let groupContainer = document.createElement('div');
-            groupContainer.style.paddingLeft = "10px";
+            groupContainer.style.paddingLeft = "20px";
             for (const [i, problem] of exercise.subproblems.entries()) {
                 previewSubExercise(problem, groupContainer, prefix + "." + i);
             }
@@ -249,13 +252,13 @@ function loadNode(root, exercise) {
         appendExercisePicker(editor);
     } else {
         loadNode(editor, JSON.parse(dataField.value));
-        previewExercise();
+        // previewExercise();
     }
     let submissionCleanup = function (e) {
-        if (e.preventDefault) e.preventDefault();
+        // if (e.preventDefault) e.preventDefault();
         dataField.value = JSON.stringify(
             extractSubProblem(document.getElementById("exercise-editor").querySelector(".exercise")));
-        return false;
+        return true;
     }
 
     if (form.attachEvent) {
