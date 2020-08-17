@@ -90,7 +90,7 @@ def sync_departments(recurse=False):
         raise Exception("Unable to fetch departments")
     clip_departments = r.json()
 
-    current = m.Department.objects.exclude(external_id=None).values_list('external_id', flat=True)
+    current = m.Department.objects.exclude(external_id=None).all()
     clip_ids = {entry['id'] for entry in clip_departments}
     new, disappeared, mirrored = _upstream_diff(set(current), clip_ids)
 
@@ -468,22 +468,27 @@ def sync_students():
                     changed = True
                 elif obj.abbreviation != upstream_abbr:  # Changing known is not
                     logger.error(f"Student {obj} abbreviation changed from {obj.abbreviation} to {upstream_abbr}")
-            # if (upstream_name := upstream['name']) is not None:
-            #     if obj.name is None:
-            #         obj.name = upstream_name
-            #         changed = True
-            #     elif obj.name != upstream_name:
-            #         logger.error(f"Student {obj} name changed from {obj.name} to {upstream_name}")
+            if (upstream_name := upstream['name']) is not None:
+                if obj.external_data is None:
+                    obj.external_data = {'name': upstream_name}
+                    changed = True
+                elif 'name' in obj.external_data:
+                    if obj.external_data['name'] != upstream_name:
+                        logger.error(f"Student {obj} name changed from {obj.name} to {upstream_name}")
+                else:
+                    obj.external_data['name'] = upstream_name
+                    changed = True
+
             if changed:
                 obj.save()
             continue
         else:
             obj = m.Student.objects.create(
-                name=upstream['name'],
                 abbreviation=upstream['abbr'],
                 iid=upstream['iid'],
                 external_id=upstream['id'],
-                external_update=make_aware(datetime.now()))
+                external_update=make_aware(datetime.now()),
+                external_data={'name': upstream['name']})
             logger.info(f'Created student {obj}.')
 
 
@@ -502,7 +507,9 @@ def sync_teachers():
         for department in m.Department.objects.exclude(external_id=None).all()}
 
     for upstream in r.json():
-        if upstream['dept'] not in departments:
+        upstream_dept_ids = set(upstream['depts'])
+        # Does not belong to any known department
+        if len(upstream_dept_ids.intersection(departments)) == 0:
             continue
         if (ext_id := upstream['id']) in existing:
             obj = existing[ext_id]
@@ -512,14 +519,22 @@ def sync_teachers():
                     obj.save()
                 elif obj.name != upstream_name:  # Setting unknown is okay
                     logger.error(f"Teacher {obj} name changed from {obj.name} to {upstream_name}")
-            continue
+                    continue
         else:
             obj = m.Teacher.objects.create(
                 name=upstream['name'],
                 iid=upstream['id'],
                 external_id=upstream['id'],
-                external_update=make_aware(datetime.now()))
+                external_update=make_aware(datetime.now()),
+                external_data={'name': upstream['name']})
             logger.info(f'Created teacher {obj}.')
+
+        current_departments = obj.departments.all()
+        new, disappeared, _ = _upstream_diff(current_departments, upstream_dept_ids)
+        m.Teacher.departments.through.objects.filter(teacher=obj, department__external_id__in=disappeared).delete()
+        m.Teacher.departments.through.objects.bulk_create(
+            map(lambda department_id: m.Teacher.departments.through(department_id=department_id, teacher=obj),
+                m.Department.objects.filter(external_id__in=new).values_list('id', flat=True)))
 
 
 def calculate_active_classes():
