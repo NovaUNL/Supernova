@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO deduplicate code in _request methods
+# TODO deduplicate code in relationships
 
 def assert_buildings_inserted():
     ignored = {2, 1191, 1197, 1198, 1632, 1653}
@@ -211,12 +212,37 @@ def _upstream_sync_class(upstream, external_id, department, recurse):
             logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
             obj.credits = upstream['ects']
             changed = True
+        if (dept_ext_id := upstream['dept']) != obj.department.external_id:
+            new_department = m.Department.objects.filter(external_id=dept_ext_id).first()
+            if new_department is None:
+                logger.error(f"Class {obj} department changed from {obj.department} "
+                             f"to an unknown department (id:{dept_ext_id}). Ignoring.")
+            else:
+                logger.warning(f"Class {obj} department changed from {obj.department} to {new_department}")
+                obj.department = new_department
+                changed = True
         if changed:
             obj.save()
 
-    # ---------  Related ---------
+    # ---------  Related Instances ---------
     instances = obj.instances.exclude(external_id=None).all()
-    _related(instances, upstream['instances'], sync_class_instance, m.ClassInstance, recurse, class_=obj)
+
+    new, disappeared, mirrored = _upstream_diff(set(instances), set(upstream['instances']))
+
+    # Class instances do not simply move to another class
+    if m.ClassInstance.objects.filter(external_id__in=new).exists():
+        logger.critical(f"Some instances of class {obj} belong to another class: {new}")
+
+    if recurse:
+        for ext_id in new:
+            sync_class_instance(ext_id, recurse=True, class_=obj)
+
+    m.ClassInstance.objects.filter(external_id__in=mirrored). \
+        update(disappeared=False, external_update=make_aware(datetime.now()))
+    m.ClassInstance.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.ClassInstance.objects.filter(external_id__in=disappeared)
+    for instance in disappeared.all():
+        logger.warning(f"{instance} removed from {obj}.")
 
 
 def sync_class_instance(external_id, class_=None, recurse=False):

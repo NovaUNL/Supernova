@@ -71,3 +71,80 @@ class SyncTest(TestCase):
         self.assertEquals(a.department, self.department)
         self.assertEquals(b.department, self.department)
         self.assertNotEqual(c.department, self.department)
+
+    def test_class_sync(self):
+        upstream = {
+            "abbr": "New",
+            "dept": self.department.external_id,
+            "ects": 12,
+            "id": 201,
+            "iid": 201,
+            "instances": [100, 1001],
+            "name": "New Class"
+        }
+
+        sync._upstream_sync_class(upstream, 201, self.department, False)
+
+        new_class = college.Class.objects.get(external_id=201)
+
+        self.assertEquals(new_class.name, "New Class")
+        self.assertEquals(new_class.abbreviation, "New")
+        self.assertEquals(new_class.credits, 12)
+        self.assertEquals(new_class.department, self.department)
+
+        # Stays
+        a = college.ClassInstance.objects.create(
+            parent=new_class,
+            year=2020,
+            period=2,
+            external_id=1001,
+            information=dict())
+        # Gets deleted
+        b = college.ClassInstance.objects.create(
+            parent=new_class,
+            year=2020,
+            period=3,
+            external_id=1002,
+            information=dict())
+
+        sync._upstream_sync_class(upstream, 201, self.department, False)
+        a.refresh_from_db()
+        b.refresh_from_db()
+
+        self.assertEquals(a.parent, new_class)
+        self.assertFalse(a.disappeared)
+        self.assertTrue(b.disappeared)
+        self.assertTrue(a in new_class.instances.all())
+        self.assertTrue(b in new_class.instances.all())
+
+        other_dept = college.Department.objects.create(name="Default", external_id=1001)
+        upstream = {
+            "abbr": "Newr",
+            "dept": other_dept.external_id,
+            "ects": 15,
+            "id": 201,
+            "iid": 201,
+            "instances": [100, 1002],
+            "name": "Newer Class"
+        }
+
+        sync._upstream_sync_class(upstream, 201, self.department, False)
+        new_class.refresh_from_db()
+        a.refresh_from_db()
+        b.refresh_from_db()
+
+        self.assertEquals(new_class.name, "Newer Class")
+        self.assertEquals(new_class.abbreviation, "Newr")
+        self.assertEquals(new_class.credits, 15)
+        self.assertEquals(new_class.department, other_dept)
+        self.assertEquals(a.parent, new_class)
+        self.assertTrue(a.disappeared)
+        self.assertFalse(b.disappeared)
+        self.assertTrue(a in new_class.instances.all())
+        self.assertTrue(b in new_class.instances.all())
+
+    # def test_disappearances(self):
+    #     pass
+    #
+    # def test_freeze(self):
+    #     pass
