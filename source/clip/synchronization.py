@@ -280,7 +280,8 @@ def sync_class_instance_files(external_id, class_inst=None):
 
         uploader_teacher = _closest_teacher(teachers, upsteam_info['uploader'])
         if downstream_file.uploader_teacher != uploader_teacher:
-            logger.warning(f"{downstream_file.uploader_teacher} changed to {uploader_teacher}")
+            logger.warning(f"{downstream_file} uploader changed "
+                           f"from {downstream_file.uploader_teacher} to {uploader_teacher}")
             downstream_file.uploader_teacher = uploader_teacher
             changed = True
         if changed:
@@ -337,12 +338,11 @@ def sync_enrollment(external_id, class_inst=None, recurse=False):
         obj = m.Enrollment.objects.get(class_instance=class_inst, external_id=external_id)
     except ObjectDoesNotExist:
         obj = m.Enrollment.objects.create(
+            student=m.Student.objects.get(external_id=upstream['student']),
             class_instance=class_inst,
-            number=upstream['number'],
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()))
-        logger.info(f"Enrollment {obj} created.")
 
 
 def sync_turn(external_id, class_inst=None, recurse=False):
@@ -416,13 +416,14 @@ def sync_turn_instance(external_id, turn=None, recurse=False):
         obj = m.TurnInstance.objects.get(turn=turn, external_id=external_id)
     except ObjectDoesNotExist:
         obj = m.TurnInstance.objects.create(
+            turn=turn,
             weekday=upstream['weekday'],
             start=upstream['start'],
             duration=upstream['end'] - upstream['start'],
             room=m.Room.objects.get(external_id=upstream['room']),
             external_id=external_id,
             frozen=False,
-            external_update=make_aware(datetime.now())),
+            external_update=make_aware(datetime.now()))
         logger.info(f"Turn instance {obj} created.")
 
     if upstream['start'] != obj.start:
