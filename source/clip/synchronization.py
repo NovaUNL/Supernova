@@ -142,9 +142,23 @@ def _request_department(department):
 
 
 def _upstream_sync_department(upstream, department, recurse=False):
-    # ---------  Related ---------
+    # ---------  Related classes ---------
     classes = department.classes.exclude(external_id=None).all()
-    _related(classes, upstream['classes'], sync_class, m.Class, recurse, department=department)
+    new, disappeared, mirrored = _upstream_diff(set(classes), set(upstream['classes']))
+
+    if recurse:
+        for ext_id in new:
+            sync_class(ext_id, recurse=True, department=department)
+
+    m.Class.objects.filter(external_id__in=new).update(department=department)
+    m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
+    m.Class.objects.filter(external_id__in=disappeared).update(department=None)
+    disappeared = m.Class.objects.filter(external_id__in=disappeared)
+    for class_ in disappeared.all():
+        logger.warning(f"{class_} removed from {department}.")
+
+    # ---------  Related teachers ---------
+    # Handled in the teacher method
 
 
 def sync_class(external_id, department=None, recurse=False):
@@ -675,7 +689,6 @@ def _related(children, clip_children_ids, related_func, related_type, recurse, *
     disappeared = related_type.objects.filter(external_id__in=disappeared)
     for disappeared_obj in disappeared.all():
         logger.warning(f"{disappeared_obj} disappeared.")
-    disappeared.update(disappeared=True, external_update=make_aware(datetime.now()))
     related_type.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
 
 
