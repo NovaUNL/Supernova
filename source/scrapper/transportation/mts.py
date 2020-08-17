@@ -10,7 +10,7 @@ def get_departure_times():
         return departure_times
 
     response = requests.post(
-        "http://intranet.mts.pt/api/search",
+        "https://intranet.mts.pt/api/search",
         data={'line': 6, 'day_type': 1, 'season': 2, 'stations': 19})
     times = response.json()['data']['times']
 
