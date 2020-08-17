@@ -15,6 +15,8 @@ from supernova.utils import correlation
 logger = logging.getLogger(__name__)
 
 
+# TODO deduplicate code in _request methods
+
 def assert_buildings_inserted():
     ignored = {2, 1191, 1197, 1198, 1632, 1653}
     r = requests.get("http://%s/buildings/" % CLIPY['host'])
@@ -85,13 +87,20 @@ def rooms():
 
 
 def sync_departments(recurse=False):
+    upstream = _request_departments()
+    _upstream_sync_departments(upstream, recurse)
+
+
+def _request_departments():
     r = requests.get("http://%s/departments/" % CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch departments")
-    clip_departments = r.json()
+    return r.json()
 
+
+def _upstream_sync_departments(upstream, recurse):
     current = m.Department.objects.exclude(external_id=None).all()
-    clip_ids = {entry['id'] for entry in clip_departments}
+    clip_ids = {entry['id'] for entry in upstream}
     new, disappeared, mirrored = _upstream_diff(set(current), clip_ids)
 
     disappeared_departments = m.Department.objects.filter(external_id__in=disappeared)
@@ -100,7 +109,7 @@ def sync_departments(recurse=False):
     disappeared_departments.update(disappeared=True, external_update=make_aware(datetime.now()))
     m.Department.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
 
-    for clip_department in clip_departments:
+    for clip_department in upstream:
         if clip_department['institution'] != CLIPY['institution']:
             continue
         if clip_department['id'] in new:
@@ -121,11 +130,18 @@ def sync_department(department, recurse=False):
     :param department: The department that is being sync'd
     :param recurse: Whether to recurse to the derivative entities (classes)
     """
+    upstream = _request_department(department)
+    _upstream_sync_department(upstream, department, recurse)
+
+
+def _request_department(department):
     r = requests.get(f"http://{CLIPY['host']}/department/{department.external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch department {department.external_id}")
+    return r.json()
 
-    upstream = r.json()
+
+def _upstream_sync_department(upstream, department, recurse=False):
     # ---------  Related ---------
     classes = department.classes.exclude(external_id=None).all()
     _related(classes, upstream['classes'], sync_class, m.Class, recurse, department=department)
@@ -138,11 +154,18 @@ def sync_class(external_id, department=None, recurse=False):
     :param department: The parent department of this class (optional)
     :param recurse: Whether to recurse to the derivative entities (class instances)
     """
+    upstream = _request_class(external_id)
+    _upstream_sync_class(upstream, external_id, department, recurse)
+
+
+def _request_class(external_id):
     r = requests.get(f"http://{CLIPY['host']}/class/{external_id}")
     if r.status_code != 200:
         raise Exception("Unable to fetch class")
-    upstream = r.json()
+    return r.json()
 
+
+def _upstream_sync_class(upstream, external_id, department, recurse):
     if department is None:
         department = m.Department.objects.get(external_id=upstream['dept'])
 
@@ -189,11 +212,18 @@ def sync_class_instance(external_id, class_=None, recurse=False):
     :param class_: The class that is parent this class instance (optional)
     :param recurse: Whether to recurse to the derivative entities (turns, enrollments and evaluations)
     """
+    upstream = _request_class_instance(external_id)
+    _upstream_sync_class_instance(upstream, external_id, class_, recurse)
+
+
+def _request_class_instance(external_id):
     r = requests.get(f"http://{CLIPY['host']}/class_inst/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch class instance {external_id}")
-    upstream = r.json()
+    return r.json()
 
+
+def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
     if class_ is None:
         class_ = m.Class.objects.get(external_id=upstream['class_id'])
 
@@ -246,11 +276,18 @@ def sync_class_instance_files(external_id, class_inst=None):
     :param external_id: The foreign id of the class instance that is being sync'd
     :param class_inst: The class instance (optional)
     """
+    upstream = _request_class_instance_files(external_id)
+    _upstream_sync_class_instance_files(upstream, external_id, class_inst)
+
+
+def _request_class_instance_files(external_id):
     r = requests.get(f"http://{CLIPY['host']}/files/{external_id}")
     if r.status_code != 200:
         raise Exception("Unable to fetch class instance files")
-    upstream = r.json()
+    return r.json()
 
+
+def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
     if class_inst is None:
         class_inst = m.ClassInstance.objects.prefetch_related('files__file').get(external_id=external_id)
 
@@ -319,18 +356,25 @@ def sync_class_instance_files(external_id, class_inst=None):
             logger.info(f"File {file} added to class {class_inst}")
 
 
-def sync_enrollment(external_id, class_inst=None, recurse=False):
+def sync_enrollment(external_id, class_inst=None):
     """
     Sync the information in an enrollment
     :param external_id: The foreign id of the enrollment that is being sync'd
     :param class_inst: The class instance (optional)
     :return:
     """
+    upstream = _request_enrollment(external_id)
+    _upstream_sync_enrollment(upstream, external_id, class_inst)
+
+
+def _request_enrollment(external_id):
     r = requests.get(f"http://{CLIPY['host']}/enrollment/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch enrollment {external_id}")
-    upstream = r.json()
+    return r.json()
 
+
+def _upstream_sync_enrollment(upstream, external_id, class_inst):
     if class_inst is None:
         class_inst = m.ClassInstance.objects.get(external_id=upstream['class_instance_id'])
 
@@ -353,11 +397,18 @@ def sync_turn(external_id, class_inst=None, recurse=False):
     :param recurse: Whether to recurse to the derivative turn instances
     :return:
     """
+    upstream = _request_turn_info(external_id)
+    _upstream_sync_turn_info(upstream, external_id, class_inst, recurse)
+
+
+def _request_turn_info(external_id):
     r = requests.get(f"http://{CLIPY['host']}/turn/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch turn {external_id}")
-    upstream = r.json()
+    return r.json()
 
+
+def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
     if class_inst is None:
         class_inst = m.ClassInstance.objects.get(external_id=upstream['class_instance_id'])
 
@@ -398,17 +449,24 @@ def sync_turn(external_id, class_inst=None, recurse=False):
             m.Teacher.objects.filter(external_id__in=new).values_list('id', flat=True)))
 
 
-def sync_turn_instance(external_id, turn=None, recurse=False):
+def sync_turn_instance(external_id, turn=None):
     """
     Sync the file information in an instance of a turn
     :param external_id: The foreign id of the turn instance that is being sync'd
     :param turn: The parent turn (optional)
     """
+    upstream = _request_turn_instance(external_id)
+    _upstream_sync_turn_instance(upstream, external_id, turn)
+
+
+def _request_turn_instance(external_id):
     r = requests.get(f"http://{CLIPY['host']}/turn_inst/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch turn instance {external_id}")
-    upstream = r.json()
+    return r.json()
 
+
+def _upstream_sync_turn_instance(upstream, external_id, turn):
     if turn is None:
         turn = m.Turn.objects.get(external_id=upstream['turn'])
 
@@ -437,7 +495,16 @@ def sync_turn_instance(external_id, turn=None, recurse=False):
         logger.warning(f"Turn instance {obj} room changed from {obj.room.external_id} to {upstream['room']}")
 
 
-def sync_evaluation(external_id, class_inst=None, recurse=False):
+def sync_evaluation(external_id, class_inst=None):
+    upstream = _request_evaluation(external_id)
+    _upstream_sync_evaluation(upstream, external_id, class_inst)
+
+
+def _request_evaluation(external_id):
+    return ''  # TODO Pending crawler implementation
+
+
+def _upstream_sync_evaluation(upstream, external_id, class_inst):
     pass  # TODO Pending crawler implementation
 
 
@@ -445,13 +512,21 @@ def sync_students():
     """
     Synchronizes students to the current upstream
     """
+    upstream = _request_students()
+    _upstream_sync_students(upstream)
+
+
+def _request_students():
     r = requests.get("http://%s/students/" % CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch students")
+    return r.json()
 
+
+def _upstream_sync_students(upstream_list):
     existing = {student.external_id: student for student in m.Student.objects.exclude(external_id=None).all()}
 
-    for upstream in r.json():
+    for upstream in upstream_list:
         if upstream['inst'] != CLIPY['institution']:
             continue
         if (ext_id := upstream['id']) in existing:
@@ -498,16 +573,24 @@ def sync_teachers():
     Synchronizes teachers to the current upstream
     """
     # TODO this method is essentially a duplication of sync_students. Figure a way to generify both
+    upstream = _request_teachers()
+    _upstream_sync_teachers(upstream)
+
+
+def _request_teachers():
     r = requests.get("http://%s/teachers/" % CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch teachers")
+    return r.json()
 
+
+def _upstream_sync_teachers(upstream_list):
     existing = {teacher.external_id: teacher for teacher in m.Teacher.objects.exclude(external_id=None).all()}
     departments = {
         department.external_id: department
         for department in m.Department.objects.exclude(external_id=None).all()}
 
-    for upstream in r.json():
+    for upstream in upstream_list:
         upstream_dept_ids = set(upstream['depts'])
         # Does not belong to any known department
         if len(upstream_dept_ids.intersection(departments)) == 0:
