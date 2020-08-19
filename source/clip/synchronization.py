@@ -159,7 +159,7 @@ def _upstream_sync_department(upstream, department, recurse=False):
         logger.warning(f"{class_} removed from {department}.")
 
     # ---------  Related teachers ---------
-    # Handled in the teacher method
+    # Handled in the teacher function
 
 
 def sync_class(external_id, department=None, recurse=False):
@@ -275,7 +275,7 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
             year=upstream['year'],
             period=upstream['period'],
             external_id=external_id,
-            information=upstream['info'],
+            information={'upstream': upstream['info']},
             frozen=False,
             external_update=make_aware(datetime.now()))
         logger.info(f"Class instance {obj} created")
@@ -284,26 +284,63 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
         changed = False
         if upstream['year'] != obj.year:
             logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream['year']}")
-            obj.year = upstream['year']
-            changed = True
+            # obj.year = upstream['year']
+            # changed = True
 
         if upstream['period'] != obj.period:
             logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream['period']}")
-            obj.period = upstream['period']
+            # obj.period = upstream['period']
+            # changed = True
+
+        if obj.information is None:
+            obj.information = {'upstream': upstream['info']}
+            changed = True
+        elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
+            obj.information['upstream'] = upstream['info']
             changed = True
 
         if changed:
             obj.save()
 
-    # TODO sync other info
-
-    # ---------  Related ---------
+    # ---------  Related turns ---------
     turns = obj.turns.exclude(external_id=None).all()
-    _related(turns, upstream['turns'], sync_turn, m.Turn, recurse, class_inst=obj)
-    enrollments = obj.enrollments.exclude(external_id=None).all()
-    _related(enrollments, upstream['enrollments'], sync_enrollment, m.Enrollment, recurse, class_inst=obj)
-    _related(turns, upstream['turns'], sync_turn, m.Turn, recurse, class_inst=obj)
 
+    new, disappeared, mirrored = _upstream_diff(set(turns), set(upstream['turns']))
+
+    if m.Turn.objects.filter(external_id__in=new).exists():
+        logger.critical(f"Some turns of class instance {obj} belong to another instance: {new}")
+
+    if recurse:
+        for ext_id in new:
+            sync_turn(ext_id, recurse=True, class_inst=obj)
+
+    m.Turn.objects.filter(external_id__in=mirrored). \
+        update(disappeared=False, external_update=make_aware(datetime.now()))
+    m.Turn.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.Turn.objects.filter(external_id__in=disappeared)
+    for turn in disappeared.all():
+        logger.warning(f"{turn} removed from {obj}.")
+
+    # ---------  Related enrollments ---------
+    enrollments = obj.enrollments.exclude(external_id=None).all()
+
+    new, disappeared, mirrored = _upstream_diff(set(enrollments), set(upstream['enrollments']))
+
+    if m.Enrollment.objects.filter(external_id__in=new).exists():
+        logger.critical(f"Some enrollments of class instance {obj} belong to another instance: {new}")
+
+    if recurse:
+        for ext_id in new:
+            sync_enrollment(ext_id, class_inst=obj)
+
+    m.Enrollment.objects.filter(external_id__in=mirrored). \
+        update(disappeared=False, external_update=make_aware(datetime.now()))
+    m.Enrollment.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.Enrollment.objects.filter(external_id__in=disappeared)
+    for enrollment in disappeared.all():
+        logger.warning(f"{enrollment} removed from {obj}.")
+
+    # ---------  OTHER TODO ---------
     sync_class_instance_files(external_id, class_inst=obj)  # Must happen after the turn sync to have the teachers known
     # TODO
     # evaluations = obj.enrollments.exclude(external_id=None).all()

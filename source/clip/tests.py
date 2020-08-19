@@ -73,13 +73,14 @@ class SyncTest(TestCase):
         self.assertNotEqual(c.department, self.department)
 
     def test_class_sync(self):
+        # TODO external id starting to refer to a whole different object, violate key uniqueness
         upstream = {
             "abbr": "New",
             "dept": self.department.external_id,
             "ects": 12,
             "id": 201,
             "iid": 201,
-            "instances": [100, 1001],
+            "instances": [100, 1000, 1001],
             "name": "New Class"
         }
 
@@ -92,15 +93,20 @@ class SyncTest(TestCase):
         self.assertEquals(new_class.credits, 12)
         self.assertEquals(new_class.department, self.department)
 
-        # Stays
-        a = college.ClassInstance.objects.create(
+        moved = college.ClassInstance.objects.create(
+            parent=self.class_,
+            year=2020,
+            period=3,
+            external_id=1000,
+            disappeared=True,
+            information=dict())
+        stays = college.ClassInstance.objects.create(
             parent=new_class,
             year=2020,
             period=2,
             external_id=1001,
             information=dict())
-        # Gets deleted
-        b = college.ClassInstance.objects.create(
+        deleted = college.ClassInstance.objects.create(
             parent=new_class,
             year=2020,
             period=3,
@@ -108,14 +114,16 @@ class SyncTest(TestCase):
             information=dict())
 
         sync._upstream_sync_class(upstream, 201, self.department, False)
-        a.refresh_from_db()
-        b.refresh_from_db()
+        moved.refresh_from_db()
+        stays.refresh_from_db()
+        deleted.refresh_from_db()
 
-        self.assertEquals(a.parent, new_class)
-        self.assertFalse(a.disappeared)
-        self.assertTrue(b.disappeared)
-        self.assertTrue(a in new_class.instances.all())
-        self.assertTrue(b in new_class.instances.all())
+        self.assertEquals(moved.parent, self.class_)
+        self.assertEquals(stays.parent, new_class)
+        self.assertEquals(deleted.parent, new_class)
+        self.assertTrue(moved.disappeared)
+        self.assertFalse(stays.disappeared)
+        self.assertTrue(deleted.disappeared)
 
         other_dept = college.Department.objects.create(name="Default", external_id=1001)
         upstream = {
@@ -124,24 +132,119 @@ class SyncTest(TestCase):
             "ects": 15,
             "id": 201,
             "iid": 201,
-            "instances": [100, 1002],
+            "instances": [100, 1000, 1002],
             "name": "Newer Class"
         }
 
         sync._upstream_sync_class(upstream, 201, self.department, False)
         new_class.refresh_from_db()
-        a.refresh_from_db()
-        b.refresh_from_db()
+        stays.refresh_from_db()
+        deleted.refresh_from_db()
 
         self.assertEquals(new_class.name, "Newer Class")
         self.assertEquals(new_class.abbreviation, "Newr")
         self.assertEquals(new_class.credits, 15)
         self.assertEquals(new_class.department, other_dept)
-        self.assertEquals(a.parent, new_class)
-        self.assertTrue(a.disappeared)
-        self.assertFalse(b.disappeared)
-        self.assertTrue(a in new_class.instances.all())
-        self.assertTrue(b in new_class.instances.all())
+        self.assertEquals(stays.parent, new_class)
+        self.assertEquals(deleted.parent, new_class)
+        self.assertTrue(stays.disappeared)
+        self.assertFalse(deleted.disappeared)
+
+    def test_class_instance_sync(self):
+        upstream = {
+            "class_id": self.class_.external_id,
+            "enrollments": [100, 1000, 1001],
+            "evaluations": [],
+            "id": 200,
+            "info": {'foo': 'bar'},
+            "period": 1,
+            "turns": [100, 1000, 1001],
+            "working_hours": 10,
+            "year": 2020
+        }
+        sync._upstream_sync_class_instance(upstream, 200, self.class_, False)
+
+        new_instance = college.ClassInstance.objects.get(external_id=200)
+
+        self.assertEquals(new_instance.information, {'upstream': {'foo': 'bar'}})
+        self.assertEquals(new_instance.period, upstream['period'])
+        self.assertEquals(new_instance.year, upstream['year'])
+
+        turn_moved = college.Turn.objects.create(
+            class_instance=self.class_instance,
+            number=4,
+            turn_type=1,
+            external_id=1000)
+        turn_stays = college.Turn.objects.create(
+            class_instance=new_instance,
+            number=2,
+            turn_type=1,
+            external_id=1001)
+        turn_deleted = college.Turn.objects.create(
+            class_instance=new_instance,
+            number=3,
+            turn_type=1,
+            external_id=1002)
+        enrollment_moved = college.Enrollment.objects.create(
+            student=college.Student.objects.create(external_id=1000),
+            class_instance=self.class_instance,
+            external_id=1000)
+        enrollment_stays = college.Enrollment.objects.create(
+            student=college.Student.objects.create(external_id=1001),
+            class_instance=new_instance,
+            external_id=1001)
+        enrollment_deleted = college.Enrollment.objects.create(
+            student=college.Student.objects.create(external_id=1002),
+            class_instance=new_instance,
+            external_id=1002)
+
+        sync._upstream_sync_class_instance(upstream, 200, self.class_, False)
+
+        turn_moved.refresh_from_db()
+        turn_stays.refresh_from_db()
+        turn_deleted.refresh_from_db()
+        enrollment_moved.refresh_from_db()
+        enrollment_stays.refresh_from_db()
+        enrollment_deleted.refresh_from_db()
+
+        self.assertFalse(turn_moved.disappeared)
+        self.assertFalse(turn_stays.disappeared)
+        self.assertTrue(turn_deleted.disappeared)
+        self.assertFalse(enrollment_moved.disappeared)
+        self.assertFalse(enrollment_stays.disappeared)
+        self.assertTrue(enrollment_deleted.disappeared)
+        self.assertEquals(turn_moved.class_instance, self.class_instance)
+        self.assertEquals(turn_stays.class_instance, new_instance)
+        self.assertEquals(turn_deleted.class_instance, new_instance)
+        self.assertEquals(enrollment_moved.class_instance, self.class_instance)
+        self.assertEquals(enrollment_stays.class_instance, new_instance)
+        self.assertEquals(enrollment_deleted.class_instance, new_instance)
+
+        other_class = college.Class.objects.create(name="Random class", external_id=1010)
+
+        tweaked_upstream = upstream.copy()
+        tweaked_upstream["class_id"] = other_class.external_id  # Illegal
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        new_instance.refresh_from_db()
+        self.assertEquals(new_instance.parent, self.class_)  # Unchanged
+        tweaked_upstream["class_id"] = upstream["class_id"]  # Revert
+
+        tweaked_upstream["info"] = {'boo': 'far'}  # Legal
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        new_instance.refresh_from_db()
+        self.assertEquals(new_instance.information, {'upstream': {'boo': 'far'}})  # Changed
+
+        tweaked_upstream["period"] = 2  # Illegal
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        new_instance.refresh_from_db()
+        self.assertEquals(new_instance.period, 1)  # Unchanged
+        tweaked_upstream["period"] = upstream["period"]  # Revert
+
+        tweaked_upstream["year"] = 2021  # Illegal
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        new_instance.refresh_from_db()
+        self.assertEquals(new_instance.year, 2020)  # Unchanged
+        tweaked_upstream["year"] = upstream["year"]  # Revert
 
     # def test_disappearances(self):
     #     pass
