@@ -132,14 +132,13 @@ function setTheme(e) {
     }
 }
 
-function loadTheme() {
+function loadTheme(promptIfUnset) {
     if (typeof (Storage) !== "undefined") {
         let theme = localStorage.getItem("theme");
-        if (theme == null) {
-            showThemePicker();
-        } else {
+        if (theme != null)
             document.body.setAttribute("data-theme", theme);
-        }
+        else if (promptIfUnset)
+            showThemePicker();
     } else {
         console.log("O navegador está a bloquear o armazenamento.");
     }

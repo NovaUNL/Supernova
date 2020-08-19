@@ -1,5 +1,5 @@
 (function () {
-    loadTheme();
+    loadTheme(true);
     let glCount = document.getElementById('gitlab-count');
     if (glCount != null) {
         fetch("/api/stars/gitlab/")
