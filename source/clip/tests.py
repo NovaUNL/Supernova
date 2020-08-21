@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from college import models as college
+from college import choice_types as ctypes
 from clip import synchronization as sync
 
 
@@ -246,8 +247,84 @@ class SyncTest(TestCase):
         self.assertEquals(new_instance.year, 2020)  # Unchanged
         tweaked_upstream["year"] = upstream["year"]  # Revert
 
+    def test_turn_sync(self):
+        upstream = {
+            "class_instance_id": self.class_instance.external_id,
+            "id": 200,
+            "instances": [self.turn_instance.external_id, 2000],
+            "minutes": 60,
+            "number": 5,
+            "restrictions": "Foo Bar",
+            "state": "Aberto",
+            "students": [self.student.external_id, 2000],
+            "teachers": [self.teacher.external_id, 2000],
+            "type": "t",
+        }
+
+        sync._upstream_sync_turn_info(upstream, 200, self.class_instance, False)
+        new_turn = college.Turn.objects.get(external_id=200)
+        self.assertEquals(new_turn.class_instance, self.class_instance)
+        self.assertEquals(new_turn.number, upstream["number"])
+        self.assertEquals(new_turn.turn_type, ctypes.TurnType.THEORETICAL)
+        self.assertEquals(new_turn.instances.count(), 0)
+        self.assertEquals(new_turn.students.count(), 1)
+        self.assertEquals(new_turn.teachers.count(), 1)
+
+        teacher_stay = college.Teacher.objects.create(name="Dr. Bar", external_id=2000)
+        teacher_deleted = college.Teacher.objects.create(name="Dr. Baz", external_id=2001)
+        student_stay = college.Student.objects.create(external_id=2000)
+        student_deleted = college.Student.objects.create(external_id=2001)
+        instance_stay = college.TurnInstance.objects.create(
+            turn=new_turn,
+            weekday=2,
+            start=600,
+            external_id=2000)
+        instance_deleted = college.TurnInstance.objects.create(
+            turn=new_turn,
+            weekday=3,
+            start=600,
+            external_id=2001)
+
+        upstream["instances"] = [self.turn_instance.external_id, 2000, 2001]
+        upstream["students"] = [self.student.external_id, 2000, 2001]
+        upstream["teachers"] = [self.teacher.external_id, 2000, 2001]
+        sync._upstream_sync_turn_info(upstream, 200, self.class_instance, False)
+        instance_stay.refresh_from_db()
+        instance_deleted.refresh_from_db()
+
+        self.assertTrue(new_turn.teachers.filter(id=self.teacher.id).exists())
+        self.assertTrue(new_turn.teachers.filter(id=teacher_stay.id).exists())
+        self.assertTrue(new_turn.teachers.filter(id=teacher_deleted.id).exists())
+        self.assertTrue(college.TurnStudents.objects.filter(turn=new_turn, student=self.student.id).exists())
+        self.assertTrue(college.TurnStudents.objects.filter(turn=new_turn, student=self.student.id).exists())
+        self.assertEquals(instance_stay.turn, new_turn)
+        self.assertEquals(instance_deleted.turn, new_turn)
+
+        # Delete _deleted relations
+        upstream["instances"] = [self.turn_instance.external_id, 2000]
+        upstream["students"] = [self.student.external_id, 2000]
+        upstream["teachers"] = [self.teacher.external_id, 2000]
+        sync._upstream_sync_turn_info(upstream, 200, self.class_instance, False)
+        instance_stay.refresh_from_db()
+        instance_deleted.refresh_from_db()
+
+        self.assertTrue(new_turn.teachers.filter(id=teacher_stay.id).exists())
+        self.assertFalse(new_turn.teachers.filter(id=teacher_deleted.id).exists())
+        self.assertTrue(college.TurnStudents.objects.filter(turn=new_turn, student=student_stay).exists())
+        self.assertFalse(college.TurnStudents.objects.filter(turn=new_turn, student=student_deleted).exists())
+        self.assertEquals(instance_stay.turn, new_turn)
+        self.assertFalse(instance_stay.turn.disappeared)
+        self.assertEquals(instance_deleted.turn, new_turn)
+        self.assertTrue(instance_deleted.disappeared)
+
     # def test_disappearances(self):
     #     pass
     #
     # def test_freeze(self):
+    #     pass
+    #
+    # def test_interference_with_non_external(self):
+    #     pass
+    #
+    # def test_constraints(self):
     #     pass

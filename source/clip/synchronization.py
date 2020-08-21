@@ -507,9 +507,29 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
             external_update=make_aware(datetime.now()))
         logger.info(f"Turn {obj} created in {class_inst}")
 
-    # ---------  Related ---------
-    turn_instances = obj.instances.exclude(external_id=None).all()
-    _related(turn_instances, upstream['instances'], sync_turn_instance, m.Turn, recurse, turn=obj)
+    # # ---------  Related ---------
+    # turn_instances = obj.instances.exclude(external_id=None).all()
+    # _related(turn_instances, upstream['instances'], sync_turn_instance, m.Turn, recurse, turn=obj)
+
+    # ---------  Related turn instances ---------
+    instances = obj.instances.exclude(external_id=None).all()
+
+    new, disappeared, mirrored = _upstream_diff(set(instances), set(upstream['instances']))
+
+    if m.TurnInstance.objects.filter(external_id__in=new).exists():
+        logger.critical(f"Some instances of turn {obj} belong to another turn: {new}")
+
+    if recurse:
+        for ext_id in new:
+            sync_turn_instance(ext_id, turn=obj)
+
+    m.TurnInstance.objects.filter(external_id__in=mirrored). \
+        update(disappeared=False, external_update=make_aware(datetime.now()))
+    m.TurnInstance.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.TurnInstance.objects.filter(external_id__in=disappeared)
+    for instances in disappeared.all():
+        logger.warning(f"{instances} removed from {obj}.")
+
     # ---------  Related M2M ---------
     current_students = m.Student.objects.filter(turn=obj).exclude(disappeared=True)
     new, disappeared, _ = _upstream_diff(current_students, set(upstream['students']))
