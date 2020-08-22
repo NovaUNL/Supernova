@@ -4,9 +4,19 @@ Requirements
 ------------
 In order to get a Supernova instance running, one has a few requirements:
 
-- Docker installed
 - 2-3GB of **spare** RAM
 - Possibly a Linux host (TODO: confirm this)
+
+Dependencies
+------------
+It's recommended you install these from the package manager for your system.
+
+- `python3 <https://www.python.org/downloads/>`_
+- `pip <https://pip.pypa.io/en/stable/installing/>`_
+- `docker <https://docs.docker.com/get-docker/>`_
+- `docker compose <https://docs.docker.com/compose/install/>`_
+- `sass <https://sass-lang.com/install>`_
+- `GDAL <https://gdal.org/>`_
 
 It is expected from you to have some knowledge of Python and to know how to use a command prompt.
 A vague idea about Docker would also come handy, although it is not that needed.
@@ -82,37 +92,36 @@ After a few seconds you should be left with the following services running:
 The default user is ``supernova``, email ``admin@supernova`` and password ``changeme``.
 
 
-| While the CLIP data is read-only and unmanaged by Supernova,
-  you need to instantiate the CLIPy tables as they are expected to exist.
-| To create them fire up a python3 terminal inside the django container:
-
+8. Create a virtual environment and install the pip packages:
 ::
 
-  # docker exec -it sn_django bash
-  $ python3
+$ python3 -m venv ./venv
+$ ./venv/bin/pip install -r pip-packages
 
-You need to let the crawler taste the database. It will instantiate every missing table.
-
+9. Now you need to instruct Django to generate the database migrations for every app and apply them to the database.
 ::
 
-  from CLIPy import CacheStorage
-  storage = CacheStorage.postgresql('supernova', 'changeme', 'supernova')
+$ ./venv/bin/python ./source/manage.py makemigrations chat college documents exercises feedback groups news planet services store supernova synopses users
+$ ./venv/bin/python ./source/manage.py migrate
 
 
-| Close the python interpreter (``CTRL + c`` should do).
-| Now you need to tell Supernova to instantiate its tables.
-
+10. Create a user and add at least one catchphrase/slogan
 ::
 
-  python3 manage.py makemigrations
-  python3 manage.py migrate
+$ ./venv/bin/python ./source/manage.py createsuperuser
+$ ./venv/bin/python ./source/manage.py addcatchphrase "The awesome system"
 
-And finally, you need to create a user and add at least one catchphrase/slogan
 
+11. Compile the styles:
 ::
 
-  python3 manage.py createsuperuser
-  python3 manage.py addcatchphrase "The awesome system"
+$ sass ./source/static/sass/style.sass:./source/static/css/style.css
+
+
+12. And finally, run the server:
+::
+
+$ ./venv/bin/python ./source/manage.py runserver localhost:8000
 
 | By now Supernova is running.
 | Note that with the default settings Supernova is only accessible in the loopback network interface.
