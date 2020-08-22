@@ -8,7 +8,7 @@ services:
     environment:
       SN_CONFIG: /conf/settings-dev.json
     volumes:
-      - ./source:/source:ro
+      - ./source:/source
       - ./conf:/conf:ro
       - ./data/http:/http:rw
     restart: unless-stopped
@@ -38,7 +38,7 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - ./conf/postgres:/etc/postgresql:ro
-      - ./data/postgres:/var/lib/postgresql/data:rw
+      - postgres_data:/var/lib/postgresql/data:rw
     restart: unless-stopped
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
@@ -114,6 +114,8 @@ volumes:
   elastic_data:
     driver: local
   pgadmin_data:
+    driver: local
+  postgres_data:
     driver: local
 
 networks:

@@ -26,5 +26,18 @@
     "default": {
       "hosts": "elastic:9200"
     }
-  }
+  },
+    "CACHES": {
+    "default": {
+      "BACKEND": "django_redis.cache.RedisCache",
+      "LOCATION": "redis://127.0.0.1:6379/1",
+      "OPTIONS": {
+        "CLIENT_CLASS": "django_redis.client.DefaultClient"
+      }
+    }
+  },
+  "MATRIX_URL": "https://app.element.io/#/room/exampleroom:matrixserver.com",
+  "MASTODON_URL": "https://masto.pt/@example",
+  "GITLAB_URL": "https://gitlab.com/example",
+  "TELEGRAM_URL": "https://t.me/exampletelegram"
 }
