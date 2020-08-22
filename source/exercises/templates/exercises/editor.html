@@ -20,6 +20,7 @@
                 <div class="form-row-top">
                   <h3>Exercício</h3>
                 </div>
+                {{ form.content.errors }}
                 {{ form.content }}
               </div>
               <div class="form-row">
@@ -27,6 +28,7 @@
                   <h4>Fonte (Opcional)</h4>
                   {{ form.source }}
                 </div>
+                {{ form.source.errors }}
                 <div class="form-row-description">
                   Um descritivo da origem deste exercício.
                 </div>
@@ -36,6 +38,7 @@
                   <h4>Endreço fonte (Opcional)</h4>
                   {{ form.source_url }}
                 </div>
+                {{ form.source_url.errors }}
                 <div class="form-row-description">
                   O URL (público) da origem deste exercício.
                 </div>
@@ -45,6 +48,7 @@
                   <h4>Seccções</h4>
                   {{ form.synopses_sections }}
                 </div>
+                {{ form.source_url.errors }}
                 <div class="form-row-description">
                   As secções de sintese das quais este exercicio faz parte.
                 </div>
