@@ -68,8 +68,8 @@ class ExerciseForm(ModelForm):
         else:
             raise forms.ValidationError(f"Tipo de exercício desconhecido: '{exercise['type']}'")
 
-        if l := len(enunciation) < min_length:
-            raise forms.ValidationError(f"Enunciado demasiado curto: '{l}'")
+        if (l := len(enunciation)) < min_length:
+            raise forms.ValidationError(f"Enunciado demasiado curto. ({l} caráteres)")
 
         return True
 
