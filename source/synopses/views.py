@@ -6,11 +6,9 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from college.models import Class
+from college import models as college
 from supernova.views import build_base_context
 from synopses import forms as f
-from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
-    SectionLog, ClassSection, SectionSubsection
 from synopses import models as m
 from users.models import User
 
@@ -23,9 +21,9 @@ def areas_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_synops'
     context['title'] = 'Sínteses - Areas de estudo'
-    context['areas'] = Area.objects.prefetch_related('subareas').all()
+    context['areas'] = m.Area.objects.prefetch_related('subareas').all()
     context['classes'] = \
-        Class.objects \
+        college.Class.objects \
             .select_related('department') \
             .annotate(section_count=Count('synopsis_sections')) \
             .filter(section_count__gt=0) \
@@ -37,7 +35,7 @@ def areas_view(request):
 
 def area_view(request, area_id):
     area = get_object_or_404(
-        Area.objects,
+        m.Area.objects,
         id=area_id)
     subareas = area.subareas.annotate(topic_count=Count('topics'))
 
@@ -53,7 +51,7 @@ def area_view(request, area_id):
 
 def subarea_view(request, subarea_id):
     subarea = get_object_or_404(
-        Subarea.objects.select_related('area'),
+        m.Subarea.objects.select_related('area'),
         id=subarea_id)
     area = subarea.area
     sections = subarea.sections.annotate(children_count=Count('children'))
@@ -71,7 +69,7 @@ def subarea_view(request, subarea_id):
 
 @user_passes_test(can_edit)
 def subarea_create_view(request, area_id):
-    area = get_object_or_404(Area, id=area_id)
+    area = get_object_or_404(m.Area, id=area_id)
 
     if request.method == 'POST':
         form = f.SubareaForm(data=request.POST)
@@ -97,7 +95,7 @@ def subarea_create_view(request, area_id):
 
 @user_passes_test(can_edit)
 def subarea_edit_view(request, subarea_id):
-    subarea = get_object_or_404(Subarea, id=subarea_id)
+    subarea = get_object_or_404(m.Subarea, id=subarea_id)
     area = subarea.area
 
     if request.method == 'POST':
@@ -123,7 +121,7 @@ def subarea_edit_view(request, subarea_id):
 
 @user_passes_test(can_edit)
 def subarea_section_create_view(request, subarea_id):
-    subarea = get_object_or_404(Subarea, id=subarea_id)
+    subarea = get_object_or_404(m.Subarea, id=subarea_id)
     area = subarea.area
     if request.method == 'POST':
         form = f.SubareaSectionForm(data=request.POST)
@@ -159,15 +157,15 @@ def section_view(request, section_id):
     View where a section is displayed as an isolated object.
     """
     section = get_object_or_404(
-        Section.objects
+        m.Section.objects
             .select_related('subarea')
             .prefetch_related('class_sections'),
         id=section_id)
-    children = m.Section.objects\
-        .filter(parents_intermediary__parent=section)\
+    children = m.Section.objects \
+        .filter(parents_intermediary__parent=section) \
         .order_by('parents_intermediary__index').all()
-    parents = m.Section.objects\
-        .filter(children_intermediary__section=section)\
+    parents = m.Section.objects \
+        .filter(children_intermediary__section=section) \
         .order_by('children_intermediary__index').all()
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_section'
@@ -186,15 +184,15 @@ def subarea_section_view(request, subarea_id, section_id):
     """
     View where a section is displayed as direct child of a subarea.
     """
-    section = get_object_or_404(Section.objects.select_related('subarea__area'), id=section_id)
+    section = get_object_or_404(m.Section.objects.select_related('subarea__area'), id=section_id)
     subarea = section.subarea
     if subarea.id != subarea_id:
         raise Http404('Mismatched section')
-    children = m.Section.objects\
-        .filter(parents_intermediary__parent=section)\
+    children = m.Section.objects \
+        .filter(parents_intermediary__parent=section) \
         .order_by('parents_intermediary__index').all()
-    parents = m.Section.objects\
-        .filter(children_intermediary__section=section)\
+    parents = m.Section.objects \
+        .filter(children_intermediary__section=section) \
         .order_by('children_intermediary__index').all()
     area = subarea.area
     context = build_base_context(request)
@@ -216,13 +214,13 @@ def subsection_view(request, parent_id, child_id):
     View where a section is displayed as a part of another section.
     """
     context = build_base_context(request)
-    parent = get_object_or_404(Section, id=parent_id)
-    child = get_object_or_404(Section, id=child_id)
-    children = m.Section.objects\
-        .filter(parents_intermediary__parent=child)\
+    parent = get_object_or_404(m.Section, id=parent_id)
+    child = get_object_or_404(m.Section, id=child_id)
+    children = m.Section.objects \
+        .filter(parents_intermediary__parent=child) \
         .order_by('parents_intermediary__index').all()
-    parents = m.Section.objects\
-        .filter(children_intermediary__section=child)\
+    parents = m.Section.objects \
+        .filter(children_intermediary__section=child) \
         .order_by('children_intermediary__index').all()
     context['pcode'] = 'l_synopses_section'
     context['title'] = '%s - %s' % (child.name, parent.name)
@@ -239,13 +237,13 @@ def subsection_view(request, parent_id, child_id):
 
 @user_passes_test(can_edit)
 def subsection_create_view(request, section_id):
-    parent = get_object_or_404(Section, id=section_id)
+    parent = get_object_or_404(m.Section, id=section_id)
     if request.method == 'POST':
         form = f.SectionChildForm(data=request.POST)
         valid = form.is_valid()
         if valid:
             section = form.save()
-            SectionSubsection(section=section, parent=parent).save()
+            m.SectionSubsection(section=section, parent=parent).save()
             return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
     else:
         form = f.SectionChildForm()
@@ -265,7 +263,7 @@ def subsection_create_view(request, section_id):
 
 def d_topic_view(request, topic_id):
     context = build_base_context(request)
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(m.Topic, id=topic_id)
     subarea = topic.subarea
     area = subarea.area
     context['title'] = topic.name
@@ -282,10 +280,10 @@ def d_topic_view(request, topic_id):
 
 @user_passes_test(can_edit)
 def section_create_view(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+    topic = get_object_or_404(m.Topic, id=topic_id)
     # Choices (for the 'after' field) are at the topic start, or after any section other than this one
     choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.name),
-                                         Section.objects.filter(topic=topic)
+                                         m.Section.objects.filter(topic=topic)
                                          .order_by('sectiontopic__index').all()))
     if request.method == 'POST':
         section_form = f.SectionEditForm(data=request.POST)
@@ -297,12 +295,12 @@ def section_create_view(request, topic_id):
             if section_form.cleaned_data['after'] == 0:
                 index = 1
             else:
-                index = SectionTopic.objects.get(topic=topic, section_id=section_form.cleaned_data['after']).index + 1
+                index = m.SectionTopic.objects.get(topic=topic, section_id=section_form.cleaned_data['after']).index + 1
 
             # Avoid index collisions. If the wanted index is taken by some other section
-            if SectionTopic.objects.filter(topic=topic, index=index).exists():
+            if m.SectionTopic.objects.filter(topic=topic, index=index).exists():
                 # Then increment the index of every section with an index >= the desired one.
-                for entry in SectionTopic.objects.filter(topic=topic, index__gte=index) \
+                for entry in m.SectionTopic.objects.filter(topic=topic, index__gte=index) \
                         .order_by('index').reverse().all():
                     entry.index += 1
                     entry.save()
@@ -311,11 +309,11 @@ def section_create_view(request, topic_id):
             section = section_form.save()
 
             # Annex it to the topic where it was created
-            section_topic_rel = SectionTopic(topic=topic, section=section, index=index)
+            section_topic_rel = m.SectionTopic(topic=topic, section=section, index=index)
             section_topic_rel.save()
 
             # Create an empty log entry for the author to be identifiable
-            section_log = SectionLog(author=request.user, section=section)
+            section_log = m.SectionLog(author=request.user, section=section)
             section_log.save()
 
             # Process the sources subform
@@ -356,7 +354,7 @@ def section_create_view(request, topic_id):
 
 @user_passes_test(can_edit)
 def section_edit_view(request, section_id):
-    section = get_object_or_404(Section, id=section_id)
+    section = get_object_or_404(m.Section, id=section_id)
     if request.method == 'POST':
         section_form = f.SectionEditForm(data=request.POST, instance=section)
         sources_formset = f.SectionSourcesFormSet(
@@ -365,7 +363,7 @@ def section_edit_view(request, section_id):
         if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
             # If the section content changed then log the change to prevent vandalism and allow reversion.
             if section.content != section_form.cleaned_data['content']:
-                log = SectionLog(author=request.user, section=section, previous_content=section.content)
+                log = m.SectionLog(author=request.user, section=section, previous_content=section.content)
                 log.save()
             section = section_form.save(commit=False)
             section.save()
@@ -373,8 +371,8 @@ def section_edit_view(request, section_id):
             # Child-Parent M2M needs to be done this way due to the non-null index
             # PS: SectionSubsection's save is overridden
             for parent in section_form.cleaned_data['parents']:
-                if not SectionSubsection.objects.filter(section=section, parent=parent).exists():
-                    SectionSubsection(section=section, parent=parent).save()
+                if not m.SectionSubsection.objects.filter(section=section, parent=parent).exists():
+                    m.SectionSubsection(section=section, parent=parent).save()
 
             section_form.save_m2m()
 
@@ -422,11 +420,11 @@ def section_edit_view(request, section_id):
 
 def class_sections_view(request, class_id):
     context = build_base_context(request)
-    class_ = get_object_or_404(Class, id=class_id)
+    class_ = get_object_or_404(college.Class, id=class_id)
     context['pcode'] = 'l_synopses_class_section'
     context['title'] = "Sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sections'] = Section.objects.filter(class_sections__corresponding_class=class_).order_by(
+    context['sections'] = m.Section.objects.filter(class_sections__corresponding_class=class_).order_by(
         'class_sections__index')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
@@ -435,7 +433,7 @@ def class_sections_view(request, class_id):
 
 @user_passes_test(can_edit)
 def class_manage_sections_view(request, class_id):
-    class_ = get_object_or_404(Class, id=class_id)
+    class_ = get_object_or_404(college.Class, id=class_id)
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_manage_sections'
     context['title'] = "Editar secções na sintese de %s" % class_.name
@@ -447,11 +445,11 @@ def class_manage_sections_view(request, class_id):
 
 
 def class_section_view(request, class_id, section_id):
-    class_ = get_object_or_404(Class, id=class_id)
-    section = get_object_or_404(Section, id=section_id)
-    class_synopsis_section = ClassSection.objects.get(section=section, corresponding_class=class_)
+    class_ = get_object_or_404(college.Class, id=class_id)
+    section = get_object_or_404(m.Section, id=section_id)
+    class_synopsis_section = m.ClassSection.objects.get(section=section, corresponding_class=class_)
     # Get sections of this class, take the one indexed before and the one after.
-    related_sections = ClassSection.objects \
+    related_sections = m.ClassSection.objects \
         .filter(corresponding_class=class_).order_by('index')
     previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
     next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
@@ -476,7 +474,7 @@ def class_section_view(request, class_id, section_id):
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Area.objects.all()
+        qs = m.Area.objects.all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
         return qs
@@ -484,7 +482,7 @@ class AreaAutocomplete(autocomplete.Select2QuerySetView):
 
 class SubareaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Subarea.objects.all()
+        qs = m.Subarea.objects.all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
         return qs
@@ -492,7 +490,7 @@ class SubareaAutocomplete(autocomplete.Select2QuerySetView):
 
 class TopicAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Topic.objects.all()
+        qs = m.Topic.objects.all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
         return qs
@@ -500,7 +498,7 @@ class TopicAutocomplete(autocomplete.Select2QuerySetView):
 
 class SectionAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Section.objects.all()
+        qs = m.Section.objects.all()
         if self.q:
             qs = qs.filter(name__contains=self.q)
         return qs
