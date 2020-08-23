@@ -4,7 +4,6 @@ from datetime import datetime
 from django.conf import settings
 from django.db import models as djm
 from django.contrib.gis.db import models as gis
-from django.contrib.postgres import fields as pgm
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
@@ -29,6 +28,8 @@ class Importable(djm.Model):
     same_as = djm.ForeignKey('self', null=True, blank=True, on_delete=djm.SET_NULL)
     #: Flag telling that this object was possibly deleted yet it is unsure
     disappeared = djm.BooleanField(default=False)
+    #: Additional external data that doesn't otherwise fit the model
+    external_data = djm.JSONField(default=dict, blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -145,7 +146,7 @@ class Place(djm.Model):
     #: Building floor where it is located
     floor = djm.IntegerField(default=0)
     #: Whether it is unlocked to unidentified personnel.
-    unlocked = djm.NullBooleanField(null=True, default=None)
+    unlocked = djm.BooleanField(null=True, default=None)
     #: Geographic location of the place
     location = gis.PointField(geography=True, null=True, blank=True)
     #: List of features associated with this place (risk of explosion, special clothing, ...)
@@ -262,7 +263,7 @@ class ClassInstance(Importable):
     #: Enrolled students
     students = djm.ManyToManyField(Student, through='Enrollment')
     #: Misc information associated to this class
-    information = pgm.JSONField(encoder=DjangoJSONEncoder)
+    information = djm.JSONField(encoder=DjangoJSONEncoder)
 
     class Meta:
         unique_together = ['parent', 'period', 'year']

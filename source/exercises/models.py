@@ -1,7 +1,6 @@
 from functools import reduce
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.db import models as djm
 from markdownx.utils import markdownify
 
@@ -20,7 +19,7 @@ class Exercise(djm.Model):
     #: `{type:select, enunciation: "...", candidates:["...", ...], answerIndex:x}`
     #: | - Multiple subproblems (recursive)
     #: - `{type:group, enunciation: "...", subproblems: [object, ...]}`
-    content = JSONField()
+    content = djm.JSONField()
 
     #: The :py:class:`users.models.User` which uploaded this exercise
     author = djm.ForeignKey(
@@ -109,7 +108,7 @@ class UserExerciseLog:
     #: Attempt result
     status = djm.IntegerField(choices=CONCLUSION_CHOICES)
     #: (Optional) Given answer
-    given_answer = JSONField(null=True, blank=True)
+    given_answer = djm.JSONField(null=True, blank=True)
     #: Attempt datetime
     datetime = djm.DateTimeField(auto_now=True)
 
