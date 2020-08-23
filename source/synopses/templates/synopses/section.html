@@ -40,78 +40,64 @@
     </div>
     <div class="row padded nowrap">
       <div class="col grow">
-        {% if section.content %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Conteúdo</h2>
-            </div>
-            <div class="pane-content">
-              {{ section.content|safe }}
-            </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
           </div>
-        {% endif %}
-        {% if section.children.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
+          <div class="pane-content">
+            <h2>Conteúdo</h2>
+            {% if  section.content %}
+              {{ section.content|safe }}
+            {% else %}
+              Esta secção não tem conteúdo.
+            {% endif %}
+            {% if children|length > 0 %}
+              <hr>
               <h2>Subsecções</h2>
-            </div>
-            <div class="pane-content">
-              <ul>
-                {% for child in section.children.all %}
+              <ul class="content-list">
+                {% for child in children %}
                   <li>
                     <a href="{% url 'synopses:subsection' section.id child.id %}">{{ child.name }}</a>
                   </li>
                 {% endfor %}
               </ul>
-            </div>
+            {% endif %}
           </div>
-        {% endif %}
+        </div>
       </div>
-      <div class="col medium">
-        {% if section.requirements.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Requisitos</h2>
-            </div>
-            <div class="pane-content">
-              <ul>
-                {% for topic in section.topics.all %}
-                  <li>
-                    <a href="{% url 'synopses:topic' topic.id %}">
-                      {{ topic.name }}
-                    </a>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-        {% endif %}
+      <div class="col nogrow">
         <div class="flex-pane">
           <div class="pane-title bg-grad">
-            <h2>Parentes</h2>
+            <h2>Meta</h2>
           </div>
           <div class="pane-content">
-            <ul>
+            <h3>Parentes</h3>
+            <ul class="content-list">
               {% if section.subarea %}
                 <li>
                   <a href="{% url 'synopses:subarea' section.subarea.id %}">{{ section.subarea.name }}</a>
                 </li>
               {% endif %}
-              {% for parent in section.parents.all %}
+              {% for parent in parents %}
                 <li>
                   <a href="{% url 'synopses:section' parent.id %}">{{ parent.name }}</a>
                 </li>
               {% endfor %}
             </ul>
-          </div>
-        </div>
-        {% if section.resources.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Recursos</h2>
-            </div>
-            <div class="pane-content">
+            <h3>Requisitos</h3>
+            {% if requirements %}
               <ul>
+                {% for requirement in section.requirements.all %}
+                  <li>
+                    <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="indented">Sem requisitos conhecidos.</span>
+            {% endif %}
+            <h3>Recursos</h3>
+            {% if section.resources.exists %}
+              <ul class="content-list">
                 {% for resource in section.resources.all %}
                   <li>
                     {% if resource.webpage %}
@@ -122,16 +108,12 @@
                   </li>
                 {% endfor %}
               </ul>
-            </div>
-          </div>
-        {% endif %}
-        {% if section.class_sections.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Unidades curriculares</h2>
-            </div>
-            <div class="pane-content">
-              <ul>
+            {% else %}
+              <span class="indented">Sem recursos adicionais.</span>
+            {% endif %}
+            <h3>Unidades curriculares</h3>
+            {% if section.class_sections.exists %}
+              <ul class="content-list">
                 {% for class_section in section.class_sections.all %}
                   <li>
                     <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
@@ -140,29 +122,11 @@
                   </li>
                 {% endfor %}
               </ul>
-            </div>
-          </div>
-        {% endif %}
-        {% if author_log.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Autores</h2>
-            </div>
-            <div class="pane-content">
-              <ul>
-                {% for log in author_log %}
-                  <li><a href="{% url 'users:profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-        {% endif %}
-        {% if section.sources.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Fontes</h2>
-            </div>
-            <div class="pane-content">
+            {% else %}
+              <span class="indented">Sem unidades curriculares associadas.</span>
+            {% endif %}
+            <h3>Fontes</h3>
+            {% if section.sources.exist %}
               <ul>
                 {% for source in section.sources.all %}
                   <li>
@@ -174,9 +138,21 @@
                   </li>
                 {% endfor %}
               </ul>
-            </div>
+            {% else %}
+              <span class="indented">Sem fontes.</span>
+            {% endif %}
+            <h3>Autoria</h3>
+            {% if author_log.length > 1 %}
+              <ul class="content-list">
+                {% for log in author_log %}
+                  <li><a href="{% url 'users:profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="indented">Sem autores registados.</span>
+            {% endif %}
           </div>
-        {% endif %}
+        </div>
       </div>
     </div>
   </div>

@@ -2,7 +2,7 @@ from dal import autocomplete
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Count
 from django.forms import HiddenInput
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
@@ -11,6 +11,7 @@ from supernova.views import build_base_context
 from synopses import forms as f
 from synopses.models import Area, Subarea, Topic, Section, SectionTopic, \
     SectionLog, ClassSection, SectionSubsection
+from synopses import models as m
 from users.models import User
 
 
@@ -153,14 +154,55 @@ def subarea_section_create_view(request, subarea_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+def section_view(request, section_id):
+    """
+    View where a section is displayed as an isolated object.
+    """
+    section = get_object_or_404(
+        Section.objects
+            .select_related('subarea')
+            .prefetch_related('class_sections'),
+        id=section_id)
+    children = m.Section.objects\
+        .filter(parents_intermediary__parent=section)\
+        .order_by('parents_intermediary__index').all()
+    parents = m.Section.objects\
+        .filter(children_intermediary__section=section)\
+        .order_by('children_intermediary__index').all()
+    context = build_base_context(request)
+    context['pcode'] = 'l_synopses_section'
+    context['title'] = section.name
+    context['section'] = section
+    context['children'] = children
+    context['parents'] = parents
+    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': section.name, 'url': '#'}]
+    return render(request, 'synopses/section.html', context)
+
+
 def subarea_section_view(request, subarea_id, section_id):
-    subarea = get_object_or_404(Subarea, id=subarea_id)
+    """
+    View where a section is displayed as direct child of a subarea.
+    """
+    section = get_object_or_404(Section.objects.select_related('subarea__area'), id=section_id)
+    subarea = section.subarea
+    if subarea.id != subarea_id:
+        raise Http404('Mismatched section')
+    children = m.Section.objects\
+        .filter(parents_intermediary__parent=section)\
+        .order_by('parents_intermediary__index').all()
+    parents = m.Section.objects\
+        .filter(children_intermediary__section=section)\
+        .order_by('children_intermediary__index').all()
     area = subarea.area
-    section = get_object_or_404(Section, id=section_id)
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_section'
     context['title'] = '%s - %s' % (section.name, area.name)
     context['section'] = section
+    context['children'] = children
+    context['parents'] = parents
     context['author_log'] = section.sectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
@@ -169,26 +211,24 @@ def subarea_section_view(request, subarea_id, section_id):
     return render(request, 'synopses/section.html', context)
 
 
-def section_view(request, section_id):
-    section = get_object_or_404(Section, id=section_id)
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = section.name
-    context['section'] = section
-    context['author_log'] = section.sectionlog_set.distinct('author')
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': '...', 'url': '#'},
-                          {'name': section.name, 'url': '#'}]
-    return render(request, 'synopses/section.html', context)
-
-
 def subsection_view(request, parent_id, child_id):
+    """
+    View where a section is displayed as a part of another section.
+    """
     context = build_base_context(request)
     parent = get_object_or_404(Section, id=parent_id)
     child = get_object_or_404(Section, id=child_id)
+    children = m.Section.objects\
+        .filter(parents_intermediary__parent=child)\
+        .order_by('parents_intermediary__index').all()
+    parents = m.Section.objects\
+        .filter(children_intermediary__section=child)\
+        .order_by('children_intermediary__index').all()
     context['pcode'] = 'l_synopses_section'
     context['title'] = '%s - %s' % (child.name, parent.name)
     context['section'] = child
+    context['children'] = children
+    context['parents'] = parents
     context['author_log'] = child.sectionlog_set.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
