@@ -15,7 +15,6 @@ urlpatterns = [
     path('seccao/<int:section_id>/', views.section_view, name='section'),
     path('seccao/<int:parent_id>/subseccao/<int:child_id>/', views.subsection_view, name='subsection'),
     path('seccao/<int:section_id>/criar_seccao/', views.subsection_create_view, name='subsection_create'),
-    path('topico/<int:topic_id>/', views.d_topic_view, name='topic'),  # TODO delete
     path('cadeira/<int:class_id>/', views.class_sections_view, name='class'),
     path('cadeira/<int:class_id>/seccoes/', views.class_manage_sections_view, name='class_manage'),
     path('cadeira/<int:class_id>/<int:section_id>/', views.class_section_view, name='class_section'),
@@ -24,6 +23,5 @@ urlpatterns = [
     # Autocompletion helpers
     path('ac/area/', views.AreaAutocomplete.as_view(), name='area_ac'),
     path('ac/subarea/', views.SubareaAutocomplete.as_view(), name='subarea_ac'),
-    path('ac/topic/', views.TopicAutocomplete.as_view(), name='topic_ac'),
     path('ac/section/', views.SectionAutocomplete.as_view(), name='section_ac'),
 ]

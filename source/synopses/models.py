@@ -40,25 +40,16 @@ class Subarea(djm.Model):
         return self.name
 
 
-class Topic(djm.Model):  # TODO DELETE
-    name = djm.CharField(verbose_name='nome', max_length=128)
-    index = djm.IntegerField()
-    subarea = djm.ForeignKey(Subarea, on_delete=djm.PROTECT, verbose_name='subarea', related_name='topics')
-    sections = djm.ManyToManyField('Section', through='SectionTopic', verbose_name='topics')
-
-    class Meta:
-        ordering = ('name',)
-        unique_together = ('index', 'subarea')
-
-    def __str__(self):
-        return self.name
-
-
 class Section(djm.Model):
     name = djm.CharField(verbose_name='nome', max_length=128)
     content = RichTextUploadingField(null=True, blank=True, verbose_name='conteúdo', config_name='complex')
-    topics = djm.ManyToManyField(Topic, through='SectionTopic', verbose_name='secções')
-    subarea = djm.ForeignKey(Subarea, null=True, blank=True, on_delete=djm.PROTECT, verbose_name='subarea', related_name='sections')
+    subarea = djm.ForeignKey(
+        Subarea,
+        null=True,
+        blank=True,
+        on_delete=djm.PROTECT,
+        verbose_name='subarea',
+        related_name='sections')
     parents = djm.ManyToManyField(
         'self',
         through='SectionSubsection',
@@ -77,7 +68,7 @@ class Section(djm.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return f"({self.id}) {self.name}"
 
     def content_reduce(self):
         """
@@ -101,19 +92,6 @@ class ClassSection(djm.Model):
 
     def __str__(self):
         return f'{self.section} annexed to {self.corresponding_class}.'
-
-
-class SectionTopic(djm.Model):
-    section = djm.ForeignKey(Section, on_delete=djm.CASCADE)
-    topic = djm.ForeignKey(Topic, on_delete=djm.PROTECT)
-    index = djm.IntegerField()
-
-    class Meta:
-        ordering = ('topic', 'index',)
-        unique_together = [('section', 'topic'), ('index', 'topic')]
-
-    def __str__(self):
-        return f'{self.section} linked to {self.topic} ({self.index}).'
 
 
 class SectionSubsection(djm.Model):

@@ -5,9 +5,9 @@
 {% block head %}
   <style>
     {% if  area.img_url %}
-      .header-decorator:after {
-        background-image: url("{{ subarea.img_url}}");
-      }
+        .header-decorator:after {
+            background-image: url("{{ subarea.img_url}}");
+        }
     {% endif %}
   </style>
 {% endblock %}
@@ -38,18 +38,6 @@
             {% for section in sections %}
               <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.name }}</a>
                 <span class="highres">({{ section.children_count }} subsecções)</span>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Tópicos</h2></div>
-        <div class="pane-content">
-          <ul id="content-list">
-            {% for topic in subarea.topics.all|dictsort:"index" %}
-              <li><a href="{% url 'synopses:topic' topic.id %}">{{ topic.name }}</a>
-                ({{ topic.sections.count }} secções)
               </li>
             {% endfor %}
           </ul>

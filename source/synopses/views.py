@@ -37,7 +37,7 @@ def area_view(request, area_id):
     area = get_object_or_404(
         m.Area.objects,
         id=area_id)
-    subareas = area.subareas.annotate(topic_count=Count('topics'))
+    subareas = area.subareas.annotate(section_count=Count('sections'))
 
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_area'
@@ -261,30 +261,13 @@ def subsection_create_view(request, section_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-def d_topic_view(request, topic_id):
-    context = build_base_context(request)
-    topic = get_object_or_404(m.Topic, id=topic_id)
-    subarea = topic.subarea
-    area = subarea.area
-    context['title'] = topic.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
-    context['sections'] = topic.sections.order_by('sectiontopic__index').all()
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])}]
-    return render(request, 'synopses/topic.html', context)
-
-
 @user_passes_test(can_edit)
-def section_create_view(request, topic_id):
-    topic = get_object_or_404(m.Topic, id=topic_id)
-    # Choices (for the 'after' field) are at the topic start, or after any section other than this one
+def section_create_view(request, parent_id):
+    parent = get_object_or_404(m.Section, id=parent_id)
+    # Choices (for the 'after' field) are at the parent start, or after any section other than this one
     choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.name),
-                                         m.Section.objects.filter(topic=topic)
-                                         .order_by('sectiontopic__index').all()))
+                                         m.Section.objects.filter(parents_intermediary__parent=parent)
+                                         .order_by('parents_intermediary__index').all()))
     if request.method == 'POST':
         section_form = f.SectionEditForm(data=request.POST)
         section_form.fields['after'].choices = choices
@@ -295,12 +278,14 @@ def section_create_view(request, topic_id):
             if section_form.cleaned_data['after'] == 0:
                 index = 1
             else:
-                index = m.SectionTopic.objects.get(topic=topic, section_id=section_form.cleaned_data['after']).index + 1
+                index = m.SectionSubsection.objects.get(parent=parent,
+                                                        section_id=section_form.cleaned_data['after']).index + 1
 
             # Avoid index collisions. If the wanted index is taken by some other section
-            if m.SectionTopic.objects.filter(topic=topic, index=index).exists():
+            if m.SectionSubsection.objects.filter(parent=parent, index=index).exists():
                 # Then increment the index of every section with an index >= the desired one.
-                for entry in m.SectionTopic.objects.filter(topic=topic, index__gte=index) \
+                # TODO do this at once with an .update + F-expression (?)
+                for entry in m.SectionSubsection.objects.filter(parent=parent, index__gte=index) \
                         .order_by('index').reverse().all():
                     entry.index += 1
                     entry.save()
@@ -308,9 +293,9 @@ def section_create_view(request, topic_id):
             # Save the new section
             section = section_form.save()
 
-            # Annex it to the topic where it was created
-            section_topic_rel = m.SectionTopic(topic=topic, section=section, index=index)
-            section_topic_rel.save()
+            # Annex it to the parent section in the correct index
+            section_parent_rel = m.SectionSubsection(parent=parent, section=section, index=index)
+            section_parent_rel.save()
 
             # Create an empty log entry for the author to be identifiable
             section_log = m.SectionLog(author=request.user, section=section)
@@ -323,7 +308,7 @@ def section_create_view(request, topic_id):
                 source.save()
 
             # Redirect to the newly created section
-            return HttpResponseRedirect(reverse('synopses:topic_section', args=[topic_id, section.id]))
+            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent_id, section.id]))
     else:
         # This is a request for the creation form. Fill the possible choices
         section_form = f.SectionEditForm(initial={'after': choices[-1][0]})
@@ -331,24 +316,21 @@ def section_create_view(request, topic_id):
         sources_formset = f.SectionSourcesFormSet(prefix="sources")
         resources_formset = f.SectionResourcesFormSet(prefix="resources")
 
-    subarea = topic.subarea
+    subarea = parent.subarea
     area = subarea.area
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar nova entrada em %s' % topic.name
-    context['area'] = area
-    context['subarea'] = subarea
-    context['topic'] = topic
+    context['title'] = 'Criar nova entrada em %s' % parent.name
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['resources_formset'] = resources_formset
-    context['action_page'] = reverse('synopses:section_create', args=[topic_id])
+    context['action_page'] = reverse('synopses:section_create', args=[parent_id])
     context['action_name'] = 'Criar'
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.name, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.name, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': topic.name, 'url': reverse('synopses:topic', args=[topic_id])},
-                          {'name': 'Criar entrada'}]
+                          {'name': parent.name, 'url': reverse('synopses:section', args=[parent_id])},
+                          {'name': 'Criar secção'}]
     return render(request, 'synopses/generic_form.html', context)
 
 
@@ -483,14 +465,6 @@ class AreaAutocomplete(autocomplete.Select2QuerySetView):
 class SubareaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Subarea.objects.all()
-        if self.q:
-            qs = qs.filter(name__istartswith=self.q)
-        return qs
-
-
-class TopicAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = m.Topic.objects.all()
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
         return qs
