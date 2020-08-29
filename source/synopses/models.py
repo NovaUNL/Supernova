@@ -41,8 +41,14 @@ class Subarea(djm.Model):
 
 
 class Section(djm.Model):
+    """
+    A synopsis section, belonging either directly or indirectly to some topic.
+    """
+    #: The title of the section
     name = djm.CharField(verbose_name='nome', max_length=128)
+    #: The CKEditor-written content (legacy format)
     content = RichTextUploadingField(null=True, blank=True, verbose_name='conteúdo', config_name='complex')
+    #: Subareas where this section directly fits in
     subarea = djm.ForeignKey(
         Subarea,
         null=True,
@@ -50,6 +56,7 @@ class Section(djm.Model):
         on_delete=djm.PROTECT,
         verbose_name='subarea',
         related_name='sections')
+    #: Sections that have this section as a subsection
     parents = djm.ManyToManyField(
         'self',
         through='SectionSubsection',
@@ -57,12 +64,15 @@ class Section(djm.Model):
         blank=True,
         related_name='children',
         verbose_name='parents')
+    #: Sections that reference this section as a requirement (dependants)
     requirements = djm.ManyToManyField(
         'self',
         blank=True,
         related_name='required_by',
         verbose_name='requisitos',
         symmetrical=False)
+    #: Whether this section has been validated as correct by a teacher
+    validated = djm.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)
