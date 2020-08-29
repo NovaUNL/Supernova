@@ -57,6 +57,19 @@ class User(AbstractUser):
     def about_html(self):
         return markdownify(self.about)
 
+    def updated_cached(self):
+        changed = False
+        is_student = self.students.exists()
+        if self.is_student != is_student:
+            self.is_student = is_student
+            changed = True
+        is_teacher = self.teachers.exists()
+        if self.is_teacher != is_teacher:
+            self.is_teacher = is_teacher
+            changed = True
+        if changed:
+            self.save()
+
     class Meta:
         permissions = [('full_student_access', 'Can browse the system as if it was the university one')]
 
