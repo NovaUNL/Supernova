@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
   <style>
     {% if  area.img_url %}
         .header-decorator:after {
@@ -28,13 +29,12 @@
     </div>
     <div class="col padded">
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Descrição</h2></div>
-        <div class="pane-content">{{ subarea.description|safe }}</div>
-      </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Secções</h2></div>
+        <div class="pane-title bg-grad"></div>
         <div class="pane-content">
-          <ul id="content-list">
+          <h2>Descrição</h2>
+          {{ subarea.description|safe }}
+          <h2>Secções</h2>
+          <ul class="content-list">
             {% for section in sections %}
               <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.name }}</a>
                 <span class="highres">({{ section.children_count }} subsecções)</span>
