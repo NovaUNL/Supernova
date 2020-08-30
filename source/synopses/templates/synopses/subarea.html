@@ -23,7 +23,7 @@
         </ul>
       </div>
       <div>
-        <h1>{{ subarea.name }}</h1>
+        <h1>{{ subarea.title }}</h1>
         <h3><a href="{% url 'synopses:area' area.id %}">{{ area }}</a></h3>
       </div>
     </div>
@@ -36,7 +36,7 @@
           <h2>Secções</h2>
           <ul class="content-list">
             {% for section in sections %}
-              <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.name }}</a>
+              <li><a href="{% url 'synopses:subarea_section' subarea.id section.id %}">{{ section.title }}</a>
                 <span class="highres">({{ section.children_count }} subsecções)</span>
               </li>
             {% endfor %}

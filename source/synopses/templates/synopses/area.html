@@ -26,7 +26,7 @@
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
-      <h1>{{ area.name }}</h1>
+      <h1>{{ area.title }}</h1>
     </div>
     <div class="col padded">
       <div class="flex-pane">
@@ -40,7 +40,7 @@
                 {% else %}
                   <div class="flex-grid-item">
                 {% endif %}
-                <span class="flex-grid-item-top">{{ subarea.name }}</span>
+                <span class="flex-grid-item-top">{{ subarea.title }}</span>
                 <span class="flex-grid-item-bottom">{{ subarea.section_count }} secções(s)</span>
                 </div>
               </a>

@@ -29,13 +29,9 @@
         </ul>
       </div>
       <div>
-        <h1>{{ section.name }}</h1>
+        <h1>{{ section.title }}</h1>
         {% if synopsis_class %}
           <h3><a href="{% url 'synopses:class' synopsis_class.id %}">Síntese de {{ synopsis_class.name }}</a></h3>
-        {% else %}
-          {% if topic %}
-            <h3>{{ topic.name }}, {{ subarea.name }}, {{ area.name }}</h3>
-          {% endif %}
         {% endif %}
       </div>
     </div>
@@ -57,7 +53,7 @@
               <ul class="content-list">
                 {% for child in children %}
                   <li>
-                    <a href="{% url 'synopses:subsection' section.id child.id %}">{{ child.name }}</a>
+                    <a href="{% url 'synopses:subsection' section.id child.id %}">{{ child.title }}</a>
                   </li>
                 {% endfor %}
               </ul>
@@ -75,12 +71,12 @@
             <ul class="content-list">
               {% if section.subarea %}
                 <li>
-                  <a href="{% url 'synopses:subarea' section.subarea.id %}">{{ section.subarea.name }}</a>
+                  <a href="{% url 'synopses:subarea' section.subarea.id %}">{{ section.subarea.title }}</a>
                 </li>
               {% endif %}
               {% for parent in parents %}
                 <li>
-                  <a href="{% url 'synopses:section' parent.id %}">{{ parent.name }}</a>
+                  <a href="{% url 'synopses:section' parent.id %}">{{ parent.title }}</a>
                 </li>
               {% endfor %}
             </ul>
@@ -89,7 +85,7 @@
               <ul>
                 {% for requirement in section.requirements.all %}
                   <li>
-                    <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.name }}</a>
+                    <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.title }}</a>
                   </li>
                 {% endfor %}
               </ul>
@@ -102,9 +98,9 @@
                 {% for resource in section.resources.all %}
                   <li>
                     {% if resource.webpage %}
-                      <a href="{{ resource.webpage }}">{{ resource.name }}</a>
+                      <a href="{{ resource.webpage }}">{{ resource.title }}</a>
                     {% elif resource.document %}
-                      <a href="{% url 'document' resource.document.id %}">{{ resource.name }}</a>
+                      <a href="{% url 'document' resource.document.id %}">{{ resource.title }}</a>
                     {% endif %}
                   </li>
                 {% endfor %}

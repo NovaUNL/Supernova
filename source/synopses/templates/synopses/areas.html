@@ -8,8 +8,6 @@
 
 {% block content_wrapper %}
   <div class="col padded">
-  <b style="color: red">O conteúdo atual é ilustrativo.
-    Não foi verificado por professores e muito possivelmente está errado.</b>
     <div class="flex-pane">
       <div class="pane-title bg-grad">
         <h2>Areas de estudo</h2>
@@ -19,12 +17,11 @@
           {% for area in areas %}
             <a href="{% url 'synopses:area' area.id %}">
               {% if area.img_url %}
-                <div class="flex-grid-item"
-                     style="background-image:url({{ area.img_url }}); background-size:cover">
+                <div class="flex-grid-item" style="background-image:url({{ area.img_url }}); background-size:cover">
               {% else %}
                 <div class="flex-grid-item">
               {% endif %}
-              <span class="flex-grid-item-top">{{ area.name }}</span>
+              <span class="flex-grid-item-top">{{ area.title }}</span>
               <span class="flex-grid-item-bottom">{{ area.subareas.count }} categoria(s)</span>
               </div>
             </a>

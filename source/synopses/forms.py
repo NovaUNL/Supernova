@@ -20,17 +20,16 @@ class SubareaForm(djf.ModelForm):
         model = synopsis.Subarea
         fields = '__all__'
         widgets = {
-            'name': djf.TextInput(),
-            'area': autocomplete.ModelSelect2(url='synopses:area_ac')
-        }
+            'title': djf.TextInput(),
+            'area': autocomplete.ModelSelect2(url='synopses:area_ac')}
 
 
 class SubareaSectionForm(djf.ModelForm):
     class Meta:
         model = synopsis.Section
-        fields = ('name', 'content', 'subarea', 'requirements')
+        fields = ('title', 'content_ck', 'subarea', 'requirements')
         widgets = {
-            'name': djf.TextInput(),
+            'title': djf.TextInput(),
             'subarea': djf.HiddenInput(),
             'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
 
@@ -38,19 +37,18 @@ class SubareaSectionForm(djf.ModelForm):
 class SectionChildForm(djf.ModelForm):
     class Meta:
         model = synopsis.Section
-        fields = ('name', 'content', 'requirements')
+        fields = ('title', 'content_ck', 'requirements')
         widgets = {
-            'name': djf.TextInput(),
+            'title': djf.TextInput(),
             'requirements': autocomplete.Select2Multiple(url='synopses:section_ac')}
 
 
 class SectionEditForm(djf.ModelForm):
-
     class Meta:
         model = synopsis.Section
-        fields = ('name', 'content', 'subarea', 'parents', 'requirements')
+        fields = ('title', 'content_ck', 'subarea', 'parents', 'requirements')
         widgets = {
-            'name': djf.TextInput(),
+            'title': djf.TextInput(),
             'subarea': autocomplete.ModelSelect2(url='synopses:subarea_ac'),
             'requirements': autocomplete.Select2Multiple(url='synopses:section_ac'),
             'parents': autocomplete.Select2Multiple(url='synopses:section_ac')}
@@ -90,14 +88,14 @@ SectionSourcesFormSet = djf.inlineformset_factory(synopsis.Section, synopsis.Sec
 
 
 class SectionResourceForm(djf.ModelForm):
-    name = djf.CharField(label='Nome')
+    title = djf.CharField(label='Título')
     resource_type = djf.ChoiceField(choices=((None, ''), (1, 'Página'), (2, 'Documento')), initial=None)
     webpage = djf.URLField(required=False)
     document = djf.ModelChoiceField(queryset=documents.Document.objects.all(), required=False)  # TODO select2
 
     class Meta:
         model = synopsis.SectionResource
-        fields = ('name', 'webpage', 'document')
+        fields = ('title', 'webpage', 'document')
 
     def clean_resource_type(self):
         try:
