@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.db import models as djm
 from ckeditor_uploader.fields import RichTextUploadingField
+from django.urls import reverse
 from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 from polymorphic.models import PolymorphicModel
 
 from college import models as college
@@ -97,6 +99,12 @@ class Section(djm.Model):
     def __str__(self):
         return f"({self.id}) {self.title}"
 
+    @property
+    def content(self):
+        if self.content_md:
+            return markdownify(self.content_md)
+        return self.content_ck
+
     def content_reduce(self):
         """
         Detects the absence of content and nullifies the field in that case.
@@ -170,32 +178,62 @@ class SectionLog(djm.Model):
         return f'{self.author} edited {self.section} @ {self.timestamp}.'
 
 
+class SectionSource(djm.Model):
+    """
+    Sources the content that a :py:class:`synopses.models.Section` presents.
+    """
+    #: :py:class:`synopses.models.Section` which references this source
+    section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='sources')
+    #: Verbose title for this resource
+    title = djm.CharField(max_length=256, null=True, blank=True)
+    #: Location containing the referenced source
+    url = djm.URLField(blank=True, null=True, verbose_name='endreço')
+
+    class Meta:
+        ordering = ('section', 'title', 'url')
+        unique_together = [('section', 'url'), ]
+
+
 class SectionResource(PolymorphicModel):
     """
-    An external resource that is referenced by a section
+    A resource that is referenced by a :py:class:`synopses.models.Section`.
+    Resources are aids aimed at easing the learning experience.
     """
     #: :py:class:`synopses.models.Section` which references this resource
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='resources')
     #: Verbose title for this resource
     title = djm.CharField(max_length=256, null=True, blank=True)
 
+    @property
+    def template_title(self):
+        return "Sem título" if self.title is None else self.title
+
+    @property
+    def template_url(self):
+        return None
+
 
 class SectionDocumentResource(SectionResource):
     #: Resource :py:class:`documents.models.Document`
-    document = djm.ForeignKey(documents.Document, null=True, blank=True, on_delete=djm.PROTECT)
+    document = djm.ForeignKey(documents.Document, on_delete=djm.PROTECT)
+
+    @property
+    def template_title(self):
+        return self.document.title if self.title is None else self.title
+
+    @property
+    def template_url(self):
+        return reverse('college:department', args=[self.document.id])
 
 
 class SectionWebResource(SectionResource):
-    """
-    Resources are aids aimed at easing the learning experience.
-    """
     #: Resource location
-    url = djm.URLField(null=True, blank=True)
+    url = djm.URLField()
 
+    @property
+    def template_title(self):
+        return self.url if self.title is None else self.title
 
-class SectionSource(SectionResource):
-    """
-    Sources attribute content
-    """
-    #: Location containing the referenced source
-    url = djm.URLField(blank=True, null=True, verbose_name='endreço')
+    @property
+    def template_url(self):
+        return self.url

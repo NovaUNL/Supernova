@@ -34,7 +34,11 @@ class Exercise(djm.Model):
     #: Optional URL of the origin
     source_url = djm.URLField(null=True, blank=True, verbose_name='endreço')
     #: :py:class:`synopses.models.Section` for which this exercise makes sense (m2m)
-    synopses_sections = djm.ManyToManyField(Section, blank=True, verbose_name='secções de sínteses')
+    synopses_sections = djm.ManyToManyField(
+        Section,
+        blank=True,
+        verbose_name='secções de sínteses',
+        related_name='exercises')
 
     #: Time this exercise was successfully solved (should be redundant and act as cache)
     successes = djm.IntegerField(default=0)
@@ -44,7 +48,6 @@ class Exercise(djm.Model):
     skips = djm.IntegerField(default=0)
 
     def count_problems(self):
-        print(Exercise._count_problems(self.content))
         return Exercise._count_problems(self.content)
 
     @staticmethod
