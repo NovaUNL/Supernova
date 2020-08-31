@@ -341,8 +341,14 @@ def section_edit_view(request, section_id):
         section_form = f.SectionEditForm(data=request.POST, instance=section)
         sources_formset = f.SectionSourcesFormSet(
             request.POST, instance=section, prefix="sources", queryset=section.sources.all())
-        resources_formset = f.SectionResourcesFormSet(request.POST, instance=section, prefix="resources")
-        if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
+        web_resources_formset = f.SectionWebpageResourcesFormSet(
+            request.POST, instance=section, prefix="wp_resources")
+        doc_resources_formset = f.SectionDocumentResourcesFormSet(
+            request.POST, instance=section, prefix="doc_resources")
+        if section_form.is_valid() \
+                and sources_formset.is_valid() \
+                and web_resources_formset.is_valid() \
+                and doc_resources_formset.is_valid():
             # If the section content changed then log the change to prevent vandalism and allow reversion.
             if section.content != section_form.cleaned_data['content']:
                 log = m.SectionLog(author=request.user, section=section, previous_content=section.content)
@@ -358,31 +364,24 @@ def section_edit_view(request, section_id):
 
             section_form.save_m2m()
 
-            # Process the sources subform
-            sources = sources_formset.save()
-            # Delete any tagged object
-            for source in sources_formset.deleted_objects:
-                source.delete()
-            # Add new objects
-            for source in sources:
-                source.section = section
-                source.save()
-
-            # Process the resources subform
-            resources = resources_formset.save()
-            # Delete any tagged object
-            for resource in resources_formset.deleted_objects:
-                resource.delete()
-            # Add new objects
-            for resource in resources:
-                resource.save()
+            for formset in (sources_formset, doc_resources_formset, web_resources_formset):
+                # Process the subform
+                result = formset.save()
+                # Delete any tagged object
+                # for resource in result.deleted_objects:
+                #     resource.delete()
+                # Add new objects (is this needed?)
+                # for resource in result:
+                # resource.section = section
+                # resource.save()
 
             # Redirect user to the updated section
             return HttpResponseRedirect(reverse('synopses:section', args=[section.id]))
     else:
         section_form = f.SectionEditForm(instance=section)
         sources_formset = f.SectionSourcesFormSet(instance=section, prefix="sources")
-        resources_formset = f.SectionResourcesFormSet(instance=section, prefix="resources")
+        web_resources_formset = f.SectionWebpageResourcesFormSet(instance=section, prefix="wp_resources")
+        doc_resources_formset = f.SectionDocumentResourcesFormSet(instance=section, prefix="doc_resources")
 
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_section'
@@ -390,7 +389,8 @@ def section_edit_view(request, section_id):
     context['section'] = section
     context['form'] = section_form
     context['sources_formset'] = sources_formset
-    context['resources_formset'] = resources_formset
+    context['web_resources_formset'] = web_resources_formset
+    context['doc_resources_formset'] = doc_resources_formset
     context['action_page'] = reverse('synopses:section_edit', args=[section_id])
     context['action_name'] = 'Editar'
 

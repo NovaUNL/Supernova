@@ -73,48 +73,50 @@ class ClassSectionForm(djf.ModelForm):
 
 
 class SectionSourceForm(djf.ModelForm):
-    url = djf.URLField(widget=djf.URLInput(attrs={'placeholder': 'Endreço (opcional)'}), required=False)
-
     class Meta:
         model = synopsis.SectionSource
         fields = ('title', 'url')
         widgets = {
-            'title': djf.TextInput(attrs={'placeholder': 'Nome da fonte'})
+            'title': djf.TextInput(attrs={'placeholder': 'Nome da fonte*'}),
+            'url': djf.URLInput(attrs={'placeholder': 'URL*'}),
         }
 
 
-SectionSourcesFormSet = djf.inlineformset_factory(synopsis.Section, synopsis.SectionSource,
-                                                  form=SectionSourceForm, extra=3)
+class SectionWebpageResourceForm(djf.ModelForm):
+    class Meta:
+        model = synopsis.SectionWebResource
+        fields = ('title', 'url')
+        widgets = {
+            'title': djf.TextInput(attrs={'placeholder': 'Descritivo*'}),
+            'url': djf.URLInput(attrs={'placeholder': 'URL'}),
+        }
 
 
-class SectionResourceForm(djf.ModelForm):
-    title = djf.CharField(label='Título')
-    resource_type = djf.ChoiceField(choices=((None, ''), (1, 'Página'), (2, 'Documento')), initial=None)
-    webpage = djf.URLField(required=False)
-    document = djf.ModelChoiceField(queryset=documents.Document.objects.all(), required=False)  # TODO select2
+class SectionDocumentResourceForm(djf.ModelForm):
+    # document = djf.ModelChoiceField(queryset=documents.Document.objects.all(), required=False)  # TODO select2
 
     class Meta:
-        model = synopsis.SectionResource
-        fields = ('title', 'webpage', 'document')
-
-    def clean_resource_type(self):
-        try:
-            return int(self.cleaned_data['resource_type'])
-        except ValueError:
-            raise dje.ValidationError("Tipo de documento inválido")
-
-    def clean_webpage(self):
-        webpage = self.cleaned_data['webpage'].strip()
-        return None if webpage == '' else webpage
-
-    def clean(self):
-        data = super().clean()
-        resource_type = data.get('resource_type')
-        if resource_type == 1 and self.cleaned_data['webpage'] is None:
-            self.add_error('webpage', 'Link em falta')
-        elif resource_type == 2 and self.cleaned_data['document'] is None:
-            self.add_error('webpage', 'Documento por escolher.')
+        model = synopsis.SectionDocumentResource
+        fields = ('title', 'document')
+        widgets = {
+            'title': djf.TextInput(attrs={'placeholder': 'Descritivo*'})
+        }
 
 
-SectionResourcesFormSet = djf.inlineformset_factory(synopsis.Section, synopsis.SectionResource,
-                                                    form=SectionResourceForm, extra=3)
+SectionDocumentResourcesFormSet = djf.inlineformset_factory(
+    synopsis.Section,
+    synopsis.SectionDocumentResource,
+    form=SectionDocumentResourceForm,
+    extra=3)
+
+SectionWebpageResourcesFormSet = djf.inlineformset_factory(
+    synopsis.Section,
+    synopsis.SectionWebResource,
+    form=SectionWebpageResourceForm,
+    extra=3)
+
+SectionSourcesFormSet = djf.inlineformset_factory(
+    synopsis.Section,
+    synopsis.SectionSource,
+    form=SectionSourceForm,
+    extra=3)

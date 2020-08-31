@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models as djm
 from ckeditor_uploader.fields import RichTextUploadingField
 from markdownx.models import MarkdownxField
+from polymorphic.models import PolymorphicModel
 
 from college import models as college
 from documents import models as documents
@@ -37,7 +38,7 @@ class Subarea(djm.Model):
     A category inside a field of knowledge (area)
     """
     #: This subarea's title
-    title = djm.CharField(max_length=128)
+    title = djm.CharField(max_length=256)
     #: An image that illustrates the area
     description = djm.TextField(max_length=1024, verbose_name='descrição')
     #: The :py:class:`synopses.models.Area` that owns this subarea
@@ -59,7 +60,7 @@ class Section(djm.Model):
     Sections form a knowledge graph.
     """
     #: The title of the section
-    title = djm.CharField(max_length=128)
+    title = djm.CharField(max_length=256)
     #: The markdown content
     content_md = MarkdownxField(null=True, blank=True)
     #: The CKEditor-written content (legacy format)
@@ -161,30 +162,32 @@ class SectionLog(djm.Model):
         return f'{self.author} edited {self.section} @ {self.timestamp}.'
 
 
-class SectionSource(djm.Model):
-    """
-    A source that is referenced by a section
-    """
-    #: :py:class:`synopses.models.Section` which references this source
-    section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='sources')
-    #: Verbose title for this source
-    title = djm.CharField(max_length=300, verbose_name='título')
-    #: Webpage containing the referenced source
-    url = djm.URLField(blank=True, null=True, verbose_name='endreço')
-
-    class Meta:
-        unique_together = (('section', 'title'), ('section', 'url'))
-
-
-class SectionResource(djm.Model):
+class SectionResource(PolymorphicModel):
     """
     An external resource that is referenced by a section
     """
     #: :py:class:`synopses.models.Section` which references this resource
     section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='resources')
     #: Verbose title for this resource
-    title = djm.CharField(max_length=256)
+    title = djm.CharField(max_length=256, null=True, blank=True)
+
+
+class SectionDocumentResource(SectionResource):
     #: Resource :py:class:`documents.models.Document`
     document = djm.ForeignKey(documents.Document, null=True, blank=True, on_delete=djm.PROTECT)
-    #: Resource webpage
-    webpage = djm.URLField(null=True, blank=True)
+
+
+class SectionWebResource(SectionResource):
+    """
+    Resources are aids aimed at easing the learning experience.
+    """
+    #: Resource location
+    url = djm.URLField(null=True, blank=True)
+
+
+class SectionSource(SectionResource):
+    """
+    Sources attribute content
+    """
+    #: Location containing the referenced source
+    url = djm.URLField(blank=True, null=True, verbose_name='endreço')
