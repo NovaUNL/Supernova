@@ -11,6 +11,33 @@
   <script src="{% static 'synopses/list_manager.js' %}" type="text/javascript" rel="stylesheet"></script>
   <link href="{% static 'autocomplete_light/vendor/select2/dist/css/select2.min.css' %}" type="text/css" rel="stylesheet"/>
   <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" rel="stylesheet"/>
+  <script>
+      MathJax = {
+          options: {
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process',
+              renderActions: {
+                  find: [10, function (doc) {
+                      for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                          const display = !!node.type.match(/; *mode=display/);
+                          const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                          const text = document.createTextNode('');
+                          const sibling = node.previousElementSibling;
+                          node.parentNode.replaceChild(text, node);
+                          math.start = {node: text, delim: '', n: 0};
+                          math.end = {node: text, delim: '', n: 0};
+                          doc.math.push(math);
+                          if (sibling && sibling.matches('.MathJax_Preview')) {
+                              sibling.parentNode.removeChild(sibling);
+                          }
+                      }
+                  }, '']
+              }
+          }
+      };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 {% endblock %}
 
 {% block content_wrapper %}
@@ -94,6 +121,13 @@
             let list = document.getElementById("sortable-list");
             var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
             populateCollection(list);
+            let element = document.querySelectorAll('.markdownx');
+            Object.keys(element).map(key =>
+                element[key].addEventListener('markdownx.update', event => {
+                    console.log(event.detail);
+                    MathJax.typeset();
+                })
+            );
         </script>
         <span style="font-weight: bold">Adicionar: </span>
         <select name="section" required id="id_area" data-autocomplete-light-url="/sinteses/ac/section/"
