@@ -1,71 +1,93 @@
-function addElementToList(list, sectionID, sectionName, sectionIndex) {
-    let line = document.createElement("div");
-    line.classList.add("sortable-line");
-    let index = document.createElement("span");
-    index.classList.add('list-line-index');
-    if (sectionIndex == null) {
-        index.appendChild(document.createTextNode('N- '));
-    } else {
-        index.appendChild(document.createTextNode((sectionIndex + 1) + 'º '));
-    }
-    line.appendChild(index);
-    line.appendChild(document.createTextNode(sectionName));
+function addToCollection(list, section) {
+    let row = document.createElement("li");
+    row.classList.add("sortable-line");
+    row.dataset.id = section.id;
+
+    row.appendChild(document.createTextNode(section.title));
     let id = document.createElement("sup");
-    id.appendChild(document.createTextNode(sectionID));
-    line.appendChild(id);
+    id.appendChild(document.createTextNode(section.id));
+    row.appendChild(id);
 
     let deleteElement = document.createElement("div");
     deleteElement.classList.add('list-line-delete');
-    let i = document.createElement("i");
-    i.classList.add('fas', 'fa-times');
-    deleteElement.appendChild(i);
-    line.appendChild(deleteElement);
-    line.setAttribute('data-id', sectionID);
-    list.appendChild(line);
+    deleteElement.innerText = "X";
+    row.appendChild(deleteElement);
+    row.setAttribute('data-id', section.id);
+    list.appendChild(row);
 
     deleteElement.addEventListener('click', function () {
-        list.removeChild(line);
+        rmFromCollectionEvt(row);
     });
 }
 
-function newItem(selector) {
-    let id = selector.value;
-    let name = selector.textContent;
-    addElementToList(document.getElementById("sortable-list"), id, name, null);
-    while (selector.firstChild) {
-        selector.removeChild(selector.firstChild);
-    }
+function addToCollectionEvt(selector) {
+    let listElem = selector.parentNode.querySelector('ul');
+    let url = listElem.dataset.endpoint;
+    fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({"child": parseInt(selector.value)})
+    }).then(function (response) {
+        return response.json();
+    }).then(function (section) {
+        addToCollection(listElem, section)
+    });
+    delChildren(selector);
 }
 
-function populate(element, url) {
+function rmFromCollectionEvt(line) {
+    let parent = line.parentNode;
+    let listElem = parent.querySelector('ul');
+    let url = listElem.dataset.endpoint;
+    parent.removeChild(line);
+
+    fetch(url, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({"child": parseInt(selector.value)})
+    }).then(function (response) {
+    });
+}
+
+function populateCollection(element) {
+    let listElem = element.parentNode.querySelector('ul');
+    let url = listElem.dataset.endpoint;
     fetch(url, {
         credentials: 'include'
     }).then(function (response) {
         return response.json();
-    }).then(function (topic) {
-        let topicSections = topic.sections;
-        for (let section of topicSections) {
-            addElementToList(element, section.id, section.name, section.index);
+    }).then(function (sections) {
+        for (let section of sections) {
+            addToCollection(element, section);
         }
     });
 }
 
-function save(sorter, url) {
+function saveCollectionOrder(collection) {
     let result = [];
     let index = 0;
-    for (let element of sorter.toArray()) {
+    for (let element of collection.querySelectorAll(":scope li[data-id]")) {
         result.push({
-            id: parseInt(element),
+            id: parseInt(element.dataset.id),
             index: index
         });
         index++;
     }
+
     fetch(url, {
         method: 'PUT',
         body: JSON.stringify(result),
         headers: new Headers({
             'Content-Type': 'application/json',
-            'X-CSRFToken': jQuery("[name=csrfmiddlewaretoken]").val()
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         }),
         credentials: 'include',
     }).then(res => res.json())
@@ -74,5 +96,4 @@ function save(sorter, url) {
             console.log('Success:', response);
             location.reload();
         });
-
 }

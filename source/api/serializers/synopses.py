@@ -1,21 +1,10 @@
 from rest_framework import serializers
 
 
-class TopicSerializer(serializers.Serializer):
+# Serializes a reference to a section (its id and name).
+class SectionReferenceSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    name = serializers.CharField()
-
-
-class SubareaSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    topics = TopicSerializer(many=True)
-
-
-class AreaSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-    subareas = SubareaSerializer(many=True)
+    title = serializers.CharField()
 
 
 # Serializes a section source
@@ -24,33 +13,39 @@ class SectionSourceSerializer(serializers.Serializer):
     url = serializers.URLField()
 
 
-# Serializes a reference to a section (its id and name).
-class SectionReferenceSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
-
-
 class SectionSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    name = serializers.CharField()
-    content = serializers.CharField()
+    title = serializers.CharField()
+    content_ck = serializers.CharField()
     sources = SectionSourceSerializer(many=True)
     requirements = SectionReferenceSerializer(many=True)
 
 
+class SubareaSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    sections = SectionSerializer(many=True)
+
+
+class AreaSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    subareas = SubareaSerializer(many=True)
+
+
 class SectionRelationSerializer(serializers.Serializer):
     id = serializers.IntegerField(source='section.id')
-    name = serializers.CharField(source='section.name')
+    title = serializers.CharField(source='section.title')
     index = serializers.IntegerField()
 
 
-class TopicSectionsSerializer(serializers.Serializer):
+class SubSectionsSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    name = serializers.CharField()
-    sections = SectionRelationSerializer(source='sectiontopic_set', many=True)
+    children = SectionRelationSerializer(source='children_intermediary', many=True)
+    # children = serializers.IntegerField(source='children_intermediary', many=True)
 
 
 class ClassSectionsSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    sections = SectionRelationSerializer(source='classsection_set', many=True)
+    sections = SectionRelationSerializer(source='synopsis_sections', many=True)

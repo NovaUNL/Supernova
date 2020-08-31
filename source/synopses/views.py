@@ -387,6 +387,7 @@ def section_edit_view(request, section_id):
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_section'
     context['title'] = 'Editar %s' % section.title
+    context['section'] = section
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['resources_formset'] = resources_formset
@@ -397,7 +398,7 @@ def section_edit_view(request, section_id):
                           {'name': '...', 'url': '#'},
                           {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
                           {'name': 'Editar'}]
-    return render(request, 'synopses/generic_form.html', context)
+    return render(request, 'synopses/section_management.html', context)
 
 
 def class_sections_view(request, class_id):

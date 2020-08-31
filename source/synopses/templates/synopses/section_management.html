@@ -1,0 +1,106 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="{% static 'synopses/list_manager.js' %}" type="text/javascript" rel="stylesheet"></script>
+  <link href="{% static 'autocomplete_light/vendor/select2/dist/css/select2.min.css' %}" type="text/css" rel="stylesheet"/>
+  <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" rel="stylesheet"/>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        <h2>{{ title }}</h2>
+      </div>
+      <div class="pane-content">
+        <form method="post" action="{{ action_page }}">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          {{ form.as_p }}
+          {% if sources_formset %}
+            <h3>Fontes:</h3>
+            {{ sources_formset.management_form }}
+            {{ sources_formset.non_form_errors }}
+            <table>
+              {% for subform in sources_formset.forms %}
+                {% if subform.non_field_errors %}
+                  <tr>{{ subform.non_field_errors }}</tr>
+                {% endif %}
+                <tr>
+                  {{ subform.id }}
+                  <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
+                  <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
+                  {% if subform.instance.pk %}
+                    <td>Apagar: {{ subform.DELETE }}</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+          {% if resources_formset %}
+            <h3>Recursos:</h3>
+            {{ resources_formset.management_form }}
+            {{ resources_formset.non_form_errors }}
+            <table>
+              <tr>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Página</th>
+                <th></th>
+                <th>Documento</th>
+              </tr>
+              {% for subform in resources_formset.forms %}
+                {% if subform.non_field_errors %}
+                  <tr>
+                    <td colspan="5"><span style="color: red;">{{ subform.non_field_errors }}</span></td>
+                  </tr>
+                {% endif %}
+                <tr>
+                  {{ subform.id }}
+                  <td><span style="color:red;">{{ subform.name.errors }}</span>{{ subform.name }}</td>
+                  <td>
+                    <span style="color:red;">{{ subform.resource_type.errors }}</span>
+                    {{ subform.resource_type }}
+                  </td>
+                  <td><span style="color: red;">{{ subform.webpage.errors }}</span>{{ subform.webpage }}</td>
+                  <td>←<b> ou </b>→</td>
+                  <td><span style="color:red;">{{ subform.document.errors }}</span>{{ subform.document }}</td>
+                  {% if subform.instance.pk %}
+                    <td>Apagar: {{ subform.DELETE }}</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+          <input type="submit" value="{{ action_name }}"/>
+          {{ form.media }}
+        </form>
+      </div>
+    </div>
+
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        <h2>{{ Subsecções }}</h2>
+      </div>
+      <div class="pane-content">
+        <ul id="sortable-list" data-endpoint="{% url 'api:synopses_section_children' section.id %}"></ul>
+        <script>
+            let list = document.getElementById("sortable-list");
+            var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
+            populateCollection(list);
+        </script>
+        <span style="font-weight: bold">Adicionar: </span>
+        <select name="section" required id="id_area" data-autocomplete-light-url="/sinteses/ac/section/"
+                data-autocomplete-light-function="select2" onchange="addToCollectionEvt(this);"></select>
+        <a class="ui-btn save-button" href="javascript:saveCollectionOrder(list);">Guardar</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

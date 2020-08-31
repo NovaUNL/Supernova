@@ -2,6 +2,8 @@ from django.urls import path
 
 from api import views
 
+app_name = 'api'
+
 urlpatterns = [
     # College
     path('buildings/', views.college.BuildingList.as_view()),
@@ -12,7 +14,8 @@ urlpatterns = [
     path('class/<int:pk>/', views.college.ClassDetailed.as_view()),
     # Groups
     path('groups/', views.groups.GroupList.as_view()),
-    path('groups/<str:abbr>/schedule/<str:from_date>/<str:to_date>', views.groups.group_schedule, name='group_schedule'),
+    path('groups/<str:abbr>/schedule/<str:from_date>/<str:to_date>', views.groups.group_schedule,
+         name='group_schedule'),
     # News
     path('news/', views.news.NewsList.as_view()),
     path('news/<int:pk>/', views.news.News.as_view()),
@@ -32,9 +35,10 @@ urlpatterns = [
     path('synopses/areas/', views.synopses.Areas.as_view()),
     path('synopses/area/<int:pk>/', views.synopses.Area.as_view()),
     path('synopses/subarea/<int:pk>/', views.synopses.Subarea.as_view()),
-    path('synopses/topic/<int:pk>/', views.synopses.TopicSections.as_view()),
     path('synopses/class/<int:pk>/', views.synopses.ClassSections.as_view()),
     path('synopses/section/<int:pk>/', views.synopses.Section.as_view()),
+    path('synopses/section/<int:pk>/children/', views.synopses.SectionChildren.as_view(),
+         name='synopses_section_children'),
     # Users
     path('profile/<str:nickname>/', views.users.ProfileDetailed.as_view()),
     path('profile/<str:nickname>/socialnetworks/', views.users.UserSocialNetworks.as_view(), name='social_networks'),
