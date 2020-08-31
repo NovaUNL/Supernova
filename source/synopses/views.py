@@ -173,7 +173,7 @@ def section_view(request, section_id):
     context['section'] = section
     context['children'] = children
     context['parents'] = parents
-    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['author_log'] = section.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
                           {'name': section.title, 'url': '#'}]
@@ -201,7 +201,7 @@ def subarea_section_view(request, subarea_id, section_id):
     context['section'] = section
     context['children'] = children
     context['parents'] = parents
-    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['author_log'] = section.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
@@ -227,7 +227,7 @@ def subsection_view(request, parent_id, child_id):
     context['section'] = child
     context['children'] = children
     context['parents'] = parents
-    context['author_log'] = child.sectionlog_set.distinct('author')
+    context['author_log'] = child.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
                           {'name': parent.title, 'url': reverse('synopses:section', args=[parent_id])},
@@ -259,6 +259,19 @@ def subsection_create_view(request, section_id):
                           {'name': parent.title, 'url': reverse('synopses:section', args=[section_id])},
                           {'name': 'Criar secção', 'url': '#'}]
     return render(request, 'synopses/generic_form.html', context)
+
+
+def section_authors_view(request, section_id):
+    section = get_object_or_404(m.Section.objects.prefetch_related('log_entries__author'), id=section_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_synopses_section'
+    context['title'] = f"Autores de {section.title}"
+    context['section'] = section
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': 'Autores', 'url': '#'}]
+    return render(request, 'synopses/section_authors.html', context)
 
 
 @user_passes_test(can_edit)
@@ -450,7 +463,7 @@ def class_section_view(request, class_id, section_id):
         context['previous_section'] = previous_section.section
     if next_section:
         context['next_section'] = next_section.section
-    context['author_log'] = section.sectionlog_set.distinct('author')
+    context['author_log'] = section.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
                           {'name': section.title,

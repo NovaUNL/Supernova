@@ -15,6 +15,7 @@ urlpatterns = [
     path('seccao/<int:section_id>/', views.section_view, name='section'),
     path('seccao/<int:parent_id>/subseccao/<int:child_id>/', views.subsection_view, name='subsection'),
     path('seccao/<int:section_id>/criar_seccao/', views.subsection_create_view, name='subsection_create'),
+    path('seccao/<int:section_id>/autores/', views.section_authors_view, name='section_authors'),
     path('cadeira/<int:class_id>/', views.class_sections_view, name='class'),
     path('cadeira/<int:class_id>/seccoes/', views.class_manage_sections_view, name='class_manage'),
     path('cadeira/<int:class_id>/<int:section_id>/', views.class_section_view, name='class_section'),

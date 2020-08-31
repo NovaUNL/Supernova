@@ -138,8 +138,8 @@
             {% endif %}
             <h3>Validado por docente</h3>
             <span class="indented">{% if section.validated %}Sim{% else %}Não{% endif %}.</span>
-            <h3><a href="#TODO">Autoria</a></h3>
-            {% if author_log.length > 1 %}
+            <h3><a href="{% url 'synopses:section_authors' section.id %}">Autoria</a></h3>
+            {% if author_log %}
               <ul class="content-list">
                 {% for log in author_log %}
                   <li><a href="{% url 'users:profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>

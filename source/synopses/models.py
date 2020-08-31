@@ -170,7 +170,7 @@ class SectionLog(djm.Model):
     The changelog for a section
     """
     author = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
-    section = djm.ForeignKey(Section, on_delete=djm.CASCADE)
+    section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='log_entries')
     timestamp = djm.DateTimeField(auto_now_add=True)
     previous_content = djm.TextField(blank=True, null=True)  # TODO Change to diff
 

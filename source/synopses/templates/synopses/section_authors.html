@@ -1,0 +1,23 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Autores de {{ section.title }}</h1>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <ul>
+            {% for entry in section.log_entries.all %}
+              <li><a href="{% url 'users:profile' entry.author.nickname %}">{{ entry.author }}</a> ás {{ entry.timestamp }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
