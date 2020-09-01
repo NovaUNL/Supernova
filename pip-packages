@@ -28,3 +28,4 @@ django-polymorphic
 Sphinx
 sphinx-rtd-theme
 Jinja2
+pymdown-extensions

@@ -223,6 +223,25 @@ LEAFLET_CONFIG = {
     'RESET_VIEW': False,
 }
 
+MARKDOWNX_MARKDOWN_EXTENSIONS = [
+    'markdown.extensions.tables',
+    'pymdownx.arithmatex',
+    'pymdownx.details',
+    'pymdownx.inlinehilite',
+    'pymdownx.keys',
+    'pymdownx.mark',
+    'pymdownx.smartsymbols',
+    'pymdownx.striphtml',
+    'pymdownx.superfences',
+    'pymdownx.tilde'
+]
+
+MARKDOWNX_MARKDOWN_EXTENSION_CONFIGS = {
+    'pymdownx.arithmatex': {
+        'smart_dollar': False
+    }
+}
+
 DEBUG = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
