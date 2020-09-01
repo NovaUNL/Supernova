@@ -2,38 +2,35 @@
 
 {% block content_wrapper %}
   <div class="header-decorator">
+    <div class="header-decorator-options">
+      <ul>
+        <li><a href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir</a></li>
+      </ul>
+    </div>
     <div>
       <h1>Síntese de <a href="{% url 'college:class' synopsis_class.id %}">{{ synopsis_class.name }}</a></h1>
-      <h3>Departamento de {{ synopsis_class.department.name }}</h3>
+      <h3>
+        <a href="{% url 'college:department' synopsis_class.department.id %}">
+          Departamento de {{ synopsis_class.department.name }}
+        </a>
+      </h3>
     </div>
   </div>
   <div class="col padded">
     <div class="flex-pane">
-      <div class="pane-title bg-grad">
-        <h2>Conteúdos</h2>
-      </div>
+      <div class="pane-title bg-grad"><h2></h2></div>
       <div class="pane-content">
         {% if not sections.exists %}
           Esta cadeira não tem conteudo na tua sintese.<br>
           Se já existir conteudo, podes adiciona-lo.
         {% endif %}
         <ul class="menu">
-          {% for section in sections %}
-            <li><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.name }}</a></li>
+          {% for section in sections.all %}
+            <li>{{ forloop.counter }} -
+              <a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.title }}</a></li>
           {% endfor %}
         </ul>
       </div>
     </div>
   </div>
 {% endblock %}
-
-{#{% block content-bottom %}#}
-{#  <nav id="bot-container" class="float-right">#}
-{#    <a class="menu-entry selected">Contribuir:</a>#}
-{#    {% if user.is_authenticated %}#}
-{#      <a class="menu-entry" href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir secções</a>#}
-{#    {% else %}#}
-{#      <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>#}
-{#    {% endif %}#}
-{#  </nav>#}
-{#{% endblock %}#}
