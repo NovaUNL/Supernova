@@ -90,6 +90,10 @@ class Section(djm.Model):
         related_name='required_by',
         verbose_name='requisitos',
         symmetrical=False)
+    classes = djm.ManyToManyField(
+        college.Class,
+        through='ClassSection',
+        related_name='synopsis_sections')
     #: Whether this section has been validated as correct by a teacher
     validated = djm.BooleanField(default=False)
 
@@ -110,8 +114,10 @@ class Section(djm.Model):
         Detects the absence of content and nullifies the field in that case.
         """
         # TODO, do this properly
-        if self.content is not None and len(self.content) < 10:
-            self.content = None
+        if self.content_md is not None and len(self.content_md) < 10:
+            self.content_md = None
+        if self.content_ck is not None and len(self.content_ck) < 10:
+            self.content_ck = None
 
     def most_recent_edit(self, editor):
         return SectionLog.objects.get(section=self, author=editor).order_by('timestamp')
@@ -129,8 +135,8 @@ class ClassSection(djm.Model):
     """
     Model which links a section to a College Class
     """
-    corresponding_class = djm.ForeignKey(college.Class, on_delete=djm.PROTECT, related_name='synopsis_sections')
-    section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='class_sections')
+    corresponding_class = djm.ForeignKey(college.Class, on_delete=djm.PROTECT, related_name='synopsis_sections_rel')
+    section = djm.ForeignKey(Section, on_delete=djm.CASCADE, related_name='classes_rel')
     index = djm.IntegerField()
 
     class Meta:

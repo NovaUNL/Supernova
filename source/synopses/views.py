@@ -159,7 +159,7 @@ def section_view(request, section_id):
     section = get_object_or_404(
         m.Section.objects
             .select_related('subarea')
-            .prefetch_related('class_sections'),
+            .prefetch_related('classes'),
         id=section_id)
     children = m.Section.objects \
         .filter(parents_intermediary__parent=section) \
@@ -422,8 +422,8 @@ def class_sections_view(request, class_id):
     context['pcode'] = 'l_synopses_class_section'
     context['title'] = "Sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sections'] = m.Section.objects.filter(class_sections__corresponding_class=class_).order_by(
-        'class_sections__index')
+    context['sections'] = m.Section.objects.filter(classes=class_).order_by(
+        'classes_rel__index')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
     return render(request, 'synopses/class_sections.html', context)
@@ -475,7 +475,7 @@ class AreaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Area.objects.all()
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(title__istartswith=self.q)
         return qs
 
 
@@ -483,7 +483,7 @@ class SubareaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Subarea.objects.all()
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(title__istartswith=self.q)
         return qs
 
 
@@ -491,5 +491,5 @@ class SectionAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Section.objects.all()
         if self.q:
-            qs = qs.filter(name__contains=self.q)
+            qs = qs.filter(title__contains=self.q)
         return qs
