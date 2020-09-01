@@ -432,7 +432,10 @@ def class_sections_view(request, class_id):
     context['pcode'] = 'l_synopses_class_section'
     context['title'] = "Sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sections'] = class_.synopsis_sections.order_by('classes_rel__index')
+    context['sections'] = class_.synopsis_sections\
+        .order_by('classes_rel__index')\
+        .annotate(exercise_count=Count('exercises'))
+    context['expand'] = 'expand' in request.GET
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
     return render(request, 'synopses/class_sections.html', context)
@@ -458,8 +461,8 @@ def class_section_view(request, class_id, section_id):
     # Get sections of this class, take the one indexed before and the one after.
     related_sections = m.ClassSection.objects \
         .filter(corresponding_class=class_).order_by('index')
-    previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
-    next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
+    # previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
+    # next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
     department = class_.department
 
     context = build_base_context(request)
@@ -468,10 +471,10 @@ def class_section_view(request, class_id, section_id):
     context['department'] = department
     context['synopsis_class'] = class_
     context['section'] = class_synopsis_section.section
-    if previous_section:
-        context['previous_section'] = previous_section.section
-    if next_section:
-        context['next_section'] = next_section.section
+    # if previous_section:
+    #     context['previous_section'] = previous_section.section
+    # if next_section:
+    #     context['next_section'] = next_section.section
     context['author_log'] = section.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
