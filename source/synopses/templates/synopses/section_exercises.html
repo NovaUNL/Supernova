@@ -1,0 +1,60 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
+  <script src="{% static 'prism.js' %}"></script>
+  <script>
+      MathJax = {
+          options: {
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process',
+              renderActions: {
+                  find: [10, function (doc) {
+                      for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                          const display = !!node.type.match(/; *mode=display/);
+                          const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                          const text = document.createTextNode('');
+                          const sibling = node.previousElementSibling;
+                          node.parentNode.replaceChild(text, node);
+                          math.start = {node: text, delim: '', n: 0};
+                          math.end = {node: text, delim: '', n: 0};
+                          doc.math.push(math);
+                          if (sibling && sibling.matches('.MathJax_Preview')) {
+                              sibling.parentNode.removeChild(sibling);
+                          }
+                      }
+                  }, '']
+              }
+          }
+      };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="#">Criar novo</a></li>
+        </ul>
+      </div>
+      <h1>Exercícios de <a href="{% url 'synopses:section' section.id %}">{{ section.title }}</a></h1>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          {% for exercise in section.exercises.all %}
+            {% if not forloop.first %}<hr>{% endif %}
+            <h2><a href="{% url 'exercises:exercise' exercise.id %}">#{{ exercise.id }}</a></h2>
+            <div class="indented">{{ exercise.render_html|safe }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -419,7 +419,6 @@ def section_edit_view(request, section_id):
     context['doc_resources_formset'] = doc_resources_formset
     context['action_page'] = reverse('synopses:section_edit', args=[section_id])
     context['action_name'] = 'Editar'
-
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
                           {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
@@ -428,8 +427,8 @@ def section_edit_view(request, section_id):
 
 
 def class_sections_view(request, class_id):
-    context = build_base_context(request)
     class_ = get_object_or_404(college.Class, id=class_id)
+    context = build_base_context(request)
     context['pcode'] = 'l_synopses_class_section'
     context['title'] = "Sintese de %s" % class_.name
     context['synopsis_class'] = class_
@@ -479,6 +478,21 @@ def class_section_view(request, class_id, section_id):
                           {'name': section.title,
                            'url': reverse('synopses:class_section', args=[class_id, section_id])}]
     return render(request, 'synopses/section.html', context)
+
+
+def section_exercises_view(request, section_id):
+    section = get_object_or_404(
+        m.Section.objects.prefetch_related('exercises'),
+        id=section_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_synopses_section_exercises'
+    context['title'] = "Exercicios em %s" % section.title
+    context['section'] = section
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': 'Exercícios'}]
+    return render(request, 'synopses/section_exercises.html', context)
 
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):

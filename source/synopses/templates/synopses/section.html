@@ -148,7 +148,7 @@
             {% else %}
               <span class="indented">Sem autores registados.</span>
             {% endif %}
-            <h3><a href="{% url 'exercises:index' %}">Exercicios</a></h3>
+            <h3><a href="{% url 'synopses:section_exercises' section.id %}">Exercicios</a></h3>
             <span class="indented">
               {% if section.exercises.count > 0 %}
                 {{ section.exercises.count }} exercícios.
