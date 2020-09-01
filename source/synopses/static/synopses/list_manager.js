@@ -40,10 +40,8 @@ function addToCollectionEvt(selector) {
 }
 
 function rmFromCollectionEvt(line) {
-    let parent = line.parentNode;
-    let listElem = parent.querySelector('ul');
+    let listElem = line.parentNode;
     let url = listElem.dataset.endpoint;
-    parent.removeChild(line);
 
     fetch(url, {
         method: 'DELETE',
@@ -52,8 +50,9 @@ function rmFromCollectionEvt(line) {
             'Content-Type': 'application/json',
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
-        body: JSON.stringify({"child": parseInt(selector.value)})
-    }).then(function (response) {
+        body: JSON.stringify({"child": parseInt(line.dataset.id)})
+    }).then(response => {
+        listElem.removeChild(line);
     });
 }
 
@@ -72,6 +71,7 @@ function populateCollection(element) {
 }
 
 function saveCollectionOrder(collection) {
+    let url = collection.dataset.endpoint;
     let result = [];
     let index = 0;
     for (let element of collection.querySelectorAll(":scope li[data-id]")) {
