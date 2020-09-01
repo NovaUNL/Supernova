@@ -1,0 +1,66 @@
+{% extends 'supernova/base.html' %}
+{% load static %}
+{% block head %}
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
+  <script src="{% static 'prism.js' %}"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+{% block content_wrapper %}
+  <style>
+      .exercise-answer {
+          color: var(--text);
+          background-color: var(--text);
+          margin-left: 20px;
+      }
+
+      .exercise-answer:hover {
+          color: inherit;
+          background-color: transparent;
+      }
+
+      .subexercises {
+          margin-left: 10px;
+          padding-left: 10px;
+          border-left: 2px solid var(--highlight);
+      }
+  </style>
+  <div class="col">
+    <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'exercises:edit' exercise.id %}">Editar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h1>Exercício</h1>
+      </div>
+    </div>
+    <div class="row padded">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"></div>
+          <div class="pane-content">
+            {{ exercise.render_html | safe }}
+            <hr>
+            <span>Submetido por <a href="{% url 'users:profile' exercise.author.nickname %}">{{ exercise.author }}</a></span>
+            <a href="{% url 'exercises:edit' exercise.id %}">Editar</a>
+          </div>
+        </div>
+      </div>
+      <div class="col nogrow">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Meta</h2></div>
+          <div class="pane-content">
+            <h3>Secções</h3>
+            <ul class="content-list">
+              {% for section in exercise.synopses_sections.all %}
+                <li><a href="{% url 'synopses:section' section.id %}">{{ section.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

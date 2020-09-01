@@ -1,0 +1,85 @@
+{% extends 'supernova/base.html' %}
+{% load static %}
+{% block head %}
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
+  <script src="{% static 'prism.js' %}"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+      .progress-bar {
+          display: flex;
+          height: 2px;
+          position: relative;
+          opacity: 80%;
+      }
+
+      .progress-bar:first-child {
+          top: -2px;
+      }
+
+      .progress-bar:last-child {
+          bottom: -2px;
+      }
+
+      .progress-bar .positive {
+          background-color: green;
+          flex-grow: 1;
+          border-top-left-radius: 5px;
+          border-bottom-left-radius: 5px;
+      }
+
+      .progress-bar .negative {
+          background-color: red;
+          flex-grow: 1;
+          border-top-right-radius: 5px;
+          border-bottom-right-radius: 5px;
+      }
+
+      .exercise-class-list {
+          display: flex;
+          flex-direction: column;
+      }
+
+      .exercise-class {
+          display: flex;
+          flex-direction: column;
+          border-radius: 10px;
+          border: 2px solid black;
+          margin-bottom: 10px;
+          padding: 0 10px;
+      }
+  </style>
+{% endblock %}
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'exercises:create' %}">Criar novo</a></li>
+        </ul>
+      </div>
+      <div>
+        <h1>Exercícios</h1>
+      </div>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <div class="exercise-class-list">
+            {% for class in classes %}
+              <div class="exercise-class">
+                <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
+                <h3><a href="{% url 'synopses:class' class.id %}">{{ class }}</a></h3>
+                <div>
+                  ? exercícios resolvidos de {{ class.exercise_count }}.
+                </div>
+                <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

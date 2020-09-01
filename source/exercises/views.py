@@ -1,19 +1,28 @@
+from django.db import models as djm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
+import settings
 from exercises.forms import ExerciseForm
 from supernova.views import build_base_context
 from exercises import models as m
+from college import models as college
+from users.utils import get_students
 
 
 def index_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
-    context['title'] = 'Exercicios'
-    context['msg_title'] = 'Por fazer'
-    context['msg_content'] = 'Esta funcionalidade ainda está inacabada'
+    context['title'] = 'Exercícios'
+    primary_students, context['secondary_students'] = get_students(request.user)
+    classes = college.Class.objects\
+        .annotate(exercise_count=djm.Count('synopsis_sections__exercises'))\
+        .filter(instances__enrollments__student__in=primary_students)\
+        .order_by('name')\
+        .all()
+    context['classes'] = classes
     context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('exercises:index')}]
-    return render(request, 'supernova/message.html', context)
+    return render(request, 'exercises/index.html', context)
 
 
 def create_exercise_view(request):
@@ -31,7 +40,7 @@ def create_exercise_view(request):
     context['pcode'] = 'l_exercises'
     context['title'] = 'Submeter exercício'
     context['form'] = form
-    context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('exercises:index')},
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
                           {'name': 'Submeter exercício', 'url': reverse('exercises:create')}]
     return render(request, 'exercises/editor.html', context)
 
@@ -48,9 +57,9 @@ def edit_exercise_view(request, exercise_id):
 
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
-    context['title'] = 'Editar exercício'
+    context['title'] = f'Editar exercício #{exercise.id}'
     context['form'] = form
-    context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('exercises:index')},
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
                           {'name': 'Editar exercício', 'url': reverse('exercises:edit', args=[exercise_id])}]
     return render(request, 'exercises/editor.html', context)
 
@@ -59,8 +68,8 @@ def exercise_view(request, exercise_id):
     exercise = get_object_or_404(m.Exercise, id=exercise_id)
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
-    context['title'] = 'Exercício'
+    context['title'] = f'Exercício #{exercise.id}'
     context['exercise'] = exercise
-    context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('exercises:index')},
-                          {'name': 'Exercicio', 'url': reverse('exercises:exercise', args=[exercise_id])}]
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
+                          {'name': f'Exercício #{exercise.id}', 'url': reverse('exercises:exercise', args=[exercise_id])}]
     return render(request, 'exercises/exercise.html', context)
