@@ -2,11 +2,11 @@ from django.db import models as djm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-import settings
 from exercises.forms import ExerciseForm
 from supernova.views import build_base_context
 from exercises import models as m
 from college import models as college
+from synopses import models as synopses
 from users.utils import get_students
 
 
@@ -15,10 +15,10 @@ def index_view(request):
     context['pcode'] = 'l_exercises'
     context['title'] = 'Exercícios'
     primary_students, context['secondary_students'] = get_students(request.user)
-    classes = college.Class.objects\
-        .annotate(exercise_count=djm.Count('synopsis_sections__exercises'))\
-        .filter(instances__enrollments__student__in=primary_students)\
-        .order_by('name')\
+    classes = college.Class.objects \
+        .annotate(exercise_count=djm.Count('synopsis_sections__exercises')) \
+        .filter(instances__enrollments__student__in=primary_students) \
+        .order_by('name') \
         .all()
     context['classes'] = classes
     context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('exercises:index')}]
@@ -34,7 +34,11 @@ def create_exercise_view(request):
             exercise.save()
             return redirect('exercises:exercise', exercise_id=exercise.id)
     else:
-        form = ExerciseForm()
+        if 'section' in request.GET:
+            section = get_object_or_404(synopses.Section, id=request.GET['section'])
+            form = ExerciseForm(initial={'synopses_sections': [section, ]})
+        else:
+            form = ExerciseForm()
 
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
@@ -71,5 +75,6 @@ def exercise_view(request, exercise_id):
     context['title'] = f'Exercício #{exercise.id}'
     context['exercise'] = exercise
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
-                          {'name': f'Exercício #{exercise.id}', 'url': reverse('exercises:exercise', args=[exercise_id])}]
+                          {'name': f'Exercício #{exercise.id}',
+                           'url': reverse('exercises:exercise', args=[exercise_id])}]
     return render(request, 'exercises/exercise.html', context)
