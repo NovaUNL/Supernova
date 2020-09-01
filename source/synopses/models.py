@@ -122,7 +122,7 @@ class Section(djm.Model):
     def most_recent_edit(self, editor):
         return SectionLog.objects.get(section=self, author=editor).order_by('timestamp')
 
-    def _compact_indexes(self):
+    def compact_indexes(self):
         index = 0
         for rel in self.children_intermediary.order_by('index').all():
             if index != rel.index:

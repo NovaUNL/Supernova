@@ -284,9 +284,16 @@ def section_create_view(request, parent_id):
     if request.method == 'POST':
         section_form = f.SectionEditForm(data=request.POST)
         section_form.fields['after'].choices = choices
-        sources_formset = f.SectionSourcesFormSet(request.POST, prefix="sources")
-        resources_formset = f.SectionResourcesFormSet(request.POST, prefix="resources")
-        if section_form.is_valid() and sources_formset.is_valid() and resources_formset.is_valid():
+        sources_formset = f.SectionSourcesFormSet(
+            request.POST, prefix="sources")
+        web_resources_formset = f.SectionWebpageResourcesFormSet(
+            request.POST, prefix="wp_resources")
+        doc_resources_formset = f.SectionDocumentResourcesFormSet(
+            request.POST, prefix="doc_resources")
+        if section_form.is_valid() \
+                and sources_formset.is_valid() \
+                and web_resources_formset.is_valid() \
+                and doc_resources_formset.is_valid():
             # Obtain the requested index
             if section_form.cleaned_data['after'] == 0:
                 index = 1
@@ -314,11 +321,10 @@ def section_create_view(request, parent_id):
             section_log = m.SectionLog(author=request.user, section=section)
             section_log.save()
 
-            # Process the sources subform
-            sources = sources_formset.save()
-            for source in sources:
-                source.section = section
-                source.save()
+            # Process the formsets
+            for data in sources_formset.save(), web_resources_formset.save(), doc_resources_formset.save():
+                data.section = section
+                data.save()
 
             # Redirect to the newly created section
             return HttpResponseRedirect(reverse('synopses:subsection', args=[parent_id, section.id]))
@@ -327,7 +333,8 @@ def section_create_view(request, parent_id):
         section_form = f.SectionEditForm(initial={'after': choices[-1][0]})
         section_form.fields['after'].choices = choices
         sources_formset = f.SectionSourcesFormSet(prefix="sources")
-        resources_formset = f.SectionResourcesFormSet(prefix="resources")
+        web_resources_formset = f.SectionWebpageResourcesFormSet(prefix="wp_resources")
+        doc_resources_formset = f.SectionDocumentResourcesFormSet(prefix="doc_resources")
 
     subarea = parent.subarea
     area = subarea.area
@@ -336,7 +343,8 @@ def section_create_view(request, parent_id):
     context['title'] = 'Criar nova entrada em %s' % parent.title
     context['form'] = section_form
     context['sources_formset'] = sources_formset
-    context['resources_formset'] = resources_formset
+    context['web_resources_formset'] = web_resources_formset
+    context['doc_resources_formset'] = doc_resources_formset
     context['action_page'] = reverse('synopses:section_create', args=[parent_id])
     context['action_name'] = 'Criar'
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
@@ -366,15 +374,18 @@ def section_edit_view(request, section_id):
             if section.content_ck is not None \
                     and section.content_md is None \
                     and section_form.cleaned_data['content_md'] is not None:
-                log = m.SectionLog(author=request.user, section=section, previous_content=section.content_ck)
-                log.save()
+                m.SectionLog.objects.create(author=request.user, section=section, previous_content=section.content_ck)
             else:
                 if section.content_md != section_form.cleaned_data['content_md']:
-                    log = m.SectionLog(author=request.user, section=section, previous_content=section.content_md)
-                    log.save()
+                    m.SectionLog.objects.create(
+                        author=request.user,
+                        section=section,
+                        previous_content=section.content_md)
                 if section.content_ck != section_form.cleaned_data['content_ck']:
-                    log = m.SectionLog(author=request.user, section=section, previous_content=section.content_ck)
-                    log.save()
+                    m.SectionLog.objects.create(
+                        author=request.user,
+                        section=section,
+                        previous_content=section.content_ck)
             section = section_form.save(commit=False)
             section.save()
 
@@ -389,7 +400,7 @@ def section_edit_view(request, section_id):
             sources_formset.save()
             doc_resources_formset.save()
             web_resources_formset.save()
-            section._compact_indexes()
+            section.compact_indexes()
             # Redirect user to the updated section
             return HttpResponseRedirect(reverse('synopses:section', args=[section.id]))
     else:
@@ -422,8 +433,7 @@ def class_sections_view(request, class_id):
     context['pcode'] = 'l_synopses_class_section'
     context['title'] = "Sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sections'] = m.Section.objects.filter(classes=class_).order_by(
-        'classes_rel__index')
+    context['sections'] = class_.synopsis_sections.order_by('classes_rel__index')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
     return render(request, 'synopses/class_sections.html', context)
