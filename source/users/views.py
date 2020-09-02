@@ -233,28 +233,38 @@ def user_calendar_view(request, nickname):
 def user_profile_settings_view(request, nickname):
     if request.user.nickname != nickname and not request.user.is_staff:
         raise PermissionDenied()
-    user = get_object_or_404(m.User, nickname=nickname)
-    requester: m.User = request.user
+    profile_user = get_object_or_404(m.User, nickname=nickname)
     context = build_base_context(request)
-    if requester != user:
-        raise Exception("TODO make a proper error message")
+    context['settings_form'] = forms.AccountSettingsForm(instance=profile_user)
+    context['permissions_form'] = forms.AccountPermissionsForm(profile_user)
     if request.method == 'POST':
-        form = forms.AccountSettingsForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
-            user = form.save()
-            if 'new_password' in form:
-                user.set_password(form.cleaned_data['new_password'])
-            return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
+        if 'permissions' in request.GET:
+            if not request.user.is_staff:
+                raise PermissionDenied("Only staff accounts can change user permissions.")
+            if request.user == profile_user:
+                raise PermissionDenied("Changing own permissions is forbidden.")
+            permissions_form = forms.AccountPermissionsForm(profile_user, request.POST)
+            context['permissions_form'] = permissions_form
+            if permissions_form.is_valid():
+                permissions_form.save()
+                profile_user.refresh_from_db()  # Reload permissions
         else:
-            context['settings_form'] = form
-    else:
-        context['settings_form'] = forms.AccountSettingsForm(instance=user)
+            settings_form = forms.AccountSettingsForm(request.POST, request.FILES, instance=profile_user)
+            if settings_form.is_valid():
+                profile_user = settings_form.save()
+                if 'new_password' in settings_form:
+                    profile_user.set_password(settings_form.cleaned_data['new_password'])
+                return HttpResponseRedirect(reverse('users:profile', args=[profile_user.nickname]))
+            else:
+                context['settings_form'] = settings_form
     context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
     context['pcode'] = 'u_settings'
     context['title'] = 'Definições da conta'
+    context['profile_user'] = profile_user
     context['sub_nav'] = [
-        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
+
     return render(request, 'users/profile_settings.html', context)
 
 

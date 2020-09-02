@@ -5,12 +5,17 @@ from datetime import datetime
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 from college import models as college
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.utils import password_strength, correlated
+from supernova.widgets import SliderInput
 from users import models as m
+from exercises import models as exercises
+from synopses import models as synopses
 from settings import CAMPUS_EMAIL_SUFFIX
 
 IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
@@ -278,6 +283,57 @@ class AccountSettingsForm(forms.ModelForm):
                 self.instance.nickname,
                 self.cleaned_data["new_password"])
         return self.cleaned_data
+
+
+class AccountPermissionsForm(forms.Form):
+    can_view_college_data = forms.BooleanField(widget=SliderInput(), required=False)
+    can_add_synopsis_sections = forms.BooleanField(widget=SliderInput(), required=False)
+    can_change_synopsis_sections = forms.BooleanField(widget=SliderInput(), required=False)
+    can_add_exercises = forms.BooleanField(widget=SliderInput(), required=False)
+    can_change_exercises = forms.BooleanField(widget=SliderInput(), required=False)
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        if 'initial' not in kwargs:
+            kwargs['initial'] = self.__calc_initial()
+        super(AccountPermissionsForm, self).__init__(*args, **kwargs)
+
+    def save(self):
+        if not self.is_valid():
+            raise Exception()
+
+        if self.user.is_staff:
+            return
+
+        # field, model, permission
+        permissions = [
+            ('can_view_college_data', m.User, 'full_student_access'),
+            ('can_add_synopsis_sections', synopses.Section, 'add_section'),
+            ('can_change_synopsis_sections', synopses.Section, 'change_section'),
+            ('can_add_exercises', exercises.Exercise, 'add_exercise'),
+            ('can_change_exercises', exercises.Exercise, 'change_exercise')
+        ]
+
+        for field, model, permission_name in permissions:
+            content_type = ContentType.objects.get_for_model(model)
+            value = self.cleaned_data[field]
+            permission = Permission.objects.get(codename=permission_name, content_type=content_type)
+            current = permission in self.user.user_permissions.all()
+            if value == current:
+                continue
+            if value:
+                self.user.user_permissions.add(permission)
+            else:
+                self.user.user_permissions.remove(permission)
+
+    def __calc_initial(self):
+        return {
+            'can_view_college_data': self.user.has_perm('users.full_student_access'),
+            'can_add_synopsis_sections': self.user.has_perm('synopses.add_section'),
+            'can_change_synopsis_sections': self.user.has_perm('synopses.change_section'),
+            'can_add_exercises': self.user.has_perm('exercises.add_exercise'),
+            'can_change_exercises': self.user.has_perm('exercises.change_exercise'),
+        }
 
 
 def enforce_password_policy(username, nickname, password):

@@ -13,13 +13,13 @@
 {% block content_wrapper %}
   <div class="col profile">
     <div class="header-decorator">
-      <h1>Definições de {{ user.nickname }}</h1>
+      <h1>Definições de {{ profile_user.nickname }}</h1>
     </div>
     <div class="col padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Informação pessoal</h2></div>
         <div class="pane-content">
-          <form class="col" action="{% url 'users:settings' user.nickname %}" method="post" enctype="multipart/form-data">
+          <form class="col" action="{% url 'users:settings' profile_user.nickname %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ settings_form.errors }}
             <div class="form-block">
@@ -45,10 +45,10 @@
                   identificavel perante os restantes.
                 </div>
                 <div style="display: flex">
-                  {% if user.picture %}
+                  {% if profile_user.picture %}
                     <div style="margin-right: 10px">
                       Fotografia atual:<br>
-                      <img alt="Fotografia de perfil" src="{% get_media_prefix %}{{ user.picture }}"
+                      <img alt="Fotografia de perfil" src="{% get_media_prefix %}{{ profile_user.picture }}"
                            style="max-width: 500px; max-height: 300px;">
                     </div>
                   {% endif %}
@@ -205,7 +205,6 @@
           </form>
         </div>
       </div>
-
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Redes sociais</h2></div>
         <div class="pane-content">
@@ -224,10 +223,72 @@
             privados.
           </div>
           <script>
-              let apiURL = "{% url 'social_networks' user.nickname %}";
+              let apiURL = "{% url 'api:social_networks' profile_user.nickname %}";
               populateSocialNetworks(apiURL, edit = true);
           </script>
           <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Permissões</h2></div>
+        <div class="pane-content">
+          <form id="test" class="col" action="{% url 'users:settings' profile_user.nickname %}?permissions=" method="post">
+            {% csrf_token %}
+            {{ permissions_form.errors }}
+            <div class="form-block">
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Ver dados académicos</h4>
+                  {{ permissions_form.can_view_college_data }}
+                </div>
+                <div class="form-row-description">
+                  Pode aceder à informação académica enquanto estudante.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Criar sínteses</h4>
+                  {{ permissions_form.can_add_synopsis_sections }}
+                </div>
+                <div class="form-row-description">
+                  Pode criar secções de sintese.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Editar sínteses</h4>
+                  {{ permissions_form.can_change_synopsis_sections }}
+                </div>
+                <div class="form-row-description">
+                  Pode editar secções de sintese.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Criar exercícios</h4>
+                  {{ permissions_form.can_add_exercises }}
+                </div>
+                <div class="form-row-description">
+                  Pode inserir novos exercicios.
+                </div>
+              </div>
+              <hr>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Editar exercícios</h4>
+                  {{ permissions_form.can_change_exercises }}
+                </div>
+                <div class="form-row-description">
+                  Pode editar exercícios existentes.
+                </div>
+              </div>
+            </div>
+            <input class="ui-btn end" type="submit" value="Guardar">
+            {{ permissions_form.media }}
+          </form>
         </div>
       </div>
     </div>
