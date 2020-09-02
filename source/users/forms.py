@@ -287,6 +287,7 @@ class AccountSettingsForm(forms.ModelForm):
 
 class AccountPermissionsForm(forms.Form):
     can_view_college_data = forms.BooleanField(widget=SliderInput(), required=False)
+    can_add_invites = forms.BooleanField(widget=SliderInput(), required=False)
     can_add_synopsis_sections = forms.BooleanField(widget=SliderInput(), required=False)
     can_change_synopsis_sections = forms.BooleanField(widget=SliderInput(), required=False)
     can_add_exercises = forms.BooleanField(widget=SliderInput(), required=False)
@@ -308,6 +309,7 @@ class AccountPermissionsForm(forms.Form):
         # field, model, permission
         permissions = [
             ('can_view_college_data', m.User, 'full_student_access'),
+            ('can_add_invites', m.Invite, 'add_invite'),
             ('can_add_synopsis_sections', synopses.Section, 'add_section'),
             ('can_change_synopsis_sections', synopses.Section, 'change_section'),
             ('can_add_exercises', exercises.Exercise, 'add_exercise'),

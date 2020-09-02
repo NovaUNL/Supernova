@@ -8,7 +8,9 @@
       <div class="header-decorator-options">
         <ul>
           {% if request.user == profile_user or request.user.is_staff %}
-            <li><a href="{% url 'users:invites' profile_user.nickname %}">Convites</a></li>
+            {% if perms.users.add_invite %}
+              <li><a href="{% url 'users:invites' profile_user.nickname %}">Convites</a></li>
+            {% endif %}
             <li><a href="{% url 'users:settings' profile_user.nickname %}">Definições</a></li>
           {% endif %}
         </ul>

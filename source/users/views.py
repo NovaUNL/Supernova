@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from dal import autocomplete
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
@@ -269,6 +269,7 @@ def user_profile_settings_view(request, nickname):
 
 
 @login_required
+@permission_required('users.add_invite')
 def invites_view(request, nickname):
     if request.user.nickname != nickname and not request.user.is_staff:
         raise PermissionDenied()
@@ -283,6 +284,7 @@ def invites_view(request, nickname):
 
 
 @login_required
+@permission_required('users.add_invite')
 def create_invite_view(request, nickname):
     if request.user.nickname != nickname:
         raise PermissionDenied()
