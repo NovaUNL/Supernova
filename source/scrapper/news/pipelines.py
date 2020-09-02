@@ -18,6 +18,7 @@ class NewsItemPipeline(object):
                 title=item['title'],
                 datetime=item['datetime'],
                 source=item['source'],
+                content=item['content'],
                 generated=True,
             )
         else:
@@ -25,6 +26,6 @@ class NewsItemPipeline(object):
 
         current.gen_summary()
         current.save()
-        if image is not None:
-            current.cover_img.save(image_filename, File(io.BytesIO(image)))
+        # if image is not None:
+        #     current.cover_img.save(image_filename, File(io.BytesIO(image)))
         return item

@@ -8,3 +8,4 @@ class NewsItemItem(Item):
     datetime = Field()
     image_data = Field()
     image_filename = Field()
+    html = Field()
