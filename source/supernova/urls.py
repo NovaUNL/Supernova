@@ -17,6 +17,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Generic views
     path('', views.index, name='index'),
+    path('alterações', views.changelog_view, name='changelog'),
     # College views
     path('faculdade/', include('college.urls')),
     # Services views

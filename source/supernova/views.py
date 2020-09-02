@@ -4,6 +4,7 @@ import random
 from django.core.cache import cache
 from django.db.models import Q, F
 from django.shortcuts import render
+from django.urls import reverse
 
 import settings
 from scrapper.boinc import boincstats
@@ -23,7 +24,7 @@ def index(request):
 
     context['title'] = "Perfeição nanométrica"
     context['news'] = NewsItem.objects.order_by('datetime').reverse()[0:6]
-    context['changelog'] = Changelog.objects.order_by('date').reverse()[0:3]
+    context['changelog'] = Changelog.objects.order_by('date').reverse().first()
     context['meal_items'], context['meal_date'], time = get_next_meal_items()
     context['meal_name'] = 'Almoço' if time == 2 else 'Jantar'
     boinc_users = boincstats.get_team_users(2068385380)
@@ -51,6 +52,14 @@ def index(request):
     context['telegram_url'] = settings.TELEGRAM_URL
     context['gitlab_url'] = settings.GITLAB_URL
     return render(request, 'supernova/index.html', context)
+
+
+def changelog_view(request):
+    context = build_base_context(request)
+    context['title'] = "Alterações"
+    context['changelog'] = Changelog.objects.order_by('date').reverse().all()
+    context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('news:index')}]
+    return render(request, 'supernova/changes.html', context)
 
 
 def build_base_context(request):
