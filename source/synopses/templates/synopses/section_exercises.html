@@ -39,7 +39,7 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          <li><a href="{% url 'exercises:create' %}?section={{ section.id }}">Criar novo</a></li>
+          {% if perms.exercises.add_exercise %}<li><a href="{% url 'exercises:create' %}?section={{ section.id }}">Criar novo</a></li>{% endif %}
         </ul>
       </div>
       <h1>Exercícios de <a href="{% url 'synopses:section' section.id %}">{{ section.title }}</a></h1>

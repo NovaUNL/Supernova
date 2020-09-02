@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import permission_required, login_required
 from django.db import models as djm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -25,6 +26,19 @@ def index_view(request):
     return render(request, 'exercises/index.html', context)
 
 
+def exercise_view(request, exercise_id):
+    exercise = get_object_or_404(m.Exercise, id=exercise_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_exercises'
+    context['title'] = f'Exercício #{exercise.id}'
+    context['exercise'] = exercise
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
+                          {'name': f'Exercício #{exercise.id}',
+                           'url': reverse('exercises:exercise', args=[exercise_id])}]
+    return render(request, 'exercises/exercise.html', context)
+
+@login_required
+@permission_required('exercises.add_exercise', raise_exception=True)
 def create_exercise_view(request):
     if request.method == 'POST':
         form = ExerciseForm(request.POST)
@@ -49,6 +63,8 @@ def create_exercise_view(request):
     return render(request, 'exercises/editor.html', context)
 
 
+@login_required
+@permission_required('exercises.change_exercise', raise_exception=True)
 def edit_exercise_view(request, exercise_id):
     exercise = get_object_or_404(m.Exercise, id=exercise_id)
     if request.method == 'POST':
@@ -66,15 +82,3 @@ def edit_exercise_view(request, exercise_id):
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
                           {'name': 'Editar exercício', 'url': reverse('exercises:edit', args=[exercise_id])}]
     return render(request, 'exercises/editor.html', context)
-
-
-def exercise_view(request, exercise_id):
-    exercise = get_object_or_404(m.Exercise, id=exercise_id)
-    context = build_base_context(request)
-    context['pcode'] = 'l_exercises'
-    context['title'] = f'Exercício #{exercise.id}'
-    context['exercise'] = exercise
-    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('exercises:index')},
-                          {'name': f'Exercício #{exercise.id}',
-                           'url': reverse('exercises:exercise', args=[exercise_id])}]
-    return render(request, 'exercises/exercise.html', context)

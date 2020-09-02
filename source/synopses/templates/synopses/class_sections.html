@@ -51,7 +51,7 @@
   <div class="header-decorator">
     <div class="header-decorator-options">
       <ul>
-        <li><a href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir</a></li>
+        {% if user.is_staff %}<li><a href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir</a></li>{% endif %}
       </ul>
     </div>
     <div>

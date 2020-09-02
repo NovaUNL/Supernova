@@ -24,8 +24,8 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          <li><a href="{% url 'synopses:section_create' section.id %}">Criar subsecção</a></li>
-          <li><a href="{% url 'synopses:section_edit' section.id %}">Editar</a></li>
+          {% if perms.synopses.add_section %}<li><a href="{% url 'synopses:section_create' section.id %}">Criar subsecção</a></li>{% endif %}
+          {% if perms.synopses.change_section %}<li><a href="{% url 'synopses:section_edit' section.id %}">Editar</a></li>{% endif %}
         </ul>
       </div>
       <div>

@@ -4,6 +4,7 @@ from dal import autocomplete
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -151,6 +152,8 @@ def registration_validation_view(request):
 
 def profile_view(request, nickname):
     # TODO visibility & change 0 bellow to access level
+    if request.user.nickname != nickname and not request.user.is_staff:
+        raise PermissionDenied()
     context = cache.get(f'profile_{nickname}_{0}_context')
     if context is not None:
         return render(request, 'users/profile.html', context)
@@ -186,6 +189,8 @@ def profile_view(request, nickname):
 
 @login_required
 def user_schedule_view(request, nickname):
+    if request.user.nickname != nickname and not request.user.is_staff:
+        raise PermissionDenied()
     context = build_base_context(request)
     if nickname == request.user.nickname:
         user = request.user
@@ -214,6 +219,8 @@ def user_schedule_view(request, nickname):
 
 @login_required
 def user_calendar_view(request, nickname):
+    if request.user.nickname != nickname and not request.user.is_staff:
+        raise PermissionDenied()
     context = build_base_context(request)
     user = get_object_or_404(m.User.objects, nickname=nickname)
     context['profile_user'] = user
@@ -224,6 +231,8 @@ def user_calendar_view(request, nickname):
 
 @login_required
 def user_profile_settings_view(request, nickname):
+    if request.user.nickname != nickname and not request.user.is_staff:
+        raise PermissionDenied()
     user = get_object_or_404(m.User, nickname=nickname)
     requester: m.User = request.user
     context = build_base_context(request)
@@ -251,6 +260,8 @@ def user_profile_settings_view(request, nickname):
 
 @login_required
 def invites_view(request, nickname):
+    if request.user.nickname != nickname and not request.user.is_staff:
+        raise PermissionDenied()
     user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
     context = build_base_context(request)
     context['pcode'] = "u_invites"
@@ -263,6 +274,8 @@ def invites_view(request, nickname):
 
 @login_required
 def create_invite_view(request, nickname):
+    if request.user.nickname != nickname:
+        raise PermissionDenied()
     user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
     if 'confirmed' in request.GET and request.GET['confirmed'] == 'true':
         token = registrations.generate_token(10)

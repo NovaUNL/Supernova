@@ -55,7 +55,7 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          <li><a href="{% url 'exercises:create' %}">Criar novo</a></li>
+          {% if perms.exercises.add_exercise %}<li><a href="{% url 'exercises:create' %}">Criar novo</a></li>{% endif %}
         </ul>
       </div>
       <div>

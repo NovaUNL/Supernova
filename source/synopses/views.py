@@ -1,5 +1,6 @@
 from dal import autocomplete
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect, Http404
@@ -10,11 +11,6 @@ from college import models as college
 from supernova.views import build_base_context
 from synopses import forms as f
 from synopses import models as m
-from users.models import User
-
-
-def can_edit(user: User):
-    return user.is_superuser
 
 
 def areas_view(request):
@@ -67,7 +63,8 @@ def subarea_view(request, subarea_id):
     return render(request, 'synopses/subarea.html', context)
 
 
-@user_passes_test(can_edit)
+@login_required
+@permission_required('synopses.add_subarea', raise_exception=True)
 def subarea_create_view(request, area_id):
     area = get_object_or_404(m.Area, id=area_id)
 
@@ -93,7 +90,8 @@ def subarea_create_view(request, area_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-@user_passes_test(can_edit)
+@login_required
+@permission_required('synopses.change_subarea', raise_exception=True)
 def subarea_edit_view(request, subarea_id):
     subarea = get_object_or_404(m.Subarea, id=subarea_id)
     area = subarea.area
@@ -116,39 +114,6 @@ def subarea_edit_view(request, subarea_id):
                           {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
                           {'name': 'Editar', 'url': reverse('synopses:subarea_edit', args=[subarea_id])}]
-    return render(request, 'synopses/generic_form.html', context)
-
-
-@user_passes_test(can_edit)
-def subarea_section_create_view(request, subarea_id):
-    subarea = get_object_or_404(m.Subarea, id=subarea_id)
-    area = subarea.area
-    if request.method == 'POST':
-        form = f.SubareaSectionForm(data=request.POST)
-        valid = form.is_valid()
-        if valid:
-            section = form.save(commit=False)
-            if section.subarea != subarea:
-                form.add_error('subarea', 'Subarea mismatch')
-                valid = False
-            if valid:
-                section = form.save(commit=False)
-                section.content_reduce()
-                section.save()
-                return HttpResponseRedirect(reverse('synopses:subarea_section', args=[subarea_id, section.id]))
-    else:
-        form = f.SubareaSectionForm(initial={'subarea': subarea})
-
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar secção em "%s"' % subarea.title
-    context['form'] = form
-    context['action_page'] = reverse('synopses:subarea_section_create', args=[subarea_id])
-    context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
-                          {'name': 'Criar secção', 'url': '#'}]
     return render(request, 'synopses/generic_form.html', context)
 
 
@@ -235,7 +200,8 @@ def subsection_view(request, parent_id, child_id):
     return render(request, 'synopses/section.html', context)
 
 
-@user_passes_test(can_edit)
+@login_required
+@permission_required('synopses.add_section', raise_exception=True)
 def subsection_create_view(request, section_id):
     parent = get_object_or_404(m.Section, id=section_id)
     if request.method == 'POST':
@@ -261,6 +227,40 @@ def subsection_create_view(request, section_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+@login_required
+@permission_required('synopses.add_section', raise_exception=True)
+def subarea_section_create_view(request, subarea_id):
+    subarea = get_object_or_404(m.Subarea, id=subarea_id)
+    area = subarea.area
+    if request.method == 'POST':
+        form = f.SubareaSectionForm(data=request.POST)
+        valid = form.is_valid()
+        if valid:
+            section = form.save(commit=False)
+            if section.subarea != subarea:
+                form.add_error('subarea', 'Subarea mismatch')
+                valid = False
+            if valid:
+                section = form.save(commit=False)
+                section.content_reduce()
+                section.save()
+                return HttpResponseRedirect(reverse('synopses:subarea_section', args=[subarea_id, section.id]))
+    else:
+        form = f.SubareaSectionForm(initial={'subarea': subarea})
+
+    context = build_base_context(request)
+    context['pcode'] = 'l_synopses_section'
+    context['title'] = 'Criar secção em "%s"' % subarea.title
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subarea_section_create', args=[subarea_id])
+    context['action_name'] = 'Criar'
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
+                          {'name': 'Criar secção', 'url': '#'}]
+    return render(request, 'synopses/generic_form.html', context)
+
+
 def section_authors_view(request, section_id):
     section = get_object_or_404(m.Section.objects.prefetch_related('log_entries__author'), id=section_id)
     context = build_base_context(request)
@@ -274,7 +274,8 @@ def section_authors_view(request, section_id):
     return render(request, 'synopses/section_authors.html', context)
 
 
-@user_passes_test(can_edit)
+@login_required
+@permission_required('synopses.add_section', raise_exception=True)
 def section_create_view(request, parent_id):
     parent = get_object_or_404(m.Section, id=parent_id)
     # Choices (for the 'after' field) are at the parent start, or after any section other than this one
@@ -355,7 +356,8 @@ def section_create_view(request, parent_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
-@user_passes_test(can_edit)
+@login_required
+@permission_required('synopses.change_section', raise_exception=True)
 def section_edit_view(request, section_id):
     section = get_object_or_404(m.Section, id=section_id)
     if request.method == 'POST':
@@ -432,8 +434,8 @@ def class_sections_view(request, class_id):
     context['pcode'] = 'l_synopses_class_section'
     context['title'] = "Sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sections'] = class_.synopsis_sections\
-        .order_by('classes_rel__index')\
+    context['sections'] = class_.synopsis_sections \
+        .order_by('classes_rel__index') \
         .annotate(exercise_count=Count('exercises'))
     context['expand'] = 'expand' in request.GET
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
@@ -441,7 +443,7 @@ def class_sections_view(request, class_id):
     return render(request, 'synopses/class_sections.html', context)
 
 
-@user_passes_test(can_edit)
+@staff_member_required
 def class_manage_sections_view(request, class_id):
     class_ = get_object_or_404(college.Class, id=class_id)
     context = build_base_context(request)
