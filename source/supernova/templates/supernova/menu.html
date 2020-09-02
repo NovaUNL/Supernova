@@ -88,7 +88,7 @@
             </li>
           {% endif %}
           <li {% if pcode|startswith:'c_news' %}class="active"{% endif %}><a href="{{ news }}">Noticias</a></li>
-          <li class="collapse">{# TODO #}
+          <li class="collapse disabled">
             <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
             <ul>
               <li><a href="#">Palestras</a></li>
@@ -97,7 +97,7 @@
               <li><a href="#">Competições</a></li>
             </ul>
           </li>
-          <li><a href="#">Perdidos</a></li>
+          <li class="disabled"><a href="#">Perdidos</a></li>
         </ul>
       </li>
     {% else %}
@@ -117,7 +117,7 @@
             </ul>
           </li>
           <li><a href="{{ news }}">Noticias</a></li>
-          <li class="collapse">
+          <li class="collapse disabled">
             <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
             <ul>
               <li><a href="#">Palestras</a></li>
@@ -126,7 +126,7 @@
               <li><a href="#">Competições</a></li>
             </ul>
           </li>
-          <li><a href="#">Perdidos</a></li>
+          <li class="disabled"><a href="#">Perdidos</a></li>
         </ul>
       </li>
     {% endif %}
@@ -152,7 +152,7 @@
       <ul>
         <li {% if pcode|startswith:'l_synops' %}class="active"{% endif %}><a href="{{ synopses }}">Sinteses</a></li>
         <li {% if pcode|startswith:'l_exercises' %}class="active"{% endif %}><a href="{{ exercises }}">Exercicios</a></li>
-        <li><a href="#">Dúvidas</a></li>
+        <li class="disabled"><a href="#">Dúvidas</a></li>
       </ul>
     </li>
 
