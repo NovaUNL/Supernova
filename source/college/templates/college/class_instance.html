@@ -5,54 +5,70 @@
     {% include 'college/class_decorator.html' %}
     <div class="row nowrap padded">
       <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Descrição</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.description_pt|safe }}
+        {% if instance.information.upstream.description %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.description.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Avaliação</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.evaluation_methods_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.evaluation %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Avaliação</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.evaluation.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Objetivos</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.objectives_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.objectives %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Objetivos</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.objectives.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Programa</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.program_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.program %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Programa</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.program.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Requisitos</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.requirements_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.requirements %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Requisitos</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.requirements.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Métodos de ensino</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.teaching_methods_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.teaching_methods %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Métodos de ensino</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.teaching_methods.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Horário de atendimento</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.assistance_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.assistance %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Horário de atendimento</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.assistance.pt|safe }}
+            </div>
           </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Bibliografia</h2></div>
-          <div class="pane-content">
-            {{ instance.clip_class_instance.bibliography_pt|safe }}
+        {% endif %}
+        {% if instance.information.upstream.bibliography %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Bibliografia</h2></div>
+            <div class="pane-content">
+              {{ instance.information.upstream.bibliography.pt|safe }}
+            </div>
           </div>
-        </div>
+        {% endif %}
       </div>
       <div class="col nogrow noshrink">
         {% include 'college/class_navigation.html' %}
