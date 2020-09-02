@@ -417,10 +417,14 @@ def room_view(request, room_id):
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
     return render(request, 'college/room.html', context)
 
-
-@permission_required('users.full_student_access')
+@login_required
 def available_places_view(request):
     context = build_base_context(request)
+    if not request.user.has_perm('users.full_student_access'):
+        context['title'] = context['msg_title'] = 'Insuficiência de permissões'
+        context['msg_content'] = 'O seu utilizador não tem permissões suficientes para consultar a informação de espaços.'
+        return render(request, 'supernova/message.html', context, status=403)
+
     context['pcode'] = "c_campus_places"
     context['title'] = 'Espaços disponíveis'
     context['sub_nav'] = [
