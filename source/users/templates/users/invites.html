@@ -3,11 +3,11 @@
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
-      <h1>Convites emitidos por {{ user.get_full_name }}</h1>
+      <h1>Convites emitidos por {{ profile_user.get_full_name }}</h1>
     </div>
     <div class="col padded">
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Convites</h2></div>
+        <div class="pane-title bg-grad"><h2></h2></div>
         <div class="pane-content col">
           <table style="min-width: 100%">
             <tr>
@@ -29,7 +29,9 @@
               </tr>
             {% endfor %}
           </table>
-          <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">Criar novo</a>
+          {% if profile_user == request.user %}
+            <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">Criar novo</a>
+          {% endif %}
         </div>
       </div>
     </div>

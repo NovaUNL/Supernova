@@ -2,9 +2,6 @@
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <h1>Convites emitidos por {{ user.get_full_name }}</h1>
-    </div>
     <div class="col padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Criar convite</h2></div>
@@ -14,7 +11,7 @@
             responsabilizo, dentro do razoável, pelo individuo que vou convidar.<br>
             Entendo que vai ficar registado algures que fui eu quem gerou este convite, e que se o mesmo acabar a ser
             utilizado para finalidades nefárias me vai ser pedida uma justificação, sendo que se desencantar uma boa
-            justificação me serão puxadas as orelhas e que caso contrario serei banido.
+            justificação serei repreendido, caso contrario ficarei sem acesso ao serviço.
           </p>
           <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}?confirmed=true">
             Prometo ser bem comportad(o/a)
