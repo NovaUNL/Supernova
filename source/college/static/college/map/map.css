@@ -6,9 +6,12 @@
 }
 
 /* Campus Map */
-.map {
+
+#campus-map {
     width: 100%;
     min-height: 400px;
+    max-height: 80vh;
+    flex-grow: 1;
 }
 
 /*Transportation Map */

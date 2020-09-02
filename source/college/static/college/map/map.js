@@ -111,10 +111,12 @@ if (typeof L === 'object') {
         }).addTo(campusMap);
         let servicesLayer = layerFromGeoJSON(services);
         servicesLayer.addTo(campusMap);
+        let studentAssociationsLayer = layerFromGeoJSON(studentAssociations);
+        studentAssociationsLayer.addTo(campusMap);
 
         let overlays = {
             "Serviços": servicesLayer,
-            "Associações de estudantes": layerFromGeoJSON(studentAssociations),
+            "Associações de estudantes": studentAssociationsLayer,
         };
         L.control.layers(null, overlays).addTo(campusMap);
     };

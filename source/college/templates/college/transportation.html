@@ -3,30 +3,40 @@
 {% load static %}
 
 {% block head %}
-  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.3/dist/svg-pan-zoom.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'college/map/map.css' %}"/>
   <script src="{% static 'college/map/map.js' %}"></script>
 {% endblock %}
 
 {% block content_wrapper %}
-  <div class="row" style="flex-grow: 1">
-    <div class="col" style="min-width: 300px">
-      <object class="map" type="image/svg+xml" data="{% static 'college/map/transportation.minimal.svg' %}"
-              onload="initTransportationMap(this)">
-        O teu navegador não suporta SVG!
-      </object>
+  <div class="row padded nowrap">
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Próximas partidas</h2></div>
+        <div class="pane-content">
+          Por fazer.
+        </div>
+      </div>
     </div>
-    <div class="col small nogrow">
-      <ul class="caption">
-        <li><span class="MTS"></span>MTS</li>
-        <li><span class="FER"></span>Fertagus</li>
-        <li><span class="TST"></span>TST</li>
-        <li><span class="TT"></span>Transtejo / Soflusa</li>
-        <li><span class="ML"></span>ML</li>
-        <li><span class="SFT"></span>SulFertagus</li>
-        <li><span class="CP"></span>CP</li>
-        <li><span class="TCB"></span>TCB</li>
-      </ul>
+    <div class="col nogrow" style="max-width: 500px">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Rede de transportes</h2></div>
+        <img src="{% static 'college/map/transportation.minimal.svg' %}" width="100%">
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <ul class="caption">
+            <li><span class="MTS"></span>MTS</li>
+            <li><span class="FER"></span>Fertagus</li>
+            <li><span class="TST"></span>TST</li>
+            <li><span class="TT"></span>Transtejo / Soflusa</li>
+            <li><span class="ML"></span>ML</li>
+            <li><span class="SFT"></span>SulFertagus</li>
+            <li><span class="CP"></span>CP</li>
+            <li><span class="TCB"></span>TCB</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
