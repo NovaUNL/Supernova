@@ -5,6 +5,7 @@ from django.core import mail
 from django.test import Client, TestCase
 from django.urls import reverse
 
+import settings
 from users import models as m, forms as f
 from college import models as college
 
@@ -39,7 +40,7 @@ class InviteRegistrationTest(TestCase):
             'username': 'campusemailtest',
             'nickname': 'campusemailtest',
             'student': 'campusemailtest',
-            'email': 'campusemailtest@campus.fct.unl.pt',
+            'email': 'campusemailtest@' + settings.CAMPUS_EMAIL_SUFFIX,
             'invite': 'CAMPUSEMAIL',
             'password': 'queijo-123',
             'password_confirmation': 'queijo-123'}
@@ -64,7 +65,7 @@ class InviteRegistrationTest(TestCase):
             'username': unused_identifier,
             'nickname': unused_identifier,
             'student': student.abbreviation,
-            'email': student.abbreviation + '@campus.fct.unl.pt',
+            'email': f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}",
             'invite': invite.token,
             'password': 'queijo-123',
             'password_confirmation': 'queijo-123'}
@@ -110,10 +111,10 @@ class InviteRegistrationTest(TestCase):
         self.assertFalse(form.is_valid())
         registration_data['nickname'] = unused_identifier
         # Test with email conflict
-        registration_data['email'] = self.student_associated.abbreviation + '@campus.fct.unl.pt'
+        registration_data['email'] = f"{self.student_associated.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
-        registration_data['email'] = student.abbreviation + '@campus.fct.unl.pt'
+        registration_data['email'] = f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
         registration_data['student'] = self.student_associated.abbreviation
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
@@ -123,10 +124,10 @@ class InviteRegistrationTest(TestCase):
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['student'] = student.abbreviation
-        registration_data['email'] = self.student_free.abbreviation + '@campus.fct.unl.pt'
+        registration_data['email'] = f"{self.student_free.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
-        registration_data['email'] = student.abbreviation + '@campus.fct.unl.pt'
+        registration_data['email'] = f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
 
     def test_invite_expiration(self):
         revoked_invite = m.Invite.objects.create(
@@ -144,7 +145,7 @@ class InviteRegistrationTest(TestCase):
             'username': 'free',
             'nickname': 'free',
             'student': student.abbreviation,
-            'email': student.abbreviation + '@campus.fct.unl.pt',
+            'email': f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}",
             'invite': revoked_invite.token,
             'password': 'queijo-123',
             'password_confirmation': 'queijo-123'}
@@ -169,7 +170,7 @@ class InviteRegistrationTest(TestCase):
                 'username': 'registration-user',
                 'nickname': 'registration-user',
                 'student': student.abbreviation,
-                'email': student.abbreviation + '@campus.fct.unl.pt',
+                'email': f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}",
                 'invite': invite.token,
                 'password': 'queijo-123',
                 'password_confirmation': 'queijo-123'})

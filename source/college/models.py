@@ -387,10 +387,12 @@ class Teacher(Importable):
     | A person who teaches.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
-    #: Full teacher name
+    #: Full teacher name (TODO deprecate)
     name = djm.TextField(max_length=100)
     #: Departments this teacher has worked for
     departments = djm.ManyToManyField(Department, related_name="teachers")
+    #: User this teacher is associated with
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.CASCADE, related_name='teachers')
 
     def __str__(self):
         return f"{self.name} ({self.iid})"
