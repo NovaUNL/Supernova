@@ -30,7 +30,7 @@
       let currentDate = new Date(Date.now());
       loadCalendar(
           '#calendar',
-          "{% url 'user_schedule' profile_user.nickname 'from' 'to'%}",
+          "{% url 'api:user_schedule' profile_user.nickname 'from' 'to'%}",
           currentDate, 28, 'week');
   </script>
 {% endblock %}
