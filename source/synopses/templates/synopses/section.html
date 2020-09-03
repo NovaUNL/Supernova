@@ -105,14 +105,10 @@
               <span class="indented">Sem recursos adicionais.</span>
             {% endif %}
             <h3>Unidades curriculares</h3>
-            {% if section.class_sections.exists %}
+            {% if section.classes.exists %}
               <ul class="content-list">
-                {% for class_section in section.class_sections.all %}
-                  <li>
-                    <a href="{% url 'synopses:class' class_section.corresponding_class.id %}">
-                      {{ class_section.corresponding_class.name }}
-                    </a>
-                  </li>
+                {% for class in section.classes.all %}
+                  <li><a href="{% url 'synopses:class' class.id %}">{{ class.name }}</a></li>
                 {% endfor %}
               </ul>
             {% else %}
