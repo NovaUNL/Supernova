@@ -119,7 +119,7 @@
       let currentDate = new Date(Date.now());
       loadCalendar(
           '#calendar',
-          "{% url 'group_schedule' group.abbreviation 'from' 'to'%}",
+          "{% url 'api:group_schedule' group.abbreviation 'from' 'to'%}",
           currentDate, 28, 'month');
   </script>
 {% endblock %}
