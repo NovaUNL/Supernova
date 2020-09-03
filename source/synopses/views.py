@@ -117,6 +117,26 @@ def subarea_edit_view(request, subarea_id):
     return render(request, 'synopses/generic_form.html', context)
 
 
+# Section display views
+def __section_common(section, context):
+    """
+    Code that is common to every section view.
+    :param section: The section that is being shown
+    :param context: The template context variable
+    """
+    context['pcode'] = 'l_synopses_section'
+    context['section'] = section
+    children = m.Section.objects \
+        .filter(parents_intermediary__parent=section) \
+        .order_by('parents_intermediary__index').all()
+    parents = m.Section.objects \
+        .filter(children_intermediary__section=section) \
+        .order_by('children_intermediary__index').all()
+    context['children'] = children
+    context['parents'] = parents
+    context['author_log'] = section.log_entries.distinct('author')
+
+
 def section_view(request, section_id):
     """
     View where a section is displayed as an isolated object.
@@ -126,22 +146,28 @@ def section_view(request, section_id):
             .select_related('subarea')
             .prefetch_related('classes'),
         id=section_id)
-    children = m.Section.objects \
-        .filter(parents_intermediary__parent=section) \
-        .order_by('parents_intermediary__index').all()
-    parents = m.Section.objects \
-        .filter(children_intermediary__section=section) \
-        .order_by('children_intermediary__index').all()
     context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
+    __section_common(section, context)
     context['title'] = section.title
-    context['section'] = section
-    context['children'] = children
-    context['parents'] = parents
-    context['author_log'] = section.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': '...', 'url': '#'},
                           {'name': section.title, 'url': '#'}]
+    return render(request, 'synopses/section.html', context)
+
+
+def subsection_view(request, parent_id, child_id):
+    """
+    View where a section is displayed as a part of another section.
+    """
+    parent = get_object_or_404(m.Section, id=parent_id)
+    child = get_object_or_404(m.Section, id=child_id)
+    context = build_base_context(request)
+    __section_common(child, context)
+    context['title'] = '%s - %s' % (child.title, parent.title)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': parent.title, 'url': reverse('synopses:section', args=[parent_id])},
+                          {'name': child.title, 'url': '#'}]
     return render(request, 'synopses/section.html', context)
 
 
@@ -153,112 +179,15 @@ def subarea_section_view(request, subarea_id, section_id):
     subarea = section.subarea
     if subarea.id != subarea_id:
         raise Http404('Mismatched section')
-    children = m.Section.objects \
-        .filter(parents_intermediary__parent=section) \
-        .order_by('parents_intermediary__index').all()
-    parents = m.Section.objects \
-        .filter(children_intermediary__section=section) \
-        .order_by('children_intermediary__index').all()
     area = subarea.area
     context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
+    __section_common(section, context)
     context['title'] = '%s - %s' % (section.title, area.title)
-    context['section'] = section
-    context['children'] = children
-    context['parents'] = parents
-    context['author_log'] = section.log_entries.distinct('author')
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
                           {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
                           {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
                           {'name': section.title, 'url': '#'}]
     return render(request, 'synopses/section.html', context)
-
-
-def subsection_view(request, parent_id, child_id):
-    """
-    View where a section is displayed as a part of another section.
-    """
-    context = build_base_context(request)
-    parent = get_object_or_404(m.Section, id=parent_id)
-    child = get_object_or_404(m.Section, id=child_id)
-    children = m.Section.objects \
-        .filter(parents_intermediary__parent=child) \
-        .order_by('parents_intermediary__index').all()
-    parents = m.Section.objects \
-        .filter(children_intermediary__section=child) \
-        .order_by('children_intermediary__index').all()
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = '%s - %s' % (child.title, parent.title)
-    context['section'] = child
-    context['children'] = children
-    context['parents'] = parents
-    context['author_log'] = child.log_entries.distinct('author')
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': '...', 'url': '#'},
-                          {'name': parent.title, 'url': reverse('synopses:section', args=[parent_id])},
-                          {'name': child.title, 'url': '#'}]
-    return render(request, 'synopses/section.html', context)
-
-
-@login_required
-@permission_required('synopses.add_section', raise_exception=True)
-def subsection_create_view(request, section_id):
-    parent = get_object_or_404(m.Section, id=section_id)
-    if request.method == 'POST':
-        form = f.SectionChildForm(data=request.POST)
-        valid = form.is_valid()
-        if valid:
-            section = form.save()
-            m.SectionSubsection(section=section, parent=parent).save()
-            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
-    else:
-        form = f.SectionChildForm()
-
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar secção em "%s"' % parent.title
-    context['form'] = form
-    context['action_page'] = reverse('synopses:subsection_create', args=[section_id])
-    context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': '...', 'url': '#'},
-                          {'name': parent.title, 'url': reverse('synopses:section', args=[section_id])},
-                          {'name': 'Criar secção', 'url': '#'}]
-    return render(request, 'synopses/generic_form.html', context)
-
-
-@login_required
-@permission_required('synopses.add_section', raise_exception=True)
-def subarea_section_create_view(request, subarea_id):
-    subarea = get_object_or_404(m.Subarea, id=subarea_id)
-    area = subarea.area
-    if request.method == 'POST':
-        form = f.SubareaSectionForm(data=request.POST)
-        valid = form.is_valid()
-        if valid:
-            section = form.save(commit=False)
-            if section.subarea != subarea:
-                form.add_error('subarea', 'Subarea mismatch')
-                valid = False
-            if valid:
-                section = form.save(commit=False)
-                section.content_reduce()
-                section.save()
-                return HttpResponseRedirect(reverse('synopses:subarea_section', args=[subarea_id, section.id]))
-    else:
-        form = f.SubareaSectionForm(initial={'subarea': subarea})
-
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar secção em "%s"' % subarea.title
-    context['form'] = form
-    context['action_page'] = reverse('synopses:subarea_section_create', args=[subarea_id])
-    context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
-                          {'name': 'Criar secção', 'url': '#'}]
-    return render(request, 'synopses/generic_form.html', context)
 
 
 def section_authors_view(request, section_id):
@@ -274,6 +203,7 @@ def section_authors_view(request, section_id):
     return render(request, 'synopses/section_authors.html', context)
 
 
+# Section creation views
 @login_required
 @permission_required('synopses.add_section', raise_exception=True)
 def section_create_view(request, parent_id):
@@ -357,6 +287,67 @@ def section_create_view(request, parent_id):
 
 
 @login_required
+@permission_required('synopses.add_section', raise_exception=True)
+def subsection_create_view(request, section_id):
+    parent = get_object_or_404(m.Section, id=section_id)
+    if request.method == 'POST':
+        form = f.SectionChildForm(data=request.POST)
+        valid = form.is_valid()
+        if valid:
+            section = form.save()
+            m.SectionSubsection(section=section, parent=parent).save()
+            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
+    else:
+        form = f.SectionChildForm()
+
+    context = build_base_context(request)
+    context['pcode'] = 'l_synopses_section'
+    context['title'] = 'Criar secção em "%s"' % parent.title
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subsection_create', args=[section_id])
+    context['action_name'] = 'Criar'
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': '...', 'url': '#'},
+                          {'name': parent.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': 'Criar secção', 'url': '#'}]
+    return render(request, 'synopses/generic_form.html', context)
+
+
+@login_required
+@permission_required('synopses.add_section', raise_exception=True)
+def subarea_section_create_view(request, subarea_id):
+    subarea = get_object_or_404(m.Subarea, id=subarea_id)
+    area = subarea.area
+    if request.method == 'POST':
+        form = f.SubareaSectionForm(data=request.POST)
+        valid = form.is_valid()
+        if valid:
+            section = form.save(commit=False)
+            if section.subarea != subarea:
+                form.add_error('subarea', 'Subarea mismatch')
+                valid = False
+            if valid:
+                section = form.save(commit=False)
+                section.content_reduce()
+                section.save()
+                return HttpResponseRedirect(reverse('synopses:subarea_section', args=[subarea_id, section.id]))
+    else:
+        form = f.SubareaSectionForm(initial={'subarea': subarea})
+
+    context = build_base_context(request)
+    context['pcode'] = 'l_synopses_section'
+    context['title'] = 'Criar secção em "%s"' % subarea.title
+    context['form'] = form
+    context['action_page'] = reverse('synopses:subarea_section_create', args=[subarea_id])
+    context['action_name'] = 'Criar'
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
+                          {'name': 'Criar secção', 'url': '#'}]
+    return render(request, 'synopses/generic_form.html', context)
+
+
+@login_required
 @permission_required('synopses.change_section', raise_exception=True)
 def section_edit_view(request, section_id):
     section = get_object_or_404(m.Section, id=section_id)
@@ -428,6 +419,7 @@ def section_edit_view(request, section_id):
     return render(request, 'synopses/section_management.html', context)
 
 
+# Class related views
 def class_sections_view(request, class_id):
     class_ = get_object_or_404(college.Class, id=class_id)
     context = build_base_context(request)
@@ -443,6 +435,35 @@ def class_sections_view(request, class_id):
     return render(request, 'synopses/class_sections.html', context)
 
 
+def class_section_view(request, class_id, section_id):
+    class_synopsis_section = get_object_or_404(
+        m.ClassSection.objects.select_related('corresponding_class', 'section'),
+        section_id=section_id, corresponding_class_id=class_id)
+    class_ = class_synopsis_section.corresponding_class
+    section = class_synopsis_section.section
+
+    context = build_base_context(request)
+    __section_common(section, context)
+    context['title'] = '%s (%s)' % (class_synopsis_section.section.title, class_.name)
+    context['synopsis_class'] = class_
+    context['section'] = class_synopsis_section.section
+    # FIXME old code to navigate from one section to the next in the same class
+    # Get sections of this class, take the one indexed before and the one after.
+    # related_sections = m.ClassSection.objects \
+    #     .filter(corresponding_class=class_).order_by('index')
+    # previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
+    # next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
+    # if previous_section:
+    #     context['previous_section'] = previous_section.section
+    # if next_section:
+    #     context['next_section'] = next_section.section
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
+                          {'name': section.title,
+                           'url': reverse('synopses:class_section', args=[class_id, section_id])}]
+    return render(request, 'synopses/section.html', context)
+
+
 @staff_member_required
 def class_manage_sections_view(request, class_id):
     class_ = get_object_or_404(college.Class, id=class_id)
@@ -454,35 +475,6 @@ def class_manage_sections_view(request, class_id):
                           {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
                           {'name': 'Secções', 'url': reverse('synopses:class_manage', args=[class_id])}]
     return render(request, 'synopses/class_management.html', context)
-
-
-def class_section_view(request, class_id, section_id):
-    class_ = get_object_or_404(college.Class, id=class_id)
-    section = get_object_or_404(m.Section, id=section_id)
-    class_synopsis_section = m.ClassSection.objects.get(section=section, corresponding_class=class_)
-    # Get sections of this class, take the one indexed before and the one after.
-    related_sections = m.ClassSection.objects \
-        .filter(corresponding_class=class_).order_by('index')
-    # previous_section = related_sections.filter(index__lt=class_synopsis_section.index).last()
-    # next_section = related_sections.filter(index__gt=class_synopsis_section.index).first()
-    department = class_.department
-
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses'
-    context['title'] = '%s (%s)' % (class_synopsis_section.section.title, class_.name)
-    context['department'] = department
-    context['synopsis_class'] = class_
-    context['section'] = class_synopsis_section.section
-    # if previous_section:
-    #     context['previous_section'] = previous_section.section
-    # if next_section:
-    #     context['next_section'] = next_section.section
-    context['author_log'] = section.log_entries.distinct('author')
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
-                          {'name': section.title,
-                           'url': reverse('synopses:class_section', args=[class_id, section_id])}]
-    return render(request, 'synopses/section.html', context)
 
 
 def section_exercises_view(request, section_id):
