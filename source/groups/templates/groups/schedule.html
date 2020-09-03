@@ -35,7 +35,7 @@
                 <tr>
                   <td>{{ entry.title }}</td>
                   <td>{{ entry.datetime }}</td>
-                  <td>{{ entry.duration }}</td>
+                  <td>{{ entry.duration }} minutos</td>
                 </tr>
               {% endfor %}
             </table>
@@ -59,7 +59,7 @@
               {% for entry in periodic_entries %}
                 <tr>
                   <td>{{ entry.title }}</td>
-                  <td>{{ entry.weekday }} ás {{ entry.time }}</td>
+                  <td>{{ entry.get_weekday_display }} ás {{ entry.time }}</td>
                   <td>{{ entry.duration }} minutos</td>
                   <td>{{ entry.start_date }}</td>
                   <td>{{ entry.end_date }}</td>
