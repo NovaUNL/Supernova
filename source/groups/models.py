@@ -32,7 +32,7 @@ class Group(djm.Model):
     #: The subscribers of this group (do not necessarily belong to it).
     subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='group_subscriptions')
     #: The place where this group is headquartered and commonly found.
-    place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True)
+    place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True, related_name='groups')
     #: An image that presents this group.
     image = djm.ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
 
@@ -135,7 +135,7 @@ class Membership(djm.Model):
     #: :py:class:`users.models.User` referred to by this membership
     member = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='group_roles')
     #: :py:class:`Role` conferred
-    role = djm.ForeignKey(Role, on_delete=djm.PROTECT)
+    role = djm.ForeignKey(Role, on_delete=djm.PROTECT, related_name='membership_rel')
 
     def __str__(self):
         return f'{self.member.nickname} -> {self.role} -> {self.group}'
@@ -147,9 +147,9 @@ class Activity(PolymorphicModel):
       is meant to be used as a feed
     """
     #: :py:class:`Group` that had this activity
-    group = djm.ForeignKey(Group, on_delete=djm.CASCADE)
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='activities')
     #: :py:class:`users.models.User` that triggered the activity.
-    author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)
+    author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT, related_name='group_activity')
     #: Datetime at which the trigger happened
     datetime = djm.DateTimeField(auto_now_add=True)
 
@@ -291,7 +291,7 @@ class Event(djm.Model):
     #: Expected duration for the event
     duration = djm.IntegerField(null=True, blank=True)
     #: Location where the event happens
-    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL)
+    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL, related_name='events')
     #: Limit of persons in this event
     capacity = djm.IntegerField(null=True, blank=True)
     #: | Flag telling that this is the official enrollment platform for the event
@@ -358,7 +358,7 @@ class Gallery(djm.Model):
     #: Gallery title
     title = djm.CharField(max_length=256)
     #: Owner :py:class:`Group`
-    group = djm.ForeignKey(Group, on_delete=djm.CASCADE)
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='galleries')
     #: Gallery absolute position in the group galleries listing
     index = djm.IntegerField(unique=True)
 
@@ -366,7 +366,7 @@ class Gallery(djm.Model):
 class GalleryItem(djm.Model):
     """A multimedia item in a :py:class:`Gallery`."""
     #: Item :py:class:`Gallery`.
-    gallery = djm.ForeignKey(Gallery, on_delete=djm.PROTECT)
+    gallery = djm.ForeignKey(Gallery, on_delete=djm.PROTECT, related_name='items')
     #: An optional caption describing the item
     caption = djm.TextField(blank=True, null=True)
     #: Datetime associated with the item, NOT the datetime at which it has been uploaded
