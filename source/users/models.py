@@ -4,6 +4,7 @@ from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from polymorphic.models import PolymorphicModel
 
 
 def user_profile_pic_path(user, filename):
@@ -168,3 +169,58 @@ class Invite(djm.Model):
 
     def __str__(self):
         return f"{self.issuer.nickname}:{self.token}"
+
+
+class Subscriptible(djm.Model):
+    """
+    | A data type which can be subscribed to
+    | (Meant to be inherited)
+    """
+    #: The id field, but renamed to avoid collisions upon multiple inheritance
+    subscriptible_id = djm.AutoField(primary_key=True)
+    #: :py:class:`users.models.User` that subscribe to this object.
+    subscribers = djm.ManyToManyField(User, through='Subscription', related_name='subscriptibles')
+
+
+class Subscription(PolymorphicModel):
+    """
+    A notification points to unknown past actions with a particular relevance.
+    """
+    #: :py:class:`Subscribable` that this subscription targets
+    to = djm.ForeignKey(Subscriptible, on_delete=djm.CASCADE, related_name='subscriptions')
+    #: :py:class:`users.models.User` that wishes to be notified.
+    subscriber = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='subscriptions')
+    #: Datetime at which the activity happened
+    issue_timestamp = djm.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.issue_timestamp}({self.destinatary})'
+
+
+class Activity(PolymorphicModel):
+    """
+    An activity is an action taken by a user at a given point in time.
+    """
+    #: The id field, but renamed to avoid collisions upon multiple inheritance
+    activity_id = djm.AutoField(primary_key=True)
+    #: Datetime at which the activity happened
+    timestamp = djm.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.datetime}({self.author})'
+
+    class Meta:
+        verbose_name_plural = "activities"
+
+
+class Notification(PolymorphicModel):
+    """
+    A notification points to unknown past actions with a particular relevance.
+    """
+    #: :py:class:`users.models.User` that received the notification.
+    recipient = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='notifications')
+    #: Datetime at which the notification was issued
+    issue_timestamp = djm.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.issue_timestamp}({self.destinatary})'
