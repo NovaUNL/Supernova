@@ -1,0 +1,17 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Recentes</h2></div>
+      <div class="pane-content news-list">
+        {% for question in questions %}
+          <h2><a href="{% url 'learning:question' question.id %}">{{ question.title }}</a></h2>
+          {% if not forloop.last %}<hr>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

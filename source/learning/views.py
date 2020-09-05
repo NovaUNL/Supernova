@@ -1,6 +1,6 @@
 from dal import autocomplete
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect, Http404
 
@@ -495,32 +495,8 @@ def section_exercises_view(request, section_id):
     return render(request, 'learning/section_exercises.html', context)
 
 
-class AreaAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = m.Area.objects.all()
-        if self.q:
-            qs = qs.filter(title__istartswith=self.q)
-        return qs
-
-
-class SubareaAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = m.Subarea.objects.all()
-        if self.q:
-            qs = qs.filter(title__istartswith=self.q)
-        return qs
-
-
-class SectionAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = m.Section.objects.all()
-        if self.q:
-            qs = qs.filter(title__contains=self.q)
-        return qs
-
-
 @login_required
-def index_view(request):
+def exercises_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
     context['title'] = 'Exercícios'
@@ -592,3 +568,105 @@ def edit_exercise_view(request, exercise_id):
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
                           {'name': 'Editar exercício', 'url': reverse('learning:edit', args=[exercise_id])}]
     return render(request, 'learning/editor.html', context)
+
+
+def questions_view(request):
+    context = build_base_context(request)
+    context['pcode'] = 'l_questions'
+    context['title'] = 'Dúvidas'
+    context['questions'] = m.Question.objects.select_related('author').annotate(answer_count=Count('answers'))
+    context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
+    return render(request, 'learning/questions.html', context)
+
+
+@login_required
+@permission_required('learning.add_question', raise_exception=True)
+def question_create_view(request):
+    context = build_base_context(request)
+    context['pcode'] = 'l_question_create'
+    context['title'] = 'Colocar dúvida'
+    if request.method == 'POST':
+        form = f.QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.author = request.user
+            question.save()
+            return redirect('learning:question', question_id=question.id)
+    else:
+        context['form'] = f.QuestionForm()
+    context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
+                          {'name': 'Colocar questão', 'url': reverse('learning:question_create')}]
+    return render(request, 'learning/question_editor.html', context)
+
+
+def question_view(request, question_id):
+    question = get_object_or_404(
+        m.Question.objects
+            .prefetch_related('answers__comments', 'comments'),
+        id=question_id)
+    answer_form = None
+    status = 200
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            if not request.user.has_perm('learning.add_questionanswer'):
+                context = build_base_context(request)
+                context['pcode'] = 'l_question'
+                context['title'] = context['msg_title'] = 'Insuficiência de permissões'
+                context['msg_content'] = 'O seu utilizador não tem permissões para responder.'
+                return render(request, 'supernova/message.html', context, status=403)
+
+            if 'submit' in request.GET and request.GET['submit'] == 'answer':
+                answer_form = f.AnswerForm(request.POST)
+                if answer_form.is_valid():
+                    answer = answer_form.save(commit=False)
+                    answer.to = question
+                    answer.author = request.user
+                    answer.save()
+                    # Reload data, new form
+                    question.refresh_from_db()
+                    answer_form = f.AnswerForm()
+            else:
+                status = 400
+        else:
+            answer_form = f.AnswerForm()
+
+    context = build_base_context(request)
+    context['pcode'] = 'l_question'
+    context['title'] = 'Dúvida: %s' % question.title
+    context['question'] = question
+    context['answer_form'] = answer_form
+    context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
+                          {'name': question.title, 'url': reverse('learning:question', args=[question_id])}]
+    return render(request, 'learning/question.html', context, status=status)
+
+
+class AreaAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Area.objects.all()
+        if self.q:
+            qs = qs.filter(Q(id=self.q) | Q(title__istartswith=self.q))
+        return qs
+
+
+class SubareaAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Subarea.objects.all()
+        if self.q:
+            qs = qs.filter(Q(id=self.q) | Q(title__istartswith=self.q))
+        return qs
+
+
+class SectionAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Section.objects.all()
+        if self.q:
+            qs = qs.filter(Q(id=self.q) | Q(title__contains=self.q))
+        return qs
+
+
+class ExerciseAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Exercise.objects.all()
+        if self.q:
+            qs = qs.filter(id=self.q)
+        return qs

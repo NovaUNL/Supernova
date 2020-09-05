@@ -200,3 +200,26 @@ class AnswerForm(djf.Form):
 
 #: A formset which will be used to return 1..n answers at once
 AnswerFormSet = djf.formset_factory(AnswerForm, extra=1)
+
+
+class QuestionForm(djf.ModelForm):
+    class Meta:
+        model = m.Question
+        fields = ('title', 'content', 'linked_sections', 'linked_classes', 'linked_exercises')
+        widgets = {
+            'linked_classes': autocomplete.ModelSelect2Multiple(url='college:class_ac'),
+            'linked_sections': autocomplete.ModelSelect2Multiple(url='learning:section_ac'),
+            'linked_exercises': autocomplete.ModelSelect2Multiple(url='learning:exercise_ac'),
+        }
+
+
+class AnswerForm(djf.ModelForm):
+    class Meta:
+        model = m.QuestionAnswer
+        fields = ('content',)
+
+
+class CommentForm(djf.ModelForm):
+    class Meta:
+        model = m.QuestionAnswer
+        fields = ('content',)

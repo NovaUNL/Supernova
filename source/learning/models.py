@@ -371,3 +371,107 @@ class WrongAnswerReport:
     exercise = djm.ForeignKey(Exercise, on_delete=djm.CASCADE, related_name='wrong_answer_reports')
     #: The issue
     reason = djm.TextField()
+
+
+class Postable(djm.Model):
+    #: The user who authored
+    author = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=djm.PROTECT,
+        related_name='questions')
+    #: Posted content
+    content = MarkdownxField()
+    #: Creation datetime
+    creation_timestamp = djm.DateTimeField(auto_now_add=True)
+
+    # Cached fields
+    upvotes = djm.IntegerField(default=0)
+    downvotes = djm.IntegerField(default=0)
+
+    class Meta:
+        ordering = ('creation_timestamp',)
+
+    @property
+    def content_html(self):
+        return markdownify(self.content)
+
+
+class Question(users.Activity, users.Subscriptible, Postable):
+    """
+    A generic question, usually about an exercise.
+    """
+    #: A descriptive title
+    title = djm.CharField(max_length=128)
+    #: The related :py:class:`synopses.models.Section`
+    linked_sections = djm.ManyToManyField(
+        Section,
+        blank=True,
+        verbose_name='Secções relacionadas',
+        related_name='linked_questions')
+    #: The related :py:class:`exercises.models.Exercise`
+    linked_exercises = djm.ManyToManyField(
+        Exercise,
+        blank=True,
+        verbose_name='Exercícios relacionados',
+        related_name='linked_questions')
+    #: The related :py:class:`college.models.Class`
+    linked_classes = djm.ManyToManyField(
+        college.Class,
+        blank=True,
+        verbose_name='Unidades curriculares relacionadas',
+        related_name='linked_questions')
+    #: Question that makes this one redundant
+    duplication_of = djm.ForeignKey(
+        'self',
+        blank=True,
+        null=True,
+        on_delete=djm.SET_NULL,
+        related_name='duplicates')
+
+    def __str__(self):
+        return self.title
+
+
+class QuestionAnswer(users.Activity, users.Subscriptible, Postable):
+    """
+    An answer to a Question
+    """
+    #: :py:class:`Postable` to which this answer refers
+    to = djm.ForeignKey(
+        Question,
+        on_delete=djm.PROTECT,
+        related_name='answers')
+    #: Signals if this answer is the accepted answer
+    accepted = djm.BooleanField(default=False)
+
+
+class PostableComment(users.Activity, users.Subscriptible, Postable):
+    """
+    A comment to any object which inherits from :py:class:`Postable`
+    """
+    #: :py:class:`Postable` to which this comment refers
+    to = djm.ForeignKey(
+        Postable,
+        on_delete=djm.PROTECT,
+        related_name='comments')
+
+
+class PostableVote(users.Activity):
+    """
+    A vote in a question, answer or another comment
+    """
+    UPVOTE = 0
+    DOWNVOTE = 1
+    VOTE_CHOICES = [
+        (UPVOTE, 'Upvote'),
+        (DOWNVOTE, 'Downvote'),
+    ]
+    #: Type of vote. Right now only up and down votes.
+    type = djm.IntegerField(choices=VOTE_CHOICES)
+    #: Postable to which this vote refers
+    to = djm.ForeignKey(
+        Postable,
+        on_delete=djm.PROTECT,
+        related_name='votes')

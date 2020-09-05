@@ -1,0 +1,111 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script>
+      MathJax = {
+          options: {
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process',
+              renderActions: {
+                  find: [10, function (doc) {
+                      for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                          const display = !!node.type.match(/; *mode=display/);
+                          const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                          const text = document.createTextNode('');
+                          const sibling = node.previousElementSibling;
+                          node.parentNode.replaceChild(text, node);
+                          math.start = {node: text, delim: '', n: 0};
+                          math.end = {node: text, delim: '', n: 0};
+                          doc.math.push(math);
+                          if (sibling && sibling.matches('.MathJax_Preview')) {
+                              sibling.parentNode.removeChild(sibling);
+                          }
+                      }
+                  }, '']
+              }
+          }
+      };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Dúvida a colocar</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'learning:question_create' %}">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="form-block">
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Título</h4>
+              </div>
+              <div class="form-row-description">
+
+                {{ form.title }}<br>
+                Uma descrição <b>concisa</b> do que se trata o problema.<br>
+                <q>Separação de termos em integral</q> ou <q>Adição de tipos distintos a vetor em Java.</q><br>
+                Não <q>Ajuda muito importante, matemática</q> ou <q>erro de compilação</q>.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Conteúdo</h4>
+              </div>
+              <div class="form-row-description">
+                Enunciação do problema, com claridade, evitando colocar múltiplas questões (especialmente se forem pouco relacionadas).<br>
+                Questões que envolvam programação requerem um exemplo que reproduza o problema. Para tal existem diversas plataformas
+                [<a href="https://ideone.com/">1</a>],[<a href="https://jsfiddle.net/">2</a>],[<a href="https://repl.it/">3</a>],[<a href="https://play.rust-lang.org/">4</a>].
+              </div>
+              {{ form.content }}
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Exercícios relacionados</h4>
+                {{ form.linked_exercises }}
+              </div>
+              <div class="form-row-description">
+                Exercício ou exercícios em que esta dúvida tenha ocorrido.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Unidades curriculares relacionadas</h4>
+                {{ form.linked_classes }}
+              </div>
+              <div class="form-row-description">
+                Unidade curricular à qual esta dúvida diz respeito (em branco para nenhuma).
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Secções relacionadas</h4>
+                {{ form.linked_sections }}
+              </div>
+              <div class="form-row-description">
+                Enumeração de secções de síntese que estão relacionadas ou suscitam a dúvida que levou a esta questão.
+              </div>
+            </div>
+          </div>
+          {{ form.media }}
+          <input class="ui-btn end" type="submit" value="Colocar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+      let element = document.querySelectorAll('.markdownx');
+      Object.keys(element).map(key =>
+          element[key].addEventListener('markdownx.update', event => {
+              console.log(event.detail);
+              MathJax.typeset();
+          })
+      );
+  </script>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script>
+      MathJax = {
+          options: {
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process',
+              renderActions: {
+                  find: [10, function (doc) {
+                      for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                          const display = !!node.type.match(/; *mode=display/);
+                          const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                          const text = document.createTextNode('');
+                          const sibling = node.previousElementSibling;
+                          node.parentNode.replaceChild(text, node);
+                          math.start = {node: text, delim: '', n: 0};
+                          math.end = {node: text, delim: '', n: 0};
+                          doc.math.push(math);
+                          if (sibling && sibling.matches('.MathJax_Preview')) {
+                              sibling.parentNode.removeChild(sibling);
+                          }
+                      }
+                  }, '']
+              }
+          }
+      };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <style>
+      .postable-wrapper {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+      }
+
+      .postable-votes {
+          padding: 10px 10px 0 0;
+      }
+
+      .postable-votes {
+          min-height: 150px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      .postable-votes > a {
+          display: block;
+          border: 2px solid black;
+          border-radius: 3px;
+          width: 48px;
+          height: 48px;
+          background-color: var(--input-light);
+          background-size: contain;
+          margin-bottom: 2px;
+      }
+
+      .upvote {
+          background-image: url("{% static 'img/icons/up.svg' %}");
+      }
+
+      .downvote {
+          background-image: url("{% static 'img/icons/down.svg' %}");
+      }
+
+      .answer {
+          background-image: url("{% static 'img/icons/check-nofil.svg' %}");
+      }
+
+      .answer:hover {
+          background-image: url("{% static 'img/icons/check.svg' %}");
+      }
+
+      .author span {
+          display: block;
+      }
+
+      .postable-footer {
+          display: flex;
+          justify-content: space-between;
+      }
+  </style>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>{{ question.title }}</h2></div>
+      <div class="pane-content">
+        <div class="postable-wrapper">
+          <div class="postable-votes">
+            <a class="upvote"></a>
+            <span>0</span>
+            <a class="downvote"></a>
+          </div>
+          <div class="postable-content">
+            {{ question.content_html|safe }}
+          </div>
+        </div>
+        <div class="postable-footer">
+          <div class="actions">
+            {#            <a>Reportar</a>#}
+          </div>
+          <div class="author">
+            <span><a href="{% url 'users:profile' question.author.id %}">{{ question.author }}</a></span>
+            <span>{{ question.timestamp }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% for answer in question.answers.all %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <div class="postable-wrapper">
+            <div class="postable-votes">
+              <a class="upvote"></a>
+              <span>0</span>
+              <a class="downvote"></a>
+              <a class="answer"></a>
+            </div>
+            <div class="postable-content">
+              {{ answer.content_html|safe }}
+            </div>
+          </div>
+          <div class="postable-footer">
+            <div class="actions"></div>
+            <div class="author">
+              <span><a href="{% url 'users:profile' answer.author.id %}">{{ answer.author }}</a></span>
+              <span>{{ answer.timestamp }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Responder</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'learning:question' question.id %}?submit=answer">
+          {% csrf_token %}
+          {{ answer_form.content }}
+          <input class="ui-btn end" type="submit" value="Submeter resposta"/>
+          {{ answer_form.media }}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
