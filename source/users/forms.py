@@ -14,8 +14,7 @@ from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.utils import password_strength, correlated
 from supernova.widgets import SliderInput
 from users import models as m
-from exercises import models as exercises
-from synopses import models as synopses
+from learning import models as learning
 from settings import CAMPUS_EMAIL_SUFFIX
 
 IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
@@ -310,10 +309,10 @@ class AccountPermissionsForm(forms.Form):
         permissions = [
             ('can_view_college_data', m.User, 'full_student_access'),
             ('can_add_invites', m.Invite, 'add_invite'),
-            ('can_add_synopsis_sections', synopses.Section, 'add_section'),
-            ('can_change_synopsis_sections', synopses.Section, 'change_section'),
-            ('can_add_exercises', exercises.Exercise, 'add_exercise'),
-            ('can_change_exercises', exercises.Exercise, 'change_exercise')
+            ('can_add_synopsis_sections', learning.Section, 'add_section'),
+            ('can_change_synopsis_sections', learning.Section, 'change_section'),
+            ('can_add_exercises', learning.Exercise, 'add_exercise'),
+            ('can_change_exercises', learning.Exercise, 'change_exercise')
         ]
 
         for field, model, permission_name in permissions:
@@ -331,10 +330,10 @@ class AccountPermissionsForm(forms.Form):
     def __calc_initial(self):
         return {
             'can_view_college_data': self.user.has_perm('users.full_student_access'),
-            'can_add_synopsis_sections': self.user.has_perm('synopses.add_section'),
-            'can_change_synopsis_sections': self.user.has_perm('synopses.change_section'),
-            'can_add_exercises': self.user.has_perm('exercises.add_exercise'),
-            'can_change_exercises': self.user.has_perm('exercises.change_exercise'),
+            'can_add_synopsis_sections': self.user.has_perm('learning.add_section'),
+            'can_change_synopsis_sections': self.user.has_perm('learning.change_section'),
+            'can_add_exercises': self.user.has_perm('learning.add_exercise'),
+            'can_change_exercises': self.user.has_perm('learning.change_exercise'),
         }
 
 

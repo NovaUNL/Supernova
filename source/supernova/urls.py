@@ -37,10 +37,9 @@ urlpatterns = [
     path('documento/<int:document_id>/', documents.document, name='document'),
     # News views
     path('noticias/', include('news.urls')),
-    # Synopses views
-    path('sinteses/', include('synopses.urls')),
-    path('exercicios/', include('exercises.urls')),
-    path('loja/', include('store.urls')),
+    # Learning views
+    path('estudo/', include('learning.urls')),
+    # path('loja/', include('store.urls')),
     # REST API views
     path('api/', include('api.urls')),
     path('api-auth/', include('rest_framework.urls')),

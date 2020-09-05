@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 
-app_name = 'synopses'
+app_name = 'learning'
 
 urlpatterns = [
     path('', views.areas_view, name='areas'),
@@ -22,6 +22,10 @@ urlpatterns = [
     path('cadeira/<int:class_id>/<int:section_id>/', views.class_section_view, name='class_section'),
     path('seccao/<int:section_id>/criar_seccao/', views.section_create_view, name='section_create'),
     path('seccao/<int:section_id>/editar/', views.section_edit_view, name='section_edit'),
+    path('exercicios', views.index_view, name='exercises'),
+    path('exercicios/criar/', views.create_exercise_view, name='create'),
+    path('exercicios/editar/<int:exercise_id>/', views.edit_exercise_view, name='edit'),
+    path('exercicios/<int:exercise_id>/', views.exercise_view, name='exercise'),
     # Autocompletion helpers
     path('ac/area/', views.AreaAutocomplete.as_view(), name='area_ac'),
     path('ac/subarea/', views.SubareaAutocomplete.as_view(), name='subarea_ac'),

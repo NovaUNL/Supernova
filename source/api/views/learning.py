@@ -9,32 +9,31 @@ from rest_framework.views import APIView
 
 from api.serializers import synopses as serializers
 from api.serializers.synopses import SectionRelationSerializer
-from college.models import Class
-from synopses import models as synopses
+from learning import models as learning
 from college import models as college
 
 
 class Areas(APIView):
     def get(self, request, format=None):
-        serializer = serializers.AreaSerializer(synopses.Area.objects.all(), many=True)
+        serializer = serializers.AreaSerializer(learning.Area.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class Area(APIView):
     def get(self, request, pk, format=None):
-        serializer = serializers.AreaSerializer(synopses.Area.objects.get(id=pk))
+        serializer = serializers.AreaSerializer(learning.Area.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class Subarea(APIView):
     def get(self, request, pk, format=None):
-        serializer = serializers.SubareaSerializer(synopses.Subarea.objects.get(id=pk))
+        serializer = serializers.SubareaSerializer(learning.Subarea.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class Section(APIView):
     def get(self, request, pk, format=None):
-        serializer = serializers.SectionSerializer(synopses.Section.objects.get(id=pk))
+        serializer = serializers.SectionSerializer(learning.Section.objects.get(id=pk))
         return Response(serializer.data)
 
 
@@ -44,7 +43,7 @@ class SectionChildren(APIView):
 
     def get(self, request, pk, format=None):
         serializer = SectionRelationSerializer(
-            synopses.SectionSubsection.objects
+            learning.SectionSubsection.objects
                 .select_related('section')
                 .order_by('index')
                 .filter(parent=pk),
@@ -52,42 +51,42 @@ class SectionChildren(APIView):
         return Response(serializer.data)
 
     def post(self, request, pk, format=None):
-        section = get_object_or_404(synopses.Section, id=pk)
+        section = get_object_or_404(learning.Section, id=pk)
         if isinstance(request.data, dict) \
                 and 'child' in request.data \
                 and isinstance((child_id := request.data['child']), int):
 
             with transaction.atomic():
-                child = get_object_or_404(synopses.Section, id=child_id)
+                child = get_object_or_404(learning.Section, id=child_id)
                 if child in section.children.all():
                     return Response("Ok")
-                biggest_index = synopses.SectionSubsection.objects \
+                biggest_index = learning.SectionSubsection.objects \
                     .filter(parent=section) \
                     .annotate(num_books=Max('index')) \
                     .aggregate(Max('index'))['index__max']
                 if biggest_index is None:
                     biggest_index = -1
-                new = synopses.SectionSubsection.objects.create(parent=section, section=child, index=biggest_index + 1)
+                new = learning.SectionSubsection.objects.create(parent=section, section=child, index=biggest_index + 1)
                 return Response(SectionRelationSerializer(new).data)
         raise ValidationError("Bad request")
 
     def delete(self, request, pk, format=None):
-        section = get_object_or_404(synopses.Section, id=pk)
+        section = get_object_or_404(learning.Section, id=pk)
         if isinstance(request.data, dict) \
                 and 'child' in request.data \
                 and isinstance((child_id := request.data['child']), int):
             with transaction.atomic():
-                rel = synopses.SectionSubsection.objects.filter(parent=section, section_id=child_id).first()
+                rel = learning.SectionSubsection.objects.filter(parent=section, section_id=child_id).first()
                 old_index = rel.index
-                synopses.SectionSubsection.objects.filter(parent=section, section_id=child_id).delete()
-                synopses.SectionSubsection.objects \
+                learning.SectionSubsection.objects.filter(parent=section, section_id=child_id).delete()
+                learning.SectionSubsection.objects \
                     .filter(parent=section, index__gt=old_index) \
                     .update(index=F('index') - 1)
             return Response("Ok")
         raise ValidationError("Bad request")
 
     def put(self, request, pk, format=None):
-        section = get_object_or_404(synopses.Section, id=pk)
+        section = get_object_or_404(learning.Section, id=pk)
         section_pairs = []
         try:
             for entry in request.data:
@@ -102,7 +101,7 @@ class SectionChildren(APIView):
         indexes = {p[1]: i for i, p in enumerate(section_pairs)}
         try:
             with transaction.atomic():
-                mismatches = synopses.SectionSubsection.objects \
+                mismatches = learning.SectionSubsection.objects \
                     .filter(parent=section) \
                     .exclude(section__in=indexes.keys()) \
                     .order_by('section_id') \
@@ -110,11 +109,11 @@ class SectionChildren(APIView):
                 if mismatches > 0:
                     return Response("Conflict. Mismatched sections.")
                 # Set indexes to negative values to avoid integrity errors
-                synopses.SectionSubsection.objects.filter(parent=section).update(index=-F('index')-1)
-                rels = synopses.SectionSubsection.objects.filter(parent=section).order_by('section_id').all()
+                learning.SectionSubsection.objects.filter(parent=section).update(index=-F('index') - 1)
+                rels = learning.SectionSubsection.objects.filter(parent=section).order_by('section_id').all()
                 for rel in rels:
                     rel.index = indexes[rel.section_id]
-                synopses.SectionSubsection.objects.bulk_update(rels, ['index'])
+                learning.SectionSubsection.objects.bulk_update(rels, ['index'])
         except IntegrityError:
             raise ValidationError("Integrity error")
         return Response("Ok")
@@ -126,7 +125,7 @@ class ClassSections(APIView):
 
     def get(self, request, pk, format=None):
         serializer = SectionRelationSerializer(
-            synopses.ClassSection.objects
+            learning.ClassSection.objects
                 .select_related('section')
                 .order_by('index')
                 .filter(corresponding_class=pk),
@@ -140,16 +139,16 @@ class ClassSections(APIView):
                 and isinstance((child_id := request.data['child']), int):
 
             with transaction.atomic():
-                child = get_object_or_404(synopses.Section, id=child_id)
+                child = get_object_or_404(learning.Section, id=child_id)
                 if child in class_.synopsis_sections.all():
                     return Response("Ok")
-                biggest_index = synopses.ClassSection.objects \
+                biggest_index = learning.ClassSection.objects \
                     .filter(corresponding_class=class_) \
                     .annotate(num_books=Max('index')) \
                     .aggregate(Max('index'))['index__max']
                 if biggest_index is None:
                     biggest_index = -1
-                new = synopses.ClassSection.objects.create(
+                new = learning.ClassSection.objects.create(
                     corresponding_class=class_,
                     section=child,
                     index=biggest_index + 1)
@@ -162,10 +161,10 @@ class ClassSections(APIView):
                 and 'child' in request.data \
                 and isinstance((child_id := request.data['child']), int):
             with transaction.atomic():
-                rel = synopses.ClassSection.objects.filter(corresponding_class=class_, section_id=child_id).first()
+                rel = learning.ClassSection.objects.filter(corresponding_class=class_, section_id=child_id).first()
                 old_index = rel.index
-                synopses.ClassSection.objects.filter(corresponding_class=class_, section_id=child_id).delete()
-                synopses.ClassSection.objects \
+                learning.ClassSection.objects.filter(corresponding_class=class_, section_id=child_id).delete()
+                learning.ClassSection.objects \
                     .filter(corresponding_class=class_, index__gt=old_index) \
                     .update(index=F('index') - 1)
             return Response("Ok")
@@ -187,7 +186,7 @@ class ClassSections(APIView):
         indexes = {p[1]: i for i, p in enumerate(section_pairs)}
         try:
             with transaction.atomic():
-                mismatches = synopses.ClassSection.objects \
+                mismatches = learning.ClassSection.objects \
                     .filter(corresponding_class=class_) \
                     .exclude(section__in=indexes.keys()) \
                     .order_by('section_id') \
@@ -195,11 +194,11 @@ class ClassSections(APIView):
                 if mismatches > 0:
                     return Response("Conflict. Mismatched sections.")
                 # Set indexes to negative values to avoid integrity errors
-                synopses.ClassSection.objects.filter(corresponding_class=class_).update(index=-F('index')-1)
-                rels = synopses.ClassSection.objects.filter(corresponding_class=class_).order_by('section_id').all()
+                learning.ClassSection.objects.filter(corresponding_class=class_).update(index=-F('index') - 1)
+                rels = learning.ClassSection.objects.filter(corresponding_class=class_).order_by('section_id').all()
                 for rel in rels:
                     rel.index = indexes[rel.section_id]
-                synopses.ClassSection.objects.bulk_update(rels, ['index'])
+                learning.ClassSection.objects.bulk_update(rels, ['index'])
         except IntegrityError:
             raise ValidationError("Integrity error")
         return Response("Ok")

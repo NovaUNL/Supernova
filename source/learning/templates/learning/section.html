@@ -24,14 +24,14 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.synopses.add_section %}<li><a href="{% url 'synopses:section_create' section.id %}">Criar subsecção</a></li>{% endif %}
-          {% if perms.synopses.change_section %}<li><a href="{% url 'synopses:section_edit' section.id %}">Editar</a></li>{% endif %}
+          {% if perms.synopses.add_section %}<li><a href="{% url 'learning:section_create' section.id %}">Criar subsecção</a></li>{% endif %}
+          {% if perms.synopses.change_section %}<li><a href="{% url 'learning:section_edit' section.id %}">Editar</a></li>{% endif %}
         </ul>
       </div>
       <div>
         <h1>{{ section.title }}</h1>
         {% if synopsis_class %}
-          <h3><a href="{% url 'synopses:class' synopsis_class.id %}">Síntese de {{ synopsis_class.name }}</a></h3>
+          <h3><a href="{% url 'learning:class' synopsis_class.id %}">Síntese de {{ synopsis_class.name }}</a></h3>
         {% endif %}
       </div>
     </div>
@@ -53,7 +53,7 @@
               <ul class="content-list">
                 {% for child in children %}
                   <li>
-                    <a href="{% url 'synopses:subsection' section.id child.id %}">{{ child.title }}</a>
+                    <a href="{% url 'learning:subsection' section.id child.id %}">{{ child.title }}</a>
                   </li>
                 {% endfor %}
               </ul>
@@ -71,12 +71,12 @@
             <ul class="content-list">
               {% if section.subarea %}
                 <li>
-                  <a href="{% url 'synopses:subarea' section.subarea.id %}">{{ section.subarea.title }}</a>
+                  <a href="{% url 'learning:subarea' section.subarea.id %}">{{ section.subarea.title }}</a>
                 </li>
               {% endif %}
               {% for parent in parents %}
                 <li>
-                  <a href="{% url 'synopses:section' parent.id %}">{{ parent.title }}</a>
+                  <a href="{% url 'learning:section' parent.id %}">{{ parent.title }}</a>
                 </li>
               {% endfor %}
             </ul>
@@ -85,7 +85,7 @@
               <ul>
                 {% for requirement in section.requirements.all %}
                   <li>
-                    <a href="{% url 'synopses:section' requirement.id %}">{{ requirement.title }}</a>
+                    <a href="{% url 'learning:section' requirement.id %}">{{ requirement.title }}</a>
                   </li>
                 {% endfor %}
               </ul>
@@ -108,7 +108,7 @@
             {% if section.classes.exists %}
               <ul class="content-list">
                 {% for class in section.classes.all %}
-                  <li><a href="{% url 'synopses:class' class.id %}">{{ class.name }}</a></li>
+                  <li><a href="{% url 'learning:class' class.id %}">{{ class.name }}</a></li>
                 {% endfor %}
               </ul>
             {% else %}
@@ -134,7 +134,7 @@
             {% endif %}
             <h3>Validado por docente</h3>
             <span class="indented">{% if section.validated %}Sim{% else %}Não{% endif %}.</span>
-            <h3><a href="{% url 'synopses:section_authors' section.id %}">Autoria</a></h3>
+            <h3><a href="{% url 'learning:section_authors' section.id %}">Autoria</a></h3>
             {% if author_log %}
               <ul class="content-list">
                 {% for log in author_log %}
@@ -144,7 +144,7 @@
             {% else %}
               <span class="indented">Sem autores registados.</span>
             {% endif %}
-            <h3><a href="{% url 'synopses:section_exercises' section.id %}">Exercicios</a></h3>
+            <h3><a href="{% url 'learning:section_exercises' section.id %}">Exercicios</a></h3>
             <span class="indented">
               {% if section.exercises.count > 0 %}
                 {{ section.exercises.count }} exercícios.

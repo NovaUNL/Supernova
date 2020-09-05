@@ -51,7 +51,7 @@
   <div class="header-decorator">
     <div class="header-decorator-options">
       <ul>
-        {% if user.is_staff %}<li><a href="{% url 'synopses:class_manage' synopsis_class.id %}">Gerir</a></li>{% endif %}
+        {% if user.is_staff %}<li><a href="{% url 'learning:class_manage' synopsis_class.id %}">Gerir</a></li>{% endif %}
       </ul>
     </div>
     <div>
@@ -73,12 +73,12 @@
         {% endif %}
         {% if expand %}
           {% for section in sections.all %}
-            <h2><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.title }}</a></h2>
+            <h2><a href="{% url 'learning:class_section' synopsis_class.id section.id %}">{{ section.title }}</a></h2>
             <div class="indented" style="border-left: 2px solid var(--highlight); padding-left: 10px">{{ section.content|safe }}</div>
           {% endfor %}
         {% else %}
           {% for section in sections.all %}
-            <h2><a href="{% url 'synopses:class_section' synopsis_class.id section.id %}">{{ section.title }}</a></h2>
+            <h2><a href="{% url 'learning:class_section' synopsis_class.id section.id %}">{{ section.title }}</a></h2>
             {% if section.exercise_count == 0 %}
               Sem exercícios.
             {% elif section.exercise_count == 1 %}

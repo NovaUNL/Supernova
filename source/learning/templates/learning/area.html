@@ -34,7 +34,7 @@
         <div class="pane-content">
           <div class="flex-wrapper">
             {% for subarea in subareas %}
-              <a href="{% url 'synopses:subarea' subarea.id %}">
+              <a href="{% url 'learning:subarea' subarea.id %}">
                 {% if subarea.img_url %}
                   <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }})">
                 {% else %}
@@ -59,7 +59,7 @@
 {#    <nav id="bot-container" class="float-right">#}
 {#        <a class="menu-entry selected">Contribuir:</a>#}
 {#        {% if user.is_authenticated %}#}
-{#            <a class="menu-entry" href="{% url 'synopses:subarea_create' area.id %}">Criar categoria</a>#}
+{#            <a class="menu-entry" href="{% url 'learning:subarea_create' area.id %}">Criar categoria</a>#}
 {#        {% else %}#}
 {#            <a class="menu-entry selected">Autentique-se para poder efetuar alterações.</a>#}
 {#        {% endif %}#}

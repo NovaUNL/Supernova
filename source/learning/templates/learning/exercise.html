@@ -39,7 +39,7 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          <li><a href="{% url 'exercises:edit' exercise.id %}">Editar</a></li>
+          <li><a href="{% url 'learning:edit' exercise.id %}">Editar</a></li>
         </ul>
       </div>
       <div>
@@ -54,7 +54,7 @@
             {{ exercise.render_html | safe }}
             <hr>
             <span>Submetido por <a href="{% url 'users:profile' exercise.author.nickname %}">{{ exercise.author }}</a></span>
-            <a href="{% url 'exercises:edit' exercise.id %}">Editar</a>
+            <a href="{% url 'learning:edit' exercise.id %}">Editar</a>
           </div>
         </div>
       </div>
@@ -65,7 +65,7 @@
             <h3>Secções</h3>
             <ul class="content-list">
               {% for section in exercise.synopses_sections.all %}
-                <li><a href="{% url 'synopses:section' section.id %}">{{ section.title }}</a></li>
+                <li><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></li>
               {% endfor %}
             </ul>
           </div>

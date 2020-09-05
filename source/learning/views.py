@@ -1,16 +1,19 @@
 from dal import autocomplete
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import get_object_or_404, render
+
+from django.contrib.auth.decorators import permission_required, login_required
+from django.db import models as djm
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-from college import models as college
 from supernova.views import build_base_context
-from synopses import forms as f
-from synopses import models as m
+from learning import models as m
+from learning import forms as f
+from college import models as college
+from users.utils import get_students
 
 
 def areas_view(request):
@@ -25,8 +28,8 @@ def areas_view(request):
             .filter(section_count__gt=0) \
             .order_by('section_count') \
             .reverse()
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')}]
-    return render(request, 'synopses/areas.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')}]
+    return render(request, 'learning/areas.html', context)
 
 
 def area_view(request, area_id):
@@ -40,9 +43,9 @@ def area_view(request, area_id):
     context['title'] = 'Sínteses - Categorias de %s' % area.title
     context['area'] = area
     context['subareas'] = subareas
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area_id])}]
-    return render(request, 'synopses/area.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area_id])}]
+    return render(request, 'learning/area.html', context)
 
 
 def subarea_view(request, subarea_id):
@@ -57,14 +60,14 @@ def subarea_view(request, subarea_id):
     context['sections'] = sections
     context['subarea'] = subarea
     context['area'] = area
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])}]
-    return render(request, 'synopses/subarea.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea_id])}]
+    return render(request, 'learning/subarea.html', context)
 
 
 @login_required
-@permission_required('synopses.add_subarea', raise_exception=True)
+@permission_required('learning.add_subarea', raise_exception=True)
 def subarea_create_view(request, area_id):
     area = get_object_or_404(m.Area, id=area_id)
 
@@ -72,7 +75,7 @@ def subarea_create_view(request, area_id):
         form = f.SubareaForm(data=request.POST)
         if form.is_valid():
             new_subarea = form.save()
-            return HttpResponseRedirect(reverse('synopses:subarea', args=[new_subarea.id]))
+            return HttpResponseRedirect(reverse('learning:subarea', args=[new_subarea.id]))
     else:
         form = f.SubareaForm(initial={'area': area})
         form.fields['area'].widget = HiddenInput()
@@ -82,16 +85,16 @@ def subarea_create_view(request, area_id):
     context['title'] = 'Criar nova categoria de "%s"' % area.title
     context['area'] = area
     context['form'] = form
-    context['action_page'] = reverse('synopses:subarea_create', args=[area_id])
+    context['action_page'] = reverse('learning:subarea_create', args=[area_id])
     context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': 'Propor nova categoria', 'url': reverse('synopses:subarea_create', args=[area_id])}]
-    return render(request, 'synopses/generic_form.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+                          {'name': 'Propor nova categoria', 'url': reverse('learning:subarea_create', args=[area_id])}]
+    return render(request, 'learning/generic_form.html', context)
 
 
 @login_required
-@permission_required('synopses.change_subarea', raise_exception=True)
+@permission_required('learning.change_subarea', raise_exception=True)
 def subarea_edit_view(request, subarea_id):
     subarea = get_object_or_404(m.Subarea, id=subarea_id)
     area = subarea.area
@@ -100,7 +103,7 @@ def subarea_edit_view(request, subarea_id):
         form = f.SubareaForm(data=request.POST, instance=subarea)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('synopses:subarea', args=[subarea_id]))
+            return HttpResponseRedirect(reverse('learning:subarea', args=[subarea_id]))
     else:
         form = f.SubareaForm(instance=subarea)
 
@@ -108,13 +111,13 @@ def subarea_edit_view(request, subarea_id):
     context['pcode'] = 'l_synopses_subarea'
     context['title'] = 'Editar categoria "%s"' % subarea.title
     context['form'] = form
-    context['action_page'] = reverse('synopses:subarea_edit', args=[subarea_id])
+    context['action_page'] = reverse('learning:subarea_edit', args=[subarea_id])
     context['action_name'] = 'Aplicar alterações'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
-                          {'name': 'Editar', 'url': reverse('synopses:subarea_edit', args=[subarea_id])}]
-    return render(request, 'synopses/generic_form.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea_id])},
+                          {'name': 'Editar', 'url': reverse('learning:subarea_edit', args=[subarea_id])}]
+    return render(request, 'learning/generic_form.html', context)
 
 
 # Section display views
@@ -149,10 +152,10 @@ def section_view(request, section_id):
     context = build_base_context(request)
     __section_common(section, context)
     context['title'] = section.title
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
                           {'name': '...', 'url': '#'},
                           {'name': section.title, 'url': '#'}]
-    return render(request, 'synopses/section.html', context)
+    return render(request, 'learning/section.html', context)
 
 
 def subsection_view(request, parent_id, child_id):
@@ -164,11 +167,11 @@ def subsection_view(request, parent_id, child_id):
     context = build_base_context(request)
     __section_common(child, context)
     context['title'] = '%s - %s' % (child.title, parent.title)
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': parent.title, 'url': reverse('synopses:section', args=[parent_id])},
+                          {'name': parent.title, 'url': reverse('learning:section', args=[parent_id])},
                           {'name': child.title, 'url': '#'}]
-    return render(request, 'synopses/section.html', context)
+    return render(request, 'learning/section.html', context)
 
 
 def subarea_section_view(request, subarea_id, section_id):
@@ -183,11 +186,11 @@ def subarea_section_view(request, subarea_id, section_id):
     context = build_base_context(request)
     __section_common(section, context)
     context['title'] = '%s - %s' % (section.title, area.title)
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea_id])},
                           {'name': section.title, 'url': '#'}]
-    return render(request, 'synopses/section.html', context)
+    return render(request, 'learning/section.html', context)
 
 
 def section_authors_view(request, section_id):
@@ -196,16 +199,16 @@ def section_authors_view(request, section_id):
     context['pcode'] = 'l_synopses_section'
     context['title'] = f"Autores de {section.title}"
     context['section'] = section
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': section.title, 'url': reverse('learning:section', args=[section_id])},
                           {'name': 'Autores', 'url': '#'}]
-    return render(request, 'synopses/section_authors.html', context)
+    return render(request, 'learning/section_authors.html', context)
 
 
 # Section creation views
 @login_required
-@permission_required('synopses.add_section', raise_exception=True)
+@permission_required('learning.add_section', raise_exception=True)
 def section_create_view(request, parent_id):
     parent = get_object_or_404(m.Section, id=parent_id)
     # Choices (for the 'after' field) are at the parent start, or after any section other than this one
@@ -258,7 +261,7 @@ def section_create_view(request, parent_id):
                 data.save()
 
             # Redirect to the newly created section
-            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent_id, section.id]))
+            return HttpResponseRedirect(reverse('learning:subsection', args=[parent_id, section.id]))
     else:
         # This is a request for the creation form. Fill the possible choices
         section_form = f.SectionEditForm(initial={'after': choices[-1][0]})
@@ -276,18 +279,18 @@ def section_create_view(request, parent_id):
     context['sources_formset'] = sources_formset
     context['web_resources_formset'] = web_resources_formset
     context['doc_resources_formset'] = doc_resources_formset
-    context['action_page'] = reverse('synopses:section_create', args=[parent_id])
+    context['action_page'] = reverse('learning:section_create', args=[parent_id])
     context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea.id])},
-                          {'name': parent.title, 'url': reverse('synopses:section', args=[parent_id])},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea.id])},
+                          {'name': parent.title, 'url': reverse('learning:section', args=[parent_id])},
                           {'name': 'Criar secção'}]
-    return render(request, 'synopses/generic_form.html', context)
+    return render(request, 'learning/generic_form.html', context)
 
 
 @login_required
-@permission_required('synopses.add_section', raise_exception=True)
+@permission_required('learning.add_section', raise_exception=True)
 def subsection_create_view(request, section_id):
     parent = get_object_or_404(m.Section, id=section_id)
     if request.method == 'POST':
@@ -296,7 +299,7 @@ def subsection_create_view(request, section_id):
         if valid:
             section = form.save()
             m.SectionSubsection(section=section, parent=parent).save()
-            return HttpResponseRedirect(reverse('synopses:subsection', args=[parent.id, section.id]))
+            return HttpResponseRedirect(reverse('learning:subsection', args=[parent.id, section.id]))
     else:
         form = f.SectionChildForm()
 
@@ -304,17 +307,17 @@ def subsection_create_view(request, section_id):
     context['pcode'] = 'l_synopses_section'
     context['title'] = 'Criar secção em "%s"' % parent.title
     context['form'] = form
-    context['action_page'] = reverse('synopses:subsection_create', args=[section_id])
+    context['action_page'] = reverse('learning:subsection_create', args=[section_id])
     context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': parent.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': parent.title, 'url': reverse('learning:section', args=[section_id])},
                           {'name': 'Criar secção', 'url': '#'}]
-    return render(request, 'synopses/generic_form.html', context)
+    return render(request, 'learning/generic_form.html', context)
 
 
 @login_required
-@permission_required('synopses.add_section', raise_exception=True)
+@permission_required('learning.add_section', raise_exception=True)
 def subarea_section_create_view(request, subarea_id):
     subarea = get_object_or_404(m.Subarea, id=subarea_id)
     area = subarea.area
@@ -330,7 +333,7 @@ def subarea_section_create_view(request, subarea_id):
                 section = form.save(commit=False)
                 section.content_reduce()
                 section.save()
-                return HttpResponseRedirect(reverse('synopses:subarea_section', args=[subarea_id, section.id]))
+                return HttpResponseRedirect(reverse('learning:subarea_section', args=[subarea_id, section.id]))
     else:
         form = f.SubareaSectionForm(initial={'subarea': subarea})
 
@@ -338,17 +341,17 @@ def subarea_section_create_view(request, subarea_id):
     context['pcode'] = 'l_synopses_section'
     context['title'] = 'Criar secção em "%s"' % subarea.title
     context['form'] = form
-    context['action_page'] = reverse('synopses:subarea_section_create', args=[subarea_id])
+    context['action_page'] = reverse('learning:subarea_section_create', args=[subarea_id])
     context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': area.title, 'url': reverse('synopses:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('synopses:subarea', args=[subarea_id])},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea_id])},
                           {'name': 'Criar secção', 'url': '#'}]
-    return render(request, 'synopses/generic_form.html', context)
+    return render(request, 'learning/generic_form.html', context)
 
 
 @login_required
-@permission_required('synopses.change_section', raise_exception=True)
+@permission_required('learning.change_section', raise_exception=True)
 def section_edit_view(request, section_id):
     section = get_object_or_404(m.Section, id=section_id)
     if request.method == 'POST':
@@ -395,7 +398,7 @@ def section_edit_view(request, section_id):
             web_resources_formset.save()
             section.compact_indexes()
             # Redirect user to the updated section
-            return HttpResponseRedirect(reverse('synopses:section', args=[section.id]))
+            return HttpResponseRedirect(reverse('learning:section', args=[section.id]))
     else:
         section_form = f.SectionEditForm(instance=section)
         sources_formset = f.SectionSourcesFormSet(instance=section, prefix="sources")
@@ -410,13 +413,13 @@ def section_edit_view(request, section_id):
     context['sources_formset'] = sources_formset
     context['web_resources_formset'] = web_resources_formset
     context['doc_resources_formset'] = doc_resources_formset
-    context['action_page'] = reverse('synopses:section_edit', args=[section_id])
+    context['action_page'] = reverse('learning:section_edit', args=[section_id])
     context['action_name'] = 'Editar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': section.title, 'url': reverse('learning:section', args=[section_id])},
                           {'name': 'Editar'}]
-    return render(request, 'synopses/section_management.html', context)
+    return render(request, 'learning/section_management.html', context)
 
 
 # Class related views
@@ -430,9 +433,9 @@ def class_sections_view(request, class_id):
         .order_by('classes_rel__index') \
         .annotate(exercise_count=Count('exercises'))
     context['expand'] = 'expand' in request.GET
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])}]
-    return render(request, 'synopses/class_sections.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': class_.name, 'url': reverse('learning:class', args=[class_id])}]
+    return render(request, 'learning/class_sections.html', context)
 
 
 def class_section_view(request, class_id, section_id):
@@ -457,11 +460,11 @@ def class_section_view(request, class_id, section_id):
     #     context['previous_section'] = previous_section.section
     # if next_section:
     #     context['next_section'] = next_section.section
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': class_.name, 'url': reverse('learning:class', args=[class_id])},
                           {'name': section.title,
-                           'url': reverse('synopses:class_section', args=[class_id, section_id])}]
-    return render(request, 'synopses/section.html', context)
+                           'url': reverse('learning:class_section', args=[class_id, section_id])}]
+    return render(request, 'learning/section.html', context)
 
 
 @staff_member_required
@@ -471,10 +474,10 @@ def class_manage_sections_view(request, class_id):
     context['pcode'] = 'l_synopses_manage_sections'
     context['title'] = "Editar secções na sintese de %s" % class_.name
     context['synopsis_class'] = class_
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
-                          {'name': class_.name, 'url': reverse('synopses:class', args=[class_id])},
-                          {'name': 'Secções', 'url': reverse('synopses:class_manage', args=[class_id])}]
-    return render(request, 'synopses/class_management.html', context)
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
+                          {'name': class_.name, 'url': reverse('learning:class', args=[class_id])},
+                          {'name': 'Secções', 'url': reverse('learning:class_manage', args=[class_id])}]
+    return render(request, 'learning/class_management.html', context)
 
 
 def section_exercises_view(request, section_id):
@@ -485,11 +488,11 @@ def section_exercises_view(request, section_id):
     context['pcode'] = 'l_synopses_section_exercises'
     context['title'] = "Exercicios em %s" % section.title
     context['section'] = section
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('synopses:areas')},
+    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
                           {'name': '...', 'url': '#'},
-                          {'name': section.title, 'url': reverse('synopses:section', args=[section_id])},
+                          {'name': section.title, 'url': reverse('learning:section', args=[section_id])},
                           {'name': 'Exercícios'}]
-    return render(request, 'synopses/section_exercises.html', context)
+    return render(request, 'learning/section_exercises.html', context)
 
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):
@@ -514,3 +517,78 @@ class SectionAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(title__contains=self.q)
         return qs
+
+
+@login_required
+def index_view(request):
+    context = build_base_context(request)
+    context['pcode'] = 'l_exercises'
+    context['title'] = 'Exercícios'
+    primary_students, context['secondary_students'] = get_students(request.user)
+    classes = college.Class.objects \
+        .annotate(exercise_count=djm.Count('synopsis_sections__exercises')) \
+        .filter(instances__enrollments__student__in=primary_students) \
+        .order_by('name') \
+        .all()
+    context['classes'] = classes
+    context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('learning:exercises')}]
+    return render(request, 'learning/exercises.html', context)
+
+
+def exercise_view(request, exercise_id):
+    exercise = get_object_or_404(m.Exercise, id=exercise_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_exercises'
+    context['title'] = f'Exercício #{exercise.id}'
+    context['exercise'] = exercise
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
+                          {'name': f'Exercício #{exercise.id}',
+                           'url': reverse('learning:exercise', args=[exercise_id])}]
+    return render(request, 'learning/exercise.html', context)
+
+
+@login_required
+@permission_required('learning.add_exercise', raise_exception=True)
+def create_exercise_view(request):
+    if request.method == 'POST':
+        form = f.ExerciseForm(request.POST)
+        if form.is_valid():
+            exercise = form.save(commit=False)
+            exercise.author = request.user
+            exercise.save()
+            return redirect('learning:exercise', exercise_id=exercise.id)
+    else:
+        if 'section' in request.GET:
+            section = get_object_or_404(m.Section, id=request.GET['section'])
+            form = f.ExerciseForm(initial={'synopses_sections': [section, ]})
+        else:
+            form = f.ExerciseForm()
+
+    context = build_base_context(request)
+    context['pcode'] = 'l_exercises'
+    context['title'] = 'Submeter exercício'
+    context['form'] = form
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
+                          {'name': 'Submeter exercício', 'url': reverse('learning:create')}]
+    return render(request, 'learning/editor.html', context)
+
+
+@login_required
+@permission_required('learning.change_exercise', raise_exception=True)
+def edit_exercise_view(request, exercise_id):
+    exercise = get_object_or_404(m.Exercise, id=exercise_id)
+    if request.method == 'POST':
+        form = f.ExerciseForm(request.POST, instance=exercise)
+        if form.is_valid():
+            exercise = form.save()
+            return redirect('learning:exercise', exercise_id=exercise.id)
+    else:
+        form = f.ExerciseForm(instance=exercise)
+
+    context = build_base_context(request)
+    context['pcode'] = 'l_exercises'
+    context['title'] = f'Editar exercício #{exercise.id}'
+    context['form'] = form
+    context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
+                          {'name': 'Editar exercício', 'url': reverse('learning:edit', args=[exercise_id])}]
+    return render(request, 'learning/editor.html', context)

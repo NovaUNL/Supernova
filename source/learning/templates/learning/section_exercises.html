@@ -39,10 +39,10 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.exercises.add_exercise %}<li><a href="{% url 'exercises:create' %}?section={{ section.id }}">Criar novo</a></li>{% endif %}
+          {% if perms.exercises.add_exercise %}<li><a href="{% url 'learning:create' %}?section={{ section.id }}">Criar novo</a></li>{% endif %}
         </ul>
       </div>
-      <h1>Exercícios de <a href="{% url 'synopses:section' section.id %}">{{ section.title }}</a></h1>
+      <h1>Exercícios de <a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></h1>
     </div>
     <div class="col padded">
       <div class="flex-pane">
@@ -50,7 +50,7 @@
         <div class="pane-content">
           {% for exercise in section.exercises.all %}
             {% if not forloop.first %}<hr>{% endif %}
-            <h2><a href="{% url 'exercises:exercise' exercise.id %}">#{{ exercise.id }}</a></h2>
+            <h2><a href="{% url 'learning:exercise' exercise.id %}">#{{ exercise.id }}</a></h2>
             <div class="indented">{{ exercise.render_html|safe }}</div>
           {% endfor %}
         </div>

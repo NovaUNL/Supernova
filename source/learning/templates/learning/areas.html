@@ -15,7 +15,7 @@
       <div class="pane-content">
         <div class="flex-wrapper">
           {% for area in areas %}
-            <a href="{% url 'synopses:area' area.id %}">
+            <a href="{% url 'learning:area' area.id %}">
               {% if area.img_url %}
                 <div class="flex-grid-item" style="background-image:url({{ area.img_url }}); background-size:cover">
               {% else %}
@@ -36,7 +36,7 @@
       <div class="pane-content">
         <div class="flex-wrapper" style="align-items: start;">
           {% for class in classes %}
-            <a class="class-synopsis" href="{% url 'synopses:class' class.id %}">
+            <a class="class-synopsis" href="{% url 'learning:class' class.id %}">
               <span style="font-size: 2em">{{ class.name }}</span>
               <br>
               <span style="font-size: 1.2em;margin-right: 20px">{{ class.section_count }} secções, {{ class.department.name }}</span>

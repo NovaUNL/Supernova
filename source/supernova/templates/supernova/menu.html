@@ -145,8 +145,8 @@
       </ul>
     </li>
 
-    {% url 'synopses:areas' as synopses %}
-    {% url 'exercises:index' as exercises %}
+    {% url 'learning:areas' as synopses %}
+    {% url 'learning:exercises' as exercises %}
     <li {% if not pcode|startswith:'l' %}class="collapse"{% endif %}>
       <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
       <ul>

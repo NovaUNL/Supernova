@@ -32,13 +32,13 @@ urlpatterns = [
     # Store
     path('store/', views.store.Store.as_view()),
     # Synopses
-    path('synopses/areas/', views.synopses.Areas.as_view()),
-    path('synopses/area/<int:pk>/', views.synopses.Area.as_view()),
-    path('synopses/subarea/<int:pk>/', views.synopses.Subarea.as_view()),
-    path('synopses/class/<int:pk>/children/', views.synopses.ClassSections.as_view(),
+    path('learning/areas/', views.learning.Areas.as_view()),
+    path('learning/area/<int:pk>/', views.learning.Area.as_view()),
+    path('learning/subarea/<int:pk>/', views.learning.Subarea.as_view()),
+    path('learning/class/<int:pk>/children/', views.learning.ClassSections.as_view(),
          name='synopses_class_section'),
-    path('synopses/section/<int:pk>/', views.synopses.Section.as_view()),
-    path('synopses/section/<int:pk>/children/', views.synopses.SectionChildren.as_view(),
+    path('learning/section/<int:pk>/', views.learning.Section.as_view()),
+    path('learning/section/<int:pk>/children/', views.learning.SectionChildren.as_view(),
          name='synopses_section_children'),
     # Users
     path('profile/<str:nickname>/', views.users.ProfileDetailed.as_view()),

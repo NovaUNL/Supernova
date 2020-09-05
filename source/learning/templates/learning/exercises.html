@@ -55,7 +55,7 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.exercises.add_exercise %}<li><a href="{% url 'exercises:create' %}">Criar novo</a></li>{% endif %}
+          {% if perms.exercises.add_exercise %}<li><a href="{% url 'learning:create' %}">Criar novo</a></li>{% endif %}
         </ul>
       </div>
       <div>
@@ -70,7 +70,7 @@
             {% for class in classes %}
               <div class="exercise-class">
                 <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
-                <h3><a href="{% url 'synopses:class' class.id %}">{{ class }}</a></h3>
+                <h3><a href="{% url 'learning:class' class.id %}">{{ class }}</a></h3>
                 <div>
                   ? exercícios resolvidos de {{ class.exercise_count }}.
                 </div>
