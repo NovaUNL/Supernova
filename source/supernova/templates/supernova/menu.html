@@ -26,25 +26,34 @@
   </div>
   <ul>
     {% if user.is_authenticated %}
-      {% if user.is_student %}
-        {% url 'users:profile' user.nickname as profile %}
-        {% url 'users:schedule' user.nickname as schedule %}
-        {% url 'users:calendar' user.nickname as calendar %}
-        {% url 'users:settings' user.nickname as settings %}
-        <li class="collapse">
-          <input type="checkbox" id="m1"/><label for="m1">Aluno</label>
+      {% url 'users:profile' user.nickname as profile %}
+      {% url 'users:schedule' user.nickname as schedule %}
+      {% url 'users:calendar' user.nickname as calendar %}
+      {% url 'users:settings' user.nickname as settings %}
+      {% if pcode|startswith:'u' %}
+        <li>
+          <label for="m1">Minha conta</label>
           <ul>
             <li {% if pcode == 'u_profile' %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
             <li {% if pcode == 'u_schedule' %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
-            <li><a href="#">Curso</a></li>
-            <li><a href="#">Avaliações</a></li>
+            <li><a class="disabled">Curso</a></li>
+            <li><a class="disabled">Avaliações</a></li>
             <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
             <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
           </ul>
         </li>
-      {% endif %}
-      {% if user.is_teacher %}
-        {# TODO #}
+      {% else %}
+        <li class="collapse">
+          <input type="checkbox" id="m1"/><label for="m1">Minha conta</label>
+          <ul>
+            <li><a href="{{ profile }}">Perfil</a></li>
+            <li><a href="{{ schedule }}">Horário</a></li>
+            <li><a class="disabled">Curso</a></li>
+            <li><a class="disabled">Avaliações</a></li>
+            <li><a href="{{ calendar }}">Calendário</a></li>
+            <li><a href="{{ settings }}">Definições</a></li>
+          </ul>
+        </li>
       {% endif %}
     {% endif %}
 
@@ -147,12 +156,13 @@
 
     {% url 'learning:areas' as synopses %}
     {% url 'learning:exercises' as exercises %}
+    {% url 'learning:questions' as questions %}
     <li {% if not pcode|startswith:'l' %}class="collapse"{% endif %}>
       <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
       <ul>
         <li {% if pcode|startswith:'l_synops' %}class="active"{% endif %}><a href="{{ synopses }}">Sinteses</a></li>
-        <li {% if pcode|startswith:'l_exercises' %}class="active"{% endif %}><a href="{{ exercises }}">Exercicios</a></li>
-        <li class="disabled"><a href="#">Dúvidas</a></li>
+        <li {% if pcode|startswith:'l_exercise' %}class="active"{% endif %}><a href="{{ exercises }}">Exercicios</a></li>
+        <li {% if pcode|startswith:'l_question' %}class="active"{% endif %}><a href="{{ questions }}">Dúvidas</a></li>
       </ul>
     </li>
 
