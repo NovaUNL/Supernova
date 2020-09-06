@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import reverse
-from django.db import models as djm
+from django.db import models as djm, transaction
 from polymorphic.models import PolymorphicModel
 
 from functools import reduce
@@ -374,13 +374,6 @@ class WrongAnswerReport:
 
 
 class Postable(djm.Model):
-    #: The user who authored
-    author = djm.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        blank=True,
-        null=True,
-        on_delete=djm.PROTECT,
-        related_name='questions')
     #: Posted content
     content = MarkdownxField()
     #: Creation datetime
@@ -396,6 +389,49 @@ class Postable(djm.Model):
     @property
     def content_html(self):
         return markdownify(self.content)
+
+    def cache_votes(self):
+        self.upvotes = PostableVote.objects.filter(to=self, type=PostableVote.UPVOTE).count()
+        self.downvotes = PostableVote.objects.filter(to=self, type=PostableVote.DOWNVOTE).count()
+        self.save()
+
+    @property
+    def vote_balance(self):
+        if self.upvotes is None:
+            self.cache_votes()
+        return 1 + self.upvotes - self.downvotes
+
+    def set_vote(self, user, vote_type):
+        with transaction.atomic():
+            votes = self.votes.filter(user=user).all()
+            has_upvote = False
+            has_downvote = False
+            # Counted this way since more types of votes might be implemented
+            for vote in votes:
+                if vote.type == PostableVote.UPVOTE:
+                    has_upvote = True
+                if vote.type == PostableVote.DOWNVOTE:
+                    has_downvote = True
+
+            if vote_type == PostableVote.UPVOTE or vote_type == PostableVote.DOWNVOTE:
+                upvote = vote_type == PostableVote.UPVOTE
+                if upvote:
+                    if has_downvote:
+                        self.votes.filter(user=user, type=PostableVote.DOWNVOTE).update(type=PostableVote.UPVOTE)
+                        self.upvotes += 1
+                        self.downvotes -= 1
+                    elif not has_upvote:
+                        PostableVote.objects.create(to=self, user=user, type=PostableVote.UPVOTE)
+                        self.upvotes += 1
+                else:
+                    if has_upvote:
+                        self.votes.filter(user=user, type=PostableVote.UPVOTE).update(type=PostableVote.DOWNVOTE)
+                        self.upvotes -= 1
+                        self.downvotes += 1
+                    elif not has_downvote:
+                        PostableVote.objects.create(to=self, user=user, type=PostableVote.DOWNVOTE)
+                        self.downvotes += 1
+            self.save()
 
 
 class Question(users.Activity, users.Subscriptible, Postable):
@@ -461,6 +497,8 @@ class PostableComment(users.Activity, users.Subscriptible, Postable):
 class PostableVote(users.Activity):
     """
     A vote in a question, answer or another comment
+    Having choices instead of something simpler (boolean?) is due to the possibility of expanding later on
+    to having more vote types (favorite, ... ?)
     """
     UPVOTE = 0
     DOWNVOTE = 1

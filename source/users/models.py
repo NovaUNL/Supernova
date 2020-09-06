@@ -201,13 +201,15 @@ class Activity(PolymorphicModel):
     """
     An activity is an action taken by a user at a given point in time.
     """
+    #: :py:class:`User` that made this activity.
+    user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='activities')
     #: The id field, but renamed to avoid collisions upon multiple inheritance
     activity_id = djm.AutoField(primary_key=True)
     #: Datetime at which the activity happened
     timestamp = djm.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.datetime}({self.author})'
+        return f'{self.datetime}({self.user})'
 
     class Meta:
         verbose_name_plural = "activities"

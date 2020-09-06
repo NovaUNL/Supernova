@@ -1,0 +1,64 @@
+
+.postable-main {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.postable-votes {
+    padding: 10px 10px 0 0;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.postable-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.postable-votes > a {
+    display: block;
+    border: 2px solid black;
+    border-radius: 3px;
+    width: 48px;
+    height: 48px;
+    background-color: var(--input-light);
+    background-size: contain;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+
+.postable-votes > span {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.upvote-btn {
+    background-image: url("/static/img/icons/up.svg");
+}
+
+.downvote-btn {
+    background-image: url("/static/img/icons/down.svg");
+}
+
+.upvote-btn.set {
+    background-color: var(--green);
+}
+
+.downvote-btn.set {
+    background-color: var(--red);
+}
+
+.answer-btn, .answer-btn.set {
+    background-image: url("/static/img/icons/check-nofil.svg");
+}
+
+.answer-btn:hover {
+    background-image: url("/static/img/icons/check.svg");
+}
+
+.author span {
+    display: block;
+}

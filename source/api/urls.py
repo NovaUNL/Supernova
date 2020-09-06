@@ -40,6 +40,8 @@ urlpatterns = [
     path('learning/section/<int:pk>/', views.learning.Section.as_view()),
     path('learning/section/<int:pk>/children/', views.learning.SectionChildren.as_view(),
          name='synopses_section_children'),
+    path('learning/postable/<int:pk>/votes', views.learning.PostableVotes.as_view(), name="postable_votes"),
+    path('learning/question/<int:pk>/votes', views.learning.QuestionUserVotes.as_view(), name="question_votes"),
     # Users
     path('profile/<str:nickname>/', views.users.ProfileDetailed.as_view()),
     path('profile/<str:nickname>/socialnetworks/', views.users.UserSocialNetworks.as_view(), name='social_networks'),

@@ -3,6 +3,8 @@
 {% load static %}
 
 {% block head %}
+  <script src="{% static 'learning/questions.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'learning/questions.css' %}"/>
   <script>
       MathJax = {
           options: {
@@ -33,69 +35,17 @@
 {% endblock %}
 
 {% block content_wrapper %}
-  <style>
-      .postable-wrapper {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-      }
-
-      .postable-votes {
-          padding: 10px 10px 0 0;
-      }
-
-      .postable-votes {
-          min-height: 150px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-      }
-
-      .postable-votes > a {
-          display: block;
-          border: 2px solid black;
-          border-radius: 3px;
-          width: 48px;
-          height: 48px;
-          background-color: var(--input-light);
-          background-size: contain;
-          margin-bottom: 2px;
-      }
-
-      .upvote {
-          background-image: url("{% static 'img/icons/up.svg' %}");
-      }
-
-      .downvote {
-          background-image: url("{% static 'img/icons/down.svg' %}");
-      }
-
-      .answer {
-          background-image: url("{% static 'img/icons/check-nofil.svg' %}");
-      }
-
-      .answer:hover {
-          background-image: url("{% static 'img/icons/check.svg' %}");
-      }
-
-      .author span {
-          display: block;
-      }
-
-      .postable-footer {
-          display: flex;
-          justify-content: space-between;
-      }
-  </style>
-  <div class="col padded">
+  <div class="col padded"
+       data-voting-endpoint="{% url 'api:postable_votes' 0 %}"
+       data-question-votes-endpoint="{% url 'api:question_votes' question.id %}">
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>{{ question.title }}</h2></div>
-      <div class="pane-content">
-        <div class="postable-wrapper">
+      <div class="pane-content postable" data-id="{{ question.id }}">
+        <div class="postable-main">
           <div class="postable-votes">
-            <a class="upvote"></a>
-            <span>0</span>
-            <a class="downvote"></a>
+            <a class="upvote-btn"></a>
+            <span>{{ question.vote_balance }}</span>
+            <a class="downvote-btn"></a>
           </div>
           <div class="postable-content">
             {{ question.content_html|safe }}
@@ -106,7 +56,7 @@
             {#            <a>Reportar</a>#}
           </div>
           <div class="author">
-            <span><a href="{% url 'users:profile' question.author.id %}">{{ question.author }}</a></span>
+            <span><a href="{% url 'users:profile' question.user.nickname %}">{{ question.author.nickname }}</a></span>
             <span>{{ question.timestamp }}</span>
           </div>
         </div>
@@ -115,13 +65,13 @@
     {% for answer in question.answers.all %}
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
-        <div class="pane-content">
-          <div class="postable-wrapper">
+        <div class="pane-content postable" data-id="{{ answer.id }}">
+          <div class="postable-main">
             <div class="postable-votes">
-              <a class="upvote"></a>
-              <span>0</span>
-              <a class="downvote"></a>
-              <a class="answer"></a>
+              <a class="upvote-btn"></a>
+              <span>{{ answer.vote_balance }}</span>
+              <a class="downvote-btn"></a>
+              <a class="answer-btn{% if answer.accepted %} set{% endif %}"></a>
             </div>
             <div class="postable-content">
               {{ answer.content_html|safe }}
@@ -130,7 +80,7 @@
           <div class="postable-footer">
             <div class="actions"></div>
             <div class="author">
-              <span><a href="{% url 'users:profile' answer.author.id %}">{{ answer.author }}</a></span>
+              <span><a href="{% url 'users:profile' answer.user.nickname %}">{{ answer.user.nickname }}</a></span>
               <span>{{ answer.timestamp }}</span>
             </div>
           </div>
@@ -149,4 +99,6 @@
       </div>
     </div>
   </div>
+  {% if not user.is_anonymous %}
+    <script>loadOwnVotes();</script>{% endif %}
 {% endblock %}

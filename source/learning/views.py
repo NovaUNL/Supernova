@@ -574,7 +574,7 @@ def questions_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_questions'
     context['title'] = 'Dúvidas'
-    context['questions'] = m.Question.objects.select_related('author').annotate(answer_count=Count('answers'))
+    context['questions'] = m.Question.objects.select_related('user').annotate(answer_count=Count('answers'))
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
     return render(request, 'learning/questions.html', context)
 
@@ -589,7 +589,7 @@ def question_create_view(request):
         form = f.QuestionForm(request.POST)
         if form.is_valid():
             question = form.save(commit=False)
-            question.author = request.user
+            question.user = request.user
             question.save()
             return redirect('learning:question', question_id=question.id)
     else:
@@ -620,7 +620,7 @@ def question_view(request, question_id):
                 if answer_form.is_valid():
                     answer = answer_form.save(commit=False)
                     answer.to = question
-                    answer.author = request.user
+                    answer.user = request.user
                     answer.save()
                     # Reload data, new form
                     question.refresh_from_db()
