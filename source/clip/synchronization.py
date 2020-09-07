@@ -341,7 +341,9 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
         logger.warning(f"{enrollment} removed from {obj}.")
 
     # ---------  OTHER TODO ---------
-    sync_class_instance_files(external_id, class_inst=obj)  # Must happen after the turn sync to have the teachers known
+    if recurse:
+        # Must happen after the turn sync to have the teachers known
+        sync_class_instance_files(external_id, class_inst=obj)
     # TODO
     # evaluations = obj.enrollments.exclude(external_id=None).all()
     # _related(evaluations, upstream['evaluations'], sync_evaluation, m.ClassEvaluation, recurse, class_inst=obj)
