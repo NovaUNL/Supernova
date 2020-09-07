@@ -338,11 +338,11 @@ class AccountPermissionsForm(forms.Form):
 
 
 def enforce_name_policy(name):
-    if name in ('admin', 'administrador', 'administração', 'gestor', 'gestão',
-                'regência', 'direção', 'diretor', 'presidente', 'coordenador', 'professor'):
-        raise forms.ValidationError("Nome de utilizador proibido")
     if not IDENTIFIER_EXP.fullmatch(name):
         raise forms.ValidationError(f"O nome '{name}' é invalido.")
+    if name.lower() in ('admin', 'administrador', 'administração', 'gestor', 'gestão',
+                        'regência', 'direção', 'diretor', 'presidente', 'coordenador', 'professor', 'ac'):
+        raise forms.ValidationError("Nome de utilizador proibido")
 
 
 def enforce_password_policy(username, nickname, password):
