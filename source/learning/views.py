@@ -1,6 +1,6 @@
 from dal import autocomplete
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect, Http404
 
@@ -574,7 +574,13 @@ def questions_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_questions'
     context['title'] = 'Dúvidas'
-    context['questions'] = m.Question.objects.select_related('user').annotate(answer_count=Count('answers'))
+    context['recent_questions'] = m.Question.objects \
+        .select_related('user') \
+        .annotate(answer_count=Count('answers'))
+    context['popular_questions'] = m.Question.objects \
+        .order_by(F('upvotes') + F('downvotes')) \
+        .select_related('user') \
+        .annotate(answer_count=Count('answers'))
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
     return render(request, 'learning/questions.html', context)
 
@@ -591,6 +597,7 @@ def question_create_view(request):
             question = form.save(commit=False)
             question.user = request.user
             question.save()
+            question.set_vote(request.user, m.PostableVote.UPVOTE)
             return redirect('learning:question', question_id=question.id)
     else:
         context['form'] = f.QuestionForm()

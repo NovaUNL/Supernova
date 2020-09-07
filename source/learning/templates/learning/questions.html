@@ -2,15 +2,62 @@
 
 {% load static %}
 
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'learning/questions.css' %}"/>
+{% endblock %}
+
 {% block content_wrapper %}
-  <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Recentes</h2></div>
-      <div class="pane-content news-list">
-        {% for question in questions %}
-          <h2><a href="{% url 'learning:question' question.id %}">{{ question.title }}</a></h2>
-          {% if not forloop.last %}<hr>{% endif %}
-        {% endfor %}
+  <style>
+  </style>
+  <div class="row padded">
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Recentes</h2></div>
+        <div class="pane-content question-list">
+          {% for question in recent_questions %}
+            <div class="question">
+              <div class="info">
+                <div class="counter votes"><span>{{ question.vote_balance }}</span></div>
+                <div class="counter answers"><span>{{ question.answer_count }}</span></div>
+              </div>
+              <div class="summary">
+                <h2><a href="{% url 'learning:question' question.id %}">{{ question.title }}</a></h2>
+                <div class="tags">
+                  <span class="ui-tag"><a href="#">foo</a></span>
+                </div>
+                <div class="author">
+                  <a href="{% url 'users:profile' question.user.nickname %}">{{ question.user }}</a>,
+                  {{ question.timestamp|date:'d/m/Y H:i' }}</div>
+              </div>
+            </div>
+            {% if not forloop.last %}<hr>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Populares</h2></div>
+        <div class="pane-content question-list">
+          {% for question in popular_questions %}
+            <div class="question">
+              <div class="info">
+                <div class="counter votes"><span>{{ question.vote_balance }}</span></div>
+                <div class="counter answers"><span>{{ question.answer_count }}</span></div>
+              </div>
+              <div class="summary">
+                <h2><a href="{% url 'learning:question' question.id %}">{{ question.title }}</a></h2>
+                <div class="tags">
+                  <span class="ui-tag"><a href="#">foo</a></span>
+                </div>
+                <div class="author">
+                  <a href="{% url 'users:profile' question.user.nickname %}">{{ question.user }}</a>,
+                  {{ question.timestamp|date:'d/m/Y H:i' }}</div>
+              </div>
+            </div>
+            {% if not forloop.last %}<hr>{% endif %}
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
