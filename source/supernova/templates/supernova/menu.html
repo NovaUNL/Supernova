@@ -25,6 +25,14 @@
     </div>
   </div>
   <ul>
+    {% if user.is_staff %}
+      <li class="collapse">
+        <input type="checkbox" id="m0"/><label for="m0">Administração</label>
+        <ul>
+          <li><a href="{% url 'users:management' %}">Gestão</a></li>
+        </ul>
+      </li>
+    {% endif %}
     {% if user.is_authenticated %}
       {% url 'users:profile' user.nickname as profile %}
       {% url 'users:schedule' user.nickname as schedule %}
