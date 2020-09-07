@@ -2,9 +2,23 @@
 
 {% load static %}
 
+{% block head %}
+  <script src="{% static  'users/management.js' %}"></script>
+  <link href="{% static  'vendor/select2/dist/css/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <link href="{% static  'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <link href="{% static  'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static  'autocomplete_light/jquery.init.js' %}"></script>
+  <script src="{% static  'vendor/select2/dist/js/select2.full.min.js' %}"></script>
+  <script src="{% static  'vendor/select2/dist/js/i18n/pt.js' %}"></script>
+  <script src="{% static  'autocomplete_light/autocomplete.init.js' %}"></script>
+  <script src="{% static  'autocomplete_light/forward.js' %}"></script>
+  <script src="{% static  'autocomplete_light/select2.js' %}"></script>
+  <script src="{% static  'autocomplete_light/jquery.post-setup.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
-  <style>
-  </style>
+  {% csrf_token %}
   <div class="row padded">
     <div class="col">
       <div class="flex-pane">
@@ -57,6 +71,33 @@
               </tr>
             {% endfor %}
           </table>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Utilizadores suspensos</h2></div>
+        <div class="pane-content" data-endpoint="{% url 'api:user_moderation' 0 %}">
+          {% if suspended_users|length == 0 %}
+            Sem utilizadores suspensos.
+          {% else %}
+            <table>
+              <tr>
+                <th>Utilizador</th>
+                <th>Até</th>
+                <th></th>
+              </tr>
+              {% for user in suspended_users %}
+                <tr data-id="{{ user.id }}">
+                  <td><a href="{% url 'users:profile' user.nickname %}">{{ user.nickname }}</a></td>
+                  <td>-</td>
+                  <td><a onclick="removeSuspension(this, {{ user.id }})">Anular</a></td>
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+          <h4>Suspender:</h4>
+        <select name="section" required id="suspension-selector" data-autocomplete-light-url="/u/ac/nickname/"
+                data-autocomplete-light-function="select2"></select>
+        <input type="button" value="Confirmar" onclick="suspend()">
         </div>
       </div>
     </div>

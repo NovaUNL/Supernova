@@ -310,6 +310,7 @@ def management_view(request):
     context['title'] = "Gestão"
     context['latest_registrations'] = m.Registration.objects.order_by('creation').reverse()[0:10]
     context['latest_activity'] = m.Activity.objects.order_by('timestamp').reverse()[0:10]
+    context['suspended_users'] = m.User.objects.order_by('nickname').filter(is_active=False).all()
     context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('users:management')}]
     return render(request, 'users/management.html', context)
 

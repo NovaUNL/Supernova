@@ -47,4 +47,5 @@ urlpatterns = [
     path('profile/<str:nickname>/socialnetworks/', views.users.UserSocialNetworks.as_view(), name='social_networks'),
     path('user/<str:nickname>/current_turns', views.college.UserTurnInstances.as_view()),
     path('user/<str:nickname>/schedule/<str:from_date>/<str:to_date>', views.users.user_schedule, name='user_schedule'),
+    path('moderate/<int:user_id>/', views.users.UserModeration.as_view(), name='user_moderation'),
 ]

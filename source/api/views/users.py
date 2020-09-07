@@ -1,11 +1,10 @@
-from datetime import datetime, timedelta
-
 from django.db.models import F
 from rest_framework import authentication
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.exceptions import ParseError, ValidationError
+from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -92,3 +91,26 @@ class UserSocialNetworks(APIView):
         if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
             raise ValidationError("Not found")
         users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).delete()
+
+
+class UserModeration(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request, user_id, format=None):
+        user = users.User.objects.get(id=user_id)
+        return Response({'active': user.is_active})
+
+    def post(self, request, user_id, format=None):
+        user = users.User.objects.get(id=user_id)
+        if user.is_staff:
+            raise PermissionDenied("Cannot take actions against administrators")
+        if not (isinstance(request.data, dict) and 'action' in request.data):
+            raise ParseError()
+        action = request.data['action']
+        if action == 'suspend':
+            user.is_active = False
+        elif action == 'unsuspend':
+            user.is_active = True
+        user.save()
+        return Response("Ok")
