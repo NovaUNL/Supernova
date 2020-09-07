@@ -209,7 +209,7 @@ class Activity(PolymorphicModel):
     timestamp = djm.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.datetime}({self.user})'
+        return f'{self.timestamp}({self.user})'
 
     class Meta:
         verbose_name_plural = "activities"

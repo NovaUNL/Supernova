@@ -120,25 +120,19 @@ class RegistrationForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data.get("username")
-        if not IDENTIFIER_EXP.fullmatch(username):
-            raise forms.ValidationError(f"O nome de utilizador '{username}' é invalido.")
-        users = m.User.objects.filter(username=username)
-        if users.exists():
+        enforce_name_policy(username)
+        if m.User.objects.filter(username=username).exists():
             raise forms.ValidationError(f"Já existe um utilizador com o nome de utilizador '{username}'.")
-        users = m.User.objects.filter(nickname=username)
-        if users.exists():
+        if m.User.objects.filter(nickname=username).exists():
             raise forms.ValidationError(f"Já existe um utilizador com a alcunha '{username}'")
         return username
 
     def clean_nickname(self):
         nickname = self.cleaned_data.get("nickname")
-        if not IDENTIFIER_EXP.fullmatch(nickname):
-            raise forms.ValidationError(f"A alcunha '{nickname}' é invalida.")
-        users = m.User.objects.filter(Q(nickname=nickname))
-        if users.exists():
+        enforce_name_policy(nickname)
+        if m.User.objects.filter(username=nickname).exists():
             raise forms.ValidationError(f"Já existe um utilizador com o nome de utilizador '{nickname}'.")
-        users = m.User.objects.filter(Q(nickname=nickname))
-        if users.exists():
+        if m.User.objects.filter(nickname=nickname).exists():
             raise forms.ValidationError(f"Já existe um utilizador com a alcunha '{nickname}'")
         return nickname
 
@@ -229,9 +223,15 @@ class AccountSettingsForm(forms.ModelForm):
         days_since_change = (datetime.now().date() - self.instance.last_nickname_change).days
         if days_since_change < 180:
             raise forms.ValidationError(f"Mudou a sua alcunha há menos de 6 meses (passaram {days_since_change} dias)")
+        enforce_name_policy(nickname)
 
-        if not IDENTIFIER_EXP.fullmatch(nickname):
-            raise forms.ValidationError("Foram utilizados carateres especiais.")
+        if m.User.objects \
+                .exclude(id=self.instance.id) \
+                .filter(Q(username=nickname) | Q(nickname=nickname)) \
+                .exists():
+            raise forms.ValidationError(f"A alcunha '{nickname}' está a uso.")
+        if college.Student.objects.filter(abbreviation=nickname).exclude(user=self.instance).exists():
+            raise forms.ValidationError(f"A alcunha '{nickname}' pertence a um estudante")
         return nickname
 
     def clean_old_password(self):
@@ -335,6 +335,14 @@ class AccountPermissionsForm(forms.Form):
             'can_add_exercises': self.user.has_perm('learning.add_exercise'),
             'can_change_exercises': self.user.has_perm('learning.change_exercise'),
         }
+
+
+def enforce_name_policy(name):
+    if name in ('admin', 'administrador', 'administração', 'gestor', 'gestão',
+                'regência', 'direção', 'diretor', 'presidente', 'coordenador', 'professor'):
+        raise forms.ValidationError("Nome de utilizador proibido")
+    if not IDENTIFIER_EXP.fullmatch(name):
+        raise forms.ValidationError(f"O nome '{name}' é invalido.")
 
 
 def enforce_password_policy(username, nickname, password):

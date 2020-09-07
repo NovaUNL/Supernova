@@ -1,0 +1,64 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <style>
+  </style>
+  <div class="row padded">
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Últimos registos</h2></div>
+        <div class="pane-content">
+          <table>
+            <tr>
+              <th>Username</th>
+              <th>Alcunha</th>
+              <th>Estudante</th>
+              <th>Email</th>
+              <th>Fracassos</th>
+              <th>Convidante</th>
+            </tr>
+            {% for registration in latest_registrations %}
+              <tr>
+                <td>{{ registration.username }}</td>
+                <td>{{ registration.nickname }}</td>
+                <td>{{ registration.student }}</td>
+                <td>{{ registration.email }}</td>
+                <td>{{ registration.failed_attempts }}</td>
+                {% with registration.invites.first as invite %}
+                  {% if invite %}
+                    <td><a href="{% url 'users:profile' invite.issuer.nickname %}">{{ invite.issuer.nickname }}</a></td>
+                  {% else %}
+                    <td>-</td>
+                  {% endif %}
+                {% endwith %}
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Actividade</h2></div>
+        <div class="pane-content">
+          <table>
+            <tr>
+              <th>Data</th>
+              <th>Utilizador</th>
+              <th>Descrição</th>
+            </tr>
+            {% for activity in latest_activity %}
+              <tr>
+                <td>{{ activity.timestamp|date:'d/m/Y H:i' }}</td>
+                <td><a href="{% url 'users:profile' activity.user.nickname %}">{{ activity.user.nickname }}</a></td>
+                <td>{{ activity|capfirst }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

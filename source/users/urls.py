@@ -5,6 +5,7 @@ from . import views
 app_name = 'users'
 
 urlpatterns = [
+    path('gestão', views.management_view, name='management'),
     path('<str:nickname>/', views.profile_view, name='profile'),
     path('<str:nickname>/horario/', views.user_schedule_view, name='schedule'),
     path('<str:nickname>/calendario/', views.user_calendar_view, name='calendar'),
