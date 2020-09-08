@@ -5,21 +5,31 @@
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
   <style>
-    .flex-wrapper > div {
-      margin: 10px 20px;
-      flex-basis: 475px;
-    }
-
-    {% if area.img_url %}
-      .header-decorator:after {
-        background-image: url("{{ area.img_url}}")
+      .flex-wrapper > div {
+          margin: 10px 20px;
+          flex-basis: 475px;
       }
-    {% endif %}
 
-    .flex-grid-item {
-      background-size: cover;
-      background-position: center
-    }
+      {% if area.image %}
+          .header-decorator {
+              background-color: unset;
+          }
+          .header-decorator:after {
+              background-image: url("{% get_media_prefix %}{{ area.image }}")
+          }
+      {% elif area.img_url %}
+          .header-decorator {
+              background-color: unset;
+          }
+          .header-decorator:after {
+              background-image: url("{{ area.img_url}}")
+          }
+      {% endif %}
+
+      .flex-grid-item {
+          background-size: cover;
+          background-position: center
+      }
   </style>
 {% endblock %}
 
@@ -35,7 +45,9 @@
           <div class="flex-wrapper">
             {% for subarea in subareas %}
               <a href="{% url 'learning:subarea' subarea.id %}">
-                {% if subarea.img_url %}
+                {% if subarea.image %}
+                  <div class="flex-grid-item" style="background-image: url({% get_media_prefix %}{{ subarea.image }})">
+                {% elif subarea.img_url %}
                   <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }})">
                 {% else %}
                   <div class="flex-grid-item">
