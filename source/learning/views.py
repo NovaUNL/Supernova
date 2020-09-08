@@ -495,18 +495,22 @@ def section_exercises_view(request, section_id):
     return render(request, 'learning/section_exercises.html', context)
 
 
-@login_required
 def exercises_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
     context['title'] = 'Exercícios'
-    primary_students, context['secondary_students'] = get_students(request.user)
-    classes = college.Class.objects \
-        .annotate(exercise_count=djm.Count('synopsis_sections__exercises')) \
-        .filter(instances__enrollments__student__in=primary_students) \
-        .order_by('name') \
+    context['department_exercises'] = college.Department.objects.filter(extinguished=False)\
+        .annotate(exercise_count=djm.Count('classes__synopsis_sections__exercises'))\
+        .order_by('exercise_count')\
         .all()
-    context['classes'] = classes
+    context['exercise_count'] = m.Exercise.objects.count()
+    if not request.user.is_anonymous and request.user.is_student:
+        primary_students, context['secondary_students'] = get_students(request.user)
+        context['classes'] = college.Class.objects \
+            .annotate(exercise_count=djm.Count('synopsis_sections__exercises')) \
+            .filter(instances__enrollments__student__in=primary_students) \
+            .order_by('name') \
+            .all()
     context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('learning:exercises')}]
     return render(request, 'learning/exercises.html', context)
 

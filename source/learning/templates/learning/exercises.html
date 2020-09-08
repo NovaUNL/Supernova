@@ -55,28 +55,45 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.exercises.add_exercise %}<li><a href="{% url 'learning:create' %}">Criar novo</a></li>{% endif %}
+          {% if perms.exercises.add_exercise %}
+            <li><a href="{% url 'learning:create' %}">Criar novo</a></li>{% endif %}
         </ul>
       </div>
-      <div>
-        <h1>Exercícios</h1>
-      </div>
+      <h1>Exercícios</h1>
     </div>
-    <div class="col padded">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
-        <div class="pane-content">
-          <div class="exercise-class-list">
-            {% for class in classes %}
-              <div class="exercise-class">
-                <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
-                <h3><a href="{% url 'learning:class' class.id %}">{{ class }}</a></h3>
-                <div>
-                  ? exercícios resolvidos de {{ class.exercise_count }}.
-                </div>
-                <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
-              </div>
+    <div class="row padded nowrap">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>{{ exercise_count }} exercícios</h2></div>
+          <div class="pane-content">
+            {% for department in department_exercises %}
+              <ul class="menu">
+                <li>{{ department.exercise_count }} - <a href="#">{{ department }}</a></li>
+              </ul>
             {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Unidades curriculares</h2></div>
+          <div class="pane-content">
+            {% if classes %}
+              <div class="exercise-class-list">
+                {% for class in classes %}
+                  <div class="exercise-class">
+                    <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
+                    <h3><a href="{% url 'learning:class' class.id %}">{{ class }}</a></h3>
+                    <div>
+                      ? exercícios resolvidos de {{ class.exercise_count }}.
+                    </div>
+                    <span class="progress-bar"><span class="positive" style="flex-grow: 90"></span><span class="negative" style="flex-grow: 10"></span></span>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              Sem informação sobre unidades curriculares.
+            {% endif %}
           </div>
         </div>
       </div>
