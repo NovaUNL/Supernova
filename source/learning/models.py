@@ -24,7 +24,7 @@ class Area(djm.Model):
     #: The title of the area
     title = djm.CharField(max_length=64)
     #: An image that illustrates the area
-    image = djm.ImageField(null=True, upload_to=area_pic_path)
+    image = djm.ImageField(null=True, blank=True, upload_to=area_pic_path)
     img_url = djm.TextField(null=True, blank=True)  # TODO deleteme
 
     class Meta:
@@ -49,7 +49,7 @@ class Subarea(djm.Model):
     #: The :py:class:`synopses.models.Area` that owns this subarea
     area = djm.ForeignKey(Area, on_delete=djm.PROTECT, related_name='subareas')
     #: An image that illustrates the subarea
-    image = djm.ImageField(null=True, upload_to=subarea_pic_path, verbose_name='imagem')
+    image = djm.ImageField(null=True, blank=True, upload_to=subarea_pic_path, verbose_name='imagem')
     img_url = djm.TextField(null=True, blank=True, verbose_name='imagem (url)')  # TODO deleteme
 
     class Meta:
@@ -399,7 +399,7 @@ class Postable(djm.Model):
     def vote_balance(self):
         if self.upvotes is None:
             self.cache_votes()
-        return 1 + self.upvotes - self.downvotes
+        return self.upvotes - self.downvotes
 
     def set_vote(self, user, vote_type):
         with transaction.atomic():
@@ -467,7 +467,7 @@ class Question(users.Activity, users.Subscriptible, Postable):
         related_name='duplicates')
 
     def __str__(self):
-        return self.title
+        return f"questão '{self.title}'"
 
 
 class QuestionAnswer(users.Activity, users.Subscriptible, Postable):
@@ -482,6 +482,9 @@ class QuestionAnswer(users.Activity, users.Subscriptible, Postable):
     #: Signals if this answer is the accepted answer
     accepted = djm.BooleanField(default=False)
 
+    def __str__(self):
+        return f"resposta a {self.to}"
+
 
 class PostableComment(users.Activity, users.Subscriptible, Postable):
     """
@@ -492,6 +495,9 @@ class PostableComment(users.Activity, users.Subscriptible, Postable):
         Postable,
         on_delete=djm.PROTECT,
         related_name='comments')
+
+    def __str__(self):
+        return f"comentario em {self.to}"
 
 
 class PostableVote(users.Activity):
@@ -513,3 +519,6 @@ class PostableVote(users.Activity):
         Postable,
         on_delete=djm.PROTECT,
         related_name='votes')
+
+    def __str__(self):
+        return f"voto {self.get_type_display()} em {self.to}"
