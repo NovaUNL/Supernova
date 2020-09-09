@@ -25,22 +25,13 @@ class SubareaForm(djf.ModelForm):
             'area': autocomplete.ModelSelect2(url='learning:area_ac')}
 
 
-class SubareaSectionForm(djf.ModelForm):
+class SectionCreateForm(djf.ModelForm):
     class Meta:
         model = m.Section
-        fields = ('title', 'content_ck', 'subarea', 'requirements')
+        fields = ('title', 'content_md', 'subarea', 'requirements')
         widgets = {
             'title': djf.TextInput(),
             'subarea': djf.HiddenInput(),
-            'requirements': autocomplete.Select2Multiple(url='learning:section_ac')}
-
-
-class SectionChildForm(djf.ModelForm):
-    class Meta:
-        model = m.Section
-        fields = ('title', 'content_ck', 'requirements')
-        widgets = {
-            'title': djf.TextInput(),
             'requirements': autocomplete.Select2Multiple(url='learning:section_ac')}
 
 
@@ -53,14 +44,6 @@ class SectionEditForm(djf.ModelForm):
             'subarea': autocomplete.ModelSelect2(url='learning:subarea_ac'),
             'requirements': autocomplete.Select2Multiple(url='learning:section_ac'),
             'parents': autocomplete.Select2Multiple(url='learning:section_ac')}
-
-    def clean_after(self):
-        after = self.cleaned_data['after']
-        try:
-            after = int(after)
-        except ValueError:
-            raise dje.ValidationError("Invalid 'after' value.")
-        return after
 
 
 class ClassSectionForm(djf.ModelForm):
@@ -94,13 +77,12 @@ class SectionWebpageResourceForm(djf.ModelForm):
 
 
 class SectionDocumentResourceForm(djf.ModelForm):
-    # document = djf.ModelChoiceField(queryset=documents.Document.objects.all(), required=False)  # TODO select2
-
     class Meta:
         model = m.SectionDocumentResource
         fields = ('title', 'document')
         widgets = {
-            'title': djf.TextInput(attrs={'placeholder': 'Descritivo*'})
+            'title': djf.TextInput(attrs={'placeholder': 'Descritivo*'}),
+            # 'document': autocomplete.ModelSelect2(url='document_ac'), # TODO select2
         }
 
 

@@ -1,11 +1,11 @@
 from dal import autocomplete
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count, Q, F
+from django.db.models import Count, Q, F, Max
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect, Http404
 
 from django.contrib.auth.decorators import permission_required, login_required
-from django.db import models as djm
+from django.db import models as djm, transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
@@ -120,7 +120,6 @@ def subarea_edit_view(request, subarea_id):
     return render(request, 'learning/generic_form.html', context)
 
 
-# Section display views
 def __section_common(section, context):
     """
     Code that is common to every section view.
@@ -206,148 +205,101 @@ def section_authors_view(request, section_id):
     return render(request, 'learning/section_authors.html', context)
 
 
-# Section creation views
 @login_required
 @permission_required('learning.add_section', raise_exception=True)
-def section_create_view(request, parent_id):
-    parent = get_object_or_404(m.Section, id=parent_id)
-    # Choices (for the 'after' field) are at the parent start, or after any section other than this one
-    choices = [(0, 'Início')] + list(map(lambda section: (section.id, section.title),
-                                         m.Section.objects.filter(parents_intermediary__parent=parent)
-                                         .order_by('parents_intermediary__index').all()))
+def section_create_view(request, subarea_id=None, parent_id=None):
+    subarea, parent = None, None  # Suppress warnings
+    if subarea_id is not None:
+        subarea = get_object_or_404(m.Subarea, id=subarea_id)
+    if parent_id is not None:
+        parent = get_object_or_404(m.Section, id=parent_id)
+
+    sources_formset = f.SectionSourcesFormSet(prefix="sources")
+    web_resources_formset = f.SectionWebpageResourcesFormSet(prefix="wp_resources")
+    doc_resources_formset = f.SectionDocumentResourcesFormSet(prefix="doc_resources")
     if request.method == 'POST':
-        section_form = f.SectionEditForm(data=request.POST)
-        section_form.fields['after'].choices = choices
-        sources_formset = f.SectionSourcesFormSet(
-            request.POST, prefix="sources")
-        web_resources_formset = f.SectionWebpageResourcesFormSet(
-            request.POST, prefix="wp_resources")
-        doc_resources_formset = f.SectionDocumentResourcesFormSet(
-            request.POST, prefix="doc_resources")
-        if section_form.is_valid() \
-                and sources_formset.is_valid() \
-                and web_resources_formset.is_valid() \
-                and doc_resources_formset.is_valid():
-            # Obtain the requested index
-            if section_form.cleaned_data['after'] == 0:
-                index = 1
+        section_form = f.SectionCreateForm(data=request.POST)
+        if section_form.is_valid():
+            if subarea:
+                # Save the new section atomically (all or nothing)
+                with transaction.atomic():
+                    section = section_form.save(commit=False)
+                    section.subarea = subarea
+                    section.save()
+                    # Create an empty log entry for the author to be identifiable
+                    section_log = m.SectionLog(author=request.user, section=section)
+                    section_log.save()
             else:
-                index = m.SectionSubsection.objects.get(parent=parent,
-                                                        section_id=section_form.cleaned_data['after']).index + 1
+                # Obtain the requested index
+                index = m.SectionSubsection.objects \
+                    .filter(parent=parent) \
+                    .aggregate(Max('index'))['index__max']
+                index = 0 if index is None else index + 1
 
-            # Avoid index collisions. If the wanted index is taken by some other section
-            if m.SectionSubsection.objects.filter(parent=parent, index=index).exists():
-                # Then increment the index of every section with an index >= the desired one.
-                # TODO do this at once with an .update + F-expression (?)
-                for entry in m.SectionSubsection.objects.filter(parent=parent, index__gte=index) \
-                        .order_by('index').reverse().all():
-                    entry.index += 1
-                    entry.save()
+                # Save the new section atomically (all or nothing)
+                with transaction.atomic():
+                    section = section_form.save()
+                    section_parent_rel = m.SectionSubsection(parent=parent, section=section, index=index)
+                    section_parent_rel.save()
+                    # Create an empty log entry for the author to be identifiable
+                    section_log = m.SectionLog(author=request.user, section=section)
+                    section_log.save()
 
-            # Save the new section
-            section = section_form.save()
-
-            # Annex it to the parent section in the correct index
-            section_parent_rel = m.SectionSubsection(parent=parent, section=section, index=index)
-            section_parent_rel.save()
-
-            # Create an empty log entry for the author to be identifiable
-            section_log = m.SectionLog(author=request.user, section=section)
-            section_log.save()
-
-            # Process the formsets
-            for data in sources_formset.save(), web_resources_formset.save(), doc_resources_formset.save():
-                data.section = section
-                data.save()
+            sources_formset = f.SectionSourcesFormSet(
+                request.POST,
+                prefix="sources",
+                instance=section)
+            web_resources_formset = f.SectionWebpageResourcesFormSet(
+                request.POST,
+                prefix="wp_resources",
+                instance=section)
+            doc_resources_formset = f.SectionDocumentResourcesFormSet(
+                request.POST,
+                prefix="doc_resources",
+                instance=section)
+            if sources_formset.is_valid():
+                sources_formset.save()
+            if web_resources_formset.is_valid():
+                for form in web_resources_formset: # For some reason this does work
+                    form.save()
+                # web_resources_formset.save() # While this doesn't... go figure!
+            if doc_resources_formset.is_valid():
+                for form in doc_resources_formset: # For some reason this does work
+                    form.save()
+                # doc_resources_formset.save()
 
             # Redirect to the newly created section
-            return HttpResponseRedirect(reverse('learning:subsection', args=[parent_id, section.id]))
+            if subarea:
+                return HttpResponseRedirect(reverse('learning:subarea_section', args=[subarea_id, section.id]))
+            else:
+                return HttpResponseRedirect(reverse('learning:subsection', args=[parent_id, section.id]))
     else:
-        # This is a request for the creation form. Fill the possible choices
-        section_form = f.SectionEditForm(initial={'after': choices[-1][0]})
-        section_form.fields['after'].choices = choices
-        sources_formset = f.SectionSourcesFormSet(prefix="sources")
-        web_resources_formset = f.SectionWebpageResourcesFormSet(prefix="wp_resources")
-        doc_resources_formset = f.SectionDocumentResourcesFormSet(prefix="doc_resources")
+        section_form = f.SectionCreateForm()
 
-    subarea = parent.subarea
-    area = subarea.area
     context = build_base_context(request)
     context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar nova entrada em %s' % parent.title
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['web_resources_formset'] = web_resources_formset
     context['doc_resources_formset'] = doc_resources_formset
-    context['action_page'] = reverse('learning:section_create', args=[parent_id])
-    context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
-                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea.id])},
-                          {'name': parent.title, 'url': reverse('learning:section', args=[parent_id])},
-                          {'name': 'Criar secção'}]
-    return render(request, 'learning/generic_form.html', context)
-
-
-@login_required
-@permission_required('learning.add_section', raise_exception=True)
-def subsection_create_view(request, section_id):
-    parent = get_object_or_404(m.Section, id=section_id)
-    if request.method == 'POST':
-        form = f.SectionChildForm(data=request.POST)
-        valid = form.is_valid()
-        if valid:
-            section = form.save()
-            m.SectionSubsection(section=section, parent=parent).save()
-            return HttpResponseRedirect(reverse('learning:subsection', args=[parent.id, section.id]))
+    if subarea:
+        area = subarea.area
+        context['title'] = 'Criar secção em "%s"' % subarea.title
+        context['sub_nav'] = [
+            {'name': 'Sínteses', 'url': reverse('learning:areas')},
+            {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
+            {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea.id])},
+            {'name': 'Criar secção'}]
+        context['action_page'] = reverse('learning:subarea_section_create', args=[subarea_id])
     else:
-        form = f.SectionChildForm()
-
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar secção em "%s"' % parent.title
-    context['form'] = form
-    context['action_page'] = reverse('learning:subsection_create', args=[section_id])
-    context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
-                          {'name': '...', 'url': '#'},
-                          {'name': parent.title, 'url': reverse('learning:section', args=[section_id])},
-                          {'name': 'Criar secção', 'url': '#'}]
-    return render(request, 'learning/generic_form.html', context)
-
-
-@login_required
-@permission_required('learning.add_section', raise_exception=True)
-def subarea_section_create_view(request, subarea_id):
-    subarea = get_object_or_404(m.Subarea, id=subarea_id)
-    area = subarea.area
-    if request.method == 'POST':
-        form = f.SubareaSectionForm(data=request.POST)
-        valid = form.is_valid()
-        if valid:
-            section = form.save(commit=False)
-            if section.subarea != subarea:
-                form.add_error('subarea', 'Subarea mismatch')
-                valid = False
-            if valid:
-                section = form.save(commit=False)
-                section.content_reduce()
-                section.save()
-                return HttpResponseRedirect(reverse('learning:subarea_section', args=[subarea_id, section.id]))
-    else:
-        form = f.SubareaSectionForm(initial={'subarea': subarea})
-
-    context = build_base_context(request)
-    context['pcode'] = 'l_synopses_section'
-    context['title'] = 'Criar secção em "%s"' % subarea.title
-    context['form'] = form
-    context['action_page'] = reverse('learning:subarea_section_create', args=[subarea_id])
-    context['action_name'] = 'Criar'
-    context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
-                          {'name': area.title, 'url': reverse('learning:area', args=[area.id])},
-                          {'name': subarea.title, 'url': reverse('learning:subarea', args=[subarea_id])},
-                          {'name': 'Criar secção', 'url': '#'}]
-    return render(request, 'learning/generic_form.html', context)
+        context['title'] = 'Criar nova entrada em %s' % parent.title
+        context['sub_nav'] = [
+            {'name': 'Sínteses', 'url': reverse('learning:areas')},
+            {'name': '...'},
+            {'name': parent.title, 'url': reverse('learning:section', args=[parent_id])},
+            {'name': 'Criar secção', 'url': '#'}]
+        context['action_page'] = reverse('learning:subsection_create', args=[parent_id])
+    return render(request, 'learning/section_management.html', context)
 
 
 @login_required
@@ -382,16 +334,13 @@ def section_edit_view(request, section_id):
                         author=request.user,
                         section=section,
                         previous_content=section.content_ck)
-            section = section_form.save(commit=False)
-            section.save()
+            section = section_form.save()
 
             # Child-Parent M2M needs to be done this way due to the non-null index
             # PS: SectionSubsection's save is overridden
             for parent in section_form.cleaned_data['parents']:
                 if not m.SectionSubsection.objects.filter(section=section, parent=parent).exists():
                     m.SectionSubsection(section=section, parent=parent).save()
-
-            section_form.save_m2m()
 
             sources_formset.save()
             doc_resources_formset.save()
@@ -499,9 +448,9 @@ def exercises_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
     context['title'] = 'Exercícios'
-    context['department_exercises'] = college.Department.objects.filter(extinguished=False)\
-        .annotate(exercise_count=djm.Count('classes__synopsis_sections__exercises'))\
-        .order_by('exercise_count')\
+    context['department_exercises'] = college.Department.objects.filter(extinguished=False) \
+        .annotate(exercise_count=djm.Count('classes__synopsis_sections__exercises')) \
+        .order_by('exercise_count') \
         .all()
     context['exercise_count'] = m.Exercise.objects.count()
     if not request.user.is_anonymous and request.user.is_student:

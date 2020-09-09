@@ -17,6 +17,33 @@
           integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI"
           crossorigin="anonymous"
           onload="renderMathInElement(document.body);"></script>
+  <script>
+      MathJax = {
+          options: {
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process',
+              renderActions: {
+                  find: [10, function (doc) {
+                      for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                          const display = !!node.type.match(/; *mode=display/);
+                          const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                          const text = document.createTextNode('');
+                          const sibling = node.previousElementSibling;
+                          node.parentNode.replaceChild(text, node);
+                          math.start = {node: text, delim: '', n: 0};
+                          math.end = {node: text, delim: '', n: 0};
+                          doc.math.push(math);
+                          if (sibling && sibling.matches('.MathJax_Preview')) {
+                              sibling.parentNode.removeChild(sibling);
+                          }
+                      }
+                  }, '']
+              }
+          }
+      };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +51,7 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.synopses.add_section %}<li><a href="{% url 'learning:section_create' section.id %}">Criar subsecção</a></li>{% endif %}
+          {% if perms.synopses.add_section %}<li><a href="{% url 'learning:subsection_create' section.id %}">Criar subsecção</a></li>{% endif %}
           {% if perms.synopses.change_section %}<li><a href="{% url 'learning:section_edit' section.id %}">Editar</a></li>{% endif %}
         </ul>
       </div>
