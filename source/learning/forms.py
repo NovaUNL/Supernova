@@ -161,8 +161,10 @@ class ExerciseForm(djf.ModelForm):
             if 'enunciation' not in exercise or 'subproblems' not in exercise:
                 raise djf.ValidationError("Grupo com campos em falta")
             enunciation, subproblems = exercise['enunciation'], exercise['subproblems']
-            if type(enunciation) is not str or type(subproblems) is not list or len(subproblems) < 2:
+            if type(enunciation) is not str or type(subproblems) is not list:
                 raise djf.ValidationError("Grupo com tipos inválidos")
+            if len(subproblems) < 2:
+                raise djf.ValidationError("Grupo com menos de dois sub-problemas")
             exercise['enunciation'] = enunciation = enunciation.strip()
             map(ExerciseForm._validate_exercise, subproblems)
         elif etype == "write":
@@ -173,15 +175,21 @@ class ExerciseForm(djf.ModelForm):
                 raise djf.ValidationError("Questão com tipos inválidos")
             enunciation, _ = exercise['enunciation'], exercise['answer'] = enunciation.strip(), answer.strip()
         elif etype == "select":
-            if 'enunciation' not in exercise or 'candidates' not in exercise or 'answerIndex' not in exercise:
+            if 'enunciation' not in exercise or 'candidates' not in exercise or 'answerIndexes' not in exercise:
                 raise djf.ValidationError("Escolha múltipla com parametros em falta")
-            enunciation, candidates, index = exercise['enunciation'], exercise['candidates'], exercise['answerIndex']
-            if type(enunciation) is not str or type(candidates) is not list or type(index) is not int:
+            enunciation, candidates = exercise['enunciation'], exercise['candidates']
+            indexes = exercise['answerIndexes']
+            if type(enunciation) is not str \
+                    or type(candidates) is not list \
+                    or type(indexes) is not list \
+                    or not all(map(lambda index: type(index) is int, indexes)):
                 raise djf.ValidationError("Escolha múltipla com tipos inválidos")
+            indexes = list(set(indexes))
             if (candidate_count := len(candidates)) < 2 \
                     or not all(map(lambda x: type(x) is str, candidates)) \
-                    or index < 0 \
-                    or index >= candidate_count:
+                    or len(indexes) == 0 \
+                    or any(map(lambda i: type(i) < 0, indexes)) \
+                    or any(map(lambda i: type(i) >= candidate_count, indexes)):
                 raise djf.ValidationError("Escolha múltipla com parametros inválidos")
             exercise['enunciation'] = enunciation = enunciation.strip()
             for i, candidate in enumerate(candidates):

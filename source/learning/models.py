@@ -316,6 +316,7 @@ class Exercise(djm.Model):
                    '<h2>Resposta</h2>' \
                    f'<div class="exercise-answer">{markdownify(problem["answer"])}</div>'
         elif type == 'select':
+            answers = "".join([f"{chr(ord('A') + index)}) {markdownify(problem['candidates'][index])}" for index in problem['answerIndexes']])
             return '<h2>Questão</h2>' \
                    f'<blockquote class="exercise-enunciation">{markdownify(problem["enunciation"])}</blockquote>' \
                    '<ol type="A" class="exercise-answer-candidates">' \
@@ -323,7 +324,7 @@ class Exercise(djm.Model):
                    '</ol>' \
                    '<h2>Resposta</h2>' \
                    '<div class="exercise-answer">' \
-                   f"{chr(ord('A') + problem['answerIndex'])}) {markdownify(problem['candidates'][problem['answerIndex']])}" \
+                   f'{answers}' \
                    '</div>'
         else:
             raise Exception("Attempted to render an exercise which is not fully implemented")

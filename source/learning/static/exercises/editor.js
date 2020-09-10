@@ -63,13 +63,13 @@ function appendWriteQuestion(elem, enunciationVal, answerVal) {
     }
 }
 
-function appendSelectQuestion(elem, enunciationVal, candidates, answerIndex) {
+function appendSelectQuestion(elem, enunciationVal, candidates, answerIndexes) {
     let exercisePart = document.createElement('div');
     exercisePart.classList.add('exercise', 'select');
     exercisePart.dataset.answers = '0';
     let closeBtn = document.createElement('span');
     closeBtn.classList.add('exercise-delete');
-    closeBtn.onclick = function () {
+    closeBtn.onclick = () => {
         deleteQuestion(exercisePart);
     };
     exercisePart.appendChild(closeBtn);
@@ -82,9 +82,10 @@ function appendSelectQuestion(elem, enunciationVal, candidates, answerIndex) {
     addAnswer.innerText = "Adicionar resposta";
     exercisePart.appendChild(addAnswer);
     label = document.createElement('span');
-    label.textContent = "Resposta:";
+    label.textContent = "Respostas (mínimo uma, CTRL para múltiplas):";
     exercisePart.appendChild(label);
     let correctAnswer = document.createElement('select');
+    correctAnswer.multiple = true;
     exercisePart.appendChild(correctAnswer);
     elem.appendChild(exercisePart);
 
@@ -114,7 +115,8 @@ function appendSelectQuestion(elem, enunciationVal, candidates, answerIndex) {
         enunciation.value = enunciationVal;
         for (let i = 0; i < candidates.length; i++)
             addAnswer.click();
-        correctAnswer.selectedIndex = answerIndex;
+        let options = correctAnswer.querySelectorAll('option');
+        answerIndexes.forEach((answerIndex) => {options[answerIndex].selected = true});
     } else {
         addAnswer.click();
         addAnswer.click();
@@ -166,12 +168,12 @@ function extractSubProblem(node) {
         return {type: "write", enunciation: textareas[0].value, answer: textareas[1].value};
     } else if (node.classList.contains("select")) {
         let enunciation = node.querySelector("textarea").value;
-        let candidates = [].slice.call(
-            document.getElementById("exercise-editor").querySelectorAll("input[type='text']")
-        ).map(x => x.value);
+        let candidates = [].slice.call(node.querySelectorAll("input[type='text']")).map(x => x.value);
         let answerSelector = node.querySelector("select");
-        let answerIndex = parseInt(answerSelector.options[answerSelector.selectedIndex].value);
-        return {type: "select", enunciation: enunciation, candidates: candidates, answerIndex: answerIndex};
+        let answerIndexes = Array.from(answerSelector.options)
+            .filter(option => option.selected)
+            .map(option => parseInt(option.value));
+        return {type: "select", enunciation: enunciation, candidates: candidates, answerIndexes: answerIndexes};
     }
 }
 
@@ -239,7 +241,7 @@ function loadNode(root, exercise) {
             appendWriteQuestion(root, exercise.enunciation, exercise.answer);
             break;
         case "select":
-            appendSelectQuestion(root, exercise.enunciation, exercise.candidates, exercise.answerIndex);
+            appendSelectQuestion(root, exercise.enunciation, exercise.candidates, exercise.answerIndexes);
             break;
     }
 }
