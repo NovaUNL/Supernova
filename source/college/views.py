@@ -2,7 +2,8 @@ from datetime import datetime
 
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponse, Http404
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.cache import cache_control, cache_page
@@ -417,6 +418,7 @@ def room_view(request, room_id):
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
     return render(request, 'college/room.html', context)
 
+
 @login_required
 def available_places_view(request):
     context = build_base_context(request)
@@ -451,7 +453,10 @@ class ClassAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Class.objects.all()
         if self.q:
-            qs = qs.filter(name__startswith=self.q)
+            try:
+                qs = qs.filter(Q(id=int(self.q)) | Q(name__istartswith=self.q))
+            except ValueError:
+                qs = qs.filter(title__contains=self.q)
         return qs
 
 
@@ -459,5 +464,8 @@ class PlaceAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Place.objects.all()
         if self.q:
-            qs = qs.filter(name__startswith=self.q)
+            try:
+                qs = qs.filter(Q(id=int(self.q)) | Q(name__istartswith=self.q))
+            except ValueError:
+                qs = qs.filter(title__contains=self.q)
         return qs

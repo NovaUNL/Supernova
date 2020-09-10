@@ -598,7 +598,10 @@ class AreaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Area.objects.all()
         if self.q:
-            qs = qs.filter(Q(id=self.q) | Q(title__istartswith=self.q))
+            try:
+                qs = qs.filter(Q(id=int(self.q)) | Q(title__istartswith=self.q))
+            except ValueError:
+                qs = qs.filter(title__contains=self.q)
         return qs
 
 
@@ -606,7 +609,10 @@ class SubareaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Subarea.objects.all()
         if self.q:
-            qs = qs.filter(Q(id=self.q) | Q(title__istartswith=self.q))
+            try:
+                qs = qs.filter(Q(id=int(self.q)) | Q(title__istartswith=self.q))
+            except ValueError:
+                qs = qs.filter(title__contains=self.q)
         return qs
 
 
@@ -614,7 +620,10 @@ class SectionAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Section.objects.all()
         if self.q:
-            qs = qs.filter(Q(id=self.q) | Q(title__contains=self.q))
+            try:
+                qs = qs.filter(Q(id=int(self.q)) | Q(title__contains=self.q))
+            except ValueError:
+                qs = qs.filter(title__contains=self.q)
         return qs
 
 
@@ -622,5 +631,8 @@ class ExerciseAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = m.Exercise.objects.all()
         if self.q:
-            qs = qs.filter(id=self.q)
+            try:
+                qs = qs.filter(id=int(self.q))
+            except ValueError:
+                qs = None
         return qs
