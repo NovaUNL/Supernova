@@ -131,7 +131,7 @@
               );
           </script>
           <span style="font-weight: bold">Adicionar: </span>
-          <select name="section" required id="id_area" data-autocomplete-light-url="/sinteses/ac/section/"
+          <select name="section" required id="id_area" data-autocomplete-light-url="{% url 'learning:section_ac' %}"
                   data-autocomplete-light-function="select2" onchange="addToCollectionEvt(this);"></select>
           <a class="ui-btn save-button" href="javascript:saveCollectionOrder(list);">Guardar</a>
         </div>

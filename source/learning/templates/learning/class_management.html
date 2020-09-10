@@ -9,7 +9,6 @@
   <link href="{% static  'vendor/select2/dist/css/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
   <link href="{% static  'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet">
   <link href="{% static  'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet">
-  <link href="" type="text/css" media="screen" rel="stylesheet">
   <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
   <script src="{% static  'autocomplete_light/jquery.init.js' %}"></script>
   <script src="{% static  'vendor/select2/dist/js/select2.full.min.js' %}"></script>
@@ -40,7 +39,7 @@
             );
         </script>
         <b>Adicionar: </b>
-        <select name="section" required id="id_area" data-autocomplete-light-url="/sinteses/ac/section/"
+        <select name="section" required id="id_area" data-autocomplete-light-url="{% url 'learning:section_ac' %}"
                 data-autocomplete-light-function="select2" onchange="addToCollectionEvt(this);"></select>
         <a class="ui-btn save-button" href="javascript:saveCollectionOrder(list);">Guardar</a>
       </div>
