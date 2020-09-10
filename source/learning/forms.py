@@ -1,7 +1,8 @@
-from django.core import exceptions as dje
 from django import forms as djf
 from dal import autocomplete
 from ckeditor.widgets import CKEditorWidget
+from django.db import transaction
+from django.db.models import Max
 
 from learning import models as m
 from learning.widgets import ExerciseWidget
@@ -38,12 +39,36 @@ class SectionCreateForm(djf.ModelForm):
 class SectionEditForm(djf.ModelForm):
     class Meta:
         model = m.Section
-        fields = ('title', 'content_ck', 'content_md', 'subarea', 'parents', 'requirements')
+        fields = ('title', 'content_ck', 'content_md', 'subarea', 'parents', 'classes', 'requirements')
         widgets = {
             'title': djf.TextInput(),
             'subarea': autocomplete.ModelSelect2(url='learning:subarea_ac'),
             'requirements': autocomplete.Select2Multiple(url='learning:section_ac'),
-            'parents': autocomplete.Select2Multiple(url='learning:section_ac')}
+            'parents': autocomplete.Select2Multiple(url='learning:section_ac'),
+            'classes': autocomplete.Select2Multiple(url='college:class_ac'),
+        }
+
+    def save(self, commit=True):
+        instance = super(SectionEditForm, self).save(commit=False)
+
+        with transaction.atomic():
+            parents = self.cleaned_data['parents']
+            for parent in parents.exclude(id__in=instance.parents.values_list('id', flat=True)):
+                next_index = m.SectionSubsection.objects.filter(parent=parent).aggregate(Max('index'))['index__max']
+                next_index = 0 if next_index is None else next_index + 1
+                m.SectionSubsection.objects.create(parent=parent, section=instance, index=next_index)
+
+            classes = self.cleaned_data['classes']
+            for class_ in classes.exclude(id__in=instance.classes.values_list('id', flat=True)):
+                next_index = m.ClassSection.objects.filter(corresponding_class=class_).aggregate(Max('index'))[
+                    'index__max']
+                next_index = 0 if next_index is None else next_index + 1
+                m.ClassSection.objects.create(corresponding_class=class_, section=instance, index=next_index)
+
+            if commit:
+                instance.save()
+                self.save_m2m()
+        return instance
 
 
 class ClassSectionForm(djf.ModelForm):

@@ -226,6 +226,7 @@ def section_create_view(request, subarea_id=None, parent_id=None):
                     section = section_form.save(commit=False)
                     section.subarea = subarea
                     section.save()
+                    section_form.save_m2m()
                     # Create an empty log entry for the author to be identifiable
                     section_log = m.SectionLog(author=request.user, section=section)
                     section_log.save()
@@ -260,11 +261,11 @@ def section_create_view(request, subarea_id=None, parent_id=None):
             if sources_formset.is_valid():
                 sources_formset.save()
             if web_resources_formset.is_valid():
-                for form in web_resources_formset: # For some reason this does work
+                for form in web_resources_formset:  # For some reason this does work
                     form.save()
                 # web_resources_formset.save() # While this doesn't... go figure!
             if doc_resources_formset.is_valid():
-                for form in doc_resources_formset: # For some reason this does work
+                for form in doc_resources_formset:  # For some reason this does work
                     form.save()
                 # doc_resources_formset.save()
 
@@ -335,13 +336,6 @@ def section_edit_view(request, section_id):
                         section=section,
                         previous_content=section.content_ck)
             section = section_form.save()
-
-            # Child-Parent M2M needs to be done this way due to the non-null index
-            # PS: SectionSubsection's save is overridden
-            for parent in section_form.cleaned_data['parents']:
-                if not m.SectionSubsection.objects.filter(section=section, parent=parent).exists():
-                    m.SectionSubsection(section=section, parent=parent).save()
-
             sources_formset.save()
             doc_resources_formset.save()
             web_resources_formset.save()
