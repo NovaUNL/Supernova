@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Max
 from django.urls import reverse
 from django.db import models as djm, transaction
 from polymorphic.models import PolymorphicModel
@@ -95,6 +96,7 @@ class Section(djm.Model):
         symmetrical=False)
     classes = djm.ManyToManyField(
         college.Class,
+        blank=True,
         through='ClassSection',
         related_name='synopsis_sections')
     #: Whether this section has been validated as correct by a teacher
@@ -169,8 +171,8 @@ class SectionSubsection(djm.Model):
 
     def save(self, **kwargs):
         if self.index is None:
-            assigned_indexes = SectionSubsection.objects.filter(parent=self.parent).values('index')
-            self.index = len(assigned_indexes)
+            biggest_index = SectionSubsection.objects.filter(parent=self.parent).aggregate(Max('index'))['index__max']
+            self.index = 0 if biggest_index is None else biggest_index + 1
         djm.Model.save(self)
 
 
