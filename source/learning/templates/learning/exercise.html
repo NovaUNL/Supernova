@@ -39,14 +39,16 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          <li><a href="{% url 'learning:edit' exercise.id %}">Editar</a></li>
+          {% if perms.learning.add_question %}<li><a href="{% url 'learning:question_create' %}?exercise={{ exercise.id }}">Colocar dúvida</a></li>{% endif %}
+          {% if perms.learning.change_exercise %}<li><a href="{% url 'learning:edit' exercise.id %}">Editar</a></li>{% endif %}
         </ul>
       </div>
       <div>
         <h1>Exercício</h1>
+        <h3>#{{ exercise.id }}</h3>
       </div>
     </div>
-    <div class="row padded">
+    <div class="row padded nowrap">
       <div class="col">
         <div class="flex-pane">
           <div class="pane-title bg-grad"></div>
@@ -58,7 +60,7 @@
           </div>
         </div>
       </div>
-      <div class="col nogrow">
+      <div class="col nogrow" style="flex-basis: 350px;">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Meta</h2></div>
           <div class="pane-content">
@@ -68,6 +70,30 @@
                 <li><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></li>
               {% endfor %}
             </ul>
+            <h3>Unidades curriculares</h3>
+            <ul class="content-list">
+              {% for class in classes %}
+                <li><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></li>
+              {% endfor %}
+            </ul>
+            <h3>Dúvidas</h3>
+            {% if exercise.question_count == 0 %}
+              <span class="indented">Sem dúvidas colocadas.</span>
+            {% elif exercise.question_count == 1 %}
+              <span class="indented">{{ exercise.question_count }} dúvida colocada.</span>
+            {% else %}
+              <span class="indented">{{ exercise.question_count }} dúvidas colocadas.</span>
+            {% endif %}
+            {% if exercise.source or exercise.source_url %}
+              <h3>Fonte</h3>
+              {% if exercise.source_url %}
+                <a class="indented" href="{{ exercise.source_url }}">
+                  {% if exercise.source %}{{ exercise.source }}{% else %}{{ exercise.source_url }}{% endif %}
+                </a>
+              {% else %}
+                <span class="indented">{{ exercise.source }}</span>
+              {% endif %}
+            {% endif %}
           </div>
         </div>
       </div>

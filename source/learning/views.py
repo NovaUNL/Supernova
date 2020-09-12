@@ -262,7 +262,7 @@ def section_create_view(request, subarea_id=None, parent_id=None):
             if web_resources_formset.is_valid():
                 # for form in web_resources_formset:  # For some reason this passes the unit tests
                 #     form.save()
-                web_resources_formset.save() # While this doesn't... go figure!
+                web_resources_formset.save()  # While this doesn't... go figure!
             if doc_resources_formset.is_valid():
                 # for form in doc_resources_formset:  # For some reason this passes the unit tests
                 #     form.save()
@@ -458,13 +458,18 @@ def exercises_view(request):
 
 
 def exercise_view(request, exercise_id):
-    exercise = get_object_or_404(m.Exercise, id=exercise_id)
+    exercise = get_object_or_404(
+        m.Exercise.objects
+            .select_related('author')
+            .annotate(question_count=Count('linked_questions')),
+        id=exercise_id)
     context = build_base_context(request)
     context['pcode'] = 'l_exercises'
     context['title'] = f'Exercício #{exercise.id}'
     context['exercise'] = exercise
+    context['classes'] = college.Class.objects.filter(synopsis_sections__exercises=exercise).distinct()
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
-                          {'name': f'Exercício #{exercise.id}',
+                          {'name': f'#{exercise_id}',
                            'url': reverse('learning:exercise', args=[exercise_id])}]
     return render(request, 'learning/exercise.html', context)
 
@@ -513,6 +518,7 @@ def edit_exercise_view(request, exercise_id):
     context['title'] = f'Editar exercício #{exercise.id}'
     context['form'] = form
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
+                          {'name': f'#{exercise_id}', 'url': reverse('learning:exercise', args=[exercise_id])},
                           {'name': 'Editar exercício', 'url': reverse('learning:edit', args=[exercise_id])}]
     return render(request, 'learning/editor.html', context)
 
