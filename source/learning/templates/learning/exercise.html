@@ -40,7 +40,7 @@
       <div class="header-decorator-options">
         <ul>
           {% if perms.learning.add_question %}<li><a href="{% url 'learning:question_create' %}?exercise={{ exercise.id }}">Colocar dúvida</a></li>{% endif %}
-          {% if perms.learning.change_exercise %}<li><a href="{% url 'learning:edit' exercise.id %}">Editar</a></li>{% endif %}
+          {% if perms.learning.change_exercise %}<li><a href="{% url 'learning:exercise_edit' exercise.id %}">Editar</a></li>{% endif %}
         </ul>
       </div>
       <div>
@@ -56,7 +56,6 @@
             {{ exercise.render_html | safe }}
             <hr>
             <span>Submetido por <a href="{% url 'users:profile' exercise.author.nickname %}">{{ exercise.author }}</a></span>
-            <a href="{% url 'learning:edit' exercise.id %}">Editar</a>
           </div>
         </div>
       </div>

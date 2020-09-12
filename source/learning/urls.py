@@ -24,9 +24,8 @@ urlpatterns = [
     path('seccao/<int:section_id>/editar/', views.section_edit_view, name='section_edit'),
     # Exercise related
     path('exercicios', views.exercises_view, name='exercises'),
-    # TODO rename the name parameters to exercise_[verb] as they became too generic after merge
-    path('exercicios/criar/', views.create_exercise_view, name='create'),
-    path('exercicios/editar/<int:exercise_id>/', views.edit_exercise_view, name='edit'),
+    path('exercicios/criar/', views.create_exercise_view, name='exercise_create'),
+    path('exercicios/editar/<int:exercise_id>/', views.edit_exercise_view, name='exercise_edit'),
     path('exercicio/<int:exercise_id>/', views.exercise_view, name='exercise'),
     # QA related
     path('duvidas', views.questions_view, name='questions'),
