@@ -223,10 +223,9 @@ def section_create_view(request, subarea_id=None, parent_id=None):
             if subarea:
                 # Save the new section atomically (all or nothing)
                 with transaction.atomic():
-                    section = section_form.save(commit=False)
+                    section = section_form.save()
                     section.subarea = subarea
                     section.save()
-                    section_form.save_m2m()
                     # Create an empty log entry for the author to be identifiable
                     section_log = m.SectionLog(author=request.user, section=section)
                     section_log.save()
@@ -261,13 +260,13 @@ def section_create_view(request, subarea_id=None, parent_id=None):
             if sources_formset.is_valid():
                 sources_formset.save()
             if web_resources_formset.is_valid():
-                for form in web_resources_formset:  # For some reason this does work
-                    form.save()
-                # web_resources_formset.save() # While this doesn't... go figure!
+                # for form in web_resources_formset:  # For some reason this passes the unit tests
+                #     form.save()
+                web_resources_formset.save() # While this doesn't... go figure!
             if doc_resources_formset.is_valid():
-                for form in doc_resources_formset:  # For some reason this does work
-                    form.save()
-                # doc_resources_formset.save()
+                # for form in doc_resources_formset:  # For some reason this passes the unit tests
+                #     form.save()
+                doc_resources_formset.save()
 
             # Redirect to the newly created section
             if subarea:
@@ -479,6 +478,7 @@ def create_exercise_view(request):
             exercise = form.save(commit=False)
             exercise.author = request.user
             exercise.save()
+            form.save_m2m()
             return redirect('learning:exercise', exercise_id=exercise.id)
     else:
         if 'section' in request.GET:
