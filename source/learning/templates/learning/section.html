@@ -51,8 +51,16 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.synopses.add_section %}<li><a href="{% url 'learning:subsection_create' section.id %}">Criar subsecção</a></li>{% endif %}
-          {% if perms.synopses.change_section %}<li><a href="{% url 'learning:section_edit' section.id %}">Editar</a></li>{% endif %}
+          {% if perms.synopses.add_section %}
+            <li><a href="{% url 'learning:question_create' %}?section={{ section.id }}">Colocar dúvida</a>
+            </li>{% endif %}
+          {% if perms.synopses.add_section %}
+            <li><a href="{% url 'learning:subsection_create' section.id %}">Criar subsecção</a></li>{% endif %}
+          {% if perms.synopses.add_section %}
+            <li><a href="{% url 'learning:exercise_create' %}?section={{ section.id }}">Adicionar exercício</a>
+            </li>{% endif %}
+          {% if perms.synopses.change_section %}
+            <li><a href="{% url 'learning:section_edit' section.id %}">Editar</a></li>{% endif %}
         </ul>
       </div>
       <div>
@@ -119,18 +127,6 @@
             {% else %}
               <span class="indented">Sem requisitos conhecidos.</span>
             {% endif %}
-            <h3>Recursos</h3>
-            {% if section.resources.exists %}
-              <ul class="content-list">
-                {% for resource in section.resources.all %}
-                  <li>
-                    <a href="{{ resource.template_url }}">{{ resource.template_title|truncatechars:35 }}</a>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <span class="indented">Sem recursos adicionais.</span>
-            {% endif %}
             <h3>Unidades curriculares</h3>
             {% if section.classes.exists %}
               <ul class="content-list">
@@ -140,6 +136,36 @@
               </ul>
             {% else %}
               <span class="indented">Sem unidades curriculares associadas.</span>
+            {% endif %}
+            <h3><a href="{% url 'learning:section_exercises' section.id %}">Exercicios</a></h3>
+            <span class="indented">
+              {% if section.exercise_count == 0 %}
+                Sem exercícios.
+              {% elif section.exercise_count == 1 %}
+                1 exercício.
+              {% else %}
+                {{ section.exercise_count }} exercícios.
+              {% endif %}
+            </span>
+            <h3>Dúvidas</h3>
+            <span class="indented">
+              {% if section.question_count == 0 %}
+                Sem dúvidas colocadas.
+              {% elif section.question_count == 1 %}
+                1 dúvida colocada.
+              {% else %}
+                {{ section.question_count }} dúvidas colocadas.
+              {% endif %}
+            </span>
+            <h3>Recursos</h3>
+            {% if section.resources.exists %}
+              <ul class="content-list">
+                {% for resource in section.resources.all %}
+                  <li><a href="{{ resource.template_url }}">{{ resource.template_title|truncatechars:35 }}</a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="indented">Sem recursos adicionais.</span>
             {% endif %}
             <h3>Fontes</h3>
             {% if section.sources.exists %}
@@ -171,14 +197,10 @@
             {% else %}
               <span class="indented">Sem autores registados.</span>
             {% endif %}
-            <h3><a href="{% url 'learning:section_exercises' section.id %}">Exercicios</a></h3>
-            <span class="indented">
-              {% if section.exercises.count > 0 %}
-                {{ section.exercises.count }} exercícios.
-              {% else %}
-                Sem exercícios.
-              {% endif %}
-            </span>
+            {% if last_update %}
+              <h3>Ultima modificação</h3>
+              <span class="indented">{{ last_update }}</span>
+            {% endif %}
           </div>
         </div>
       </div>

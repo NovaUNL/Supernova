@@ -136,6 +136,10 @@ def __section_common(section, context):
         .order_by('children_intermediary__index').all()
     context['children'] = children
     context['parents'] = parents
+    last_timestamp = section.log_entries.aggregate(Max('timestamp'))
+    if last_timestamp is not None:
+        last_timestamp = last_timestamp['timestamp__max']
+    context['last_update'] = last_timestamp
     context['author_log'] = section.log_entries.distinct('author')
 
 
@@ -146,7 +150,8 @@ def section_view(request, section_id):
     section = get_object_or_404(
         m.Section.objects
             .select_related('subarea')
-            .prefetch_related('classes'),
+            .prefetch_related('classes')
+            .annotate(question_count=Count('linked_questions'), exercise_count=Count('exercises')),
         id=section_id)
     context = build_base_context(request)
     __section_common(section, context)
@@ -162,7 +167,11 @@ def subsection_view(request, parent_id, child_id):
     View where a section is displayed as a part of another section.
     """
     parent = get_object_or_404(m.Section, id=parent_id)
-    child = get_object_or_404(m.Section, id=child_id)
+    child = get_object_or_404(
+        m.Section.objects
+            .prefetch_related('classes')
+            .annotate(question_count=Count('linked_questions'), exercise_count=Count('exercises')),
+        id=child_id)
     context = build_base_context(request)
     __section_common(child, context)
     context['title'] = '%s - %s' % (child.title, parent.title)
@@ -177,7 +186,11 @@ def subarea_section_view(request, subarea_id, section_id):
     """
     View where a section is displayed as direct child of a subarea.
     """
-    section = get_object_or_404(m.Section.objects.select_related('subarea__area'), id=section_id)
+    section = get_object_or_404(
+        m.Section.objects
+            .select_related('subarea__area', 'classes')
+            .annotate(question_count=Count('linked_questions'), exercise_count=Count('exercises')),
+        id=section_id)
     subarea = section.subarea
     if subarea.id != subarea_id:
         raise Http404('Mismatched section')
