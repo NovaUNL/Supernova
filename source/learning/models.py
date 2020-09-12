@@ -318,15 +318,30 @@ class Exercise(djm.Model):
                    '<h2>Resposta</h2>' \
                    f'<div class="exercise-answer">{markdownify(problem["answer"])}</div>'
         elif type == 'select':
-            answers = "".join([f"{chr(ord('A') + index)}) {markdownify(problem['candidates'][index])}" for index in problem['answerIndexes']])
+            # TODO this shouldn't be here, calculate upon upload instead of per request
+            answer_count = len(problem["candidates"])
+            correct_answer_count = len(problem["answerIndexes"])
+            line_num_is_answer = False
+            if all(map(
+                    lambda c: chr(c[0]) == c[1] or chr(ord('A') + c[0]) == c[1] or chr(ord('a') + c[0]) == c[1],
+                    enumerate(problem['candidates']))):
+                line_num_is_answer = True
+            if line_num_is_answer:
+                answers = ""
+                correct_answers = "".join(
+                    [f"{problem['candidates'][index]}, "
+                     for index in problem['answerIndexes']])[:-2]
+            else:
+                answers = "".join(["<li>%s</li>" % markdownify(candidate) for candidate in problem["candidates"]])
+                correct_answers = "".join(
+                    [f"{chr(ord('A') + index)}) {markdownify(problem['candidates'][index])}"
+                     for index in problem['answerIndexes']])
             return '<h2>Questão</h2>' \
                    f'<blockquote class="exercise-enunciation">{markdownify(problem["enunciation"])}</blockquote>' \
-                   '<ol type="A" class="exercise-answer-candidates">' \
-                   f'{"".join(["<li>%s</li>" % markdownify(candidate) for candidate in problem["candidates"]])}' \
-                   '</ol>' \
-                   '<h2>Resposta</h2>' \
+                   f'<ol type="A" class="exercise-answer-candidates">{answers}</ol>' \
+                   f'<h2>Resposta{"s" if correct_answer_count > 1 else ""}</h2>' \
                    '<div class="exercise-answer">' \
-                   f'{answers}' \
+                   f'{correct_answers}' \
                    '</div>'
         else:
             raise Exception("Attempted to render an exercise which is not fully implemented")
