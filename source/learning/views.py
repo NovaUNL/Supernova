@@ -600,11 +600,14 @@ def questions_view(request):
     context['recent_questions'] = m.Question.objects \
         .select_related('user') \
         .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
-        .annotate(answer_count=Count('answers'))
+        .order_by('timestamp') \
+        .annotate(answer_count=Count('answers'))\
+        .reverse()[:50]
     context['popular_questions'] = m.Question.objects \
-        .order_by(F('upvotes') + F('downvotes')) \
+        .order_by(F('upvotes') + F('downvotes'), 'timestamp') \
         .select_related('user') \
-        .annotate(answer_count=Count('answers'))
+        .annotate(answer_count=Count('answers'))\
+        .reverse()[:50]
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
     return render(request, 'learning/questions.html', context)
 
