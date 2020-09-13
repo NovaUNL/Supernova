@@ -563,10 +563,26 @@ def question_create_view(request):
             question = form.save(commit=False)
             question.user = request.user
             question.save()
+            form.save_m2m()
             question.set_vote(request.user, m.PostableVote.UPVOTE)
             return redirect('learning:question', question_id=question.id)
     else:
-        context['form'] = f.QuestionForm()
+        initial = {}
+        if 'section' in request.GET:
+            try:
+                section = m.Section.objects.filter(id=int(request.GET['section'])).first()
+                if section is not None:
+                    initial['linked_sections'] = [section, ]
+            except ValueError:
+                pass
+        if 'exercise' in request.GET:
+            try:
+                section = m.Exercise.objects.filter(id=int(request.GET['exercise'])).first()
+                if section is not None:
+                    initial['linked_exercises'] = [section, ]
+            except ValueError:
+                pass
+        context['form'] = f.QuestionForm(initial=initial)
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': 'Colocar questão', 'url': reverse('learning:question_create')}]
     return render(request, 'learning/question_editor.html', context)
