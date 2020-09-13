@@ -26,6 +26,7 @@ urlpatterns = [
     path('exercicios', views.exercises_view, name='exercises'),
     path('exercicios/criar/', views.create_exercise_view, name='exercise_create'),
     path('exercicios/editar/<int:exercise_id>/', views.edit_exercise_view, name='exercise_edit'),
+    path('exercicios/departamento/<int:department_id>/', views.department_exercises_view, name='department_exercises'),
     path('exercicio/<int:exercise_id>/', views.exercise_view, name='exercise'),
     # QA related
     path('duvidas', views.questions_view, name='questions'),

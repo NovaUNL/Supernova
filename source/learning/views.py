@@ -9,6 +9,7 @@ from django.db import models as djm, transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
+import settings
 from supernova.views import build_base_context
 from learning import models as m
 from learning import forms as f
@@ -456,7 +457,7 @@ def exercises_view(request):
     context['title'] = 'Exercícios'
     context['department_exercises'] = college.Department.objects.filter(extinguished=False) \
         .annotate(exercise_count=djm.Count('classes__synopsis_sections__exercises')) \
-        .order_by('exercise_count') \
+        .order_by('name') \
         .all()
     context['exercise_count'] = m.Exercise.objects.count()
     if not request.user.is_anonymous and request.user.is_student:
@@ -534,6 +535,62 @@ def edit_exercise_view(request, exercise_id):
                           {'name': f'#{exercise_id}', 'url': reverse('learning:exercise', args=[exercise_id])},
                           {'name': 'Editar', 'url': reverse('learning:exercise_edit', args=[exercise_id])}]
     return render(request, 'learning/editor.html', context)
+
+
+def department_exercises_view(request, department_id):
+    department = get_object_or_404(college.Department, id=department_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_exercises'
+    context['title'] = f'Exercícios de {department.classes}'
+    context['department'] = department
+    if not request.user.is_anonymous and request.user.is_student:
+        user_students = request.user.students.all()
+        current_class_ids = department.classes \
+            .filter(instances__enrollments__student__in=user_students,
+                    instances__year=settings.COLLEGE_YEAR,
+                    instances__period=settings.COLLEGE_PERIOD) \
+            .distinct() \
+            .values_list('id', flat=True) \
+            .all()
+
+        done_class_ids = department.classes \
+            .filter(instances__enrollments__student__in=user_students, ) \
+            .exclude(id__in=current_class_ids) \
+            .distinct() \
+            .values_list('id', flat=True) \
+            .all()
+
+        classes = department.classes \
+            .annotate(section_count=djm.Count('synopsis_sections'),
+                      exercise_count=djm.Count('synopsis_sections__exercises')) \
+            .filter(instances__year__gt=settings.COLLEGE_YEAR - 2) \
+            .order_by('name') \
+            .all()
+
+        current, done, other = [], [], []
+        for class_ in classes:
+            if class_.id in current_class_ids:
+                current.append(class_)
+            elif class_.id in done_class_ids:
+                done.append(class_)
+            else:
+                other.append(class_)
+
+        context['other_classes'] = other
+        context['current_classes'] = current
+        context['done_classes'] = done
+    else:
+        context['classes'] = department.classes \
+            .annotate(section_count=djm.Count('synopsis_sections'),
+                      exercise_count=djm.Count('synopsis_sections__exercises')) \
+            .order_by('name') \
+            .reverse() \
+            .all()
+
+    context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('learning:exercises')},
+                          {'name': department.name,
+                           'url': reverse('learning:department_exercises', args=[department_id])}]
+    return render(request, 'learning/department_exercises.html', context)
 
 
 def questions_view(request):

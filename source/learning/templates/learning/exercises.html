@@ -64,11 +64,14 @@
     <div class="row padded nowrap">
       <div class="col">
         <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>{{ exercise_count }} exercícios</h2></div>
+          <div class="pane-title bg-grad"><h2>Por departamento</h2></div>
           <div class="pane-content">
             {% for department in department_exercises %}
               <ul class="menu">
-                <li>{{ department.exercise_count }} - <a href="#">{{ department }}</a></li>
+                <li>
+                  {{ department.exercise_count }} -
+                  <a href="{% url 'learning:department_exercises' department.id %}">{{ department }}</a>
+                </li>
               </ul>
             {% endfor %}
           </div>
