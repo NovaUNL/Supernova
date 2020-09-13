@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
   <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
   <script src="{% static 'prism.js' %}"></script>
   <script>
@@ -76,13 +77,15 @@
               {% endfor %}
             </ul>
             <h3>Dúvidas</h3>
+            <span class="indented">
             {% if exercise.question_count == 0 %}
-              <span class="indented">Sem dúvidas colocadas.</span>
+              Sem dúvidas colocadas.
             {% elif exercise.question_count == 1 %}
-              <span class="indented">{{ exercise.question_count }} dúvida colocada.</span>
+              1 dúvida colocada.
             {% else %}
-              <span class="indented">{{ exercise.question_count }} dúvidas colocadas.</span>
+              {{ exercise.question_count }} dúvidas colocadas.
             {% endif %}
+            </span>
             {% if exercise.source or exercise.source_url %}
               <h3>Fonte</h3>
               {% if exercise.source_url %}
