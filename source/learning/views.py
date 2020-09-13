@@ -599,6 +599,7 @@ def questions_view(request):
     context['title'] = 'Dúvidas'
     context['recent_questions'] = m.Question.objects \
         .select_related('user') \
+        .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
         .annotate(answer_count=Count('answers'))
     context['popular_questions'] = m.Question.objects \
         .order_by(F('upvotes') + F('downvotes')) \

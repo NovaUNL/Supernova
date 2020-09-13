@@ -23,7 +23,8 @@
               <div class="summary">
                 <h2><a href="{% url 'learning:question' question.id %}">{{ question.title }}</a></h2>
                 <div class="tags">
-                  <span class="ui-tag"><a href="#">foo</a></span>
+                  {% for class in question.linked_classes.all %}<span class="ui-tag"><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></span>{% endfor %}
+                  {% for section in question.linked_sections.all %}<span class="ui-tag"><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></span>{% endfor %}
                 </div>
                 <div class="author">
                   <a href="{% url 'users:profile' question.user.nickname %}">{{ question.user }}</a>,
@@ -48,7 +49,8 @@
               <div class="summary">
                 <h2><a href="{% url 'learning:question' question.id %}">{{ question.title }}</a></h2>
                 <div class="tags">
-                  <span class="ui-tag"><a href="#">foo</a></span>
+                  {% for class in question.linked_classes.all %}<span class="ui-tag"><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></span>{% endfor %}
+                  {% for section in question.linked_sections.all %}<span class="ui-tag"><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></span>{% endfor %}
                 </div>
                 <div class="author">
                   <a href="{% url 'users:profile' question.user.nickname %}">{{ question.user }}</a>,
