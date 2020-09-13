@@ -82,8 +82,7 @@
     justify-content: space-between;
 }
 
-
-.postable span {
+.postable-footer span {
     display: block;
 }
 
