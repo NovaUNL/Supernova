@@ -152,7 +152,8 @@ def section_view(request, section_id):
         m.Section.objects
             .select_related('subarea')
             .prefetch_related('classes')
-            .annotate(question_count=Count('linked_questions'), exercise_count=Count('exercises')),
+            .annotate(question_count=Count('linked_questions', distinct=True),
+                      exercise_count=Count('exercises', distinct=True)),
         id=section_id)
     context = build_base_context(request)
     __section_common(section, context)
@@ -171,7 +172,8 @@ def subsection_view(request, parent_id, child_id):
     child = get_object_or_404(
         m.Section.objects
             .prefetch_related('classes')
-            .annotate(question_count=Count('linked_questions'), exercise_count=Count('exercises')),
+            .annotate(question_count=Count('linked_questions', distinct=True),
+                      exercise_count=Count('exercises', distinct=True)),
         id=child_id)
     context = build_base_context(request)
     __section_common(child, context)
@@ -190,7 +192,8 @@ def subarea_section_view(request, subarea_id, section_id):
     section = get_object_or_404(
         m.Section.objects
             .select_related('subarea__area', 'classes')
-            .annotate(question_count=Count('linked_questions'), exercise_count=Count('exercises')),
+            .annotate(question_count=Count('linked_questions', distinct=True),
+                      exercise_count=Count('exercises', distinct=True)),
         id=section_id)
     subarea = section.subarea
     if subarea.id != subarea_id:
@@ -396,16 +399,22 @@ def class_sections_view(request, class_id):
 
 def class_section_view(request, class_id, section_id):
     class_synopsis_section = get_object_or_404(
-        m.ClassSection.objects.select_related('corresponding_class', 'section'),
+        m.ClassSection.objects
+            .select_related('corresponding_class'),
         section_id=section_id, corresponding_class_id=class_id)
     class_ = class_synopsis_section.corresponding_class
-    section = class_synopsis_section.section
+    # TODO move the question_count and exercise_count variable_count vars to the context
+    # in order to avoid this duplicated query (section could be select_related in the ClassSection query)
+    section = m.Section.objects \
+        .annotate(question_count=Count('linked_questions', distinct=True),
+                  exercise_count=Count('exercises', distinct=True)) \
+        .get(id=section_id)
 
     context = build_base_context(request)
     __section_common(section, context)
-    context['title'] = '%s (%s)' % (class_synopsis_section.section.title, class_.name)
+    context['title'] = '%s (%s)' % (section.title, class_.name)
     context['synopsis_class'] = class_
-    context['section'] = class_synopsis_section.section
+    context['section'] = section
     # FIXME old code to navigate from one section to the next in the same class
     # Get sections of this class, take the one indexed before and the one after.
     # related_sections = m.ClassSection.objects \
@@ -597,17 +606,19 @@ def questions_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_questions'
     context['title'] = 'Dúvidas'
-    context['recent_questions'] = m.Question.objects \
-        .select_related('user') \
-        .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
-        .order_by('timestamp') \
-        .annotate(answer_count=Count('answers'))\
-        .reverse()[:50]
-    context['popular_questions'] = m.Question.objects \
-        .order_by(F('upvotes') + F('downvotes'), 'timestamp') \
-        .select_related('user') \
-        .annotate(answer_count=Count('answers'))\
-        .reverse()[:50]
+    context['recent_questions'] = \
+        m.Question.objects \
+            .select_related('user') \
+            .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
+            .order_by('timestamp') \
+            .annotate(answer_count=Count('answers')) \
+            .reverse()[:50]
+    context['popular_questions'] = \
+        m.Question.objects \
+            .order_by(F('upvotes') + F('downvotes'), 'timestamp') \
+            .select_related('user') \
+            .annotate(answer_count=Count('answers')) \
+            .reverse()[:50]
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
     return render(request, 'learning/questions.html', context)
 
