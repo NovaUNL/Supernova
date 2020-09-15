@@ -107,7 +107,7 @@ def email_confirmation(request, registration: users.Registration):
     text = env.get_template('registration.mail.txt').render(link=link, manual_link=manual_link, token=token)
     send_mail(
         subject="Supernova - Ativação de conta",
-        from_email=settings.EMAIL_USER,
+        from_email=settings.EMAIL_HOST_USER,
         recipient_list=(registration.email,),
         message=text,
         html_message=html)
