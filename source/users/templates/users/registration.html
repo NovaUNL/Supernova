@@ -22,7 +22,7 @@
         <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}
           <div class="form-block">
-            {{ creation_form.non_field_errors }}
+            {% if creation_form.non_field_errors %}<div class="errors">{{ creation_form.non_field_errors }}</div>{% endif %}
             <div class="form-row">
               <div class="form-row-top">
                 <h4>Código do convite</h4>
@@ -43,7 +43,7 @@
                 O código inserido está incorreto.
                 <hr>
               {% endif %}
-              {{ creation_form.username.errors }}
+              {% if creation_form.invite.errors %}<div class="errors">{{ creation_form.invite.errors }}</div>{% endif %}
               <div class="form-row-description">
                 Um código que te foi cedido para te registares.<br>
                 Sem um código não serás capaz de concluir o registo.
@@ -55,7 +55,7 @@
                 <h4>Nome de utilizador</h4>
                 {{ creation_form.username }}
               </div>
-              {{ creation_form.username.errors }}
+              {% if creation_form.username.errors %}<div class="errors">{{ creation_form.username.errors }}</div>{% endif %}
               <div class="form-row-description">
                 A credencial utilizada para aceder à conta.
               </div>
@@ -66,7 +66,7 @@
                 <h4>Alcunha (Opcional)</h4>
                 {{ creation_form.nickname }}
               </div>
-              {{ creation_form.nickname.errors }}
+              {% if creation_form.nickname.errors %}<div class="errors">{{ creation_form.nickname.errors }}</div>{% endif %}
               <div class="form-row-description">
                 Uma alcunha que será exibida aos restantes enquanto referência ao perfil.<br>
                 Caso opte por não providênciar uma, o nome de utilizador será utilizado como alcunha.<br>
@@ -80,7 +80,7 @@
                 <h4>Identificador do CLIP</h4>
                 {{ creation_form.student }}
               </div>
-              {{ creation_form.student.errors }}
+              {% if creation_form.student.errors %}<div class="errors">{{ creation_form.student.errors }}</div>{% endif %}
               <div class="form-row-description">
                 O identificador, típicamente alfanumérico, que utiliza para aceder ao CLIP. (p.ex c.pereira)
               </div>
@@ -91,7 +91,7 @@
                 <h4>Email</h4>
                 {{ creation_form.email }}
               </div>
-              {{ creation_form.email.errors }}
+              {% if creation_form.email.errors %}<div class="errors">{{ creation_form.email.errors }}</div>{% endif %}
               <div class="form-row-description">
                 O email <b>académico</b>. Será utilizado para confirmação de identidade.<br>
                 Típicamente será <code>identificador.do.clip@campus.fct.unl.pt</code>.<br>
@@ -109,8 +109,12 @@
                   {{ creation_form.password_confirmation }}
                 </div>
               </div>
-              {{ creation_form.password.errors }}
-              {{ creation_form.password_confirmation.errors }}
+              {% if creation_form.password.errors or creation_form.password_confirmation.errors %}
+                <div class="errors">
+                  {{ creation_form.password.errors }}
+                  {{ creation_form.password_confirmation.errors }}
+                </div>
+              {% endif %}
               <div class="form-row-description">
                 Uma palavra-passe razoavelmente longa e preferêncialmente diversa (letras, numeros, pontuação).<br>
                 O registo falha se a palavra-passe for excessivamente curta e pouco diversa.
