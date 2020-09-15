@@ -87,17 +87,19 @@
         </div>
       </div>
     {% endfor %}
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Responder</h2></div>
-      <div class="pane-content">
-        <form class="col" method="post" action="{% url 'learning:question' question.id %}?submit=answer">
-          {% csrf_token %}
-          {{ answer_form.content }}
-          <input class="ui-btn end" type="submit" value="Submeter resposta"/>
-          {{ answer_form.media }}
-        </form>
+    {% if perms.learning.add_question_answer %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Responder</h2></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'learning:question' question.id %}?submit=answer">
+            {% csrf_token %}
+            {{ answer_form.content }}
+            <input class="ui-btn end" type="submit" value="Submeter resposta"/>
+            {{ answer_form.media }}
+          </form>
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
   {% if not user.is_anonymous %}
     <script>loadOwnVotes();</script>{% endif %}
