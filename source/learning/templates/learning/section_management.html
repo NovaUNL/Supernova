@@ -58,7 +58,7 @@
                 <tr>{{ subform.non_field_errors }}</tr>
               {% endif %}
               <tr>
-                {{ subform.id }}
+                {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
                 <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
                 <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
                 {% if subform.instance.pk %}
@@ -76,7 +76,7 @@
                 <tr>{{ subform.non_field_errors }}</tr>
               {% endif %}
               <tr>
-                {{ subform.id }}
+                {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
                 <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
                 <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
                 {% if subform.instance.pk %}
@@ -94,7 +94,7 @@
                 <tr>{{ subform.non_field_errors }}</tr>
               {% endif %}
               <tr>
-                {{ subform.id }}
+                {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
                 <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
                 <td>{{ subform.document }} <span style="color:red;">{{ subform.document.errors }}</span></td>
                 {% if subform.instance.pk %}
@@ -122,13 +122,6 @@
               let list = document.getElementById("sortable-list");
               var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
               populateCollection(list);
-              let element = document.querySelectorAll('.markdownx');
-              Object.keys(element).map(key =>
-                  element[key].addEventListener('markdownx.update', event => {
-                      console.log(event.detail);
-                      MathJax.typeset();
-                  })
-              );
           </script>
           <span style="font-weight: bold">Adicionar: </span>
           <select name="section" required id="id_area" data-autocomplete-light-url="{% url 'learning:section_ac' %}"
@@ -138,4 +131,9 @@
       </div>
     {% endif %}
   </div>
+  <script>
+      let element = document.querySelectorAll('.markdownx');
+      Object.keys(element).map(key => element[key].addEventListener('markdownx.update', () => MathJax.typeset()));
+      MathJax.typeset();
+  </script>
 {% endblock %}
