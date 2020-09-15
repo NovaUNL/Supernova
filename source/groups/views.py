@@ -168,7 +168,7 @@ def documents_view(request, group_abbr):
 
 def members_view(request, group_abbr):
     group = get_object_or_404(
-        m.Group.objects.prefetch_related('member_roles__member', 'member_roles__role'),
+        m.Group.objects.prefetch_related('memberships__member', 'memberships__role'),
         abbreviation=group_abbr)
     context = build_base_context(request)
     context['title'] = f'Membros de {group.name}'
@@ -261,7 +261,7 @@ def roles_view(request, group_abbr):
         membership_formset = f.GroupMembershipFormSet(
             request.POST,
             instance=group,
-            queryset=group.member_roles)
+            queryset=group.memberships)
         if membership_formset.is_valid():
             # TODO forbid assignment of roles more permissive than the issuer has
             membership = membership_formset.save(commit=False)
@@ -274,7 +274,7 @@ def roles_view(request, group_abbr):
     else:
         membership_formset = f.GroupMembershipFormSet(
             instance=group,
-            queryset=group.member_roles)
+            queryset=group.memberships)
 
     context['membership_formset'] = membership_formset
     return render(request, 'groups/roles.html', context)

@@ -26,10 +26,10 @@
           <div class="pane-title bg-grad"><h2>Membros</h2></div>
           <div class="pane-content">
             <ul >
-              {% for association in group.member_roles.all %}
+              {% for membership in group.memberships.all %}
                 <li>
-                  <a href="{% url 'users:profile' association.member.nickname %}">{{ association.member.get_full_name }}</a>,
-                  enquanto {{ association.role.name }}
+                  <a href="{% url 'users:profile' membership.member.nickname %}">{{ membership.member.get_full_name }}</a>,
+                  enquanto {{ membership.role.name }}
                 </li>
               {% endfor %}
             </ul>

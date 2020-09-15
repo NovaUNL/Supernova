@@ -51,7 +51,7 @@ def roles_combined(roles):
 
 def get_user_group_permissions(user, group):
     roles = m.Role.objects.filter(
-        membership__member=user,
-        membership__group=group)
+        memberships__member=user,
+        memberships__group=group)
 
     return roles_combined(roles)

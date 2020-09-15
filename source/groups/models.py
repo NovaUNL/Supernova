@@ -27,8 +27,10 @@ class Group(djm.Model):
     name = djm.CharField(max_length=65)
     #: A description that defines the group.
     description = MarkdownxField(blank=True, null=True)
-    #: The members that are part of this group (belong to it).
-    members = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='memberships')
+    #: | The members that are part of this group (belong to it).
+    #: | The related_name _ prefix is due to the Django own groups
+    #: | TODO either integrate or remove django groups
+    members = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='groups_custom')
     #: The subscribers of this group (do not necessarily belong to it).
     subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='group_subscriptions')
     #: The place where this group is headquartered and commonly found.
@@ -131,11 +133,11 @@ class Role(djm.Model):
 class Membership(djm.Model):
     """ Membership M2M table ( :py:class:`Group` >--< :py:class:`users.models.User` )"""
     #: :py:class:`Group` referred to by this membership
-    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='member_roles')
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='memberships')
     #: :py:class:`users.models.User` referred to by this membership
-    member = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='group_roles')
+    member = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='memberships')
     #: :py:class:`Role` conferred
-    role = djm.ForeignKey(Role, on_delete=djm.PROTECT, related_name='membership_rel')
+    role = djm.ForeignKey(Role, on_delete=djm.PROTECT, related_name='memberships')
 
     def __str__(self):
         return f'{self.member.nickname} -> {self.role} -> {self.group}'

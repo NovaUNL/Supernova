@@ -25,7 +25,7 @@
       </h1>
     </div>
     <div class="row padded">
-      <div class="col" style="max-width: 400px">
+      <div class="col nogrow" style="flex-basis: 400px">
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Informação</h2></div>
           <div class="pane-content">
@@ -97,11 +97,11 @@
             </div>
           </div>
         {% endif %}
-        {% if profile_user.memberships.exists %}
+        {% if profile_user.groups_custom.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Grupos</h2></div>
             <div class="pane-content">
-              {% for group in profile_user.memberships.all %}
+              {% for group in profile_user.groups_custom.all %}
                 <a href="{% url 'groups:group' group.abbreviation %}">
                 <span class="group" style="background-image: url({% get_media_prefix %}{{ group.image }}">
                   {{ group.abbreviation }}
