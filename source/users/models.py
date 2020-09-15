@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import chain
 
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
@@ -70,6 +71,17 @@ class User(AbstractUser):
             changed = True
         if changed:
             self.save()
+
+    def calculate_missing_info(self):
+        # Set a name if none is known
+        for entity in chain(self.students.all(), self.teachers.all()):
+            if self.first_name is None or self.first_name.strip() == '':
+                if 'name' in entity.external_data:
+                    names = entity.external_data['name'].split()
+                    self.first_name = names[0]
+                    if len(names) > 1:
+                        self.last_name = ' '.join(names[1:])
+                    self.save()
 
     class Meta:
         permissions = [('full_student_access', 'Can browse the system as if it was the university one')]

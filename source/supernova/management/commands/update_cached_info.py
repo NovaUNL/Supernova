@@ -12,3 +12,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for user in users.User.objects.all():
             user.updated_cached()
+            user.calculate_missing_info()

@@ -78,6 +78,7 @@ def validate_token(email, token) -> users.User:
     for student in students:
         student.user = user
         student.save()
+    user.calculate_missing_info()
     user.updated_cached()
     return user
 
