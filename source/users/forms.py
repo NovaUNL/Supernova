@@ -244,7 +244,7 @@ class AccountSettingsForm(forms.ModelForm):
         if 'new_password' not in self.cleaned_data:
             return None
         password = self.cleaned_data['new_password']
-        if password == '':
+        if password.strip() == '':
             return None
         return self.cleaned_data["new_password"]
 
