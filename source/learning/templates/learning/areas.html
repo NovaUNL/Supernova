@@ -31,10 +31,10 @@
     </div>
     <div class="flex-pane">
       <div class="pane-title bg-grad">
-        <h2>Cadeiras</h2>
+        <h2>Unidades curriculares</h2>
       </div>
       <div class="pane-content">
-        <div class="flex-wrapper" style="align-items: start;">
+        <div class="flex-wrapper">
           {% for class in classes %}
             <a class="class-synopsis" href="{% url 'learning:class' class.id %}">
               <span style="font-size: 2em">{{ class.name }}</span>
