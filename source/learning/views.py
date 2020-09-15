@@ -191,7 +191,8 @@ def subarea_section_view(request, subarea_id, section_id):
     """
     section = get_object_or_404(
         m.Section.objects
-            .select_related('subarea__area', 'classes')
+            .select_related('subarea__area')
+            .prefetch_related('classes')
             .annotate(question_count=Count('linked_questions', distinct=True),
                       exercise_count=Count('exercises', distinct=True)),
         id=section_id)
