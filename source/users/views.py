@@ -237,7 +237,10 @@ def user_profile_settings_view(request, nickname):
     profile_user = get_object_or_404(m.User, nickname=nickname)
     context = build_base_context(request)
     context['settings_form'] = forms.AccountSettingsForm(instance=profile_user)
-    context['permissions_form'] = forms.AccountPermissionsForm(profile_user)
+
+    if request.user.nickname != nickname and request.user.is_staff:
+        context['permissions_form'] = forms.AccountPermissionsForm(profile_user)
+
     if request.method == 'POST':
         if 'permissions' in request.GET:
             if not request.user.is_staff:

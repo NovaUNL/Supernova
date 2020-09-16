@@ -229,78 +229,80 @@
           <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Permissões</h2></div>
-        <div class="pane-content">
-          <form id="test" class="col" action="{% url 'users:settings' profile_user.nickname %}?permissions=" method="post">
-            {% csrf_token %}
-            {{ permissions_form.errors }}
-            <div class="form-block">
-              <div class="form-row">
-                <div class="form-row-top">
-                  <h4>Ver dados académicos</h4>
-                  {{ permissions_form.can_view_college_data }}
+      {% if permissions_form %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Permissões</h2></div>
+          <div class="pane-content">
+            <form id="test" class="col" action="{% url 'users:settings' profile_user.nickname %}?permissions=" method="post">
+              {% csrf_token %}
+              {{ permissions_form.errors }}
+              <div class="form-block">
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Ver dados académicos</h4>
+                    {{ permissions_form.can_view_college_data }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode aceder à informação académica enquanto estudante.
+                  </div>
                 </div>
-                <div class="form-row-description">
-                  Pode aceder à informação académica enquanto estudante.
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Criar convites</h4>
+                    {{ permissions_form.can_add_invites }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode criar convites para registo.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Criar sínteses</h4>
+                    {{ permissions_form.can_add_synopsis_sections }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode criar secções de sintese.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Editar sínteses</h4>
+                    {{ permissions_form.can_change_synopsis_sections }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode editar secções de sintese.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Criar exercícios</h4>
+                    {{ permissions_form.can_add_exercises }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode inserir novos exercicios.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Editar exercícios</h4>
+                    {{ permissions_form.can_change_exercises }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode editar exercícios existentes.
+                  </div>
                 </div>
               </div>
-              <hr>
-              <div class="form-row">
-                <div class="form-row-top">
-                  <h4>Criar convites</h4>
-                  {{ permissions_form.can_add_invites }}
-                </div>
-                <div class="form-row-description">
-                  Pode criar convites para registo.
-                </div>
-              </div>
-              <hr>
-              <div class="form-row">
-                <div class="form-row-top">
-                  <h4>Criar sínteses</h4>
-                  {{ permissions_form.can_add_synopsis_sections }}
-                </div>
-                <div class="form-row-description">
-                  Pode criar secções de sintese.
-                </div>
-              </div>
-              <hr>
-              <div class="form-row">
-                <div class="form-row-top">
-                  <h4>Editar sínteses</h4>
-                  {{ permissions_form.can_change_synopsis_sections }}
-                </div>
-                <div class="form-row-description">
-                  Pode editar secções de sintese.
-                </div>
-              </div>
-              <hr>
-              <div class="form-row">
-                <div class="form-row-top">
-                  <h4>Criar exercícios</h4>
-                  {{ permissions_form.can_add_exercises }}
-                </div>
-                <div class="form-row-description">
-                  Pode inserir novos exercicios.
-                </div>
-              </div>
-              <hr>
-              <div class="form-row">
-                <div class="form-row-top">
-                  <h4>Editar exercícios</h4>
-                  {{ permissions_form.can_change_exercises }}
-                </div>
-                <div class="form-row-description">
-                  Pode editar exercícios existentes.
-                </div>
-              </div>
-            </div>
-            <input class="ui-btn end" type="submit" value="Guardar">
-            {{ permissions_form.media }}
-          </form>
+              <input class="ui-btn end" type="submit" value="Guardar">
+              {{ permissions_form.media }}
+            </form>
+          </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 {% endblock %}
