@@ -359,3 +359,121 @@
   margin-left: 10px
   padding-left: 10px
   border-left: 2px solid var(--highlight)
+
+
+.question
+  display: flex
+  flex-wrap: nowrap
+
+.question-list
+  .info
+    margin-top: 10px
+
+  .info span
+    font-size: 18px
+
+  .tags
+    float: left
+
+  .summary
+    flex-grow: 1
+
+  .author
+    float: right
+
+  .counter
+    margin-right: 10px
+    padding: 5px
+    background-color: var(--input-light)
+    text-align: center
+    font-size: 12px
+    background-repeat: no-repeat
+    background-size: 32px 32px
+    background-position: left
+    box-shadow: 0 1px 2px var(--soft-shadow)
+
+  .counter:first-child
+    border-top-left-radius: 5px
+    border-top-right-radius: 5px
+    border-bottom: 0
+
+  .counter:last-child
+    border-bottom-left-radius: 5px
+    border-bottom-right-radius: 5px
+    border-top: 0
+
+  .counter span
+    margin-left: 32px
+
+  .counter.answers
+    background-image: url("/static/img/icons/check-nofil.svg")
+
+  .counter.votes
+    background-image: url("/static/img/icons/up.svg")
+
+  &.small
+    .info
+      margin-top: 3px
+
+    .tags
+      font-size: 0.8em
+
+    .counter
+      background-size: 24px 24px
+      font-size: 10px
+      padding: 2px
+
+      span
+        margin-left: 20px
+
+.postable-main
+  display: flex
+  flex-direction: row
+  flex-wrap: nowrap
+
+.postable-votes
+  padding: 10px 10px 0 0
+  min-height: 150px
+  display: flex
+  flex-direction: column
+  align-items: center
+
+  > a
+    display: block
+    border: 2px solid black
+    border-radius: 3px
+    width: 48px
+    height: 48px
+    background-color: var(--input-light)
+    background-size: contain
+    margin-bottom: 2px
+    cursor: pointer
+
+  > span
+    font-weight: bold
+    font-size: 1.2em
+
+  .upvote-btn
+    background-image: url("/static/img/icons/up.svg")
+
+    &.set
+      background-color: var(--green)
+
+  .downvote-btn
+    background-image: url("/static/img/icons/down.svg")
+
+    &.set
+      background-color: var(--red)
+
+  .answer-btn, .answer-btn.set
+    background-image: url("/static/img/icons/check-nofil.svg")
+
+  .answer-btn:hover
+    background-image: url("/static/img/icons/check.svg")
+
+.postable-footer
+  display: flex
+  justify-content: space-between
+
+  span
+    display: block
