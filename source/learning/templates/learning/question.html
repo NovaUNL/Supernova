@@ -51,11 +51,15 @@
           </div>
         </div>
         <div class="postable-footer">
+          <div class="tags">
+            {% for class in question.linked_classes.all %}<span class="ui-tag"><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></span>{% endfor %}
+            {% for section in question.linked_sections.all %}<span class="ui-tag"><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></span>{% endfor %}
+          </div>
           <div class="actions">
             {#            <a>Reportar</a>#}
           </div>
           <div class="author">
-            <span><a href="{% url 'users:profile' question.user.nickname %}">{{ question.author.nickname }}</a></span>
+            <span><a href="{% url 'users:profile' question.user.nickname %}">{{ question.user.nickname }}</a></span>
             <span>{{ question.timestamp }}</span>
           </div>
         </div>
