@@ -68,7 +68,14 @@ def communities_view(request):
 
 def group_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
     context = build_base_context(request)
+    membership_perms = {
+        'is_admin': permission_flags & permissions.IS_ADMIN,
+        'can_announce': permission_flags & permissions.CAN_ANNOUNCE,
+        'can_modify_roles': permission_flags & permissions.CAN_MODIFY_ROLES,
+        'can_change_schedule': permission_flags & permissions.CAN_CHANGE_SCHEDULE}
+    context['membership_perms'] = membership_perms
     context['title'] = group.name
     context['group'] = group
     context['pcode'], nav_type = resolve_group_type(group)

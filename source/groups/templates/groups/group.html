@@ -6,11 +6,11 @@
 {% block head %}
   <style>
     {% if  group.image %}
-      .header-decorator:after {
-        background-image: url("{{ group.image.url}}");
-        background-size: contain;
-        background-position: right;
-      }
+        .header-decorator:after {
+            background-image: url("{{ group.image.url}}");
+            background-size: contain;
+            background-position: right;
+        }
     {% endif %}
   </style>
   <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.css"/>
@@ -20,6 +20,12 @@
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+{#          <li><a href="{% url 'groups:subscribe' subarea.id %}">Subscrever</a></li>#}
+          {% if not user.is_anonymous and group.outsiders_openness <= group.CLOSED %}<li><a>Solicitar admissão</a></li>{% endif %}
+        </ul>
+      </div>
       <div>
         <h1>{{ group.name }}</h1>
         {% if not group.official %}
@@ -71,40 +77,40 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Sobre</h2></div>
           <div class="pane-content">
-            <ul>
-              <li>Membros: {{ group.members.count }}</li>
-              <li>Fundação: ???</li>
-              <li>
-                {% if group.outsiders_openness <= group.CLOSED_PRIVATE %}
-                  Admissão por convite
-                {% elif group.outsiders_openness == group.OPEN %}
-                  <a>Entrar</a>
-                {% else %}
-                  Admissão por convite
-                {% endif %}
-              </li>
-              <li>
-                {% if group.location %}
-                  {{ group.location }}
-                {% else %}
-                  Sem localização associada
-                {% endif %}
-              </li>
-            </ul>
+            <h3>Admissão</h3>
+            <span class="indented">
+              {% if group.outsiders_openness <= group.CLOSED_PRIVATE %}
+                Por convite
+              {% elif group.outsiders_openness == group.OPEN %}
+                <a>Entrar</a>
+              {% else %}
+                Por convite
+              {% endif %}
+            </span>
+            <h3>Localização</h3>
+            <span class="indented">
+              {% if group.location %}
+                {{ group.location }}
+              {% else %}
+                Sem localização associada
+              {% endif %}
+            </span>
+            <h3>Membros</h3>
+            <span class="indented">{{ group.members.count }} membros</span>
           </div>
         </div>
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Ações</h2></div>
           <div class="pane-content">
             <ul class="menu">
-              <li><a> Subscrever</a></li>
-              {% if group.outsiders_openness <= group.CLOSED %}
-                <li><a>Solicitar admissão</a></li>
-              {% endif %}
-              <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>
-              <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>
-              <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>
-              <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>
+              {% if  membership_perms.can_announce %}
+                <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>{% endif %}
+              {% if  membership_perms.can_modify_roles %}
+                <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>{% endif %}
+              {% if  membership_perms.can_change_schedule %}
+                <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
+              {% if  membership_perms.is_admin %}
+                <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>{% endif %}
             </ul>
           </div>
         </div>
