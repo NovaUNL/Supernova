@@ -1,7 +1,7 @@
 from datetime import datetime, time
 
 from django.conf import settings
-from django.db import models as djm
+from django.db import models as djm, transaction
 from django.urls import reverse
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
@@ -9,13 +9,14 @@ from polymorphic.models import PolymorphicModel
 
 from college.choice_types import WEEKDAY_CHOICES
 from college.models import Place
+from users import models as users
 
 
 def group_profile_pic_path(group, filename):
     return f'g/{group.id}/pic.{filename.split(".")[-1].lower()}'
 
 
-class Group(djm.Model):
+class Group(users.Subscriptible):
     """
     | A set of :py:class:`users.models.User` who represent a collective entity, such as an institutional division,
       students nuclei, working group, ...
@@ -31,8 +32,6 @@ class Group(djm.Model):
     #: | The related_name _ prefix is due to the Django own groups
     #: | TODO either integrate or remove django groups
     members = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='groups_custom')
-    #: The subscribers of this group (do not necessarily belong to it).
-    subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='group_subscriptions')
     #: The place where this group is headquartered and commonly found.
     place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True, related_name='groups')
     #: An image that presents this group.
@@ -84,6 +83,9 @@ class Group(djm.Model):
     outsiders_openness = djm.IntegerField(choices=OPENNESS_CHOICES, default=SECRET)
     #: | Whether the group really is the group
     official = djm.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
