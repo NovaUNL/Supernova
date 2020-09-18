@@ -452,7 +452,7 @@ class Postable(djm.Model):
             self.save()
 
 
-class Question(users.Activity, users.Subscriptible, Postable):
+class Question(users.Activity, users.Subscribable, Postable):
     """
     A generic question, usually about an exercise.
     """
@@ -488,7 +488,7 @@ class Question(users.Activity, users.Subscriptible, Postable):
         return f"questão '{self.title}'"
 
 
-class QuestionAnswer(users.Activity, users.Subscriptible, Postable):
+class QuestionAnswer(users.Activity, users.Subscribable, Postable):
     """
     An answer to a Question
     """
@@ -504,7 +504,7 @@ class QuestionAnswer(users.Activity, users.Subscriptible, Postable):
         return f"resposta a {self.to}"
 
 
-class PostableComment(users.Activity, users.Subscriptible, Postable):
+class PostableComment(users.Activity, users.Subscribable, Postable):
     """
     A comment to any object which inherits from :py:class:`Postable`
     """

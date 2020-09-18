@@ -16,7 +16,7 @@ def group_profile_pic_path(group, filename):
     return f'g/{group.id}/pic.{filename.split(".")[-1].lower()}'
 
 
-class Group(users.Subscriptible):
+class Group(users.Subscribable):
     """
     | A set of :py:class:`users.models.User` who represent a collective entity, such as an institutional division,
       students nuclei, working group, ...

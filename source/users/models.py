@@ -183,15 +183,15 @@ class Invite(djm.Model):
         return f"{self.issuer.nickname}:{self.token}"
 
 
-class Subscriptible(djm.Model):
+class Subscribable(djm.Model):
     """
     | A data type which can be subscribed to
     | (Meant to be inherited)
     """
     #: The id field, but renamed to avoid collisions upon multiple inheritance
-    subscriptible_id = djm.AutoField(primary_key=True)
+    subscribable_id = djm.AutoField(primary_key=True)
     #: :py:class:`users.models.User` that subscribe to this object.
-    subscribers = djm.ManyToManyField(User, through='Subscription', related_name='subscriptibles')
+    subscribers = djm.ManyToManyField(User, through='Subscription', related_name='subscribables')
 
 
 class Subscription(PolymorphicModel):
@@ -199,7 +199,7 @@ class Subscription(PolymorphicModel):
     A notification points to unknown past actions with a particular relevance.
     """
     #: :py:class:`Subscribable` that this subscription targets
-    to = djm.ForeignKey(Subscriptible, on_delete=djm.CASCADE, related_name='subscriptions')
+    to = djm.ForeignKey(Subscribable, on_delete=djm.CASCADE, related_name='subscriptions')
     #: :py:class:`users.models.User` that wishes to be notified.
     subscriber = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='subscriptions')
     #: Datetime at which the activity happened
