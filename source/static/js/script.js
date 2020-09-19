@@ -7,6 +7,53 @@ function toggleMenu() {
     }
 }
 
+function setupPopover(button) {
+    const popover = button.parentNode.querySelector('.popover');
+    let popperInstance = null;
+
+    function show() {
+        popover.setAttribute('data-show', '');
+        popperInstance = Popper.createPopper(button, popover, {
+            modifiers: [
+                {
+                    name: 'offset',
+                    options: {
+                        offset: [0, 8],
+                    },
+                },
+            ],
+        });
+    }
+
+    function hide(e) {
+        if (e.target === popover || e.target.nodeName === 'A') return;
+        popover.removeAttribute('data-show');
+        if (popperInstance) {
+            popperInstance.destroy();
+            popperInstance = null;
+        }
+    }
+
+    button.addEventListener('click', show);
+    document.addEventListener('click', hide, true);
+}
+
+function loadNotifications() {
+    const listElem = document.querySelector('#notification-list');
+    if (listElem != null) {
+        fetch("/api/notification/list", {credentials: 'include'})
+            .then((response) => response.json())
+            .then((list) => {
+                for (let entry of list) {
+                    let elem = document.createElement('a');
+                    elem.innerText = entry.message;
+                    listElem.appendChild(elem);
+                    if (entry.url !== undefined) elem.href = entry.url
+                }
+            });
+    }
+}
+
 function loadTransportation(element, url) {
     fetch(url, {credentials: 'include'})
         .then(function (response) {
@@ -50,7 +97,6 @@ function delChildren(elem) {
         elem.removeChild(elem.firstChild);
     }
 }
-
 
 const themes = ["Quasar", "Tokamak", "Nebula"];
 

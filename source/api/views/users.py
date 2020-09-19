@@ -1,10 +1,11 @@
+from django.core.cache import cache
 from django.db.models import F
 from rest_framework import authentication
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -91,6 +92,36 @@ class UserSocialNetworks(APIView):
         if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
             raise ValidationError("Not found")
         users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).delete()
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def notification_count_view(request):
+    notification_count = cache.get('%s_notification_count' % request.user.nickname)
+    notification_count = None
+    if notification_count is None:
+        count = users.Notification.objects.filter(receiver=request.user, dismissed=False).count()
+        cache.set('%s_notification_count' % request.user.nickname, count)
+        return Response(count)
+    return Response(notification_count)
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def notification_list_view(request):
+    notification_list = cache.get('%s_notification_list' % request.user.nickname)
+    notification_list = None
+    if notification_list is None:
+        notifications = users.Notification.objects\
+            .filter(receiver=request.user, dismissed=False)\
+            .order_by('issue_timestamp')\
+            .reverse()
+        notifications = list(map(lambda n: n.to_api(), notifications))
+        cache.set('%s_notification_list' % request.user.nickname, notifications)
+        return Response(notifications)
+    return Response(notification_list)
 
 
 class UserModeration(APIView):

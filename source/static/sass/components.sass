@@ -160,3 +160,41 @@
     embed
       min-height: 80vh
       width: 100%
+
+
+.popover
+  background: var(--pane-bg)
+  color: var(--text)
+  font-weight: bold
+  padding: 4px 8px
+  font-size: 13px
+  border-radius: 4px
+  display: none
+  box-shadow: 1px 1px 5px var(--shadow)
+
+  .arrow, .arrow::before
+    position: absolute
+    width: 8px
+    height: 8px
+    z-index: -1
+
+  .arrow::before
+    content: ''
+    transform: rotate(45deg)
+    background: var(--pane-bg)
+
+  &[data-show]
+    display: block
+
+  &[data-popper-placement^='top'] > .arrow
+    bottom: -4px
+
+
+  &[data-popper-placement^='bottom'] > .arrow
+    top: -4px
+
+  &[data-popper-placement^='left'] > .arrow
+    right: -4px
+
+  &[data-popper-placement^='right'] > .arrow
+    left: -4px

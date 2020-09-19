@@ -227,14 +227,20 @@ class Activity(PolymorphicModel):
         verbose_name_plural = "activities"
 
 
+
 class Notification(PolymorphicModel):
     """
     A notification points to unknown past actions with a particular relevance.
     """
     #: :py:class:`users.models.User` that received the notification.
-    recipient = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='notifications')
+    receiver = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='notifications')
     #: Datetime at which the notification was issued
     issue_timestamp = djm.DateTimeField(auto_now_add=True)
+    #: Whether the notification has been seen
+    dismissed = djm.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.issue_timestamp}({self.destinatary})'
+        return f'{self.issue_timestamp}({self.receiver})'
+
+    def to_api(self):
+        return {'message': f'Generic notification @{self.issue_timestamp}'}
