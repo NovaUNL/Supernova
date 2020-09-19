@@ -2,7 +2,7 @@ from datetime import datetime
 import random
 
 from django.core.cache import cache
-from django.db.models import Q, F
+from django.db.models import Q, F, Count
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -13,6 +13,7 @@ from supernova.models import Changelog, Catchphrase
 from news.models import NewsItem
 from college import models as college
 from groups import models as groups
+from learning import models as learning
 
 
 def index(request):
@@ -47,6 +48,12 @@ def index(request):
                                 .select_related('group') \
                                 .order_by('datetime') \
                                 .reverse()[:5]
+    context['recent_questions'] = learning.Question.objects \
+        .select_related('user') \
+        .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
+        .annotate(answer_count=Count('answers')) \
+        .order_by('timestamp')\
+        .reverse()[:5]
     context['matrix_url'] = settings.MATRIX_URL
     context['mastodon_url'] = settings.MASTODON_URL
     context['telegram_url'] = settings.TELEGRAM_URL
