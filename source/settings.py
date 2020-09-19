@@ -261,6 +261,8 @@ CLIPY = {
     'institution': 12345
 }
 
+INDEX_MESSAGE = None
+
 MATRIX_URL = "https://app.element.io/#/room/#room:matrix.example.com"
 MASTODON_URL = "https://example.com/@supernova"
 GITLAB_URL = "https://gitlab.com/claudiop/Supernova/issues"

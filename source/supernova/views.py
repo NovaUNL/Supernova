@@ -54,6 +54,7 @@ def index(request):
         .annotate(answer_count=Count('answers')) \
         .order_by('timestamp')\
         .reverse()[:5]
+    context['message'] = settings.INDEX_MESSAGE
     context['matrix_url'] = settings.MATRIX_URL
     context['mastodon_url'] = settings.MASTODON_URL
     context['telegram_url'] = settings.TELEGRAM_URL
