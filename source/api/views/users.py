@@ -24,6 +24,9 @@ from groups import models as groups
 
 
 class ProfileDetailed(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (permissions.SelfOnly,)
+
     def get(self, request, nickname, format=None):  # TODO authentication
         user = users.User.objects.get(nickname=nickname)
         serializer = serializers.ProfileDetailedSerializer(user)

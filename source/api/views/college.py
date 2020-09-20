@@ -1,5 +1,7 @@
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -45,12 +47,18 @@ class CourseDetailed(APIView):
 
 
 class ClassDetailed(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, pk, format=None):
         serializer = serializers.CourseSerializer(college.Class.objects.get(id=pk))
         return Response(serializer.data)
 
 
 class UserTurnInstances(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, nickname, format=None):
         user = get_object_or_404(users.User.objects.prefetch_related('students'), nickname=nickname)
         primary_students, _ = get_students(user)
