@@ -25,7 +25,9 @@
         <ul>
           {% if not user.is_anonymous %}
             <li><a id="subscribe-btn" href="javascript: void(0)" data-endpoint="{% url 'api:group_subscription' group.abbreviation %}"></a></li>
-            {% if group.outsiders_openness <= group.CLOSED %}<li><a>Solicitar admissão</a></li>{% endif %}
+            {% if not is_member and group.outsiders_openness <= group.CLOSED %}
+              <li><a href="{% url 'groups:membership_req' group.abbreviation %}">Solicitar admissão</a></li>
+            {% endif %}
           {% endif %}
         </ul>
       </div>
@@ -102,21 +104,23 @@
             <span class="indented">{{ group.members.count }} membros</span>
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Ações</h2></div>
-          <div class="pane-content">
-            <ul class="menu">
-              {% if  membership_perms.can_announce %}
-                <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>{% endif %}
-              {% if  membership_perms.can_modify_roles %}
-                <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>{% endif %}
-              {% if  membership_perms.can_change_schedule %}
-                <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
-              {% if  membership_perms.is_admin %}
-                <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>{% endif %}
-            </ul>
+        {% if is_member %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Ações</h2></div>
+            <div class="pane-content">
+              <ul class="menu">
+                {% if  membership_perms.can_announce %}
+                  <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>{% endif %}
+                {% if  membership_perms.can_modify_roles %}
+                  <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>{% endif %}
+                {% if  membership_perms.can_change_schedule %}
+                  <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
+                {% if  membership_perms.is_admin %}
+                  <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>{% endif %}
+              </ul>
+            </div>
           </div>
-        </div>
+        {% endif %}
       </div>
     </div>
   </div>

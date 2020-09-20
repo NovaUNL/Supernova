@@ -145,6 +145,26 @@ class Membership(djm.Model):
         return f'{self.member.nickname} -> {self.role} -> {self.group}'
 
 
+class MembershipRequest(djm.Model):
+    """Requests to obtain :py:class:`Membership` in a :py:class:`Group`"""
+    #: Requesting :py:class:`users.models.User`
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='membership_requests')
+    #: Requested :py:class:`Group`
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='membership_requests')
+    #: Datetime when the trigger happened
+    datetime = djm.DateTimeField(auto_now_add=True)
+    #: Whether the request was granted and the user gained a membership
+    granted = djm.BooleanField(default=None)
+    #: Some message that was left with the request
+    message = djm.TextField(default=None, blank=True, null=True, max_length=1000)
+
+    class Meta:
+        unique_together = ('user', 'group')
+
+    def __str__(self):
+        return f'{self.user.nickname} membership request to {self.group}'
+
+
 class Activity(PolymorphicModel):
     """
     | An activity is an action taken by a group at a given point in time. These end up building an activity log which

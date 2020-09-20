@@ -1,6 +1,7 @@
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -78,6 +79,7 @@ def group_view(request, group_abbr):
     context['membership_perms'] = membership_perms
     context['title'] = group.name
     context['group'] = group
+    context['is_member'] = group in request.user.groups_custom.all()
     context['pcode'], nav_type = resolve_group_type(group)
     context['activities'] = m.Activity.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [
@@ -183,13 +185,54 @@ def members_view(request, group_abbr):
     # context['membership' = g
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_memb'
-    context['documents'] = Document.objects.filter(author_group=group).all()
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
         {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Membros', 'url': reverse('groups:members', args=[group_abbr])}]
     return render(request, 'groups/members.html', context)
+
+
+def membership_request_view(request, group_abbr):
+    group = get_object_or_404(m.Group, abbreviation=group_abbr)
+
+    if m.Membership.objects.filter(member=request.user, group=group).exists():
+        return redirect('groups:group', group_abbr=group_abbr)
+
+    previously_requested = m.MembershipRequest.objects.filter(user=request.user, group=group).exists()
+    if previously_requested:
+        return HttpResponse(status=403)
+
+    if group.outsiders_openness == m.Group.OPEN:
+        if group.default_role_id is not None:
+            m.Membership.objects.create(member=request.user, group=group, role_id=group.default_role_id)
+            redirect('groups:group', group_abbr=group_abbr)
+    elif group.outsiders_openness != m.Group.REQUEST:
+        return HttpResponse(status=403)
+
+    if request.method == "POST":
+        form = f.MembershipRequestForm(request.POST)
+        if form.is_valid():
+            message = form.cleaned_data['message']
+            if isinstance(message, str):
+                message = message.strip()
+            m.MembershipRequest.objects.create(user=request.user, group=group, message=message)
+            return redirect('groups:group', group_abbr=group_abbr)
+    else:
+        form = f.MembershipRequestForm()
+
+    context = build_base_context(request)
+    context['form'] = form
+    context['title'] = f'Solicitar admissão em {group.name}'
+    context['group'] = group
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_memb_req'
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Solicitar admissão', 'url': reverse('groups:membership_req', args=[group_abbr])}]
+    return render(request, 'groups/membership_request.html', context)
 
 
 @login_required

@@ -17,6 +17,7 @@ urlpatterns = [
     path('groups/<str:abbr>/schedule/<str:from_date>/<str:to_date>', views.groups.group_schedule,
          name='group_schedule'),
     path('group/<str:abbr>/subscribe', views.groups.GroupSubscription.as_view(), name='group_subscription'),
+    path('group/<str:abbr>/subscribe', views.groups.GroupMembershipRequest.as_view(), name='group_membership_request'),
     # News
     path('news/', views.news.NewsList.as_view()),
     path('news/<int:pk>/', views.news.News.as_view()),

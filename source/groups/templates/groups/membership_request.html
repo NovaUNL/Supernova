@@ -1,0 +1,33 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>Solitar admissão em {{ group.name }}</h1>
+        <h3>@{{ group.abbreviation }}</h3>
+      </div>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'groups:membership_req' group.abbreviation %}">
+            {% csrf_token %}
+            {{ form.errors }}
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Mensagem (Opcional)</h4>
+              </div>
+              {{ form.message }}
+              <div class="form-row-description">
+              </div>
+            </div>
+            <input class="ui-btn end" type="submit" value="Solicitar"/>
+            {{ form.media }}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

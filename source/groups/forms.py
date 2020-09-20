@@ -49,6 +49,13 @@ class MembershipForm(djf.ModelForm):
             'role': autocomplete.ModelSelect2(url='groups:group_role_ac', forward=['group'])}
 
 
+class MembershipRequestForm(djf.ModelForm):
+    # TODO add group field and freeze it
+    class Meta:
+        model = m.MembershipRequest
+        fields = ('message',)
+
+
 # TODO figure how to limit a form field queryset through this
 # to prevent attacks such as asking for a role from other group
 GroupMembershipFormSet = djf.inlineformset_factory(m.Group, m.Membership, extra=3, form=MembershipForm)
