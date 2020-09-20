@@ -33,6 +33,7 @@ function loadNotifications() {
             let elem = document.createElement('a');
             elem.innerText = entry.message;
             listElem.insertBefore(elem, clearBtn);
+            listElem.insertBefore(document.createElement('hr'), clearBtn);
             if (entry.url !== undefined) elem.href = entry.url
         }
         notificationLoadTimestamp = r.timestamp;
