@@ -594,7 +594,6 @@ def department_exercises_view(request, department_id):
             .annotate(section_count=djm.Count('synopsis_sections'),
                       exercise_count=djm.Count('synopsis_sections__exercises')) \
             .order_by('name') \
-            .reverse() \
             .all()
 
     context['sub_nav'] = [{'name': 'Exercicios', 'url': reverse('learning:exercises')},
