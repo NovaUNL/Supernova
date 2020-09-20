@@ -210,9 +210,7 @@ class Subscription(PolymorphicModel):
 
 
 class Activity(PolymorphicModel):
-    """
-    An activity is an action taken by a user at a given point in time.
-    """
+    """An activity is an action taken by a user at a given point in time."""
     #: :py:class:`User` that made this activity.
     user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='activities')
     #: The id field, but renamed to avoid collisions upon multiple inheritance
@@ -227,11 +225,8 @@ class Activity(PolymorphicModel):
         verbose_name_plural = "activities"
 
 
-
 class Notification(PolymorphicModel):
-    """
-    A notification points to unknown past actions with a particular relevance.
-    """
+    """A notification points to unknown past actions with a particular relevance."""
     #: :py:class:`users.models.User` that received the notification.
     receiver = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='notifications')
     #: Datetime at which the notification was issued
@@ -244,3 +239,15 @@ class Notification(PolymorphicModel):
 
     def to_api(self):
         return {'message': f'Generic notification @{self.issue_timestamp}'}
+
+
+class GenericNotification(Notification):
+    """Some generic text notification."""
+    #: The message that will be presented with this notification.
+    message = djm.TextField()
+
+    def __str__(self):
+        return f'{self.issue_timestamp}({self.receiver}): {self.message}'
+
+    def to_api(self):
+        return {'id': self.id, 'message': self.message}

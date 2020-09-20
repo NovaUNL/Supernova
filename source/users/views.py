@@ -135,6 +135,7 @@ def registration_validation_view(request):
                         invite.resulting_user = user
                         invite.save()
                     login(request, user)
+                    m.GenericNotification.objects.create(receiver=user, text="Bem vindo ao Supernova!")
                     return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
                 except exceptions.AccountExists as e:
                     form.add_error(None, str(e))
