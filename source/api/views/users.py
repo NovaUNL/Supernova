@@ -1,3 +1,6 @@
+from datetime import datetime
+from django.utils import timezone
+
 from django.core.cache import cache
 from django.db.models import F
 from rest_framework import authentication
@@ -106,20 +109,32 @@ def notification_count_view(request):
     return Response(notification_count)
 
 
-@api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def notification_list_view(request):
-    notification_list = cache.get('%s_notification_list' % request.user.id)
-    if notification_list is None:
-        notifications = users.Notification.objects\
-            .filter(receiver=request.user, dismissed=False)\
-            .order_by('issue_timestamp')\
-            .reverse()
-        notifications = list(map(lambda n: n.to_api(), notifications))
-        cache.set('%s_notification_list' % request.user.id, notifications)
-        return Response(notifications)
-    return Response(notification_list)
+class UserNotificationList(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request):
+        timestamp = int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
+        notification_list = cache.get('%s_notification_list' % request.user.id)
+        if notification_list is None:
+            notifications = users.Notification.objects \
+                .filter(receiver=request.user, dismissed=False) \
+                .order_by('issue_timestamp') \
+                .reverse()
+            notification_list = list(map(lambda n: n.to_api(), notifications))
+            cache.set('%s_notification_list' % request.user.id, notification_list)
+        return Response({'notifications': notification_list, 'timestamp': timestamp})
+
+    def delete(self, request):
+        if 'timestamp' in request.data:
+            timestamp = timezone.make_aware(datetime.fromtimestamp(request.data['timestamp']))
+            users.Notification.objects \
+                .filter(receiver=request.user, issue_timestamp__lte=timestamp) \
+                .update(dismissed=True)
+        else:
+            users.Notification.objects.filter(receiver=request.user).update(dismissed=True)
+        request.user.clear_notification_cache()
+        return Response()
 
 
 class UserModeration(APIView):

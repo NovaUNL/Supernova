@@ -4,14 +4,10 @@ function delChildren(elem) {
     }
 }
 
-function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
-
 function defaultRequestHeaders() {
     return {
         'Content-Type': 'application/json',
-        'X-CSRFToken': getCSRFToken()
+        'X-CSRFToken': Cookies.get('csrftoken')
     }
 }
 
@@ -24,20 +20,36 @@ function toggleMenu() {
     }
 }
 
+let notificationLoadTimestamp;
+
 function loadNotifications() {
-    const listElem = document.querySelector('#notification-list');
-    if (listElem != null) {
-        fetch("/api/notification/list", {credentials: 'include'})
-            .then((response) => response.json())
-            .then((list) => {
-                for (let entry of list) {
-                    let elem = document.createElement('a');
-                    elem.innerText = entry.message;
-                    listElem.appendChild(elem);
-                    if (entry.url !== undefined) elem.href = entry.url
-                }
-            });
-    }
+    const listElem = document.getElementById('notification-list');
+    const clearBtn = listElem.querySelector('.clear');
+    notificationLoadTimestamp = +new Date();
+    fetch("/api/notification/list", {credentials: 'include'}
+    ).then((r) => r.json()
+    ).then((r) => {
+        for (let entry of r.notifications) {
+            let elem = document.createElement('a');
+            elem.innerText = entry.message;
+            listElem.insertBefore(elem, clearBtn);
+            if (entry.url !== undefined) elem.href = entry.url
+        }
+        notificationLoadTimestamp = r.timestamp;
+    });
+    clearBtn.addEventListener('click', clearNotifications);
+}
+
+function clearNotifications() {
+    const e = document.getElementById('notifications');
+    fetch("/api/notification/list", {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: defaultRequestHeaders(),
+        body: JSON.stringify({'timestamp': notificationLoadTimestamp})
+    }).then(() => {
+        e.remove();
+    });
 }
 
 function setupPopover(button) {
@@ -195,7 +207,6 @@ function loadTheme(promptIfUnset) {
         console.log("O navegador está a bloquear o armazenamento.");
     }
 }
-
 
 function showFilePreview(elem, src, mime) {
     let previewElem = elem.parentNode.parentNode.querySelector(".preview");

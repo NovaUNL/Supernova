@@ -1,6 +1,7 @@
 from datetime import datetime
 from itertools import chain
 
+from django.core.cache import cache
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
 from markdownx.models import MarkdownxField
@@ -55,6 +56,9 @@ class User(AbstractUser):
     is_student = djm.BooleanField(default=False)
     is_teacher = djm.BooleanField(default=False)
 
+    class Meta:
+        permissions = [('full_student_access', 'Can browse the system as if it was the university one')]
+
     @property
     def about_html(self):
         return markdownify(self.about)
@@ -83,8 +87,8 @@ class User(AbstractUser):
                         self.last_name = ' '.join(names[1:])
                     self.save()
 
-    class Meta:
-        permissions = [('full_student_access', 'Can browse the system as if it was the university one')]
+    def clear_notification_cache(self):
+        cache.delete_many(['%s_notification_count' % self.id, '%s_notification_list' % self.id])
 
 
 class Badge(djm.Model):
@@ -204,6 +208,9 @@ class Subscription(PolymorphicModel):
     subscriber = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='subscriptions')
     #: Datetime at which the activity happened
     issue_timestamp = djm.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['to', 'subscriber']
 
     def __str__(self):
         return f'{self.issue_timestamp}({self.destinatary})'

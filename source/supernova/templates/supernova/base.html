@@ -8,7 +8,10 @@
   <title>Supernova - {{ title }}</title>
   <link rel="icon" href="{% static 'supernova/images/favicon.png' %}" type="image/x-icon"/>
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  {% if not request.user.is_anonymous %}<script src="https://unpkg.com/@popperjs/core@2"></script>{% endif %}
+  {% if not request.user.is_anonymous %}
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+  {% endif %}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
   <script src="{% static 'js/script.js' %}"></script>
@@ -44,6 +47,7 @@
         <div id="notifications">
           <a id="notification-btn" href="{% url 'users:profile' user.nickname %}"><span id="notification-count"></span></a>
           <div id="notification-list" class="popover" role="tooltip">
+            <a class="clear" href="javascript: void(0)">Limpar notifícações</a>
             <div class="arrow" data-popper-arrow></div>
           </div>
         </div>
