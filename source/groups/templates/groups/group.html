@@ -18,12 +18,15 @@
 {% endblock %}
 
 {% block content_wrapper %}
+  {% csrf_token %}
   <div class="col">
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-{#          <li><a href="{% url 'groups:subscribe' subarea.id %}">Subscrever</a></li>#}
-          {% if not user.is_anonymous and group.outsiders_openness <= group.CLOSED %}<li><a>Solicitar admissão</a></li>{% endif %}
+          {% if not user.is_anonymous %}
+            <li><a id="subscribe-btn" href="javascript: void(0)" data-endpoint="{% url 'api:group_subscription' group.abbreviation %}"></a></li>
+            {% if group.outsiders_openness <= group.CLOSED %}<li><a>Solicitar admissão</a></li>{% endif %}
+          {% endif %}
         </ul>
       </div>
       <div>
@@ -122,6 +125,7 @@
   <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
   <script src="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.js"></script>
   <script>
+      setSubscribeButton();
       let currentDate = new Date(Date.now());
       loadCalendar(
           '#calendar',

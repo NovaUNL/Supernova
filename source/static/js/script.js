@@ -1,3 +1,20 @@
+function delChildren(elem) {
+    while (elem.firstChild) {
+        elem.removeChild(elem.firstChild);
+    }
+}
+
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+function defaultRequestHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken()
+    }
+}
+
 function toggleMenu() {
     let element = document.getElementById("nav-column");
     if (element.style.display !== 'block') {
@@ -5,37 +22,6 @@ function toggleMenu() {
     } else {
         element.style.display = 'none';
     }
-}
-
-function setupPopover(button) {
-    const popover = button.parentNode.querySelector('.popover');
-    let popperInstance = null;
-
-    function show() {
-        popover.setAttribute('data-show', '');
-        popperInstance = Popper.createPopper(button, popover, {
-            modifiers: [
-                {
-                    name: 'offset',
-                    options: {
-                        offset: [0, 8],
-                    },
-                },
-            ],
-        });
-    }
-
-    function hide(e) {
-        if (e.target === popover || e.target.nodeName === 'A') return;
-        popover.removeAttribute('data-show');
-        if (popperInstance) {
-            popperInstance.destroy();
-            popperInstance = null;
-        }
-    }
-
-    button.addEventListener('click', show);
-    document.addEventListener('click', hide, true);
 }
 
 function loadNotifications() {
@@ -52,6 +38,32 @@ function loadNotifications() {
                 }
             });
     }
+}
+
+function setupPopover(button) {
+    const popover = button.parentNode.querySelector('.popover');
+    let popperInstance = null;
+
+    function show() {
+        popover.setAttribute('data-show', '');
+        popperInstance = Popper.createPopper(button, popover, {
+            modifiers: [
+                {name: 'offset', options: {offset: [0, 8]}},
+            ],
+        });
+    }
+
+    function hide(e) {
+        if (e.target === popover || e.target.nodeName === 'A') return;
+        popover.removeAttribute('data-show');
+        if (popperInstance) {
+            popperInstance.destroy();
+            popperInstance = null;
+        }
+    }
+
+    button.addEventListener('click', show);
+    document.addEventListener('click', hide, true);
 }
 
 function loadTransportation(element, url) {
@@ -91,12 +103,6 @@ Date.prototype.addDays = function (days) {
     date.setDate(date.getDate() + days);
     return date;
 };
-
-function delChildren(elem) {
-    while (elem.firstChild) {
-        elem.removeChild(elem.firstChild);
-    }
-}
 
 const themes = ["Quasar", "Tokamak", "Nebula"];
 
@@ -190,6 +196,7 @@ function loadTheme(promptIfUnset) {
     }
 }
 
+
 function showFilePreview(elem, src, mime) {
     let previewElem = elem.parentNode.parentNode.querySelector(".preview");
     delChildren(previewElem);
@@ -220,4 +227,40 @@ function showFilePreview(elem, src, mime) {
     }
     previewElem.appendChild(container);
     elem.style.display = "none";
+}
+
+function setSubscribeButton() {
+    const b = document.getElementById("subscribe-btn")
+    fetch(b.dataset.endpoint, {credentials: 'include', method: 'GET'})
+        .then((response) => response.json())
+        .then((val) => {
+            b.innerText = val ? "Dessubscrever" : "Subscrever";
+            b.dataset.val = val;
+            b.addEventListener('click', clickSubscribe);
+        }).catch(() => {
+        b.remove()
+    });
+}
+
+function clickSubscribe(e) {
+    const b = e.target;
+    if (b.dataset.val === "true") {
+        fetch(b.dataset.endpoint, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: defaultRequestHeaders()
+        }).then(() => {
+            b.innerText = "Subscrever"
+            b.dataset.val = "false";
+        });
+    } else {
+        fetch(b.dataset.endpoint, {
+            method: 'POST',
+            credentials: 'include',
+            headers: defaultRequestHeaders()
+        }).then(() => {
+            b.innerText = "Dessubscrever";
+            b.dataset.val = "true";
+        });
+    }
 }
