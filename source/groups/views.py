@@ -117,9 +117,9 @@ def announcement_view(request, group_abbr, announcement_id):
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
-        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group.id])},
-        {'name': 'Anúncios', 'url': reverse('groups:announcements', args=[group.id])},
-        {'name': announcement.title, 'url': reverse('groups:announcement', args=[group.id, announcement.id])}]
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Anúncios', 'url': reverse('groups:announcements', args=[group_abbr])},
+        {'name': announcement.title, 'url': reverse('groups:announcement', args=[group_abbr, announcement.id])}]
     return render(request, 'groups/announcement.html', context)
 
 
@@ -151,6 +151,7 @@ def announce_view(request, group_abbr):
             announcement.group = group
             announcement.author = request.user
             announcement.save()
+            group.notify_subscribers(announcement)
             return redirect('groups:announcement', group_abbr=group_abbr, announcement_id=announcement.id)
     else:
         form = f.AnnounceForm()
@@ -182,7 +183,6 @@ def members_view(request, group_abbr):
     context = build_base_context(request)
     context['title'] = f'Membros de {group.name}'
     context['group'] = group
-    # context['membership' = g
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_memb'
     context['sub_nav'] = [

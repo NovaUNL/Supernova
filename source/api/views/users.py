@@ -98,8 +98,7 @@ class UserSocialNetworks(APIView):
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def notification_count_view(request):
-    notification_count = cache.get('%s_notification_count' % request.user.nickname)
-    notification_count = None
+    notification_count = cache.get('%s_notification_count' % request.user.id)
     if notification_count is None:
         count = users.Notification.objects.filter(receiver=request.user, dismissed=False).count()
         cache.set('%s_notification_count' % request.user.nickname, count)
@@ -111,15 +110,14 @@ def notification_count_view(request):
 @authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def notification_list_view(request):
-    notification_list = cache.get('%s_notification_list' % request.user.nickname)
-    notification_list = None
+    notification_list = cache.get('%s_notification_list' % request.user.id)
     if notification_list is None:
         notifications = users.Notification.objects\
             .filter(receiver=request.user, dismissed=False)\
             .order_by('issue_timestamp')\
             .reverse()
         notifications = list(map(lambda n: n.to_api(), notifications))
-        cache.set('%s_notification_list' % request.user.nickname, notifications)
+        cache.set('%s_notification_list' % request.user.id, notifications)
         return Response(notifications)
     return Response(notification_list)
 

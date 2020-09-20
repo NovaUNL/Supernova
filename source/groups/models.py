@@ -1,6 +1,7 @@
 from datetime import datetime, time
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models as djm, transaction
 from django.urls import reverse
 from markdownx.models import MarkdownxField
@@ -94,6 +95,12 @@ class Group(users.Subscribable):
     def description_html(self):
         return markdownify(self.description)
 
+    def notify_subscribers(self, activity):
+        for subscriber in self.subscribers.all():
+            # TODO bulk insert
+            GroupActivityNotification.objects.create(activity=activity, receiver=subscriber)
+            subscriber.clear_notification_cache()
+
 
 class Role(djm.Model):
     """
@@ -174,7 +181,7 @@ class Activity(PolymorphicModel):
     group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='activities')
     #: :py:class:`users.models.User` that triggered the activity.
     author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT, related_name='group_activity')
-    #: Datetime at which the trigger happened
+    #: Datetime when the trigger happened
     datetime = djm.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -192,7 +199,7 @@ class Announcement(Activity):
     content = MarkdownxField()
 
     def __str__(self):
-        return self.title
+        return f"@{self.group.abbreviation}: {self.title}"
 
     @property
     def content_html(self):
@@ -250,11 +257,15 @@ class ScheduleCreation(Activity):
     entry = djm.OneToOneField(ScheduleEntry, on_delete=djm.CASCADE, related_name='creation')
 
     def __str__(self):
-        return f"Agendamento: {self.entry}"
+        return f"@{self.group.abbreviation}: {self.entry}"
 
     @property
     def title(self):
         return str(self.entry)
+
+    @property
+    def link_to(self):
+        return reverse('groups:announcement', args=[self.group.abbreviation, self.id])
 
 
 class ScheduleSuspension(Activity):
@@ -281,6 +292,10 @@ class ScheduleSuspension(Activity):
         else:
             return f"Alterações nas actividades de {self.entry.title} entre {self.start_date} e {self.end_date}."
 
+    @property
+    def link_to(self):
+        return reverse('groups:schedule', args=[self.entry.group.abbreviation])
+
 
 class ScheduleRevoke(Activity):
     """ An activity log entry to signal that a :py:class:`ScheduleEntry` has been permanently revoked."""
@@ -296,8 +311,12 @@ class ScheduleRevoke(Activity):
         null=True,
         related_name='replaced_revoked_entries')
 
+    @property
+    def link_to(self):
+        return reverse('groups:schedule', args=[self.entry.group.abbreviation])
+
     def __str__(self):
-        return f"Cancelamento de {self.entry}"
+        return f"@{self.entry.group.abbreviation}: Cancelamento de {self.entry}"
 
 
 class Event(djm.Model):
@@ -306,6 +325,8 @@ class Event(djm.Model):
     which are assumed to attend by default; an Event is assumed as something that stands off, to which many users do
     not want to attend, can have an associated cost and tends to be open towards outsiders.
     """
+    #: :py:class:`Group` that will have this event
+    group = djm.ForeignKey(Group, on_delete=djm.CASCADE, related_name='events')
     #: A short title that identifies the event
     title = djm.CharField(max_length=200)
     #: A textual description of the event
@@ -358,11 +379,22 @@ class Event(djm.Model):
     #: Users who want to receive information about changes to this event
     subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, related_name='event_subscription')
 
+    def __str__(self):
+        return f"Evento por @{self.group.abbreviation}: {self.title}"
+
 
 class EventAnnouncement(Activity):
     """An activity log to signal event announcements."""
     #: The event being announced
     event = djm.OneToOneField(Event, on_delete=djm.CASCADE)
+
+    def __str__(self):
+        return str(self.event)
+
+    @property
+    def link_to(self):
+        # FIXME point to a more specific page once said page exists
+        return reverse('groups:group', args=[self.event.group.abbreviation])
 
 
 class EventUserQueue(djm.Model):
@@ -404,3 +436,13 @@ class GalleryUpload(Activity):
     """An activity log entry to signal that a :py:class:`GalleryItem` has been created."""
     #: The item this upload refers to. Nullified if the item gets deleted.
     item = djm.OneToOneField(GalleryItem, blank=True, null=True, on_delete=djm.SET_NULL, related_name="upload")
+
+
+class GroupActivityNotification(users.Notification):
+    """A notification of group activity, meant to be received by subscribers."""
+    activity = djm.ForeignKey(Activity, on_delete=djm.CASCADE)
+
+    def to_api(self):
+        return {'id': self.id,
+                'message': str(self.activity),
+                'url': self.activity.link_to}
