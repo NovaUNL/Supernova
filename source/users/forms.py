@@ -268,7 +268,7 @@ class AccountSettingsForm(forms.ModelForm):
                 new = self.data["new_password"]
                 confirmation = self.data["new_password_confirmation"]
                 if new != confirmation:
-                    raise forms.ValidationError("As nova palavra-passe não coincide com a confirmação.")
+                    raise forms.ValidationError("A nova palavra-passe não coincide com a confirmação.")
                 else:
                     return self.cleaned_data
             else:
