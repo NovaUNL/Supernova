@@ -66,7 +66,7 @@
             {% for class in classes %}
               <ul class="menu">
                 <li>
-                  <a href="{% url 'learning:class' class.id %}">{{ class.name }}</a><br>
+                  <a href="{% url 'learning:class' class.id %}">{{ class.name }}</a>{% if class.iid %}<sup>{{ class.iid }}</sup>{% endif %}<br>
                   <span class="indented">{{ class.exercise_count }} exercícios em {{ class.section_count }} secções.</span>
                 </li>
               </ul>
