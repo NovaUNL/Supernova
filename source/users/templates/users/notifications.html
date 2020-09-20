@@ -1,0 +1,21 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Notificações de {{ user.get_full_name }}</h1>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content col padded">
+          <ul>
+            {% for notification in notifications %}
+              <li><a{% if notification.to_url %} href="{{ notification.to_url }}" {% endif %}>{{ notification }}</a> - {{ notification.issue_timestamp }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

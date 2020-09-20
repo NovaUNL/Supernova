@@ -39,3 +39,9 @@ class ChangelogNotification(Notification):
 
     def to_api(self):
         return {'id': self.id, 'message': f'Nova versão do Supernova: {self.entry.title}', 'url': reverse('changelog')}
+
+    def to_url(self):
+        return reverse('changelog')
+
+    def __str__(self):
+        return f'Nova versão do Supernova: {self.entry.title}'

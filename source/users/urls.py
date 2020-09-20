@@ -12,5 +12,6 @@ urlpatterns = [
     path('<str:nickname>/definicoes/', views.user_profile_settings_view, name='settings'),
     path('<str:nickname>/convites/', views.invites_view, name='invites'),
     path('<str:nickname>/convites/novo', views.create_invite_view, name='create_invite'),
+    path('notificacoes', views.notifications_view, name='notifications'),
     path('ac/nickname/', views.NicknameAutocomplete.as_view(), name='nickname_ac'),
 ]

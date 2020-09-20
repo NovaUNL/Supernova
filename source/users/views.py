@@ -308,6 +308,20 @@ def create_invite_view(request, nickname):
     return render(request, 'users/invite_new.html', context)
 
 
+@login_required
+def notifications_view(request):
+    context = build_base_context(request)
+    context['pcode'] = "u_notifications"
+    context['title'] = "Notificações"
+    context['notifications'] = m.Notification.objects \
+        .filter(receiver=request.user) \
+        .order_by('issue_timestamp') \
+        .reverse() \
+        .all()
+    context['sub_nav'] = [{'name': 'Notificações', 'url': reverse('users:notifications')}]
+    return render(request, 'users/notifications.html', context)
+
+
 @staff_member_required
 def management_view(request):
     context = build_base_context(request)

@@ -446,3 +446,9 @@ class GroupActivityNotification(users.Notification):
         return {'id': self.id,
                 'message': str(self.activity),
                 'url': self.activity.link_to}
+
+    def to_url(self):
+        return self.activity.link_to
+
+    def __str__(self):
+        return str(self.activity)

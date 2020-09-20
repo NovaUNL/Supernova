@@ -45,7 +45,7 @@
       </div>
       {% if not request.user.is_anonymous %}
         <div id="notifications">
-          <a id="notification-btn" href="{% url 'users:profile' user.nickname %}"><span id="notification-count"></span></a>
+          <a id="notification-btn" href="{% url 'users:notifications' %}"><span id="notification-count"></span></a>
           <div id="notification-list" class="popover" role="tooltip">
             <a class="clear" href="javascript: void(0)">Limpar notifícações</a>
             <div class="arrow" data-popper-arrow></div>
