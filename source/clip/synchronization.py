@@ -387,7 +387,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
             logger.warning(f"{downstream_file} name changed to {name}")
             downstream_file.name = name
             changed = True
-        upstream_date = make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']))
+        upstream_date = make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True)
         if downstream_file.upload_datetime != upstream_date:
             logger.warning(f"{downstream_file} upload date changed "
                            f"from {downstream_file.upload_datetime} to {upstream_date}")
@@ -430,7 +430,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                 class_instance=class_inst,
                 type=upsteam_info['type'],
                 name=upsteam_info['name'],
-                upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime'])),
+                upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True),
                 uploader_teacher=uploader_teacher)
             logger.info(f"File {file} added to class {class_inst}")
 
@@ -497,6 +497,9 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
         if type_abbr == abbr:
             turn_type = i
             break
+    if turn_type is None:
+        logger.error("Unknown turn type: %s", abbr)
+        return
     try:
         obj = m.Turn.objects.get(class_instance=class_inst, external_id=external_id)
     except ObjectDoesNotExist:
