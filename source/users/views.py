@@ -296,8 +296,8 @@ def create_invite_view(request, nickname):
     user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
     if 'confirmed' in request.GET and request.GET['confirmed'] == 'true':
         token = registrations.generate_token(10)
-        m.Invite(issuer=user, token=token, expiration=(datetime.now() + timedelta(days=2))).save()
-        return HttpResponseRedirect(reverse('users:invites', args=[request.user]))
+        m.Invite.objects.create(issuer=user, token=token, expiration=(datetime.now() + timedelta(days=2)))
+        return HttpResponseRedirect(reverse('users:invites', args=[nickname]))
 
     context = build_base_context(request)
     context['pcode'] = "u_invites"
