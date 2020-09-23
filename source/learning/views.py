@@ -521,7 +521,7 @@ def create_exercise_view(request):
     context['title'] = 'Submeter exercício'
     context['form'] = form
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
-                          {'name': 'Submeter exercício', 'url': reverse('learning:exercise')}]
+                          {'name': 'Submeter exercício', 'url': reverse('learning:exercise_create')}]
     return render(request, 'learning/editor.html', context)
 
 
