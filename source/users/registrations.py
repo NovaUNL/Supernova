@@ -1,6 +1,8 @@
 import random
 import string
 
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils import timezone
@@ -78,6 +80,11 @@ def validate_token(email, token) -> users.User:
     for student in students:
         student.user = user
         student.save()
+    if len(students) > 0:
+        permission = Permission.objects.get(
+            codename='can_view_college_data',
+            content_type=ContentType.objects.get_for_model(users.User))
+        user.user_permissions.add(permission)
     user.calculate_missing_info()
     user.updated_cached()
     return user
