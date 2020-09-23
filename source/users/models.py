@@ -186,6 +186,10 @@ class Invite(djm.Model):
     def __str__(self):
         return f"{self.issuer.nickname}:{self.token}"
 
+    @property
+    def expired(self):
+        return self.expiration < make_aware(datetime.now(), is_dst=True)
+
 
 class Subscribable(djm.Model):
     """

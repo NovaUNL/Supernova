@@ -7,7 +7,7 @@
     </div>
     <div class="col padded">
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2></h2></div>
+        <div class="pane-title bg-grad"></div>
         <div class="pane-content col">
           <table style="min-width: 100%">
             <tr>
@@ -20,15 +20,20 @@
               <tr>
                 <td>{{ invite.token }}</td>
                 <td>De {{ invite.created }}</td>
-                {% if invite.registration %}
-                  <td colspan="2">Utilizado</td>
-                {% else %}
                   <td>Até {{ invite.expiration }}</td>
+                {% if invite.registration %}
+                  <td>Utilizado</td>
+                {% elif invite.expired %}
+                  <td>Caducado</td>
+                {% else %}
                   <td><a href="{% url 'registration' %}?t={{ invite.token }}">Link de registo</a></td>
                 {% endif %}
               </tr>
             {% endfor %}
           </table>
+          {% if profile_user.invites.all|length == 0 %}
+            <span>Sem convites emitidos.</span>
+          {% endif %}
           {% if profile_user == request.user %}
             <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">Criar novo</a>
           {% endif %}
