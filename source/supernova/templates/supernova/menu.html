@@ -44,7 +44,7 @@
           <ul>
             <li {% if pcode == 'u_profile' %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
             <li {% if pcode == 'u_schedule' %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
-            <li><a class="disabled">Curso</a></li>
+            {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li><a class="disabled">Avaliações</a></li>
             <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
             <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
@@ -56,7 +56,7 @@
           <ul>
             <li><a href="{{ profile }}">Perfil</a></li>
             <li><a href="{{ schedule }}">Horário</a></li>
-            <li><a class="disabled">Curso</a></li>
+            {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li><a class="disabled">Avaliações</a></li>
             <li><a href="{{ calendar }}">Calendário</a></li>
             <li><a href="{{ settings }}">Definições</a></li>
