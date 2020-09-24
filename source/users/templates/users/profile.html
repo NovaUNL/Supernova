@@ -26,42 +26,44 @@
     </div>
     <div class="row padded">
       <div class="col nogrow" style="flex-basis: 400px">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
-          <div class="pane-content">
-            <div class="students">
-              {% for student in primary_students %}
-                <div>
-                  <b>CLIP ID: </b>{{ student.abbreviation }}<br>
-                  <b>Numero: </b>{{ student.number }}<br>
-                  <b>Curso: </b>
-                  <a href="{% url 'college:course' student.course.id %}">
-                    {{ student.course.abbreviation }}
-                  </a>
-                </div>
-              {% endfor %}
-              {% for student in secondary_students %}
-                {% if student != primary_student %}
+        {% if permissions.info_visibility %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Informação</h2></div>
+            <div class="pane-content">
+              <div class="students">
+                {% for student in primary_students %}
                   <div>
+                    <b>CLIP ID: </b>{{ student.abbreviation }}<br>
                     <b>Numero: </b>{{ student.number }}<br>
                     <b>Curso: </b>
                     <a href="{% url 'college:course' student.course.id %}">
                       {{ student.course.abbreviation }}
                     </a>
                   </div>
-                {% endif %}
-              {% endfor %}
+                {% endfor %}
+                {% for student in secondary_students %}
+                  {% if student != primary_student %}
+                    <div>
+                      <b>Numero: </b>{{ student.number }}<br>
+                      <b>Curso: </b>
+                      <a href="{% url 'college:course' student.course.id %}">
+                        {{ student.course.abbreviation }}
+                      </a>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% if profile_user.residence %}
+                <b>Residência:</b> {{ profile_user.residence }}<br>
+              {% endif %}
+              <b>Ultima atividade:</b> {{ profile_user.last_activity }}<br>
+              {% if profile_user.webpage %}
+                <b>Página:</b> <a href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a><br>
+              {% endif %}
             </div>
-            {% if profile_user.residence %}
-              <b>Residência:</b> {{ profile_user.residence }}<br>
-            {% endif %}
-            <b>Ultima atividade:</b> {{ profile_user.last_activity }}<br>
-            {% if profile_user.webpage %}
-              <b>Página:</b> <a href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a><br>
-            {% endif %}
           </div>
-        </div>
-        {% if profile_user.bio %}
+        {% endif %}
+        {% if permissions.about_visibility and profile_user.bio %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Sobre mim</h2></div>
             <div class="pane-content">
@@ -83,7 +85,7 @@
             </div>
           </div>
         {% endif %}
-        {% if profile_user.social_networks.exists %}
+        {% if permissions.social_visibility and profile_user.social_networks.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
               <h2>Social</h2>
@@ -97,7 +99,7 @@
             </div>
           </div>
         {% endif %}
-        {% if profile_user.groups_custom.exists %}
+        {% if permissions.groups_visibility and profile_user.groups_custom.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Grupos</h2></div>
             <div class="pane-content">
@@ -113,7 +115,7 @@
         {% endif %}
       </div>
       <div class="col big">
-        {% if current_class_instances.exists %}
+        {% if permissions.enrollments_visibility and current_class_instances.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
               <h2>Inscrições</h2>
@@ -127,7 +129,7 @@
             </div>
           </div>
         {% endif %}
-        {% if schedule %}
+        {% if permissions.schedule_visibility and schedule %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
               <h2>Horário</h2>

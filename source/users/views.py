@@ -153,39 +153,47 @@ def registration_validation_view(request):
 
 
 def profile_view(request, nickname):
-    # TODO visibility & change 0 bellow to access level
-    if request.user.nickname != nickname and not request.user.is_staff:
-        raise PermissionDenied()
-    context = cache.get(f'profile_{nickname}_{0}_context')
-    if context is not None:
-        return render(request, 'users/profile.html', context)
+    profile_user = get_object_or_404(m.User.objects, nickname=nickname)
+    permissions = profile_user.profile_permissions_for(request.user)
 
-    user = get_object_or_404(
-        m.User.objects.prefetch_related('students__course', 'memberships', 'social_networks', 'badges'),
-        nickname=nickname)
     context = build_base_context(request)
-    context['pcode'] = "u_profile"
-    page_name = f"Perfil de {user.get_full_name()}"
-    context['title'] = page_name
-    context['profile_user'] = user
-    primary_students, context['secondary_students'] = get_students(user)
-    context['primary_students'] = primary_students
-    turn_instances = college.TurnInstance.objects \
-        .select_related('turn__class_instance__parent') \
-        .prefetch_related('room__building') \
-        .filter(turn__student__in=primary_students,
-                turn__class_instance__year=settings.COLLEGE_YEAR,
-                turn__class_instance__period=settings.COLLEGE_PERIOD)
-    context['weekday_spans'], context['schedule'], context['unsortable'] = \
-        schedules.build_schedule(turn_instances)
+    if not permissions["profile_visibility"]:
+        context['title'] = context['msg_title'] = 'Insuficiência de permissões'
+        context['msg_content'] = 'O perfil deste utilizador está definido como oculto.'
+        return render(request, 'supernova/message.html', context)
 
-    context['current_class_instances'] = college.ClassInstance.objects \
-        .select_related('parent') \
-        .filter(student__in=primary_students,
-                year=settings.COLLEGE_YEAR,
-                period=settings.COLLEGE_PERIOD)
+    cached_context = cache.get(f'profile_{nickname}_{permissions["checksum"]}')
+    if False and cached_context is not None:
+        # Override cached with the base context
+        context = {**cached_context, **context}
+        return render(request, 'users/profile.html', context)
+    context['pcode'] = "u_profile"
+    page_name = f"Perfil de {profile_user.get_full_name()}"
+    context['title'] = page_name
+    context['profile_user'] = profile_user
+
+    context['permissions'] = permissions
+    if permissions['enrollments_visibility']:
+        primary_students, context['secondary_students'] = get_students(profile_user)
+        context['primary_students'] = primary_students
+
+        context['current_class_instances'] = college.ClassInstance.objects \
+            .select_related('parent') \
+            .filter(student__in=primary_students,
+                    year=settings.COLLEGE_YEAR,
+                    period=settings.COLLEGE_PERIOD)
+
+        if permissions['schedule_visibility']:
+            turn_instances = college.TurnInstance.objects \
+                .select_related('turn__class_instance__parent') \
+                .prefetch_related('room__building') \
+                .filter(turn__student__in=primary_students,
+                        turn__class_instance__year=settings.COLLEGE_YEAR,
+                        turn__class_instance__period=settings.COLLEGE_PERIOD)
+            context['weekday_spans'], context['schedule'], context['unsortable'] = \
+                schedules.build_schedule(turn_instances)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
-    cache.set(f'profile_{nickname}_{0}_context', context, timeout=3600)
+    cache.set(f'profile_{nickname}_{0}_context', context, timeout=600)
     return render(request, 'users/profile.html', context)
 
 

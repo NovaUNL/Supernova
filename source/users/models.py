@@ -73,8 +73,52 @@ class User(AbstractUser):
         if self.is_teacher != is_teacher:
             self.is_teacher = is_teacher
             changed = True
+        course_candidates = set()
+
+        for student in self.students.filter(last_year=settings.COLLEGE_YEAR).all():
+            course_candidates.add(student.course)
+        for teacher in self.teachers.filter(last_year=settings.COLLEGE_YEAR).all():
+            course_candidates.add(teacher.course)
+        course_candidates.discard(None)
+        if len(course_candidates) == 1:
+            self.course = course_candidates.pop()
+            changed = True
+
         if changed:
             self.save()
+
+    def profile_permissions_for(self, user):
+        permissions = {
+            'profile_visibility': False,
+            'info_visibility': False,
+            'about_visibility': False,
+            'social_visibility': False,
+            'groups_visibility': False,
+            'enrollments_visibility': False,
+            'schedule_visibility': False}
+
+        # Owner and staff can do everything
+        if self == user or user.is_staff:
+            for permission in permissions.keys():
+                permissions[permission] = True
+            permissions['checksum'] = (1 << len(permissions)) - 1
+            return permissions
+
+        # Without profile visibility most people can do nothing
+        if not (self.profile_visibility == User.EVERYBODY \
+                or (self.profile_visibility == User.USERS and not user.is_anonymous)):
+            permissions['checksum'] = 0
+            return permissions
+
+        # Calculate for others
+        checksum = 0
+        for i, permission_name in enumerate(list(permissions.keys())):
+            permission = getattr(self, permission_name)
+            if permission == User.EVERYBODY or (permission == User.USERS and not user.is_anonymous):
+                permissions[permission_name] = True
+                checksum = checksum + (1 << i)
+        permissions['checksum'] = checksum
+        return permissions
 
     def calculate_missing_info(self):
         # Set a name if none is known
