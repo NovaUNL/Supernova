@@ -27,6 +27,9 @@ class TurnType:
     SEMINAR = 4
     TUTORIAL_ORIENTATION = 5
     FIELD_WORK = 6
+    THEORETICAL_ONLINE = 7
+    PRACTICAL_ONLINE = 8
+    PRACTICAL_THEORETICAL_ONLINE = 9
     CHOICES = (
         (THEORETICAL, 'Teórico'),
         (PRACTICAL, 'Prático'),
@@ -34,6 +37,9 @@ class TurnType:
         (SEMINAR, 'Seminário'),
         (TUTORIAL_ORIENTATION, 'Orientação tutorial'),
         (FIELD_WORK, 'Trabalho de campo'),
+        (THEORETICAL_ONLINE, 'Teórico Online'),
+        (PRACTICAL_ONLINE, 'Prático Online'),
+        (PRACTICAL_THEORETICAL_ONLINE, 'Teórico-Pratico Online'),
     )
     ABBREVIATIONS = {
         THEORETICAL: 'T',
@@ -41,7 +47,10 @@ class TurnType:
         PRACTICAL_THEORETICAL: 'TP',
         SEMINAR: 'S',
         TUTORIAL_ORIENTATION: 'OT',
-        FIELD_WORK: 'TC'
+        FIELD_WORK: 'TC',
+        THEORETICAL_ONLINE: 'TO',
+        PRACTICAL_ONLINE: 'PO',
+        PRACTICAL_THEORETICAL_ONLINE: 'OP'
     }
 
     @staticmethod
