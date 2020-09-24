@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 from dal import autocomplete
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.cache import cache
@@ -338,18 +337,6 @@ def notifications_view(request):
         .all()
     context['sub_nav'] = [{'name': 'Notificações', 'url': reverse('users:notifications')}]
     return render(request, 'users/notifications.html', context)
-
-
-@staff_member_required
-def management_view(request):
-    context = build_base_context(request)
-    context['title'] = "Gestão"
-    context['latest_registrations'] = m.Registration.objects.order_by('creation').reverse()[0:10]
-    context['latest_activity'] = m.Activity.objects.order_by('timestamp').reverse()[0:10]
-    context['suspended_users'] = m.User.objects.order_by('nickname').filter(is_active=False).all()
-    context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('users:management')}]
-    return render(request, 'users/management.html', context)
-
 
 class NicknameAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):

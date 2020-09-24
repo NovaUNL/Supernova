@@ -18,7 +18,7 @@ class Catchphrase(djm.Model):
 class Changelog(djm.Model):
     """A verbose list of changes since the past major version"""
     #: The entry title
-    title = djm.TextField(max_length=100)
+    title = djm.CharField(max_length=100)
     #: The entry content
     content = MarkdownxField()
     #: Publish date

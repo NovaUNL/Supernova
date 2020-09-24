@@ -36,7 +36,7 @@
             {% for registration in latest_registrations %}
               <tr>
                 <td>{{ registration.username }}</td>
-                <td>{{ registration.nickname }}</td>
+                <td><a href="{% url 'users:profile' registration.nickname %}">{{ registration.nickname }}</a></td>
                 <td>{{ registration.student }}</td>
                 <td>{{ registration.email }}</td>
                 <td>{{ registration.failed_attempts }}</td>
@@ -50,6 +50,15 @@
               </tr>
             {% endfor %}
           </table>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Anúnciar alteração</h2></div>
+        <div class="pane-content">
+          <form method="post" action="{% url 'management' %}">
+            {{ changelog_form.as_p }}
+            <input style="float: right" type="submit" value="Anúnciar">
+          </form>
         </div>
       </div>
     </div>
@@ -95,9 +104,9 @@
             </table>
           {% endif %}
           <h4>Suspender:</h4>
-        <select name="section" required id="suspension-selector" data-autocomplete-light-url="/u/ac/nickname/"
-                data-autocomplete-light-function="select2"></select>
-        <input type="button" value="Confirmar" onclick="suspend()">
+          <select name="section" required id="suspension-selector" data-autocomplete-light-url="/u/ac/nickname/"
+                  data-autocomplete-light-function="select2"></select>
+          <input type="button" value="Confirmar" onclick="suspend()">
         </div>
       </div>
     </div>

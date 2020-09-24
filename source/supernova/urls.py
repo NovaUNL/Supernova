@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     url(r'^markdownx/', include('markdownx.urls')),
+    path('gest/', views.management_view, name='management'),
     path('sobre/', flatpages.flatpage, {'url': '/sobre/'}, name='about'),
     path('privacidade/', flatpages.flatpage, {'url': '/privacidade/'}, name='privacy'),
     path('faq/', flatpages.flatpage, {'url': '/faq/'}, name='faq'),
