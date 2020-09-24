@@ -10,7 +10,7 @@
         {% for news_item in news %}
           <h2><a href="{% url 'news:item' news_item.id %}">{{ news_item.title }}</a></h2>
           <div class="news-list-item">
-            <img src="{% get_media_prefix %}{{ news_item.cover_img }}" alt="{{ news_item.title }}">
+            {% if news_item.cover_img %}<img src="{% get_media_prefix %}{{ news_item.cover_img }}" alt="{{ news_item.title }}">{% endif %}
             <div>
               <span>{{ news_item.summary }}</span>
               {% if news_item.author %}
