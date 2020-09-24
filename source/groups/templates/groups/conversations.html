@@ -1,22 +1,10 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'groups/base.html' %}
 
-{% load static %}
-
-{% block content %}
-    <style>
-        .flex-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-        }
-    </style>
-
-    {% include 'groups/header.html' %}
-    <div class="flex-wrapper">
-        <h1>TODO</h1>
+{% block group_content %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Contactos</h2></div>
+    <div class="pane-content">
+      TODO
     </div>
-{% endblock %}
-
-{% block navigation %}
-    {% include 'groups/navigation.html' %}
+  </div>
 {% endblock %}

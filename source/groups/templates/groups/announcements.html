@@ -1,48 +1,21 @@
-{% extends 'supernova/base.html' %}
+{% extends 'groups/base.html' %}
 
-{% block head %}
-  <style>
-    {% if  group.image.url %}
-      .header-decorator:after {
-        background-image: url("{{ group.image.url}}");
-        background-size: contain;
-        background-position: right;
-      }
-    {% endif %}
-  </style>
-{% endblock %}
-
-{% block content_wrapper %}
-  <div class="col">
-    <div class="header-decorator">
-      <div>
-        <h1>Anúncios por {{ group.name }}</h1>
-        <h3>@{{ group.abbreviation }}</h3>
+{% block group_content %}
+  {% if not announcements.exists %}
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Anúncios</h2></div>
+      <div class="pane-content">
+        Este grupo nunca anunciou nada.<br>
+        Talvez sejam tímidos, talvez não tenham presença no Supernova. :(
       </div>
     </div>
-    <div class="row nowrap padded">
-      <div class="col">
-        {% if not announcements.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Sem anúncios</h2></div>
-            <div class="pane-content">
-              Este grupo nunca anunciou nada.<br>
-              Talvez sejam tímidos, talvez não tenham presença no Supernova. :(
-            </div>
-          </div>
-        {% endif %}
-        {% for announcement in announcements %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>{{ announcement.title }}</h2></div>
-            <div class="pane-content">
-              {{ announcement.content_html | safe }}
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-      <div class="col nogrow noshrink">
-        {% include 'groups/navigation.html' %}
+  {% endif %}
+  {% for announcement in announcements %}
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>{{ announcement.title }}</h2></div>
+      <div class="pane-content">
+        {{ announcement.content_html | safe }}
       </div>
     </div>
-  </div>
+  {% endfor %}
 {% endblock %}

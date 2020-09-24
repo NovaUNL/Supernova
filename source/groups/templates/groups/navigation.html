@@ -23,7 +23,7 @@
       {% if request.path == documents_url %}
         <li>Documentos</li>
       {% else %}
-        <li><a href="{{ members_url }}">Documentos</a></li>
+        <li><a href="{{ documents_url }}">Documentos</a></li>
       {% endif %}
 
       {% if request.path == members_url %}
@@ -35,10 +35,27 @@
       {% if request.path == contact_url %}
         <li>Contactar</li>
       {% else %}
-        <li><a href="{{ contact_url }}">Contactar</a></li>
+        <li class="disabled"><a href="{{ contact_url }}">Contactar</a></li>
       {% endif %}
-
       {# TODO - Schedule, Calendar#}
     </ul>
   </div>
 </div>
+
+{% if is_member %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Ações</h2></div>
+    <div class="pane-content">
+      <ul class="menu">
+        {% if  membership_perms.can_announce %}
+          <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>{% endif %}
+        {% if  membership_perms.can_modify_roles %}
+          <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>{% endif %}
+        {% if  membership_perms.can_change_schedule %}
+          <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
+        {% if  membership_perms.is_admin %}
+          <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>{% endif %}
+      </ul>
+    </div>
+  </div>
+{% endif %}

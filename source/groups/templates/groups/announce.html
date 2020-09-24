@@ -1,15 +1,4 @@
 {% extends 'supernova/base.html' %}
-{% block head %}
-  <style>
-    {% if  group.image.url %}
-      .header-decorator:after {
-        background-image: url("{{ group.image.url}}");
-        background-size: contain;
-        background-position: right;
-      }
-    {% endif %}
-  </style>
-{% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
@@ -48,7 +37,7 @@
                 {{ form.content }}
               </div>
             </div>
-            <input class="ui-btn end" type="submit" value="Guardar"/>
+            <input class="ui-btn end" type="submit" value="Públicar"/>
             {{ form.media }}
           </form>
         </div>

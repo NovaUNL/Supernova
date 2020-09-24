@@ -265,7 +265,7 @@ class ScheduleCreation(Activity):
 
     @property
     def link_to(self):
-        return reverse('groups:announcement', args=[self.group.abbreviation, self.id])
+        return None
 
 
 class ScheduleSuspension(Activity):

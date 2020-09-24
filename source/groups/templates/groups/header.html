@@ -1,0 +1,34 @@
+{% load static %}
+
+{% block head %}
+  <style>
+    {% if  group.image %}
+        .header-decorator:after {
+            background-image: url("{{ group.image.url}}");
+            background-size: contain;
+            background-position: right;
+        }
+    {% endif %}
+  </style>
+{% endblock %}
+
+<div class="header-decorator">
+  <div class="header-decorator-options">
+    <ul>
+      {% if not user.is_anonymous %}
+        <li><a id="subscribe-btn" href="javascript: void(0)" data-endpoint="{% url 'api:group_subscription' group.abbreviation %}"></a></li>
+        {% if not is_member and group.outsiders_openness <= group.CLOSED %}
+          <li><a href="{% url 'groups:membership_req' group.abbreviation %}">Solicitar admissão</a></li>
+        {% endif %}
+      {% endif %}
+    </ul>
+  </div>
+  <div>
+    <h1>{{ group.name }}</h1>
+    {% if not group.official %}
+      <span style="float: right">(<img src="{% static 'img/icons/warning.svg' %}" height="16px"> Não oficial)</span>
+    {% endif %}
+    <h3>@{{ group.abbreviation }}</h3>
+  </div>
+</div>
+<script>setSubscribeButton();</script>

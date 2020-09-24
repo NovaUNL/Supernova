@@ -1,127 +1,80 @@
-{% extends 'supernova/base.html' %}
+{% extends 'groups/base.html' %}
 
 {% load static %}
 {% load misc %}
 
 {% block head %}
-  <style>
-    {% if  group.image %}
-        .header-decorator:after {
-            background-image: url("{{ group.image.url}}");
-            background-size: contain;
-            background-position: right;
-        }
-    {% endif %}
-  </style>
+  {{ block.super }}
   <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.css"/>
   <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock %}
 
-{% block content_wrapper %}
-  {% csrf_token %}
-  <div class="col">
-    <div class="header-decorator">
-      <div class="header-decorator-options">
-        <ul>
-          {% if not user.is_anonymous %}
-            <li><a id="subscribe-btn" href="javascript: void(0)" data-endpoint="{% url 'api:group_subscription' group.abbreviation %}"></a></li>
-            {% if not is_member and group.outsiders_openness <= group.CLOSED %}
-              <li><a href="{% url 'groups:membership_req' group.abbreviation %}">Solicitar admissão</a></li>
-            {% endif %}
-          {% endif %}
-        </ul>
-      </div>
-      <div>
-        <h1>{{ group.name }}</h1>
-        {% if not group.official %}
-          <span style="float: right">(<img src="{% static 'img/icons/warning.svg' %}" height="16px"> Não oficial)</span>
-        {% endif %}
-        <h3>@{{ group.abbreviation }}</h3>
-      </div>
+{% block group_content %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Sobre</h2></div>
+    <div class="pane-content">
+      {% if group.description %}
+        <p>{{ group.description_html | safe }}</p>
+      {% else %}
+        <span>Sem informação</span>
+      {% endif %}
     </div>
-    <div class="row nowrap padded">
-      <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Quem somos</h2></div>
-          <div class="pane-content" style="flex-basis: 100px; flex-shrink: 100">
-            <p>{{ group.description_html | safe }}</p>
-          </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Atividade</h2></div>
-          <div class="pane-content">
-            {% if not activities.exists %}
-              Este grupo é tímido. Nunca participou... :(
+  </div>
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Atividade</h2></div>
+    <div class="pane-content">
+      {% if not activities.exists %}
+        Este grupo é tímido. Nunca participou... :(
+      {% endif %}
+      <ul>
+        {% for activity in activities %}
+          <li>
+            {{ activity.datetime|date:'Y/m/d H:i' }}:
+            {% with activity.link_to as link %}
+              {% if link %}
+                <a href="{{ link }}">{{ activity }}</a>
+              {% else %}
+                {{ activity }}
+              {% endif %}
+            {% endwith %}
+            <span class="ui-tag {{ activity | class_name | lower }}"></span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Agenda</h2></div>
+    <div class="pane-content">
+      <div id="calendar"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block group_sidebar %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Informação</h2></div>
+    <div class="pane-content">
+      <h3>Admissão</h3>
+      <span class="indented">
+            {% if group.outsiders_openness <= group.CLOSED_PRIVATE %}
+              Por convite
+            {% elif group.outsiders_openness == group.OPEN %}
+              Aberto
+            {% else %}
+              A pedido
             {% endif %}
-            <ul>
-              {% for activity in activities %}
-                <li>
-                  {{ activity.datetime|date:'Y/m/d H:i' }}:
-                  {% with activity.link_to as link %}
-                    {% if link %}
-                      <a href="{{ link }}">{{ activity }}</a>
-                    {% else %}
-                      {{ activity }}
-                    {% endif %}
-                  {% endwith %}
-                  <span class="ui-tag {{ activity | class_name | lower }}"></span>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Agenda</h2></div>
-          <div class="pane-content">
-            <div id="calendar"></div>
-          </div>
-        </div>
-      </div>
-      <div class="col nogrow noshrink">
-        {% include 'groups/navigation.html' %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Sobre</h2></div>
-          <div class="pane-content">
-            <h3>Admissão</h3>
-            <span class="indented">
-              {% if group.outsiders_openness <= group.CLOSED_PRIVATE %}
-                Por convite
-              {% elif group.outsiders_openness == group.OPEN %}
-                <a>Entrar</a>
-              {% else %}
-                Por convite
-              {% endif %}
-            </span>
-            <h3>Localização</h3>
-            <span class="indented">
-              {% if group.location %}
-                {{ group.location }}
-              {% else %}
-                Sem localização associada
-              {% endif %}
-            </span>
-            <h3>Membros</h3>
-            <span class="indented">{{ group.members.count }} membros</span>
-          </div>
-        </div>
-        {% if is_member %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Ações</h2></div>
-            <div class="pane-content">
-              <ul class="menu">
-                {% if  membership_perms.can_announce %}
-                  <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>{% endif %}
-                {% if  membership_perms.can_modify_roles %}
-                  <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>{% endif %}
-                {% if  membership_perms.can_change_schedule %}
-                  <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
-                {% if  membership_perms.is_admin %}
-                  <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>{% endif %}
-              </ul>
-            </div>
-          </div>
-        {% endif %}
-      </div>
+          </span>
+      <h3>Localização</h3>
+      <span class="indented">
+            {% if group.location %}
+              {{ group.location }}
+            {% else %}
+              Sem localização associada
+            {% endif %}
+          </span>
+      <h3>Membros</h3>
+      <span class="indented">{{ group.members.count }} membros</span>
     </div>
   </div>
   <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.js"></script>
@@ -129,7 +82,6 @@
   <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
   <script src="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.js"></script>
   <script>
-      setSubscribeButton();
       let currentDate = new Date(Date.now());
       loadCalendar(
           '#calendar',

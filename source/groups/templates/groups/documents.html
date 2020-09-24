@@ -1,68 +1,19 @@
-{% extends 'supernova/content_navigation.html' %}
+{% extends 'groups/base.html' %}
 
-{% load static %}
-
-{% block content-top %}
-  <nav class="">
-  {% if page == 'group' %}
-    <a class="menu-entry selected">Página inícial</a>
-  {% else %}
-    <a class="menu-entry" href="{% url 'groups:group' group.id %}">Página inícial</a>
-  {% endif %}
-    {% if page == 'group_anouncements' %}
-      <a class="menu-entry selected">Anúncios</a>
-    {% else %}
-      <a class="menu-entry" href="{% url 'groups:announcements' group.id %}">Anúncios</a>
-    {% endif %}
-    {#{% if page == 'group_schedule' %}#}
-    {#    <a class="menu-entry selected">Horário</a>#}
-    {#{% else %}#}
-    {#    <a class="menu-entry">Horário</a>#}
-    {#{% endif %}#}
-    {#{% if page == 'group_calendar' %}#}
-    {#    <a class="menu-entry selected">Calendário</a>#}
-    {#{% else %}#}
-    {#    <a class="menu-entry">Calendário</a>#}
-    {#{% endif %}#}
-    {% if page == 'group_documents' %}
-      <a class="menu-entry selected">Documentos</a>
-    {% elif group.document_set.count > 0 %}
-      <a class="menu-entry" href="{% url 'groups:documents' group.id %}">Documentos</a>
-    {% endif %}
-    {% if group.public_members %}
-      {% if page == 'groups:members' %}
-        <a class="menu-entry selected">Membros</a>
-      {% else %}
-        <a class="menu-entry">Membros</a>
-      {% endif %}
-    {% endif %}
-    {% if page == 'group_contact' %}
-      <a class="menu-entry selected">Contactar</a>
-    {% else %}
-      <a class="menu-entry" href="{% url 'groups:contact' group.id %}">Contactar</a>
-    {% endif %}
-  </nav>
-{% endblock %}
-
-{% block content %}
-    <style>
-        .flex-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-        }
-    </style>
-    <h1 style="display: inline-block">Documentos de {{ group.name }}</h1>
-    {% include 'groups/header.html' %}
-    <div class="flex-wrapper">
-        {% for document in documents %}
-            <div style="width: 100%">
-                <h2><a href="{% url 'document' document.id %}">{{ document.title }}</a></h2>
-                <span>Criado em {{ document.creation }} {% if document.author_user %}por
-                    <a href="{% url 'users:profile' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
-                    {% if document.last_edition %}<br>Última edição em {{ document.last_edition }} por
-                        {{ document.last_editor }}{% endif %}</span>
-            </div>
-        {% endfor %}
+{% block group_content %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Ficheiros</h2></div>
+    <div class="pane-content">
+      {% for document in documents %}
+        <div>
+          <h2><a href="{% url 'document' document.id %}">{{ document.title }}</a></h2>
+          <span>Criado em {{ document.creation }} {% if document.author_user %}por
+            <a href="{% url 'users:profile' document.author_user.nickname %}">{{ document.author_user }}</a> {% endif %}
+            {% if document.last_edition %}<br>Última edição em {{ document.last_edition }} por
+              {{ document.last_editor }}{% endif %}</span>
+        </div>
+      {% endfor %}
+      {% if documents|length == 0 %}<span>Sem ficheiros partilhados</span>{% endif %}
     </div>
+  </div>
 {% endblock %}
