@@ -267,6 +267,9 @@ def user_profile_settings_view(request, nickname):
                 profile_user = settings_form.save()
                 if 'new_password' in settings_form:
                     profile_user.set_password(settings_form.cleaned_data['new_password'])
+                    # Prevent logout locally
+                    if profile_user == request.user:
+                        login(request, profile_user)
                 return HttpResponseRedirect(reverse('users:profile', args=[profile_user.nickname]))
             else:
                 context['settings_form'] = settings_form
