@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db.models import Q, F, Count
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 
 import settings
 from scrapper.boinc import boincstats
@@ -71,6 +72,9 @@ def changelog_view(request):
 
 
 def build_base_context(request):
+    if not request.user.is_anonymous:
+        request.user.last_activity = timezone.now()
+        request.user.save(update_fields=['last_activity'])
     catchphrases = cache.get('catchphrases')
     if catchphrases is None:
         catchphrases = list(Catchphrase.objects.all())
