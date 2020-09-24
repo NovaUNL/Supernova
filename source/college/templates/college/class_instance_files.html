@@ -24,9 +24,9 @@
           <div class="pane-content">
             <div class="file-list">
               {% for ifile in instance_files %}
-                <div class="file">
+                <div class="file" data-mime="{{ ifile.file.mime }}">
                   <div class="file-body">
-                    <h4><a>{{ ifile.name }}</a></h4>
+                    <h4><a href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">{{ ifile.name }}</a></h4>
                     <span>
                       ({% if ifile.file.size < 1024 %}{{ ifile.file.size }} Bytes
                        {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
@@ -44,13 +44,9 @@
                     <div class="preview"></div>
                     <span class="clearfix"></span>
                   </div>
-                  <div class="actions">
+                  <div class="actions highres">
                     {% if ifile.file.can_preview %}
-                      <a class="viewlink highres"
-                         onclick='showFilePreview(
-                             this,
-                             "{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}",
-                             "{{ ifile.file.mime }}");'>
+                      <a class="viewlink" href="javascript:void(0)" onclick='showFilePreview(this);'>
                         <span></span>
                       </a>
                     {% endif %}

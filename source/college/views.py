@@ -253,8 +253,10 @@ def class_instance_file_download(request, instance_id, file_hash):
         class_instance__id=instance_id,
         file__hash=file_hash)
     response = HttpResponse()
+    response['Content-Type'] = class_file.file.mime
     response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
-    response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
+    if 'inline' not in request.GET:
+        response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
     return response
 
 

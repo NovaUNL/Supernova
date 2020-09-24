@@ -209,8 +209,12 @@ function loadTheme(promptIfUnset) {
     }
 }
 
-function showFilePreview(elem, src, mime) {
-    let previewElem = elem.parentNode.parentNode.querySelector(".preview");
+function showFilePreview(elem) {
+    let fileElem = elem.closest('.file');
+    let dlElem = fileElem.querySelector('.dllink')
+    let previewElem = fileElem.querySelector('.preview')
+    const mime = fileElem.dataset.mime;
+    const src = dlElem.href + "?inline";
     delChildren(previewElem);
     let container;
     switch (mime.split('/')[0]) {
@@ -219,9 +223,9 @@ function showFilePreview(elem, src, mime) {
             break;
         case "application":
             if (mime === "application/pdf") {
-                container = document.createElement("embed");
-                container.src = src;
-                container.type = mime;
+                container = document.createElement("object");
+                container.data = src;
+                container.mime = mime;
             }
             break;
         case "image":
@@ -238,7 +242,7 @@ function showFilePreview(elem, src, mime) {
             break;
     }
     previewElem.appendChild(container);
-    elem.style.display = "none";
+    elem.remove();
 }
 
 function setSubscribeButton() {
