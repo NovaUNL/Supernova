@@ -52,7 +52,7 @@ def user_schedule(_, nickname, from_date, to_date):
     schedule_entries = []
 
     append_turn_instances(schedule_entries, turn_instances, weekday_occurrences)
-    user_groups = user.memberships.all()
+    user_groups = user.groups_custom.all()
     once_schedule_entries = groups.ScheduleOnce.objects.filter(group__in=user_groups)
     periodic_schedule_entries = groups.SchedulePeriodic.objects.filter(group__in=user_groups)
     append_schedule_entries(schedule_entries, once_schedule_entries)
