@@ -177,11 +177,18 @@ def profile_view(request, nickname):
         primary_students, context['secondary_students'] = get_students(profile_user)
         context['primary_students'] = primary_students
 
-        context['current_class_instances'] = college.ClassInstance.objects \
-            .select_related('parent') \
+        context['current_class_instances'] = current_class_instances = college.ClassInstance.objects \
+            .select_related('parent')\
+            .order_by('parent__name') \
             .filter(student__in=primary_students,
                     year=settings.COLLEGE_YEAR,
                     period=settings.COLLEGE_PERIOD)
+
+        context['past_classes'] = college.Class.objects \
+            .filter(instances__enrollments__student__in=primary_students) \
+            .exclude(instances__in=current_class_instances) \
+            .order_by('name') \
+            .distinct('name')
 
         if permissions['schedule_visibility']:
             turn_instances = college.TurnInstance.objects \
@@ -193,7 +200,7 @@ def profile_view(request, nickname):
             context['weekday_spans'], context['schedule'], context['unsortable'] = \
                 schedules.build_schedule(turn_instances)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
-    cache.set(f'profile_{nickname}_{0}_context', context, timeout=600)
+    cache.set(f'profile_{nickname}_{permissions["checksum"]}_context', context, timeout=600)
     return render(request, 'users/profile.html', context)
 
 

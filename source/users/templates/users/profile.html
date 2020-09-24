@@ -24,7 +24,7 @@
         {{ profile_user.get_full_name }}
       </h1>
     </div>
-    <div class="row padded">
+    <div class="row padded nowrap">
       <div class="col nogrow" style="flex-basis: 400px">
         {% if permissions.info_visibility %}
           <div class="flex-pane">
@@ -114,31 +114,51 @@
           </div>
         {% endif %}
       </div>
-      <div class="col big">
-        {% if permissions.enrollments_visibility and current_class_instances.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Inscrições</h2>
-            </div>
-            <div class="pane-content">
-              <ul class="menu">
-                {% for instance in current_class_instances %}
-                  <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
-                {% endfor %}
-              </ul>
-            </div>
+      <div class="col">
+        <div class="row">
+          <div class="col">
+            {% if permissions.schedule_visibility and schedule %}
+              <div class="flex-pane">
+                <div class="pane-title bg-grad">
+                  <h2>Horário</h2>
+                </div>
+                <div class="pane-content">
+                  {% include 'college/schedule.html' %}
+                </div>
+              </div>
+            {% endif %}
           </div>
-        {% endif %}
-        {% if permissions.schedule_visibility and schedule %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Horário</h2>
-            </div>
-            <div class="pane-content">
-              {% include 'college/schedule.html' %}
-            </div>
+          <div class="col" style="flex-basis: 350px">
+            {% if permissions.enrollments_visibility and current_class_instances.exists %}
+              <div class="flex-pane">
+                <div class="pane-title bg-grad">
+                  <h2>Inscrições atuais</h2>
+                </div>
+                <div class="pane-content">
+                  <ul class="menu">
+                    {% for instance in current_class_instances %}
+                      <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            {% endif %}
+            {% if permissions.enrollments_visibility and past_classes.exists %}
+              <div class="flex-pane">
+                <div class="pane-title bg-grad">
+                  <h2>Inscrições prévias</h2>
+                </div>
+                <div class="pane-content">
+                  <ul class="menu">
+                    {% for class in past_classes %}
+                      <li><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            {% endif %}
           </div>
-        {% endif %}
+        </div>
       </div>
     </div>
   </div>
