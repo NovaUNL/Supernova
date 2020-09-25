@@ -61,6 +61,7 @@ class User(AbstractUser):
     is_student = djm.BooleanField(default=False)
     is_teacher = djm.BooleanField(default=False)
     course = djm.ForeignKey(Course, on_delete=djm.CASCADE, null=True, blank=True, default=None)
+    points = djm.IntegerField(default=0)
 
     class Meta:
         permissions = [('full_student_access', 'Can browse the system as if it was the university one')]

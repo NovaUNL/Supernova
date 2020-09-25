@@ -488,4 +488,46 @@
       display: block
 
   .tags span
-      margin-bottom: 5px
+    margin-bottom: 5px
+
+
+#milestones
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+
+  .milestone
+    display: flex
+    flex-wrap: nowrap
+    justify-content: flex-start
+
+    .circle
+      border: 4px solid var(--primary2)
+      border-radius: 64px
+      width: 128px
+      height: 128px
+      background-position: center
+      background-size: cover !important
+
+      &.done
+        border-color: var(--green)
+
+  .info
+    padding-left: 20px
+
+  .unlock-list
+    list-style: disclosure-closed
+    margin: 0
+    padding-left: 20px
+
+  .link
+    margin-left: 64px
+    width: 3px
+    height: 50px
+    border: 2px solid var(--primary2)
+    background-color: var(--primary1)
+    border-top: 0
+    border-bottom: 0
+
+    &.done
+      background-color: var(--green)

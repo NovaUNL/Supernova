@@ -1,0 +1,173 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+{% load flatpages %}
+
+{% block head %}
+  <script>MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col profile">
+    <div class="header-decorator">
+      <h1>
+        {% if profile_user.picture %}
+          <img src="{% get_media_prefix %}{{ profile_user.picture }}">
+        {% else %}
+          <img src="{% static 'img/user.svg' %}">
+        {% endif %}
+        {{ profile_user.get_full_name }}
+      </h1>
+    </div>
+    <div class="row padded nowrap">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"></div>
+          <div id="milestones" class="pane-content">
+            <div class="milestone">
+              <div class="circle done" style="background: url('{% static 'img/icons/chick.svg' %}')"></div>
+              <div class="info">
+                <h3>Novato</h3>
+                <ul class="unlock-list">
+                  <li>Responde ás <a href="{% url 'learning:questions' %}">duvidas</a> dos restantes para progredires.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="link done"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 7 %} done{% endif %}" style="background: url('{% static 'img/icons/question.svg' %}')"></div>
+              <div class="info">
+                <h3>Curioso, $\pi$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Coloca as tuas dúvidas aos restantes.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="link{% if profile_user.points >= 7 %} done{% endif %}"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 255 %} done{% endif %}" style="background: url('{% static 'img/icons/pencil.svg' %}')"></div>
+              <div class="info">
+                <h3>Estudioso, $0\text{xFF}$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Partilha os exercícios que fizeres.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="link{% if profile_user.points >= 255 %} done{% endif %}"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 1024 %} done{% endif %}" style="background: url('{% static 'img/icons/add-circle.svg' %}')"></div>
+              <div class="info">
+                <h3>Embaixador, $2_2^{10}$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Traz os teus amigos para o Supernova.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="link{% if profile_user.points >= 1024 %} done{% endif %}"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 5730 %} done{% endif %}" style="background: url('{% static 'img/icons/books.svg' %}')"></div>
+              <div class="info">
+                <h3>Sábio, $t_{1/2}({}^{14}\text{C})$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Amplia o catálogo de conhecimento.</li>
+                  <ul>
+                    <li>Escreve as tuas sínteses.</li>
+                    <li>Anexa ficheiros ás unidades curriculares.</li>
+                  </ul>
+                  <li>Podes agora editar conteúdo.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="link{% if profile_user.points >= 5730 %} done{% endif %}"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 10000000 %} done{% endif %}" style="background: url('{% static 'img/icons/hammer-wrench.svg' %}')"></div>
+              <div class="info">
+                <h3>Fiscal, $10^7$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Podes corrigir informações erradas nos dados académicos.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="link{% if profile_user.points >= 10000000 %} done{% endif %}"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 149587871 %} done{% endif %}" style="background: url('{% static 'img/icons/collaboration.svg' %}')"></div>
+              <div class="info">
+                <h3>Representante, $1,49597871 \cdot 10^8$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Cria a tua própria comunidade no Supernova.</li>
+                  <ul>
+                    <li>Tua temática.</li>
+                    <li>Tuas regras.</li>
+                  </ul>
+                </ul>
+              </div>
+            </div>
+            <div class="link{% if profile_user.points >= 149587871 %} done{% endif %}"></div>
+            <div class="milestone">
+              <div class="circle{% if profile_user.points >= 299792458 %} done{% endif %}" style="background: url('{% static 'img/badges/galaxy1.webp' %}')"></div>
+              <div class="info">
+                <h3>Hipergigante, $299.792.458$ pontos</h3>
+                <ul class="unlock-list">
+                  <li>Estás por entre as mais luminosas estrelas.</li>
+                  <li>A tua supernova é como nunca antes vista.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col nogrow noshrink">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Reputação</h2></div>
+          <div class="pane-content">
+            <h3 style="text-align: center">{{ profile_user.points }} pontos</h3>
+            <table class="info-table stylized grow">
+              <tr>
+                <th>Questões colocadas</th>
+                <td>{{ question_count }}</td>
+              </tr>
+              <tr>
+                <th>Respostas Submetidas</th>
+                <td>{{ answer_count }}</td>
+              </tr>
+              <tr>
+                <th>Respostas Aceites</th>
+                <td>{{ accepted_answer_percentage }}%</td>
+              </tr>
+              <tr>
+                <th>Secções submetidas</th>
+                <td>{{ edited_section_count }}</td>
+              </tr>
+              <tr>
+                <th>Exercícios submetidos</th>
+                <td>{{ exercise_count }}</td>
+              </tr>
+              <tr>
+                <th>Secções submetidas</th>
+                <td>{{ edited_section_count }}</td>
+              </tr>
+              <tr>
+                <th>Edições</th>
+                <td>0</td>
+              </tr>
+              <tr>
+                <th>Utilizadores convidados</th>
+                <td>{{ invited_count }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        {% get_flatpages '/points/' as points %}
+        {% if points.first %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Como ganho reputação?</h2></div>
+            <div class="pane-content">{{ points.first.content|safe }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

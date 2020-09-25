@@ -37,6 +37,7 @@
       {% url 'users:profile' user.nickname as profile %}
       {% url 'users:schedule' user.nickname as schedule %}
       {% url 'users:calendar' user.nickname as calendar %}
+      {% url 'users:reputation' user.nickname as reputation %}
       {% url 'users:settings' user.nickname as settings %}
       {% if pcode|startswith:'u' %}
         <li>
@@ -47,6 +48,7 @@
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li><a class="disabled">Avaliações</a></li>
             <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
+            <li {% if pcode == 'u_reputation' %}class="active"{% endif %}><a href="{{ reputation }}">Reputação</a></li>
             <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
           </ul>
         </li>
@@ -59,6 +61,7 @@
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li><a class="disabled">Avaliações</a></li>
             <li><a href="{{ calendar }}">Calendário</a></li>
+            <li><a href="{{ reputation }}">Reputação</a></li>
             <li><a href="{{ settings }}">Definições</a></li>
           </ul>
         </li>

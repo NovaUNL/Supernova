@@ -14,7 +14,7 @@ from . import models as m, exceptions, forms, registrations
 from college import models as college
 from college import schedules
 from supernova.views import build_base_context
-from .utils import get_students
+from .utils import get_students, get_user_stats
 
 
 def login_view(request):
@@ -177,7 +177,7 @@ def profile_view(request, nickname):
         context['primary_students'] = primary_students
 
         context['current_class_instances'] = current_class_instances = college.ClassInstance.objects \
-            .select_related('parent')\
+            .select_related('parent') \
             .order_by('parent__name') \
             .filter(student__in=primary_students,
                     year=settings.COLLEGE_YEAR,
@@ -219,9 +219,6 @@ def user_schedule_view(request, nickname):
 
     context['pcode'] = "u_schedule"
     context['title'] = "Horário de " + nickname
-    context['sub_nav'] = [
-        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
-        {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
 
     turn_instances = college.TurnInstance.objects \
         .select_related('turn__class_instance__parent') \
@@ -230,6 +227,9 @@ def user_schedule_view(request, nickname):
                 turn__class_instance__year=settings.COLLEGE_YEAR,
                 turn__class_instance__period=settings.COLLEGE_PERIOD)
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
+    context['sub_nav'] = [
+        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
     return render(request, 'users/profile_schedule.html', context)
 
 
@@ -242,7 +242,27 @@ def user_calendar_view(request, nickname):
     context['profile_user'] = user
     context['pcode'] = "u_calendar"
     context['title'] = "Calendário de " + nickname
+    context['sub_nav'] = [
+        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Calendário", 'url': reverse('users:schedule', args=[nickname])}]
     return render(request, 'users/calendar.html', context)
+
+
+@login_required
+def user_reputation_view(request, nickname):
+    if request.user.nickname != nickname:
+        raise PermissionDenied()
+    profile_user = get_object_or_404(m.User.objects, nickname=nickname)
+
+    context = build_base_context(request)
+    context['pcode'] = "u_reputation"
+    context['title'] = f"Reputação de {profile_user.get_full_name()}"
+    stats = get_user_stats(profile_user)
+    context.update(stats)
+    context['profile_user'] = profile_user
+    context['sub_nav'] = [{'name': profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+                          {'name': 'Reputação', 'url': reverse('users:reputation', args=[nickname])}]
+    return render(request, 'users/reputation.html', context)
 
 
 @login_required
@@ -337,6 +357,7 @@ def notifications_view(request):
         .all()
     context['sub_nav'] = [{'name': 'Notificações', 'url': reverse('users:notifications')}]
     return render(request, 'users/notifications.html', context)
+
 
 class NicknameAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
