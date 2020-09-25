@@ -1,12 +1,17 @@
-from datetime import datetime
+from datetime import datetime, time
 from itertools import chain
 
 from django.core.cache import cache
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import make_aware
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 from polymorphic.models import PolymorphicModel
+
+import settings
+from college.choice_types import WEEKDAY_CHOICES
+from college.models import Course
 
 
 def user_profile_pic_path(user, filename):
@@ -55,6 +60,7 @@ class User(AbstractUser):
     # Cached fields
     is_student = djm.BooleanField(default=False)
     is_teacher = djm.BooleanField(default=False)
+    course = djm.ForeignKey(Course, on_delete=djm.CASCADE, null=True, blank=True, default=None)
 
     class Meta:
         permissions = [('full_student_access', 'Can browse the system as if it was the university one')]
