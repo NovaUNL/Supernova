@@ -13,6 +13,7 @@ import settings
 from college.choice_types import Degree, RoomType
 from college import models as m
 from college import schedules
+from college.utils import get_transportation_departures
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.views import build_base_context
 
@@ -44,6 +45,7 @@ def transportation_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_campus_tranportation"
     context['title'] = "Transportes para o campus"
+    context['departures'] = get_transportation_departures()
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},

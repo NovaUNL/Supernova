@@ -12,8 +12,14 @@
     <div class="col">
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Próximas partidas</h2></div>
-        <div class="pane-content">
-          Por fazer.
+        <div id="transportation-widget" class="pane-content">
+          {% for departure in departures %}
+            <div class="pt-line {% if departure.name == "3" %}metro{% else %}bus{% endif %}">
+              <span class="number">{{ departure.name }}</span>
+              <span class="time">{{ departure.time }}</span>
+              <span class="direction">{{ departure.destination }}</span>
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>
