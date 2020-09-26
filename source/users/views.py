@@ -10,11 +10,13 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 import settings
-from . import models as m, exceptions, forms, registrations
+from users import models as m
+from users import forms as f
+from users import registrations, exceptions
 from college import models as college
 from college import schedules
 from supernova.views import build_base_context
-from .utils import get_students, get_user_stats
+from .utils import get_students, get_user_stats, calculate_points
 
 
 def login_view(request):
@@ -25,7 +27,7 @@ def login_view(request):
         return HttpResponseRedirect(reverse('users:profile', args=[request.user]))
 
     if request.method == 'POST':
-        form = forms.LoginForm(data=request.POST)
+        form = f.LoginForm(data=request.POST)
         if form.is_valid():
             user: m.User = form.get_user()
             login(request, user)
@@ -39,7 +41,7 @@ def login_view(request):
         else:
             context['login_form'] = form
     else:
-        context['login_form'] = forms.LoginForm()
+        context['login_form'] = f.LoginForm()
     return render(request, 'users/login.html', context)
 
 
@@ -60,7 +62,7 @@ def registration_view(request):
     context['enabled'] = settings.REGISTRATIONS_ENABLED
     if request.method == 'POST':
         # This is a registration request, validate it
-        form = forms.RegistrationForm(data=request.POST)
+        form = f.RegistrationForm(data=request.POST)
         valid = form.is_valid()
         if valid:
             registration = form.save(commit=False)
@@ -87,7 +89,7 @@ def registration_view(request):
         if 't' in request.GET:
             # If an invite token is in the querystring, populate the form with it
             invite_token = request.GET['t']
-            form = forms.RegistrationForm(initial={'invite': invite_token})
+            form = f.RegistrationForm(initial={'invite': invite_token})
             # But warn if the invite token is not valid
             invites = m.Invite.objects.filter(token=invite_token)
             if invites.exists():
@@ -99,7 +101,7 @@ def registration_view(request):
             else:
                 context['invite_unknown'] = True
         else:
-            form = forms.RegistrationForm()
+            form = f.RegistrationForm()
         context['creation_form'] = form
     return render(request, 'users/registration.html', context)
 
@@ -118,14 +120,14 @@ def registration_validation_view(request):
         data = None
 
     if data is None:
-        form = forms.RegistrationValidationForm()
+        form = f.RegistrationValidationForm()
     else:
         if 'token' in data and 'email' in data:
             registration = m.Registration.objects \
                 .order_by('creation') \
                 .filter(email=data['email'], token=data['token']) \
                 .first()
-            form = forms.RegistrationValidationForm(instance=registration, data=data)
+            form = f.RegistrationValidationForm(instance=registration, data=data)
             if form.is_valid():
                 try:
                     user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
@@ -143,7 +145,7 @@ def registration_validation_view(request):
                 except exceptions.InvalidToken as e:
                     form.add_error(None, str(e))
         else:
-            form = forms.RegistrationValidationForm(data=data)
+            form = f.RegistrationValidationForm(data=data)
             form.is_valid()  # Trigger the cleanup
 
     context['form'] = form
@@ -195,7 +197,8 @@ def profile_view(request, nickname):
                 .prefetch_related('room__building') \
                 .filter(turn__student__in=primary_students,
                         turn__class_instance__year=settings.COLLEGE_YEAR,
-                        turn__class_instance__period=settings.COLLEGE_PERIOD)
+                        turn__class_instance__period=settings.COLLEGE_PERIOD) \
+                .exclude(disappeared=True)
             context['weekday_spans'], context['schedule'], context['unsortable'] = \
                 schedules.build_schedule(turn_instances)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
@@ -209,33 +212,36 @@ def user_schedule_view(request, nickname):
         raise PermissionDenied()
     context = build_base_context(request)
     if nickname == request.user.nickname:
-        user = request.user
+        profile_user = request.user
     else:
-        user = get_object_or_404(m.User.objects.prefetch_related('students'), nickname=nickname)
+        profile_user = get_object_or_404(m.User.objects.prefetch_related('students'), nickname=nickname)
 
-    primary_students, _ = get_students(user)
+    primary_students, _ = get_students(profile_user)
     if len(primary_students) == 0:
         return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
 
     context['pcode'] = "u_schedule"
-    context['title'] = "Horário de " + nickname
+    context['title'] = "Horário de " + profile_user.get_full_name()
+    context['profile_user'] = profile_user
 
     turn_instances = college.TurnInstance.objects \
         .select_related('turn__class_instance__parent') \
         .prefetch_related('room__building') \
         .filter(turn__student__in=primary_students,
                 turn__class_instance__year=settings.COLLEGE_YEAR,
-                turn__class_instance__period=settings.COLLEGE_PERIOD)
+                turn__class_instance__period=settings.COLLEGE_PERIOD) \
+        .exclude(disappeared=True)
+
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
     context['sub_nav'] = [
-        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
     return render(request, 'users/profile_schedule.html', context)
 
 
 @login_required
 def user_calendar_view(request, nickname):
-    if request.user.nickname != nickname and not request.user.is_staff:
+    if request.user.nickname != nickname:
         raise PermissionDenied()
     context = build_base_context(request)
     user = get_object_or_404(m.User.objects, nickname=nickname)
@@ -244,8 +250,55 @@ def user_calendar_view(request, nickname):
     context['title'] = "Calendário de " + nickname
     context['sub_nav'] = [
         {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
-        {'name': "Calendário", 'url': reverse('users:schedule', args=[nickname])}]
+        {'name': "Calendário", 'url': reverse('users:calendar', args=[nickname])}]
     return render(request, 'users/calendar.html', context)
+
+
+@login_required
+def user_calendar_management_view(request, nickname):
+    if request.user.nickname != nickname:
+        raise PermissionDenied()
+    context = build_base_context(request)
+    profile_user = get_object_or_404(m.User.objects, nickname=nickname)
+    context['profile_user'] = profile_user
+    context['pcode'] = "u_calendar_manage"
+    context['title'] = "Gerir calendário"
+
+    once_schedule_entries = m.ScheduleOnce.objects.filter(user=profile_user)
+    periodic_schedule_entries = m.SchedulePeriodic.objects.filter(user=profile_user)
+    context['once_entries'] = once_schedule_entries
+    context['periodic_entries'] = periodic_schedule_entries
+
+    # Show empty forms by default
+    once_form = f.ScheduleOnceForm()
+    periodic_form = f.SchedulePeriodicForm()
+    if 'type' in request.GET:
+        rtype = request.GET['type']
+        if rtype == "periodic" and request.method == 'POST':
+            filled_form = f.SchedulePeriodicForm(request.POST)
+            if filled_form.is_valid():
+                entry = filled_form.save(commit=False)
+                entry.user = profile_user
+                entry.save()
+            else:
+                periodic_form = filled_form  # Replace empty form with filled form with form filled with errors
+        elif rtype == "once" and request.method == 'POST':
+            filled_form = f.ScheduleOnceForm(request.POST)
+            if filled_form.is_valid():
+                entry = filled_form.save(commit=False)
+                entry.user = profile_user
+                entry.save()
+            else:
+                once_form = filled_form  # Replace empty form with form filled with errors
+
+    context['once_form'] = once_form
+    context['periodic_form'] = periodic_form
+
+    context['sub_nav'] = [
+        {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Calendário", 'url': reverse('users:calendar', args=[nickname])},
+        {'name': "Gerir", 'url': reverse('users:calendar_manage', args=[nickname])}]
+    return render(request, 'users/calendar_manage.html', context)
 
 
 @login_required
@@ -271,10 +324,10 @@ def user_profile_settings_view(request, nickname):
         raise PermissionDenied()
     profile_user = get_object_or_404(m.User, nickname=nickname)
     context = build_base_context(request)
-    context['settings_form'] = forms.AccountSettingsForm(instance=profile_user)
+    context['settings_form'] = f.AccountSettingsForm(instance=profile_user)
 
     if request.user.nickname != nickname and request.user.is_staff:
-        context['permissions_form'] = forms.AccountPermissionsForm(profile_user)
+        context['permissions_form'] = f.AccountPermissionsForm(profile_user)
 
     if request.method == 'POST':
         if 'permissions' in request.GET:
@@ -282,13 +335,13 @@ def user_profile_settings_view(request, nickname):
                 raise PermissionDenied("Only staff accounts can change user permissions.")
             if request.user == profile_user:
                 raise PermissionDenied("Changing own permissions is forbidden.")
-            permissions_form = forms.AccountPermissionsForm(profile_user, request.POST)
+            permissions_form = f.AccountPermissionsForm(profile_user, request.POST)
             context['permissions_form'] = permissions_form
             if permissions_form.is_valid():
                 permissions_form.save()
                 profile_user.refresh_from_db()  # Reload permissions
         else:
-            settings_form = forms.AccountSettingsForm(request.POST, request.FILES, instance=profile_user)
+            settings_form = f.AccountSettingsForm(request.POST, request.FILES, instance=profile_user)
             if settings_form.is_valid():
                 profile_user = settings_form.save()
                 if 'new_password' in settings_form:

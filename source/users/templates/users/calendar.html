@@ -8,13 +8,18 @@
 {% block content_wrapper %}
   <div class="col calendar">
     <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'users:calendar_manage' profile_user.nickname %}">Editar</a></li>
+        </ul>
+      </div>
       <div>
-        <h1>Calendário de {{ user.get_full_name }}</h1>
+        <h1>Calendário</h1>
         <div id="cal-ctls">
           <span id="cal-prev" class="ui-btn hid" onclick="calendarPrev();"></span>
           <span id="cal-range-label"></span>
           <span id="cal-next" class="ui-btn" onclick="calendarNext();"></span>
-          {#          <span class="ui-btn" onclick="calendar.today();">Hoje</span>#}
+          {# <span class="ui-btn" onclick="calendar.today();">Hoje</span>#}
         </div>
       </div>
     </div>

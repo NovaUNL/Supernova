@@ -53,6 +53,10 @@ def user_schedule(_, nickname, from_date, to_date):
 
     append_turn_instances(schedule_entries, turn_instances, weekday_occurrences)
     user_groups = user.groups_custom.all()
+    once_schedule_entries = users.ScheduleOnce.objects.filter(user=user)
+    periodic_schedule_entries = users.SchedulePeriodic.objects.filter(user=user)
+    append_schedule_entries(schedule_entries, once_schedule_entries)
+    append_periodic_schedule_entries_in_extension(schedule_entries, periodic_schedule_entries, weekday_occurrences)
     once_schedule_entries = groups.ScheduleOnce.objects.filter(group__in=user_groups)
     periodic_schedule_entries = groups.SchedulePeriodic.objects.filter(group__in=user_groups)
     append_schedule_entries(schedule_entries, once_schedule_entries)

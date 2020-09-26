@@ -1,12 +1,19 @@
 {% extends 'supernova/base.html' %}
 
+{% load static %}
+
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
-      <h1>Horário de {{ user.get_full_name }}</h1>
+      <h1>Horário</h1>
     </div>
     <div class="col padded">
-      {% include 'college/schedule.html' %}
+      <div class="flex-pane">
+        <div class="pane-content bg-grad"></div>
+        <div class="pane-content">
+          {% include 'college/schedule.html' %}
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

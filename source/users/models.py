@@ -313,3 +313,46 @@ class GenericNotification(Notification):
 
     def to_api(self):
         return {'id': self.id, 'message': self.message}
+
+
+class ScheduleEntry(PolymorphicModel):
+    """Base entry in this :py:class:`User` 's personal activity schedule."""
+    #: :py:class:`User` with this entry
+    user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='schedule_entries')
+    #: Title for the entry
+    title = djm.CharField(max_length=128)
+    #: (Optional) Textual information associated with the entry
+    note = djm.TextField(blank=True, null=True)
+    #: Whether the entry occurrence scheduling is cancelled
+    revoked = djm.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'schedule entries'
+
+
+class ScheduleOnce(ScheduleEntry):
+    """Represents a one-time entry in this :py:class:`Group` 's activity schedule."""
+    #: The date at which this event is set to happen
+    datetime = djm.DateTimeField()
+    #: The predicted duration of this event interval
+    duration = djm.IntegerField()
+
+    def __str__(self):
+        return f"{self.title}, dia {datetime.strftime(self.datetime, '%d/%m/%Y %H:%M')}"
+
+
+class SchedulePeriodic(ScheduleEntry):
+    """Represents a periodic entry in this group's activity schedule. This entry happens weekly."""
+    #: The weekday on which this event is set to happen
+    weekday = djm.IntegerField(choices=WEEKDAY_CHOICES)
+    #: The time at which the event occurs.
+    time = djm.TimeField()
+    #: The predicted duration of these recurring timeline
+    duration = djm.IntegerField()
+    #: The date on which this scheduling was defined to start
+    start_date = djm.DateField()
+    #: The date on which this scheduling lost its validity
+    end_date = djm.DateField(blank=True, null=True, default=None)
+
+    def __str__(self):
+        return f"{self.title}, {self.get_weekday_display()} ás {time.strftime(self.time, '%H:%M')}"

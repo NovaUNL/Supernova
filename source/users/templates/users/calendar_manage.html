@@ -1,25 +1,9 @@
 {% extends 'supernova/base.html' %}
 {% load static %}
-{% block head %}
-  <style>
-    {% if  group.image.url %}
-      .header-decorator:after {
-        background-image: url("{{ group.image.url}}");
-        background-size: contain;
-        background-position: right;
-      }
-    {% endif %}
-  </style>
-{% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <div>
-        <h1>Agenda de {{ group.name }}</h1>
-        <h3>@{{ group.abbreviation }}</h3>
-      </div>
-    </div>
+    <div class="header-decorator"><h1>Agenda</h1></div>
     <div class="col padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Agenda pontual</h2></div>
@@ -75,7 +59,7 @@
         <div class="flex-pane grow">
           <div class="pane-title bg-grad"><h2>Adicionar evento recorrente</h2></div>
           <div class="pane-content">
-            <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=periodic">
+            <form class="col" method="post" action="{% url 'users:calendar_manage' profile_user.nickname %}?type=periodic">
               {% csrf_token %}
               {{ periodic_form.errors }}
               <div class="form-block">
@@ -123,7 +107,7 @@
         <div class="flex-pane grow">
           <div class="pane-title bg-grad"><h2>Adicionar evento pontual</h2></div>
           <div class="pane-content">
-            <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=once">
+            <form class="col" method="post" action="{% url 'users:calendar_manage' profile_user.nickname %}?type=once">
               {% csrf_token %}
               {{ once_form.errors }}
               <div class="form-block">
