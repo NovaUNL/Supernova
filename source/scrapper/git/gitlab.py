@@ -10,7 +10,7 @@ def get_repo_stars(user='claudiop', repo='Supernova'):
 
     response = requests.get(f"https://gitlab.com/{user}/{repo}")
     soup = bs4.BeautifulSoup(response.text, 'lxml')
-    elem = soup.find(class_="count", title='Starrer')
+    elem = soup.find(class_="count", title='Starrers')
     if elem is None:
         # For this to happen either the code is broken or GH is down.
         # Set the cache nonetheless to avoid sending pointless requests (once per page load)
