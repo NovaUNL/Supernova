@@ -12,6 +12,10 @@ from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
 app_name = 'supernova'
+handler400 = views.bad_request_view
+handler403 = views.permission_denied_view
+handler404 = views.page_not_found_view
+handler500 = views.error_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -56,6 +60,4 @@ urlpatterns = [
 
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
-    urlpatterns = [
-                      path('__debug__/', include(debug_toolbar.urls)),
-                  ] + urlpatterns
+    urlpatterns = [path('__debug__/', include(debug_toolbar.urls)), ] + urlpatterns

@@ -3,6 +3,7 @@ import random
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q, F, Count
 from django.shortcuts import render
 from django.urls import reverse
@@ -97,6 +98,36 @@ def management_view(request):
     context['changelog_form'] = changelog_form
     context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('management')}]
     return render(request, 'supernova/management.html', context)
+
+
+def bad_request_view(request, exception=None):
+    context = build_base_context(request)
+    context['title'] = context['msg_title'] = 'Mau pedido'
+    context['msg_content'] = 'Fez um pedido inválido.'
+    return render(request, "supernova/message.html", context, status=400)
+
+
+def permission_denied_view(request, exception=None):
+    context = build_base_context(request)
+    context['title'] = context['msg_title'] = 'Sem permissões'
+    context['msg_content'] = 'Não tem permissões para aceder a este conteúdo.'
+    return render(request, "supernova/message.html", context, status=403)
+
+
+def page_not_found_view(request, exception=None):
+    context = build_base_context(request)
+    context['title'] = context['msg_title'] = 'Não encontrado'
+    context['msg_content'] = 'O conteúdo solicitado não foi encontrado.'
+    return render(request, "supernova/message.html", context, status=404)
+
+
+def error_view(request, exception=None):
+    context = build_base_context(request)
+    context['title'] = context['msg_title'] = 'Erro'
+    context['msg_content'] = '''<p>Houve um erro a responder ao pedido.</p>
+    <p>Um exercito de estagiários mal pagos saberá deste erro,
+    todavia podes ajuda-los preenchendo um <a href="%s">relatório de bug</a>.</p>''' % settings.GITLAB_URL
+    return render(request, "supernova/message.html", context, status=500)
 
 
 def build_base_context(request):
