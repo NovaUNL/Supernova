@@ -6,6 +6,8 @@ from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
+from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from . import choice_types as ctypes
@@ -212,7 +214,7 @@ class Course(Importable):
     #: Abbreviation of the course name
     abbreviation = djm.CharField(max_length=128, null=True, blank=True)
     #: Description of the course
-    description = djm.TextField(max_length=4096, null=True, blank=True)
+    description = MarkdownxField(null=True, blank=True)
     #: Conferred degree
     degree = djm.IntegerField(choices=ctypes.Degree.CHOICES)
     #: Whether the course is actively happening
@@ -227,6 +229,10 @@ class Course(Importable):
 
     def __str__(self):
         return f'{ctypes.Degree.name(self.degree)} em {self.name}'
+
+    @property
+    def description_html(self):
+        return markdownify(self.description)
 
 
 class Class(Importable):

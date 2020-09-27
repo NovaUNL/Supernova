@@ -1,19 +1,20 @@
 {% extends 'supernova/base.html' %}
+
 {% load static %}
+
 {% block head %}
   <style>
-    #info-div > h3 {
-      margin-left: 10px;
-    }
+      #info-div > h3 {
+          margin-left: 10px;
+      }
 
-    .info-entry {
-      margin-left: 20px;
-      display: block;
-      text-align: right;
-    }
+      .info-entry {
+          margin-left: 20px;
+          display: block;
+          text-align: right;
+      }
   </style>
 {% endblock %}
-
 
 {% block content_wrapper %}
   <div class="col">
@@ -34,14 +35,12 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Descrição</h2></div>
           <div class="pane-content">
-            <p>{{ course.description }}</p>
+            <p>{{ course.description_html | safe }}</p>
           </div>
         </div>
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Estrutura Curricular</h2></div>
-          <div class="pane-content">
-            <p>{{ course.description }}</p>
-          </div>
+          <div class="pane-content construction"></div>
         </div>
       </div>
       <div class="col nogrow noshrink">
@@ -49,10 +48,11 @@
           <div class="pane-title bg-grad"><h2>Navegação</h2></div>
           <div class="pane-content">
             <ul class="menu">
-              <li><a href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a></li>
+              <li><a class="disabled" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a>
+              </li>
               <li><a href="{% url 'college:course_students' course.id %}">Alunos</a></li>
-              <li><a href="{% url 'groups:group' 0 %}">Núcleo do curso</a></li>
-              <li><a href="{% url 'groups:group' 0 %}">Concelho pedagógico</a></li>
+              <li><a class="disabled">Núcleo do curso</a></li>
+              <li><a class="disabled">Concelho pedagógico</a></li>
             </ul>
           </div>
         </div>
@@ -65,14 +65,13 @@
             <span class="info-entry">{{ active_student_count }}</span>
             <h3>Novos alunos:</h3>
             <span class="info-entry">{{ new_students_count }}</span>
-            <h3>Média dos alunos:</h3>
-            <span class="info-entry">TODO</span>
-            <h3>Taxa de desistências:</h3>
-            <span class="info-entry">TODO</span>
+            {# <h3>Média dos alunos:</h3>#}
+            {# <span class="info-entry">TODO</span>#}
+            {# <h3>Taxa de desistências:</h3>#}
+            {# <span class="info-entry">TODO</span>#}
           </div>
         </div>
       </div>
     </div>
   </div>
 {% endblock %}
-
