@@ -10,7 +10,7 @@ from learning import forms as f
 from learning import views as v
 
 
-class SyncTest(TestCase):
+class LearningTest(TestCase):
     def setUp(self):
         self.privileged_user = users.User.objects.create(
             username='privileged',
@@ -31,6 +31,9 @@ class SyncTest(TestCase):
         self.area = m.Area.objects.create(title="Area")
         self.subarea = m.Subarea.objects.create(title="Subrea", area=self.area)
         self.section = m.Section.objects.create(title="Subsection")
+        self.class_ = college.Class.objects.create(name='Foo', department=college.Department.objects.create(name='Foo'))
+        m.ClassSection(corresponding_class=self.class_, section=self.section, index=0)
+        m.SectionSubsection(parent=self.section, section=self.section, index=0)
 
     def test_area_form(self):
         area_form_data = {'title': 'test_areas'}
@@ -148,6 +151,7 @@ class SyncTest(TestCase):
         self.assertEqual(initial_section_count + 2, m.Section.objects.count())
         section = m.Section.objects.get(title='Testing section creation 4')
         self.assertEqual(section.subarea, None)
+        self.assertTrue(self.section in section.parents.all())
         self.assertEqual(section.sources.count(), 0)
         self.assertEqual(section.resources.count(), 0)
 
@@ -182,6 +186,7 @@ class SyncTest(TestCase):
         self.assertEqual(initial_section_count + 4, m.Section.objects.count())
         section = m.Section.objects.get(title='Testing section creation 6')
         self.assertEqual(section.subarea, None)
+        self.assertTrue(self.section in section.parents.all())
         self.assertEqual(section.sources.count(), 1)
         self.assertEqual(section.sources.first().title, "Test 123")
         self.assertEqual(section.sources.first().url, "http://example.com")
