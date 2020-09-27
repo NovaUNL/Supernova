@@ -1,8 +1,22 @@
+from django.contrib.sitemaps import Sitemap
 from django.urls import path
 
-from . import views
+from news import views
+from news import models as m
 
 app_name = 'news'
+
+
+class NewsSitemap(Sitemap):
+    changefreq = "weekly"
+    priority = 0.6
+
+    def items(self):
+        return m.NewsItem.objects.filter()
+
+    def lastmod(self, obj):
+        return obj.edit_datetime if obj.edited else obj.datetime
+
 
 urlpatterns = [
     path('', views.index, name='index'),

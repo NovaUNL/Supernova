@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.db import models as djm
+from django.urls import reverse
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
@@ -38,12 +39,15 @@ class NewsItem(djm.Model):
     cover_img = djm.ImageField(null=True, blank=True, max_length=256, upload_to=news_item_picture)
     generated = djm.BooleanField(default=True)
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         unique_together = ['title', 'datetime']
         ordering = ['datetime', 'title']
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('news:item', args=[str(self.id)])
 
     @property
     def content_html(self):

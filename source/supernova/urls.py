@@ -1,13 +1,16 @@
 import debug_toolbar
 from django.conf.urls import url
 from django.conf.urls.static import static
-from django.contrib import admin
+from django.contrib import admin, sitemaps
 from django.contrib.flatpages import views as flatpages
-from django.urls import path, include
+from django.contrib.sitemaps import views as sitemaps_views
+from django.views.decorators.cache import cache_page
+from django.urls import path, include, reverse
 
 import users.views as users
 import feedback.views as feedback
 import documents.views as documents
+from news.urls import NewsSitemap
 from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
@@ -16,6 +19,23 @@ handler400 = views.bad_request_view
 handler403 = views.permission_denied_view
 handler404 = views.page_not_found_view
 handler500 = views.error_view
+
+
+class StaticViewSitemap(sitemaps.Sitemap):
+    priority = 0.5
+    changefreq = 'daily'
+
+    def items(self):
+        return ['index', 'about', 'privacy', 'faq', 'terms']
+
+    def location(self, item):
+        return reverse(item)
+
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'news': NewsSitemap,
+}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -56,6 +76,12 @@ urlpatterns = [
     path('privacidade/', flatpages.flatpage, {'url': '/privacidade/'}, name='privacy'),
     path('faq/', flatpages.flatpage, {'url': '/faq/'}, name='faq'),
     path('termos/', flatpages.flatpage, {'url': '/termos/'}, name='terms'),
+    path('sitemap.xml',
+         cache_page(86400)(sitemaps_views.index),
+         {'sitemaps': sitemaps}),
+    path('sitemap-<section>.xml',
+         cache_page(86400)(sitemaps_views.sitemap), {'sitemaps': sitemaps},
+         name='django.contrib.sitemaps.views.sitemap')
 ]
 
 if DEBUG:
