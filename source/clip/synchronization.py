@@ -2,6 +2,8 @@ import re
 from datetime import date, datetime
 import requests
 import logging
+
+from django.utils import timezone
 from django.utils.timezone import make_aware
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -35,7 +37,7 @@ def assert_buildings_inserted():
 door_number_exp = re.compile('(?P<floor>\d)\.?(?P<door_number>\d+)')
 
 
-def rooms():
+def sync_rooms():
     """
     Fetches the most recent available info about rooms.
     Creates missing rooms.
@@ -186,6 +188,31 @@ def _upstream_sync_class(upstream, external_id, department, recurse):
 
     try:
         obj = m.Class.objects.get(department=department, external_id=external_id)
+        if not obj.frozen:
+            changed = False
+            if upstream['name'] != obj.name:
+                logger.warning(f"Class {obj} name changed from {obj.name} to {upstream['name']}")
+                obj.name = upstream['name']
+                changed = True
+            if upstream['abbr'] != obj.abbreviation:
+                logger.warning(f"Class {obj} abbreviation changed from {obj.abbreviation} to {upstream['abbr']}")
+                obj.abbreviation = upstream['abbr']
+                changed = True
+            if upstream['ects'] != obj.credits:
+                logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
+                obj.credits = upstream['ects']
+                changed = True
+            if (dept_ext_id := upstream['dept']) != obj.department.external_id:
+                new_department = m.Department.objects.filter(external_id=dept_ext_id).first()
+                if new_department is None:
+                    logger.error(f"Class {obj} department changed from {obj.department} "
+                                 f"to an unknown department (id:{dept_ext_id}). Ignoring.")
+                else:
+                    logger.warning(f"Class {obj} department changed from {obj.department} to {new_department}")
+                    obj.department = new_department
+                    changed = True
+            if changed:
+                obj.save()
     except ObjectDoesNotExist:
         obj = m.Class.objects.create(
             name=upstream['name'],
@@ -197,32 +224,6 @@ def _upstream_sync_class(upstream, external_id, department, recurse):
             frozen=False,
             external_update=make_aware(datetime.now()))
         logger.info(f"Created class {obj}")
-
-    if not obj.frozen:
-        changed = False
-        if upstream['name'] != obj.name:
-            logger.warning(f"Class {obj} name changed from {obj.name} to {upstream['name']}")
-            obj.name = upstream['name']
-            changed = True
-        if upstream['abbr'] != obj.abbreviation:
-            logger.warning(f"Class {obj} abbreviation changed from {obj.abbreviation} to {upstream['abbr']}")
-            obj.abbreviation = upstream['abbr']
-            changed = True
-        if upstream['ects'] != obj.credits:
-            logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
-            obj.credits = upstream['ects']
-            changed = True
-        if (dept_ext_id := upstream['dept']) != obj.department.external_id:
-            new_department = m.Department.objects.filter(external_id=dept_ext_id).first()
-            if new_department is None:
-                logger.error(f"Class {obj} department changed from {obj.department} "
-                             f"to an unknown department (id:{dept_ext_id}). Ignoring.")
-            else:
-                logger.warning(f"Class {obj} department changed from {obj.department} to {new_department}")
-                obj.department = new_department
-                changed = True
-        if changed:
-            obj.save()
 
     # ---------  Related Instances ---------
     instances = obj.instances.exclude(external_id=None).all()
@@ -269,6 +270,27 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
 
     try:
         obj = m.ClassInstance.objects.get(parent=class_, external_id=external_id)
+        if not obj.frozen:
+            changed = False
+            if upstream['year'] != obj.year:
+                logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream['year']}")
+                # obj.year = upstream['year']
+                # changed = True
+
+            if upstream['period'] != obj.period:
+                logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream['period']}")
+                # obj.period = upstream['period']
+                # changed = True
+
+            if obj.information is None:
+                obj.information = {'upstream': upstream['info']}
+                changed = True
+            elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
+                obj.information['upstream'] = upstream['info']
+                changed = True
+
+            if changed:
+                obj.save()
     except ObjectDoesNotExist:
         obj = m.ClassInstance.objects.create(
             parent=class_,
@@ -277,30 +299,8 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
             external_id=external_id,
             information={'upstream': upstream['info']},
             frozen=False,
-            external_update=make_aware(datetime.now()))
+            external_update=timezone.now())
         logger.info(f"Class instance {obj} created")
-
-    if not obj.frozen:
-        changed = False
-        if upstream['year'] != obj.year:
-            logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream['year']}")
-            # obj.year = upstream['year']
-            # changed = True
-
-        if upstream['period'] != obj.period:
-            logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream['period']}")
-            # obj.period = upstream['period']
-            # changed = True
-
-        if obj.information is None:
-            obj.information = {'upstream': upstream['info']}
-            changed = True
-        elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
-            obj.information['upstream'] = upstream['info']
-            changed = True
-
-        if changed:
-            obj.save()
 
     # ---------  Related turns ---------
     turns = obj.turns.exclude(external_id=None).all()
@@ -314,7 +314,8 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
         for ext_id in new:
             sync_turn(ext_id, recurse=True, class_inst=obj)
 
-    m.Turn.objects.filter(external_id__in=mirrored). \
+    m.Turn.objects \
+        .filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
     m.Turn.objects.filter(external_id__in=disappeared).update(disappeared=True)
     disappeared = m.Turn.objects.filter(external_id__in=disappeared)
@@ -349,7 +350,7 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
     # _related(evaluations, upstream['evaluations'], sync_evaluation, m.ClassEvaluation, recurse, class_inst=obj)
 
 
-def sync_class_instance_files(external_id, class_inst=None):
+def sync_class_instance_files(external_id, class_inst):
     """
     Sync the file information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
@@ -488,8 +489,16 @@ def _request_turn_info(external_id):
 
 
 def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
-    if class_inst is None:
-        class_inst = m.ClassInstance.objects.get(external_id=upstream['class_instance_id'])
+    invalid = not all(
+        k in upstream
+        for k in ('type', 'number', 'class_instance_id', 'restrictions', 'state', 'instances', 'students', 'teachers'))
+    if invalid:
+        logger.error(f"Invalid upstream turn instance data: {upstream}")
+        return
+
+    if class_inst.external_id != upstream['class_instance_id']:
+        logger.critical("Consistency error. Turn upstream parent is not the local parent")
+        return
 
     type_abbr = upstream['type'].upper() if 'type' in upstream else None
     turn_type = None
@@ -498,10 +507,15 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
             turn_type = i
             break
     if turn_type is None:
-        logger.error("Unknown turn type: %s", abbr)
+        logger.error("Unknown turn type: %s" % type_abbr)
         return
+
+    upstream_details = {'state': upstream['state'], 'restrictions': upstream['restrictions']}
     try:
         obj = m.Turn.objects.get(class_instance=class_inst, external_id=external_id)
+        if not obj.frozen and obj.external_data != upstream_details:
+            obj.external_data = upstream_details
+            obj.save()
     except ObjectDoesNotExist:
         obj = m.Turn.objects.create(
             class_instance=class_inst,
@@ -509,12 +523,9 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
             number=upstream['number'],
             external_id=external_id,
             frozen=False,
-            external_update=make_aware(datetime.now()))
+            external_update=make_aware(datetime.now()),
+            external_data=upstream_details)
         logger.info(f"Turn {obj} created in {class_inst}")
-
-    # # ---------  Related ---------
-    # turn_instances = obj.instances.exclude(external_id=None).all()
-    # _related(turn_instances, upstream['instances'], sync_turn_instance, m.Turn, recurse, turn=obj)
 
     # ---------  Related turn instances ---------
     instances = obj.instances.exclude(external_id=None).all()
@@ -523,6 +534,7 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
 
     if m.TurnInstance.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some instances of turn {obj} belong to another turn: {new}")
+        return
 
     if recurse:
         for ext_id in new:
@@ -551,13 +563,16 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
             m.Teacher.objects.filter(external_id__in=new).values_list('id', flat=True)))
 
 
-def sync_turn_instance(external_id, turn=None):
+def sync_turn_instance(external_id, turn):
     """
     Sync the file information in an instance of a turn
     :param external_id: The foreign id of the turn instance that is being sync'd
     :param turn: The parent turn (optional)
     """
     upstream = _request_turn_instance(external_id)
+    if upstream is None:
+        logger.warning(f"Failed to sync turn instance {external_id} in turn {turn}")
+        return
     _upstream_sync_turn_instance(upstream, external_id, turn)
 
 
@@ -569,32 +584,83 @@ def _request_turn_instance(external_id):
 
 
 def _upstream_sync_turn_instance(upstream, external_id, turn):
-    if turn is None:
-        turn = m.Turn.objects.get(external_id=upstream['turn'])
+    if not all(k in upstream for k in ('turn', 'start', 'end', 'weekday', 'room')):
+        logger.error(f"Invalid upstream turn instance data: {upstream}")
+        return
+
+    if turn.external_id != upstream['turn']:
+        logger.critical("Consistency error. TurnInstance upstream parent is not the local parent")
+        return
+
+    upstream_room = None
+    if upstream['room'] is not None:
+        try:
+            upstream_room = m.Room.objects.get(external_id=upstream['room'])
+        except m.Room.DoesNotExist:
+            logger.warning(f"Room {upstream['room']} is missing (turn instance {external_id})")
+
+    upstream_start = upstream['start']
+    upstream_end = upstream['end']
+    upstream_weekday = upstream['weekday']
+    if not ((isinstance(upstream_start, int) or upstream_start is None)
+            and (isinstance(upstream_end, int) or upstream_end is None)
+            and (isinstance(upstream_weekday, int) or upstream_weekday is None)):
+        logger.error(f"Invalid upstream turn instance data: {upstream}")
+        return
+
+    upstream_duration = upstream_end - upstream_start \
+        if upstream_end is not None and upstream_start is not None \
+        else None
 
     try:
-        obj = m.TurnInstance.objects.get(turn=turn, external_id=external_id)
-    except ObjectDoesNotExist:
-        obj = m.TurnInstance.objects.create(
+        turn_instance = m.TurnInstance.objects.get(turn=turn, external_id=external_id)
+        changed = False
+        if upstream_start != turn_instance.start:
+            logger.warning(f"Turn instance {turn_instance} start changed "
+                           f"from {turn_instance.start} to {upstream_start}")
+            turn_instance.start = upstream_start
+            changed = True
+
+        if upstream_duration != turn_instance.duration:
+            if turn_instance.duration is not None:
+                logger.warning(f"Turn instance {turn_instance} duration changed "
+                               f"from {turn_instance.duration} to {upstream_duration}")
+            turn_instance.duration = upstream_duration
+            changed = True
+
+        if upstream_weekday != turn_instance.weekday:
+            logger.warning(f"Turn instance {turn_instance} weekday changed "
+                           f"from {turn_instance.weekday} to {upstream_weekday}")
+            turn_instance.weekday = upstream_weekday
+            changed = True
+
+        if upstream_room is None:
+            if turn_instance.room is not None:
+                logger.warning(f"Turn instance {turn_instance} is no longer in a room (was in {turn_instance.room})")
+                turn_instance.room = None
+                changed = True
+        else:
+            if turn_instance.room is None:
+                turn_instance.room = upstream_room
+                changed = True
+            elif turn_instance.room != upstream_room:
+                logger.warning(f"Turn instance {turn_instance} room changed "
+                               f"from {turn_instance.room.external_id} to {upstream['room']}")
+                turn_instance.room = upstream_room
+                changed = True
+        if changed:
+            turn_instance.save()
+    except m.TurnInstance.DoesNotExist:
+        turn_instance = m.TurnInstance.objects.create(
             turn=turn,
-            weekday=upstream['weekday'],
-            start=upstream['start'],
-            duration=upstream['end'] - upstream['start'],
-            room=m.Room.objects.get(external_id=upstream['room']),
+            weekday=upstream_weekday,
+            start=upstream_start,
+            duration=upstream_duration,
+            room=upstream_room,
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()))
-        logger.info(f"Turn instance {obj} created.")
-
-    if upstream['start'] != obj.start:
-        logger.warning(f"Turn instance {obj} start changed from {obj.start} to {upstream['start']}")
-    if upstream['end'] != obj.start + obj.duration:
-        logger.warning(
-            f"Turn instance {obj} duration changed from {obj.duration} to {upstream['end'] - upstream['start']}")
-    if upstream['weekday'] != obj.weekday:
-        logger.warning(f"Turn instance {obj} weekday changed from {obj.weekday} to {upstream['weekday']}")
-    if upstream['room'] != obj.room.external_id:
-        logger.warning(f"Turn instance {obj} room changed from {obj.room.external_id} to {upstream['room']}")
+        logger.info(f"Turn instance {turn_instance} created.")
 
 
 def sync_evaluation(external_id, class_inst=None):
@@ -635,25 +701,27 @@ def _upstream_sync_students(upstream_list):
             obj = existing[ext_id]
             changed = False
             if (upstream_iid := upstream['iid']) is not None:
-                if obj.iid is None:  # Setting unknown is okay
+                if obj.iid is None or obj.number:  # Setting unknown is okay
                     obj.iid = upstream_iid
+                    obj.number = upstream_iid
                     changed = True
                 elif obj.iid != str(upstream_iid):  # Changing known is not
                     logger.error(f"Student {obj} IID changed from {obj.iid} to {upstream_iid}")
+                    continue
             if (upstream_abbr := upstream['abbr']) is not None:
-                if obj.abbreviation is None:  # Setting unknown is okay
-                    obj.abbreviation = upstream_abbr
-                    changed = True
-                elif obj.abbreviation != upstream_abbr:  # Changing known is not
-                    logger.error(f"Student {obj} abbreviation changed from {obj.abbreviation} to {upstream_abbr}")
+                if obj.abbreviation != upstream_abbr:
+                    logger.warning(f'Student {obj} abbreviation change ignored '
+                                   f'("{obj.abbreviation}" to "{upstream_abbr}").')
+                obj.abbreviation = upstream_abbr
+                changed = True
             if (upstream_name := upstream['name']) is not None:
                 if obj.external_data is None:
                     obj.external_data = {'name': upstream_name}
                     changed = True
-                elif 'name' in obj.external_data:
-                    if obj.external_data['name'] != upstream_name:
-                        logger.error(f"Student {obj} name changed from {obj.name} to {upstream_name}")
                 else:
+                    if 'name' in obj.external_data and obj.external_data['name'] != upstream_name:
+                        logger.warning(
+                            f"Student {obj} name changed from {obj.external_data['name']} to {upstream_name}")
                     obj.external_data['name'] = upstream_name
                     changed = True
 
@@ -664,6 +732,7 @@ def _upstream_sync_students(upstream_list):
             obj = m.Student.objects.create(
                 abbreviation=upstream['abbr'],
                 iid=upstream['iid'],
+                number=upstream['iid'],
                 external_id=upstream['id'],
                 external_update=make_aware(datetime.now()),
                 external_data={'name': upstream['name']})
@@ -730,17 +799,20 @@ def calculate_active_classes():
         first_year = 9999
         last_year = 0
         max_enrollments = 0
+        changed = False
         for instance in class_.instances.all():
             if instance.year < first_year:
                 first_year = instance.year
+                changed = True
             if instance.year > last_year:
                 last_year = instance.year
+                changed = True
             # enrollments = instance.enrollments.count()
             # if enrollments > max_enrollments:
             #     max_enrollments = enrollments
-
-        class_.extinguished = last_year < current_year - 2  # or max_enrollments < 5  # TODO get rid of magic number
-        class_.save()
+        if changed:
+            class_.extinguished = last_year < current_year - 1  # or max_enrollments < 5  # TODO get rid of magic number
+            class_.save()
 
 
 def _upstream_diff(current_objs, clip_ids):

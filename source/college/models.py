@@ -56,6 +56,7 @@ class Student(Importable):
     class_instances = djm.ManyToManyField('ClassInstance', through='Enrollment')
     #: Grade this student obtained upon finishing his course
     graduation_grade = djm.IntegerField(null=True, blank=True, default=None)
+    # Cached fields
     #: Cache field which stores the first year on which this student was seen as active
     first_year = djm.IntegerField(null=True, blank=True)
     #: Cache field which stores the last year on which this student was seen as active
@@ -84,7 +85,7 @@ class Student(Importable):
                 self.last_year = last_year
                 changed = True
             if changed:
-                self.save()
+                self.save(update_fields=['first_year', 'last_year'])
 
 
 def building_pic_path(building, filename):
@@ -399,6 +400,11 @@ class Teacher(Importable):
     departments = djm.ManyToManyField(Department, related_name="teachers")
     #: User this teacher is associated with
     user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.CASCADE, related_name='teachers')
+    # Cached fields
+    #: Cache field which stores the last year on which this teacher was seen as active
+    first_year = djm.IntegerField(null=True, blank=True)
+    #: Cache field which stores the last year on which this teacher was seen as active
+    last_year = djm.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.iid})"
@@ -407,6 +413,23 @@ class Teacher(Importable):
     def short_name(self):
         name_parts = self.name.split(" ")
         return "%s %s" % (name_parts[0], name_parts[-1]) if len(name_parts) > 1 else self.name
+
+    def update_yearspan(self):
+        years = list(self.turns.distinct('class_instance__year').values_list('class_instance__year', flat=True))
+        if len(years) > 0:
+            first_year = min(years)
+            last_year = max(years)
+            changed = False
+            if first_year != self.first_year:
+                logger.warning(f'First year changed from {self.first_year} to {first_year}')
+                self.first_year = first_year
+                changed = True
+            if last_year != self.last_year:
+                logger.warning(f'Last year changed from {self.last_year} to {last_year}')
+                self.last_year = last_year
+                changed = True
+            if changed:
+                self.save(update_fields=['first_year', 'last_year'])
 
 
 def file_upload_path(file, _):
