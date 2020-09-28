@@ -110,7 +110,9 @@ def build_schedule(turn_instances: [college.TurnInstance]):
 
 
 def build_turns_schedule(turns: [college.Turn]):
-    turn_instances = [turn_instance for turn in turns for turn_instance in turn.instances.all()]
+    turn_instances = [turn_instance
+                      for turn in turns
+                      for turn_instance in turn.instances.exclude(disappeared=True).all()]
     return build_schedule(turn_instances)
 
 

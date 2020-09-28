@@ -98,9 +98,9 @@ def department_view(request, department_id):
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher, id=teacher_id)
     context = build_base_context(request)
-    turns = teacher.turns.filter(
-        class_instance__year=settings.COLLEGE_YEAR,
-        class_instance__period=settings.COLLEGE_PERIOD).all()
+    turns = teacher.turns \
+        .filter(class_instance__year=settings.COLLEGE_YEAR, class_instance__period=settings.COLLEGE_PERIOD) \
+        .exclude(disappeared=True).all()
     context['pcode'] = "c_teachers"
     context['title'] = teacher.name
     context['teacher'] = teacher
@@ -181,7 +181,11 @@ def class_instance_turns_view(request, instance_id):
     context['title'] = str(instance)
     context['department'] = department
     context['instance'] = instance
-    turns = instance.turns.order_by('turn_type', 'number').prefetch_related('instances__room__building').all()
+    turns = instance.turns\
+        .exclude(disappeared=True)\
+        .order_by('turn_type', 'number')\
+        .prefetch_related('instances__room__building')\
+        .all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
     context['turns'] = turns
     context['sub_nav'] = [
@@ -408,7 +412,9 @@ def room_view(request, room_id):
     room = get_object_or_404(m.Room, id=room_id)
     building = room.building
     turn_instances = room.turn_instances \
-        .filter(turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD).all()
+        .filter(turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD) \
+        .exclude(disappeared=True) \
+        .all()
     context = build_base_context(request)
     context['pcode'] = "c_campus_building_room"
     context['title'] = str(room)
