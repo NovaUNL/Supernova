@@ -54,11 +54,16 @@
                 {% endfor %}
               </div>
               {% if profile_user.residence %}
-                <b>Residência:</b> {{ profile_user.residence }}<br>
+                <h4>Zona de residência:</h4>
+                <span class="indented">{{ profile_user.residence }}</span>
               {% endif %}
-              <b>Ultima atividade:</b> {{ profile_user.last_activity }}<br>
+              <h4>Utilizador desde:</h4>
+              <span class="indented">{{ profile_user.date_joined }}</span>
+              <h4>Última atividade:</h4>
+              <span class="indented">{{ profile_user.last_activity }}</span>
               {% if profile_user.webpage %}
-                <b>Página:</b> <a href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a><br>
+                <h4>Página:</h4>
+                <a class="indented" href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a>
               {% endif %}
             </div>
           </div>
@@ -88,7 +93,7 @@
         {% if permissions.social_visibility and profile_user.social_networks.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
-              <h2>Social</h2>
+              <h2>Perfis</h2>
             </div>
             <div class="pane-content">
               <ul id="social-network-list" class="menu">
