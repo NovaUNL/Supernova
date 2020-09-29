@@ -76,6 +76,7 @@ urlpatterns = [
     path('privacidade/', flatpages.flatpage, {'url': '/privacidade/'}, name='privacy'),
     path('faq/', flatpages.flatpage, {'url': '/faq/'}, name='faq'),
     path('termos/', flatpages.flatpage, {'url': '/termos/'}, name='terms'),
+    path('intro/', flatpages.flatpage, {'url': '/intro/'}, name='intro'),
     path('sitemap.xml',
          cache_page(86400)(sitemaps_views.index),
          {'sitemaps': sitemaps}),

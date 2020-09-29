@@ -68,6 +68,7 @@
       {% endif %}
     {% endif %}
 
+    {% url 'intro' as intro %}
     {% url 'college:courses' as courses %}
     {% url 'college:departments' as departments %}
     {% url 'college:index' as college %}
@@ -82,6 +83,7 @@
       <li>
         <label>Faculdade</label>
         <ul>
+          <li><a href="{{ intro }}">Introdução</a></li>
           <li {% if pcode|startswith:'c_course' %}class="active"{% endif %}><a href="{{ courses }}">Cursos</a></li>
           <li {% if pcode|startswith:'c_department' %}class="active"{% endif %}><a href="{{ departments }}">Departamentos</a></li>
           {% if pcode|startswith:'c_campus' %}
@@ -124,6 +126,7 @@
       <li class="collapse">
         <input type="checkbox" id="m2"/><label for="m2">Faculdade</label>
         <ul>
+          <li><a href="{{ intro }}">Introdução</a></li>
           <li><a href="{{ courses }}">Cursos</a></li>
           <li><a href="{{ departments }}">Departamentos</a></li>
           <li class="collapse">
