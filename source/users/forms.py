@@ -200,6 +200,16 @@ class RegistrationValidationForm(djf.ModelForm):
         return email
 
 
+class UserForm(djf.ModelForm):
+    class Meta:
+        fields = ('username', 'nickname', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'date_joined',
+                  'last_login', 'last_nickname_change', 'birth_date', 'gender',
+                  'profile_visibility', 'info_visibility', 'about_visibility', 'social_visibility',
+                  'groups_visibility', 'enrollments_visibility', 'schedule_visibility',
+                  'residence', 'picture', 'webpage', 'about', 'is_student', 'is_teacher', 'course', 'points')
+        model = m.User
+
+
 class AccountSettingsForm(djf.ModelForm):
     new_password = djf.CharField(widget=djf.PasswordInput(), required=False, error_messages=default_errors)
     new_password_confirmation = djf.CharField(widget=djf.PasswordInput(), required=False,
