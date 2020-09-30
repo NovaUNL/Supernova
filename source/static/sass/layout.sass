@@ -6,6 +6,8 @@
   display: flex
   position: relative
   z-index: 3
+  // v Needed for Safari v
+  flex-shrink: 0
 
 #top-main
   flex-grow: 1
@@ -207,6 +209,8 @@
   display: flex
   flex-grow: 1
   width: 100%
+  // v Needed for Safari v
+  flex-shrink: 0
 
   @media #{$lowres}
     scroll-snap-type: x mandatory
@@ -215,7 +219,6 @@
     overflow: auto
 
 #nav-column
-  height: 100%
   color: var(--text-alt-hc)
   display: flex
   flex-direction: column
