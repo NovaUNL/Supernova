@@ -40,6 +40,8 @@
 
   img
     height: 100%
+    // Hack due to some SVG padding glitch
+    max-width: unset !important
     display: none
 
     [data-theme="quasar"] &.light-only
@@ -206,6 +208,9 @@
   flex-grow: 1
   width: 100%
 
+  @media #{$lowres}
+    scroll-snap-type: x mandatory
+
   @media #{$lowmidres}
     overflow: auto
 
@@ -214,6 +219,7 @@
   color: var(--text-alt-hc)
   display: flex
   flex-direction: column
+  justify-content: space-between
 
   @media #{$lowres}
     display: none
@@ -308,12 +314,10 @@
 #content-column
   display: flex
   flex-flow: column
-  //flex-flow: nowrap
   flex-grow: 1
 
   @media #{$lowmidres}
-    overflow: auto
-    scroll-snap-type: x mandatory
+    width: 100%
     height: 100%
 
 #breadcrumbs
@@ -374,6 +378,10 @@
   &.noshrink
     flex-shrink: 0
 
+  @media #{$lowres}
+    max-width: 100vw
+    scroll-snap-align: none start
+
 .flex-pane
   border-radius: 5px
   background-color: var(--pane-bg)
@@ -381,11 +389,8 @@
   box-shadow: 1px 1px 5px var(--shadow)
 
   @media #{$lowres}
-    width: calc(100vw - 20px)
-
-  @media #{$lowmidres}
-    scroll-snap-align: center
-    scroll-padding: 10px 0 0 10px
+    margin: 10px 5px 10px 5px
+    width: calc(100vw - 10px)
 
 .row
   display: flex
@@ -439,8 +444,6 @@
   padding: 5px 10px 10px 10px
   line-height: 1.5
   font-size: 16px
-  //TODO needed?
-  color: var(--text)
 
   &.construction
     display: flex
