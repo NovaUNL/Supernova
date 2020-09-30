@@ -4,6 +4,7 @@ import string
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
+from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 
@@ -68,26 +69,27 @@ def validate_token(email, token) -> users.User:
     if elapsed_minutes > settings.REGISTRATIONS_TIMEWINDOW:
         raise ExpiredRegistration('O registo foi validado após o tempo permitido.')
 
-    user = users.User.objects.create_user(
-        username=registration.username,
-        email=registration.email,
-        nickname=registration.nickname,
-        last_activity=timezone.now()
-    )
-    user.password = registration.password  # Copy hash
-    user.save()
-    students = college.Student.objects.filter(abbreviation=registration.student).all()
-    for student in students:
-        student.user = user
-        student.save()
-    if len(students) > 0:
-        permission = Permission.objects.get(
-            codename='can_view_college_data',
-            content_type=ContentType.objects.get_for_model(users.User))
-        user.user_permissions.add(permission)
-    user.calculate_missing_info()
-    user.updated_cached()
-    return user
+    with transaction.atomic():
+        user = users.User.objects.create_user(
+            username=registration.username,
+            email=registration.email,
+            nickname=registration.nickname,
+            last_activity=timezone.now()
+        )
+        user.password = registration.password  # Copy hash
+        user.save()
+        students = college.Student.objects.filter(abbreviation=registration.student).all()
+        for student in students:
+            student.user = user
+            student.save()
+        if len(students) > 0:
+            permission = Permission.objects.get(
+                codename='full_student_access',
+                content_type=ContentType.objects.get_for_model(users.User))
+            user.user_permissions.add(permission)
+        user.calculate_missing_info()
+        user.updated_cached()
+        return user
 
 
 def generate_token(length: int) -> str:
