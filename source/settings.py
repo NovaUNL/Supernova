@@ -201,11 +201,11 @@ AUTH_USER_MODEL = 'users.User'
 
 _now = datetime.now()
 if _now.month > 7:
-    COLLEGE_YEAR = _now.year
-    COLLEGE_PERIOD = 3
-else:
     COLLEGE_YEAR = _now.year + 1
     COLLEGE_PERIOD = 2
+else:
+    COLLEGE_YEAR = _now.year
+    COLLEGE_PERIOD = 3
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
