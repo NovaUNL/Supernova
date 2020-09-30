@@ -9,10 +9,11 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
+import settings
 from college import models as college
 from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.fields import NativeSplitDateTimeField
-from supernova.utils import password_strength, correlated
+from supernova.utils import password_strength, correlation
 from supernova.widgets import SliderInput, NativeTimeInput
 from users import models as m
 from learning import models as learning
@@ -377,10 +378,10 @@ def enforce_name_policy(name):
 
 
 def enforce_password_policy(username, nickname, password):
-    if correlated(username, password, threshold=0.3):  # TODO magic number to settings
+    if correlation(username, password) > settings.MAX_PASSWORD_CORRELATION:  # TODO magic number to settings
         raise djf.ValidationError("Password demasiado similar à credencial")
 
-    if correlated(nickname, password, threshold=0.3):
+    if correlation(nickname, password) > settings.MAX_PASSWORD_CORRELATION:
         raise djf.ValidationError("Password demasiado similar à alcunha")
 
     if password_strength(password) < 5:

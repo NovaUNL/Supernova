@@ -33,18 +33,7 @@ def password_strength(password: str):
                + log(special + 1) * 2 + special * 0.5)
 
 
-def correlated(a: str, b: str, threshold=0.5):
-    """
-    Checks if two strings are above a correlation threshold
-    :param a: First string
-    :param b: Second string
-    :param threshold: Minimum correlation
-    :return: Related
-    """
-    return SequenceMatcher(None, a, b).ratio() > threshold
-
-
-def correlation(a: str, b: str):  # TODO redundant, merge with above
+def correlation(a: str, b: str):
     """
     Checks two strings correlation
     :param a: First string

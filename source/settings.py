@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'django.contrib.sitemaps',
     'captcha',
     'ckeditor',
     'ckeditor_uploader',
@@ -96,6 +97,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+MAX_PASSWORD_CORRELATION = 0.7
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
@@ -104,7 +107,7 @@ CACHES = {
 
 # Internationalization
 LANGUAGE_CODE = 'pt-pt'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Lisbon'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
