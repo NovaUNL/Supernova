@@ -141,6 +141,9 @@ class User(AbstractUser):
     def clear_notification_cache(self):
         cache.delete_many(['%s_notification_count' % self.id, '%s_notification_list' % self.id])
 
+    def __str__(self):
+        return self.nickname
+
 
 class Badge(djm.Model):
     name = djm.CharField(max_length=32, unique=True)
