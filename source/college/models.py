@@ -271,6 +271,10 @@ class ClassInstance(Importable):
     students = djm.ManyToManyField(Student, through='Enrollment')
     #: Misc information associated to this class
     information = djm.JSONField(encoder=DjangoJSONEncoder)
+    #: License of the file being shared
+    license = djm.IntegerField(choices=ctypes.FileLicense.CHOICES, default=ctypes.FileAvailability.NOBODY)
+    #: Availability of this file
+    availability = djm.IntegerField(choices=ctypes.FileAvailability.CHOICES, default=ctypes.FileAvailability.NOBODY)
 
     class Meta:
         unique_together = ['parent', 'period', 'year']
@@ -468,6 +472,16 @@ class ClassFile(Importable):
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, related_name='files')
     #: Type of file being shared
     type = djm.IntegerField(choices=ctypes.FileType.CHOICES)
+    #: License of the file being shared
+    license = djm.IntegerField(
+        choices=ctypes.FileLicense.CHOICES,
+        blank=True,
+        null=True,
+        default=ctypes.FileLicense.RIGHTS_RESERVED)
+    #: License string (for the unlisted licenses)
+    license_str = djm.CharField(max_length=128, blank=True, null=True, default=None)
+    #: Availability of this file
+    availability = djm.IntegerField(choices=ctypes.FileAvailability.CHOICES, default=ctypes.FileAvailability.NOBODY)
     #: Datetime on which this file got uploaded
     upload_datetime = djm.DateTimeField(default=timezone.now)
     #: User who uploaded the file

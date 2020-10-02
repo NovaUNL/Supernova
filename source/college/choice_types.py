@@ -129,6 +129,41 @@ class FileType:
     )
 
 
+class FileLicense:
+    RIGHTS_RESERVED = 0
+    PUBLIC_DOMAIN = 1
+    GPL = 2
+    MIT = 3
+    BSD = 4
+    CC_BY = 5
+    CC_BY_SA = 6
+    GENERIC_PERMISSIVE = 100
+
+    CHOICES = (
+        (RIGHTS_RESERVED, 'Todos os direitos reservados'),
+        (PUBLIC_DOMAIN, 'Domínio Público'),
+        (GPL, 'GPLv3'),
+        (MIT, 'MIT'),
+        (BSD, 'BSD'),
+        (CC_BY, 'Creative Commons BY'),
+        (CC_BY_SA, 'Creative Commons BY-SA'),
+        (GENERIC_PERMISSIVE, 'Teste'),
+    )
+
+class FileAvailability:
+    PUBLIC = 0
+    STUDENTS = 1
+    ENROLLED = 2
+    NOBODY = 3
+
+    CHOICES = (
+        (PUBLIC, 'Todos'),
+        (STUDENTS, 'Estudantes'),
+        (ENROLLED, 'Inscritos'),
+        (NOBODY, 'Ninguém'),
+    )
+
+
 WEEKDAY_CHOICES = (
     (0, 'Segunda-feira'),
     (1, 'Terça-feira'),
