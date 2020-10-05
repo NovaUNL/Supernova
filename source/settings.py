@@ -126,6 +126,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = '/srv/http/supernova/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/srv/http/supernova/media/'
+EXTERNAL_URL = '/external/'
+EXTERNAL_ROOT = '/srv/external/'
 
 # CKEditor plugin
 CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'

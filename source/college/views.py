@@ -273,7 +273,7 @@ def class_instance_file_download(request, instance_id, file_hash):
         response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
 
     if class_file.file.external:
-        response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
+        response['X-Accel-Redirect'] = f'{settings.EXTERNAL_URL}{file_hash[:2]}/{file_hash[2:]}'
     else:
         raise Exception("Not implemented")
     return response
