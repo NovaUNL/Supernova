@@ -138,7 +138,7 @@ def class_view(request, class_id):
     context = build_base_context(request)
     context['pcode'] = "c_class"
     context['title'] = klass.name
-    context['class_obj'] = klass
+    context['klass'] = klass
     context['instances'] = klass.instances.order_by('year', 'period').reverse()
     context['sub_nav'] = _class__nav(klass)
     return render(request, 'college/class.html', context)
