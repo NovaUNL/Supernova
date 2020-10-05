@@ -11,17 +11,16 @@
           <h2>Informação</h2>
         </div>
         <div class="pane-content">
-          <h3>Descrição:</h3>
-          <div style="margin-left: 5px">
+          <h3>Descrição</h3>
+          <span class="indented">
             {% if department.description %}
               {{ department.description }}
             {% else %}
-              Este departamento não tem uma descrição associada
+              Sem descrição.
             {% endif %}
-          </div>
-          <h3>Localização:</h3>
-          <a style="margin-left: 5px"
-             href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
+          </span>
+          <h3>Localização</h3>
+          <a class="indented" href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
         </div>
       </div>
       <div class="flex-pane">
@@ -46,6 +45,9 @@
           <h2>Cadeiras</h2>
         </div>
         <div class="pane-content">
+          {% if classes|length == 0 %}
+            <span>Sem unidades curriculares associadas.</span>
+          {% endif %}
           <ul class="menu">
             {% for class in classes %}
               <li>

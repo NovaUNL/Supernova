@@ -447,7 +447,8 @@ def available_places_view(request):
     context = build_base_context(request)
     if not request.user.has_perm('users.full_student_access'):
         context['title'] = context['msg_title'] = 'Insuficiência de permissões'
-        context['msg_content'] = 'O seu utilizador não tem permissões suficientes para consultar a informação de espaços.'
+        context['msg_content'] \
+            = 'O seu utilizador não tem permissões suficientes para consultar a informação de espaços.'
         return render(request, 'supernova/message.html', context, status=403)
 
     context['pcode'] = "c_campus_places"
