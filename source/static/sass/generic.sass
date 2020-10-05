@@ -188,14 +188,15 @@ form hr
   align-items: flex-end
 
 table.stylized
-  tr:nth-of-type(odd)
-    background-color: var(--primary1)
-
-  tr:nth-of-type(even)
-    background-color: var(--primary0)
-
   thead
     background-color: var(--primary2)
+    font-weight: 700
+
+  tbody tr:nth-of-type(odd)
+    background-color: var(--primary1)
+
+  tbody tr:nth-of-type(even)
+      background-color: var(--primary0)
 
   &.grow
     width: 100%
