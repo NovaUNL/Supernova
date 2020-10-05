@@ -79,7 +79,7 @@ def group_view(request, group_abbr):
     context['membership_perms'] = membership_perms
     context['title'] = group.name
     context['group'] = group
-    context['is_member'] = group in request.user.groups_custom.all()
+    context['is_member'] = False if request.user.is_anonymous else group in request.user.groups_custom.all()
     context['pcode'], nav_type = resolve_group_type(group)
     context['activities'] = m.Activity.objects.filter(group=group).order_by('datetime').reverse()
     context['sub_nav'] = [
