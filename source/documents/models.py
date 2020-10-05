@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models as djm
 from ckeditor.fields import RichTextField
 
-from college.models import Place, TurnInstance, Building
+from college.models import Place, Building
 from groups.models import Group
 
 

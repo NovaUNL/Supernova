@@ -1,5 +1,5 @@
 {% url 'college:class_instance' instance.id as info_url %}
-{% url 'college:class_instance_turns' instance.id as turns_url %}
+{% url 'college:class_instance_turns' instance.id as shifts_url %}
 {% url 'college:class_instance_enrolled' instance.id as enrolled_url %}
 {% url 'college:class_instance_files' instance.id as files_url %}
 {% url 'learning:class' instance.parent.id as synopsis_url %}
@@ -17,10 +17,10 @@
         {% endif %}
       </li>
       <li>
-        {% if turns_url in request.path %}
+        {% if shifts_url in request.path %}
           Turnos
         {% else %}
-          <a class="menu-entry" href="{{ turns_url }}">Turnos</a>
+          <a class="menu-entry" href="{{ shifts_url }}">Turnos</a>
         {% endif %}
       </li>
       <li>

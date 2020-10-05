@@ -251,7 +251,7 @@ def sync_class_instance(external_id, class_=None, recurse=False):
     Sync the information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
     :param class_: The class that is parent this class instance (optional)
-    :param recurse: Whether to recurse to the derivative entities (turns, enrollments and evaluations)
+    :param recurse: Whether to recurse to the derivative entities (shifts, enrollments and evaluations)
     """
     upstream = _request_class_instance(external_id)
     _upstream_sync_class_instance(upstream, external_id, class_, recurse)
@@ -302,25 +302,25 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
             external_update=timezone.now())
         logger.info(f"Class instance {obj} created")
 
-    # ---------  Related turns ---------
-    turns = obj.turns.exclude(external_id=None).all()
+    # ---------  Related shifts ---------
+    shifts = obj.shifts.exclude(external_id=None).all()
 
-    new, disappeared, mirrored = _upstream_diff(set(turns), set(upstream['turns']))
+    new, disappeared, mirrored = _upstream_diff(set(shifts), set(upstream['shifts']))
 
-    if m.Turn.objects.filter(external_id__in=new).exists():
-        logger.critical(f"Some turns of class instance {obj} belong to another instance: {new}")
+    if m.Shift.objects.filter(external_id__in=new).exists():
+        logger.critical(f"Some shifts of class instance {obj} belong to another instance: {new}")
 
     if recurse:
         for ext_id in new:
-            sync_turn(ext_id, recurse=True, class_inst=obj)
+            sync_shift(ext_id, recurse=True, class_inst=obj)
 
-    m.Turn.objects \
+    m.Shift.objects \
         .filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
-    m.Turn.objects.filter(external_id__in=disappeared).update(disappeared=True)
-    disappeared = m.Turn.objects.filter(external_id__in=disappeared)
-    for turn in disappeared.all():
-        logger.warning(f"{turn} removed from {obj}.")
+    m.Shift.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.Shift.objects.filter(external_id__in=disappeared)
+    for shift in disappeared.all():
+        logger.warning(f"{shift} removed from {obj}.")
 
     # ---------  Related enrollments ---------
     enrollments = obj.enrollments.exclude(external_id=None).all()
@@ -378,7 +378,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
     new = upstream_ids.difference(downstream_ids)
     removed = downstream_ids.difference(upstream_ids)
     mirrored = downstream_ids.intersection(upstream_ids)
-    teachers = {teacher.name: teacher for teacher in m.Teacher.objects.filter(turns__class_instance=class_inst).all()}
+    teachers = {teacher.name: teacher for teacher in m.Teacher.objects.filter(shifts__class_instance=class_inst).all()}
 
     for hash in mirrored:
         upsteam_info = upstream[hash]
@@ -469,7 +469,7 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
             external_update=make_aware(datetime.now()))
 
 
-def sync_turn(external_id, class_inst=None, recurse=False):
+def sync_shift(external_id, class_inst=None, recurse=False):
     """
     Sync the information in a turn
     :param external_id: The foreign id of the turn that is being sync'd
@@ -477,18 +477,18 @@ def sync_turn(external_id, class_inst=None, recurse=False):
     :param recurse: Whether to recurse to the derivative turn instances
     :return:
     """
-    upstream = _request_turn_info(external_id)
-    _upstream_sync_turn_info(upstream, external_id, class_inst, recurse)
+    upstream = _request_shift_info(external_id)
+    _upstream_sync_shift_info(upstream, external_id, class_inst, recurse)
 
 
-def _request_turn_info(external_id):
+def _request_shift_info(external_id):
     r = requests.get(f"http://{CLIPY['host']}/turn/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch turn {external_id}")
     return r.json()
 
 
-def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
+def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
     invalid = not all(
         k in upstream
         for k in ('type', 'number', 'class_instance_id', 'restrictions', 'state', 'instances', 'students', 'teachers'))
@@ -497,99 +497,99 @@ def _upstream_sync_turn_info(upstream, external_id, class_inst, recurse):
         return
 
     if class_inst.external_id != upstream['class_instance_id']:
-        logger.critical("Consistency error. Turn upstream parent is not the local parent")
+        logger.critical("Consistency error. Shift upstream parent is not the local parent")
         return
 
     type_abbr = upstream['type'].upper() if 'type' in upstream else None
-    turn_type = None
-    for i, abbr in ctypes.TurnType.ABBREVIATIONS.items():
+    shift_type = None
+    for i, abbr in ctypes.ShiftType.ABBREVIATIONS.items():
         if type_abbr == abbr:
-            turn_type = i
+            shift_type = i
             break
-    if turn_type is None:
+    if shift_type is None:
         logger.error("Unknown turn type: %s" % type_abbr)
         return
 
     upstream_details = {'state': upstream['state'], 'restrictions': upstream['restrictions']}
     try:
-        obj = m.Turn.objects.get(class_instance=class_inst, external_id=external_id)
+        obj = m.Shift.objects.get(class_instance=class_inst, external_id=external_id)
         if not obj.frozen and obj.external_data != upstream_details:
             obj.external_data = upstream_details
             obj.save()
     except ObjectDoesNotExist:
-        obj = m.Turn.objects.create(
+        obj = m.Shift.objects.create(
             class_instance=class_inst,
-            turn_type=turn_type,
+            shift_type=shift_type,
             number=upstream['number'],
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()),
             external_data=upstream_details)
-        logger.info(f"Turn {obj} created in {class_inst}")
+        logger.info(f"Shift {obj} created in {class_inst}")
 
     # ---------  Related turn instances ---------
     instances = obj.instances.exclude(external_id=None).all()
 
     new, disappeared, mirrored = _upstream_diff(set(instances), set(upstream['instances']))
 
-    if m.TurnInstance.objects.filter(external_id__in=new).exists():
+    if m.ShiftInstance.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some instances of turn {obj} belong to another turn: {new}")
         return
 
     if recurse:
         for ext_id in new:
-            sync_turn_instance(ext_id, turn=obj)
+            sync_shift_instance(ext_id, shift=obj)
 
-    m.TurnInstance.objects.filter(external_id__in=mirrored). \
+    m.ShiftInstance.objects.filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
-    m.TurnInstance.objects.filter(external_id__in=disappeared).update(disappeared=True)
-    disappeared = m.TurnInstance.objects.filter(external_id__in=disappeared)
+    m.ShiftInstance.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.ShiftInstance.objects.filter(external_id__in=disappeared)
     for instances in disappeared.all():
         logger.warning(f"{instances} removed from {obj}.")
 
     # ---------  Related M2M ---------
-    current_students = m.Student.objects.filter(turn=obj).exclude(disappeared=True)
+    current_students = m.Student.objects.filter(shift=obj).exclude(disappeared=True)
     new, disappeared, _ = _upstream_diff(current_students, set(upstream['students']))
-    m.TurnStudents.objects.filter(turn=obj, student__external_id__in=disappeared).delete()
-    m.TurnStudents.objects.bulk_create(
-        map(lambda student_id: m.TurnStudents(student_id=student_id, turn=obj),
+    m.ShiftStudents.objects.filter(shift=obj, student__external_id__in=disappeared).delete()
+    m.ShiftStudents.objects.bulk_create(
+        map(lambda student_id: m.ShiftStudents(student_id=student_id, shift=obj),
             m.Student.objects.filter(external_id__in=new).values_list('id', flat=True)))
 
-    current_teachers = m.Teacher.objects.filter(turns=obj)
+    current_teachers = m.Teacher.objects.filter(shifts=obj)
     new, disappeared, _ = _upstream_diff(current_teachers, set(upstream['teachers']))
-    m.Turn.teachers.through.objects.filter(turn=obj, teacher__external_id__in=disappeared).delete()
-    m.Turn.teachers.through.objects.bulk_create(
-        map(lambda student_id: m.Turn.teachers.through(teacher_id=student_id, turn=obj),
+    m.Shift.teachers.through.objects.filter(shift=obj, teacher__external_id__in=disappeared).delete()
+    m.Shift.teachers.through.objects.bulk_create(
+        map(lambda student_id: m.Shift.teachers.through(teacher_id=student_id, shift=obj),
             m.Teacher.objects.filter(external_id__in=new).values_list('id', flat=True)))
 
 
-def sync_turn_instance(external_id, turn):
+def sync_shift_instance(external_id, shift):
     """
     Sync the file information in an instance of a turn
     :param external_id: The foreign id of the turn instance that is being sync'd
     :param turn: The parent turn (optional)
     """
-    upstream = _request_turn_instance(external_id)
+    upstream = _request_shift_instance(external_id)
     if upstream is None:
-        logger.warning(f"Failed to sync turn instance {external_id} in turn {turn}")
+        logger.warning(f"Failed to sync turn instance {external_id} in shift {shift}")
         return
-    _upstream_sync_turn_instance(upstream, external_id, turn)
+    _upstream_sync_shift_instance(upstream, external_id, shift)
 
 
-def _request_turn_instance(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/turn_inst/{external_id}")
+def _request_shift_instance(external_id):
+    r = requests.get(f"http://{CLIPY['host']}/shift_inst/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch turn instance {external_id}")
     return r.json()
 
 
-def _upstream_sync_turn_instance(upstream, external_id, turn):
-    if not all(k in upstream for k in ('turn', 'start', 'end', 'weekday', 'room')):
+def _upstream_sync_shift_instance(upstream, external_id, shift):
+    if not all(k in upstream for k in ('shift', 'start', 'end', 'weekday', 'room')):
         logger.error(f"Invalid upstream turn instance data: {upstream}")
         return
 
-    if turn.external_id != upstream['turn']:
-        logger.critical("Consistency error. TurnInstance upstream parent is not the local parent")
+    if shift.external_id != upstream['shift']:
+        logger.critical("Consistency error. ShiftInstance upstream parent is not the local parent")
         return
 
     upstream_room = None
@@ -597,7 +597,7 @@ def _upstream_sync_turn_instance(upstream, external_id, turn):
         try:
             upstream_room = m.Room.objects.get(external_id=upstream['room'])
         except m.Room.DoesNotExist:
-            logger.warning(f"Room {upstream['room']} is missing (turn instance {external_id})")
+            logger.warning(f"Room {upstream['room']} is missing (shift instance {external_id})")
 
     upstream_start = upstream['start']
     upstream_end = upstream['end']
@@ -605,7 +605,7 @@ def _upstream_sync_turn_instance(upstream, external_id, turn):
     if not ((isinstance(upstream_start, int) or upstream_start is None)
             and (isinstance(upstream_end, int) or upstream_end is None)
             and (isinstance(upstream_weekday, int) or upstream_weekday is None)):
-        logger.error(f"Invalid upstream turn instance data: {upstream}")
+        logger.error(f"Invalid upstream shift instance data: {upstream}")
         return
 
     upstream_duration = upstream_end - upstream_start \
@@ -613,46 +613,46 @@ def _upstream_sync_turn_instance(upstream, external_id, turn):
         else None
 
     try:
-        turn_instance = m.TurnInstance.objects.get(turn=turn, external_id=external_id)
+        shift_instance = m.ShiftInstance.objects.get(shift=shift, external_id=external_id)
         changed = False
-        if upstream_start != turn_instance.start:
-            logger.warning(f"Turn instance {turn_instance} start changed "
-                           f"from {turn_instance.start} to {upstream_start}")
-            turn_instance.start = upstream_start
+        if upstream_start != shift_instance.start:
+            logger.warning(f"Shift instance {shift_instance} start changed "
+                           f"from {shift_instance.start} to {upstream_start}")
+            shift_instance.start = upstream_start
             changed = True
 
-        if upstream_duration != turn_instance.duration:
-            if turn_instance.duration is not None:
-                logger.warning(f"Turn instance {turn_instance} duration changed "
-                               f"from {turn_instance.duration} to {upstream_duration}")
-            turn_instance.duration = upstream_duration
+        if upstream_duration != shift_instance.duration:
+            if shift_instance.duration is not None:
+                logger.warning(f"Shift instance {shift_instance} duration changed "
+                               f"from {shift_instance.duration} to {upstream_duration}")
+            shift_instance.duration = upstream_duration
             changed = True
 
-        if upstream_weekday != turn_instance.weekday:
-            logger.warning(f"Turn instance {turn_instance} weekday changed "
-                           f"from {turn_instance.weekday} to {upstream_weekday}")
-            turn_instance.weekday = upstream_weekday
+        if upstream_weekday != shift_instance.weekday:
+            logger.warning(f"Shift instance {shift_instance} weekday changed "
+                           f"from {shift_instance.weekday} to {upstream_weekday}")
+            shift_instance.weekday = upstream_weekday
             changed = True
 
         if upstream_room is None:
-            if turn_instance.room is not None:
-                logger.warning(f"Turn instance {turn_instance} is no longer in a room (was in {turn_instance.room})")
-                turn_instance.room = None
+            if shift_instance.room is not None:
+                logger.warning(f"Shift instance {shift_instance} is no longer in a room (was in {shift_instance.room})")
+                shift_instance.room = None
                 changed = True
         else:
-            if turn_instance.room is None:
-                turn_instance.room = upstream_room
+            if shift_instance.room is None:
+                shift_instance.room = upstream_room
                 changed = True
-            elif turn_instance.room != upstream_room:
-                logger.warning(f"Turn instance {turn_instance} room changed "
-                               f"from {turn_instance.room.external_id} to {upstream['room']}")
-                turn_instance.room = upstream_room
+            elif shift_instance.room != upstream_room:
+                logger.warning(f"Shift instance {shift_instance} room changed "
+                               f"from {shift_instance.room.external_id} to {upstream['room']}")
+                shift_instance.room = upstream_room
                 changed = True
         if changed:
-            turn_instance.save()
-    except m.TurnInstance.DoesNotExist:
-        turn_instance = m.TurnInstance.objects.create(
-            turn=turn,
+            shift_instance.save()
+    except m.ShiftInstance.DoesNotExist:
+        shift_instance = m.ShiftInstance.objects.create(
+            shift=shift,
             weekday=upstream_weekday,
             start=upstream_start,
             duration=upstream_duration,
@@ -660,7 +660,7 @@ def _upstream_sync_turn_instance(upstream, external_id, turn):
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()))
-        logger.info(f"Turn instance {turn_instance} created.")
+        logger.info(f"Shift instance {shift_instance} created.")
 
 
 def sync_evaluation(external_id, class_inst=None):

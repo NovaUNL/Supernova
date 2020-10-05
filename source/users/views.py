@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, timezone
 from dal import autocomplete
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
@@ -177,7 +179,6 @@ def profile_view(request, nickname):
     if permissions['enrollments_visibility']:
         primary_students, context['secondary_students'] = get_students(profile_user)
         context['primary_students'] = primary_students
-
         context['current_class_instances'] = current_class_instances = college.ClassInstance.objects \
             .select_related('parent') \
             .order_by('parent__name') \
@@ -192,17 +193,18 @@ def profile_view(request, nickname):
             .distinct('name')
 
         if permissions['schedule_visibility']:
-            turn_instances = college.TurnInstance.objects \
-                .select_related('turn__class_instance__parent') \
+            shift_instances = college.ShiftInstance.objects \
+                .select_related('shift__class_instance__parent') \
                 .prefetch_related('room__building') \
-                .filter(turn__student__in=primary_students,
-                        turn__class_instance__year=settings.COLLEGE_YEAR,
-                        turn__class_instance__period=settings.COLLEGE_PERIOD) \
+                .filter(shift__student__in=primary_students,
+                        shift__class_instance__year=settings.COLLEGE_YEAR,
+                        shift__class_instance__period=settings.COLLEGE_PERIOD) \
                 .exclude(disappeared=True)
             context['weekday_spans'], context['schedule'], context['unsortable'] = \
-                schedules.build_schedule(turn_instances)
+                schedules.build_schedule(shift_instances)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
     cache.set(f'profile_{nickname}_{permissions["checksum"]}_context', context, timeout=600)
+
     return render(request, 'users/profile.html', context)
 
 
@@ -224,15 +226,15 @@ def user_schedule_view(request, nickname):
     context['title'] = "Horário de " + profile_user.get_full_name()
     context['profile_user'] = profile_user
 
-    turn_instances = college.TurnInstance.objects \
-        .select_related('turn__class_instance__parent') \
+    shift_instances = college.ShiftInstance.objects \
+        .select_related('shift__class_instance__parent') \
         .prefetch_related('room__building') \
-        .filter(turn__student__in=primary_students,
-                turn__class_instance__year=settings.COLLEGE_YEAR,
-                turn__class_instance__period=settings.COLLEGE_PERIOD) \
+        .filter(shift__student__in=primary_students,
+                shift__class_instance__year=settings.COLLEGE_YEAR,
+                shift__class_instance__period=settings.COLLEGE_PERIOD) \
         .exclude(disappeared=True)
 
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(shift_instances)
     context['sub_nav'] = [
         {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]

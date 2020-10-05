@@ -82,21 +82,21 @@ class StudentSerializer(serializers.Serializer):
 class ScheduleSerializer(serializers.ModelSerializer):
     # class_ = serializers.SlugRelatedField(
     #     read_only=True,
-    #     slug_field='turn__class_instance__parent__name')
-    # turn = serializers.SlugRelatedField(
+    #     slug_field='shift__class_instance__parent__name')
+    # shift = serializers.SlugRelatedField(
     #     read_only=True,
-    #     slug_field='turn__class_instance__parent__name')
+    #     slug_field='shift__class_instance__parent__name')
     # id = serializers.IntegerField()
     # start = serializers.IntegerField()
 
-    class_name = serializers.CharField(read_only=True, source="turn.class_instance.parent.name")
-    turn_type = serializers.CharField(read_only=True, source="turn.get_turn_type_display")
-    turn_number = serializers.IntegerField(read_only=True, source="turn.number")
+    class_name = serializers.CharField(read_only=True, source="shift.class_instance.parent.name")
+    shift_type = serializers.CharField(read_only=True, source="shift.get_shift_type_display")
+    shift_number = serializers.IntegerField(read_only=True, source="shift.number")
     end = serializers.IntegerField()
 
     # weekday = serializers.IntegerField()
     # room = serializers.IntegerField()
 
     class Meta:
-        model = college.TurnInstance
-        fields = ('id', 'start', 'end', 'weekday', 'class_name', 'turn_type', 'turn_number')
+        model = college.ShiftInstance
+        fields = ('id', 'start', 'end', 'weekday', 'class_name', 'shift_type', 'shift_number')

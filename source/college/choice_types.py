@@ -20,7 +20,7 @@ class Period:
     SHORT_CHOICES = ('', 'S1', 'S2', 'T1', 'T2', 'T3', 'T4')
 
 
-class TurnType:
+class ShiftType:
     THEORETICAL = 1
     PRACTICAL = 2
     PRACTICAL_THEORETICAL = 3
@@ -54,9 +54,9 @@ class TurnType:
     }
 
     @staticmethod
-    def abbreviation(turn_type):
-        if turn_type in TurnType.ABBREVIATIONS:
-            return TurnType.ABBREVIATIONS[turn_type]
+    def abbreviation(shift_type):
+        if shift_type in ShiftType.ABBREVIATIONS:
+            return ShiftType.ABBREVIATIONS[shift_type]
         return ""
 
 

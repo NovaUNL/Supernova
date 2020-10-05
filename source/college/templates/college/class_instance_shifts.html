@@ -8,7 +8,7 @@
       align-items: start;
     }
 
-    .turn-list {
+    .shift-list {
       margin: 10px;
       padding: 5px 5px;
       border-radius: 5px;
@@ -18,7 +18,7 @@
       text-align: left;
     }
 
-    .turn-list a {
+    .shift-list a {
       vertical-align: top;
       color: #333;
     }
@@ -34,12 +34,12 @@
           <div class="pane-title bg-grad"><h2>Turnos</h2></div>
           <div class="pane-content flex-wrapper">
             {% for turn in turns %}
-              <div class="turn-list turn-{{ turn.type_abbreviation|lower }}" href="#">
+              <div class="shift-list turn-{{ shift.type_abbreviation|lower }}" href="#">
                 <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
-                  {{ turn.type_abbreviation }}{{ turn.number }}
+                  {{ shift.type_abbreviation }}{{ shift.number }}
                 </a>
                 <div style="display: inline-block;">
-                  {% for instance in turn.instances.all %}
+                  {% for instance in shift.instances.all %}
                     <span>{{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}</span><br>
                     {% if instance.room %}
                       <a style="border-bottom: 1px solid black"

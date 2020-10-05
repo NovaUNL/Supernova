@@ -21,7 +21,7 @@ class Command(BaseCommand):
             print("Bad type. Available types are: 'fast', 'slow' and 'full'.")
             exit(-1)
 
-        # # Very fast
+        # Very fast
         sync.assert_buildings_inserted()
         sync.sync_rooms()
         logging.info("Syncing students")
@@ -41,11 +41,11 @@ class Command(BaseCommand):
             for class_instance in class_instances.all():
                 sync.sync_class_instance(class_instance.external_id, class_=class_instance.parent, recurse=True)
                 class_instance.refresh_from_db()
-                for turn in class_instance.turns.exclude(disappeared=True, external_id=None).all():
-                    sync.sync_turn(turn.external_id, class_inst=turn.class_instance, recurse=True)
-                    turn.refresh_from_db()
-                    for turn_instance in turn.instances.exclude(disappeared=True, external_id=None).all():
-                        sync.sync_turn_instance(turn_instance.external_id, turn=turn)
+                for shift in class_instance.shifts.exclude(disappeared=True, external_id=None).all():
+                    sync.sync_shift(shift.external_id, class_inst=shift.class_instance, recurse=True)
+                    shift.refresh_from_db()
+                    for shift_instance in shift.instances.exclude(disappeared=True, external_id=None).all():
+                        sync.sync_shift_instance(shift_instance.external_id, shift=shift)
         elif sync_type == "slow":
             for class_ in m.Class.objects.select_related('department').exclude(disappeared=True, external_id=None):
                 sync.sync_class(class_.external_id, department=class_.department, recurse=True)
@@ -57,8 +57,7 @@ class Command(BaseCommand):
                     instance.refresh_from_db()
                     for enrollment in instance.enrollments.exclude(disappeared=True, external_id=None).all():
                         sync.sync_enrollment(enrollment.external_id, class_inst=instance)
-                    for class_file in instance.files.exclude(disappeared=True, external_id=None).all():
-                        sync.sync_class_instance_files(class_file.external_id, class_inst=instance)
+                    sync.sync_class_instance_files(instance.external_id, class_inst=instance)
             update_cached()
         elif sync_type == "full":
             for class_ in m.Class.objects.select_related('department').exclude(disappeared=True, external_id=None):

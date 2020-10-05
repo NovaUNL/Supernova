@@ -50,8 +50,8 @@ class Student(Importable):
     abbreviation = djm.CharField(null=True, blank=True, max_length=64)
     #: This student's course
     course = djm.ForeignKey('Course', on_delete=djm.PROTECT, related_name='students', null=True, blank=True)
-    #: Turns this student is enrolled to
-    turns = djm.ManyToManyField('Turn', through='TurnStudents')
+    #: Shifts this student is enrolled to
+    shifts = djm.ManyToManyField('Shift', through='ShiftStudents')
     #: Classes this student is enrolled to
     class_instances = djm.ManyToManyField('ClassInstance', through='Enrollment')
     #: Grade this student obtained upon finishing his course
@@ -308,70 +308,70 @@ class Enrollment(Importable):
         unique_together = ['student', 'class_instance']
 
 
-class Turn(Importable):
-    """Abstract concept of a turn, without temporal presence"""
-    #: Class that this turn lectured
-    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='turns')  # Eg: Analysis
-    #: Type of turn (enumeration)
-    turn_type = djm.IntegerField(choices=ctypes.TurnType.CHOICES)  # Theoretical, Practical, ...
-    #: Turn index
+class Shift(Importable):
+    """Abstract concept of a shift, without temporal presence"""
+    #: Class that this shift lectures
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='shifts')  # Eg: Analysis
+    #: Type of shift (enumeration)
+    shift_type = djm.IntegerField(choices=ctypes.ShiftType.CHOICES)  # Theoretical, Practical, ...
+    #: Shift index
     number = djm.IntegerField()  # 1
     #: Required attendance
     required = djm.BooleanField(default=True)  # Optional attendance
     #: Enrolled students
-    students = djm.ManyToManyField(Student, through='TurnStudents')
+    students = djm.ManyToManyField(Student, through='ShiftStudents')
     #: Associated teachers
-    teachers = djm.ManyToManyField('Teacher', related_name='turns')
+    teachers = djm.ManyToManyField('Teacher', related_name='shifts')
 
     class Meta:
-        unique_together = ['class_instance', 'turn_type', 'number']
+        unique_together = ['class_instance', 'shift_type', 'number']
 
     def __str__(self):
-        return f"{self.class_instance} {ctypes.TurnType.abbreviation(self.turn_type)}{self.number}"
+        return f"{self.class_instance} {ctypes.ShiftType.abbreviation(self.shift_type)}{self.number}"
 
     @property
     def type_abbreviation(self):
-        return ctypes.TurnType.abbreviation(self.turn_type)
+        return ctypes.ShiftType.abbreviation(self.shift_type)
 
 
-class TurnStudents(djm.Model):
-    turn = djm.ForeignKey(Turn, on_delete=djm.CASCADE)
+class ShiftStudents(djm.Model):
+    shift = djm.ForeignKey(Shift, on_delete=djm.CASCADE)
     student = djm.ForeignKey(Student, on_delete=djm.CASCADE)
 
     class Meta:
-        verbose_name_plural = 'turn students'
+        verbose_name_plural = 'shift students'
 
     def __str__(self):
-        return f'{self.student} enrolled to turn {self.turn}'
+        return f'{self.student} enrolled to shift {self.shift}'
 
 
-class TurnInstance(Importable):
-    """A physical presence of a Turn"""
+class ShiftInstance(Importable):
+    """A physical presence of a Shift"""
     #:
-    turn = djm.ForeignKey(Turn, on_delete=djm.CASCADE, related_name='instances')  # Eg: Theoretical 1
-    #: | Whether this is a recurring turn
-    #: | Recurring turns always happen at a given weekday and hour, lasting for k minutes
+    shift = djm.ForeignKey(Shift, on_delete=djm.CASCADE, related_name='instances')  # Eg: Theoretical 1
+    #: | Whether this is a recurring shift
+    #: | Recurring shifts always happen at a given weekday and hour, lasting for k minutes
     recurring = djm.BooleanField(default=True)
     #: Weekday this happens on, with the index 0 being Monday
     weekday = djm.IntegerField(null=True, blank=True, choices=ctypes.WEEKDAY_CHOICES)  # 0 - Monday
-    #: Temporal offset in minutes from the midnight until the start of this turn (8*60+30 = 8:30 AM)
+    #: Temporal offset in minutes from the midnight until the start of this shift (8*60+30 = 8:30 AM)
     start = djm.IntegerField(null=True, blank=True)
     #: Duration in minutes
     duration = djm.IntegerField(null=True, blank=True)
-    # Room where the turn instance happens
-    room = djm.ForeignKey(Room, on_delete=djm.PROTECT, null=True, blank=True, related_name='turn_instances')
+    # Room where the shift instance happens
+    room = djm.ForeignKey(Room, on_delete=djm.PROTECT, null=True, blank=True, related_name='shift_instances')
 
     class Meta:
         ordering = ['weekday', 'start']
 
     def __str__(self):
-        return f"{self.turn}, d{self.weekday}, {self.minutes_to_str(self.start)}"
+        return f"{self.shift}, d{self.weekday}, {self.minutes_to_str(self.start)}"
 
-    def intersects(self, turn_instance):
+    def intersects(self, shift_instance):
         # Same weekday AND A starts before B ends and B starts before A ends
-        return self.weekday == turn_instance.weekday and \
-               self.start < turn_instance.start + turn_instance.duration and \
-               turn_instance.start < self.start + self.duration
+        return self.weekday == shift_instance.weekday and \
+               self.start < shift_instance.start + shift_instance.duration and \
+               shift_instance.start < self.start + self.duration
 
     def weekday_pt(self):
         return ctypes.WEEKDAY_CHOICES[self.weekday][1]
@@ -384,7 +384,7 @@ class TurnInstance(Importable):
 
     def happening(self):
         now = datetime.now()
-        if not (self.turn.class_instance.year == COLLEGE_YEAR and self.turn.class_instance.period == COLLEGE_PERIOD):
+        if not (self.shift.class_instance.year == COLLEGE_YEAR and self.shift.class_instance.period == COLLEGE_PERIOD):
             return False
 
         # same weekday and within current time interval
@@ -421,7 +421,7 @@ class Teacher(Importable):
         return "%s %s" % (name_parts[0], name_parts[-1]) if len(name_parts) > 1 else self.name
 
     def update_yearspan(self):
-        years = list(self.turns.distinct('class_instance__year').values_list('class_instance__year', flat=True))
+        years = list(self.shifts.distinct('class_instance__year').values_list('class_instance__year', flat=True))
         if len(years) > 0:
             first_year = min(years)
             last_year = max(years)

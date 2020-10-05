@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 import settings
 from api.serializers import users as serializers
 from api import permissions
-from api.schedule_utils import get_weekday_occurrences, append_turn_instances, append_schedule_entries, \
+from api.schedule_utils import get_weekday_occurrences, append_shift_instances, append_schedule_entries, \
     append_periodic_schedule_entries_in_extension
 from users.utils import get_network_identifier, get_students
 from users import models as users
@@ -41,17 +41,17 @@ def user_schedule(_, nickname, from_date, to_date):
     user = get_object_or_404(users.User.objects.prefetch_related('students', 'memberships'), nickname=nickname)
     primary_students, _ = get_students(user)
 
-    turn_instances = college.TurnInstance.objects \
-        .select_related('turn__class_instance__parent') \
+    shift_instances = college.ShiftInstance.objects \
+        .select_related('shift__class_instance__parent') \
         .prefetch_related('room__building') \
-        .filter(turn__student__in=primary_students,
-                turn__class_instance__year=settings.COLLEGE_YEAR,
-                turn__class_instance__period=settings.COLLEGE_PERIOD) \
+        .filter(shift__student__in=primary_students,
+                shift__class_instance__year=settings.COLLEGE_YEAR,
+                shift__class_instance__period=settings.COLLEGE_PERIOD) \
         .annotate(end=F('start') - F('duration')) \
         .all()
     schedule_entries = []
 
-    append_turn_instances(schedule_entries, turn_instances, weekday_occurrences)
+    append_shift_instances(schedule_entries, shift_instances, weekday_occurrences)
     user_groups = user.groups_custom.all()
     once_schedule_entries = users.ScheduleOnce.objects.filter(user=user)
     periodic_schedule_entries = users.SchedulePeriodic.objects.filter(user=user)
@@ -85,6 +85,8 @@ class UserSocialNetworks(APIView):
         if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
             raise ValidationError("Unknown network")
         profile = get_network_identifier(network, request.data['profile'])
+        if profile is None:
+            raise ValidationError(f"Bad profile ('{request.data['profile']}')")
         if users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
             raise ValidationError("Duplicated network")
 

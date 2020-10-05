@@ -56,11 +56,9 @@
     </div>
     <div>
       <h1>Síntese de <a href="{% url 'college:class' synopsis_class.id %}">{{ synopsis_class.name }}</a></h1>
-      <h3>
-        <a href="{% url 'college:department' synopsis_class.department.id %}">
-          Departamento de {{ synopsis_class.department.name }}
-        </a>
-      </h3>
+      {% if synopsis_class.department %}
+        <h3><a href="{% url 'college:department' synopsis_class.department.id %}">Departamento de {{ synopsis_class.department.name }}</a></h3>
+      {% endif %}
     </div>
   </div>
   <div class="col padded">

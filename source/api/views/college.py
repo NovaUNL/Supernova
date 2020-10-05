@@ -55,7 +55,7 @@ class ClassDetailed(APIView):
         return Response(serializer.data)
 
 
-class UserTurnInstances(APIView):
+class UserShiftInstances(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
@@ -63,13 +63,13 @@ class UserTurnInstances(APIView):
         user = get_object_or_404(users.User.objects.prefetch_related('students'), nickname=nickname)
         primary_students, _ = get_students(user)
 
-        turn_instances = college.TurnInstance.objects \
-            .select_related('turn__class_instance__parent') \
+        shift_instances = college.ShiftInstance.objects \
+            .select_related('shift__class_instance__parent') \
             .prefetch_related('room__building') \
-            .filter(turn__student__in=primary_students,
-                    turn__class_instance__year=settings.COLLEGE_YEAR,
-                    turn__class_instance__period=settings.COLLEGE_PERIOD) \
+            .filter(shift__student__in=primary_students,
+                    shift__class_instance__year=settings.COLLEGE_YEAR,
+                    shift__class_instance__period=settings.COLLEGE_PERIOD) \
             .annotate(end=F('start') - F('duration')) \
             .all()
-        serializer = serializers.ScheduleSerializer(turn_instances, many=True)
+        serializer = serializers.ScheduleSerializer(shift_instances, many=True)
         return Response(serializer.data)

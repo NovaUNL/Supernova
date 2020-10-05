@@ -2,47 +2,47 @@ from college import models as college
 from college.choice_types import RoomType
 
 
-def build_schedule(turn_instances: [college.TurnInstance]):
+def build_schedule(shift_instances: [college.ShiftInstance]):
     week = [[], [], [], [], []]  # Monday-Friday turn instances
     unsortable = []  # Instances without schedule information
-    end = 8 * 60  # Last turn added, to crop the end of the schedule. Starts as 8AM when there are no turns
-    for turn_instance in turn_instances:  # Fetch every turn of this class instance
-        if hasattr(turn_instance, 'weekday') and turn_instance.weekday is not None \
-                and hasattr(turn_instance, 'start') and turn_instance.start is not None \
-                and hasattr(turn_instance, 'duration'):
-            week[turn_instance.weekday].append(turn_instance)
-            end = max(end, turn_instance.start + turn_instance.duration)
+    end = 8 * 60  # Last turn added, to crop the end of the schedule. Starts as 8AM when there are no shifts
+    for shift_instance in shift_instances:  # Fetch every turn of this class instance
+        if hasattr(shift_instance, 'weekday') and shift_instance.weekday is not None \
+                and hasattr(shift_instance, 'start') and shift_instance.start is not None \
+                and hasattr(shift_instance, 'duration'):
+            week[shift_instance.weekday].append(shift_instance)
+            end = max(end, shift_instance.start + shift_instance.duration)
         else:  # Otherwise it's an unsortable turn instance
-            unsortable.append(turn_instance)
+            unsortable.append(shift_instance)
 
     for day_index, day in enumerate(week):  # Sort days in chronological order
-        week[day_index] = sorted(day, key=(lambda turn_instance: turn_instance.start))
+        week[day_index] = sorted(day, key=(lambda shift_instance: shift_instance.start))
 
     # Outer to inner dimension: Week, day, column, row. Formatted means it displays properly, without intersection.
     formatted_week = [[[]], [[]], [[]], [[]], [[]]]
 
     # Sort turn instances into columns without intersection between elements
     for f_day, day in zip(formatted_week, week):
-        for turn_instance in day:
+        for shift_instance in day:
             allocated = False  # Whether this turn was successfully allocated in one column
             for column in f_day:  # Iterate through existing columns
                 has_space = True  # Whether this column had space to allocate the turn
                 for allocated_turn in column:  # For every turn already in the column
-                    allocated_turn: college.TurnInstance = allocated_turn
-                    turn_instance: college.TurnInstance = turn_instance
+                    allocated_turn: college.ShiftInstance = allocated_turn
+                    shift_instance: college.ShiftInstance = shift_instance
                     # If one of them intersect this one, then this column is no good, skip it
                     # TODO check only against the last added turn, if one intersects, that would be the one
-                    if turn_instance.intersects(allocated_turn):
+                    if shift_instance.intersects(allocated_turn):
                         has_space = False
                         break
                 if has_space:
-                    column.append(turn_instance)
+                    column.append(shift_instance)
                     allocated = True
                     break
                 else:
                     continue
             if not allocated:  # New column needed
-                f_day.append([turn_instance])  # Append a new column to this day with the element already on it
+                f_day.append([shift_instance])  # Append a new column to this day with the element already on it
 
     schedule = [[], [], [], [], []]
     for day, schedule_day in zip(formatted_week, schedule):
@@ -53,7 +53,7 @@ def build_schedule(turn_instances: [college.TurnInstance]):
                 margin = event.start - last_addition  # Minutes from the last element
                 gaps = margin // 30  # Every thirty minutes there's one gap
                 [schedule_column.append(None) for _ in range(gaps)]  # Fill empty gaps
-                schedule_column.append({'turn': event, 'rowspan': event.duration // 30,
+                schedule_column.append({'shift': event, 'rowspan': event.duration // 30,
                                         'start': event.minutes_to_str(event.start)})
                 # Well, I kinda lost myself when I came back to comment. This would be margin + event duration
                 last_addition += margin + 30  # But works with 30 minutes and doesn't with the event duration ¯\_(ツ )_/¯
@@ -109,11 +109,11 @@ def build_schedule(turn_instances: [college.TurnInstance]):
     return weekday_colspans, result, unsortable
 
 
-def build_turns_schedule(turns: [college.Turn]):
-    turn_instances = [turn_instance
-                      for turn in turns
-                      for turn_instance in turn.instances.exclude(disappeared=True).all()]
-    return build_schedule(turn_instances)
+def build_shifts_schedule(shifts: [college.Shift]):
+    shift_instances = [shift_instance
+                      for shift in shifts
+                      for shift_instance in shift.instances.exclude(disappeared=True).all()]
+    return build_schedule(shift_instances)
 
 
 def build_occupation_table(period, year, weekday):
@@ -122,43 +122,43 @@ def build_occupation_table(period, year, weekday):
     end_time = 20 * 60  # End at 20:00
     slots = (end_time - start_time) // 30
     building_room_timeslots = dict()
-    turn_instances = college.TurnInstance.objects \
+    shift_instances = college.ShiftInstance.objects \
         .select_related('room', 'room__building') \
         .order_by('room__building', 'room', 'start') \
         .filter(weekday=weekday,
                 start__lt=end_time,
-                turn__class_instance__period=period,
-                turn__class_instance__year=year) \
+                shift__class_instance__period=period,
+                shift__class_instance__year=year) \
         .exclude(room=None).all()
 
     current_room = None
     room_slots = None
-    for turn_instance in turn_instances:
-        if turn_instance.room != current_room:
-            if current_room is None or turn_instance.room.building != current_room.building:
+    for shift_instance in shift_instances:
+        if shift_instance.room != current_room:
+            if current_room is None or shift_instance.room.building != current_room.building:
                 building_dict = dict()
-                building_room_timeslots[turn_instance.room.building] = building_dict
+                building_room_timeslots[shift_instance.room.building] = building_dict
             else:
                 building_dict = building_room_timeslots[current_room.building]
 
-            current_room = turn_instance.room
+            current_room = shift_instance.room
             empty_state = False if current_room == RoomType.CLASSROOM or current_room.unlocked else None
             room_slots = slots * [empty_state]
             building_dict[current_room] = room_slots
 
         # Fill the corresponding slots for this turn instance
-        if turn_instance.start < start_time:
-            if turn_instance.start + turn_instance.duration > start_time:
-                busy_slots = (turn_instance.start - start_time + turn_instance.duration) // 30
+        if shift_instance.start < start_time:
+            if shift_instance.start + shift_instance.duration > start_time:
+                busy_slots = (shift_instance.start - start_time + shift_instance.duration) // 30
                 room_slots[:busy_slots] = busy_slots * [True]
             else:
                 continue
         else:
-            start_slot = (turn_instance.start - start_time) // 30
-            if turn_instance.start + turn_instance.duration > end_time:
-                relevant_duration = end_time - turn_instance.start
+            start_slot = (shift_instance.start - start_time) // 30
+            if shift_instance.start + shift_instance.duration > end_time:
+                relevant_duration = end_time - shift_instance.start
             else:
-                relevant_duration = turn_instance.duration
+                relevant_duration = shift_instance.duration
             busy_slots = relevant_duration // 30
             room_slots[start_slot:start_slot + busy_slots] = busy_slots * [True]
 
@@ -184,38 +184,38 @@ def build_building_occupation_table(period, year, weekday, building):
     end_time = 20 * 60  # End at 20:00
     slots = (end_time - start_time) // 30
     room_timeslots = dict()
-    turn_instances = college.TurnInstance.objects \
+    shift_instances = college.ShiftInstance.objects \
         .select_related('room', 'room__building') \
         .order_by('room', 'start') \
         .filter(weekday=weekday,
                 start__lt=end_time,
-                turn__class_instance__period=period,
-                turn__class_instance__year=year,
+                shift__class_instance__period=period,
+                shift__class_instance__year=year,
                 room__building=building) \
         .exclude(room=None).all()
 
     current_room = None
     room_slots = None
-    for turn_instance in turn_instances:
-        if turn_instance.room != current_room:
-            current_room = turn_instance.room
+    for shift_instance in shift_instances:
+        if shift_instance.room != current_room:
+            current_room = shift_instance.room
             empty_state = False if current_room == RoomType.CLASSROOM or current_room.unlocked else None
             room_slots = slots * [empty_state]
             room_timeslots[current_room] = room_slots
 
         # Fill the corresponding slots for this turn instance
-        if turn_instance.start < start_time:
-            if turn_instance.start + turn_instance.duration > start_time:
-                busy_slots = (turn_instance.start - start_time + turn_instance.duration) // 30
+        if shift_instance.start < start_time:
+            if shift_instance.start + shift_instance.duration > start_time:
+                busy_slots = (shift_instance.start - start_time + shift_instance.duration) // 30
                 room_slots[:busy_slots] = busy_slots * [True]
             else:
                 continue
         else:
-            start_slot = (turn_instance.start - start_time) // 30
-            if turn_instance.start + turn_instance.duration > end_time:
-                relevant_duration = end_time - turn_instance.start
+            start_slot = (shift_instance.start - start_time) // 30
+            if shift_instance.start + shift_instance.duration > end_time:
+                relevant_duration = end_time - shift_instance.start
             else:
-                relevant_duration = turn_instance.duration
+                relevant_duration = shift_instance.duration
             busy_slots = relevant_duration // 30
             room_slots[start_slot:start_slot + busy_slots] = busy_slots * [True]
 

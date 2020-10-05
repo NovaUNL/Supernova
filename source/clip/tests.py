@@ -22,13 +22,13 @@ class SyncTest(TestCase):
             period=2,
             external_id=100,
             information=dict())
-        self.turn = college.Turn.objects.create(
+        self.shift = college.Shift.objects.create(
             class_instance=self.class_instance,
             number=1,
-            turn_type=1,
+            shift_type=1,
             external_id=100)
-        self.turn_instance = college.TurnInstance.objects.create(
-            turn=self.turn,
+        self.shift_instance = college.ShiftInstance.objects.create(
+            shift=self.shift,
             weekday=2,
             start=600,
             external_id=100)
@@ -38,7 +38,7 @@ class SyncTest(TestCase):
             student=self.student,
             class_instance=self.class_instance,
             external_id=100)
-        college.TurnStudents.objects.create(student=self.student, turn=self.turn)
+        college.ShiftStudents.objects.create(student=self.student, shift=self.shift)
 
     def test_departments_sync(self):
         upstream = [
@@ -159,7 +159,7 @@ class SyncTest(TestCase):
             "id": 200,
             "info": {'foo': 'bar'},
             "period": 1,
-            "turns": [100, 1000, 1001],
+            "shifts": [100, 1000, 1001],
             "working_hours": 10,
             "year": 2020
         }
@@ -171,20 +171,20 @@ class SyncTest(TestCase):
         self.assertEquals(new_instance.period, upstream['period'])
         self.assertEquals(new_instance.year, upstream['year'])
 
-        turn_moved = college.Turn.objects.create(
+        shift_moved = college.Shift.objects.create(
             class_instance=self.class_instance,
             number=4,
-            turn_type=1,
+            shift_type=1,
             external_id=1000)
-        turn_stays = college.Turn.objects.create(
+        shift_stays = college.Shift.objects.create(
             class_instance=new_instance,
             number=2,
-            turn_type=1,
+            shift_type=1,
             external_id=1001)
-        turn_deleted = college.Turn.objects.create(
+        shift_deleted = college.Shift.objects.create(
             class_instance=new_instance,
             number=3,
-            turn_type=1,
+            shift_type=1,
             external_id=1002)
         enrollment_moved = college.Enrollment.objects.create(
             student=college.Student.objects.create(external_id=1000),
@@ -201,22 +201,22 @@ class SyncTest(TestCase):
 
         sync._upstream_sync_class_instance(upstream, 200, self.class_, False)
 
-        turn_moved.refresh_from_db()
-        turn_stays.refresh_from_db()
-        turn_deleted.refresh_from_db()
+        shift_moved.refresh_from_db()
+        shift_stays.refresh_from_db()
+        shift_deleted.refresh_from_db()
         enrollment_moved.refresh_from_db()
         enrollment_stays.refresh_from_db()
         enrollment_deleted.refresh_from_db()
 
-        self.assertFalse(turn_moved.disappeared)
-        self.assertFalse(turn_stays.disappeared)
-        self.assertTrue(turn_deleted.disappeared)
+        self.assertFalse(shift_moved.disappeared)
+        self.assertFalse(shift_stays.disappeared)
+        self.assertTrue(shift_deleted.disappeared)
         self.assertFalse(enrollment_moved.disappeared)
         self.assertFalse(enrollment_stays.disappeared)
         self.assertTrue(enrollment_deleted.disappeared)
-        self.assertEquals(turn_moved.class_instance, self.class_instance)
-        self.assertEquals(turn_stays.class_instance, new_instance)
-        self.assertEquals(turn_deleted.class_instance, new_instance)
+        self.assertEquals(shift_moved.class_instance, self.class_instance)
+        self.assertEquals(shift_stays.class_instance, new_instance)
+        self.assertEquals(shift_deleted.class_instance, new_instance)
         self.assertEquals(enrollment_moved.class_instance, self.class_instance)
         self.assertEquals(enrollment_stays.class_instance, new_instance)
         self.assertEquals(enrollment_deleted.class_instance, new_instance)
@@ -247,11 +247,11 @@ class SyncTest(TestCase):
         self.assertEquals(new_instance.year, 2020)  # Unchanged
         tweaked_upstream["year"] = upstream["year"]  # Revert
 
-    def test_turn_sync(self):
+    def test_shift_sync(self):
         upstream = {
             "class_instance_id": self.class_instance.external_id,
             "id": 200,
-            "instances": [self.turn_instance.external_id, 2000],
+            "instances": [self.shift_instance.external_id, 2000],
             "minutes": 60,
             "number": 5,
             "restrictions": "Foo Bar",
@@ -261,60 +261,60 @@ class SyncTest(TestCase):
             "type": "t",
         }
 
-        sync._upstream_sync_turn_info(upstream, 200, self.class_instance, False)
-        new_turn = college.Turn.objects.get(external_id=200)
-        self.assertEquals(new_turn.class_instance, self.class_instance)
-        self.assertEquals(new_turn.number, upstream["number"])
-        self.assertEquals(new_turn.turn_type, ctypes.TurnType.THEORETICAL)
-        self.assertEquals(new_turn.instances.count(), 0)
-        self.assertEquals(new_turn.students.count(), 1)
-        self.assertEquals(new_turn.teachers.count(), 1)
+        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, False)
+        new_shift = college.Shift.objects.get(external_id=200)
+        self.assertEquals(new_shift.class_instance, self.class_instance)
+        self.assertEquals(new_shift.number, upstream["number"])
+        self.assertEquals(new_shift.shift_type, ctypes.ShiftType.THEORETICAL)
+        self.assertEquals(new_shift.instances.count(), 0)
+        self.assertEquals(new_shift.students.count(), 1)
+        self.assertEquals(new_shift.teachers.count(), 1)
 
         teacher_stay = college.Teacher.objects.create(name="Dr. Bar", external_id=2000)
         teacher_deleted = college.Teacher.objects.create(name="Dr. Baz", external_id=2001)
         student_stay = college.Student.objects.create(external_id=2000)
         student_deleted = college.Student.objects.create(external_id=2001)
-        instance_stay = college.TurnInstance.objects.create(
-            turn=new_turn,
+        instance_stay = college.ShiftInstance.objects.create(
+            shift=new_shift,
             weekday=2,
             start=600,
             external_id=2000)
-        instance_deleted = college.TurnInstance.objects.create(
-            turn=new_turn,
+        instance_deleted = college.ShiftInstance.objects.create(
+            shift=new_shift,
             weekday=3,
             start=600,
             external_id=2001)
 
-        upstream["instances"] = [self.turn_instance.external_id, 2000, 2001]
+        upstream["instances"] = [self.shift_instance.external_id, 2000, 2001]
         upstream["students"] = [self.student.external_id, 2000, 2001]
         upstream["teachers"] = [self.teacher.external_id, 2000, 2001]
-        sync._upstream_sync_turn_info(upstream, 200, self.class_instance, False)
+        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, False)
         instance_stay.refresh_from_db()
         instance_deleted.refresh_from_db()
 
-        self.assertTrue(new_turn.teachers.filter(id=self.teacher.id).exists())
-        self.assertTrue(new_turn.teachers.filter(id=teacher_stay.id).exists())
-        self.assertTrue(new_turn.teachers.filter(id=teacher_deleted.id).exists())
-        self.assertTrue(college.TurnStudents.objects.filter(turn=new_turn, student=self.student.id).exists())
-        self.assertTrue(college.TurnStudents.objects.filter(turn=new_turn, student=self.student.id).exists())
-        self.assertEquals(instance_stay.turn, new_turn)
-        self.assertEquals(instance_deleted.turn, new_turn)
+        self.assertTrue(new_shift.teachers.filter(id=self.teacher.id).exists())
+        self.assertTrue(new_shift.teachers.filter(id=teacher_stay.id).exists())
+        self.assertTrue(new_shift.teachers.filter(id=teacher_deleted.id).exists())
+        self.assertTrue(college.ShiftStudents.objects.filter(shift=new_shift, student=self.student.id).exists())
+        self.assertTrue(college.ShiftStudents.objects.filter(shift=new_shift, student=self.student.id).exists())
+        self.assertEquals(instance_stay.shift, new_shift)
+        self.assertEquals(instance_deleted.shift, new_shift)
 
         # Delete _deleted relations
-        upstream["instances"] = [self.turn_instance.external_id, 2000]
+        upstream["instances"] = [self.shift_instance.external_id, 2000]
         upstream["students"] = [self.student.external_id, 2000]
         upstream["teachers"] = [self.teacher.external_id, 2000]
-        sync._upstream_sync_turn_info(upstream, 200, self.class_instance, False)
+        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, False)
         instance_stay.refresh_from_db()
         instance_deleted.refresh_from_db()
 
-        self.assertTrue(new_turn.teachers.filter(id=teacher_stay.id).exists())
-        self.assertFalse(new_turn.teachers.filter(id=teacher_deleted.id).exists())
-        self.assertTrue(college.TurnStudents.objects.filter(turn=new_turn, student=student_stay).exists())
-        self.assertFalse(college.TurnStudents.objects.filter(turn=new_turn, student=student_deleted).exists())
-        self.assertEquals(instance_stay.turn, new_turn)
-        self.assertFalse(instance_stay.turn.disappeared)
-        self.assertEquals(instance_deleted.turn, new_turn)
+        self.assertTrue(new_shift.teachers.filter(id=teacher_stay.id).exists())
+        self.assertFalse(new_shift.teachers.filter(id=teacher_deleted.id).exists())
+        self.assertTrue(college.ShiftStudents.objects.filter(shift=new_shift, student=student_stay).exists())
+        self.assertFalse(college.ShiftStudents.objects.filter(shift=new_shift, student=student_deleted).exists())
+        self.assertEquals(instance_stay.shift, new_shift)
+        self.assertFalse(instance_stay.shift.disappeared)
+        self.assertEquals(instance_deleted.shift, new_shift)
         self.assertTrue(instance_deleted.disappeared)
 
     # def test_disappearances(self):

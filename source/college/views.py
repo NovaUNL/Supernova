@@ -86,7 +86,7 @@ def department_view(request, department_id):
     context['classes'] = department.classes.filter(extinguished=False).order_by('name').all()
     # FIXME
     context['teachers'] = department.teachers \
-        .filter(turns__class_instance__year__gt=2015) \
+        .filter(shifts__class_instance__year__gt=2015) \
         .distinct().order_by('name')
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
@@ -99,7 +99,7 @@ def department_view(request, department_id):
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher, id=teacher_id)
     context = build_base_context(request)
-    turns = teacher.turns \
+    shifts = teacher.shifts \
         .filter(class_instance__year=settings.COLLEGE_YEAR, class_instance__period=settings.COLLEGE_PERIOD) \
         .exclude(disappeared=True).all()
     context['pcode'] = "c_teachers"
@@ -107,10 +107,10 @@ def teacher_view(request, teacher_id):
     context['teacher'] = teacher
     context['class_instances'] = \
         m.ClassInstance.objects \
-            .filter(turns__teachers=teacher) \
+            .filter(shifts__teachers=teacher) \
             .order_by('parent__name', 'year', 'period') \
             .distinct()
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_shifts_schedule(shifts)
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Professores', 'url': '#'},
@@ -180,29 +180,29 @@ def class_instance_view(request, instance_id):
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
 @permission_required('users.full_student_access')
-def class_instance_turns_view(request, instance_id):
+def class_instance_shifts_view(request, instance_id):
     # TODO optimize queries (4 duplicated in the schedule building)
     instance = get_object_or_404(
         m.ClassInstance.objects
-            .prefetch_related('turns__instances__room__building')
+            .prefetch_related('shifts__instances__room__building')
             .select_related('parent', 'department'),
         id=instance_id)
 
     context = build_base_context(request)
-    context['pcode'] = "c_class_instance_turns"
+    context['pcode'] = "c_class_instance_shifts"
     context['title'] = str(instance)
     context['instance'] = instance
-    turns = instance.turns \
+    shifts = instance.shifts \
         .exclude(disappeared=True) \
-        .order_by('turn_type', 'number') \
+        .order_by('shift_type', 'number') \
         .prefetch_related('instances__room__building') \
         .all()
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_turns_schedule(turns)
-    context['turns'] = turns
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_shifts_schedule(shifts)
+    context['shifts'] = shifts
     sub_nav = _class_instance_nav(instance)
     sub_nav.append({'name': 'Horário', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
-    return render(request, 'college/class_instance_turns.html', context)
+    return render(request, 'college/class_instance_shifts.html', context)
 
 
 @permission_required('users.full_student_access')
@@ -424,8 +424,8 @@ def building_view(request, building_id):
 def room_view(request, room_id):
     room = get_object_or_404(m.Room, id=room_id)
     building = room.building
-    turn_instances = room.turn_instances \
-        .filter(turn__class_instance__year=COLLEGE_YEAR, turn__class_instance__period=COLLEGE_PERIOD) \
+    shift_instances = room.shift_instances \
+        .filter(shift__class_instance__year=COLLEGE_YEAR, shift__class_instance__period=COLLEGE_PERIOD) \
         .exclude(disappeared=True) \
         .all()
     context = build_base_context(request)
@@ -438,7 +438,7 @@ def room_view(request, room_id):
         {'name': room.name, 'url': reverse('college:room', args=[room_id])}]
     context['building'] = building
     context['room'] = room
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(turn_instances)
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(shift_instances)
     return render(request, 'college/room.html', context)
 
 

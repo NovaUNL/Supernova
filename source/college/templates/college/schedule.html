@@ -1,4 +1,5 @@
-<table class="schedule">
+{% spaceless %}
+  <table class="schedule">
   <tr>
     <th>Hora</th>
     <th colspan="{{ weekday_spans.0 }}">Segunda-feira</th>
@@ -12,16 +13,15 @@
       <td>{{ row.0|safe }}</td>
       {% for element in row.1 %}
         {% if element %}
-          <td class="turn-container turn-{{ element.turn.turn.type_abbreviation|lower }}"
-              rowspan="{{ element.rowspan }}">
-            <div class="turn-info">
-              <a href="{% url 'college:class_instance' element.turn.turn.class_instance.id %}">
-                {{ element.turn.turn.class_instance.parent.abbreviation }}
+          <td class="shift-container shift-{{ element.shift.shift.type_abbreviation|lower }}" rowspan="{{ element.rowspan }}">
+            <div class="shift-info">
+              <a href="{% url 'college:class_instance' element.shift.shift.class_instance.id %}">
+                {{ element.shift.shift.class_instance.parent.abbreviation }}
               </a>
-              <span>{{ element.turn.turn.type_abbreviation }}{{ element.turn.turn.number }}</span>
-              {% if element.turn.room %}
-                <a href="{% url 'college:room' element.turn.room.id %}">
-                  {{ element.turn.room.short_str }}</a>
+              <span>{{ element.shift.shift.type_abbreviation }}{{ element.shift.shift.number }}</span>
+              {% if element.shift.room %}
+                <a href="{% url 'college:room' element.shift.room.id %}">
+                  {{ element.shift.room.short_str }}</a>
               {% endif %}
             </div>
           </td>
@@ -32,3 +32,4 @@
     </tr>
   {% endfor %}
 </table>
+{% endspaceless %}
