@@ -273,6 +273,20 @@ MASTODON_URL = "https://example.com/@supernova"
 GITLAB_URL = "https://gitlab.com/claudiop/Supernova/issues"
 TELEGRAM_URL = "https://t.me/example"
 
+REWARDS = {
+    'add_section': 200,
+    'add_exercise': 100,
+    'major_tweak': 0,
+    'minor_tweak': 0,
+    'post_question': -5,
+    'post_answer': 10,
+    'accepted_answer': 100,
+    'vote_cost': -1,
+    'upvoted': 10,
+    'downvoted': -15,
+    'invited': 1000,
+}
+
 with open(CONFIG_PATH) as file:
     locals().update(json.load(file))
 
