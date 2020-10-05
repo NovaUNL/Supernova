@@ -15,14 +15,8 @@
   {% csrf_token %}
   <div class="col">
     {% include 'groups/header.html' %}
-    <div class="row nowrap padded">
-      <div class="col">
-        {% block group_content %}{% endblock %}
-      </div>
-      <div class="col nogrow noshrink">
-        {% include 'groups/navigation.html' %}
-        {% block group_sidebar %}{% endblock %}
-      </div>
+    <div class="col padded">
+      {% block group_content %}{% endblock %}
     </div>
   </div>
 {% endblock %}

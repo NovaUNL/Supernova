@@ -1,164 +1,152 @@
-{% extends 'supernova/base.html' %}
+{% extends 'groups/base_simple.html' %}
 {% load static %}
 {% block head %}
   <style>
-    {% if  group.image.url %}
-      .header-decorator:after {
-        background-image: url("{{ group.image.url}}");
-        background-size: contain;
-        background-position: right;
-      }
+    {% if group.image %}
+        .header-background:after {
+            background-image: url("{{ group.image.url}}");
+        }
     {% endif %}
   </style>
 {% endblock %}
 
-{% block content_wrapper %}
-  <div class="col">
-    <div class="header-decorator">
-      <div>
-        <h1>Agenda de {{ group.name }}</h1>
-        <h3>@{{ group.abbreviation }}</h3>
+{% block group_content %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Agenda pontual</h2></div>
+    <div class="pane-content">
+      {% if once_entries.exists %}
+        <table>
+          <tr>
+            <th>Titulo</th>
+            <th>Dia</th>
+            <th>Duração</th>
+          </tr>
+          {% for entry in once_entries %}
+            <tr>
+              <td>{{ entry.title }}</td>
+              <td>{{ entry.datetime }}</td>
+              <td>{{ entry.duration }} minutos</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% else %}
+        <p>Sem eventos</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Agenda recorrente</h2></div>
+    <div class="pane-content">
+      {% if periodic_entries.exists %}
+        <table>
+          <tr>
+            <th>Titulo</th>
+            <th>Dia</th>
+            <th>Duração</th>
+            <th>Valido de</th>
+            <th>até</th>
+          </tr>
+          {% for entry in periodic_entries %}
+            <tr>
+              <td>{{ entry.title }}</td>
+              <td>{{ entry.get_weekday_display }} ás {{ entry.time }}</td>
+              <td>{{ entry.duration }} minutos</td>
+              <td>{{ entry.start_date }}</td>
+              <td>{{ entry.end_date }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% else %}
+        <p>Sem eventos</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row baseline">
+    <div class="flex-pane grow">
+      <div class="pane-title bg-grad"><h2>Adicionar evento recorrente</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=periodic">
+          {% csrf_token %}
+          {{ periodic_form.errors }}
+          <div class="form-block">
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Título</h4>
+                {{ periodic_form.title }}
+              </div>
+              <div class="form-row-description">
+                Um título curto e claro para o evento, como "Atendimento presencial", "Treino", ...
+              </div>
+            </div>
+            <hr>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Dia</h4>
+              </div>
+              <div class="form-row-description">
+                Altura em que se estima a ocorrência.<br>
+                Durações de 0 minutos implicam desconhecimento.
+              </div>
+              <div>
+                {{ periodic_form.weekday }} ás {{ periodic_form.time }} durante {{ periodic_form.duration }} minutos
+              </div>
+            </div>
+            <hr>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Validade</h4>
+              </div>
+              <div class="form-row-description">
+                Bloco calendário no qual o evento ocorre recorrentemente.
+              </div>
+              <div>
+                De {{ periodic_form.start_date }}
+                até {{ periodic_form.end_date }}
+              </div>
+            </div>
+          </div>
+          <input class="ui-btn end" type="submit" value="Adicionar"/>
+          {{ periodic_form.media }}
+        </form>
       </div>
     </div>
-    <div class="col padded">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Agenda pontual</h2></div>
-        <div class="pane-content">
-          {% if once_entries.exists %}
-            <table>
-              <tr>
-                <th>Titulo</th>
-                <th>Dia</th>
-                <th>Duração</th>
-              </tr>
-              {% for entry in once_entries %}
-                <tr>
-                  <td>{{ entry.title }}</td>
-                  <td>{{ entry.datetime }}</td>
-                  <td>{{ entry.duration }} minutos</td>
-                </tr>
-              {% endfor %}
-            </table>
-          {% else %}
-            <p>Sem eventos</p>
-          {% endif %}
-        </div>
-      </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Agenda recorrente</h2></div>
-        <div class="pane-content">
-          {% if periodic_entries.exists %}
-            <table>
-              <tr>
-                <th>Titulo</th>
-                <th>Dia</th>
-                <th>Duração</th>
-                <th>Valido de</th>
-                <th>até</th>
-              </tr>
-              {% for entry in periodic_entries %}
-                <tr>
-                  <td>{{ entry.title }}</td>
-                  <td>{{ entry.get_weekday_display }} ás {{ entry.time }}</td>
-                  <td>{{ entry.duration }} minutos</td>
-                  <td>{{ entry.start_date }}</td>
-                  <td>{{ entry.end_date }}</td>
-                </tr>
-              {% endfor %}
-            </table>
-          {% else %}
-            <p>Sem eventos</p>
-          {% endif %}
-        </div>
-      </div>
-      <div class="row baseline">
-        <div class="flex-pane grow">
-          <div class="pane-title bg-grad"><h2>Adicionar evento recorrente</h2></div>
-          <div class="pane-content">
-            <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=periodic">
-              {% csrf_token %}
-              {{ periodic_form.errors }}
-              <div class="form-block">
-                <div class="form-row">
-                  <div class="form-row-top">
-                    <h4>Título</h4>
-                    {{ periodic_form.title }}
-                  </div>
-                  <div class="form-row-description">
-                    Um título curto e claro para o evento, como "Atendimento presencial", "Treino", ...
-                  </div>
-                </div>
-                <hr>
-                <div class="form-row">
-                  <div class="form-row-top">
-                    <h4>Dia</h4>
-                  </div>
-                  <div class="form-row-description">
-                    Altura em que se estima a ocorrência.<br>
-                    Durações de 0 minutos implicam desconhecimento.
-                  </div>
-                  <div>
-                    {{ periodic_form.weekday }} ás {{ periodic_form.time }} durante {{ periodic_form.duration }} minutos
-                  </div>
-                </div>
-                <hr>
-                <div class="form-row">
-                  <div class="form-row-top">
-                    <h4>Validade</h4>
-                  </div>
-                  <div class="form-row-description">
-                    Bloco calendário no qual o evento ocorre recorrentemente.
-                  </div>
-                  <div>
-                    De {{ periodic_form.start_date }}
-                    até {{ periodic_form.end_date }}
-                  </div>
-                </div>
+    <div class="flex-pane grow">
+      <div class="pane-title bg-grad"><h2>Adicionar evento pontual</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=once">
+          {% csrf_token %}
+          {{ once_form.errors }}
+          <div class="form-block">
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Título</h4>
+                {{ once_form.title }}
               </div>
-              <input class="ui-btn end" type="submit" value="Adicionar"/>
-              {{ periodic_form.media }}
-            </form>
-          </div>
-        </div>
-        <div class="flex-pane grow">
-          <div class="pane-title bg-grad"><h2>Adicionar evento pontual</h2></div>
-          <div class="pane-content">
-            <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=once">
-              {% csrf_token %}
-              {{ once_form.errors }}
-              <div class="form-block">
-                <div class="form-row">
-                  <div class="form-row-top">
-                    <h4>Título</h4>
-                    {{ once_form.title }}
-                  </div>
-                  <div class="form-row-description">
-                    Um título curto e claro para o evento, como "Palestra abc", "Workshop xyz", ...
-                  </div>
-                </div>
-                <hr>
-                <div class="form-row">
-                  <div class="form-row-top">
-                    <h4>Dia</h4>
-                    <div>{{ once_form.datetime }}</div>
-                  </div>
-                </div>
-                <hr>
-                <div class="form-row">
-                  <div class="form-row-top">
-                    <h4>Duração estimada</h4>
-                    <div>{{ once_form.duration }} minutos</div>
-                  </div>
-                  <div class="form-row-description">
-                    Durações de 0 minutos implicam desconhecimento.
-                  </div>
-                </div>
+              <div class="form-row-description">
+                Um título curto e claro para o evento, como "Palestra abc", "Workshop xyz", ...
               </div>
-              <input class="ui-btn end" type="submit" value="Adicionar"/>
-              {{ once_form.media }}
-            </form>
+            </div>
+            <hr>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Dia</h4>
+                <div>{{ once_form.datetime }}</div>
+              </div>
+            </div>
+            <hr>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Duração estimada</h4>
+                <div>{{ once_form.duration }} minutos</div>
+              </div>
+              <div class="form-row-description">
+                Durações de 0 minutos implicam desconhecimento.
+              </div>
+            </div>
           </div>
-        </div>
+          <input class="ui-btn end" type="submit" value="Adicionar"/>
+          {{ once_form.media }}
+        </form>
       </div>
     </div>
   </div>

@@ -1,22 +1,24 @@
-{% extends 'supernova/base.html' %}
+{% extends 'groups/base_simple.html' %}
 {% block head %}
-  <style>
-    {% if  group.image.url %}
-      .header-decorator:after {
-        background-image: url("{{ group.image.url}}");
-        background-size: contain;
-        background-position: right;
-      }
-    {% endif %}
-  </style>
+  {% spaceless %}
+    <style>
+      {% if group.image %}
+          .header-background:after {
+              background-image: url("{{ group.image.url}}");
+          }
+      {% endif %}
+    </style>
+  {% endspaceless %}
 {% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <div>
-        <h1>Definições de {{ group.name }}</h1>
-        <h3>@{{ group.abbreviation }}</h3>
+    <div class="header-background faded contain right">
+      <div class="header-decorator">
+        <div>
+          <h1>{{ group.name }}</h1>
+          <h3>@{{ group.abbreviation }}</h3>
+        </div>
       </div>
     </div>
     <div class="col padded">

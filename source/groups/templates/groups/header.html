@@ -1,17 +1,9 @@
 {% load static %}
 
 {% block head %}
-  <style>
-    {% if  group.image %}
-        .header-decorator:after {
-            background-image: url("{{ group.image.url}}");
-            background-size: contain;
-            background-position: right;
-        }
-    {% endif %}
-  </style>
 {% endblock %}
 
+{% if group.image %}<div class="header-background faded contain right">{% endif %}
 <div class="header-decorator">
   <div class="header-decorator-options">
     <ul>
@@ -31,4 +23,5 @@
     <h3>@{{ group.abbreviation }}</h3>
   </div>
 </div>
+{% if group.image %}</div>{% endif %}
 <script>setSubscribeButton();</script>

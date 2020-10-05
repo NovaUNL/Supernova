@@ -472,10 +472,7 @@
 
 /* Content decorator styles */
 .header-decorator
-  min-height: 150px
   background-color: var(--header-bg)
-  background-size: cover
-  background-position: center
   position: relative
   display: flex
   flex-direction: row
@@ -483,22 +480,11 @@
   align-items: center
   padding: 10px 20px
 
-  &:after
-    content: ' '
-    position: absolute
-    left: 0
-    width: 100%
-    height: 100%
-    z-index: -1
-    opacity: 0.3
-    background-repeat: no-repeat
-    background-size: cover
-    background-position: center
+  h1, h2, h3, a
+    color: var(--text-hc)
 
   h1
-    color: var(--text)
     font-size: 3em
-    text-shadow: var(--header-bg) 0 0 5px
     display: inline
 
     > img
@@ -508,16 +494,52 @@
       vertical-align: middle
       padding: 0 10px
 
-  h1 a
-    color: var(--text-hc)
-
   h3
-    color: var(--text)
     font-size: 2em
-    text-shadow: var(--header-bg) 0 0 3px
 
-  h3 a
-    color: var(--text-hc)
+
+  @media #{$highres}
+    min-height: 150px
+
+  @media #{$lowres}
+    background-color: var(--header-bg) !important
+    background-image: none !important
+
+    h1
+      font-size: 2.2em
+
+    h3
+      font-size: 1.6em
+
+.header-background
+  background-color: var(--header-bg)
+  background-repeat: no-repeat
+  position: relative
+
+  &.right:after
+    background-position: right
+
+  &.contain:after
+    background-size: contain
+
+  @media #{$midhighres}
+    > .header-decorator
+      background-color: unset
+      z-index: 2
+
+    &:after
+      content: ' '
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
+      background-repeat: no-repeat
+      background-size: cover
+      background-position: center
+
+    &.faded:after
+      opacity: 0.3
 
 .header-decorator-options
   position: absolute

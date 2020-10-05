@@ -12,7 +12,9 @@
   {% endif %}
   {% for announcement in announcements %}
     <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>{{ announcement.title }}</h2></div>
+      <div class="pane-title bg-grad">
+        <h2><a href="{% url 'groups:announcement' group.abbreviation announcement.id %}">{{ announcement.title }}</a></h2>
+      </div>
       <div class="pane-content">
         {{ announcement.content_html | safe }}
       </div>
