@@ -6,7 +6,8 @@
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>Estudantes de {{ course }}</h2></div>
       <div class="pane-content">
-        <table class="stylized">
+        <table class="stylized grow">
+          <thead>
           <tr>
             <th>Numero</th>
             <th>Nome</th>
@@ -15,6 +16,7 @@
             <th>Matriculas</th>
             <th>ECTS</th>
           </tr>
+          </thead>
           {% for student in students %}
             {% if student.user_id %}
               <tr>
@@ -22,17 +24,17 @@
                 <td><a href="{% url 'users:profile' student.user.nickname %}">{{ student.user.get_full_name }}</a></td>
                 <td>{{ student.first_year|add:"-1" }}</td>
                 <td>{{ student.last_year }}</td>
-                <td>TODO</td>
-                <td>TODO</td>
+                <td>-</td>
+                <td>-</td>
               </tr>
             {% else %}
               <tr>
                 <td>{{ student.number }}</td>
-                <td>{{ student.clip_student.name }}</td>
+                <td>{{ student.external_data.name }}</td>
                 <td>{{ student.first_year|add:"-1" }}</td>
                 <td>{{ student.last_year }}</td>
-                <td>TODO</td>
-                <td>TODO</td>
+                <td>-</td>
+                <td>-</td>
               </tr>
             {% endif %}
           {% endfor %}
