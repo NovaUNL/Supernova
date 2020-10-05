@@ -29,6 +29,7 @@ def service_view(request, service_abbr):
     context['pcode'] = "c_campus_service"
     context['title'] = f"Serviço {service.name}"
     context['service'] = service
+    context['meals'] = None
     context['sub_nav'] = [
         {'name': 'Serviços', 'url': reverse('services:services')},
         {'name': service.name, 'url': reverse('services:service', args=[service_abbr])}]

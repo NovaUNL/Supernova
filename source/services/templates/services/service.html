@@ -2,9 +2,9 @@
 
 {% block head %}
   <style>
-    .left {
-      text-align: left;
-    }
+      .left {
+          text-align: left;
+      }
   </style>
 {% endblock %}
 
@@ -13,38 +13,57 @@
     <div class="header-decorator">
       <h1>{{ service.name }}</h1>
     </div>
-    <div class="row padded">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Horário</h2></div>
-        <div class="pane-content">
-          <table style="min-width: 100%">
-            <tr class="left">
-              <th></th>
-              <th>Abertura</th>
-              <th>Fecho</th>
-            </tr>
-            {% for entry in service.schedule.all %}
-              <tr>
-                <td>{{ entry.get_weekday_display }}</td>
-                <td>{{ entry.start }}</td>
-                <td>{{ entry.end }}</td>
-              </tr>
-            {% endfor %}
-          </table>
-        </div>
+    <div class="row padded nowrap">
+      <div class="col">
+        {% if service.serves_meals %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Ementa</h2></div>
+            <div class="pane-content">
+              {% if meals %}
+                <table>
+                  <tr class="left">
+                  </tr>
+                  {% for entry in service.meal_items.all %}
+                    <tr>
+                      <td>{{ entry }}</td>
+                    </tr>
+                  {% endfor %}
+                </table>
+              {% else %}
+                Sem ementa disponível.
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        {% if service.sells_goods %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Preçário</h2></div>
+            <div class="pane-content">
+              Sem preçário disponível.
+            </div>
+          </div>
+        {% endif %}
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Ementa</h2></div>
-        <div class="pane-content">
-          <table style="min-width: 100%">
-            <tr class="left">
-            </tr>
-            {% for entry in service.meal_items.all %}
-              <tr>
-                <td>{{ entry }}</td>
+      <div class="col nogrow noshrink">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            <h3>Horário</h3>
+            <table class="stylized grow">
+              <tr class="left">
+                <th></th>
+                <th>Abertura</th>
+                <th>Fecho</th>
               </tr>
-            {% endfor %}
-          </table>
+              {% for entry in service.schedule.all %}
+                <tr>
+                  <td>{{ entry.get_weekday_display }}</td>
+                  <td>{{ entry.start }}</td>
+                  <td>{{ entry.end }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
         </div>
       </div>
     </div>

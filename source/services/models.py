@@ -54,6 +54,14 @@ class Service(djm.Model):
     def __str__(self):
         return "{} ({})".format(self.name, '-')
 
+    @property
+    def serves_meals(self):
+        return self.type == Service.MEAL_PLACE
+
+    @property
+    def sells_goods(self):
+        return self.type in (Service.MEAL_PLACE, Service.STORE)
+
 
 class ServiceScheduleEntry(djm.Model):
     """An entry on a service's schedule."""
