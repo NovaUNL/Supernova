@@ -2,9 +2,6 @@
 
 
 {% block content_wrapper %}
-  <div class="col">
-
-  </div>
   <div class="col padded">
     {% for services in services_by_type.values %}
       <div class="flex-pane">
@@ -15,11 +12,11 @@
           <div class="flex-wrapper">
             {% for service in services %}
               <a href="{% url 'services:service' service.abbreviation %}">
-                  <div class="flex-grid-item"{% if service.picture %} style="background-image: url({{ service.picture.url }})" {% endif %}>
-                    <div class="flex-grid-item-top">
-                      <span>{{ service.name }}</span>
-                    </div>
+                <div class="flex-grid-item"{% if service.picture %} style="background-image: url({{ service.picture.url }})" {% endif %}>
+                  <div class="flex-grid-item-top">
+                    <span>{{ service.name }}</span>
                   </div>
+                </div>
               </a>
             {% endfor %}
           </div>
