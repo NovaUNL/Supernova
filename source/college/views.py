@@ -13,6 +13,7 @@ import settings
 from college.choice_types import Degree, RoomType
 from college import models as m
 from college import schedules
+from college import choice_types as ctypes
 from college.utils import get_transportation_departures
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.views import build_base_context
@@ -235,11 +236,25 @@ def class_instance_files_view(request, instance_id):
     context['pcode'] = "c_class_instance_files"
     context['title'] = str(instance)
     context['instance'] = instance
-    context['files'] = instance.files \
-        .select_related('file', 'uploader_teacher') \
-        .order_by('upload_datetime') \
-        .reverse()
 
+    is_enrolled = instance.enrollments.filter(student__user=request.user).exists()
+    files = list(instance.files \
+                 .select_related('file', 'uploader_teacher') \
+                 .order_by('upload_datetime') \
+                 .reverse())
+    allowed_files = []
+    denied_files = []
+    suppressed = False
+    for file in files:
+        if file.license == ctypes.FileAvailability.NOBODY:
+            denied_files.append((file, 'nobody'))
+        elif file.license == ctypes.FileAvailability.ENROLLED and not is_enrolled:
+            denied_files.append((file, 'enrolled'))
+        allowed_files.append(file)
+    context['suppressed_files'] = suppressed
+    context['files'] = allowed_files
+    context['denied_files'] = denied_files
+    context['instance_files'] = files
     sub_nav = _class_instance_nav(instance)
     sub_nav.append({'name': 'Ficheiros', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
@@ -254,9 +269,13 @@ def class_instance_file_download(request, instance_id, file_hash):
         file__hash=file_hash)
     response = HttpResponse()
     response['Content-Type'] = class_file.file.mime
-    response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
     if 'inline' not in request.GET:
         response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
+
+    if class_file.file.external:
+        response['X-Accel-Redirect'] = f'/clip/{file_hash[:2]}/{file_hash[2:]}'
+    else:
+        raise Exception("Not implemented")
     return response
 
 

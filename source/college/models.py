@@ -273,9 +273,9 @@ class ClassInstance(Importable):
     students = djm.ManyToManyField(Student, through='Enrollment')
     #: Misc information associated to this class
     information = djm.JSONField(encoder=DjangoJSONEncoder)
-    #: License of the file being shared
+    #: Default file license
     license = djm.IntegerField(choices=ctypes.FileLicense.CHOICES, default=ctypes.FileAvailability.NOBODY)
-    #: Availability of this file
+    #: Default file availability
     availability = djm.IntegerField(choices=ctypes.FileAvailability.CHOICES, default=ctypes.FileAvailability.NOBODY)
 
     class Meta:
@@ -449,12 +449,14 @@ PREVIEWABLE_MIMES = {
 
 class File(Importable):
     """A file in the filesystem"""
+    #: File SHA1 hash
+    hash = djm.CharField(max_length=40, primary_key=True)
     #: File size in (kilo)?bytes
     size = djm.IntegerField()
-    #: File SHA1 hash
-    hash = djm.CharField(max_length=40, null=True)
     #: File mimetype
     mime = djm.CharField(null=True, max_length=256)
+    #: Whether the file is managed externally
+    external = djm.BooleanField(default=False)
 
     def __str__(self):
         return self.hash

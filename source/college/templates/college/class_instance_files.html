@@ -4,13 +4,13 @@
 
 {% block head %}
   <style>
-    .dllink > span {
-      background-image: url("{% static 'img/icons/download.svg' %}");
-    }
+      .dllink > span {
+          background-image: url("{% static 'img/icons/download.svg' %}");
+      }
 
-    .viewlink > span {
-      background-image: url("{% static 'img/icons/magnify.svg' %}");
-    }
+      .viewlink > span {
+          background-image: url("{% static 'img/icons/magnify.svg' %}");
+      }
   </style>
 {% endblock %}
 
@@ -23,14 +23,19 @@
           <div class="pane-title bg-grad"><h2>Ficheiros</h2></div>
           <div class="pane-content">
             <div class="file-list">
-              {% for ifile in instance_files %}
+              {% if files|length == 0 %}
+                Esta unidade curricular não tem ficheiros. <small>(<a class="disabled">Submeter</a>)</small>
+              {% endif %}
+              {% for ifile in files %}
                 <div class="file" data-mime="{{ ifile.file.mime }}">
                   <div class="file-body">
-                    <h4><a href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">{{ ifile.name }}</a></h4>
+                    <h4>
+                      <a href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">{{ ifile.name }}</a>
+                    </h4>
                     <span>
                       ({% if ifile.file.size < 1024 %}{{ ifile.file.size }} Bytes
-                       {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
-                       {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
+                      {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
+                      {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
                     </span>
                     <div class="info">
                       {% if ifile.type %} <span class="ui-tag">{{ ifile.get_type_display }}</span>{% endif %}
@@ -55,12 +60,42 @@
                       <span></span>
                     </a>
                   </div>
-
                 </div>
               {% endfor %}
             </div>
           </div>
         </div>
+        {% if  denied_files|length > 0 %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Ficheiros restritos</h2></div>
+            <div class="pane-content">
+              <div class="file-list">
+                {% for reason, file in denied_files %}
+                  <div class="file" data-mime="{{ ifile.file.mime }}">
+                    <div class="file-body">
+                      <h4>{{ ifile.name }}</h4>
+                      <span>
+                      ({% if ifile.file.size < 1024 %}{{ ifile.file.size }} Bytes
+                        {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
+                        {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
+                    </span>
+                      <div class="info">
+                        {% if ifile.type %} <span class="ui-tag">{{ ifile.get_type_display }}</span>{% endif %}
+                        {% if ifile.uploader %}
+                          Por <span>{{ ifile.uploader.name }}</span>
+                        {% elif ifile.uploader_teacher %}
+                          Por <span>{{ ifile.uploader_teacher.short_name }}</span>
+                        {% endif %}
+                        em <span>{{ ifile.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</span>
+                      </div>
+                      <span class="clearfix"></span>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
       </div>
       <div class="col nogrow noshrink">
         {% include 'college/class_navigation.html' %}
