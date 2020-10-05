@@ -246,10 +246,10 @@ class Class(Importable):
     description = djm.TextField(max_length=1024, null=True, blank=True)
     #: ECTS awarded by this class (2 credits = 1 ECTS)
     credits = djm.IntegerField(null=True, blank=True)
-    #: Department that lectures this class
-    department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
     #: Whether this class still exists
     extinguished = djm.BooleanField(default=False)
+    #: Department that currently lectures this class (Cached attribute)
+    department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
 
     class Meta:
         ordering = ['name']
@@ -263,6 +263,8 @@ class ClassInstance(Importable):
     """An instance of a class with an associated point in time"""
     #: Class this refers to
     parent = djm.ForeignKey(Class, on_delete=djm.PROTECT, related_name='instances')
+    #: Department this instance belonged to
+    department = djm.ForeignKey(Department, on_delete=djm.PROTECT, related_name='class_instances')
     #: Period this happened on (enumeration)
     period = djm.IntegerField(choices=ctypes.Period.CHOICES)
     #: Year of lecturing

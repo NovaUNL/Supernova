@@ -75,8 +75,14 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Informação</h2></div>
           <div class="pane-content">
-            <b>Departamento</b>:
-            <a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a>
+            <h3>Departamento</h3>
+            {% if instance.department %}
+              <a class="indented" href="{% url 'college:department' instance.department.id %}">Departamento de {{ instance.department.name }}</a>
+            {% else %}
+              <span class="indented">Desconhecido</span>
+            {% endif %}
+            <h3>Inscritos</h3>
+            <span class="indented">{{ instance.enrolled_count }} alunos inscritos (entre {{ instance.course_count }} cursos) </span>
           </div>
         </div>
         {% include 'college/class_editions.html' %}

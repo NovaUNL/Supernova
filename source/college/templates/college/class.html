@@ -7,7 +7,11 @@
     <div class="header-decorator">
       <div>
         <h1>{{ class_obj.name }}</h1>
-        <h3><a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a></h3>
+        {% if class_obj.department %}
+          <h3><a href="{% url 'college:department' department.id %}">Departamento de {{ department.name }}</a></h3>
+        {% else %}
+          <h3>Departamento desconhecido</h3>
+        {% endif %}
       </div>
     </div>
     <div class="row padded">
@@ -15,13 +19,17 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Descrição</h2></div>
           <div class="pane-content">
-            {{ class_obj.description }}
+            {% if class_obj.description %}
+              {{ class_obj.description }}
+            {% else %}
+              Sem uma descrição introduzida.
+            {% endif %}
           </div>
         </div>
         <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Atual plano curricular</h2></div>
+          <div class="pane-title bg-grad"><h2>Planos curriculares</h2></div>
           <div class="pane-content">
-            TODO
+            Planos curriculares incompletos.
           </div>
         </div>
       </div>
