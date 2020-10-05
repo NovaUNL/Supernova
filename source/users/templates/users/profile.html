@@ -36,9 +36,11 @@
                     <b>CLIP ID: </b>{{ student.abbreviation }}<br>
                     <b>Numero: </b>{{ student.number }}<br>
                     <b>Curso: </b>
-                    <a href="{% url 'college:course' student.course.id %}">
-                      {{ student.course.abbreviation }}
-                    </a>
+                    {% if student.course %}
+                      <a href="{% url 'college:course' student.course.id %}">{{ student.course.abbreviation }}</a>
+                    {% else %}
+                      Desconhecido
+                    {% endif %}
                   </div>
                 {% endfor %}
                 {% for student in secondary_students %}
@@ -122,13 +124,17 @@
       <div class="col">
         <div class="row">
           <div class="col">
-            {% if permissions.schedule_visibility and schedule %}
+            {% if permissions.schedule_visibility %}
               <div class="flex-pane">
                 <div class="pane-title bg-grad">
                   <h2>Horário</h2>
                 </div>
                 <div class="pane-content">
-                  {% include 'college/schedule.html' %}
+                  {% if schedule %}
+                    {% include 'college/schedule.html' %}
+                  {% else %}
+                    O teu horário encontra-se vazio. A aparição de inscrições recentes pode levar até 48 horas.
+                  {% endif %}
                 </div>
               </div>
             {% endif %}
