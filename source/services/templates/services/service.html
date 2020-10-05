@@ -5,14 +5,27 @@
       .left {
           text-align: left;
       }
+      {% if service.picture %}
+          .header-background:after {
+              background-image: url("{{ service.picture.url }}")
+          }
+      {% endif %}
   </style>
 {% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <h1>{{ service.name }}</h1>
-    </div>
+    {% if service.picture %}
+      <div class="header-background faded contain right">
+        <div class="header-decorator">
+          <h1>{{ service.name }}</h1>
+        </div>
+      </div>
+    {% else %}
+      <div class="header-decorator">
+        <h1>{{ service.name }}</h1>
+      </div>
+    {% endif %}
     <div class="row padded nowrap">
       <div class="col">
         {% if service.serves_meals %}

@@ -4,40 +4,29 @@
 
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
-  <style>
-      .flex-wrapper > div {
-          margin: 10px 20px;
-          flex-basis: 475px;
-      }
-
-      {% if area.image %}
-          .header-decorator {
-              background-color: unset;
-          }
-          .header-decorator:after {
-              background-image: url("{% get_media_prefix %}{{ area.image }}")
-          }
-      {% elif area.img_url %}
-          .header-decorator {
-              background-color: unset;
-          }
-          .header-decorator:after {
-              background-image: url("{{ area.img_url}}")
-          }
-      {% endif %}
-
-      .flex-grid-item {
-          background-size: cover;
-          background-position: center
-      }
-  </style>
+  {% if area.image or area.img_url %}
+    <style>
+        .header-background:after {
+            background-image:
+                {% if area.image %}url("{{ area.image.url }}"){% else %}url("{{ area.img_url}}"){% endif %}
+        }
+    </style>
+  {% endif %}
 {% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <h1>{{ area.title }}</h1>
-    </div>
+    {% if area.image or area.img_url %}
+      <div class="header-background faded">
+        <div class="header-decorator">
+          <h1>{{ area.title }}</h1>
+        </div>
+      </div>
+    {% else %}
+      <div class="header-decorator">
+        <h1>{{ area.title }}</h1>
+      </div>
+    {% endif %}
     <div class="col padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
@@ -46,7 +35,7 @@
             {% for subarea in subareas %}
               <a href="{% url 'learning:subarea' subarea.id %}">
                 {% if subarea.image %}
-                  <div class="flex-grid-item" style="background-image: url({% get_media_prefix %}{{ subarea.image }})">
+                  <div class="flex-grid-item" style="background-image: url({{ subarea.image.url }})">
                 {% elif subarea.img_url %}
                   <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }})">
                 {% else %}

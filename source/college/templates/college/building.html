@@ -13,18 +13,26 @@
   <script src="{% static 'college/map/map.js' %}"></script>
   {% if  building.picture %}
     <style>
-      .header-decorator:after {
-        background-image: url("{{ building.picture.url }}");
-      }
+        .header-background:after {
+            background-image: url("{{ building.picture.url }}");
+        }
     </style>
   {% endif %}
 {% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <h1>{{ building.name }}</h1>
-    </div>
+    {% if building.picture %}
+      <div class="header-background faded">
+        <div class="header-decorator">
+          <h1>{{ building.name }}</h1>
+        </div>
+      </div>
+    {% else %}
+      <div class="header-decorator">
+        <h1>{{ building.name }}</h1>
+      </div>
+    {% endif %}
     <div class="row padded nowrap">
       <div class="col">
         <div class="row">

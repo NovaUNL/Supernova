@@ -4,29 +4,32 @@
 
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
-  <style>
-    {% if  area.img_url %}
-        .header-decorator:after {
+
+  {% if subarea.image %}
+    <style>
+        .header-background:after {
+            background-image: url("{{ subarea.image.url}}");
+        }
+    </style>
+  {% elif subarea.img_url %}
+    <style>
+        .header-background:after {
             background-image: url("{{ subarea.img_url}}");
         }
-    {% endif %}
-  </style>
+    </style>
+  {% endif %}
 {% endblock %}
+
 
 {% block content_wrapper %}
   <div class="col">
-    <div class="header-decorator">
-      <div class="header-decorator-options">
-        <ul>
-          {% if perms.synopses.change_section %}<li><a href="{% url 'learning:subarea_section_create' subarea.id %}">Criar nova secção</a></li>{% endif %}
-          {% if perms.synopses.add_section %}<li><a href="{% url 'learning:subarea_edit' subarea.id %}">Editar</a></li>{% endif %}
-        </ul>
+    {% if subarea.image or subarea.img_url %}
+      <div class="header-background faded">
+        {% include 'learning/subarea_header.html' %}
       </div>
-      <div>
-        <h1>{{ subarea.title }}</h1>
-        <h3><a href="{% url 'learning:area' area.id %}">{{ area }}</a></h3>
-      </div>
-    </div>
+    {% else %}
+      {% include 'learning/subarea_header.html' %}
+    {% endif %}
     <div class="col padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
