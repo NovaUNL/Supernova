@@ -1,0 +1,33 @@
+{% spaceless %}
+  <hr>
+  <div class="form-block">
+    <h3>Informação externa</h3>
+    <div class="form-row">
+      <div class="form-row-top">
+        <h4>Congelar dados</h4>
+        {{ form.frozen }}
+      </div>
+      <div class="form-row-description">
+        Bloquear alterações vindas de sincronização com dados externos.
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-row-top">
+        <h4>Última atualização</h4>
+        <span>{{ form.instance.external_update }}</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-row-top">
+        <h4>Identificador externo</h4>
+        <span>{{ form.instance.external_id }}</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-row-top">
+        <h4>Dados externos anexados</h4>
+      </div>
+      <pre>{{ form.instance.external_data }}</pre>
+    </div>
+  </div>
+{% endspaceless %}

@@ -1,46 +1,76 @@
 {% extends 'supernova/base.html' %}
 
+{% load static %}
+
 {% block content_wrapper %}
-  <div class="col">
-    <div class="header-decorator">
-      <h1>{{ teacher.name }}</h1>
-    </div>
-    <div class="row padded">
-      <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Horario</h2></div>
-          <div class="pane-content">
-            <div style="overflow-x: auto;">
-              {% include 'college/schedule.html' %}
-            </div>
-            <b style="color: #850000"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
-              Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.
-            </b>
+  <div class="header-decorator">
+    {% if perms.college.change_teacher %}
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'college:teacher_edit' teacher.id %}">Editar</a></li>
+        </ul>
+      </div>
+    {% endif %}
+    {% if teacher.picture %}
+      <h1><img class="highres" src="{{ teacher.picture.url }}">{{ teacher.name }}</h1>
+    {% else %}
+      <h1><img class="highres" src="{% static 'img/user.svg' %}">{{ teacher.name }}</h1>
+    {% endif %}
+  </div>
+  <div class="row padded">
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Horario</h2></div>
+        <div class="pane-content">
+          <div style="overflow-x: auto;">
+            {% include 'college/schedule.html' %}
           </div>
+          <b style="color: #850000"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
+            Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.
+          </b>
         </div>
       </div>
-      <div class="col nogrow noshrink">
+    </div>
+    <div class="col nogrow noshrink">
+      {% if teacher.url or teacher.email %}
         <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Departamentos</h2></div>
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
           <div class="pane-content">
-            <ul class="menu">
-              {% for department in teacher.departments.all %}
-                <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
-              {% endfor %}
-            </ul>
+            {% if teacher.url %}
+              <h3>Página pessoal</h3>
+              <a class="indented" href="{{ teacher.url }}">Link</a>
+            {% endif %}
+            {% if teacher.email %}
+              <h3>Email</h3>
+              <a class="indented" href="mailto:{{ teacher.email }}">{{ teacher.email }}</a>
+            {% endif %}
+            {% if teacher.phone %}
+              <h3>Telefóne</h3>
+              <a class="indented" href="tel:{{ teacher.phone }}">{{ teacher.phone }}</a>
+            {% endif %}
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
-          <div class="pane-content">
-            <ul class="menu">
-              {% for instance in class_instances %}
-                <li>
-                  <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
+      {% endif %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Departamentos</h2></div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for department in teacher.departments.all %}
+              <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for instance in class_instances %}
+              <li>
+                <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
+              </li>
+            {% endfor %}
+          </ul>
         </div>
       </div>
     </div>

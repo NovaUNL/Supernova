@@ -15,10 +15,7 @@
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
-      <h1>
-        {{ room }},
-        <small><a href="{% url 'college:building' building.id %}">{{ building.name }}</a></small>
-      </h1>
+      <h1>{{ room }}, <small><a href="{% url 'college:building' building.id %}">{{ building.name }}</a></small></h1>
       {% if room.description %}
         <h3>{{ room.description }}</h3>
       {% endif %}

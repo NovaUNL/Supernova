@@ -1,15 +1,13 @@
 from datetime import datetime, time
 
 from django.conf import settings
-from django.core.cache import cache
-from django.db import models as djm, transaction
+from django.db import models as djm
 from django.urls import reverse
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 from polymorphic.models import PolymorphicModel
 
 from college.choice_types import WEEKDAY_CHOICES
-from college.models import Place
 from users import models as users
 
 
@@ -34,7 +32,7 @@ class Group(users.Subscribable):
     #: | TODO either integrate or remove django groups
     members = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='groups_custom')
     #: The place where this group is headquartered and commonly found.
-    place = djm.ForeignKey(Place, on_delete=djm.SET_NULL, null=True, blank=True, related_name='groups')
+    place = djm.ForeignKey('college.Place', on_delete=djm.SET_NULL, null=True, blank=True, related_name='groups')
     #: An image that presents this group.
     image = djm.ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
 
@@ -336,7 +334,7 @@ class Event(djm.Model):
     #: Expected duration for the event
     duration = djm.IntegerField(null=True, blank=True)
     #: Location where the event happens
-    place = djm.ForeignKey(Place, null=True, blank=True, on_delete=djm.SET_NULL, related_name='events')
+    place = djm.ForeignKey('college.Place', null=True, blank=True, on_delete=djm.SET_NULL, related_name='events')
     #: Limit of persons in this event
     capacity = djm.IntegerField(null=True, blank=True)
     #: | Flag telling that this is the official enrollment platform for the event

@@ -1,17 +1,20 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction
 from django.db.models import Q, Count
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 import settings
 from college.choice_types import Degree, RoomType
 from college import models as m
+from college import forms as f
 from college import schedules
 from college import choice_types as ctypes
 from college.utils import get_transportation_departures
@@ -95,6 +98,52 @@ def department_view(request, department_id):
     return render(request, 'college/department.html', context)
 
 
+@login_required
+@permission_required('course.change_department', raise_exception=True)
+def department_edit_view(request, department_id):
+    department = get_object_or_404(
+        m.Department.objects,
+        id=department_id)
+
+    if request.method == 'POST':
+        form = f.DepartmentForm(request.POST, request.FILES, instance=department)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(department=department, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=department,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+            return redirect('college:department', department_id=department_id)
+    else:
+        form = f.DepartmentForm(instance=department)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_department"
+    context['title'] = f'Departamento de {department.name}'
+    context['department'] = department
+    context['form'] = form
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        {'name': department.name, 'url': reverse('college:department', args=[department_id])},
+        {'name': 'Editar', 'url': reverse('college:department_edit', args=[department_id])}]
+    return render(request, 'college/department_edit.html', context)
+
+
+@login_required
 @permission_required('users.full_student_access')
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher, id=teacher_id)
@@ -114,8 +163,51 @@ def teacher_view(request, teacher_id):
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Professores', 'url': '#'},
-        {'name': teacher.name, 'url': '#'}]
+        {'name': teacher.name, 'url': reverse('college:teacher', args=[teacher_id])}]
     return render(request, 'college/teacher.html', context)
+
+
+@login_required
+@permission_required('course.change_teacher', raise_exception=True)
+def teacher_edit_view(request, teacher_id):
+    teacher = get_object_or_404(m.Teacher, id=teacher_id)
+
+    if request.method == 'POST':
+        form = f.TeacherForm(request.POST, request.FILES, instance=teacher)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=10)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(teacher=teacher, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=teacher,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+            return redirect('college:teacher', teacher_id=teacher_id)
+    else:
+        form = f.TeacherForm(instance=teacher)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_teachers"
+    context['title'] = teacher.name
+    context['teacher'] = teacher
+    context['form'] = form
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Professores'},
+        {'name': teacher.name, 'url': reverse('college:teacher', args=[teacher_id])},
+        {'name': 'Editar', 'url': '#'}]
+    return render(request, 'college/teacher_edit.html', context)
 
 
 def _class__nav(klass):
@@ -144,6 +236,45 @@ def class_view(request, class_id):
     return render(request, 'college/class.html', context)
 
 
+def class_edit_view(request, class_id):
+    klass = get_object_or_404(m.Class.objects, id=class_id)
+
+    if request.method == 'POST':
+        form = f.ClassForm(request.POST, request.FILES, instance=klass)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(klass=klass, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=klass,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+            return redirect('college:class', class_id=class_id)
+    else:
+        form = f.ClassForm(instance=klass)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_class"
+    context['title'] = klass.name
+    context['klass'] = klass
+    context['form'] = form
+    sub_nav = _class__nav(klass)
+    sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_edit.html', context)
+
+
 def _class_instance_nav(instance):
     department_nav = {'name': 'Sem departamento'} if instance.department is None else {
         'name': instance.department.name, 'url': reverse('college:department', args=[instance.department.id])
@@ -156,6 +287,7 @@ def _class_instance_nav(instance):
         {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance.id])}]
 
 
+@login_required
 @permission_required('users.full_student_access')
 def class_instance_view(request, instance_id):
     instance = get_object_or_404(
@@ -200,11 +332,12 @@ def class_instance_shifts_view(request, instance_id):
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_shifts_schedule(shifts)
     context['shifts'] = shifts
     sub_nav = _class_instance_nav(instance)
-    sub_nav.append({'name': 'Horário', 'url': request.get_raw_uri()})
+    sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_shifts.html', context)
 
 
+@login_required
 @permission_required('users.full_student_access')
 def class_instance_enrolled_view(request, instance_id):
     instance = get_object_or_404(
@@ -226,6 +359,7 @@ def class_instance_enrolled_view(request, instance_id):
     return render(request, 'college/class_instance_enrolled.html', context)
 
 
+@login_required
 @permission_required('users.full_student_access')
 def class_instance_files_view(request, instance_id):
     instance = get_object_or_404(
@@ -261,6 +395,7 @@ def class_instance_files_view(request, instance_id):
     return render(request, 'college/class_instance_files.html', context)
 
 
+@login_required
 @permission_required('users.full_student_access')
 def class_instance_file_download(request, instance_id, file_hash):
     class_file = get_object_or_404(
@@ -302,18 +437,24 @@ def courses_view(request):
     return render(request, 'college/courses.html', context)
 
 
+def _course__nav(course):
+    department_nav = {'name': 'Sem departamento'} if course.department is None else {
+        'name': course.department.name, 'url': reverse('college:department', args=[course.department.id])
+    }
+    return [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Departamentos', 'url': reverse('college:departments')},
+        department_nav,
+        {'name': str(course), 'url': reverse('college:course', args=[course.id])}]
+
+
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
 def course_view(request, course_id):
-    course = get_object_or_404(m.Course, id=course_id)
-    department = course.department
-    if department is None:
-        department_name = "Desconhecido"
-        department_url = "#"
-    else:
-        department_name = str(department)
-        department_url = reverse('college:department', args=[department.id])
+    course = get_object_or_404(
+        m.Course.objects.select_related('department', 'coordinator'),
+        id=course_id)
 
     context = build_base_context(request)
     context['pcode'] = "c_course"
@@ -325,12 +466,51 @@ def course_view(request, course_id):
         course.students \
             .filter(first_year=settings.COLLEGE_YEAR, last_year=settings.COLLEGE_YEAR) \
             .count()
-    context['sub_nav'] = [
-        {'name': 'Faculdade', 'url': reverse('college:index')},
-        {'name': 'Departamentos', 'url': reverse('college:departments')},
-        {'name': department_name, 'url': department_url},
-        {'name': course, 'url': reverse('college:course', args=[course_id])}]
+    context['sub_nav'] = _course__nav(course)
     return render(request, 'college/course.html', context)
+
+
+@login_required
+@permission_required('course.change_course', raise_exception=True)
+def course_edit_view(request, course_id):
+    course = get_object_or_404(
+        m.Course.objects.select_related('department', 'coordinator'),
+        id=course_id)
+
+    if request.method == 'POST':
+        form = f.CourseForm(request.POST, request.FILES, instance=course)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(course=course, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=course,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+            return redirect('college:course', course_id=course_id)
+    else:
+        form = f.CourseForm(instance=course)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_course"
+    context['title'] = str(course)
+    context['course'] = course
+    context['form'] = form
+    sub_nav = _course__nav(course)
+    sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/course_edit.html', context)
 
 
 @cache_page(3600 * 24)

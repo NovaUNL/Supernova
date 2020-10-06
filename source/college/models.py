@@ -2,6 +2,8 @@ import logging
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.core.serializers.json import DjangoJSONEncoder
@@ -9,6 +11,7 @@ from django.utils import timezone
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
+from users.models import Activity
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from . import choice_types as ctypes
 
@@ -121,13 +124,28 @@ class Department(Importable):
     #: Full name of the department
     name = djm.CharField(max_length=128)
     #: Verbose description of the department role and activities.
-    description = djm.TextField(max_length=4096, null=True, blank=True)
+    description = MarkdownxField(null=True, blank=True)
     #: Headquarters building
     building = djm.ForeignKey(Building, on_delete=djm.PROTECT, null=True, blank=True, related_name='departments')
     #: Flag telling whether the department still exists
     extinguished = djm.BooleanField(default=True)
     #: Picture illustrating this department
     picture = djm.ImageField(upload_to=department_pic_path, null=True, blank=True)
+    #: URL to this departments's official page
+    url = djm.URLField(max_length=256, null=True, blank=True)
+    #: Phone number in the format +country number,extension
+    phone = djm.CharField(max_length=20, null=True, blank=True)
+    #: This department's general email address
+    email = djm.EmailField(null=True, blank=True)
+    #: This department's president
+    president = djm.ForeignKey(
+        'Teacher',
+        null=True,
+        blank=True,
+        on_delete=djm.PROTECT,
+        related_name='presided_departments')
+    #: Changes performed on this department object
+    changes = GenericRelation('AcademicDataChange', related_query_name='department')
 
     class Meta:
         ordering = ['name']
@@ -222,8 +240,17 @@ class Course(Importable):
     active = djm.BooleanField(default=False)
     #: Department that manages this course
     department = djm.ForeignKey('Department', null=True, blank=True, on_delete=djm.PROTECT, related_name='courses')
+    #: Teacher which coordinates this course
+    coordinator = djm.ForeignKey(
+        'Teacher',
+        null=True,
+        blank=True,
+        on_delete=djm.PROTECT,
+        related_name='coordinated_courses')
     #: URL to this course's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
+    #: Changes performed on this course object
+    changes = GenericRelation('AcademicDataChange', related_query_name='course')
 
     class Meta:
         ordering = ['name']
@@ -243,13 +270,17 @@ class Class(Importable):
     #: Abbreviation for this class
     abbreviation = djm.CharField(max_length=16, default='---')
     #: Verbose description of the class
-    description = djm.TextField(max_length=1024, null=True, blank=True)
+    description = MarkdownxField(null=True, blank=True)
     #: ECTS awarded by this class (2 credits = 1 ECTS)
     credits = djm.IntegerField(null=True, blank=True)
     #: Whether this class still exists
     extinguished = djm.BooleanField(default=False)
     #: Department that currently lectures this class (Cached attribute)
     department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
+    #: URL to this classe's official page
+    url = djm.URLField(max_length=256, null=True, blank=True)
+    #: Changes performed on this class object
+    changes = GenericRelation('AcademicDataChange', related_query_name='klass')
 
     class Meta:
         ordering = ['name']
@@ -257,6 +288,14 @@ class Class(Importable):
 
     def __str__(self):
         return self.name
+
+    @property
+    def ects(self):
+        return self.credits/2
+
+    @property
+    def description_html(self):
+        return markdownify(self.description)
 
 
 class ClassInstance(Importable):
@@ -395,13 +434,24 @@ class ShiftInstance(Importable):
         return "%02d:%02d" % (minutes // 60, minutes % 60)
 
 
+def teacher_pic_path(teacher, filename):
+    return f'c/t/{teacher.id}/pic.{filename.split(".")[-1].lower()}'
+
+
+class TeacherRank(djm.Model):
+    #: The name of this rank
+    name = djm.CharField(max_length=32)
+
+
 class Teacher(Importable):
     """
     | A person who teaches.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
-    #: Full teacher name (TODO deprecate)
+    #: Full teacher name (TODO deprecate, only needed for imported data)
     name = djm.TextField(max_length=100)
+    #: This teacher's rank
+    rank = djm.ForeignKey(TeacherRank, on_delete=djm.PROTECT, null=True, blank=True)
     #: Departments this teacher has worked for
     departments = djm.ManyToManyField(Department, related_name="teachers")
     #: User this teacher is associated with
@@ -411,6 +461,16 @@ class Teacher(Importable):
     first_year = djm.IntegerField(null=True, blank=True)
     #: Cache field which stores the last year on which this teacher was seen as active
     last_year = djm.IntegerField(null=True, blank=True)
+    #: URL to this teacher's official page
+    url = djm.URLField(max_length=256, null=True, blank=True)
+    #: This teacher's email
+    email = djm.EmailField(max_length=256, null=True, blank=True)
+    #: Phone number in the format +country number,extension
+    phone = djm.CharField(max_length=20, null=True, blank=True)
+    #:  A picture of this teacher
+    picture = djm.ImageField(upload_to=teacher_pic_path, null=True, blank=True)
+    #: Changes performed on this teacher's object
+    changes = GenericRelation('AcademicDataChange', related_query_name='teacher')
 
     def __str__(self):
         return f"{self.name} ({self.iid})"
@@ -538,3 +598,18 @@ class Curriculum(djm.Model):
     class Meta:
         ordering = ['year', 'period_type', 'period']
         unique_together = ['course', 'corresponding_class']
+
+
+class AcademicDataChange(Activity):
+    """An activity is an action taken by a user at a given point in time."""
+    content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
+    object_id = djm.PositiveIntegerField()
+    changed_object = GenericForeignKey('content_type', 'object_id')
+    #: A dict describing changes {attrs=>[], new=>{attr=>val}, old=>{attr=>val}}
+    changes = djm.JSONField()
+
+    class Meta:
+        verbose_name_plural = "activities"
+
+    def __str__(self):
+        return f'Atributos {self.changes["attrs"]} alterados em {self.changed_object}.'

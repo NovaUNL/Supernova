@@ -1,0 +1,48 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <div>
+      <h1>{{ klass.name }}</h1>
+      {% if klass.department %}
+        <h3>
+          <a href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
+        </h3>
+      {% else %}
+        <h3>Departamento desconhecido</h3>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar unidade curricular</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'college:class_edit' klass.id %}">
+          {% csrf_token %}
+          <div class="form-block">
+            <h3>Informação</h3>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Descrição da cadeira</h4>
+              </div>
+              <div>{{ form.description }}</div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Página oficial</h4>
+                {{ form.url }}
+              </div>
+              <div class="form-row-description">
+                Página oficial desta unidade curricular nos portais da universidade.
+              </div>
+            </div>
+          </div>
+          {% include 'college/importable_edit.html' %}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

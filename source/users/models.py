@@ -11,7 +11,6 @@ from polymorphic.models import PolymorphicModel
 
 import settings
 from college.choice_types import WEEKDAY_CHOICES
-from college.models import Course
 
 
 def user_profile_pic_path(user, filename):
@@ -60,7 +59,7 @@ class User(AbstractUser):
     # Cached fields
     is_student = djm.BooleanField(default=False)
     is_teacher = djm.BooleanField(default=False)
-    course = djm.ForeignKey(Course, on_delete=djm.CASCADE, null=True, blank=True, default=None)
+    course = djm.ForeignKey('college.Course', on_delete=djm.CASCADE, null=True, blank=True, default=None)
     points = djm.IntegerField(default=0)
 
     class Meta:

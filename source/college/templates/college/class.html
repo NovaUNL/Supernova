@@ -3,54 +3,78 @@
 {% load static %}
 
 {% block content_wrapper %}
-  <div class="col">
-    <div class="header-decorator">
-      <div>
-        <h1>{{ klass.name }}</h1>
-        {% if klass.department %}
-          <h3>
-            <a href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
-          </h3>
-        {% else %}
-          <h3>Departamento desconhecido</h3>
-        {% endif %}
+  <div class="header-decorator">
+    {% if perms.college.change_class %}
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'college:class_edit' klass.id %}">Editar</a></li>
+        </ul>
+      </div>
+    {% endif %}
+    <div>
+      <h1>{{ klass.name }}</h1>
+      {% if klass.department %}
+        <h3>
+          <a href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
+        </h3>
+      {% else %}
+        <h3>Departamento desconhecido</h3>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row padded">
+    <div class="col big">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+        <div class="pane-content">
+          {% if klass.description %}
+            {{ klass.description_html|safe }}
+          {% else %}
+            Sem uma descrição introduzida.
+          {% endif %}
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Planos curriculares</h2></div>
+        <div class="pane-content">
+          Planos curriculares incompletos.
+        </div>
       </div>
     </div>
-    <div class="row padded">
-      <div class="col big">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Descrição</h2></div>
-          <div class="pane-content">
-            {% if klass.description %}
-              {{ klass.description }}
-            {% else %}
-              Sem uma descrição introduzida.
-            {% endif %}
-          </div>
-        </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Planos curriculares</h2></div>
-          <div class="pane-content">
-            Planos curriculares incompletos.
-          </div>
+    <div class="col nogrow">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane-content">
+          <h3>Abreviação</h3>
+          <span class="indented">{{ klass.abbreviation }}</span>
+          <h3>Departamento</h3>
+          {% if klass.department %}
+            <a class="indented" href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
+          {% else %}
+            <span class="indented">Departamento desconhecido</span>
+          {% endif %}
+          {% if klass.url %}
+            <h3>Página</h3>
+            <a class="indented" href="{{ klass.url }}">Link</a>
+          {% endif %}
+          <h3>Créditos</h3>
+          <span class="indented">{{ klass.ects }} ECTS</span>
         </div>
       </div>
-      <div class="col nogrow">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Edições</h2></div>
-          <div class="pane-content">
-            {% if perms.users.full_student_access %}
-              <ul class="menu">
-                {% for instance in instances %}
-                  <li>
-                    <a href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              A consulta de edições está restrita a alunos e docentes.
-            {% endif %}
-          </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Edições</h2></div>
+        <div class="pane-content">
+          {% if perms.users.full_student_access %}
+            <ul class="menu">
+              {% for instance in instances %}
+                <li>
+                  <a href="{% url 'college:class_instance' instance.id %}">{{ instance.occasion }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            A consulta de edições está restrita a alunos e docentes.
+          {% endif %}
         </div>
       </div>
     </div>

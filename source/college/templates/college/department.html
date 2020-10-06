@@ -2,6 +2,13 @@
 
 {% block content_wrapper %}
   <div class="header-decorator">
+    {% if perms.college.change_department %}
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'college:department_edit' department.id %}">Editar</a></li>
+        </ul>
+      </div>
+    {% endif %}
     <h1>Departamento de {{ department.name }}</h1>
   </div>
   <div class="row nowrap padded">
@@ -21,6 +28,10 @@
           </span>
           <h3>Localização</h3>
           <a class="indented" href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
+          {% if department.url %}
+            <h3>Página oficial</h3>
+            <a class="indented" href="{{ department.url }}">Link</a>
+          {% endif %}
         </div>
       </div>
       <div class="flex-pane">

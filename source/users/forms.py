@@ -303,6 +303,9 @@ class AccountPermissionsForm(djf.Form):
     can_change_synopsis_sections = djf.BooleanField(widget=SliderInput(), required=False)
     can_add_exercises = djf.BooleanField(widget=SliderInput(), required=False)
     can_change_exercises = djf.BooleanField(widget=SliderInput(), required=False)
+    can_change_courses = djf.BooleanField(widget=SliderInput(), required=False)
+    can_change_departments = djf.BooleanField(widget=SliderInput(), required=False)
+    can_change_teachers = djf.BooleanField(widget=SliderInput(), required=False)
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -324,7 +327,10 @@ class AccountPermissionsForm(djf.Form):
             ('can_add_synopsis_sections', learning.Section, 'add_section'),
             ('can_change_synopsis_sections', learning.Section, 'change_section'),
             ('can_add_exercises', learning.Exercise, 'add_exercise'),
-            ('can_change_exercises', learning.Exercise, 'change_exercise')
+            ('can_change_exercises', learning.Exercise, 'change_exercise'),
+            ('can_change_courses', college.Course, 'change_course'),
+            ('can_change_departments', college.Department, 'change_department'),
+            ('can_change_teachers', college.Teacher, 'change_teacher')
         ]
 
         for field, model, permission_name in permissions:
@@ -346,6 +352,9 @@ class AccountPermissionsForm(djf.Form):
             'can_change_synopsis_sections': self.user.has_perm('learning.change_section'),
             'can_add_exercises': self.user.has_perm('learning.add_exercise'),
             'can_change_exercises': self.user.has_perm('learning.change_exercise'),
+            'can_change_courses': self.user.has_perm('college.change_course'),
+            'can_change_departments': self.user.has_perm('college.change_department'),
+            'can_change_teachers': self.user.has_perm('college.change_teacher'),
         }
 
 

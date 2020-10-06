@@ -1,0 +1,62 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <h1>{{ teacher.name }}</h1>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar professor</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'college:teacher_edit' teacher.id %}">
+          {% csrf_token %}
+          <div class="form-block">
+            <h3>Informação</h3>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Foto</h4>
+              </div>
+              {{ form.picture }}
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Página pessoal</h4>
+                {{ form.url }}
+              </div>
+              <div class="form-row-description">Página web oficial deste docente.</div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Telefone</h4>
+                {{ form.phone }}
+              </div>
+              <div class="form-row-description">
+                O contacto telefónico oficial deste docente, no formato [+351 número][,extensão].
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Email</h4>
+                {{ form.email }}
+              </div>
+              <div class="form-row-description">
+                O contacto de correio eletrónico oficial deste docente.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Cargo</h4>
+                {{ form.rank }}
+              </div>
+              <div class="form-row-description">
+                O cargo ocupado por este docente.
+              </div>
+            </div>
+          </div>
+          {% include 'college/importable_edit.html' %}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

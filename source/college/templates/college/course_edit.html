@@ -1,0 +1,64 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <div>
+      <h1>{{ course }}</h1>
+      {% if course.department is None %}
+        <h3>Sem departamento associado</h3>
+      {% else %}
+        <h3>
+          <a href="{% url 'college:department' course.department.id %}">Departamento de {{ course.department }}</a>
+        </h3>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar curso</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'college:course_edit' course.id %}">
+          {% csrf_token %}
+          <div class="form-block">
+            <h3>Informação</h3>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Descrição do curso</h4>
+              </div>
+              <div>{{ form.description }}</div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Departamento</h4>
+                {{ form.department }}
+              </div>
+              <div class="form-row-description">
+                Departamento que gere este curso.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Página oficial</h4>
+                {{ form.url }}
+              </div>
+              <div class="form-row-description">
+                Página oficial deste curso nos portais da universidade.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Coordenador</h4>
+                {{ form.coordinator }}
+              </div>
+              <div class="form-row-description">
+                O docente que presta coordenação aos alunos deste curso.
+              </div>
+            </div>
+          </div>
+          {% include 'college/importable_edit.html' %}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
