@@ -3,6 +3,7 @@ import re
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
+from django.db.models import Sum
 
 import settings
 from users import models as m
@@ -128,6 +129,7 @@ def calculate_points(user):
     points += settings.REWARDS['add_exercise'] \
               * learning.Exercise.objects.filter(author=user).count()
     points += settings.REWARDS['invited'] * m.Invite.objects.filter(issuer=user).exclude(registration=None).count()
+    points += user.point_offsets.annotate(point_sum=Sum('amount')).point_sum
     user.points = points
     user.save(update_fields=['points'])
 

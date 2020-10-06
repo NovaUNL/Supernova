@@ -4,6 +4,7 @@ from itertools import chain
 from django.core.cache import cache
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
+from django.urls import reverse
 from django.utils.timezone import make_aware
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
@@ -358,3 +359,45 @@ class SchedulePeriodic(ScheduleEntry):
 
     def __str__(self):
         return f"{self.title}, {self.get_weekday_display()} ás {time.strftime(self.time, '%H:%M')}"
+
+
+class ReputationOffset(PolymorphicModel):
+    """An award or penalization with effect in an user's reputation points."""
+    #: :py:class:`users.models.User` that received the award.
+    receiver = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='point_offsets')
+    #: Datetime at which the notification was issued
+    issue_timestamp = djm.DateTimeField(auto_now_add=True)
+    #: Amount of points being given
+    amount = djm.IntegerField()
+    #: Reason
+    reason = djm.CharField(max_length=300, null=True)
+
+    def __str__(self):
+        return f'{self.issue_timestamp}({self.receiver})'
+
+    def issue_notification(self):
+        ReputationOffsetNotification.objects.create(reputation_offset=self, receiver=self.receiver)
+
+
+class ReputationOffsetNotification(Notification):
+    """Notification generated when a reputation offset is issued."""
+    #: The message that will be presented with this notification.
+    reputation_offset = djm.ForeignKey(ReputationOffset, on_delete=djm.CASCADE)
+
+    def __str__(self):
+        points = self.reputation_offset.amount
+        if reason := self.reputation_offset.reason:
+            if points < 0:
+                return f'Penalização de {points} pontos: {reason}.'
+            else:
+                return f'Atribuição de {points} pontos: {reason}.'
+        else:
+            if points < 0:
+                return f'Penalização de {points} pontos.'
+            else:
+                return f'Atribuição de {points} pontos.'
+
+    def to_api(self):
+        return {'id': self.id,
+                'message': str(self.activity),
+                'url': reverse('users:reputation', self.reputation_offset.receiver.nickname)}
