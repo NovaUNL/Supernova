@@ -85,7 +85,7 @@
             {% if children|length > 0 %}
               <hr>
               <h2>Subsecções</h2>
-              <ul class="content-list">
+              <ul class="entity-list">
                 {% for child in children %}
                   <li>
                     <a href="{% url 'learning:subsection' section.id child.id %}">{{ child.title }}</a>
@@ -103,7 +103,7 @@
           </div>
           <div class="pane-content">
             <h3>Parentes</h3>
-            <ul class="content-list">
+            <ul class="entity-list">
               {% if section.subarea %}
                 <li>
                   <a href="{% url 'learning:subarea' section.subarea.id %}">{{ section.subarea.title }}</a>
@@ -129,7 +129,7 @@
             {% endif %}
             <h3>Unidades curriculares</h3>
             {% if section.classes.exists %}
-              <ul class="content-list">
+              <ul class="entity-list">
                 {% for class in section.classes.all %}
                   <li><a href="{% url 'learning:class' class.id %}">{{ class.name }}</a></li>
                 {% endfor %}
@@ -159,7 +159,7 @@
             </span>
             <h3>Recursos</h3>
             {% if section.resources.exists %}
-              <ul class="content-list">
+              <ul class="entity-list">
                 {% for resource in section.resources.all %}
                   <li><a href="{{ resource.template_url }}">{{ resource.template_title|truncatechars:35 }}</a></li>
                 {% endfor %}
@@ -189,7 +189,7 @@
             <span class="indented">{% if section.validated %}Sim{% else %}Não{% endif %}.</span>
             <h3><a href="{% url 'learning:section_authors' section.id %}">Autoria</a></h3>
             {% if author_log %}
-              <ul class="content-list">
+              <ul class="entity-list">
                 {% for log in author_log %}
                   <li><a href="{% url 'users:profile' log.author.nickname %}">{{ log.author.nickname }}</a></li>
                 {% endfor %}

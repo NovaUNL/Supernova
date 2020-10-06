@@ -37,7 +37,7 @@
           <h2>Descrição</h2>
           {{ subarea.description|safe }}
           <h2>Secções</h2>
-          <ul class="content-list">
+          <ul class="entity-list">
             {% for section in sections %}
               <li><a href="{% url 'learning:subarea_section' subarea.id section.id %}">{{ section.title }}</a>
                 <span class="highres">({{ section.children_count }} subsecções)</span>

@@ -65,13 +65,13 @@
           <div class="pane-title bg-grad"><h2>Meta</h2></div>
           <div class="pane-content">
             <h3>Secções</h3>
-            <ul class="content-list">
+            <ul class="entity-list">
               {% for section in exercise.synopses_sections.all %}
                 <li><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></li>
               {% endfor %}
             </ul>
             <h3>Unidades curriculares</h3>
-            <ul class="content-list">
+            <ul class="entity-list">
               {% for class in classes %}
                 <li><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></li>
               {% endfor %}
