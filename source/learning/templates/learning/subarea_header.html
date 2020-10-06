@@ -1,0 +1,14 @@
+<div class="header-decorator">
+  <div class="header-decorator-options">
+    <ul>
+      {% if perms.synopses.change_section %}
+        <li><a href="{% url 'learning:subarea_section_create' subarea.id %}">Criar nova secção</a></li>{% endif %}
+      {% if perms.synopses.add_section %}
+        <li><a href="{% url 'learning:subarea_edit' subarea.id %}">Editar</a></li>{% endif %}
+    </ul>
+  </div>
+  <div>
+    <h1>{{ subarea.title }}</h1>
+    <h3><a href="{% url 'learning:area' area.id %}">{{ area }}</a></h3>
+  </div>
+</div>
