@@ -524,6 +524,7 @@
       height: 128px
       background-position: center
       background-size: cover !important
+      flex-shrink: 0
 
       &.done
         border-color: var(--green)
@@ -547,3 +548,17 @@
 
     &.done
       background-color: var(--green)
+
+
+  @media #{$lowmidres}
+    .circle
+      border-radius: 32px !important
+      width: 64px !important
+      height: 64px !important
+
+    .link
+      height: 20px !important
+      margin-left: 32px !important
+
+    .unlock-list
+      display: none
