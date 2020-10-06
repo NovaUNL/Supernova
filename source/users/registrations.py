@@ -14,6 +14,8 @@ import settings
 from users.exceptions import InvalidToken, ExpiredRegistration, AccountExists
 import jinja2
 
+from users.utils import calculate_points, award_user
+
 
 def validate_token(email, token) -> users.User:
     """
@@ -89,6 +91,25 @@ def validate_token(email, token) -> users.User:
             user.user_permissions.add(permission)
         user.calculate_missing_info()
         user.updated_cached()
+        awarded = False
+        if len(students) == 1:
+            student = students[0]
+            if student.first_year == settings.COLLEGE_YEAR:
+                offset = users.ReputationOffset.objects.create(amount=10, user=user, reason='Prémio para caloiros :)')
+                offset.issue_notification()
+        user_count = users.User.objects.count()
+        if user_count < 100:
+            offset = users.ReputationOffset.objects.create(amount=1000, user=user, reason='Primeiros 100 utilizadores')
+            offset.issue_notification()
+            awarded = True
+        elif user_count < 1000:
+            offset = users.ReputationOffset.objects.create(amount=500, user=user, reason='Primeiros 1000 utilizadores')
+            offset.issue_notification()
+            awarded = True
+
+        if awarded:
+            calculate_points(user)
+            award_user(user)
         return user
 
 
