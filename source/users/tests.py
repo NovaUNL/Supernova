@@ -34,12 +34,13 @@ class InviteRegistrationTest(TestCase):
             token='CAMPUSEMAIL',
             issuer=self.user_standalone,
             expiration=datetime.now() + timedelta(days=1))
-        college.Student.objects.create(
+        requested_student = college.Student.objects.create(
             abbreviation='campusemailtest')
         registration_data = {
             'username': 'campusemailtest',
             'nickname': 'campusemailtest',
-            'student': 'campusemailtest',
+            'requested_student': str(requested_student.id),
+            'requested_teacher': '',
             'email': 'campusemailtest@' + settings.CAMPUS_EMAIL_SUFFIX,
             'invite': 'CAMPUSEMAIL',
             'password': 'queijo-123',
@@ -47,9 +48,12 @@ class InviteRegistrationTest(TestCase):
 
         form = f.RegistrationForm(data=registration_data)
         self.assertTrue(form.is_valid())
-        registration_data['email'] = 'campusemailtest@fct.unl.pt'
+        registration_data['email'] = 'campusemailtest@subdomain.' + settings.CAMPUS_EMAIL_SUFFIX
         form = f.RegistrationForm(data=registration_data)
-        self.assertFalse(form.is_valid())
+        self.assertTrue(form.is_valid())
+        registration_data['email'] = 'campusemailtest@' + settings.CAMPUS_EMAIL_SUFFIX
+        form = f.RegistrationForm(data=registration_data)
+        self.assertTrue(form.is_valid())
         registration_data['email'] = 'campusemailtest@xmail.pom'
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
@@ -64,7 +68,8 @@ class InviteRegistrationTest(TestCase):
         registration_data = {
             'username': unused_identifier,
             'nickname': unused_identifier,
-            'student': student.abbreviation,
+            'requested_student': str(student.id),
+            'requested_teacher': '',
             'email': f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}",
             'invite': invite.token,
             'password': 'queijo-123',
@@ -108,22 +113,22 @@ class InviteRegistrationTest(TestCase):
         self.assertFalse(form.is_valid())
         registration_data['nickname'] = ''
         form = f.RegistrationForm(data=registration_data)
-        self.assertFalse(form.is_valid())
+        self.assertTrue(form.is_valid())
         registration_data['nickname'] = unused_identifier
         # Test with email conflict
         registration_data['email'] = f"{self.student_associated.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['email'] = f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
-        registration_data['student'] = self.student_associated.abbreviation
+        registration_data['requested_student'] = str(self.student_associated.id)
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
-        registration_data['student'] = student.abbreviation
+        registration_data['student'] = str(student.id)
         # Test with student-email mismatch
-        registration_data['student'] = self.student_free.abbreviation
+        registration_data['requested_student'] = str(self.student_free.id)
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
-        registration_data['student'] = student.abbreviation
+        registration_data['requested_student'] = str(student.id)
         registration_data['email'] = f"{self.student_free.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
         form = f.RegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
@@ -144,7 +149,8 @@ class InviteRegistrationTest(TestCase):
         registration_data = {
             'username': 'free',
             'nickname': 'free',
-            'student': student.abbreviation,
+            'requested_student': str(student.id),
+            'requested_teacher': '',
             'email': f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}",
             'invite': revoked_invite.token,
             'password': 'queijo-123',
@@ -169,7 +175,8 @@ class InviteRegistrationTest(TestCase):
             data={
                 'username': 'registration-user',
                 'nickname': 'registration-user',
-                'student': student.abbreviation,
+                'requested_student': str(student.id),
+                'requested_teacher': '',
                 'email': f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}",
                 'invite': invite.token,
                 'password': 'queijo-123',
@@ -187,8 +194,9 @@ class InviteRegistrationTest(TestCase):
                 'token': registration.token})
         invite.refresh_from_db()
         logged_user = auth.get_user(client)
-        created_user = invite.resulting_user
-        self.assertEquals(logged_user, created_user)
+        self.assertIsNotNone(invite.registration)
+        created_user = invite.registration.resulting_user
         self.assertIsNotNone(created_user)
+        self.assertEquals(logged_user, created_user)
         self.assertEquals(page.url, reverse('users:profile', args=[created_user.nickname]))
         self.assertTrue(student in created_user.students.all())

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from functools import reduce
 
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
@@ -144,9 +145,9 @@ def department_edit_view(request, department_id):
 
 
 @login_required
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def teacher_view(request, teacher_id):
-    teacher = get_object_or_404(m.Teacher, id=teacher_id)
+    teacher = get_object_or_404(m.Teacher.objects.select_related('rank'), id=teacher_id)
     context = build_base_context(request)
     shifts = teacher.shifts \
         .filter(class_instance__year=settings.COLLEGE_YEAR, class_instance__period=settings.COLLEGE_PERIOD) \
@@ -291,8 +292,11 @@ def _class_instance_nav(instance):
         {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance.id])}]
 
 
+@cache_page(3600)
+@cache_control(max_age=3600)
+@vary_on_cookie
 @login_required
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def class_instance_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects
@@ -316,7 +320,7 @@ def class_instance_view(request, instance_id):
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def class_instance_shifts_view(request, instance_id):
     # TODO optimize queries (4 duplicated in the schedule building)
     instance = get_object_or_404(
@@ -343,7 +347,7 @@ def class_instance_shifts_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def class_instance_enrolled_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent', 'department'),
@@ -365,7 +369,7 @@ def class_instance_enrolled_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def class_instance_files_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent', 'department'),
@@ -401,7 +405,7 @@ def class_instance_files_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def class_instance_file_download(request, instance_id, file_hash):
     class_file = get_object_or_404(
         m.ClassFile.objects.prefetch_related('file'),
@@ -521,7 +525,7 @@ def course_edit_view(request, course_id):
 @cache_page(3600 * 24)
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
-@permission_required('users.full_student_access')
+@permission_required('users.student_access')
 def course_students_view(request, course_id):
     course = get_object_or_404(m.Course.objects, id=course_id)
     department = course.department
@@ -630,7 +634,7 @@ def room_view(request, room_id):
 @login_required
 def available_places_view(request):
     context = build_base_context(request)
-    if not request.user.has_perm('users.full_student_access'):
+    if not request.user.has_perm('users.student_access'):
         context['title'] = context['msg_title'] = 'Insuficiência de permissões'
         context['msg_content'] \
             = 'O seu utilizador não tem permissões suficientes para consultar a informação de espaços.'
@@ -678,3 +682,51 @@ class PlaceAutocomplete(autocomplete.Select2QuerySetView):
             except ValueError:
                 qs = qs.filter(title__contains=self.q)
         return qs
+
+
+class TeacherAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Teacher.objects.all()
+        if self.q and len(self.q) >= 5:
+            filter = reduce(lambda x, y: x & y, [Q(name__icontains=word) for word in self.q.split(' ')])
+            qs = qs.filter(filter)
+            return qs
+        return []
+
+
+class UnregisteredTeacherAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.Teacher.objects.all()
+        if self.q and len(self.q) >= 5:
+            filter = reduce(lambda x, y: x & y, [Q(name__icontains=word) for word in self.q.split(' ')])
+            qs = qs.filter(filter, user=None)
+            return qs
+        return []
+
+
+class StudentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if self.q and len(self.q) >= 5:
+            qs = m.Student.objects.all()
+            filter = reduce(lambda x, y: x & y, [Q(name__icontains=word) for word in self.q.split(' ')])
+            try:
+                filter = filter | Q(number=int(self.q))
+            except ValueError:
+                pass
+            qs = qs.filter(filter)
+            return qs
+        return []
+
+
+class UnregisteredStudentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if self.q and len(self.q) >= 5:
+            qs = m.Student.objects.all()
+            filter = reduce(lambda x, y: x & y, [Q(name__icontains=word) for word in self.q.split(' ')])
+            try:
+                filter = filter | Q(number=int(self.q))
+            except ValueError:
+                pass
+            qs = qs.filter(filter, user=None)
+            return qs
+        return []

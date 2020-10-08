@@ -64,7 +64,7 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Edições</h2></div>
         <div class="pane-content">
-          {% if perms.users.full_student_access %}
+          {% if perms.users.student_access %}
             <ul class="menu">
               {% for instance in instances %}
                 <li>

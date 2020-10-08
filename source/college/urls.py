@@ -32,4 +32,8 @@ urlpatterns = [
     path('curso/<int:course_id>/editar', views.course_edit_view, name='course_edit'),
     path('ac/class', views.ClassAutocomplete.as_view(), name='class_ac'),
     path('ac/place', views.PlaceAutocomplete.as_view(), name='place_ac'),
+    path('ac/teacher', views.TeacherAutocomplete.as_view(), name='teacher_ac'),
+    path('ac/unreg_teacher', views.UnregisteredTeacherAutocomplete.as_view(), name='unreg_teacher_ac'),
+    path('ac/student', views.StudentAutocomplete.as_view(), name='student_ac'),
+    path('ac/unreg_student', views.UnregisteredStudentAutocomplete.as_view(), name='unreg_student_ac'),
 ]

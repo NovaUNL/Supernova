@@ -94,13 +94,7 @@ def registration_view(request):
             form = f.RegistrationForm(initial={'invite': invite_token})
             # But warn if the invite token is not valid
             invites = m.Invite.objects.filter(token=invite_token)
-            if invites.exists():
-                invite = invites.first()
-                if invite.registration is not None:
-                    context['invite_used'] = True
-                elif invite.expiration is None or invite.expiration < datetime.now(timezone.utc):
-                    context['invite_expired'] = True
-            else:
+            if not invites.exists():
                 context['invite_unknown'] = True
         else:
             form = f.RegistrationForm()
@@ -127,18 +121,13 @@ def registration_validation_view(request):
         if 'token' in data and 'email' in data:
             registration = m.Registration.objects \
                 .order_by('creation') \
-                .filter(email=data['email'], token=data['token']) \
-                .first()
+                .get(email=data['email'], token=data['token'])
             form = f.RegistrationValidationForm(instance=registration, data=data)
             if form.is_valid():
                 try:
                     user = registrations.validate_token(form.cleaned_data['email'], form.cleaned_data['token'])
-                    invite = registration.invites.first()
-                    if invite:
-                        invite.resulting_user = user
-                        invite.save()
                     login(request, user)
-                    m.GenericNotification.objects.create(receiver=user, text="Bem vindo ao Supernova!")
+                    m.GenericNotification.objects.create(receiver=user, message="Bem vindo ao Supernova!")
                     return HttpResponseRedirect(reverse('users:profile', args=[user.nickname]))
                 except exceptions.AccountExists as e:
                     form.add_error(None, str(e))

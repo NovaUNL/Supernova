@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 
@@ -11,6 +12,7 @@ from django.utils import timezone
 import college.models as college
 import users.models as users
 import settings
+from supernova.utils import correlation
 from users.exceptions import InvalidToken, ExpiredRegistration, AccountExists
 import jinja2
 
@@ -31,38 +33,21 @@ def validate_token(email, token) -> users.User:
     :param token: Corresponding token
     :return: Created user
     """
-    registration = users.Registration.objects.filter(email=email).prefetch_related('invites')
-    if registration.exists():
-        registration = registration.order_by('creation').reverse().first()
-    else:
+    same_email_registrations = users.Registration.objects.filter(email=email).exclude(resulting_user=None)
+    if same_email_registrations.exists():
+        raise ExpiredRegistration('Já foi completado um registo neste email.')
+
+    registration = users.Registration.objects.filter(email=email, token=token).first()
+    if registration is None:
         raise ExpiredRegistration('Não foi possível encontrar um registo com este email.')
 
     if registration.token != token:  # Incorrect token
         if registration.failed_attempts < settings.REGISTRATIONS_ATTEMPTS_TOKEN - 1:
             registration.failed_attempts += 1
-            registration.save()
+            registration.save(update_fields=['failed_attempts'])
             raise InvalidToken()
         else:
             raise InvalidToken(deleted=True)
-
-    # Failure conditions
-    # TODO write test for them
-    if users.User.objects.filter(username=registration.username).exists():
-        raise AccountExists(f"Entretanto registou-se um utilizador com o nome {registration.username}."
-                            "É necessário um novo registo.")
-
-    # TODO perhaps replace the nickname with the username to avoid failing in this case:
-    if users.User.objects.filter(nickname=registration.nickname).exists():
-        if registration.invites.exists():
-            registration.invites.first()
-        raise AccountExists(f"Entretanto registou-se um utilizador com a alcunha '{registration.nickname}'."
-                            "É necessário um novo registo.")
-
-    if users.User.objects.filter(email=registration.email).exists():
-        raise AccountExists(f'Foi validada outra conta com o email {registration.email}.')
-
-    if college.Student.objects.filter(abbreviation=registration.student, user__isnull=False).exists():
-        raise AccountExists(f'Já foi criada uma conta com o identificador de estudante deste registo.')
 
     if registration.failed_attempts > settings.REGISTRATIONS_ATTEMPTS_TOKEN:
         raise ExpiredRegistration("Já tentou validar este registo demasiadas vezes.")
@@ -71,39 +56,100 @@ def validate_token(email, token) -> users.User:
     if elapsed_minutes > settings.REGISTRATIONS_TIMEWINDOW:
         raise ExpiredRegistration('O registo foi validado após o tempo permitido.')
 
+    if users.User.objects.filter(email=registration.email).exists():
+        raise AccountExists(f'Foi validada outra conta com o email {registration.email}.')
+
+    if registration.requested_student:
+        if registration.requested_student.user is not None:
+            raise AccountExists(f"O estudante solicitado já foi associado a outra conta.")
+
+        equivalent_students_registered = \
+            college.Student.objects \
+                .filter(abbreviation=registration.requested_student.abbreviation) \
+                .exclude(user=None) \
+                .exists()
+        if equivalent_students_registered:
+            logging.critical(f"Student {registration.requested_student.abbreviation} is partially associated.")
+            raise AccountExists(f"O estudante solicitado já foi parcialmente associado a outra conta.")
+
+    if registration.requested_teacher and registration.requested_teacher.user is not None:
+        raise AccountExists(f"O professor solicitado já foi associado a outra conta.")
+
+    if users.User.objects.filter(nickname=registration.nickname).exists():
+        raise AccountExists("Desde que o registo foi feito registou-se outro utilizador com a alcunha "
+                            f"'{registration.nickname}'. É necessário um novo registo.")
+
+    if users.User.objects.filter(nickname=registration.username).exists():
+        raise AccountExists("Desde que o registo foi feito registou-se outro utilizador com o username "
+                            f"'{registration.username}'. É necessário um novo registo.")
+
+    # Registration request accepted
     with transaction.atomic():
+        student_access = Permission.objects.get(
+            codename='student_access',
+            content_type=ContentType.objects.get_for_model(users.User))
+        teacher_access = Permission.objects.get(
+            codename='teacher_access',
+            content_type=ContentType.objects.get_for_model(users.User))
+
         user = users.User.objects.create_user(
             username=registration.username,
             email=registration.email,
             nickname=registration.nickname,
-            last_activity=timezone.now()
+            last_activity=timezone.now(),
+            password=registration.password,
         )
-        user.password = registration.password  # Copy hash
         user.save()
-        students = college.Student.objects.filter(abbreviation=registration.student).all()
-        for student in students:
-            student.user = user
-            student.save()
-        if len(students) > 0:
-            permission = Permission.objects.get(
-                codename='full_student_access',
-                content_type=ContentType.objects.get_for_model(users.User))
-            user.user_permissions.add(permission)
+        registration.resulting_user = user
+        registration.save(update_fields=['resulting_user'])
+
+        if registration.requested_teacher:
+            student_name = None
+            if registration.requested_student:
+                student_name = registration.requested_student.name
+            # Teacher email is known and matches or names are very very close
+            if registration.email.split('@')[0] == registration.requested_teacher.abbreviation or \
+                    (student_name and correlation(student_name, registration.requested_teacher) > 0.9):
+                registration.requested_teacher.user = user
+                registration.requested_teacher.save()
+                user.user_permissions.add(student_access)
+                user.user_permissions.add(teacher_access)
+            else:
+                # Do nothing, those need to be approved manually
+                users.GenericNotification.objects.create(
+                    receiver=user,
+                    message='O professor reivindicado no seu registo não foi automáticamente associado. '
+                            'Poderá vir a ser contactado/a.')
+
+        if registration.requested_student:
+            college.Student.objects.filter(abbreviation=registration.requested_student.abbreviation).update(user=user)
+            user.user_permissions.add(student_access)
+            students = college.Student.objects.filter(abbreviation=registration.requested_student.abbreviation).all()
+            if len(students) == 1:
+                student = students[0]
+                if student.first_year == settings.COLLEGE_YEAR:
+                    offset = users.ReputationOffset.objects.create(
+                        amount=10,
+                        receiver=user,
+                        reason='Prémio para caloiros :)')
+                    offset.issue_notification()
+
         user.calculate_missing_info()
         user.updated_cached()
         awarded = False
-        if len(students) == 1:
-            student = students[0]
-            if student.first_year == settings.COLLEGE_YEAR:
-                offset = users.ReputationOffset.objects.create(amount=10, user=user, reason='Prémio para caloiros :)')
-                offset.issue_notification()
         user_count = users.User.objects.count()
         if user_count < 100:
-            offset = users.ReputationOffset.objects.create(amount=1000, user=user, reason='Primeiros 100 utilizadores')
+            offset = users.ReputationOffset.objects.create(
+                amount=1000,
+                receiver=user,
+                reason='Primeiros 100 utilizadores')
             offset.issue_notification()
             awarded = True
         elif user_count < 1000:
-            offset = users.ReputationOffset.objects.create(amount=500, user=user, reason='Primeiros 1000 utilizadores')
+            offset = users.ReputationOffset.objects.create(
+                amount=500,
+                receiver=user,
+                reason='Primeiros 1000 utilizadores')
             offset.issue_notification()
             awarded = True
 
@@ -138,7 +184,7 @@ def email_confirmation(request, registration: users.Registration):
     text = env.get_template('registration.mail.txt').render(link=link, manual_link=manual_link, token=token)
     send_mail(
         subject="Supernova - Ativação de conta",
-        from_email=settings.EMAIL_HOST_USER,
+        from_email=settings.EMAIL_HOST_FROM,
         recipient_list=(registration.email,),
         message=text,
         html_message=html)

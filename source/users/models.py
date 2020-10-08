@@ -64,7 +64,10 @@ class User(AbstractUser):
     points = djm.IntegerField(default=0)
 
     class Meta:
-        permissions = [('full_student_access', 'Can browse the system as if it was the university one')]
+        permissions = [
+            ('student_access', 'Can browse the system as a student.'),
+            ('teacher_access', 'Can browse the system as a teacher.'),
+        ]
 
     @property
     def about_html(self):
@@ -129,14 +132,13 @@ class User(AbstractUser):
 
     def calculate_missing_info(self):
         # Set a name if none is known
-        for entity in chain(self.students.all(), self.teachers.all()):
-            if self.first_name is None or self.first_name.strip() == '':
-                if 'name' in entity.external_data:
-                    names = entity.external_data['name'].split()
-                    self.first_name = names[0]
-                    if len(names) > 1:
-                        self.last_name = ' '.join(names[1:])
-                    self.save()
+        for entity in chain(self.teachers.all(), self.students.all()):
+            if (self.first_name is None or self.first_name.strip() == '') and entity.name:
+                names = entity.name.split()
+                self.first_name = names[0]
+                if len(names) > 1:
+                    self.last_name = ' '.join(names[1:])
+                self.save()
 
     def clear_notification_cache(self):
         cache.delete_many(['%s_notification_count' % self.id, '%s_notification_list' % self.id])
@@ -197,17 +199,41 @@ class SocialNetworkAccount(djm.Model):
 
 
 class Registration(djm.Model):
+    #: Email that is being used to register
     email = djm.EmailField()
+    #: Claimed username
     username = djm.CharField(verbose_name='utilizador', max_length=128)
-    nickname = djm.CharField(verbose_name='alcunha', max_length=128)
+    #: Claimed nickname
+    nickname = djm.CharField(verbose_name='alcunha', blank=True, max_length=128)
+    #: Student that is being claimed (deprecated)
     student = djm.CharField(max_length=128)
+    #: Hash of the password
     password = djm.CharField(verbose_name='palavra-passe', max_length=128)
+    #: Student that this registration is claiming
+    requested_student = djm.ForeignKey(
+        'college.Student',
+        null=True,
+        blank=True,
+        on_delete=djm.CASCADE,
+        related_name='registrations')
+    #: Teacher that this registration is claiming
+    requested_teacher = djm.ForeignKey(
+        'college.Teacher',
+        null=True,
+        blank=True,
+        on_delete=djm.CASCADE,
+        related_name='registrations')
+    #: User to which this registration led
+    resulting_user = djm.OneToOneField('User', null=True, on_delete=djm.CASCADE)
+    #: Creation timestamp
     creation = djm.DateTimeField(auto_now_add=True)
+    #: Validation token
     token = djm.CharField(max_length=16)
+    #: Number of validation attempts
     failed_attempts = djm.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.username}/{self.nickname}/{self.student} -{self.email}"
+        return f"{self.username}/{self.nickname}/{self.student}/{self.requested_teacher} -{self.email}"
 
 
 class VulnerableHash(djm.Model):
@@ -231,8 +257,8 @@ class Invite(djm.Model):
     expiration = djm.DateTimeField()
     #: :py:class:`Registration` that used the invite
     # FIXME Invite rendered useless if another registration conflicts with this one before it is confirmed.
-    registration = djm.ForeignKey(Registration, null=True, blank=True, on_delete=djm.SET_NULL, related_name='invites')
-    #: :py:class:`User` that resulted from the usage of this invite
+    registration = djm.OneToOneField(Registration, null=True, on_delete=djm.SET_NULL)
+    #: :py:class:`User` that resulted from the usage of this invite TODO deprecate
     resulting_user = djm.OneToOneField(User, null=True, blank=True, on_delete=djm.SET_NULL)
     #: Whether the invite got revoked
     revoked = djm.BooleanField(default=False)
@@ -399,5 +425,5 @@ class ReputationOffsetNotification(Notification):
 
     def to_api(self):
         return {'id': self.id,
-                'message': str(self.activity),
-                'url': reverse('users:reputation', self.reputation_offset.receiver.nickname)}
+                'message': str(self),
+                'url': reverse('users:reputation', args=[self.reputation_offset.receiver.nickname])}

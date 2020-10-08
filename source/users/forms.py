@@ -2,6 +2,7 @@ import hashlib
 import re
 from datetime import datetime
 
+from dal import autocomplete
 from django import forms as djf
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
@@ -71,19 +72,21 @@ class RegistrationForm(djf.ModelForm):
         required=True,
         error_messages=default_errors)
     # captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
-    student = djf.CharField(
-        label='Identificador (ex. c.pereira)',
-        widget=djf.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
+    # student = djf.CharField(
+    #     label='Identificador (ex. c.pereira)',
+    #     widget=djf.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
     nickname = djf.CharField(label='Alcunha', widget=djf.TextInput(), required=False)
     invite = djf.CharField(required=True)
 
     class Meta:
         model = m.Registration
-        fields = ('nickname', 'username', 'password', 'email', 'student')
+        fields = ('nickname', 'username', 'password', 'email', 'requested_student', 'requested_teacher')
         widgets = {
             'username': djf.TextInput(),
             'email': djf.TextInput(attrs={'onChange': 'emailModified=true;'}),
-            'password': djf.PasswordInput()
+            'password': djf.PasswordInput(),
+            'requested_teacher': autocomplete.ModelSelect2(url='college:unreg_teacher_ac'),
+            'requested_student': autocomplete.ModelSelect2(url='college:unreg_student_ac'),
         }
 
     def clean_password(self):
@@ -95,26 +98,15 @@ class RegistrationForm(djf.ModelForm):
             raise djf.ValidationError("As palavas-passe não coincidem.")
         return confirmation
 
-    def clean_student(self):
-        student_id: str = self.cleaned_data["student"].strip()
-        students = college.Student.objects.filter(abbreviation=student_id).all()
-        if not students.exists():
-            raise djf.ValidationError(f"O aluno {student_id} não foi encontrado.")
-        elif students.filter(user__isnull=False).exists():
-            raise djf.ValidationError(f"O aluno {student_id} já está registado.")
-        return student_id
-
     def clean_email(self):
         pattern = re.compile(r'^[\w\d.\-_+]+@[\w\d\-_]+(.[\w\d]+)*(\.\w{2,})$')
         email = self.cleaned_data["email"]
-        student_id = self.data["student"]
         if not pattern.match(email):
             raise djf.ValidationError("Formato inválido de email.")
+
         prefix, suffix = email.split('@')
         if CAMPUS_EMAIL_SUFFIX not in suffix:
-            raise djf.ValidationError(f"Só são aceites emails {CAMPUS_EMAIL_SUFFIX}")
-        if student_id != prefix:
-            raise djf.ValidationError("Este email não parece pertencer ao identificador indicado.")
+            raise djf.ValidationError(f"Só são aceites emails @{CAMPUS_EMAIL_SUFFIX}")
 
         if m.User.objects.filter(email=email).exists():
             raise djf.ValidationError("Já existe uma conta registada com o email fornecido.")
@@ -129,14 +121,6 @@ class RegistrationForm(djf.ModelForm):
             raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{username}'")
         return username
 
-    def clean_nickname(self):
-        nickname = self.cleaned_data.get("nickname")
-        enforce_name_policy(nickname)
-        if m.User.objects.filter(username=nickname).exists():
-            raise djf.ValidationError(f"Já existe um utilizador com o nome de utilizador '{nickname}'.")
-        if m.User.objects.filter(nickname=nickname).exists():
-            raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{nickname}'")
-        return nickname
 
     def clean_invite(self):
         if 'invite' not in self.cleaned_data or self.cleaned_data['invite'].strip() == '':
@@ -154,24 +138,50 @@ class RegistrationForm(djf.ModelForm):
         return invite
 
     def clean(self):
-        if not ({'student', 'email', 'username', 'nickname'} <= set(self.cleaned_data)):
+        if not ({'email', 'username', 'nickname'} <= set(self.cleaned_data)):
             raise djf.ValidationError("Alguns dos campos contem erros")
 
-        student_abbreviation = self.cleaned_data.get("student")
+        requested_student = self.cleaned_data.get("requested_student", None)
+        requested_teacher = self.cleaned_data.get("requested_teacher", None)
         email_prefix = self.cleaned_data.get("email").split('@')[0]
         nickname = self.cleaned_data.get("nickname")
         username = self.cleaned_data.get("username")
 
-        if student_abbreviation != email_prefix:
-            raise djf.ValidationError("Suspeitamos que este email não pertence a este identificador.")
+        if nickname.strip() == '':
+            nickname = username
+            self.cleaned_data['nickname'] = username
 
-        matching_students = college.Student.objects \
-            .filter(Q(abbreviation=email_prefix) | Q(abbreviation=nickname) | Q(abbreviation=username)) \
-            .all()
+        enforce_name_policy(nickname)
+        if m.User.objects.filter(username=nickname).exists():
+            raise djf.ValidationError(f"Já existe um utilizador com o nome de utilizador '{nickname}'.")
+        if m.User.objects.filter(nickname=nickname).exists():
+            raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{nickname}'")
 
-        for student in matching_students:
-            if student.user is not None or student.abbreviation != email_prefix:
-                raise djf.ValidationError("O email utilizado pertence a outro estudante.")
+
+        collision_filter = Q(abbreviation=email_prefix) | Q(abbreviation=nickname) | Q(abbreviation=username)
+        if requested_student:
+            collided_students = college.Student.objects \
+                .filter(collision_filter) \
+                .exclude(user=None, id=requested_student.id)
+            if requested_student.abbreviation != email_prefix:
+                raise djf.ValidationError("O email inserido aparentementa não pertencer ao aluno escolhido. "
+                                          "Corrija a informação; se estiver certa faça o favor de nos contactar.")
+        else:
+            collided_students = college.Student.objects.filter(collision_filter).exclude(user=None)
+
+        if collided_students.exists():
+            raise djf.ValidationError("Os dados utilizados colidiram com outro estudante.")
+
+        if requested_teacher:
+            collided_teachers = college.Teacher.objects \
+                .filter(collision_filter) \
+                .exclude(user=None, id=requested_teacher.id)
+        else:
+            collided_teachers = college.Teacher.objects.filter(collision_filter).exclude(user=None)
+
+        if collided_teachers.exists():
+            raise djf.ValidationError("Os dados utilizados colidiram com outro docente.")
+
         enforce_password_policy(
             self.cleaned_data["username"],
             self.cleaned_data["nickname"],
@@ -231,6 +241,9 @@ class AccountSettingsForm(djf.ModelForm):
         nickname = self.cleaned_data["nickname"]
         if self.instance.nickname == nickname:
             return nickname
+
+        if len(nickname) < 5:
+            raise djf.ValidationError(f"Alcunha demasiado curta")
 
         days_since_change = (datetime.now().date() - self.instance.last_nickname_change).days
         if days_since_change < 180:
@@ -322,7 +335,7 @@ class AccountPermissionsForm(djf.Form):
 
         # field, model, permission
         permissions = [
-            ('can_view_college_data', m.User, 'full_student_access'),
+            ('can_view_college_data', m.User, 'student_access'),
             ('can_add_invites', m.Invite, 'add_invite'),
             ('can_add_synopsis_sections', learning.Section, 'add_section'),
             ('can_change_synopsis_sections', learning.Section, 'change_section'),
@@ -347,7 +360,7 @@ class AccountPermissionsForm(djf.Form):
 
     def __calc_initial(self):
         return {
-            'can_view_college_data': self.user.has_perm('users.full_student_access'),
+            'can_view_college_data': self.user.has_perm('users.student_access'),
             'can_add_synopsis_sections': self.user.has_perm('learning.add_section'),
             'can_change_synopsis_sections': self.user.has_perm('learning.change_section'),
             'can_add_exercises': self.user.has_perm('learning.add_exercise'),
@@ -386,6 +399,13 @@ class SchedulePeriodicForm(djf.ModelForm):
 
 
 UserSchedulePeriodicFormset = djf.inlineformset_factory(m.User, m.SchedulePeriodic, extra=1, form=SchedulePeriodicForm)
+
+
+class ReputationOffsetForm(djf.ModelForm):
+    class Meta:
+        model = m.ReputationOffset
+        fields = ('receiver', 'amount', 'reason')
+        widgets = {'receiver': autocomplete.ModelSelect2(url='users:nickname_ac')}
 
 
 def enforce_name_policy(name):

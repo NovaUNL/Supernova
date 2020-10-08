@@ -45,6 +45,8 @@ class Student(Importable):
     | A student instance.
     | Each user can have multiple instances if the user enrolled multiple times to multiple courses.
     """
+    #: Full teacher name (eventually redundant, useful for registrations)
+    name = djm.TextField(max_length=200, null=True)
     #: User this student is associated with
     user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.CASCADE, related_name='students')
     #: The public number which identifies this student
@@ -291,7 +293,7 @@ class Class(Importable):
 
     @property
     def ects(self):
-        return self.credits/2
+        return self.credits / 2
 
     @property
     def description_html(self):
@@ -434,13 +436,19 @@ class ShiftInstance(Importable):
         return "%02d:%02d" % (minutes // 60, minutes % 60)
 
 
-def teacher_pic_path(teacher, filename):
-    return f'c/t/{teacher.id}/pic.{filename.split(".")[-1].lower()}'
-
-
 class TeacherRank(djm.Model):
     #: The name of this rank
     name = djm.CharField(max_length=32)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+def teacher_pic_path(teacher, filename):
+    return f'c/t/{teacher.id}/pic.{filename.split(".")[-1].lower()}'
 
 
 class Teacher(Importable):
@@ -448,19 +456,22 @@ class Teacher(Importable):
     | A person who teaches.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
-    #: Full teacher name (TODO deprecate, only needed for imported data)
-    name = djm.TextField(max_length=100)
+    #: Full teacher name (eventually redundant, useful for registrations)
+    name = djm.TextField(max_length=200)
     #: This teacher's rank
     rank = djm.ForeignKey(TeacherRank, on_delete=djm.PROTECT, null=True, blank=True)
     #: Departments this teacher has worked for
     departments = djm.ManyToManyField(Department, related_name="teachers")
     #: User this teacher is associated with
-    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.CASCADE, related_name='teachers')
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.CASCADE,
+                          related_name='teachers')
     # Cached fields
     #: Cache field which stores the last year on which this teacher was seen as active
     first_year = djm.IntegerField(null=True, blank=True)
     #: Cache field which stores the last year on which this teacher was seen as active
     last_year = djm.IntegerField(null=True, blank=True)
+    #: The textual abbreviation which identifies this teacher (speculated)
+    abbreviation = djm.CharField(null=True, blank=True, max_length=64)
     #: URL to this teacher's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
     #: This teacher's email
@@ -496,6 +507,10 @@ class Teacher(Importable):
                 changed = True
             if changed:
                 self.save(update_fields=['first_year', 'last_year'])
+
+    def calculate_abbreviation(self):
+        if self.email:
+            self.abbreviation = self.email.split('@')[0]
 
 
 def file_upload_path(file, _):
