@@ -5,7 +5,7 @@
     {% include 'college/class_decorator.html' %}
     <div class="row nowrap padded">
       <div class="col">
-        {% if instance.information.upstream.description %}
+        {% if instance.information.upstream.description and instance.information.upstream.description.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Descrição</h2></div>
             <div class="pane-content">
@@ -13,7 +13,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.evaluation %}
+        {% if instance.information.upstream.evaluation and instance.information.upstream.evaluation.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Avaliação</h2></div>
             <div class="pane-content">
@@ -21,7 +21,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.objectives %}
+        {% if instance.information.upstream.objectives and instance.information.upstream.objectives.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Objetivos</h2></div>
             <div class="pane-content">
@@ -29,7 +29,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.program %}
+        {% if instance.information.upstream.program and instance.information.upstream.program.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Programa</h2></div>
             <div class="pane-content">
@@ -37,7 +37,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.requirements %}
+        {% if instance.information.upstream.requirements and instance.information.upstream.requirements.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Requisitos</h2></div>
             <div class="pane-content">
@@ -45,7 +45,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.teaching_methods %}
+        {% if instance.information.upstream.teaching_methods and instance.information.upstream.teaching_methods.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Métodos de ensino</h2></div>
             <div class="pane-content">
@@ -53,7 +53,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.assistance %}
+        {% if instance.information.upstream.assistance and instance.information.upstream.assistance.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Horário de atendimento</h2></div>
             <div class="pane-content">
@@ -61,7 +61,7 @@
             </div>
           </div>
         {% endif %}
-        {% if instance.information.upstream.bibliography %}
+        {% if instance.information.upstream.bibliography and instance.information.upstream.bibliography.pt %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Bibliografia</h2></div>
             <div class="pane-content">
@@ -77,12 +77,20 @@
           <div class="pane-content">
             <h3>Departamento</h3>
             {% if instance.department %}
-              <a class="indented" href="{% url 'college:department' instance.department.id %}">Departamento de {{ instance.department.name }}</a>
+              <a class="entity indented" href="{% url 'college:department' instance.department.id %}">Departamento de {{ instance.department.name }}</a>
             {% else %}
               <span class="indented">Desconhecido</span>
             {% endif %}
+            <h3>Regente</h3>
+            <span class="indented">Desconhecido</span>
+            <h3>Docentes</h3>
+            <ul class="entity-list">
+              {% for teacher in teachers %}
+                <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+              {% endfor %}
+            </ul>
             <h3>Inscritos</h3>
-            <span class="indented">{{ instance.enrolled_count }} alunos inscritos (entre {{ instance.course_count }} cursos) </span>
+            <span class="indented">{{ instance.enrolled_count }} alunos inscritos {% if instance.course_count == 1%}(curso único){% else %}(entre {{ instance.course_count }} cursos){% endif %}</span>
           </div>
         </div>
         {% include 'college/class_editions.html' %}

@@ -232,6 +232,10 @@ def class_view(request, class_id):
     context['title'] = klass.name
     context['klass'] = klass
     context['instances'] = klass.instances.order_by('year', 'period').reverse()
+    context['teachers'] = m.Teacher.objects \
+        .filter(shifts__class_instance__parent=klass) \
+        .order_by('name') \
+        .distinct('name')
     context['sub_nav'] = _class__nav(klass)
     return render(request, 'college/class.html', context)
 
@@ -304,6 +308,7 @@ def class_instance_view(request, instance_id):
     context['title'] = str(instance)
     context['department'] = department
     context['instance'] = instance
+    context['teachers'] = m.Teacher.objects.filter(shifts__class_instance=instance).order_by('name').distinct('name')
     context['sub_nav'] = _class_instance_nav(instance)
     return render(request, 'college/class_instance.html', context)
 

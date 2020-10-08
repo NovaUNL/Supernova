@@ -77,6 +77,16 @@
           {% endif %}
         </div>
       </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Docentes <small>(entre edições)</small></h2></div>
+        <div class="pane-content">
+          <ul class="entity-list">
+            {% for teacher in teachers %}
+              <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
