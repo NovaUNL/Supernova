@@ -68,6 +68,7 @@ class RoomType:
     COMPUTER = 5
     MEETING = 6
     MASTERS = 7
+    CABINET = 8
 
     CHOICES = (
         (GENERIC, 'Genérico'),
@@ -77,6 +78,7 @@ class RoomType:
         (COMPUTER, 'Sala de computadores'),
         (MEETING, 'Sala de reuniões'),
         (MASTERS, 'Sala de mestrados'),
+        (CABINET, 'Gabinete'),
     )
 
     @staticmethod
@@ -87,7 +89,8 @@ class RoomType:
                    4: 'Laboratórios',
                    5: 'Salas de computadores',
                    6: 'Salas de reuniões',
-                   7: 'Salas de mestrados'}
+                   7: 'Salas de mestrados',
+                   8: 'Gabinetes'}
         if room_type not in plurals:
             return None
         return plurals[room_type]
