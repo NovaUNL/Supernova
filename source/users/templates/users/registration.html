@@ -1,5 +1,11 @@
 {% extends 'supernova/base.html' %}
 
+{% load static %}
+
+{% block head %}
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="col padded">
     <div class="flex-pane">
@@ -22,8 +28,10 @@
         <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}
           <div class="form-block">
-            {% if creation_form.non_field_errors %}<div class="errors">{{ creation_form.non_field_errors }}</div>{% endif %}
-            <div class="form-row">
+            {% if creation_form.non_field_errors %}
+              <div class="errors">{{ creation_form.non_field_errors }}</div>
+            {% endif %}
+            <div class="form-row{% if creation_form.invite.errors %} error{% endif %}">
               <div class="form-row-top">
                 <h4>Código do convite</h4>
                 {{ creation_form.invite }}
@@ -43,63 +51,73 @@
                 O código inserido está incorreto.
                 <hr>
               {% endif %}
-              {% if creation_form.invite.errors %}<div class="errors">{{ creation_form.invite.errors }}</div>{% endif %}
+              {{ creation_form.invite.errors }}
               <div class="form-row-description">
                 Um código que te foi cedido para te registares.<br>
                 Sem um código não serás capaz de concluir o registo.
               </div>
             </div>
             <hr>
-            <div class="form-row">
+            <div class="form-row{% if creation_form.username.errors %} error{% endif %}">
               <div class="form-row-top">
                 <h4>Nome de utilizador</h4>
                 {{ creation_form.username }}
               </div>
-              {% if creation_form.username.errors %}<div class="errors">{{ creation_form.username.errors }}</div>{% endif %}
+              {{ creation_form.username.errors }}
               <div class="form-row-description">
                 A credencial utilizada para aceder à conta.
               </div>
             </div>
             <hr>
-            <div class="form-row">
+            <div class="form-row{% if creation_form.nickname.errors %} error{% endif %}">
               <div class="form-row-top">
                 <h4>Alcunha (Opcional)</h4>
                 {{ creation_form.nickname }}
               </div>
-              {% if creation_form.nickname.errors %}<div class="errors">{{ creation_form.nickname.errors }}</div>{% endif %}
+              {{ creation_form.nickname.errors }}
               <div class="form-row-description">
                 Uma alcunha que será exibida aos restantes enquanto referência ao perfil.<br>
                 Caso opte por não providênciar uma, o nome de utilizador será utilizado como alcunha.<br>
-                A alcunha pode ser alterada posteriormente (até uma vez por semestre).<br>
-                O seu perfil será <code>/u/alcunha</code>.
+                A alcunha pode ser alterada posteriormente (até uma vez por semestre).
               </div>
             </div>
             <hr>
-            <div class="form-row">
+            <div class="form-row{% if creation_form.requested_student.errors %} error{% endif %}">
               <div class="form-row-top">
-                <h4>Identificador do CLIP</h4>
-                {{ creation_form.student }}
+                <h4>Estudante (Opcional)</h4>
+                {{ creation_form.requested_student }}
               </div>
-              {% if creation_form.student.errors %}<div class="errors">{{ creation_form.student.errors }}</div>{% endif %}
+              {{ creation_form.requested_student.errors }}
               <div class="form-row-description">
-                O identificador, típicamente alfanumérico, que utiliza para aceder ao CLIP. (p.ex c.pereira)
+                O identificador ou número de aluno, para solicitação de contas de aluno.
               </div>
             </div>
             <hr>
-            <div class="form-row">
+            <div class="form-row{% if creation_form.requested_teacher.errors %} error{% endif %}">
+              <div class="form-row-top">
+                <h4>Docente (Opcional)</h4>
+                {{ creation_form.requested_teacher }}
+              </div>
+              {{ creation_form.requested_teacher.errors }}
+              <div class="form-row-description">
+                O nome do professor, para solicitação de contas de professor.<br>
+                Não é mutuamente exclusivo com a solicitação de um aluno (inclusive ex-alunos).
+              </div>
+            </div>
+            <hr>
+            <div class="form-row{% if creation_form.email.errors %} error{% endif %}">
               <div class="form-row-top">
                 <h4>Email</h4>
                 {{ creation_form.email }}
               </div>
-              {% if creation_form.email.errors %}<div class="errors">{{ creation_form.email.errors }}</div>{% endif %}
+              {{ creation_form.email.errors }}
               <div class="form-row-description">
                 O email <b>académico</b>. Será utilizado para confirmação de identidade.<br>
-                Típicamente será <code>identificador.do.clip@campus.fct.unl.pt</code>.<br>
-                Para já só se aceitam endreços <code>@campus.fct.unl.pt</code>.
+                Só se aceitam endereços no domínio <code>unl.pt</code>.
               </div>
             </div>
             <hr>
-            <div class="form-row">
+            <div class="form-row{% if creation_form.password.errors or creation_form.password_confirmation.errors %} error{% endif %}">
               <div class="form-row-top">
                 <h4>Palavra-passe</h4>
                 <div>
@@ -110,17 +128,16 @@
                 </div>
               </div>
               {% if creation_form.password.errors or creation_form.password_confirmation.errors %}
-                <div class="errors">
-                  {{ creation_form.password.errors }}
-                  {{ creation_form.password_confirmation.errors }}
-                </div>
+                {{ creation_form.password.errors }}
+                {{ creation_form.password_confirmation.errors }}
               {% endif %}
               <div class="form-row-description">
-                Uma palavra-passe razoavelmente longa e preferêncialmente diversa (letras, numeros, pontuação).<br>
-                O registo falha se a palavra-passe for excessivamente curta e pouco diversa.
+                Uma palavra-passe razoavelmente longa e preferencialmente diversa (letras, números, pontuação).<br>
+                Não pode ser excessivamente curta, pouco diversa ou estar fortemente relacionada com um dos atributos públicos da conta.
               </div>
             </div>
           </div>
+          {{ creation_form.media }}
           <input class="ui-btn end" type="submit" value="Registar">
         </form>
       </div>
