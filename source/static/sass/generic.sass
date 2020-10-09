@@ -159,16 +159,21 @@ blockquote p:first-child
   display: block
   margin: auto
 
-form hr
-  color: var(--primary2)
-  margin: 0
+form
+  hr
+    color: var(--primary2)
+    margin: 0
 
-  .errors
-    text-decoration-color: var(--highlight)
-    font-weight: bold
+.errorlist
+  text-decoration: underline red
+  font-weight: bold
 
 .form-row
   padding: 10px
+
+  &.error
+    border-left: 5px solid red
+
 
 .form-row:hover
   color: var(--text-hc)
