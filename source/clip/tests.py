@@ -20,6 +20,7 @@ class SyncTest(TestCase):
             parent=self.class_,
             year=2020,
             period=2,
+            department=self.department,
             external_id=100,
             information=dict())
         self.shift = college.Shift.objects.create(
@@ -44,7 +45,6 @@ class SyncTest(TestCase):
         upstream = [
             {"id": 100, "institution": 97747, "name": "Default"},
             {"id": 101, "institution": 97747, "name": "New"},
-            {"id": 102, "institution": 123, "name": "Forbidden"},
         ]
         sync._upstream_sync_departments(upstream, False)
         self.assertEquals(college.Department.objects.count(), 2)
@@ -77,7 +77,6 @@ class SyncTest(TestCase):
         # TODO external id starting to refer to a whole different object, violate key uniqueness
         upstream = {
             "abbr": "New",
-            "dept": self.department.external_id,
             "ects": 12,
             "id": 201,
             "iid": 201,
@@ -85,36 +84,38 @@ class SyncTest(TestCase):
             "name": "New Class"
         }
 
-        sync._upstream_sync_class(upstream, 201, self.department, False)
+        sync._upstream_sync_class(upstream, 201, False)
 
         new_class = college.Class.objects.get(external_id=201)
 
         self.assertEquals(new_class.name, "New Class")
         self.assertEquals(new_class.abbreviation, "New")
         self.assertEquals(new_class.credits, 12)
-        self.assertEquals(new_class.department, self.department)
 
         moved = college.ClassInstance.objects.create(
             parent=self.class_,
             year=2020,
             period=3,
             external_id=1000,
+            department=self.department,
             disappeared=True,
             information=dict())
         stays = college.ClassInstance.objects.create(
             parent=new_class,
             year=2020,
             period=2,
+            department=self.department,
             external_id=1001,
             information=dict())
         deleted = college.ClassInstance.objects.create(
             parent=new_class,
             year=2020,
             period=3,
+            department=self.department,
             external_id=1002,
             information=dict())
 
-        sync._upstream_sync_class(upstream, 201, self.department, False)
+        sync._upstream_sync_class(upstream, 201, False)
         moved.refresh_from_db()
         stays.refresh_from_db()
         deleted.refresh_from_db()
@@ -137,7 +138,7 @@ class SyncTest(TestCase):
             "name": "Newer Class"
         }
 
-        sync._upstream_sync_class(upstream, 201, self.department, False)
+        sync._upstream_sync_class(upstream, 201, False)
         new_class.refresh_from_db()
         stays.refresh_from_db()
         deleted.refresh_from_db()
@@ -154,6 +155,7 @@ class SyncTest(TestCase):
     def test_class_instance_sync(self):
         upstream = {
             "class_id": self.class_.external_id,
+            "department_id": self.department.external_id,
             "enrollments": [100, 1000, 1001],
             "evaluations": [],
             "id": 200,
