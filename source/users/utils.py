@@ -129,7 +129,10 @@ def calculate_points(user):
     points += settings.REWARDS['add_exercise'] \
               * learning.Exercise.objects.filter(author=user).count()
     points += settings.REWARDS['invited'] * m.Invite.objects.filter(issuer=user).exclude(registration=None).count()
-    points += user.point_offsets.annotate(point_sum=Sum('amount')).point_sum
+    points += settings.REWARDS['minor_tweak'] * college.Activity.objects.filter(user=user).count()
+    offsets = user.point_offsets.all().aggregate(Sum('amount'))['amount__sum']
+    if offsets is not None:
+        points += offsets
     user.points = points
     user.save(update_fields=['points'])
 
