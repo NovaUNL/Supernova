@@ -76,7 +76,7 @@
           <h2>Professores</h2>
         </div>
         <div class="pane-content">
-          {% if perms.users.full_student_access %}
+          {% if perms.users.student_access %}
             <ul class="menu">
               {% for teacher in teachers %}
                 <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
