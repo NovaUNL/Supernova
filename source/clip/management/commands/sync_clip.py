@@ -1,6 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 import settings
 from clip import synchronization as sync
@@ -27,44 +28,43 @@ class Command(BaseCommand):
         logging.info("Syncing students")
         sync.sync_students()
         logging.info("Syncing teachers")
-        # # TODO move teacher<->department sync to the sync_department method
-        # #  as this needs to run twice to sync a new teacher to a department
+        # TODO move teacher<->department sync to the sync_department method
+        #  as this needs to run twice to sync a new teacher to a department
         sync.sync_teachers()
-        sync.sync_departments(recurse=True)
+        sync.sync_classes(recurse=True)
 
         if sync_type == "fast":
             logging.info("Syncing class instances")
             class_instances = m.ClassInstance.objects \
-                .filter(year=settings.COLLEGE_YEAR, period=settings.COLLEGE_PERIOD) \
                 .exclude(disappeared=True, external_id=None) \
                 .select_related('parent')
             for class_instance in class_instances.all():
-                sync.sync_class_instance(class_instance.external_id, class_=class_instance.parent, recurse=True)
+                sync.sync_class_instance(class_instance.external_id, klass=class_instance.parent, recurse=True)
                 class_instance.refresh_from_db()
-                for shift in class_instance.shifts.exclude(disappeared=True, external_id=None).all():
+                for shift in class_instance.shifts.exclude(Q(disappeared=True) | Q(external_id=None)).all():
                     sync.sync_shift(shift.external_id, class_inst=shift.class_instance, recurse=True)
                     shift.refresh_from_db()
-                    for shift_instance in shift.instances.exclude(disappeared=True, external_id=None).all():
+                    for shift_instance in shift.instances.exclude(Q(disappeared=True) | Q(external_id=None)).all():
                         sync.sync_shift_instance(shift_instance.external_id, shift=shift)
         elif sync_type == "slow":
-            for class_ in m.Class.objects.select_related('department').exclude(disappeared=True, external_id=None):
-                sync.sync_class(class_.external_id, department=class_.department, recurse=True)
-                class_.refresh_from_db()
-                for instance in class_.instances \
-                        .filter(year__gte=settings.COLLEGE_YEAR - 2) \
-                        .exclude(disappeared=True, external_id=None).all():
-                    sync.sync_class_instance(instance.external_id, class_=class_, recurse=True)
+            for klass in m.Class.objects.exclude(Q(disappeared=True) | Q(external_id=None)):
+                sync.sync_class(klass.external_id, recurse=True)
+                klass.refresh_from_db()
+                for instance in klass.instances \
+                        .filter(year__gte=settings.COLLEGE_YEAR - 8) \
+                        .exclude(Q(disappeared=True) | Q(external_id=None)).all():
+                    sync.sync_class_instance(instance.external_id, klass=klass, recurse=True)
                     instance.refresh_from_db()
                     for enrollment in instance.enrollments.exclude(disappeared=True, external_id=None).all():
                         sync.sync_enrollment(enrollment.external_id, class_inst=instance)
                     sync.sync_class_instance_files(instance.external_id, class_inst=instance)
             update_cached()
         elif sync_type == "full":
-            for class_ in m.Class.objects.select_related('department').exclude(disappeared=True, external_id=None):
-                sync.sync_class(class_.external_id, department=class_.department, recurse=True)
-                class_.refresh_from_db()
-                for instance in class_.instances.exclude(disappeared=True, external_id=None).all():
-                    sync.sync_class_instance(instance.external_id, class_=class_, recurse=True)
+            for klass in m.Class.objects.exclude(Q(disappeared=True) | Q(external_id=None)):
+                sync.sync_class(klass.external_id, recurse=True)
+                klass.refresh_from_db()
+                for instance in klass.instances.exclude(disappeared=True, external_id=None).all():
+                    sync.sync_class_instance(instance.external_id, klass=klass, recurse=True)
                     instance.refresh_from_db()
                     for enrollment in instance.enrollments.exclude(disappeared=True, external_id=None).all():
                         sync.sync_enrollment(enrollment.external_id, class_inst=instance)

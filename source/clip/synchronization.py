@@ -113,8 +113,6 @@ def _upstream_sync_departments(upstream, recurse):
     m.Department.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
 
     for clip_department in upstream:
-        if clip_department['institution'] != CLIPY['institution']:
-            continue
         if clip_department['id'] in new:
             department = m.Department.objects.create(
                 name=clip_department['name'],
@@ -157,14 +155,43 @@ def _upstream_sync_department(upstream, department, recurse=False):
     m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
     m.Class.objects.filter(external_id__in=disappeared).update(department=None)
     disappeared = m.Class.objects.filter(external_id__in=disappeared)
-    for class_ in disappeared.all():
-        logger.warning(f"{class_} removed from {department}.")
+    for klass in disappeared.all():
+        logger.warning(f"{klass} removed from {department}.")
 
     # ---------  Related teachers ---------
     # Handled in the teacher function
 
 
-def sync_class(external_id, department=None, recurse=False):
+def sync_classes(recurse=False):
+    upstream = _request_classes()
+    _upstream_sync_classes(upstream, recurse)
+
+
+def _request_classes():
+    r = requests.get("http://%s/classes/" % CLIPY['host'])
+    if r.status_code != 200:
+        raise Exception("Unable to fetch classes")
+    return r.json()
+
+
+def _upstream_sync_classes(upstream, recurse):
+    known_ids = set(m.Class.objects.exclude(external_id=None).values_list('external_id', flat=True))
+    clip_ids = {entry['id'] for entry in upstream}
+    disappeared = known_ids.difference(clip_ids)
+    mirrored = known_ids.intersection(clip_ids)
+
+    disappeared_classes = m.Class.objects.filter(external_id__in=disappeared)
+    for klass in disappeared_classes.all():
+        logger.warning(f"Class {klass.name} disappeared")
+    disappeared_classes.update(disappeared=True, external_update=make_aware(datetime.now()))
+    m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
+
+    for clip_class in upstream:
+        if clip_class['id'] not in disappeared:
+            _upstream_sync_class(clip_class, clip_class['id'], recurse)
+
+
+def sync_class(external_id, recurse=False):
     """
     Sync the information in a class
     :param external_id: The foreign id of the class that is being sync'd
@@ -172,7 +199,7 @@ def sync_class(external_id, department=None, recurse=False):
     :param recurse: Whether to recurse to the derivative entities (class instances)
     """
     upstream = _request_class(external_id)
-    _upstream_sync_class(upstream, external_id, department, recurse)
+    _upstream_sync_class(upstream, external_id, recurse)
 
 
 def _request_class(external_id):
@@ -182,12 +209,9 @@ def _request_class(external_id):
     return r.json()
 
 
-def _upstream_sync_class(upstream, external_id, department, recurse):
-    if department is None:
-        department = m.Department.objects.get(external_id=upstream['dept'])
-
+def _upstream_sync_class(upstream, external_id, recurse):
     try:
-        obj = m.Class.objects.get(department=department, external_id=external_id)
+        obj = m.Class.objects.get(external_id=external_id)
         if not obj.frozen:
             changed = False
             if upstream['name'] != obj.name:
@@ -202,24 +226,14 @@ def _upstream_sync_class(upstream, external_id, department, recurse):
                 logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
                 obj.credits = upstream['ects']
                 changed = True
-            if (dept_ext_id := upstream['dept']) != obj.department.external_id:
-                new_department = m.Department.objects.filter(external_id=dept_ext_id).first()
-                if new_department is None:
-                    logger.error(f"Class {obj} department changed from {obj.department} "
-                                 f"to an unknown department (id:{dept_ext_id}). Ignoring.")
-                else:
-                    logger.warning(f"Class {obj} department changed from {obj.department} to {new_department}")
-                    obj.department = new_department
-                    changed = True
             if changed:
                 obj.save()
     except ObjectDoesNotExist:
         obj = m.Class.objects.create(
             name=upstream['name'],
             abbreviation=upstream['abbr'],
-            department=department,
             credits=upstream['ects'],
-            iid=upstream['iid'],
+            iid=upstream['id'],
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()))
@@ -236,7 +250,7 @@ def _upstream_sync_class(upstream, external_id, department, recurse):
 
     if recurse:
         for ext_id in new:
-            sync_class_instance(ext_id, recurse=True, class_=obj)
+            sync_class_instance(ext_id, recurse=True, klass=obj)
 
     m.ClassInstance.objects.filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
@@ -246,15 +260,15 @@ def _upstream_sync_class(upstream, external_id, department, recurse):
         logger.warning(f"{instance} removed from {obj}.")
 
 
-def sync_class_instance(external_id, class_=None, recurse=False):
+def sync_class_instance(external_id, klass=None, recurse=False):
     """
     Sync the information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
-    :param class_: The class that is parent this class instance (optional)
+    :param klass: The class that is parent this class instance (optional)
     :param recurse: Whether to recurse to the derivative entities (shifts, enrollments and evaluations)
     """
     upstream = _request_class_instance(external_id)
-    _upstream_sync_class_instance(upstream, external_id, class_, recurse)
+    _upstream_sync_class_instance(upstream, external_id, klass, recurse)
 
 
 def _request_class_instance(external_id):
@@ -264,12 +278,18 @@ def _request_class_instance(external_id):
     return r.json()
 
 
-def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
-    if class_ is None:
-        class_ = m.Class.objects.get(external_id=upstream['class_id'])
+def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
+    if klass is None:
+        klass = m.Class.objects.get(external_id=upstream['class_id'])
 
     try:
-        obj = m.ClassInstance.objects.get(parent=class_, external_id=external_id)
+        department = m.Department.objects.get(external_id=upstream['department_id'])
+    except m.Department.DoesNotExist:
+        logger.error(f"Class instance {external_id} belongs to unknown department ({upstream['department_id']}")
+        return
+
+    try:
+        obj = m.ClassInstance.objects.get(parent=klass, external_id=external_id)
         if not obj.frozen:
             changed = False
             if upstream['year'] != obj.year:
@@ -293,14 +313,20 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
                 obj.save()
     except ObjectDoesNotExist:
         obj = m.ClassInstance.objects.create(
-            parent=class_,
+            parent=klass,
             year=upstream['year'],
             period=upstream['period'],
+            department=department,
             external_id=external_id,
             information={'upstream': upstream['info']},
             frozen=False,
             external_update=timezone.now())
         logger.info(f"Class instance {obj} created")
+        if klass.department != department:
+            if klass.instances.order_by('year', 'period').reverse().first() == obj:
+                logger.warning(f'Changed class {klass} department from {klass.department} to {department}')
+                klass.department = department
+                klass.save()
 
     # ---------  Related shifts ---------
     shifts = obj.shifts.exclude(external_id=None).all()
@@ -343,7 +369,7 @@ def _upstream_sync_class_instance(upstream, external_id, class_, recurse):
 
     # ---------  OTHER TODO ---------
     if recurse:
-        # Must happen after the turn sync to have the teachers known
+        # Must happen after the shift sync to have the teachers known
         sync_class_instance_files(external_id, class_inst=obj)
     # TODO
     # evaluations = obj.enrollments.exclude(external_id=None).all()
@@ -471,10 +497,10 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
 
 def sync_shift(external_id, class_inst=None, recurse=False):
     """
-    Sync the information in a turn
-    :param external_id: The foreign id of the turn that is being sync'd
+    Sync the information in a shift
+    :param external_id: The foreign id of the shift that is being sync'd
     :param class_inst: The class instance (optional)
-    :param recurse: Whether to recurse to the derivative turn instances
+    :param recurse: Whether to recurse to the derivative shift instances
     :return:
     """
     upstream = _request_shift_info(external_id)
@@ -482,9 +508,9 @@ def sync_shift(external_id, class_inst=None, recurse=False):
 
 
 def _request_shift_info(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/turn/{external_id}")
+    r = requests.get(f"http://{CLIPY['host']}/shift/{external_id}")
     if r.status_code != 200:
-        raise Exception(f"Unable to fetch turn {external_id}")
+        raise Exception(f"Unable to fetch shift {external_id}")
     return r.json()
 
 
@@ -493,7 +519,7 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
         k in upstream
         for k in ('type', 'number', 'class_instance_id', 'restrictions', 'state', 'instances', 'students', 'teachers'))
     if invalid:
-        logger.error(f"Invalid upstream turn instance data: {upstream}")
+        logger.error(f"Invalid upstream shift instance data: {upstream}")
         return
 
     if class_inst.external_id != upstream['class_instance_id']:
@@ -507,7 +533,7 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
             shift_type = i
             break
     if shift_type is None:
-        logger.error("Unknown turn type: %s" % type_abbr)
+        logger.error("Unknown shift type: %s" % type_abbr)
         return
 
     upstream_details = {'state': upstream['state'], 'restrictions': upstream['restrictions']}
@@ -527,13 +553,13 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
             external_data=upstream_details)
         logger.info(f"Shift {obj} created in {class_inst}")
 
-    # ---------  Related turn instances ---------
+    # ---------  Related shift instances ---------
     instances = obj.instances.exclude(external_id=None).all()
 
     new, disappeared, mirrored = _upstream_diff(set(instances), set(upstream['instances']))
 
     if m.ShiftInstance.objects.filter(external_id__in=new).exists():
-        logger.critical(f"Some instances of turn {obj} belong to another turn: {new}")
+        logger.critical(f"Some instances of shift {obj} belong to another shift: {new}")
         return
 
     if recurse:
@@ -565,13 +591,13 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
 
 def sync_shift_instance(external_id, shift):
     """
-    Sync the file information in an instance of a turn
-    :param external_id: The foreign id of the turn instance that is being sync'd
-    :param turn: The parent turn (optional)
+    Sync the file information in an instance of a shift
+    :param external_id: The foreign id of the shift instance that is being sync'd
+    :param shift: The parent shift (optional)
     """
     upstream = _request_shift_instance(external_id)
     if upstream is None:
-        logger.warning(f"Failed to sync turn instance {external_id} in shift {shift}")
+        logger.warning(f"Failed to sync shift instance {external_id} in shift {shift}")
         return
     _upstream_sync_shift_instance(upstream, external_id, shift)
 
@@ -579,13 +605,13 @@ def sync_shift_instance(external_id, shift):
 def _request_shift_instance(external_id):
     r = requests.get(f"http://{CLIPY['host']}/shift_inst/{external_id}")
     if r.status_code != 200:
-        raise Exception(f"Unable to fetch turn instance {external_id}")
+        raise Exception(f"Unable to fetch shift instance {external_id}")
     return r.json()
 
 
 def _upstream_sync_shift_instance(upstream, external_id, shift):
     if not all(k in upstream for k in ('shift', 'start', 'end', 'weekday', 'room')):
-        logger.error(f"Invalid upstream turn instance data: {upstream}")
+        logger.error(f"Invalid upstream shift instance data: {upstream}")
         return
 
     if shift.external_id != upstream['shift']:
@@ -695,25 +721,25 @@ def _upstream_sync_students(upstream_list):
     existing = {student.external_id: student for student in m.Student.objects.exclude(external_id=None).all()}
 
     for upstream in upstream_list:
-        if upstream['inst'] != CLIPY['institution']:
-            continue
+        upstream_course = None
+        if upstream_course_id := upstream['course']:
+            try:
+                upstream_course = m.Course.objects.get(external_id=upstream_course_id)
+            except m.Course.DoesNotExist:
+                logger.error(f'Course {upstream_course} does not exist')
+
         if (ext_id := upstream['id']) in existing:
             obj = existing[ext_id]
             changed = False
-            if (upstream_iid := upstream['iid']) is not None:
-                if obj.iid is None or obj.number:  # Setting unknown is okay
-                    obj.iid = upstream_iid
-                    obj.number = upstream_iid
-                    changed = True
-                elif obj.iid != str(upstream_iid):  # Changing known is not
-                    logger.error(f"Student {obj} IID changed from {obj.iid} to {upstream_iid}")
-                    continue
             if (upstream_abbr := upstream['abbr']) is not None:
                 if obj.abbreviation != upstream_abbr:
-                    logger.warning(f'Student {obj} abbreviation change ignored '
-                                   f'("{obj.abbreviation}" to "{upstream_abbr}").')
+                    logger.warning(f'Student {obj} abbreviation changed ("{obj.abbreviation}" to "{upstream_abbr}").')
                 obj.abbreviation = upstream_abbr
                 changed = True
+            if upstream_course:
+                if not obj.course or obj.course != upstream_course:
+                    obj.course = upstream_course
+                    changed = True
             if (upstream_name := upstream['name']) is not None:
                 if obj.external_data is None:
                     obj.external_data = {'name': upstream_name}
@@ -731,8 +757,9 @@ def _upstream_sync_students(upstream_list):
         else:
             obj = m.Student.objects.create(
                 abbreviation=upstream['abbr'],
-                iid=upstream['iid'],
-                number=upstream['iid'],
+                iid=upstream['id'],
+                number=upstream['id'],
+                course=upstream_course,
                 external_id=upstream['id'],
                 external_update=make_aware(datetime.now()),
                 external_data={'name': upstream['name']})
@@ -795,12 +822,12 @@ def _upstream_sync_teachers(upstream_list):
 def calculate_active_classes():
     today = date.today()
     current_year = today.year + today.month % 8
-    for class_ in m.Class.objects.all():
+    for klass in m.Class.objects.all():
         first_year = 9999
         last_year = 0
         max_enrollments = 0
         changed = False
-        for instance in class_.instances.all():
+        for instance in klass.instances.all():
             if instance.year < first_year:
                 first_year = instance.year
                 changed = True
@@ -811,8 +838,8 @@ def calculate_active_classes():
             # if enrollments > max_enrollments:
             #     max_enrollments = enrollments
         if changed:
-            class_.extinguished = last_year < current_year - 1  # or max_enrollments < 5  # TODO get rid of magic number
-            class_.save()
+            klass.extinguished = last_year < current_year - 1  # or max_enrollments < 5  # TODO get rid of magic number
+            klass.save()
 
 
 def _upstream_diff(current_objs, clip_ids):
