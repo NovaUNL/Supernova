@@ -62,6 +62,9 @@ class Student(Importable):
     #: Grade this student obtained upon finishing his course
     graduation_grade = djm.IntegerField(null=True, blank=True, default=None)
     # Cached fields
+    #: | Cache field which stores the current year of this student
+    #: | (years being measured with (ECTS-36)/60 + 1)
+    year = djm.IntegerField(null=True, blank=True)
     #: Cache field which stores the first year on which this student was seen as active
     first_year = djm.IntegerField(null=True, blank=True)
     #: Cache field which stores the last year on which this student was seen as active
@@ -334,14 +337,51 @@ class ClassInstance(Importable):
         return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
 
 
+class ClassInstanceEvent(Importable):
+    #: Class instance where this event happens
+    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='events')
+    #: Date on which the event happened/will happen
+    date = djm.DateField()
+    #: Time at which the event started/will start
+    time = djm.TimeField(null=True, blank=True)
+    #: Duration of the event
+    duration = djm.IntegerField(null=True, blank=True)
+    #: Event type (eg. test, exam, trip, work, ...)
+    type = djm.IntegerField(choices=ctypes.EventType.CHOICES, null=True)
+    #: Choice between continuous, recourse and special seasons.
+    season = djm.IntegerField(choices=ctypes.EventSeason.CHOICES, null=True)
+    #: Textual information
+    info = djm.CharField(max_length=300, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.info} {self.time}- {self.class_instance}'
+
+
 class Enrollment(Importable):
     """An enrollment of a student to a class"""
     #: Enrolled student
     student = djm.ForeignKey(Student, on_delete=djm.CASCADE, related_name='enrollments')
     #: Class of enrollment
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='enrollments')
-    #: u => unknown, r => reproved, n => approved@normal, e => approved@exam, s => approved@special
-    result = djm.CharField(default='u', max_length=1)
+    #: Whether the student got attendance
+    attendance = djm.BooleanField(null=True)
+    #: The date on which the attendance has been assigned
+    attendance_date = djm.DateField(null=True, blank=True)
+    #: The grade that this enrollment obtained during the normal season
+    normal_grade = djm.IntegerField(null=True, blank=True)
+    #: The date on which the normal season grade has been assigned
+    normal_grade_date = djm.DateField(null=True, blank=True)
+    #: The grade that this enrollment obtained during the recourse season
+    recourse_grade = djm.IntegerField(null=True, blank=True)
+    #: The date on which the recourse season grade has been assigned
+    recourse_grade_date = djm.DateField(null=True, blank=True)
+    #: The grade that this enrollment obtained during the special season
+    special_grade = djm.IntegerField(null=True, blank=True)
+    #: The date on which the special season grade has been assigned
+    special_grade_date = djm.DateField(null=True, blank=True)
+    # Cached fields
+    #: Whether this enrollment lead to an approval
+    approved = djm.BooleanField(null=True, blank=True)
     #: Conclusion grade
     grade = djm.FloatField(null=True, blank=True)
 
@@ -574,16 +614,6 @@ class ClassFile(Importable):
     #: Uploader name fallback (due to imports who cannot be resolved to a user)
     uploader_teacher = djm.ForeignKey(Teacher, null=True, blank=True, on_delete=djm.SET_NULL,
                                       related_name='class_files')
-
-
-class ClassEvaluation(djm.Model):
-    """Evaluation occurrence associated with a class"""
-    #: Class for which this evaluation stands
-    class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT)
-    #: Evaluation date
-    datetime = djm.DateTimeField()
-    #: Type of evaluation
-    type = djm.IntegerField(db_column='evaluation_type', choices=ctypes.EvaluationType.CHOICES)
 
 
 class ClassInstanceAnnouncement(Importable):

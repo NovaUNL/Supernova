@@ -348,6 +348,22 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     for shift in disappeared.all():
         logger.warning(f"{shift} removed from {obj}.")
 
+    events = obj.events.exclude(external_id=None).all()
+    upstream_events = {event['id']: event for event in upstream['events']}
+    new, disappeared, mirrored = _upstream_diff(set(events), set(upstream_events.keys()))
+
+    if recurse:
+        for ext_id in new:
+            upstream_data = upstream_events[ext_id]
+            _upstream_sync_event(upstream_data, ext_id, class_inst=obj)
+
+    m.ClassInstanceEvent.objects.filter(external_id__in=mirrored). \
+        update(disappeared=False, external_update=make_aware(datetime.now()))
+    m.ClassInstanceEvent.objects.filter(external_id__in=disappeared).update(disappeared=True)
+    disappeared = m.ClassInstanceEvent.objects.filter(external_id__in=disappeared)
+    for event in disappeared.all():
+        logger.warning(f"{event} removed from {obj}.")
+
     # ---------  Related enrollments ---------
     enrollments = obj.enrollments.exclude(external_id=None).all()
 
@@ -470,6 +486,9 @@ def sync_enrollment(external_id, class_inst=None):
     :return:
     """
     upstream = _request_enrollment(external_id)
+    if upstream is None:
+        logger.critical("Deleted enrollment attempted to sync")
+        return
     _upstream_sync_enrollment(upstream, external_id, class_inst)
 
 
@@ -483,16 +502,86 @@ def _request_enrollment(external_id):
 def _upstream_sync_enrollment(upstream, external_id, class_inst):
     if class_inst is None:
         class_inst = m.ClassInstance.objects.get(external_id=upstream['class_instance_id'])
+    invalid = not all(
+        k in upstream
+        for k in ('id', 'student', 'class_instance', 'attempt', 'student_year', 'statutes',
+                  'attendance', 'attendance_date', 'improvement_grade', 'improvement_grade_date',
+                  'continuous_grade', 'continuous_grade_date', 'recourse_grade', 'recourse_grade_date',
+                  'special_grade', 'special_grade_date', 'approved'))
+    student = m.Student.objects.get(external_id=upstream['student'])
+
+    if (student_year := upstream['student_year']) is not None:
+        if student.year is None or student_year > student.year:
+            logger.info(f"Updated student {student} year ({student.year} to {student_year})")
+            student.year = student_year
+            student.save(update_fields=['year'])
+
+    grade = 0
+    attendance = upstream['attendance']
+    attendance_date = upstream['attendance_date']
+    if attendance_date:
+        make_aware(datetime.fromisoformat(attendance_date), is_dst=True)
+
+    normal_grade = upstream['continuous_grade']
+    if normal_grade:
+        grade = normal_grade
+    normal_grade_date = upstream['continuous_grade_date']
+    if normal_grade_date:
+        make_aware(datetime.fromisoformat(normal_grade_date), is_dst=True)
+    recourse_grade = upstream['exam_grade']
+    if recourse_grade:
+        grade = max(grade, recourse_grade)
+    recourse_grade_date = upstream['exam_grade_date']
+    if recourse_grade_date:
+        make_aware(datetime.fromisoformat(recourse_grade_date), is_dst=True)
+    special_grade = upstream['special_grade']
+    if special_grade:
+        grade = max(grade, special_grade)
+    special_grade_date = upstream['special_grade_date']
+    if special_grade_date:
+        make_aware(datetime.fromisoformat(special_grade_date), is_dst=True)
+
+    approved = grade >= 10
+    if approved != upstream['approved']:
+        logger.debug(f'Upstream enrollment approval does not match the calculated one (enrollment {external_id}).')
 
     try:
-        obj = m.Enrollment.objects.get(class_instance=class_inst, external_id=external_id)
-    except ObjectDoesNotExist:
-        obj = m.Enrollment.objects.create(
-            student=m.Student.objects.get(external_id=upstream['student']),
+        obj = m.Enrollment.objects.get(external_id=external_id)
+        changed = False
+        for attr in ('normal_grade_date', 'recourse_grade_date', 'special_grade_date', 'attendance', 'approved'):
+            current = getattr(obj, attr)
+            new = locals()[attr]
+            if current != new:
+                setattr(obj, attr, new)
+                changed = True
+        for attr in ('normal_grade', 'recourse_grade', 'special_grade', 'grade'):
+            current = getattr(obj, attr)
+            new = locals()[attr]
+            if current != new:
+                logger.warning(f"Grade changed from {current} to {new} in {obj}.")
+                setattr(obj, attr, new)
+                changed = True
+        if changed:
+            obj.save()
+
+    except m.Enrollment.DoesNotExist:
+        m.Enrollment.objects.create(
+            student=student,
             class_instance=class_inst,
+            attendance=attendance,
+            attendance_date=attendance_date,
+            normal_grade=normal_grade,
+            normal_grade_date=normal_grade_date,
+            recourse_grade=recourse_grade,
+            recourse_grade_date=recourse_grade_date,
+            special_grade=special_grade,
+            special_grade_date=special_grade_date,
+            approved=approved,
+            grade=grade,
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()))
+        logger.info(f"Inserted new enrollment {obj}")
 
 
 def sync_shift(external_id, class_inst=None, recurse=False):
@@ -587,6 +676,82 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
     m.Shift.teachers.through.objects.bulk_create(
         map(lambda student_id: m.Shift.teachers.through(teacher_id=student_id, shift=obj),
             m.Teacher.objects.filter(external_id__in=new).values_list('id', flat=True)))
+
+
+def _upstream_sync_event(upstream, external_id, class_inst):
+    invalid = not all(
+        k in upstream
+        for k in ('id', 'instance_id', 'date', 'from_time', 'to_time', 'type', 'season', 'info', 'note'))
+
+    if invalid:
+        logger.error(f"Invalid upstream event data: {upstream}")
+        return
+
+    date = make_aware(datetime.fromisoformat(upstream['date']), is_dst=True)
+    duration = None
+
+    to_time = upstream['to_time']
+    if to_time is not None:
+        to_time = datetime.strptime(to_time, "%H:%M")
+
+    from_time = upstream['from_time']
+    if from_time is not None:
+        if to_time is None:
+            logger.error(f"Consistency error syncing event id {external_id}. End time is set but start is not.")
+            return
+        from_time = datetime.strptime(from_time, "%H:%M")
+        duration = (to_time - from_time).seconds // 60
+        from_time = from_time.time() # Was a datetime
+
+    if (upstream_info := upstream['info']) is not None:
+        info = upstream_info + '.'
+        if (upstream_note := upstream['note']) is not None:
+            info = f'{info} {upstream_note}'
+    else:
+        info = None
+
+    try:
+        class_event = m.ClassInstanceEvent.objects.get(external_id=external_id)
+        changed = False
+        if from_time is not None and (class_event.time is None or class_event.time != from_time):
+            logger.info(f"Event {class_event} time changed")
+            class_event.time = from_time
+            if to_time is not None:
+                class_event.duration = duration
+            # TODO notify users
+            changed = True
+
+        if class_event.info != info:
+            logger.info(f"Event {class_event} info changed to {info}")
+            class_event.info = info
+            changed = True
+
+        if class_event.type != upstream['type']:
+            logger.info(f"Event {class_event} type changed")
+            class_event.type = upstream['type']
+            changed = True
+
+        if class_event.type != upstream['season']:
+            logger.info(f"Event {class_event} season changed")
+            class_event.type = upstream['season']
+            changed = True
+
+        if changed:
+            class_event.save()
+
+    except m.ClassInstanceEvent.DoesNotExist:
+        obj = m.ClassInstanceEvent.objects.create(
+            class_instance=class_inst,
+            duration=duration,
+            date=date,
+            time=from_time,
+            type=upstream['type'],
+            season=upstream['season'],
+            info=info,
+            external_id=external_id,
+            frozen=False,
+            external_update=make_aware(datetime.now()))
+        logger.info(f"Inserted new class event {obj}")
 
 
 def sync_shift_instance(external_id, shift):

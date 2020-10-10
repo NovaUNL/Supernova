@@ -96,15 +96,40 @@ class RoomType:
         return plurals[room_type]
 
 
-class EvaluationType:
+class EventSeason:
+    NORMAL = 1
+    EXAM = 2
+    SPECIAL = 3
+
+    CHOICES = (
+        (NORMAL, 'Epoca normal'),
+        (EXAM, 'Epoca de exame'),
+        (SPECIAL, 'Epoca especial'),
+    )
+
+class EventType:
     TEST = 1
     EXAM = 2
-    PROJECT = 3
+    DISCUSSION = 3
+    FIELD_TRIP = 4
+    PROJECT_ANNOUNCEMENT = 5
+    PROJECT_DELIVERY = 6
+    ADDITIONAL_CLASS = 7
+    PRESENTATION = 8
+    SEMINAR = 9
+    TALK = 10
 
     CHOICES = (
         (TEST, 'Teste'),
         (EXAM, 'Exame'),
-        (PROJECT, 'Projeto'),
+        (DISCUSSION, 'Discussão'),
+        (FIELD_TRIP, 'Viagem'),
+        (PROJECT_ANNOUNCEMENT, 'Enúnciação'),
+        (PROJECT_DELIVERY, 'Entrega'),
+        (ADDITIONAL_CLASS, 'Aula'),
+        (PRESENTATION, 'Apresentação'),
+        (SEMINAR, 'Seminário'),
+        (TALK, 'Palestra'),
     )
 
 
