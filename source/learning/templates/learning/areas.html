@@ -39,7 +39,7 @@
             <a class="class-synopsis" href="{% url 'learning:class' class.id %}">
               <span style="font-size: 2em">{{ class.name }}</span>
               <br>
-              <span style="font-size: 1.2em;margin-right: 20px">{{ class.section_count }} secções</span>
+              <span>{{ class.section_count }} secções</span>
               {% if class.department %}<span>, {{ class.department.name }}</span>{% endif %}
             </a>
           {% endfor %}
