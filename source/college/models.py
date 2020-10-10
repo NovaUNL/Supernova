@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Sum, F
 from django.utils import timezone
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
@@ -69,6 +70,10 @@ class Student(Importable):
     first_year = djm.IntegerField(null=True, blank=True)
     #: Cache field which stores the last year on which this student was seen as active
     last_year = djm.IntegerField(null=True, blank=True)
+    #: Number of ECTS this student has cumulated
+    credits = djm.IntegerField(null=True, blank=True)
+    #: Number of ECTS this student has cumulated
+    avg_grade = djm.FloatField(null=True, blank=True)
 
     class Meta:
         ordering = ['number']
@@ -78,7 +83,7 @@ class Student(Importable):
             return f'{self.number} - {self.abbreviation} ({self.user})'
         return f'{self.number} - {self.abbreviation}'
 
-    def update_yearspan(self):
+    def update_progress_info(self):
         years = list(self.class_instances.distinct('year').values_list('year', flat=True))
         if len(years) > 0:
             first_year = min(years)
@@ -92,8 +97,28 @@ class Student(Importable):
                 logger.warning(f'Last year changed from {self.last_year} to {last_year}')
                 self.last_year = last_year
                 changed = True
+
+            grade_info = self.enrollments \
+                .filter(approved=True) \
+                .all() \
+                .aggregate(credit_grade=Sum(F('grade') * F('class_instance__parent__credits')),
+                           credit_count=Sum('class_instance__parent__credits'))
+            credit_grade = grade_info['credit_grade']
+            credit_count = grade_info['credit_count']
+            avg_grade = credit_grade / credit_count
+            if self.credits != credit_count:
+                self.credits = credit_count
+                changed = True
+            if self.avg_grade != avg_grade:
+                self.avg_grade = avg_grade
+                changed = True
             if changed:
-                self.save(update_fields=['first_year', 'last_year'])
+                self.save(update_fields=['ects', 'avg_grade', 'first_year', 'last_year'])
+
+    @property
+    def ects(self):
+        if self.credits:
+            return self.credits // 2
 
 
 def building_pic_path(building, filename):
@@ -383,10 +408,13 @@ class Enrollment(Importable):
     #: Whether this enrollment lead to an approval
     approved = djm.BooleanField(null=True, blank=True)
     #: Conclusion grade
-    grade = djm.FloatField(null=True, blank=True)
+    grade = djm.IntegerField(null=True, blank=True)
 
     class Meta:
         unique_together = ['student', 'class_instance']
+
+    def __str__(self):
+        return f'{self.student} to {self.class_instance}'
 
 
 class Shift(Importable):
