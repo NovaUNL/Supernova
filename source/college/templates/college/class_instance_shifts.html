@@ -33,8 +33,8 @@
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Turnos</h2></div>
           <div class="pane-content flex-wrapper">
-            {% for turn in turns %}
-              <div class="shift-list turn-{{ shift.type_abbreviation|lower }}" href="#">
+            {% for shift in shifts %}
+              <div class="shift-list shift-{{ shift.type_abbreviation|lower }}">
                 <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
                   {{ shift.type_abbreviation }}{{ shift.number }}
                 </a>
