@@ -351,7 +351,7 @@ class ClassInstanceEvent(Importable):
     #: Choice between continuous, recourse and special seasons.
     season = djm.IntegerField(choices=ctypes.EventSeason.CHOICES, null=True)
     #: Textual information
-    info = djm.CharField(max_length=300, null=True, blank=True)
+    info = djm.TextField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.info} {self.time}- {self.class_instance}'
