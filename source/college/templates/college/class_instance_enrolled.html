@@ -11,7 +11,7 @@
           <div class="pane-title bg-grad"><h2>Inscritos</h2></div>
           <div class="pane-content">
             <table class="stylized grow">
-              <thead><td>Nome</td><td>Curso</td><td>Identificador</td><td>Numero</td><td>Resultado</td></thead>
+              <thead><td>Nome</td><td class="highres">Identificador</td><td>Numero</td><td>Curso</td><td>Resultado</td></thead>
               {% for enrollment in enrollments %}
                 <tr>
                   <td>
@@ -21,9 +21,9 @@
                       {{ enrollment.student.external_data.name }}
                     {% endif %}
                   </td>
+                  <td class="highres">{% if enrollment.student.abbreviation %}{{ enrollment.student.abbreviation }}{% endif %}</td>
+                  <td>{% if enrollment.student.number %}{{ enrollment.student.number }}{% endif %}</td>
                   <td>{% if enrollment.student.course %}<a href="{% url 'college:course' enrollment.student.course.id %}">{{ enrollment.student.course.abbreviation }}</a>{% endif %}</td>
-                  <td>{{ enrollment.student.abbreviation }}</td>
-                  <td>{{ enrollment.student.number }}</td>
                   {% if enrollment.grade %}
                     <td>{{ enrollment.grade }}</td>
                   {% else %}

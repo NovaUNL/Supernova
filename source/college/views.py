@@ -346,15 +346,22 @@ def class_instance_shifts_view(request, instance_id):
     return render(request, 'college/class_instance_shifts.html', context)
 
 
+@cache_page(3600 * 24)
+@cache_control(max_age=3600 * 24)
+@vary_on_cookie
 @login_required
 @permission_required('users.student_access')
 def class_instance_enrolled_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent', 'department'),
         id=instance_id)
-    enrollments = instance.enrollments.select_related('student__user').all()
     parent = instance.parent
     department = parent.department
+    enrollments = m.Enrollment.objects \
+        .filter(class_instance=instance) \
+        .order_by('student__number') \
+        .select_related('student__course', 'student__user') \
+        .all()
 
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_enrolled"
