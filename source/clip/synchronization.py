@@ -554,18 +554,23 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
             if current != new:
                 setattr(obj, attr, new)
                 changed = True
+        grades_changed = False
         for attr in ('normal_grade', 'recourse_grade', 'special_grade', 'grade'):
             current = getattr(obj, attr)
             new = locals()[attr]
+
             if current != new:
-                logger.warning(f"Grade changed from {current} to {new} in {obj}.")
+                grades_changed = True
                 setattr(obj, attr, new)
                 changed = True
+        if grades_changed:
+            logger.warning(f"Grade changed from {current} to {new} in {obj}.")
+
         if changed:
             obj.save()
 
     except m.Enrollment.DoesNotExist:
-        m.Enrollment.objects.create(
+        obj = m.Enrollment.objects.create(
             student=student,
             class_instance=class_inst,
             attendance=attendance,
@@ -691,17 +696,15 @@ def _upstream_sync_event(upstream, external_id, class_inst):
     duration = None
 
     to_time = upstream['to_time']
+    from_time = upstream['from_time']
     if to_time is not None:
         to_time = datetime.strptime(to_time, "%H:%M")
-
-    from_time = upstream['from_time']
-    if from_time is not None:
-        if to_time is None:
+        if from_time is None:
             logger.error(f"Consistency error syncing event id {external_id}. End time is set but start is not.")
             return
         from_time = datetime.strptime(from_time, "%H:%M")
         duration = (to_time - from_time).seconds // 60
-        from_time = from_time.time() # Was a datetime
+        from_time = from_time.time()  # Was a datetime
 
     if (upstream_info := upstream['info']) is not None:
         info = upstream_info + '.'
@@ -906,14 +909,9 @@ def _upstream_sync_students(upstream_list):
                     obj.course = upstream_course
                     changed = True
             if (upstream_name := upstream['name']) is not None:
-                if obj.external_data is None:
-                    obj.external_data = {'name': upstream_name}
-                    changed = True
-                else:
-                    if 'name' in obj.external_data and obj.external_data['name'] != upstream_name:
-                        logger.warning(
-                            f"Student {obj} name changed from {obj.external_data['name']} to {upstream_name}")
-                    obj.external_data['name'] = upstream_name
+                if obj.name != upstream_name:
+                    logger.warning(f"Student {obj} name changed from {obj.external_data['name']} to {upstream_name}")
+                    obj.name = upstream_name
                     changed = True
 
             if changed:
@@ -921,6 +919,7 @@ def _upstream_sync_students(upstream_list):
             continue
         else:
             obj = m.Student.objects.create(
+                name=upstream['name'],
                 abbreviation=upstream['abbr'],
                 iid=upstream['id'],
                 number=upstream['id'],
