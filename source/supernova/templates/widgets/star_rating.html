@@ -1,0 +1,9 @@
+{% spaceless %}
+  <span class="star-rating">
+    <span class="ui-star{% if star_count == 5 %} select{% endif %}"></span>
+    <span class="ui-star{% if star_count == 4 %} select{% endif %}"></span>
+    <span class="ui-star{% if star_count == 3 %} select{% endif %}"></span>
+    <span class="ui-star{% if star_count == 2 %} select{% endif %}"></span>
+    <span class="ui-star{% if star_count == 1 %} select{% endif %}"></span>
+  </span>
+{% endspaceless %}

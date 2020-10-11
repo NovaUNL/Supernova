@@ -5,70 +5,54 @@
     {% include 'college/class_decorator.html' %}
     <div class="row nowrap padded">
       <div class="col">
-        {% if instance.information.upstream.description and instance.information.upstream.description.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Descrição</h2></div>
-            <div class="pane-content">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            {% if instance.information.upstream.description and instance.information.upstream.description.pt %}
+              <h3>Descrição</h3>
               {{ instance.information.upstream.description.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.evaluation and instance.information.upstream.evaluation.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Avaliação</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.evaluation and instance.information.upstream.evaluation.pt %}
+              <h3>Avaliação</h3>
               {{ instance.information.upstream.evaluation.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.objectives and instance.information.upstream.objectives.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Objetivos</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.objectives and instance.information.upstream.objectives.pt %}
+              <h3>Objetivos</h3>
               {{ instance.information.upstream.objectives.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.program and instance.information.upstream.program.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Programa</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.program and instance.information.upstream.program.pt %}
+              <h3>Programa</h3>
               {{ instance.information.upstream.program.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.requirements and instance.information.upstream.requirements.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Requisitos</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.requirements and instance.information.upstream.requirements.pt %}
+              <h3>Requisitos</h3>
               {{ instance.information.upstream.requirements.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.teaching_methods and instance.information.upstream.teaching_methods.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Métodos de ensino</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.teaching_methods and instance.information.upstream.teaching_methods.pt %}
+              <h3>Métodos de ensino</h3>
               {{ instance.information.upstream.teaching_methods.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.assistance and instance.information.upstream.assistance.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Horário de atendimento</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.assistance and instance.information.upstream.assistance.pt %}
+              <h3>Horário de atendimento</h3>
               {{ instance.information.upstream.assistance.pt|safe }}
-            </div>
-          </div>
-        {% endif %}
-        {% if instance.information.upstream.bibliography and instance.information.upstream.bibliography.pt %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Bibliografia</h2></div>
-            <div class="pane-content">
+            {% endif %}
+            {% if instance.information.upstream.bibliography and instance.information.upstream.bibliography.pt %}
+              <h3>Bibliografia</h3>
               {{ instance.information.upstream.bibliography.pt|safe }}
-            </div>
+            {% endif %}
           </div>
-        {% endif %}
+        </div>
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2><a href="{% url 'college:class_instance_reviews' instance.id %}">Opiniões</a></h2>
+          </div>
+          <div class="pane-content">
+            {% include 'feedback/reviews_widget.html' %}
+            {% if reviews|length == 0 %}
+              Sem opiniões. <a href="{% url 'college:class_instance_review_create' instance.id %}">Adiciona a tua</a>.
+            {% endif %}
+          </div>
+        </div>
       </div>
       <div class="col nogrow noshrink">
         {% include 'college/class_navigation.html' %}

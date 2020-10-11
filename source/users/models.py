@@ -69,6 +69,12 @@ class User(AbstractUser):
             ('teacher_access', 'Can browse the system as a teacher.'),
         ]
 
+    def __str__(self):
+        return self.nickname
+
+    def get_absolute_url(self):
+        return reverse('users:profile', args=[self.nickname])
+
     @property
     def about_html(self):
         return markdownify(self.about)
@@ -142,9 +148,6 @@ class User(AbstractUser):
 
     def clear_notification_cache(self):
         cache.delete_many(['%s_notification_count' % self.id, '%s_notification_list' % self.id])
-
-    def __str__(self):
-        return self.nickname
 
 
 class Badge(djm.Model):

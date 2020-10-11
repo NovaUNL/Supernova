@@ -1,0 +1,47 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="header-decorator"><h1>{{ title }}</h1></div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2></h2></div>
+      <div class="pane-content">
+        <form class="col" action="{{ request.get_full_path }}" method="post">
+          {% csrf_token %}
+          <div class="form-block">
+            {{ form.non_field_errors }}
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Classificação</h4>
+                {{ form.rating }}
+              </div>
+              {{ form.rating.errors }}
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Observações (opcional)</h4>
+              </div>
+              {{ form.text.errors }}
+              <div class="form-row-description">{{ form.text }}</div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Anónimo</h4>
+                {{ form.anonymity }}
+              </div>
+              {{ form.anonymity.errors }}
+              <div class="form-row-description">
+                Caso seleccionada esta opção a autoria da avaliação será omitida ao público.<br>
+                A equipa de moderação continua a conseguir atribuir autoria à avaliação, todavia a mesma munca será divulgada
+                excetuando para efeitos de moderação a abusos.
+              </div>
+            </div>
+          </div>
+          <input class="ui-btn end" type="submit" value="Submeter"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

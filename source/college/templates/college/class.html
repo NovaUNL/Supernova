@@ -40,6 +40,15 @@
           Planos curriculares incompletos.
         </div>
       </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Opiniões (várias edições)</h2></div>
+        <div class="pane-content">
+          {% include 'feedback/reviews_widget.html' %}
+          {% if reviews|length == 0 %}
+            Sem opiniões.
+          {% endif %}
+        </div>
+      </div>
     </div>
     <div class="col nogrow">
       <div class="flex-pane">

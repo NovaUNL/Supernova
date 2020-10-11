@@ -112,12 +112,18 @@ class Vote(users.Activity):
 class Review(users.Activity):
     content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
     object_id = djm.PositiveIntegerField()
-    changed_object = GenericForeignKey('content_type', 'object_id')
-    text = djm.TextField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    text = djm.TextField(null=True, blank=True)
     rating = djm.IntegerField()
+    anonymity = djm.BooleanField(default=False)
 
     def __str__(self):
-        return f'Análise a {self.changed_object}.'
+        return f'Opinião sobre {self.content_object}.'
+
+    @property
+    def text_short(self):
+        if self.text and len(self.text) > 200:
+            return self.text[:200] + " ..."
 
 
 class Report(djm.Model):

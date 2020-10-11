@@ -1,0 +1,14 @@
+{% spaceless %}
+<div class="star-picker">
+  <input class="ui-star star-5" id="{{ widget.name }}-5" type="radio" name="{{ widget.name }}" value="5"{% if widget.value == 5 %} checked{% endif %}>
+  <label class="ui-star star-5" for="{{ widget.name }}-5"></label>
+  <input class="ui-star star-4" id="{{ widget.name }}-4" type="radio" name="{{ widget.name }}" value="4"{% if widget.value == 4 %} checked{% endif %}>
+  <label class="ui-star star-4" for="{{ widget.name }}-4"></label>
+  <input class="ui-star star-3" id="{{ widget.name }}-3" type="radio" name="{{ widget.name }}" value="3"{% if widget.value == 3 %} checked{% endif %}>
+  <label class="ui-star star-3" for="{{ widget.name }}-3"></label>
+  <input class="ui-star star-2" id="{{ widget.name }}-2" type="radio" name="{{ widget.name }}" value="2"{% if widget.value == 2 %} checked{% endif %}>
+  <label class="ui-star star-2" for="{{ widget.name }}-2"></label>
+  <input class="ui-star star-1" id="{{ widget.name }}-1" type="radio" name="{{ widget.name }}" value="1"{% if widget.value == 1 %} checked{% endif %}>
+  <label class="ui-star star-1" for="{{ widget.name }}-1"></label>
+</div>
+{% endspaceless %}

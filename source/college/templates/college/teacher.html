@@ -4,13 +4,12 @@
 
 {% block content_wrapper %}
   <div class="header-decorator">
-    {% if perms.college.change_teacher %}
-      <div class="header-decorator-options">
-        <ul>
-          <li><a href="{% url 'college:teacher_edit' teacher.id %}">Editar</a></li>
-        </ul>
-      </div>
-    {% endif %}
+    <div class="header-decorator-options">
+      <ul>
+        {% if perms.feedback.add_review %}<li><a href="{% url 'college:teacher_review_create' teacher.id %}">Avaliar</a></li>{% endif %}
+        {% if perms.college.change_teacher %}<li><a href="{% url 'college:teacher_edit' teacher.id %}">Editar</a></li>{% endif %}
+      </ul>
+    </div>
     {% if teacher.picture %}
       <h1><img class="highres" src="{{ teacher.picture.url }}">{{ teacher.name }}</h1>
     {% else %}
@@ -30,8 +29,20 @@
           </b>
         </div>
       </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for instance in class_instances %}
+              <li>
+                <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
     </div>
-    <div class="col nogrow noshrink">
+    <div class="col nogrow noshrink" style="flex-basis: 350px;">
       {% if teacher.url or teacher.email %}
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Informação</h2></div>
@@ -66,15 +77,12 @@
         </div>
       {% endif %}
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
+        <div class="pane-title bg-grad"><h2><a href="{% url 'college:teacher_reviews' teacher.id %}">Opiniões</a></h2></div>
         <div class="pane-content">
-          <ul class="menu">
-            {% for instance in class_instances %}
-              <li>
-                <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
-              </li>
-            {% endfor %}
-          </ul>
+          {% include 'feedback/reviews_widget.html' %}
+          {% if reviews|length == 0 %}
+            Sem opiniões. <a href="{% url 'college:teacher_review_create' teacher.id %}">Adiciona a tua</a>.
+          {% endif %}
         </div>
       </div>
     </div>

@@ -1,0 +1,14 @@
+{% spaceless %}
+  <table class="reviews-widget">
+    <tbody>
+    {% for review in reviews %}
+      <tr>
+        <td>
+          {% with review.rating as star_count %}{% include 'widgets/star_rating.html' %}{% endwith %}-
+          {% if review.anonymous %}<span>Anónimo</span>{% else %}<a href="{{ user.get_absolute_url }}">{{ user.nickname }}</a>{% endif %}</td>
+        <td><span>{{ review.timestamp|date:'Y/m/d' }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endspaceless %}

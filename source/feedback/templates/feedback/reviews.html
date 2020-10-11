@@ -1,0 +1,45 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <style>
+
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <div class="header-decorator-options">
+      <ul>
+        <li><a href="{{ new_url }}">Nova</a></li>
+      </ul>
+    </div>
+    <h1>{{ title }}</h1>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"></div>
+      <div class="pane-content">
+        {% for review in reviews %}
+          <div>
+            <h3>
+              {% with review.rating as star_count %}{% include 'widgets/star_rating.html' %}{% endwith %}
+              {% if review.anonymous %}
+                Utilizador anónimo
+              {% else %}
+                <a href="{{ user.get_absolute_url }}">{{ user.nickname }}</a>
+              {% endif %}
+            </h3>
+
+            <blockquote>{% if review.text %}{{ review.text }}{% else %}(Sem comentários){% endif %}</blockquote>
+            <span>{{ review.timestamp.date }}</span>
+          </div>
+          {% if not forloop.last %}
+            <hr>{% endif %}
+        {% endfor %}
+        {% if reviews|length == 0 %}<span>Sem avaliações</span>{% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

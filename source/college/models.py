@@ -14,6 +14,7 @@ from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
 from users.models import Activity
+from feedback import models as feedback
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from . import choice_types as ctypes
 
@@ -355,16 +356,18 @@ class ClassInstance(Importable):
     license = djm.IntegerField(choices=ctypes.FileLicense.CHOICES, default=ctypes.FileAvailability.NOBODY)
     #: Default file availability
     availability = djm.IntegerField(choices=ctypes.FileAvailability.CHOICES, default=ctypes.FileAvailability.NOBODY)
+    #: Reviews that are linked to this object
+    reviews = GenericRelation(feedback.Review, related_query_name='class_instance')
 
     class Meta:
         unique_together = ['parent', 'period', 'year']
 
     def __str__(self):
-        return f"{self.parent.abbreviation}, {self.period} de {self.year}"
+        return f"{self.parent.abbreviation}, {self.get_period_display()} de {self.year}"
 
     @property
     def occasion(self):
-        return f'{ctypes.Period.CHOICES[self.period - 1][1]}, {self.year - 1}/{self.year}'
+        return f'{self.get_period_display()}, {self.year - 1}/{self.year}'
 
     @property
     def short_occasion(self):
@@ -530,7 +533,7 @@ def teacher_pic_path(teacher, filename):
 
 class Teacher(Importable):
     """
-    | A person who teaches.
+    | A person who teaches or investigates.
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
     #: Full teacher name (eventually redundant, useful for registrations)
@@ -561,6 +564,8 @@ class Teacher(Importable):
     room = djm.ForeignKey(Room, null=True, on_delete=djm.PROTECT, related_name='teachers')
     #: Changes performed on this teacher's object
     changes = GenericRelation('AcademicDataChange', related_query_name='teacher')
+    #: Reviews that are linked to this object
+    reviews = GenericRelation(feedback.Review)
 
     def __str__(self):
         return f"{self.name} ({self.iid})"
@@ -590,6 +595,9 @@ class Teacher(Importable):
     def calculate_abbreviation(self):
         if self.email:
             self.abbreviation = self.email.split('@')[0]
+
+    def get_absolute_url(self):
+        return reverse('college:teacher', args=[self.id])
 
 
 def file_upload_path(file, _):

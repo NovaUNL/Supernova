@@ -64,6 +64,39 @@
   a
     color: var(--text-lc)
 
+
+.star-picker
+  display: flex
+  flex-direction: row-reverse
+  justify-content: left
+
+  input.ui-star
+    display: none
+
+  label.ui-star
+    padding: 0 5px
+    font-size: 22px
+    cursor: pointer
+
+  input.ui-star:checked ~ label.ui-star:before
+    content: '★'
+    color: #cdaf29
+
+  label.ui-star:before
+    content: '☆'
+
+.star-rating
+  display: inline-flex
+  flex-direction: row-reverse
+  justify-content: left
+
+  .ui-star:before
+    content: '☆'
+
+  .ui-star.select:before, .ui-star.select ~ .ui-star:before
+    content: '★'
+    color: #cdaf29
+
 /* GIT repository star button */
 .tiny-btn-widget
   display: inline-block

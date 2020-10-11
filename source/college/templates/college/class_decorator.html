@@ -1,6 +1,15 @@
-<div class="header-decorator">
-  <div>
-    <h1>{{ instance.parent.name }}</h1>
-    <h3>{{ instance.occasion }}</h3>
+{% spaceless %}
+  <div class="header-decorator">
+    {% if perms.feedback.add_review %}
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'college:class_instance_review_create' instance.id %}">Avaliar</a></li>
+        </ul>
+      </div>
+    {% endif %}
+    <div>
+      <h1>{{ instance.parent.name }}</h1>
+      <h3>{{ instance.occasion }}</h3>
+    </div>
   </div>
-</div>
+{% endspaceless %}
