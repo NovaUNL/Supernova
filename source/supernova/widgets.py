@@ -44,6 +44,18 @@ class SliderInput(Widget):
         return False
 
 
+class StarInput(Widget):
+    template_name = 'widgets/star_rating_picker.html'
+
+    def value_from_datadict(self, data, files, name):
+        value = data.get(name)
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except ValueError:
+                pass
+
+
 class NativeDateInput(DateInput):
     input_type = 'date'
 
