@@ -24,64 +24,34 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Últimos registos</h2></div>
         <div class="pane-content">
-          <table>
+          <table class="stylized grow">
             <tr>
               <th>Username</th>
               <th>Alcunha</th>
               <th>Estudante</th>
+              <th>Professor</th>
               <th>Email</th>
-              <th>Fracassos</th>
+              <th>F</th>
               <th>Convidante</th>
+              <th>Utilizador</th>
             </tr>
             {% for registration in latest_registrations %}
               <tr>
-                <td>{{ registration.username }}</td>
-                <td><a href="{% url 'users:profile' registration.nickname %}">{{ registration.nickname }}</a></td>
-                <td>{{ registration.student }}</td>
-                <td>{{ registration.email }}</td>
+                <td>{% if registration.resulting_user %}<a href="{{ registration.resulting_user.get_absolute_url }}">{{ registration.username }}</a>{% else %}{{ registration.username }}{% endif %}</td>
+                <td>{% if registration.nickname and registration.nickname != '' %}{{ registration.nickname }}{% else %}-{% endif %}</td>
+                <td>{{ registration.requested_student.abbreviation }}</td>
+                <td>{{ registration.requested_teacher.abbreviation }}</td>
+                <td>{{ registration.email|cut:"campus.fct.unl.pt" }}</td>
                 <td>{{ registration.failed_attempts }}</td>
-                {% with registration.invites.first as invite %}
-                  {% if invite %}
-                    <td><a href="{% url 'users:profile' invite.issuer.nickname %}">{{ invite.issuer.nickname }}</a></td>
-                  {% else %}
-                    <td>-</td>
-                  {% endif %}
-                {% endwith %}
+                <td>{% if registration.invite %}<a href="{{ registration.invite.issuer.get_absolute_url }}">{{ registration.invite.issuer.nickname }}</a>{% else %} - {% endif %}</td>
+                <td>{{ registration.creation|date:'Y/m/d H:i' }}</td>
               </tr>
             {% endfor %}
           </table>
-        </div>
-      </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Anúnciar alteração</h2></div>
-        <div class="pane-content">
-          <form method="post" action="{% url 'management' %}">
-            {{ changelog_form.as_p }}
-            <input style="float: right" type="submit" value="Anúnciar">
-          </form>
         </div>
       </div>
     </div>
     <div class="col">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Actividade</h2></div>
-        <div class="pane-content">
-          <table>
-            <tr>
-              <th>Data</th>
-              <th>Utilizador</th>
-              <th>Descrição</th>
-            </tr>
-            {% for activity in latest_activity %}
-              <tr>
-                <td>{{ activity.timestamp|date:'d/m/Y H:i' }}</td>
-                <td><a href="{% url 'users:profile' activity.user.nickname %}">{{ activity.user.nickname }}</a></td>
-                <td>{{ activity|capfirst }}</td>
-              </tr>
-            {% endfor %}
-          </table>
-        </div>
-      </div>
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Utilizadores suspensos</h2></div>
         <div class="pane-content" data-endpoint="{% url 'api:user_moderation' 0 %}">
@@ -107,6 +77,39 @@
           <select name="section" required id="suspension-selector" data-autocomplete-light-url="/u/ac/nickname/"
                   data-autocomplete-light-function="select2"></select>
           <input type="button" value="Confirmar" onclick="suspend()">
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Emitir diferencial de pontos</h2></div>
+        <div class="pane-content">
+          <form method="post" action="{% url 'management:users' %}?reputation_offset=">
+            {% csrf_token %}
+            {{ reputation_offset_form.as_p }}
+            <input style="float: right" type="submit" value="Emitir">
+          </form>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Utilizadores</h2></div>
+        <div class="pane-content stylized grow">
+          <table class="stylized grow">
+            <thead>
+            <tr>
+              <th>Username</th>
+              <th>Alcunha</th>
+              <th>Points</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for other_user in users %}
+              <tr>
+                <td>{{ other_user.username }}</td>
+                <td><a href="{% url 'users:profile' other_user.nickname %}">{{ other_user.nickname }}</a></td>
+                <td>{{ other_user.points }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

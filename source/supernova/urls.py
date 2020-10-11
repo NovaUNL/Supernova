@@ -8,7 +8,6 @@ from django.views.decorators.cache import cache_page
 from django.urls import path, include, reverse
 
 import users.views as users
-import feedback.views as feedback
 import documents.views as documents
 from news.urls import NewsSitemap
 from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
@@ -55,14 +54,15 @@ urlpatterns = [
     # Group views
     path('grupos/', include('groups.urls')),
     # Feedback views
-    path('feedback/', feedback.feedback_list, name='feedback'),
-    path('feedback/<int:idea_id>/', feedback.idea, name='feedback_idea'),
+    path('feedback/', include('feedback.urls')),
     # Documents views
     path('documento/<int:document_id>/', documents.document, name='document'),
     # News views
     path('noticias/', include('news.urls')),
     # Learning views
     path('estudo/', include('learning.urls')),
+    # Management view
+    path('manage/', include('management.urls')),
     # path('loja/', include('store.urls')),
     # REST API views
     path('api/', include('api.urls')),
@@ -71,7 +71,6 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     url(r'^markdownx/', include('markdownx.urls')),
-    path('gest/', views.management_view, name='management'),
     path('sobre/', flatpages.flatpage, {'url': '/sobre/'}, name='about'),
     path('privacidade/', flatpages.flatpage, {'url': '/privacidade/'}, name='privacy'),
     path('faq/', flatpages.flatpage, {'url': '/faq/'}, name='faq'),

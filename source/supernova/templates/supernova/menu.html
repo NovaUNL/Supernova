@@ -26,10 +26,14 @@
   </div>
   <ul>
     {% if user.is_staff %}
-      <li class="collapse">
+      <li {% if pcode|startswith:'manag' %}{% else %}class="collapse"{% endif %}>
         <input type="checkbox" id="m0"/><label for="m0">Administração</label>
         <ul>
-          <li><a href="{% url 'management' %}">Gestão</a></li>
+          <li {% if pcode == 'manag_index' %}class="active"{% endif %}><a href="{% url 'management:index' %}">Painel geral</a></li>
+          <li {% if pcode == 'manag_users' %}class="active"{% endif %}><a href="{% url 'management:users' %}">Utilizadores</a></li>
+          <li {% if pcode == 'manag_announcements' %}class="active"{% endif %}><a href="{% url 'management:announcements' %}">Anúncios</a></li>
+          <li {% if pcode == 'manag_activity' %}class="active"{% endif %}><a href="{% url 'management:activity' %}">Actividade</a></li>
+          <li {% if pcode == 'manag_settings' %}class="active"{% endif %}><a href="{% url 'management:settings' %}">Definições</a></li>
         </ul>
       </li>
     {% endif %}

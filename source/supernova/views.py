@@ -1,9 +1,7 @@
 from datetime import datetime
 import random
 
-from django.contrib.admin.views.decorators import staff_member_required
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied
 from django.db.models import Q, F, Count
 from django.shortcuts import render
 from django.urls import reverse
@@ -12,9 +10,7 @@ from django.utils import timezone
 import settings
 from scrapper.boinc import boincstats
 from services.utils import get_next_meal_items
-from supernova import forms as f
 from supernova import models as m
-from users import models as users
 from news import models as news
 from college import models as college
 from groups import models as groups
@@ -75,29 +71,6 @@ def changelog_view(request):
     context['changelog'] = m.Changelog.objects.order_by('date').reverse().all()
     context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('news:index')}]
     return render(request, 'supernova/changes.html', context)
-
-
-@staff_member_required
-def management_view(request):
-    context = build_base_context(request)
-    context['title'] = "Gestão"
-    context['latest_registrations'] = users.Registration.objects.order_by('creation').reverse()[0:10]
-    context['latest_activity'] = users.Activity.objects.order_by('timestamp').reverse()[0:10]
-    context['suspended_users'] = users.User.objects.order_by('nickname').filter(is_active=False).all()
-    if request.method == 'POST':
-        changelog_form = f.ChangelogForm(request.POST)
-        if changelog_form.is_valid():
-            entry = changelog_form.save()
-            if changelog_form.cleaned_data['broadcast_notification']:
-                m.ChangelogNotification.objects.bulk_create(
-                    [m.ChangelogNotification(receiver=receiver, entry=entry) for receiver in users.User.objects.all()])
-
-    else:
-        changelog_form = f.ChangelogForm()
-    users.User.objects.filter()
-    context['changelog_form'] = changelog_form
-    context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('management')}]
-    return render(request, 'supernova/management.html', context)
 
 
 def bad_request_view(request, exception=None):

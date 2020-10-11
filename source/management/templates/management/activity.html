@@ -1,0 +1,27 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Actividade</h2></div>
+      <div class="pane-content">
+        <table>
+          <tr>
+            <th>Data</th>
+            <th>Utilizador</th>
+            <th>Descrição</th>
+          </tr>
+          {% for activity in latest_activity %}
+            <tr>
+              <td>{{ activity.timestamp|date:'d/m/Y H:i' }}</td>
+              <td><a href="{% url 'users:profile' activity.user.nickname %}">{{ activity.user.nickname }}</a></td>
+              <td>{{ activity|capfirst }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  {% csrf_token %}
+  <div class="row padded">
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>-</h2></div>
+        <div class="pane-content">
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

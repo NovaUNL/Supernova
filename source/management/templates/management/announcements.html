@@ -1,0 +1,33 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script src="{% static  'users/management.js' %}"></script>
+  <link href="{% static  'vendor/select2/dist/css/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <link href="{% static  'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <link href="{% static  'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static  'autocomplete_light/jquery.init.js' %}"></script>
+  <script src="{% static  'vendor/select2/dist/js/select2.full.min.js' %}"></script>
+  <script src="{% static  'vendor/select2/dist/js/i18n/pt.js' %}"></script>
+  <script src="{% static  'autocomplete_light/autocomplete.init.js' %}"></script>
+  <script src="{% static  'autocomplete_light/forward.js' %}"></script>
+  <script src="{% static  'autocomplete_light/select2.js' %}"></script>
+  <script src="{% static  'autocomplete_light/jquery.post-setup.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Anúnciar alteração</h2></div>
+      <div class="pane-content">
+        <form method="post" action="{% url 'management:announcements' %}?announce=">
+          {% csrf_token %}
+          {{ changelog_form.as_p }}
+          <input style="float: right" type="submit" value="Anúnciar">
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

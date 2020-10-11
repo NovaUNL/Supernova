@@ -410,11 +410,7 @@ class SchedulePeriodicForm(djf.ModelForm):
 UserSchedulePeriodicFormset = djf.inlineformset_factory(m.User, m.SchedulePeriodic, extra=1, form=SchedulePeriodicForm)
 
 
-class ReputationOffsetForm(djf.ModelForm):
-    class Meta:
-        model = m.ReputationOffset
-        fields = ('receiver', 'amount', 'reason')
-        widgets = {'receiver': autocomplete.ModelSelect2(url='users:nickname_ac')}
+
 
 
 def enforce_name_policy(name):
