@@ -14,6 +14,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from users import models as users
 from college import models as college
 from documents import models as documents
+from feedback import models as feedback
 
 
 def area_pic_path(area, filename):
@@ -396,65 +397,16 @@ class WrongAnswerReport:
     reason = djm.TextField()
 
 
-class Postable(djm.Model):
+class Postable(feedback.Votable, djm.Model):
     #: Posted content
     content = MarkdownxField()
     #: Creation datetime
     creation_timestamp = djm.DateTimeField(auto_now_add=True)
-
-    # Cached fields
-    upvotes = djm.IntegerField(default=0)
-    downvotes = djm.IntegerField(default=0)
+    #: Edit datetime
+    edit_timestamp = djm.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ('creation_timestamp',)
-
-    @property
-    def content_html(self):
-        return markdownify(self.content)
-
-    def cache_votes(self):
-        self.upvotes = PostableVote.objects.filter(to=self, type=PostableVote.UPVOTE).count()
-        self.downvotes = PostableVote.objects.filter(to=self, type=PostableVote.DOWNVOTE).count()
-        self.save()
-
-    @property
-    def vote_balance(self):
-        if self.upvotes is None:
-            self.cache_votes()
-        return self.upvotes - self.downvotes
-
-    def set_vote(self, user, vote_type):
-        with transaction.atomic():
-            votes = self.votes.filter(user=user).all()
-            has_upvote = False
-            has_downvote = False
-            # Counted this way since more types of votes might be implemented
-            for vote in votes:
-                if vote.type == PostableVote.UPVOTE:
-                    has_upvote = True
-                if vote.type == PostableVote.DOWNVOTE:
-                    has_downvote = True
-
-            if vote_type == PostableVote.UPVOTE or vote_type == PostableVote.DOWNVOTE:
-                upvote = vote_type == PostableVote.UPVOTE
-                if upvote:
-                    if has_downvote:
-                        self.votes.filter(user=user, type=PostableVote.DOWNVOTE).update(type=PostableVote.UPVOTE)
-                        self.upvotes += 1
-                        self.downvotes -= 1
-                    elif not has_upvote:
-                        PostableVote.objects.create(to=self, user=user, type=PostableVote.UPVOTE)
-                        self.upvotes += 1
-                else:
-                    if has_upvote:
-                        self.votes.filter(user=user, type=PostableVote.UPVOTE).update(type=PostableVote.DOWNVOTE)
-                        self.upvotes -= 1
-                        self.downvotes += 1
-                    elif not has_downvote:
-                        PostableVote.objects.create(to=self, user=user, type=PostableVote.DOWNVOTE)
-                        self.downvotes += 1
-            self.save()
 
 
 class Question(users.Activity, users.Subscribable, Postable):

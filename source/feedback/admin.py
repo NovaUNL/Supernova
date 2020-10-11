@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from feedback.models import Comment, Entry, EntryComment
+from feedback import models as m
 
-admin.site.register(Comment)
-admin.site.register(Entry)
-admin.site.register(EntryComment)
+admin.site.register(m.Review)
+admin.site.register(m.Suggestion)
+admin.site.register(m.Report)
