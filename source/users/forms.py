@@ -115,9 +115,9 @@ class RegistrationForm(djf.ModelForm):
     def clean_username(self):
         username = self.cleaned_data.get("username")
         enforce_name_policy(username)
-        if m.User.objects.filter(username=username).exists():
+        if m.User.objects.filter(username__iexact=username).exists():
             raise djf.ValidationError(f"Já existe um utilizador com o nome de utilizador '{username}'.")
-        if m.User.objects.filter(nickname=username).exists():
+        if m.User.objects.filter(nickname__iexact=username).exists():
             raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{username}'")
         return username
 
@@ -152,13 +152,13 @@ class RegistrationForm(djf.ModelForm):
             self.cleaned_data['nickname'] = username
 
         enforce_name_policy(nickname)
-        if m.User.objects.filter(username=nickname).exists():
+        if m.User.objects.filter(username__iexact=nickname).exists():
             raise djf.ValidationError(f"Já existe um utilizador com o nome de utilizador '{nickname}'.")
-        if m.User.objects.filter(nickname=nickname).exists():
+        if m.User.objects.filter(nickname__iexact=nickname).exists():
             raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{nickname}'")
 
 
-        collision_filter = Q(abbreviation=email_prefix) | Q(abbreviation=nickname) | Q(abbreviation=username)
+        collision_filter = Q(abbreviation=email_prefix.lower()) | Q(abbreviation=nickname.lower()) | Q(abbreviation=username.lower())
         if requested_student:
             collided_students = college.Student.objects \
                 .filter(collision_filter) \
@@ -252,11 +252,13 @@ class AccountSettingsForm(djf.ModelForm):
 
         if m.User.objects \
                 .exclude(id=self.instance.id) \
-                .filter(Q(username=nickname) | Q(nickname=nickname)) \
+                .filter(Q(username__iexact=nickname) | Q(nickname__iexact=nickname)) \
                 .exists():
             raise djf.ValidationError(f"A alcunha '{nickname}' está a uso.")
-        if college.Student.objects.filter(abbreviation=nickname).exclude(user=self.instance).exists():
+        if college.Student.objects.filter(abbreviation__iexact=nickname).exclude(user=self.instance).exists():
             raise djf.ValidationError(f"A alcunha '{nickname}' pertence a um estudante")
+        if college.Teacher.objects.filter(abbreviation__iexact=nickname).exclude(user=self.instance).exists():
+            raise djf.ValidationError(f"A alcunha '{nickname}' pertence a um professor")
         return nickname
 
     def clean_old_password(self):
