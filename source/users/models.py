@@ -57,6 +57,7 @@ class User(AbstractUser):
     )
     gender = djm.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
     about = MarkdownxField(blank=True, null=True)
+    permissions_overridden = djm.BooleanField(default=False)
     # Cached fields
     is_student = djm.BooleanField(default=False)
     is_teacher = djm.BooleanField(default=False)
@@ -208,8 +209,6 @@ class Registration(djm.Model):
     username = djm.CharField(verbose_name='utilizador', max_length=128)
     #: Claimed nickname
     nickname = djm.CharField(verbose_name='alcunha', blank=True, max_length=128)
-    #: Student that is being claimed (deprecated)
-    student = djm.CharField(max_length=128)
     #: Hash of the password
     password = djm.CharField(verbose_name='palavra-passe', max_length=128)
     #: Student that this registration is claiming
@@ -236,7 +235,7 @@ class Registration(djm.Model):
     failed_attempts = djm.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.username}/{self.nickname}/{self.student}/{self.requested_teacher} -{self.email}"
+        return f"{self.username}/{self.nickname}/{self.requested_student}/{self.requested_teacher} -{self.email}"
 
 
 class VulnerableHash(djm.Model):
