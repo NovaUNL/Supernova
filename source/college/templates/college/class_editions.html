@@ -4,7 +4,7 @@
     <ul class="menu">
         {% for other_instance in instance.parent.instances.all|dictsortreversed:'year' %}
         {% if instance == other_instance %}
-          <li>{{ other_instance.occasion }}</li>
+          <li>{{ other_instance.occasion }} (<a href="{{ instance.parent.get_absolute_url }}">Sair</a>)</li>
         {% else %}
           <li><a href="{% url 'college:class_instance' other_instance.id %}">{{ other_instance.occasion }}</a>
           </li>
