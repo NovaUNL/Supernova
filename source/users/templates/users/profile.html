@@ -35,8 +35,16 @@
                   <div>
                     <b>CLIP ID: </b>{{ student.abbreviation }}<br>
                     <b>Numero: </b>{{ student.number }}<br>
-                    <b>Curso: </b>
+                    {% if student.year %}
+                      <b>Ano:</b> <span>{{ student.year }}º</span>
+                      <br>
+                    {% endif %}
+                    {% if student.avg_grade %}
+                      <b>Média:</b> <span>{{ student.avg_grade|floatformat }} (em {{ student.ects }} ECTS conhecidos)</span>
+                      <br>
+                    {% endif %}
                     {% if student.course %}
+                      <b>Curso: </b>
                       <a href="{% url 'college:course' student.course.id %}">{{ student.course.abbreviation }}</a>
                     {% else %}
                       Desconhecido
@@ -47,10 +55,16 @@
                   {% if student != primary_student %}
                     <div>
                       <b>Numero: </b>{{ student.number }}<br>
-                      <b>Curso: </b>
-                      <a href="{% url 'college:course' student.course.id %}">
-                        {{ student.course.abbreviation }}
-                      </a>
+                      {% if student.avg_grade %}
+                        <b>Média:</b> <span>{{ student.avg_grade|floatformat }} (em {{ student.ects }} ECTS conhecidos)</span>
+                        <br>
+                      {% endif %}
+                      {% if student.course %}
+                        <b>Curso: </b>
+                        <a href="{% url 'college:course' student.course.id %}">
+                          {{ student.course.abbreviation }}
+                        </a>
+                      {% endif %}
                     </div>
                   {% endif %}
                 {% endfor %}
