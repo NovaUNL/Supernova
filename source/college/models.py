@@ -8,6 +8,7 @@ from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Sum, F
+from django.urls import reverse
 from django.utils import timezone
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
@@ -320,12 +321,19 @@ class Class(Importable):
         return self.name
 
     @property
+    def title(self):
+        return self.name
+
+    @property
     def ects(self):
         return self.credits / 2
 
     @property
     def description_html(self):
         return markdownify(self.description)
+
+    def get_absolute_url(self):
+        return reverse('college:class', args=[self.id])
 
 
 class ClassInstance(Importable):

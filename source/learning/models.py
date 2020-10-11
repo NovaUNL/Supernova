@@ -1,7 +1,9 @@
+from itertools import chain
+
 from django.conf import settings
 from django.db.models import Max
 from django.urls import reverse
-from django.db import models as djm, transaction
+from django.db import models as djm
 from polymorphic.models import PolymorphicModel
 
 from functools import reduce
@@ -107,6 +109,9 @@ class Section(djm.Model):
 
     def __str__(self):
         return f"({self.id}) {self.title}"
+
+    def get_absolute_url(self):
+        return reverse('learning:section', args=[self.id])
 
     @property
     def content(self):
@@ -486,6 +491,12 @@ class Question(users.Activity, users.Subscribable, Postable):
 
     def __str__(self):
         return f"questão '{self.title}'"
+
+    def tags(self):
+        return chain(self.linked_classes.all(), self.linked_sections.all())
+
+    def get_absolute_url(self):
+        return reverse('learning:question', args=[self.id])
 
 
 class QuestionAnswer(users.Activity, users.Subscribable, Postable):

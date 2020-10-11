@@ -1,0 +1,72 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          {% if create_url %}<li><a href="{{ create_url }}">Colocar nova</a></li>{% endif %}
+        </ul>
+      </div>
+      <h1>{{ title }}</h1>
+    </div>
+    <div class="row padded nowrap">
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Recentes</h2></div>
+          <div class="pane-content question-list">
+            {% for obj in recent_objects %}
+              <div class="question">
+                <div class="info">
+                  <div class="counter votes"><span>{{ obj.vote_balance }}</span></div>
+                  <div class="counter answers"><span>{{ obj.answer_count }}</span></div>
+                </div>
+                <div class="summary">
+                  <h2><a href="{{ obj.get_absolute_url }}">{{ obj.title }}</a></h2>
+                  <div class="tags">
+                    {% for tag in obj.tags %}
+                      <span class="ui-tag"><a href="{{ tag.get_absolute_url }}">{{ tag.title }}</a></span>
+                    {% endfor %}
+                  </div>
+                  <div class="author">
+                    <a href="{% url 'users:profile' obj.user.nickname %}">{{ obj.user }}</a>,
+                    {{ obj.timestamp|date:'d/m/Y H:i' }}</div>
+                </div>
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Populares</h2></div>
+          <div class="pane-content question-list">
+            {% for obj in popular_objects %}
+              <div class="question">
+                <div class="info">
+                  <div class="counter votes"><span>{{ obj.vote_balance }}</span></div>
+                  <div class="counter answers"><span>{{ obj.answer_count }}</span></div>
+                </div>
+                <div class="summary">
+                  <h2><a href="{{ obj.get_absolute_url }}">{{ obj.title }}</a></h2>
+                  <div class="tags">
+                    {% for tag in obj.tags %}
+                      <span class="ui-tag"><a href="{{ tag.get_absolute_url }}">{{ tag.title }}</a></span>
+                    {% endfor %}
+                  </div>
+                  <div class="author">
+                    <a href="{% url 'users:profile' obj.user.nickname %}">{{ obj.user }}</a>,
+                    {{ obj.timestamp|date:'d/m/Y H:i' }}</div>
+                </div>
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -606,21 +606,23 @@ def questions_view(request):
     context = build_base_context(request)
     context['pcode'] = 'l_questions'
     context['title'] = 'Dúvidas'
-    context['recent_questions'] = \
+    context['recent_objects'] = \
         m.Question.objects \
             .select_related('user') \
             .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
             .order_by('timestamp') \
             .annotate(answer_count=Count('answers')) \
             .reverse()[:50]
-    context['popular_questions'] = \
+    context['popular_objects'] = \
         m.Question.objects \
             .order_by(F('upvotes') + F('downvotes'), 'timestamp') \
             .select_related('user') \
             .annotate(answer_count=Count('answers')) \
             .reverse()[:50]
+    if request.user.has_perm('learning.add_question'):
+        context['create_url'] = reverse('learning:questions')
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
-    return render(request, 'learning/questions.html', context)
+    return render(request, 'supernova/recent_and_popular_lists.html', context)
 
 
 @login_required
