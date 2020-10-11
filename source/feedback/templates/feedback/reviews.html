@@ -28,7 +28,7 @@
               {% if review.anonymous %}
                 Utilizador anónimo
               {% else %}
-                <a href="{{ user.get_absolute_url }}">{{ user.nickname }}</a>
+                <a href="{{ review.user.get_absolute_url }}">{{ review.user.nickname }}</a>
               {% endif %}
             </h3>
 
