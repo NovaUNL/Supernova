@@ -28,29 +28,12 @@
         <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}
           <div class="form-block">
-            {% if creation_form.non_field_errors %}
-              <div class="errors">{{ creation_form.non_field_errors }}</div>
-            {% endif %}
+            {{ creation_form.non_field_errors }}
             <div class="form-row{% if creation_form.invite.errors %} error{% endif %}">
               <div class="form-row-top">
                 <h4>Código do convite</h4>
                 {{ creation_form.invite }}
               </div>
-              {% if  invite_used %}
-                <hr>
-                O código inserido já foi utilizado. Introduz um novo código.
-                <hr>
-              {% endif %}
-              {% if  invite_expired %}
-                <hr>
-                O código inserido já excedeu a validade. Introduz um novo código.
-                <hr>
-              {% endif %}
-              {% if  invite_unknown %}
-                <hr>
-                O código inserido está incorreto.
-                <hr>
-              {% endif %}
               {{ creation_form.invite.errors }}
               <div class="form-row-description">
                 Um código que te foi cedido para te registares.<br>
