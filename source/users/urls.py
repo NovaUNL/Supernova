@@ -10,6 +10,7 @@ urlpatterns = [
     path('<str:nickname>/calendario/', views.user_calendar_view, name='calendar'),
     path('<str:nickname>/calendario/editar', views.user_calendar_management_view, name='calendar_manage'),
     path('<str:nickname>/reputacao/', views.user_reputation_view, name='reputation'),
+    path('<str:nickname>/avaliações/', views.user_evaluations_view, name='evaluations'),
     path('<str:nickname>/definicoes/', views.user_profile_settings_view, name='settings'),
     path('<str:nickname>/convites/', views.invites_view, name='invites'),
     path('<str:nickname>/convites/novo', views.create_invite_view, name='create_invite'),

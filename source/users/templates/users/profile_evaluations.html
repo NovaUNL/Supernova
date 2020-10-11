@@ -1,0 +1,159 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <h1>Avaliações</h1>
+    </div>
+    <style>
+      .evaluation-title h3 {
+          display: inline;
+      }
+
+      .evaluation .entity {
+          display: inline;
+      }
+
+        .evaluation-list {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .enrollment {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: stretch;
+            min-height: 30px;
+        }
+
+        .enrollment div:first-child {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .enrollment-evaluation, .enrollment-attendance {
+            text-align: center;
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+        .enrollment div:last-child {
+            margin-right: 0;
+        }
+
+        .enrollment-evaluation span {
+            display: block;
+        }
+
+        .enrollment-grade, .enrollment-evaluation, .enrollment-attendance {
+            padding: 5px 10px;
+            border: 2px solid var(--input-light);
+            background-color: var(--input-light);
+            border-radius: 5px;
+        }
+
+        .enrollment-grade.approved, .enrollment-attendance {
+            background-color: var(--green);
+        }
+        .enrollment-attendance {
+            line-height: 45px;
+        }
+
+        .enrollment-grade small {
+            vertical-align: top;
+        }
+
+        .enrollment-grade span {
+            font-size: 2em;
+        }
+    </style>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Próximas avaliações</h2></div>
+        <div class="pane-content">
+          <div class="event-list">
+            {% for evaluation in next_evaluations %}
+              <div class="evaluation">
+                <div class="evaluation-title">
+                  <a class="entity" href="{{ evaluation.class_instance.get_absolute_url }}">{{ evaluation.class_instance.parent.name }}</a>
+                  <span class="ui-tag">{{ evaluation.get_season_display }}</span>
+                </div>
+                <b>{{ evaluation.get_type_display }}</b> <span>Dia {{ evaluation.date }}{% if evaluation.time %}{% if evaluation.duration %}, entre as {{ evaluation.time }} e as {{ evaluation.to_time }}{% else %}ás {{ evaluation.time }}{% endif %}{% endif %}</span>
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+            {% if next_evaluations|length == 0 %}
+              Sem avaliações agendadas nas inscrições atuais.
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Próximos eventos</h2></div>
+        <div class="pane-content">
+          <div class="event-list">
+            {% for event in next_events %}
+              <div class="evaluation">
+                <div class="evaluation-title">
+                  <h3>{{ event.get_type_display }}</h3>
+                  <a class="entity" href="{{ event.class_instance.get_absolute_url }}">{{ event.class_instance.parent.name }}</a>
+                  {% if event.season %}<span class="ui-tag">{{ event.get_season_display }}</span>{% endif %}
+                </div>
+                {% if event.info %}<span style="display: block">{{ event.info }}</span>{% endif %}
+                <span>Dia {{ evaluation.date }}{% if evaluation.time %}{% if evaluation.duration %}, entre as {{ evaluation.time }} e as {{ evaluation.to_time }}{% else %}ás {{ evaluation.time }}{% endif %}{% endif %}</span>
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+            {% if next_events|length == 0 %}
+              Sem eventos agendados nas inscrições atuais.
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Avaliações passadas</h2></div>
+        <div class="pane-content">
+          <div class="evaluation-list">
+            {% for enrollment in enrollments %}
+              <div class="enrollment">
+                <div>
+                  <a class="entity" href="{{ enrollment.class_instance.get_absolute_url }}">{{ enrollment.class_instance.parent.name }}</a>
+                  <span>{{ enrollment.class_instance.occasion }}</span>
+                </div>
+                {% if enrollment.normal_grade and enrollment.normal_grade > 0 %}
+                  <div class="enrollment-evaluation">
+                    <span>Normal</span>
+                    <span>{{ enrollment.normal_grade }}</span>
+                  </div>
+                {% endif %}
+                {% if enrollment.recourse_grade and enrollment.recourse_grade > 0 %}
+                  <div class="enrollment-evaluation">
+                    <span>Recurso</span>
+                    <span>{{ enrollment.recourse_grade }}</span>
+                  </div>
+                {% endif %}
+                {% if enrollment.special_grade and enrollment.special_grade > 0 %}
+                  <div class="enrollment-evaluation">
+                    <span>Especial</span>
+                    <span>{{ enrollment.special_grade }}</span>
+                  </div>
+                {% endif %}
+                {% if enrollment.attendance %}
+                  <div class="enrollment-attendance midhighres">Frequência</div>
+                {% endif %}
+                {% if enrollment.grade and enrollment.grade > 0 %}
+                  <div class="enrollment-grade{% if enrollment.approved %} approved{% endif %}">
+                    <small>Final</small><span>{{ enrollment.grade }}</span>
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -310,6 +310,33 @@ def user_reputation_view(request, nickname):
 
 
 @login_required
+def user_evaluations_view(request, nickname):
+    if request.user.nickname != nickname:
+        raise PermissionDenied()
+    profile_user = get_object_or_404(m.User.objects, nickname=nickname)
+    context = build_base_context(request)
+    context['pcode'] = "u_evaluations"
+    context['title'] = f"Avaliações de {profile_user.get_full_name()}"
+    context['profile_user'] = profile_user
+    context['enrollments'] = college.Enrollment.objects\
+        .filter(student__user=profile_user) \
+        .exclude(class_instance__year=settings.COLLEGE_YEAR, class_instance__period=settings.COLLEGE_PERIOD) \
+        .select_related('class_instance__parent') \
+        .order_by('class_instance__year', 'class_instance__period')\
+        .reverse()\
+        .all()
+    events = college.ClassInstanceEvent.objects \
+        .filter(date__gte=datetime.today().date(), class_instance__student__user=profile_user) \
+        .select_related('class_instance__parent')
+    context['next_evaluations'] = next_evaluations \
+        = list(filter(lambda e: e.type in (college.ctypes.EventType.TEST, college.ctypes.EventType.EXAM), events))
+    context['next_events'] = filter(lambda e: e not in next_evaluations, events)
+    context['sub_nav'] = [{'name': profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+                          {'name': 'Eventos', 'url': request.get_raw_uri()}]
+    return render(request, 'users/profile_evaluations.html', context)
+
+
+@login_required
 def user_profile_settings_view(request, nickname):
     if request.user.nickname != nickname and not request.user.is_staff:
         raise PermissionDenied()
