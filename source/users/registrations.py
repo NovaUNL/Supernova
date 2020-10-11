@@ -103,60 +103,64 @@ def validate_token(email, token) -> users.User:
         registration.resulting_user = user
         registration.save(update_fields=['resulting_user'])
 
-        if registration.requested_teacher:
-            student_name = None
-            if registration.requested_student:
-                student_name = registration.requested_student.name
-            # Teacher email is known and matches or names are very very close
-            if registration.email.split('@')[0] == registration.requested_teacher.abbreviation or \
-                    (student_name and correlation(student_name, registration.requested_teacher) > 0.9):
-                registration.requested_teacher.user = user
-                registration.requested_teacher.save()
-                user.user_permissions.add(student_access)
-                user.user_permissions.add(teacher_access)
-            else:
-                # Do nothing, those need to be approved manually
-                users.GenericNotification.objects.create(
-                    receiver=user,
-                    message='O professor reivindicado no seu registo não foi automáticamente associado. '
-                            'Poderá vir a ser contactado/a.')
-
-        if registration.requested_student:
-            college.Student.objects.filter(abbreviation=registration.requested_student.abbreviation).update(user=user)
-            user.user_permissions.add(student_access)
-            students = college.Student.objects.filter(abbreviation=registration.requested_student.abbreviation).all()
-            if len(students) == 1:
-                student = students[0]
-                if student.first_year == settings.COLLEGE_YEAR:
-                    offset = users.ReputationOffset.objects.create(
-                        amount=10,
+        try:
+            if registration.requested_teacher:
+                student_name = None
+                if registration.requested_student:
+                    student_name = registration.requested_student.name
+                # Teacher email is known and matches or names are very very close
+                if registration.email.split('@')[0] == registration.requested_teacher.abbreviation or \
+                        (student_name and correlation(student_name, registration.requested_teacher) > 0.9):
+                    registration.requested_teacher.user = user
+                    registration.requested_teacher.save()
+                    user.user_permissions.add(student_access)
+                    user.user_permissions.add(teacher_access)
+                else:
+                    # Do nothing, those need to be approved manually
+                    users.GenericNotification.objects.create(
                         receiver=user,
-                        reason='Prémio para caloiros :)')
-                    offset.issue_notification()
+                        message='O professor reivindicado no seu registo não foi automáticamente associado. '
+                                'Poderá vir a ser contactado/a.')
 
-        user.calculate_missing_info()
-        user.updated_cached()
-        awarded = False
-        user_count = users.User.objects.count()
-        if user_count < 100:
-            offset = users.ReputationOffset.objects.create(
-                amount=1000,
-                receiver=user,
-                reason='Primeiros 100 utilizadores')
-            offset.issue_notification()
-            awarded = True
-        elif user_count < 1000:
-            offset = users.ReputationOffset.objects.create(
-                amount=500,
-                receiver=user,
-                reason='Primeiros 1000 utilizadores')
-            offset.issue_notification()
-            awarded = True
+            if registration.requested_student:
+                college.Student.objects\
+                    .filter(abbreviation=registration.requested_student.abbreviation)\
+                    .update(user=user)
+                user.user_permissions.add(student_access)
+                students = college.Student.objects\
+                    .filter(abbreviation=registration.requested_student.abbreviation)\
+                    .all()
+                if len(students) == 1:
+                    student = students[0]
+                    if student.first_year == settings.COLLEGE_YEAR:
+                        offset = users.ReputationOffset.objects.create(
+                            amount=10,
+                            receiver=user,
+                            reason='Prémio para caloiros :)')
+                        offset.issue_notification()
 
-        if awarded:
+            user.calculate_missing_info()
+            user.updated_cached()
+            user_count = users.User.objects.count()
+            if user_count < 100:
+                offset = users.ReputationOffset.objects.create(
+                    amount=1000,
+                    receiver=user,
+                    reason='Primeiros 100 utilizadores')
+                offset.issue_notification()
+            elif user_count < 1000:
+                offset = users.ReputationOffset.objects.create(
+                    amount=500,
+                    receiver=user,
+                    reason='Primeiros 1000 utilizadores')
+                offset.issue_notification()
+        except Exception as e:
+            logging.error(f'Failed to complete the additional steps in {registration}.\n{str(e)}')
+        finally:
+            user.updated_cached()
             calculate_points(user)
             award_user(user)
-        return user
+            return user
 
 
 def generate_token(length: int) -> str:
