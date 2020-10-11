@@ -9,6 +9,7 @@ import settings
 from users import models as m
 from learning import models as learning
 from college import models as college
+from feedback import models as feedback
 
 NETWORK_PROFILE_URL_REGEX = [
     re.compile(r'(http[s]?://)?(www\.)?gitlab\.com/(?P<username>\w+)[/]?$'),
@@ -60,7 +61,9 @@ def get_students(user):
 def get_network_identifier(network: int, link: str):
     if network >= len(NETWORK_PROFILE_URL_REGEX):
         raise Exception()  # TODO proper django exception
-    return NETWORK_PROFILE_URL_REGEX[network].match(link).group('username')
+    if (match := NETWORK_PROFILE_URL_REGEX[network].match(link)) is None:
+        return None
+    return match.group('username')
 
 
 def get_network_url(network: int, identifier: str):
@@ -86,10 +89,18 @@ def get_user_stats(user):
     return stats
 
 
+def regen_user_stats(user):
+    cache.delete(f'user_{user.id}_stats')
+    return get_user_stats(user)
+
+
 permissions = [
-    (0, ((learning.QuestionAnswer, 'add_question_answer'),)),
+    (0, ((learning.QuestionAnswer, 'add_questionanswer'),)),
     (7, ((learning.Question, 'add_question'),)),
-    (255, ((learning.Exercise, 'add_exercise'),)),
+    (255, (
+        (learning.Exercise, 'add_exercise'),
+        (feedback.Review, 'add_review'),
+    )),
     (1024, ((learning.Question, 'add_question'),)),
     (5730, (
         (learning.Exercise, 'change_exercise'),
@@ -110,12 +121,11 @@ def calculate_points(user):
     points += settings.REWARDS['post_answer'] * learning.QuestionAnswer.objects.filter(user=user).count()
     points += settings.REWARDS['accepted_answer'] \
               * learning.QuestionAnswer.objects.filter(user=user, accepted=True).count()
+
     points += settings.REWARDS['upvoted'] \
-              * learning.Question.objects.filter(user=user, votes__type=learning.PostableVote.UPVOTE).count()
+              * feedback.Vote.objects.filter(user=user, type=feedback.Vote.UPVOTE).count()
     points += settings.REWARDS['downvoted'] \
-              * learning.Question.objects.filter(user=user, votes__type=learning.PostableVote.DOWNVOTE).count()
-    points += settings.REWARDS['downvoted'] \
-              * learning.Question.objects.filter(user=user, votes__type=learning.PostableVote.DOWNVOTE).count()
+              * feedback.Vote.objects.filter(user=user, type=feedback.Vote.DOWNVOTE).count()
     points += settings.REWARDS['add_section'] \
               * learning.Section.objects \
                   .filter(log_entries__author=user, log_entries__previous_content__isnull=True) \
@@ -138,6 +148,8 @@ def calculate_points(user):
 
 
 def award_user(user):
+    if user.permissions_overridden:
+        return
     for points, model_permission in permissions:
         if points <= user.points:
             for model, permission in model_permission:

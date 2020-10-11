@@ -18,6 +18,7 @@ from supernova.utils import password_strength, correlation
 from supernova.widgets import SliderInput, NativeTimeInput
 from users import models as m
 from learning import models as learning
+from feedback import models as feedback
 from settings import CAMPUS_EMAIL_SUFFIX
 
 IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
@@ -121,7 +122,6 @@ class RegistrationForm(djf.ModelForm):
             raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{username}'")
         return username
 
-
     def clean_invite(self):
         if 'invite' not in self.cleaned_data or self.cleaned_data['invite'].strip() == '':
             raise djf.ValidationError("O código de convite não foi preenchido.")
@@ -157,8 +157,9 @@ class RegistrationForm(djf.ModelForm):
         if m.User.objects.filter(nickname__iexact=nickname).exists():
             raise djf.ValidationError(f"Já existe um utilizador com a alcunha '{nickname}'")
 
-
-        collision_filter = Q(abbreviation=email_prefix.lower()) | Q(abbreviation=nickname.lower()) | Q(abbreviation=username.lower())
+        collision_filter = Q(abbreviation=email_prefix.lower()) \
+                           | Q(abbreviation=nickname.lower()) \
+                           | Q(abbreviation=username.lower())
         if requested_student:
             collided_students = college.Student.objects \
                 .filter(collision_filter) \
@@ -318,6 +319,7 @@ class AccountPermissionsForm(djf.Form):
     can_change_synopsis_sections = djf.BooleanField(widget=SliderInput(), required=False)
     can_add_exercises = djf.BooleanField(widget=SliderInput(), required=False)
     can_change_exercises = djf.BooleanField(widget=SliderInput(), required=False)
+    can_add_reviews = djf.BooleanField(widget=SliderInput(), required=False)
     can_change_courses = djf.BooleanField(widget=SliderInput(), required=False)
     can_change_departments = djf.BooleanField(widget=SliderInput(), required=False)
     can_change_teachers = djf.BooleanField(widget=SliderInput(), required=False)
@@ -343,6 +345,7 @@ class AccountPermissionsForm(djf.Form):
             ('can_change_synopsis_sections', learning.Section, 'change_section'),
             ('can_add_exercises', learning.Exercise, 'add_exercise'),
             ('can_change_exercises', learning.Exercise, 'change_exercise'),
+            ('can_add_reviews', feedback.Review, 'add_review'),
             ('can_change_courses', college.Course, 'change_course'),
             ('can_change_departments', college.Department, 'change_department'),
             ('can_change_teachers', college.Teacher, 'change_teacher')
@@ -360,6 +363,9 @@ class AccountPermissionsForm(djf.Form):
             else:
                 self.user.user_permissions.remove(permission)
 
+        self.user.permissions_overridden = True
+        self.user.save()
+
     def __calc_initial(self):
         return {
             'can_view_college_data': self.user.has_perm('users.student_access'),
@@ -367,6 +373,7 @@ class AccountPermissionsForm(djf.Form):
             'can_change_synopsis_sections': self.user.has_perm('learning.change_section'),
             'can_add_exercises': self.user.has_perm('learning.add_exercise'),
             'can_change_exercises': self.user.has_perm('learning.change_exercise'),
+            'can_add_reviews': self.user.has_perm('feedback.add_review'),
             'can_change_courses': self.user.has_perm('college.change_course'),
             'can_change_departments': self.user.has_perm('college.change_department'),
             'can_change_teachers': self.user.has_perm('college.change_teacher'),

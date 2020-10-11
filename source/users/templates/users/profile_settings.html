@@ -310,6 +310,46 @@
                     Pode editar exercícios existentes.
                   </div>
                 </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Adicionar opiniões</h4>
+                    {{ permissions_form.can_add_reviews }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode publicar opiniões nas entidades que suportam tal.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Editar cursos</h4>
+                    {{ permissions_form.can_change_courses }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode editar cursos.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Editar departamentos</h4>
+                    {{ permissions_form.can_change_departments }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode editar departamentos.
+                  </div>
+                </div>
+                <hr>
+                <div class="form-row">
+                  <div class="form-row-top">
+                    <h4>Editar professores</h4>
+                    {{ permissions_form.can_change_teachers }}
+                  </div>
+                  <div class="form-row-description">
+                    Pode editar professores.
+                  </div>
+                </div>
               </div>
               <input class="ui-btn end" type="submit" value="Guardar">
               {{ permissions_form.media }}
