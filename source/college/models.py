@@ -106,15 +106,16 @@ class Student(Importable):
                            credit_count=Sum('class_instance__parent__credits'))
             credit_grade = grade_info['credit_grade']
             credit_count = grade_info['credit_count']
-            avg_grade = credit_grade / credit_count
-            if self.credits != credit_count:
-                self.credits = credit_count
-                changed = True
-            if self.avg_grade != avg_grade:
-                self.avg_grade = avg_grade
-                changed = True
+            if credit_grade and credit_count:
+                avg_grade = credit_grade / credit_count
+                if self.credits != credit_count:
+                    self.credits = credit_count
+                    changed = True
+                if self.avg_grade != avg_grade:
+                    self.avg_grade = avg_grade
+                    changed = True
             if changed:
-                self.save(update_fields=['ects', 'avg_grade', 'first_year', 'last_year'])
+                self.save(update_fields=['credits', 'avg_grade', 'first_year', 'last_year'])
 
     @property
     def ects(self):
