@@ -16,11 +16,7 @@
         </ul>
       </div>
       <h1>
-        {% if profile_user.picture %}
-          <img class="highres" src="{{ profile_user.picture.url }}">
-        {% else %}
-          <img class="highres" src="{% static 'img/user.svg' %}">
-        {% endif %}
+        <img class="highres" src="{% if profile_user.picture %}{{ profile_user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}">
         {{ profile_user.get_full_name }}
       </h1>
     </div>
