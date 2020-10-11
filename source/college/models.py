@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -392,6 +392,11 @@ class ClassInstanceEvent(Importable):
 
     def __str__(self):
         return f'{self.info} {self.time}- {self.class_instance}'
+
+    @property
+    def to_time(self):
+        delta = timedelta(minutes=self.duration)
+        return (datetime.combine(datetime.today(), self.time) + delta).time()
 
 
 class Enrollment(Importable):
