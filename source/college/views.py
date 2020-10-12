@@ -470,6 +470,36 @@ def class_instance_enrolled_view(request, instance_id):
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_enrolled.html', context)
 
+@cache_page(3600)
+@cache_control(max_age=3600)
+@vary_on_cookie
+@login_required
+@permission_required('users.student_access')
+def class_instance_events_view(request, instance_id):
+    instance = get_object_or_404(
+        m.ClassInstance.objects.select_related('parent', 'department'),
+        id=instance_id)
+    parent = instance.parent
+    department = parent.department
+
+
+    context = build_base_context(request)
+    context['pcode'] = "c_class_instance_enrolled"
+    context['title'] = str(instance)
+    events = m.ClassInstanceEvent.objects \
+        .filter(class_instance=instance) \
+        .select_related('class_instance__parent')
+    context['evaluations'] = next_evaluations \
+        = list(filter(lambda e: e.type in (ctypes.EventType.TEST, ctypes.EventType.EXAM), events))
+    context['events'] = list(filter(lambda e: e not in next_evaluations, events))
+
+    context['department'] = department
+    context['instance'] = instance
+    sub_nav = _class_instance_nav(instance)
+    sub_nav.append({'name': 'Eventos', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_instance_events.html', context)
+
 
 @login_required
 @permission_required('users.student_access')

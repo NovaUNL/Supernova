@@ -1,0 +1,53 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col">
+    {% include 'college/class_decorator.html' %}
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Avaliações</h2></div>
+        <div class="pane-content">
+          <div class="event-list">
+            {% for evaluation in evaluations %}
+              <div class="evaluation">
+                <div class="evaluation-title">
+                  <a class="entity" href="{{ evaluation.class_instance.get_absolute_url }}">{{ evaluation.class_instance.parent.name }}</a>
+                  <span class="ui-tag">{{ evaluation.get_season_display }}</span>
+                </div>
+                <b>{{ evaluation.get_type_display }}</b> <span>Dia {{ evaluation.date }}{% if evaluation.time %}{% if evaluation.duration %}, entre as {{ evaluation.time }} e as {{ evaluation.to_time }}{% else %}ás {{ evaluation.time }}{% endif %}{% endif %}</span>
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+            {% if evaluations|length == 0 %}
+              Sem avaliações agendadas.
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Eventos</h2></div>
+        <div class="pane-content">
+          <div class="event-list">
+            {% for event in events %}
+              <div class="evaluation">
+                <div class="evaluation-title">
+                  {% if event.type %}<h3>{{ event.get_type_display }}</h3>{% endif %}
+                  <a class="entity" href="{{ event.class_instance.get_absolute_url }}">{{ event.class_instance.parent.name }}</a>
+                  {% if event.season %}<span class="ui-tag">{{ event.get_season_display }}</span>{% endif %}
+                </div>
+                {% if event.info %}<span style="display: block">{{ event.info }}</span>{% endif %}
+                <span>Dia {{ event.date }}{% if event.time %}{% if event.duration %}, entre as {{ event.time }} e as {{ event.to_time }}{% else %}ás {{ event.time }}{% endif %}{% endif %}</span>
+              </div>
+              {% if not forloop.last %}<hr>{% endif %}
+            {% endfor %}
+            {% if events|length == 0 %}
+              Sem eventos agendados.
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
