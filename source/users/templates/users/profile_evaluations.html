@@ -7,69 +7,6 @@
     <div class="header-decorator">
       <h1>Avaliações</h1>
     </div>
-    <style>
-      .evaluation-title h3 {
-          display: inline;
-      }
-
-      .evaluation .entity {
-          display: inline;
-      }
-
-        .evaluation-list {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .enrollment {
-            display: flex;
-            margin-bottom: 10px;
-            align-items: stretch;
-            min-height: 30px;
-        }
-
-        .enrollment div:first-child {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .enrollment-evaluation, .enrollment-attendance {
-            text-align: center;
-            padding: 5px 10px;
-            margin-right: 10px;
-        }
-        .enrollment div:last-child {
-            margin-right: 0;
-        }
-
-        .enrollment-evaluation span {
-            display: block;
-        }
-
-        .enrollment-grade, .enrollment-evaluation, .enrollment-attendance {
-            padding: 5px 10px;
-            border: 2px solid var(--input-light);
-            background-color: var(--input-light);
-            border-radius: 5px;
-        }
-
-        .enrollment-grade.approved, .enrollment-attendance {
-            background-color: var(--green);
-        }
-        .enrollment-attendance {
-            line-height: 45px;
-        }
-
-        .enrollment-grade small {
-            vertical-align: top;
-        }
-
-        .enrollment-grade span {
-            font-size: 2em;
-        }
-    </style>
     <div class="col padded">
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Próximas avaliações</h2></div>
@@ -98,12 +35,12 @@
             {% for event in next_events %}
               <div class="evaluation">
                 <div class="evaluation-title">
-                  <h3>{{ event.get_type_display }}</h3>
+                  {% if event.type %}<h3>{{ event.get_type_display }}</h3>{% endif %}
                   <a class="entity" href="{{ event.class_instance.get_absolute_url }}">{{ event.class_instance.parent.name }}</a>
                   {% if event.season %}<span class="ui-tag">{{ event.get_season_display }}</span>{% endif %}
                 </div>
                 {% if event.info %}<span style="display: block">{{ event.info }}</span>{% endif %}
-                <span>Dia {{ evaluation.date }}{% if evaluation.time %}{% if evaluation.duration %}, entre as {{ evaluation.time }} e as {{ evaluation.to_time }}{% else %}ás {{ evaluation.time }}{% endif %}{% endif %}</span>
+                <span>Dia {{ event.date }}{% if event.time %}{% if event.duration %}, entre as {{ event.time }} e as {{ event.to_time }}{% else %}ás {{ event.time }}{% endif %}{% endif %}</span>
               </div>
               {% if not forloop.last %}<hr>{% endif %}
             {% endfor %}
@@ -114,7 +51,7 @@
         </div>
       </div>
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Avaliações passadas</h2></div>
+        <div class="pane-title bg-grad"><h2>Histórico de inscrições</h2></div>
         <div class="pane-content">
           <div class="evaluation-list">
             {% for enrollment in enrollments %}

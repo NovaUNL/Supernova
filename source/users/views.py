@@ -320,7 +320,7 @@ def user_evaluations_view(request, nickname):
     context['profile_user'] = profile_user
     context['enrollments'] = college.Enrollment.objects\
         .filter(student__user=profile_user) \
-        .exclude(class_instance__year=settings.COLLEGE_YEAR, class_instance__period=settings.COLLEGE_PERIOD) \
+        .exclude(class_instance__year=settings.COLLEGE_YEAR, class_instance__period__gte=settings.COLLEGE_PERIOD) \
         .select_related('class_instance__parent') \
         .order_by('class_instance__year', 'class_instance__period')\
         .reverse()\
@@ -330,7 +330,7 @@ def user_evaluations_view(request, nickname):
         .select_related('class_instance__parent')
     context['next_evaluations'] = next_evaluations \
         = list(filter(lambda e: e.type in (college.ctypes.EventType.TEST, college.ctypes.EventType.EXAM), events))
-    context['next_events'] = filter(lambda e: e not in next_evaluations, events)
+    context['next_events'] = list(filter(lambda e: e not in next_evaluations, events))
     context['sub_nav'] = [{'name': profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
                           {'name': 'Eventos', 'url': request.get_raw_uri()}]
     return render(request, 'users/profile_evaluations.html', context)

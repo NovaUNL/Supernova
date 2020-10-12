@@ -571,3 +571,56 @@
 
   td:nth-child(2)
     text-align: left
+
+.evaluation
+  .entity
+    display: inline
+
+.evaluation-title h3
+  display: inline
+
+.evaluation-list
+  display: flex
+  flex-direction: column
+  align-items: stretch
+
+.enrollment-evaluation, .enrollment-attendance
+  text-align: center
+  padding: 5px 10px
+  margin-right: 10px
+
+.enrollment
+  display: flex
+  margin-bottom: 10px
+  align-items: stretch
+  min-height: 30px
+
+  div:first-child
+    flex-grow: 1
+    display: flex
+    flex-direction: column
+
+  div:last-child
+    margin-right: 0
+
+.enrollment-evaluation span
+    display: block
+
+.enrollment-grade, .enrollment-evaluation, .enrollment-attendance
+  padding: 5px 10px
+  border: 2px solid var(--input-light)
+  background-color: var(--input-light)
+  border-radius: 5px
+
+.enrollment-grade.approved, .enrollment-attendance
+  background-color: var(--green)
+
+.enrollment-attendance
+  line-height: 45px
+
+.enrollment-grade
+  small
+    vertical-align: top
+
+  span
+    font-size: 2em
