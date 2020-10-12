@@ -1,0 +1,40 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  {% include 'college/class_decorator.html' %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar ficheiros</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'college:class_instance_files_edit' instance.id %}">
+          {% csrf_token %}
+          {{ formset.management_form }}
+          {% for form in formset %}
+            <div class="form-block">
+              <h3>{{ form.instance.name }} </h3>
+              {{ form.non_field_errors }}
+              <div class="form-row">
+                <div class="form-row-top"><h4>Nome</h4>{{ form.name }}</div>
+                {{ form.name.errors }}
+              </div>
+              <div class="form-row">
+                <div class="form-row-top"><h4>Tipo</h4>{{ form.type }}</div>
+                {{ form.type.errors }}
+              </div>
+              <div class="form-row">
+                <div class="form-row-top"><h4>Disponíbilidade</h4>{{ form.availability }}</div>
+                {{ form.availability.errors }}
+              </div>
+            </div>
+            <a href="{% url 'college:class_instance_file_edit' instance.id form.instance.id %}">Ver mais</a>
+            <hr>
+          {% endfor %}
+          {{ formset.media }}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

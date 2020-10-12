@@ -47,6 +47,35 @@ class TeacherForm(Loggable, djf.ModelForm):
         loggable_fields = ('url', 'email', 'phone')
 
 
+class ClassInstanceForm(Loggable, djf.ModelForm):
+    class Meta:
+        model = m.ClassInstance
+        fields = ('regent', 'visibility')
+        loggable_fields = ('availability',)
+
+
+class ClassFileForm(Loggable, djf.ModelForm):
+    class Meta:
+        model = m.ClassFile
+        fields = ('name', 'category', 'visibility')
+        loggable_fields = ('name', 'type', 'availability')
+
+
+class FileForm(Loggable, djf.ModelForm):
+    class Meta:
+        model = m.File
+        fields = ('license', 'author', 'author_str', 'doi')
+        loggable_fields = ('author_str', 'doi')
+
+
+ClassFileFormset = djf.inlineformset_factory(
+    m.ClassInstance,
+    m.ClassFile,
+    form=ClassFileForm,
+    can_delete=False,
+    extra=0)
+
+
 def merge_changes(old_changes, new_changes):
     original = old_changes['old']
     # intermediary = old_changes['new']

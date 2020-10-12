@@ -1,8 +1,20 @@
 {% extends 'supernova/base.html' %}
 
+
 {% block content_wrapper %}
   <div class="col">
-    {% include 'college/class_decorator.html' %}
+    <div class="header-decorator">
+      <div class="header-decorator-options">
+        <ul>
+          {% if perms.feedback.add_review %}<li><a href="{% url 'college:class_instance_review_create' instance.id %}">Colocar opinião</a></li>{% endif %}
+          {% if perms.college.change_class_instance %}<li><a href="{% url 'college:class_instance_edit' instance.id %}">Editar</a></li>{% endif %}
+        </ul>
+      </div>
+      <div>
+        <h1>{{ instance.parent.name }}</h1>
+        <h3>{{ instance.occasion }}</h3>
+      </div>
+    </div>
     <div class="row nowrap padded">
       <div class="col">
         <div class="flex-pane">

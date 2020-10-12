@@ -3,6 +3,7 @@ from functools import reduce
 
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q, Count
 from django.http import HttpResponse
@@ -19,9 +20,10 @@ from college import forms as f
 from college import schedules
 from college import choice_types as ctypes
 from college.utils import get_transportation_departures
+from feedback.forms import ReviewForm
+from feedback import models as feedback
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.views import build_base_context
-
 from services.models import Service
 
 
@@ -100,7 +102,7 @@ def department_view(request, department_id):
 
 
 @login_required
-@permission_required('course.change_department', raise_exception=True)
+@permission_required('college.change_department', raise_exception=True)
 def department_edit_view(request, department_id):
     department = get_object_or_404(
         m.Department.objects,
@@ -151,6 +153,7 @@ def teacher_view(request, teacher_id):
     context = build_base_context(request)
     shifts = teacher.shifts \
         .filter(class_instance__year=settings.COLLEGE_YEAR, class_instance__period=settings.COLLEGE_PERIOD) \
+        .select_related('class_instance__parent') \
         .exclude(disappeared=True).all()
     context['pcode'] = "c_teachers"
     context['title'] = teacher.name
@@ -159,7 +162,9 @@ def teacher_view(request, teacher_id):
         m.ClassInstance.objects \
             .filter(shifts__teachers=teacher) \
             .order_by('parent__name', 'year', 'period') \
+            .select_related('parent') \
             .distinct()
+    context['reviews'] = teacher.reviews.all()
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_shifts_schedule(shifts)
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
@@ -169,7 +174,7 @@ def teacher_view(request, teacher_id):
 
 
 @login_required
-@permission_required('course.change_teacher', raise_exception=True)
+@permission_required('college.change_teacher', raise_exception=True)
 def teacher_edit_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher, id=teacher_id)
 
@@ -211,6 +216,51 @@ def teacher_edit_view(request, teacher_id):
     return render(request, 'college/teacher_edit.html', context)
 
 
+@login_required
+@permission_required('users.student_access')
+def teacher_reviews_view(request, teacher_id):
+    teacher = get_object_or_404(m.Teacher.objects, id=teacher_id)
+    context = build_base_context(request)
+    context['title'] = f"Avaliações de {teacher.name}"
+    context['pcode'] = "c_teachers"
+    context['reviews'] = teacher.reviews.all()
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Professores', 'url': '#'},
+        {'name': teacher.name, 'url': reverse('college:teacher', args=[teacher_id])},
+        {'name': 'Avaliações', 'url': request.get_raw_uri()}]
+    return render(request, 'feedback/reviews.html', context)
+
+
+@login_required
+@permission_required('users.student_access')
+def teacher_review_create_view(request, teacher_id):
+    teacher = get_object_or_404(m.Teacher.objects, id=teacher_id)
+
+    context = build_base_context(request)
+    context['title'] = f"Nova avaliação a {teacher.name}"
+    context['pcode'] = "c_teachers"
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.object_id = teacher_id
+            review.content_type = ContentType.objects.get_for_model(m.Teacher)
+            review.save()
+            return redirect('college:teacher_reviews', teacher_id=teacher_id)
+    else:
+        form = ReviewForm()
+    context['form'] = form
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Professores', 'url': '#'},
+        {'name': teacher.name, 'url': reverse('college:teacher', args=[teacher_id])},
+        {'name': 'Avaliar', 'url': request.get_raw_uri()},
+    ]
+    return render(request, 'feedback/review_create.html', context)
+
+
 def _class__nav(klass):
     department_nav = {'name': 'Sem departamento'} if klass.department is None else {
         'name': klass.department.name, 'url': reverse('college:department', args=[klass.department.id])
@@ -222,6 +272,10 @@ def _class__nav(klass):
         {'name': klass.name, 'url': reverse('college:class', args=[klass.id])}]
 
 
+@cache_page(3600)
+@cache_control(private=True, max_age=3600)
+@vary_on_cookie
+@login_required
 def class_view(request, class_id):
     klass = get_object_or_404(
         m.Class.objects
@@ -233,6 +287,7 @@ def class_view(request, class_id):
     context['title'] = klass.name
     context['klass'] = klass
     context['instances'] = klass.instances.order_by('year', 'period').reverse()
+    context['reviews'] = feedback.Review.objects.filter(class_instance__parent=klass).all()
     context['teachers'] = m.Teacher.objects \
         .filter(shifts__class_instance__parent=klass) \
         .order_by('name') \
@@ -293,7 +348,7 @@ def _class_instance_nav(instance):
 
 
 @cache_page(3600)
-@cache_control(max_age=3600)
+@cache_control(private=True, max_age=3600)
 @vary_on_cookie
 @login_required
 @permission_required('users.student_access')
@@ -306,19 +361,60 @@ def class_instance_view(request, instance_id):
                       course_count=Count('enrollments__student__course', distinct=True)),
         id=instance_id)
     department = instance.department
-
     context = build_base_context(request)
     context['pcode'] = "c_class_instance"
     context['title'] = str(instance)
     context['department'] = department
     context['instance'] = instance
+    context['reviews'] = instance.reviews.all()
     context['teachers'] = m.Teacher.objects.filter(shifts__class_instance=instance).order_by('name').distinct('name')
     context['sub_nav'] = _class_instance_nav(instance)
     return render(request, 'college/class_instance.html', context)
 
 
-@cache_page(3600 * 24)
-@cache_control(max_age=3600 * 24)
+@login_required
+@permission_required('college.classinstance_change', raise_exception=True)
+def class_instance_edit_view(request, instance_id):
+    instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
+
+    if request.method == 'POST':
+        form = f.ClassInstanceForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(class_instance=instance, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=instance,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+            return redirect('college:class_instance', instance_id=instance_id)
+    else:
+        form = f.ClassInstanceForm(instance=instance)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_class_instance_edit"
+    context['title'] = str(instance)
+    context['instance'] = instance
+    context['form'] = form
+    sub_nav = _class_instance_nav(instance)
+    sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_instance_edit.html', context)
+
+
+@cache_page(3600)
+@cache_control(max_age=3600)
 @vary_on_cookie
 @permission_required('users.student_access')
 def class_instance_shifts_view(request, instance_id):
@@ -341,7 +437,7 @@ def class_instance_shifts_view(request, instance_id):
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_shifts_schedule(shifts)
     context['shifts'] = shifts
     sub_nav = _class_instance_nav(instance)
-    sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
+    sub_nav.append({'name': 'Turnos', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_shifts.html', context)
 
@@ -387,28 +483,48 @@ def class_instance_files_view(request, instance_id):
     context['title'] = str(instance)
     context['instance'] = instance
 
+    access_override = request.user.is_superuser or False  # <- TODO Verify if one is the author
     is_enrolled = instance.enrollments.filter(student__user=request.user).exists()
-    files = list(instance.files \
-                 .select_related('file', 'uploader_teacher') \
-                 .order_by('upload_datetime') \
-                 .reverse())
+    class_files = list(instance.files \
+                       .select_related('file', 'uploader_teacher') \
+                       .order_by('upload_datetime') \
+                       .reverse())
     allowed_files = []
     denied_files = []
-    suppressed = False
-    for file in files:
-        if file.license == ctypes.FileAvailability.NOBODY:
-            denied_files.append((file, 'nobody'))
-        elif file.license == ctypes.FileAvailability.ENROLLED and not is_enrolled:
-            denied_files.append((file, 'enrolled'))
-        allowed_files.append(file)
-    context['suppressed_files'] = suppressed
+    for class_file in class_files:
+        if access_override:
+            allowed_files.append(class_file)
+        else:
+            if class_file.visibility == ctypes.FileVisibility.NOBODY:
+                denied_files.append((class_file, 'nobody'))
+            elif class_file.visibility == ctypes.FileVisibility.ENROLLED and not is_enrolled:
+                denied_files.append((class_file, 'enrolled'))
+            else:
+                allowed_files.append(class_file)
     context['files'] = allowed_files
     context['denied_files'] = denied_files
-    context['instance_files'] = files
+    context['instance_files'] = class_files
     sub_nav = _class_instance_nav(instance)
     sub_nav.append({'name': 'Ficheiros', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_files.html', context)
+
+
+@login_required
+@permission_required('users.student_access')
+def class_instance_file_view(request, instance_id, class_file_id):
+    class_file = get_object_or_404(
+        m.ClassFile.objects.select_related('file', 'class_instance__parent__department'),
+        id=class_file_id,
+        class_instance_id=instance_id)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_class_instance_file"
+    context['title'] = f'Ficheiro {class_file}'
+    context['title'] = f'Ficheiro {class_file}'
+    context['instance'] = class_file.class_instance
+    context['class_file'] = class_file
+    return render(request, 'college/class_instance_file.html', context)
 
 
 @login_required
@@ -425,9 +541,151 @@ def class_instance_file_download(request, instance_id, file_hash):
 
     if class_file.file.external:
         response['X-Accel-Redirect'] = f'{settings.EXTERNAL_URL}{file_hash[:2]}/{file_hash[2:]}'
+        response['X-Frame-Options'] = 'SAMEORIGIN'
     else:
         raise Exception("Not implemented")
     return response
+
+
+@login_required
+@permission_required('users.teacher_access')
+def class_instance_files_edit_view(request, instance_id):
+    instance = get_object_or_404(m.ClassInstance.objects, id=instance_id)
+    context = build_base_context(request)
+    context['pcode'] = "c_class_file"
+    context['title'] = f'Edição dos ficheiros de {instance}'
+    context['instance'] = instance
+    context['formset'] = f.ClassFileFormset(instance=instance, queryset=instance.files.filter(disappeared=False))
+    sub_nav = _class_instance_nav(instance)
+    sub_nav.append({'name': 'Ficheiros', 'url': reverse('college:class_instance_files', args=[instance.id])})
+    sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_instance_files_edit.html', context)
+
+
+@login_required
+@permission_required('users.teacher_access')
+def class_instance_file_edit_view(request, instance_id, class_file_id):
+    class_file = get_object_or_404(
+        m.ClassFile.objects.select_related('class_instance__parent__department'),
+        id=class_file_id,
+        class_instance=instance_id)
+
+    if request.method == 'POST':
+        form = f.ClassFileForm(request.POST, request.FILES, instance=class_file)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(class_file=class_file, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=class_file,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+    else:
+        form = f.ClassFileForm(instance=class_file)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_class_file"
+    context['title'] = f'Edição de {class_file}'
+    context['instance'] = class_file.class_instance
+    context['form'] = form
+    sub_nav = _class_instance_nav(class_file.class_instance)
+    sub_nav.append({'name': 'Ficheiros',
+                    'url': reverse('college:class_instance_files', args=[class_file.class_instance.id])})
+    sub_nav.append({'name': 'Editar',
+                    'url': reverse('college:class_instance_files_edit', args=[class_file.class_instance.id])})
+    sub_nav.append({'name': class_file.name, 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_instance_file_edit.html', context)
+
+
+@login_required
+@permission_required('users.teacher_access')
+def file_edit_view(request, file_hash):
+    file = get_object_or_404(m.File.objects, hash=file_hash)
+
+    if request.method == 'POST':
+        form = f.FileForm(request.POST, request.FILES, instance=file)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(file=file, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=file,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+    else:
+        form = f.FileForm(instance=file)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_file"
+    context['title'] = f'Edição do ficheiro {file_hash}'
+    context['file'] = file
+    context['form'] = form
+    return render(request, 'college/file.html', context)
+
+
+@login_required
+@permission_required('users.student_access')
+def class_instance_reviews_view(request, instance_id):
+    instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
+
+    context = build_base_context(request)
+    context['title'] = f"Avaliações de {instance}"
+    context['pcode'] = "c_class_instance_evaluations"
+    context['reviews'] = instance.reviews.all()
+    sub_nav = _class_instance_nav(instance)
+    sub_nav.append({'name': 'Avaliações', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'feedback/reviews.html', context)
+
+
+@login_required
+@permission_required('users.student_access')
+def class_instance_review_create_view(request, instance_id):
+    instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
+    context = build_base_context(request)
+
+    context['title'] = f"Nova avaliação a {instance}"
+    context['pcode'] = "c_class_instance_evaluations"
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.object_id = instance_id
+            review.content_type = ContentType.objects.get_for_model(m.ClassInstance)
+            review.save()
+            return redirect('college:class_instance_reviews', instance_id=instance_id)
+    else:
+        form = ReviewForm()
+    context['form'] = form
+    sub_nav = _class_instance_nav(instance)
+    sub_nav.append({'name': 'Ficheiros', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'feedback/review_create.html', context)
 
 
 @cache_page(3600 * 24)
@@ -596,7 +854,7 @@ def building_view(request, building_id):
     rooms = m.Room.objects.filter(building=building).order_by('type', 'name', 'door_number').all()
     rooms_by_type = {}
     for room in rooms:
-        plural = RoomType.plural(room.type)
+        plural = RoomType.plural(room.category)
         if plural not in rooms_by_type:
             rooms_by_type[plural] = []
         rooms_by_type[plural].append(room)

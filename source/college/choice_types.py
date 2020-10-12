@@ -178,7 +178,7 @@ class FileLicense:
         (GENERIC_PERMISSIVE, 'Teste'),
     )
 
-class FileAvailability:
+class FileVisibility:
     PUBLIC = 0
     STUDENTS = 1
     ENROLLED = 2

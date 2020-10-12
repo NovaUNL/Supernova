@@ -1,0 +1,51 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  {% include 'college/class_decorator.html' %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar edição</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'college:class_instance_edit' instance.id %}">
+          {% csrf_token %}
+          <div class="form-block">
+            <h3>Informação</h3>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Regente</h4>
+                {{ form.regent }}
+              </div>
+              <div class="form-row-description">
+                Professor que rege esta edição da unidade curricular.
+              </div>
+            </div>
+            {#            <div class="form-row">#}
+            {#              <div class="form-row-top">#}
+            {#                <h4>Licensa</h4>#}
+            {#                {{ form.license }}#}
+            {#              </div>#}
+            {#              <div class="form-row-description">#}
+            {#                Licensa de utilização dos conteúdos.<br>#}
+            {#                Aplica-se por defeito a novos ficheiros, mas os existentes mantem os respetivos parametros.#}
+            {#              </div>#}
+            {#            </div>#}
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Disponíbilidade ficheiros</h4>
+                {{ form.availability }}
+              </div>
+              <div class="form-row-description">
+                Disponibilidade dos ficheiros aos utilizadores.<br>
+                Aplica-se por defeito a novos ficheiros; os existentes mantem os respetivos parametros.
+              </div>
+            </div>
+          </div>
+          {% include 'college/importable_edit.html' %}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

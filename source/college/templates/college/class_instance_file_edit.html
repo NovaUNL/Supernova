@@ -1,0 +1,56 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <div class="header-decorator-options">
+      <ul>
+        <li><a href="{% url 'college:file_edit_view' form.instance.file.hash %}">Editar raiz</a></li>
+      </ul>
+    </div>
+    <div>
+      <h1>{{ instance.parent.name }}</h1>
+      <h3>{{ instance.occasion }}</h3>
+    </div>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar edição</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{% url 'college:class_instance_file_edit' instance.id form.instance.id %}">
+          {% csrf_token %}
+          <div class="form-block">
+            <h3>Informação </h3>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Nome</h4>{{ form.name }}
+              </div>
+              <div class="form-row-description">
+                O nome que o ficheiro apresenta.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Tipo</h4>{{ form.category }}
+              </div>
+              <div class="form-row-description">
+                A categoria em que o ficheiro se insere.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Visibilidade</h4>{{ form.visibility }}
+              </div>
+              <div class="form-row-description">
+                A audiência que consegue visualizar este ficheiro.
+              </div>
+            </div>
+          </div>
+          {% include 'college/importable_edit.html' %}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
