@@ -4,7 +4,7 @@
 
 {% block head %}
   {{ block.super }}
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'users/socialNetworks.js' %}"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'users/profile.css' %}"/>
 {% endblock %}
@@ -24,7 +24,7 @@
             <div class="form-block">
               <div class="form-row">
                 <div class="form-row-top">
-                  <h4>Alcunha (Opcional)</h4>
+                  <h4>Alcunha</h4>
                   {{ settings_form.nickname }}
                 </div>
                 {{ settings_form.nickname.errors }}
@@ -41,8 +41,8 @@
                   <h4>Foto (Opcional)</h4>
                 </div>
                 <div class="form-row-description">
-                  Uma imagem do teu agrado, preferêncialmente tua, que aches que te representa ou torna
-                  identificavel perante os restantes.
+                  Uma imagem do teu agrado, preferencialmente tua, que aches que te representa ou torna
+                  identificável perante os restantes.
                 </div>
                 <div style="display: flex">
                   {% if profile_user.picture %}
@@ -105,7 +105,7 @@
               <hr>
               <div class="form-row">
                 <div class="form-row-top">
-                  <h4>Genero (Opcional)</h4>
+                  <h4>Género (Opcional)</h4>
                   <div>
                     {{ settings_form.gender.0 }}
                     {{ settings_form.gender.1 }}
@@ -151,12 +151,12 @@
               <hr>
               <div class="form-row">
                 <div class="form-row-top">
-                  <h4>Visibilidade das redes sociais</h4>
+                  <h4>Visibilidade das tuas páginas</h4>
                   {{ settings_form.social_visibility }}
                 </div>
                 {{ settings_form.social_visibility.errors }}
                 <div class="form-row-description">
-                  Indica quem é que pode ver as tuas redes sociais.
+                  Indica quem é que pode ver a tua página pessoal e perfis externos.
                 </div>
               </div>
               <hr>
@@ -220,7 +220,7 @@
         </div>
       </div>
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Redes sociais</h2></div>
+        <div class="pane-title bg-grad"><h2>Na internet</h2></div>
         <div class="pane-content">
           <div>
             <ul id="social-network-list">
@@ -230,11 +230,10 @@
                 <option value="{{ network.0 }}" selected="">{{ network.1 }}</option>
               {% endfor %}
             </select>
-            <input id="network-link" type="text" placeholder="Endreço do perfil">
+            <input id="network-link" type="text" placeholder="Endereço do perfil">
             <input type="button" value="Adicionar" onclick="addNetwork()"><br>
-            Entra em contacto connosco caso aches que falta alguma plataforma que queiras adicionar.<br>
-            Tem em conta que não vamos adicionar plataformas parasiticas cujo modelo de negócio seja o comércio de dados
-            privados.
+            Entra em contacto connosco para adicionar mais plataformas.<br>
+            PS: Não vamos adicionar plataformas cujo modelo de negócio assente no comércio de dados pessoais.
           </div>
           <script>
               let apiURL = "{% url 'api:social_networks' profile_user.nickname %}";
