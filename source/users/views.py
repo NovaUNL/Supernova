@@ -347,10 +347,11 @@ def user_profile_settings_view(request, nickname):
         raise PermissionDenied()
     profile_user = get_object_or_404(m.User, nickname=nickname)
     context = build_base_context(request)
-    context['settings_form'] = f.AccountSettingsForm(instance=profile_user)
 
     if request.user.nickname != nickname and request.user.is_staff:
         context['permissions_form'] = f.AccountPermissionsForm(profile_user)
+
+    settings_form = f.AccountSettingsForm(instance=profile_user)
 
     if request.method == 'POST':
         if 'permissions' in request.GET:
@@ -367,14 +368,15 @@ def user_profile_settings_view(request, nickname):
             settings_form = f.AccountSettingsForm(request.POST, request.FILES, instance=profile_user)
             if settings_form.is_valid():
                 profile_user = settings_form.save()
-                if 'new_password' in settings_form:
+                if 'new_password' in settings_form.cleaned_data and settings_form.cleaned_data['new_password']:
                     profile_user.set_password(settings_form.cleaned_data['new_password'])
+                    profile_user.save()
                     # Prevent logout locally
                     if profile_user == request.user:
                         login(request, profile_user)
                 return HttpResponseRedirect(reverse('users:profile', args=[profile_user.nickname]))
-            else:
-                context['settings_form'] = settings_form
+
+    context['settings_form'] = settings_form
     context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
     context['pcode'] = 'u_settings'
     context['title'] = 'Definições da conta'
