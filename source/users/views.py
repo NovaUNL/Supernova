@@ -69,16 +69,21 @@ def registration_view(request):
         if valid:
             registration = form.save(commit=False)
             invite = form.cleaned_data['invite']
+            token = registrations.generate_token(settings.REGISTRATIONS_TOKEN_LENGTH)
+            print(token)
+            registration.token = token
             try:
-                token = registrations.generate_token(settings.REGISTRATIONS_TOKEN_LENGTH)
-                registration.token = token
-                registration.save()
                 try:
                     registrations.email_confirmation(request, registration)
-                    invite.registration = registration
-                finally:
-                    invite.save()
+                except Exception as e:
+                    raise exceptions.EmailSendingError(str(e))
+                registration.save()
+                invite.registration = registration
+                invite.save()
                 return HttpResponseRedirect(reverse('registration_validation'))
+            except exceptions.EmailSendingError as e:
+                form.add_error(None, "Não foi possível enviar um email. Por favor tenta novamente mais tarde.")
+                logging.critical(f"Unable to send email to {registration.email}.\n{e}")
             except exceptions.InvalidUsername as e:
                 form.add_error(None, str(e))
             except exceptions.AccountExists as e:
