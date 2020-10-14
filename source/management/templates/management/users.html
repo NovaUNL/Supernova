@@ -33,20 +33,48 @@
               <th>Email</th>
               <th>F</th>
               <th>Convidante</th>
-              <th>Utilizador</th>
+              <th>Data</th>
             </tr>
             {% for registration in latest_registrations %}
               <tr>
-                <td>{% if registration.resulting_user %}<a href="{{ registration.resulting_user.get_absolute_url }}">{{ registration.username }}</a>{% else %}{{ registration.username }}{% endif %}</td>
-                <td>{% if registration.nickname and registration.nickname != '' %}{{ registration.nickname }}{% else %}-{% endif %}</td>
+                <td>{% if registration.resulting_user %}
+                  <a href="{{ registration.resulting_user.get_absolute_url }}">{{ registration.username }}</a>{% else %}{{ registration.username }}{% endif %}
+                </td>
+                <td>
+                  {% if registration.nickname and registration.nickname != '' %}{{ registration.nickname }}{% else %}-{% endif %}</td>
                 <td>{{ registration.requested_student.abbreviation }}</td>
                 <td>{{ registration.requested_teacher.abbreviation }}</td>
                 <td>{{ registration.email|cut:"campus.fct.unl.pt" }}</td>
                 <td>{{ registration.failed_attempts }}</td>
-                <td>{% if registration.invite %}<a href="{{ registration.invite.issuer.get_absolute_url }}">{{ registration.invite.issuer.nickname }}</a>{% else %} - {% endif %}</td>
+                <td>{% if registration.invite %}
+                  <a href="{{ registration.invite.issuer.get_absolute_url }}">{{ registration.invite.issuer.nickname }}</a>{% else %} - {% endif %}
+                </td>
                 <td>{{ registration.creation|date:'Y/m/d H:i' }}</td>
               </tr>
             {% endfor %}
+          </table>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Utilizadores</h2></div>
+        <div class="pane-content stylized grow">
+          <table class="stylized grow">
+            <thead>
+            <tr>
+              <th>Username</th>
+              <th>Alcunha</th>
+              <th>Points</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for other_user in users %}
+              <tr>
+                <td>{{ other_user.username }}</td>
+                <td><a href="{% url 'users:profile' other_user.nickname %}">{{ other_user.nickname }}</a></td>
+                <td>{{ other_user.points }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
           </table>
         </div>
       </div>
@@ -90,26 +118,37 @@
         </div>
       </div>
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Utilizadores</h2></div>
-        <div class="pane-content stylized grow">
-          <table class="stylized grow">
-            <thead>
-            <tr>
-              <th>Username</th>
-              <th>Alcunha</th>
-              <th>Points</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for other_user in users %}
-              <tr>
-                <td>{{ other_user.username }}</td>
-                <td><a href="{% url 'users:profile' other_user.nickname %}">{{ other_user.nickname }}</a></td>
-                <td>{{ other_user.points }}</td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
+        <div class="pane-title bg-grad"><h2>Atribuir professor</h2></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'management:users' %}?assign_teacher=">
+            {% csrf_token %}
+            {{ assign_teacher_form.as_p }}
+            <input class="end" type="submit" value="Atribuir">
+          </form>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Atribuir aluno</h2></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'management:users' %}?password_reset=">
+            {% csrf_token %}
+            {{ assign_student_form.as_p }}
+            <input class="end" type="submit" value="Atribuir">
+          </form>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Alterar password</h2></div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{% url 'management:users' %}?password_reset=">
+            {% csrf_token %}
+            {% if new_password %}
+              Password gerada: <b>{{ new_password }}</b>
+            {% else %}
+              {{ password_reset_form.as_p }}
+              <input class="end" type="submit" value="Gerar nova">
+            {% endif %}
+          </form>
         </div>
       </div>
     </div>
