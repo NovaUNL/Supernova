@@ -247,14 +247,14 @@
   @media #{$lowres}
     scroll-snap-type: x mandatory
 
-  @media #{$lowmidres}
-    overflow: auto
-
 #nav-column
   color: var(--text-alt-hc)
   display: flex
   flex-direction: column
   justify-content: space-between
+
+  @media #{$midres}
+    flex-basis: 0
 
   @media #{$lowres}
     display: none
@@ -352,8 +352,8 @@
   flex-grow: 1
 
   @media #{$lowmidres}
-    width: 100%
     height: 100%
+    overflow: auto
 
 #breadcrumbs
   font-size: 1.0em
@@ -403,6 +403,7 @@
   display: flex
   flex-flow: column
   flex-grow: 1
+  max-width: 100%
 
   &.padded
     padding: 10px
@@ -414,6 +415,7 @@
     flex-shrink: 0
 
   @media #{$lowres}
+    padding: 0 !important
     max-width: 100vw
     scroll-snap-align: none start
 
@@ -438,9 +440,6 @@
   &.padded
     padding: 10px
 
-    @media #{$lowres}
-      padding: 0
-
   &.baseline
     align-items: baseline
 
@@ -458,6 +457,13 @@
 
   > .full
     flex-basis: 100%
+
+  @media #{$lowres}
+    padding: 0 !important
+
+    &.nowrap
+      overflow: auto
+      scroll-snap-type: x mandatory
 
 .pane-title
   border-bottom: 2px solid var(--pane-title-border)
