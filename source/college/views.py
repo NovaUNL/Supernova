@@ -884,7 +884,7 @@ def building_view(request, building_id):
     rooms = m.Room.objects.filter(building=building).order_by('type', 'name', 'door_number').all()
     rooms_by_type = {}
     for room in rooms:
-        plural = RoomType.plural(room.category)
+        plural = RoomType.plural(room.type)
         if plural not in rooms_by_type:
             rooms_by_type[plural] = []
         rooms_by_type[plural].append(room)
