@@ -30,11 +30,24 @@ function loadNotifications() {
     ).then((r) => r.json()
     ).then((r) => {
         for (let entry of r.notifications) {
-            let elem = document.createElement('a');
-            elem.innerText = entry.message;
-            listElem.insertBefore(elem, clearBtn);
-            listElem.insertBefore(document.createElement('hr'), clearBtn);
-            if (entry.url !== undefined) elem.href = entry.url
+            let notification = document.createElement('a');
+            notification.className = 'notification';
+            let top = document.createElement('span');
+            let bottom = document.createElement('span');
+            let message = document.createElement('span');
+            message.innerText = entry.message;
+            let type = document.createElement('b');
+            type.innerText = entry.type;
+            let entity = document.createElement('b');
+            entity.innerText = entry.entity;
+            let timestamp = document.createElement('span');
+            timestamp.innerText = entry.timestamp;
+            if (entry.url !== undefined) notification.href = entry.url;
+            top.appendChild(type);
+            bottom.append(entity, timestamp);
+            notification.append(top, message, bottom);
+            listElem.insertBefore(notification, clearBtn);
+            listElem.insertBefore(document.createElement('hr'), clearBtn)
         }
         notificationLoadTimestamp = r.timestamp;
     });

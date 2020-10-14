@@ -331,7 +331,13 @@ class Notification(PolymorphicModel):
         return f'{self.issue_timestamp}({self.receiver})'
 
     def to_api(self):
-        return {'message': f'Generic notification @{self.issue_timestamp}'}
+        return {
+            'id': self.id,
+            'message': None,
+            'timestamp': self.issue_timestamp.strftime('%y/%-m/%-d %H:%M'),
+            'type': None,
+            'entity': None,
+            'url': None}
 
 
 class GenericNotification(Notification):
@@ -343,7 +349,9 @@ class GenericNotification(Notification):
         return f'{self.issue_timestamp}({self.receiver}): {self.message}'
 
     def to_api(self):
-        return {'id': self.id, 'message': self.message}
+        result = super(GenericNotification, self).to_api()
+        result['message'] = self.message
+        return result
 
 
 class ScheduleEntry(PolymorphicModel):
@@ -426,6 +434,7 @@ class ReputationOffsetNotification(Notification):
                 return f'Atribuição de {points} pontos.'
 
     def to_api(self):
-        return {'id': self.id,
-                'message': str(self),
-                'url': reverse('users:reputation', args=[self.reputation_offset.receiver.nickname])}
+        result = super(ReputationOffsetNotification, self).to_api()
+        result['message'] = str(self)
+        result['url'] = reverse('users:reputation', args=[self.reputation_offset.receiver.nickname])
+        return result

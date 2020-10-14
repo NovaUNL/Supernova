@@ -33,3 +33,8 @@ class ExpiredRegistration(Exception):
 class AssignedStudent(Exception):
     def __init__(self, message):
         super().__init__(message)
+
+
+class EmailSendingError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

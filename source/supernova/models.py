@@ -38,7 +38,11 @@ class ChangelogNotification(Notification):
     entry = djm.ForeignKey(Changelog, on_delete=djm.CASCADE)
 
     def to_api(self):
-        return {'id': self.id, 'message': f'Nova versão do Supernova: {self.entry.title}', 'url': reverse('changelog')}
+        result = super(ChangelogNotification, self).to_api()
+        result['message'] = f'Nova versão do Supernova: {self.entry.title}'
+        result['url'] = reverse('changelog')
+        result['type'] = 'Alteração'
+        return result
 
     def to_url(self):
         return reverse('changelog')

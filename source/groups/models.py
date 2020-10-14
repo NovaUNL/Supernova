@@ -185,6 +185,10 @@ class Activity(PolymorphicModel):
     def __str__(self):
         return f'{self.datetime}({self.author})'
 
+    @property
+    def activity_name(self):
+        return None
+
     class Meta:
         verbose_name_plural = "activities"
 
@@ -197,11 +201,15 @@ class Announcement(Activity):
     content = MarkdownxField()
 
     def __str__(self):
-        return f"@{self.group.abbreviation}: {self.title}"
+        return f"{self.title}"
 
     @property
     def content_html(self):
         return markdownify(self.content)
+
+    @property
+    def activity_name(self):
+        return 'Anúncio'
 
     @property
     def link_to(self):
@@ -262,6 +270,10 @@ class ScheduleCreation(Activity):
         return str(self.entry)
 
     @property
+    def activity_name(self):
+        return 'Agendamento'
+
+    @property
     def link_to(self):
         return None
 
@@ -291,6 +303,10 @@ class ScheduleSuspension(Activity):
             return f"Alterações nas actividades de {self.entry.title} entre {self.start_date} e {self.end_date}."
 
     @property
+    def activity_name(self):
+        return 'Alteração agenda'
+
+    @property
     def link_to(self):
         return reverse('groups:schedule', args=[self.entry.group.abbreviation])
 
@@ -309,12 +325,18 @@ class ScheduleRevoke(Activity):
         null=True,
         related_name='replaced_revoked_entries')
 
+
+    def __str__(self):
+        return f"Cancelamento de {self.entry}"
+
+
+    @property
+    def activity_name(self):
+        return 'Cancelamento'
+
     @property
     def link_to(self):
         return reverse('groups:schedule', args=[self.entry.group.abbreviation])
-
-    def __str__(self):
-        return f"@{self.entry.group.abbreviation}: Cancelamento de {self.entry}"
 
 
 class Event(djm.Model):
@@ -378,7 +400,7 @@ class Event(djm.Model):
     subscribers = djm.ManyToManyField(settings.AUTH_USER_MODEL, related_name='event_subscription')
 
     def __str__(self):
-        return f"Evento por @{self.group.abbreviation}: {self.title}"
+        return f"{self.title}"
 
 
 class EventAnnouncement(Activity):
@@ -388,6 +410,10 @@ class EventAnnouncement(Activity):
 
     def __str__(self):
         return str(self.event)
+
+    @property
+    def activity_name(self):
+        return 'Anúncio'
 
     @property
     def link_to(self):
@@ -441,9 +467,12 @@ class GroupActivityNotification(users.Notification):
     activity = djm.ForeignKey(Activity, on_delete=djm.CASCADE)
 
     def to_api(self):
-        return {'id': self.id,
-                'message': str(self.activity),
-                'url': self.activity.link_to}
+        result = super(GroupActivityNotification, self).to_api()
+        result['message'] = str(self.activity)
+        result['url'] = self.activity.link_to
+        result['type'] = self.activity.activity_name
+        result['entity'] = f'@{self.activity.group.abbreviation}'
+        return result
 
     def to_url(self):
         return self.activity.link_to
