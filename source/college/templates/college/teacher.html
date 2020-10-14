@@ -6,8 +6,10 @@
   <div class="header-decorator">
     <div class="header-decorator-options">
       <ul>
-        {% if perms.feedback.add_review %}<li><a href="{% url 'college:teacher_review_create' teacher.id %}">Avaliar</a></li>{% endif %}
-        {% if perms.college.change_teacher %}<li><a href="{% url 'college:teacher_edit' teacher.id %}">Editar</a></li>{% endif %}
+        {% if perms.feedback.add_review %}
+          <li><a href="{% url 'college:teacher_review_create' teacher.id %}">Avaliar</a></li>{% endif %}
+        {% if perms.college.change_teacher %}
+          <li><a href="{% url 'college:teacher_edit' teacher.id %}">Editar</a></li>{% endif %}
       </ul>
     </div>
     {% if teacher.picture %}
@@ -43,41 +45,48 @@
       </div>
     </div>
     <div class="col nogrow noshrink" style="flex-basis: 350px;">
-      {% if teacher.url or teacher.email %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
-          <div class="pane-content">
-            {% if teacher.url %}
-              <h3>Página pessoal</h3>
-              <a class="indented" href="{{ teacher.url }}">Link</a>
-            {% endif %}
-            {% if teacher.room %}
-              <h3>Gabinete</h3>
-              <a class="entity indented" href="{% url 'college:room' teacher.room.id %}">{{ teacher.room.name }}</a>
-            {% endif %}
-            {% if teacher.email %}
-              <h3>Email</h3>
-              <a class="indented" href="mailto:{{ teacher.email }}">{{ teacher.email }}</a>
-            {% endif %}
-            {% if teacher.phone %}
-              <h3>Telefone</h3>
-              <a class="indented" href="tel:{{ teacher.phone }}">{{ teacher.phone }}</a>
-            {% endif %}
-            {% if teacher.rank.name %}
-              <h3>Estatuto</h3>
-              <span class="indented">{{ teacher.rank.name }}</span>
-            {% endif %}
-            <h3>Departamentos</h3>
-            <ul class="entity-list">
-              {% for department in teacher.departments.all %}
-                <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      {% endif %}
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2><a href="{% url 'college:teacher_reviews' teacher.id %}">Opiniões</a></h2></div>
+        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane-content">
+          {% if teacher.url %}
+            <h3>Página pessoal</h3>
+            <a class="indented" href="{{ teacher.url }}">Link</a>
+          {% endif %}
+          {% if teacher.room %}
+            <h3>Gabinete</h3>
+            <a class="entity indented" href="{% url 'college:room' teacher.room.id %}">{{ teacher.room.name }}</a>
+          {% endif %}
+          {% if teacher.email %}
+            <h3>Email</h3>
+            <a class="indented" href="mailto:{{ teacher.email }}">{{ teacher.email }}</a>
+          {% endif %}
+          {% if teacher.phone %}
+            <h3>Telefone</h3>
+            <a class="indented" href="tel:{{ teacher.phone }}">{{ teacher.phone }}</a>
+          {% endif %}
+          {% if teacher.rank.name %}
+            <h3>Estatuto</h3>
+            <span class="indented">{{ teacher.rank.name }}</span>
+          {% endif %}
+          <h3>Departamentos</h3>
+          <ul class="entity-list">
+            {% for department in teacher.departments.all %}
+              <li><a href="{% url 'college:department' department.id %}">{{ department }}</a></li>
+            {% endfor %}
+          </ul>
+          <h3>Participação</h3>
+          <span class="indented">Este professor{% if not teacher.user %} não{% endif %} tem conta.</span><br>
+          <span class="indented">
+            {% if teacher.consent is None %}
+              <a href="{% url 'college:teachers_consent' %}">Sem autorização para conteúdos.</a>
+            {% else %}
+              Conteúdos autorizados a: {{ teacher.get_consent_display }}
+            {% endif %}</span>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2><a href="{% url 'college:teacher_reviews' teacher.id %}">Opiniões</a></h2>
+        </div>
         <div class="pane-content">
           {% include 'feedback/reviews_widget.html' %}
           {% if reviews|length == 0 %}

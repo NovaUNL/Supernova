@@ -956,6 +956,14 @@ def available_places_view(request):
         {'name': 'Espaços', 'url': reverse('college:available_places')}]
     return render(request, 'college/available_places.html', context)
 
+@login_required
+def teacher_consent_view(request):
+    context = build_base_context(request)
+    context['pcode'] = "c_teacher_consent"
+    context['title'] = 'Consentimento docente'
+    context['teachers'] = m.Teacher.objects.order_by('name').all()
+    return render(request, 'college/teacher_consent.html', context)
+
 
 class ClassAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):

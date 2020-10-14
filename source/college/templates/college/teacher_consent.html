@@ -1,0 +1,98 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+{% load flatpages %}
+
+{% block head %}
+  <script>MathJax = {tex: {inlineMath: [['$', '$']]}};</script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+      .teacher-list tbody td:nth-child(n+2) {
+          text-align: center;
+      }
+
+      .teacher-list img {
+          max-width: 16px;
+          max-height: 16px;
+      }
+  </style>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col profile">
+    <div class="header-decorator">
+      <h1>Consentimento dos docentes</h1>
+    </div>
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <p>
+            Uma vez que não podemos disponibilizar conteúdo sujeito a direitos autorais estamos dependentes da autorização dos professores.<br>
+            Abaixo apresenta-se um registo dos docentes e respetivas pronuncias a respeito da autorização que o
+            Supernova tem <b>por defeito</b> para utilizar os conteúdos publicados pelos mesmos.<br>
+            É agradecido aos utilizadores do supernova que solicitem esta informação aos respetivos docentes.
+          </p>
+          <p>
+            A sugestão que se faz para uma solicitação consiste no seguinte formato:
+          </p>
+          <blockquote>
+            Bom dia professor/a.<br>
+            Existe uma plataforma, designada de Supernova e que pode ser visitada em supernova.nunl.pt, que tem o âmbito de complementar os serviços disponibilizados pela faculdade.<br>
+            Os autores da plataforma, que são alunos sem afiliação à organização da FCT/UNL, gostariam de exibir os seus conteúdos.<br>
+            Neste sentido agradecia que a/o professor se pronunciasse e indicasse a sua vontade entre as restantes opções:<br>
+            - Não autorizo a ninguém o acesso aos meus conteúdos.<br>
+            - Autorizo que os alunos inscritos nas minhas unidades curriculares possam ter acesso aos conteúdos das mesmas.<br>
+            - Autorizo a todos os alunos o acesso aos meus conteúdos.<br>
+            - Autorizo o acesso aos meus conteúdos, sem exceções.<br>
+            Note-se que em nenhuma das opções abdica dos seus direitos sobre os seus conteúdos, podendo revogar a sua autorização a qualquer momento,
+            com a exceção do caso em que opta por autorizar sem exceções. Nesse caso opte por uma opção entre:<br>
+            - Domínio público<br>
+            - CC BY (necessário manter autoria)<br>
+            - CC BY-SA (necessário manter autoria e partilhar derivados)<br>
+            - CC BY-NC (necessário manter autoria, proibido uso comercial)<br>
+            - CC BY-SA-NC (necessário manter autoria e partilhar derivados, proibido uso comercial)
+          </blockquote>
+          <div style="overflow: auto">
+            <table class="stylized grow teacher-list">
+              <thead>
+              <tr>
+                <th rowspan="2">Docente</th>
+                <th colspan="4">Autorização</th>
+                <th rowspan="2">?</th>
+              </tr>
+              <tr>
+                <th>Púb.</th>
+                <th>Alu.</th>
+                <th>Insc.</th>
+                <th>Ninguém</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for teacher in teachers %}
+                <tr>
+                  <td><a href="{{ teacher.get_absolute_url }}">{{ teacher.name }}</a>
+                    {% if teacher.first_year %} ({{ teacher.first_year }}-{{ teacher.last_year }}){% endif %}</td>
+                  <td>{% if teacher.file_consent == 0 %}
+                    <img alt="Sim" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
+                  <td>{% if teacher.file_consent == 1 %}
+                    <img alt="Sim" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
+                  <td>{% if teacher.file_consent == 2 %}
+                    <img alt="Sim" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
+                  <td>{% if teacher.file_consent == 3 %}
+                    <img alt="Sim" src="{% static 'img/icons/cross.svg' %}">{% endif %}
+                  </td>
+                  <td>{% if teacher.file_consent is None %}
+                    <img alt="Sim" src="{% static 'img/icons/cross.svg' %}">{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
