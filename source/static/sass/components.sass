@@ -231,3 +231,34 @@
 
   &[data-popper-placement^='right'] > .arrow
     left: -4px
+
+
+.markdown-editor
+  .mode-pickers > span
+    border-radius: 5px 5px 0 0
+    border: 2px solid var(--primary3)
+    border-bottom: 0
+    padding: 2px 10px
+    display: inline-block
+    margin-left: 5px
+    font-weight: bold
+
+  .mode-pickers > span.selected
+    background-color: var(--input-light)
+    position: relative
+    z-index: 2
+
+  .modes
+    position: relative
+    top: -2px
+    border: 2px solid var(--primary3)
+    border-radius: 5px
+
+  textarea
+    margin: 0
+    border: 0
+
+  .preview
+    display: none
+    padding: 5px
+    background-color: var(--pane-bg)

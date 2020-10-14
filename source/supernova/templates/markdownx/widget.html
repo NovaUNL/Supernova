@@ -1,0 +1,12 @@
+{% spaceless %}
+  <div class="markdownx markdown-editor">
+    <div class="mode-pickers">
+      <span class="selected edit-btn" onclick="toggleMarkdownPreview(this, false)">Escrever</span>
+      <span class="preview-btn" onclick="toggleMarkdownPreview(this, true)">Prever</span>
+    </div>
+    <div class="modes">
+      {% include 'django/forms/widgets/textarea.html' %}
+      <div class="preview markdownx-preview"></div>
+    </div>
+  </div>
+{% endspaceless %}
