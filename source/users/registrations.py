@@ -13,6 +13,7 @@ import college.models as college
 import users.models as users
 import settings
 from supernova.utils import correlation
+from users import triggers
 from users.exceptions import InvalidToken, ExpiredRegistration, AccountExists
 import jinja2
 
@@ -85,13 +86,6 @@ def validate_token(email, token) -> users.User:
 
     # Registration request accepted
     with transaction.atomic():
-        student_access = Permission.objects.get(
-            codename='student_access',
-            content_type=ContentType.objects.get_for_model(users.User))
-        teacher_access = Permission.objects.get(
-            codename='teacher_access',
-            content_type=ContentType.objects.get_for_model(users.User))
-
         user = users.User.objects.create_user(
             username=registration.username,
             email=registration.email,
@@ -110,11 +104,10 @@ def validate_token(email, token) -> users.User:
                     student_name = registration.requested_student.name
                 # Teacher email is known and matches or names are very very close
                 if registration.email.split('@')[0] == registration.requested_teacher.abbreviation or \
-                        (student_name and correlation(student_name, registration.requested_teacher) > 0.9):
+                        (student_name and correlation(student_name, registration.requested_teacher.name) > 0.9):
                     registration.requested_teacher.user = user
                     registration.requested_teacher.save()
-                    user.user_permissions.add(student_access)
-                    user.user_permissions.add(teacher_access)
+                    triggers.on_teacher_assignment(user, registration.requested_teacher)
                 else:
                     # Do nothing, those need to be approved manually
                     users.GenericNotification.objects.create(
@@ -126,7 +119,7 @@ def validate_token(email, token) -> users.User:
                 college.Student.objects\
                     .filter(abbreviation=registration.requested_student.abbreviation)\
                     .update(user=user)
-                user.user_permissions.add(student_access)
+                triggers.on_student_assignment(user, registration.requested_student)
                 students = college.Student.objects\
                     .filter(abbreviation=registration.requested_student.abbreviation)\
                     .all()
