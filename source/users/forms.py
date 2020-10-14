@@ -111,6 +111,10 @@ class RegistrationForm(djf.ModelForm):
 
         if m.User.objects.filter(email=email).exists():
             raise djf.ValidationError("Já existe uma conta registada com o email fornecido.")
+
+        if m.Registration.objects.filter(email=email).exclude(resulting_user=None).exists():
+            raise djf.ValidationError("Já existe uma conta registada com o email fornecido.")
+
         return email
 
     def clean_username(self):
