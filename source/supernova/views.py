@@ -99,7 +99,7 @@ def error_view(request, exception=None):
     context['title'] = context['msg_title'] = 'Erro'
     context['msg_content'] = '''<p>Houve um erro a responder ao pedido.</p>
     <p>Um exercito de estagiários mal pagos saberá deste erro,
-    todavia podes ajuda-los preenchendo um <a href="%s">relatório de bug</a>.</p>''' % settings.GITLAB_URL
+    todavia podes ajudá-los preenchendo um <a href="%s">relatório de bug</a>.</p>''' % settings.GITLAB_URL
     return render(request, "supernova/message.html", context, status=500)
 
 
