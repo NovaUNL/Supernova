@@ -2,8 +2,11 @@ import json
 import os
 import subprocess
 from datetime import datetime
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from django.urls import reverse
+
+BASE_DIR = Path(__file__).resolve().parent
 
 # Application definition
 INSTALLED_APPS = [
@@ -66,7 +69,7 @@ SITE_ID = 1
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
