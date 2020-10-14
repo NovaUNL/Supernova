@@ -14,6 +14,7 @@ from supernova.views import build_base_context
 from learning import models as m
 from learning import forms as f
 from college import models as college
+from feedback import models as feedback
 from users.utils import get_students
 
 
@@ -638,7 +639,7 @@ def question_create_view(request):
             question.user = request.user
             question.save()
             form.save_m2m()
-            question.set_vote(request.user, m.PostableVote.UPVOTE)
+            question.set_vote(request.user, feedback.Vote.UPVOTE)
             return redirect('learning:question', question_id=question.id)
     else:
         initial = {}

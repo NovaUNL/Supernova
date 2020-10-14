@@ -1,6 +1,7 @@
 from itertools import chain
 
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db.models import Max
 from django.urls import reverse
 from django.db import models as djm
@@ -296,6 +297,9 @@ class Exercise(djm.Model):
     #: Number of times users skipped this exercise (should be redundant and act as cache)
     skips = djm.IntegerField(default=0)
 
+    def __str__(self):
+        return f'Exercício #{self.id}'
+
     def count_problems(self):
         return Exercise._count_problems(self.content)
 
@@ -405,8 +409,16 @@ class Postable(feedback.Votable, djm.Model):
     #: Edit datetime
     edit_timestamp = djm.DateTimeField(null=True, blank=True)
 
+    votes = GenericRelation(
+        'feedback.Vote',
+        related_query_name='postable')
+
     class Meta:
         ordering = ('creation_timestamp',)
+
+    @property
+    def content_html(self):
+        return markdownify(self.content)
 
 
 class Question(users.Activity, users.Subscribable, Postable):
@@ -464,7 +476,7 @@ class QuestionAnswer(users.Activity, users.Subscribable, Postable):
     accepted = djm.BooleanField(default=False)
 
     def __str__(self):
-        return f"resposta a {self.to}"
+        return f"Resposta a {self.to}."
 
 
 class PostableComment(users.Activity, users.Subscribable, Postable):
@@ -478,28 +490,4 @@ class PostableComment(users.Activity, users.Subscribable, Postable):
         related_name='comments')
 
     def __str__(self):
-        return f"comentario em {self.to}"
-
-
-class PostableVote(users.Activity):
-    """
-    A vote in a question, answer or another comment
-    Having choices instead of something simpler (boolean?) is due to the possibility of expanding later on
-    to having more vote types (favorite, ... ?)
-    """
-    UPVOTE = 0
-    DOWNVOTE = 1
-    VOTE_CHOICES = [
-        (UPVOTE, 'Upvote'),
-        (DOWNVOTE, 'Downvote'),
-    ]
-    #: Type of vote. Right now only up and down votes.
-    type = djm.IntegerField(choices=VOTE_CHOICES)
-    #: Postable to which this vote refers
-    to = djm.ForeignKey(
-        Postable,
-        on_delete=djm.PROTECT,
-        related_name='votes')
-
-    def __str__(self):
-        return f"voto {self.get_type_display()} em {self.to}"
+        return f"Comentário em {self.to}."

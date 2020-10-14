@@ -98,11 +98,9 @@ class Vote(users.Activity):
     #: Whether this vote is meant to be anonymous
     anonymity = djm.BooleanField(default=True)
     #: Suggestion to which this vote refers
-    to_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
-    to_object_id = djm.PositiveIntegerField()
-    to_object = GenericForeignKey('to_content_type', 'to_object_id')
-    #: Suggestion to which this vote refers
-    to = djm.ForeignKey(Suggestion, on_delete=djm.CASCADE, related_name='votes')
+    content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
+    object_id = djm.PositiveIntegerField()
+    to = GenericForeignKey()
     type = djm.IntegerField(choices=VOTE_CHOICES)
 
     def __str__(self):

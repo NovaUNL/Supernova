@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction, IntegrityError
 from django.db.models import F, Max
 from elasticsearch_dsl import Q
@@ -13,6 +15,7 @@ from api.serializers import synopses as serializers
 from api.serializers.synopses import SectionRelationSerializer
 from learning import models as learning
 from college import models as college
+from feedback import models as feedback
 
 
 class Areas(APIView):
@@ -208,13 +211,18 @@ class ClassSections(APIView):
 
 class QuestionUserVotes(APIView):
     def get(self, request, pk, format=None):
-        question = get_object_or_404(learning.Question.objects.prefetch_related('votes', 'answers__votes'), id=pk)
+        question = get_object_or_404(learning.Question, id=pk)
+        # FIXME TypeError: cannot unpack non-iterable MatchAll object
+        # feedback.Vote.objects\
+        #     .filter(Q(postable__questionanswer__to=question) | Q(postable__question=question))\
+        #     .values_list('object_id', 'type')
         votes = {}
-        votes[question.id] = learning.PostableVote.objects.filter(to=question).values_list('type', flat=True)
-        answer_votes = learning.PostableVote.objects \
-            .filter(to__questionanswer__to=question) \
-            .order_by('to__questionanswer__to_id') \
-            .values_list('to_id', 'type')
+        votes[question.id] = feedback.Vote.objects \
+            .filter(postable__question=question) \
+            .values_list('type', flat=True)
+        answer_votes = feedback.Vote.objects \
+            .filter(postable__questionanswer__to=question).order_by('object_id') \
+            .values_list('object_id', 'type')
         last_postable = None
         last_list = None
         for postable_id, vote_type in answer_votes:
@@ -230,10 +238,14 @@ class PostableVotes(APIView):
     def post(self, request, pk, format=None):
         postable = get_object_or_404(learning.Postable, id=pk)
         if 'type' in request.data:
-            if request.data['type'] == 'upvote':
-                postable.set_vote(request.user, learning.PostableVote.UPVOTE)
+            type = request.data['type']
+            if type == 'upvote':
+                postable.set_vote(request.user, feedback.Vote.UPVOTE)
+            elif type == 'downvote':
+                postable.set_vote(request.user, feedback.Vote.DOWNVOTE)
             else:
-                postable.set_vote(request.user, learning.PostableVote.DOWNVOTE)
+                logging.error(f"Received an unknown type of vote: {type}")
+                return Response(status=400)
         return Response("Ok")
 
     def delete(self, request, pk, format=None):
@@ -241,9 +253,9 @@ class PostableVotes(APIView):
         if 'type' in request.data:
             del_type = None
             if request.data['type'] == 'upvote':
-                del_type = learning.PostableVote.UPVOTE
+                del_type = feedback.Vote.UPVOTE
             elif request.data['type'] == 'downvote':
-                del_type = learning.PostableVote.DOWNVOTE
+                del_type = feedback.Vote.DOWNVOTE
 
             if del_type is not None:
                 postable.votes.filter(user=request.user, type=del_type).delete()

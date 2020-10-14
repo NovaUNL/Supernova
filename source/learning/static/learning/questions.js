@@ -18,10 +18,7 @@ function castVote(evt) {
     fetch(url, {
         method: is_set ? 'DELETE' : 'POST',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
+        headers: defaultRequestHeaders(),
         body: JSON.stringify({"type": is_upvote ? "upvote" : "downvote"})
     });
 }
@@ -36,10 +33,7 @@ function loadOwnVotes() {
     fetch(url, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
+        headers: defaultRequestHeaders()
     }).then(function (response) {
         return response.json();
     }).then((data) => {
