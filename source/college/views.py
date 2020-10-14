@@ -1002,8 +1002,8 @@ class UnregisteredTeacherAutocomplete(autocomplete.Select2QuerySetView):
 class StudentAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if self.q and len(self.q) >= 5:
-            qs = m.Student.objects.all()
-            filter = reduce(lambda x, y: x & y, [Q(name__icontains=word) for word in self.q.split(' ')])
+            qs = m.Student.objects
+            filter = Q(abbreviation__icontains=self.q)
             try:
                 filter = filter | Q(number=int(self.q))
             except ValueError:
@@ -1016,8 +1016,8 @@ class StudentAutocomplete(autocomplete.Select2QuerySetView):
 class UnregisteredStudentAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if self.q and len(self.q) >= 5:
-            qs = m.Student.objects.all()
-            filter = reduce(lambda x, y: x & y, [Q(name__icontains=word) for word in self.q.split(' ')])
+            qs = m.Student.objects
+            filter = Q(abbreviation__icontains=self.q)
             try:
                 filter = filter | Q(number=int(self.q))
             except ValueError:
