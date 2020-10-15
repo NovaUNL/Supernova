@@ -130,7 +130,7 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Atribuir aluno</h2></div>
         <div class="pane-content">
-          <form class="col" method="post" action="{% url 'management:users' %}?password_reset=">
+          <form class="col" method="post" action="{% url 'management:users' %}?assign_student=">
             {% csrf_token %}
             {{ assign_student_form.as_p }}
             <input class="end" type="submit" value="Atribuir">

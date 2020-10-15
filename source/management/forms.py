@@ -31,7 +31,7 @@ class BindStudentToUserForm(djf.Form):
         user_id = self.cleaned_data.get("user")
         return users.User.objects.filter(id=user_id).first()
 
-    def clean_teacher(self):
+    def clean_student(self):
         student_id = self.cleaned_data.get("student")
         return college.Student.objects.filter(id=student_id, user=None).first()
 
