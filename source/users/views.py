@@ -57,14 +57,21 @@ def logout_view(request):
 def registration_view(request):
     # Redirect logged users to their profiles
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('users:profile', args=[request.user.nickname]))
+        return HttpResponseRedirect(request.user.get_absolute_url())
 
+    if 'professor' in request.GET:
+        registration_form = f.TeacherRegistrationForm
+        student_optional = True
+    else:
+        registration_form = f.StudentRegistrationForm
+        student_optional = False
     context = build_base_context(request)
     context['title'] = "Criar conta"
     context['enabled'] = settings.REGISTRATIONS_ENABLED
+    context['student_optional'] = student_optional
     if request.method == 'POST':
         # This is a registration request, validate it
-        form = f.RegistrationForm(data=request.POST)
+        form = registration_form(data=request.POST)
         valid = form.is_valid()
         if valid:
             registration = form.save(commit=False)
@@ -96,13 +103,13 @@ def registration_view(request):
         if 't' in request.GET:
             # If an invite token is in the querystring, populate the form with it
             invite_token = request.GET['t']
-            form = f.RegistrationForm(initial={'invite': invite_token})
+            form = registration_form(initial={'invite': invite_token})
             # But warn if the invite token is not valid
             invites = m.Invite.objects.filter(token=invite_token)
             if not invites.exists():
                 context['invite_unknown'] = True
         else:
-            form = f.RegistrationForm()
+            form = registration_form()
         context['creation_form'] = form
     return render(request, 'users/registration.html', context)
 

@@ -65,26 +65,32 @@
               </div>
             </div>
             <hr>
+            {% if creation_form.requested_teacher %}
+              <div class="form-row{% if creation_form.requested_teacher.errors %} error{% endif %}">
+                <div class="form-row-top">
+                  <h4>Docente</h4>
+                  {{ creation_form.requested_teacher }}
+                </div>
+                {{ creation_form.requested_teacher.errors }}
+                <div class="form-row-description">
+                  O nome do professor, para solicitação de contas de professor.<br>
+                  Não é mutuamente exclusivo com a solicitação de um aluno (inclusive ex-alunos).
+                </div>
+              </div>
+              <hr>
+            {% endif %}
             <div class="form-row{% if creation_form.requested_student.errors %} error{% endif %}">
               <div class="form-row-top">
-                <h4>Estudante (Opcional)</h4>
+                <h4>Estudante{% if student_optional %} (Opcional){% endif %}</h4>
                 {{ creation_form.requested_student }}
               </div>
               {{ creation_form.requested_student.errors }}
               <div class="form-row-description">
-                O identificador ou número de aluno, para solicitação de contas de aluno.
-              </div>
-            </div>
-            <hr>
-            <div class="form-row{% if creation_form.requested_teacher.errors %} error{% endif %}">
-              <div class="form-row-top">
-                <h4>Docente (Opcional)</h4>
-                {{ creation_form.requested_teacher }}
-              </div>
-              {{ creation_form.requested_teacher.errors }}
-              <div class="form-row-description">
-                O nome do professor, para solicitação de contas de professor.<br>
-                Não é mutuamente exclusivo com a solicitação de um aluno (inclusive ex-alunos).
+                {% if creation_form.requested_teacher %}
+                  O identificador ou número de aluno; Para docentes que também tem/tiveram uma conta de estudante.
+                {% else %}
+                  O identificador ou número de aluno.
+                {% endif %}
               </div>
             </div>
             <hr>

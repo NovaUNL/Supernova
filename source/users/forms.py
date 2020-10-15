@@ -67,28 +67,6 @@ class LoginForm(djf.Form):
 
 
 class RegistrationForm(djf.ModelForm):
-    password_confirmation = djf.CharField(
-        label='Palavra-passe (confirmação)',
-        widget=djf.PasswordInput(),
-        required=True,
-        error_messages=default_errors)
-    # captcha = CaptchaField(label='Como correu Análise?', error_messages=default_errors)
-    # student = djf.CharField(
-    #     label='Identificador (ex. c.pereira)',
-    #     widget=djf.TextInput(attrs={'onChange': 'studentIDChanged(this);'}))
-    nickname = djf.CharField(label='Alcunha', widget=djf.TextInput(), required=False)
-    invite = djf.CharField(required=True)
-
-    class Meta:
-        model = m.Registration
-        fields = ('nickname', 'username', 'password', 'email', 'requested_student', 'requested_teacher')
-        widgets = {
-            'username': djf.TextInput(),
-            'email': djf.TextInput(attrs={'onChange': 'emailModified=true;'}),
-            'password': djf.PasswordInput(),
-            'requested_teacher': autocomplete.ModelSelect2(url='college:unreg_teacher_ac'),
-            'requested_student': autocomplete.ModelSelect2(url='college:unreg_student_ac'),
-        }
 
     def clean_password(self):
         return make_password(self.cleaned_data["password"])
@@ -192,6 +170,56 @@ class RegistrationForm(djf.ModelForm):
             self.cleaned_data["nickname"],
             self.data["password"])
         return self.cleaned_data
+
+
+class TeacherRegistrationForm(djf.ModelForm):
+    password_confirmation = djf.CharField(
+        label='Palavra-passe (confirmação)',
+        widget=djf.PasswordInput(),
+        required=True,
+        error_messages=default_errors)
+    nickname = djf.CharField(label='Alcunha', widget=djf.TextInput(), required=False)
+    invite = djf.CharField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(TeacherRegistrationForm, self).__init__(*args, **kwargs)
+        self.fields['requested_teacher'].required = True
+
+    class Meta:
+        model = m.Registration
+        fields = ('nickname', 'username', 'password', 'email', 'requested_student', 'requested_teacher')
+        widgets = {
+            'username': djf.TextInput(),
+            'email': djf.TextInput(attrs={'onChange': 'emailModified=true;'}),
+            'password': djf.PasswordInput(),
+            'requested_teacher': autocomplete.ModelSelect2(url='college:unreg_teacher_ac'),
+            'requested_student': autocomplete.ModelSelect2(url='college:unreg_student_ac'),
+        }
+
+
+class StudentRegistrationForm(RegistrationForm):
+    password_confirmation = djf.CharField(
+        label='Palavra-passe (confirmação)',
+        widget=djf.PasswordInput(),
+        required=True,
+        error_messages=default_errors)
+    nickname = djf.CharField(label='Alcunha', widget=djf.TextInput(), required=False)
+    invite = djf.CharField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(StudentRegistrationForm, self).__init__(*args, **kwargs)
+        self.fields['requested_student'].required = True
+
+    class Meta:
+        model = m.Registration
+        fields = ('nickname', 'username', 'password', 'email', 'requested_student')
+        widgets = {
+            'username': djf.TextInput(),
+            'email': djf.TextInput(attrs={'onChange': 'emailModified=true;'}),
+            'password': djf.PasswordInput(),
+            'requested_teacher': autocomplete.ModelSelect2(url='college:unreg_teacher_ac'),
+            'requested_student': autocomplete.ModelSelect2(url='college:unreg_student_ac'),
+        }
 
 
 class RegistrationValidationForm(djf.ModelForm):
@@ -412,9 +440,6 @@ class SchedulePeriodicForm(djf.ModelForm):
 
 
 UserSchedulePeriodicFormset = djf.inlineformset_factory(m.User, m.SchedulePeriodic, extra=1, form=SchedulePeriodicForm)
-
-
-
 
 
 def enforce_name_policy(name):
