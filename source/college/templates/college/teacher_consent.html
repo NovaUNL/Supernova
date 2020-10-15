@@ -75,16 +75,16 @@
                   <td><a href="{{ teacher.get_absolute_url }}">{{ teacher.name }}</a>
                     {% if teacher.first_year %} ({{ teacher.first_year }}-{{ teacher.last_year }}){% endif %}</td>
                   <td>{% if teacher.file_consent == 0 %}
-                    <img alt="Sim" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
+                    <img alt="Todos" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
                   <td>{% if teacher.file_consent == 1 %}
-                    <img alt="Sim" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
+                    <img alt="Alunos" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
                   <td>{% if teacher.file_consent == 2 %}
-                    <img alt="Sim" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
+                    <img alt="Inscritos" src="{% static 'img/icons/checkbox.svg' %}">{% endif %}</td>
                   <td>{% if teacher.file_consent == 3 %}
-                    <img alt="Sim" src="{% static 'img/icons/cross.svg' %}">{% endif %}
+                    <img alt="Ninguém" src="{% static 'img/icons/cross.svg' %}">{% endif %}
                   </td>
                   <td>{% if teacher.file_consent is None %}
-                    <img alt="Sim" src="{% static 'img/icons/cross.svg' %}">{% endif %}
+                    <img alt="Desconhecido" src="{% static 'img/icons/cross.svg' %}">{% endif %}
                   </td>
                 </tr>
               {% endfor %}
