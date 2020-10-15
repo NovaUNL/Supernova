@@ -385,12 +385,11 @@
   padding-left: 10px
   border-left: 2px solid var(--highlight)
 
-
-.question
-  display: flex
-  flex-wrap: nowrap
-
 .question-list
+  .question
+    display: flex
+    flex-wrap: nowrap
+
   .info
     margin-top: 10px
 
@@ -431,7 +430,7 @@
     margin-left: 32px
 
   .counter.answers
-    background-image: url("/static/img/icons/check-nofil.svg")
+    background-image: url("/static/img/icons/check-nofill.svg")
 
   .counter.votes
     background-image: url("/static/img/icons/up.svg")
@@ -465,14 +464,24 @@
 
   > a
     display: block
-    border: 2px solid black
-    border-radius: 3px
-    width: 48px
-    height: 48px
-    background-color: var(--input-light)
     background-size: contain
     margin-bottom: 2px
     cursor: pointer
+
+
+  > a.big
+    border: 2px solid var(--input-dark)
+    border-radius: 3px
+    width: 40px
+    height: 40px
+    background-color: var(--input-light)
+
+  > a.small
+    width: 32px
+    height: 32px
+
+  > a.disabled
+    opacity: 0.3
 
   > span
     font-weight: bold
@@ -490,25 +499,80 @@
     &.set
       background-color: var(--red)
 
-  .answer-btn, .answer-btn.set
-    background-image: url("/static/img/icons/check-nofil.svg")
+  .bookmark-btn
+    background-image: url("/static/img/icons/bookmark.svg")
+    filter: grayscale(100%)
 
-  .answer-btn:hover
+  // General view
+  .answer-btn
+    background-image: url("/static/img/icons/check-nofill.svg")
+
+  .answer-btn.set
+    background-image: url("/static/img/icons/check.svg")
+
+  .answer-btn.set.teacher-set
+    background-image: url("/static/img/icons/check-gold.svg")
+
+  // Author view
+  .answer-btn.for-author:hover
+    background-image: url("/static/img/icons/check.svg")
+
+  .answer-btn.for-author.set:hover
+    background-image: url("/static/img/icons/check-nofill.svg")
+
+  .answer-btn.for-author.teacher-set:hover
+    background-image: url("/static/img/icons/check-gold.svg")
+
+  .answer-btn.for-author.set.teacher-set:hover
+    background-image: url("/static/img/icons/check-nofill-gold.svg")
+
+  // Teacher view
+  .answer-btn.for-teacher:hover
+    background-image: url("/static/img/icons/check-nofill-gold.svg")
+
+  .answer-btn.for-teacher.set:hover
+    background-image: url("/static/img/icons/check-gold.svg")
+
+  .answer-btn.for-teacher.teacher-set:hover
+    background-image: url("/static/img/icons/check-nofill-gold.svg")
+
+  .answer-btn.for-teacher.set.teacher-set:hover
     background-image: url("/static/img/icons/check.svg")
 
 .postable-footer
   display: flex
-  justify-content: space-between
-
-  .author
-    flex-shrink: 0
-
-    span
-      display: block
+  flex-wrap: wrap-reverse
 
   .tags span
     margin-bottom: 5px
 
+  .actions
+    align-self: end
+
+    a
+      margin-right: 5px
+      display: inline-block
+
+  .author
+    flex-shrink: 0
+    align-self: flex-end
+    margin-left: auto
+
+    span
+      display: block
+
+    img
+      max-height: 16px
+
+  @media #{$lowmidres}
+    .question .postable-footer
+      flex-direction: column
+
+    .actions
+      align-self: unset
+
+    .author
+      margin-bottom: 10px
 
 #milestones
   display: flex
@@ -604,7 +668,7 @@
     margin-right: 0
 
 .enrollment-evaluation span
-    display: block
+  display: block
 
 .enrollment-grade, .enrollment-evaluation, .enrollment-attendance
   padding: 5px 10px

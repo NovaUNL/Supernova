@@ -1,15 +1,23 @@
 function castVote(evt) {
-    // Done this way to allow for more types of votes
     let e = evt.target;
     let is_set = e.classList.contains("set");
-    let is_upvote = e.classList.contains("upvote-btn");
+    let vote_type;
+    if (e.classList.contains("upvote-btn")) {
+        vote_type = 'up'
+    } else if (e.classList.contains("downvote-btn")) {
+        vote_type = 'down'
+    } else if (e.classList.contains("answer-btn")) {
+        vote_type = 'ans'
+    } else if (e.classList.contains("fav-btn")) {
+        vote_type = 'fav'
+    }
     if (is_set) {
         e.classList.remove('set');
     } else {
         e.classList.add('set');
-        if (is_upvote)
+        if (vote_type === 'up')
             e.parentNode.querySelector(".downvote-btn").classList.remove('set');
-        else if (e.classList.contains("downvote-btn"))
+        else if (vote_type === 'down')
             e.parentNode.querySelector(".upvote-btn").classList.remove('set');
     }
     let id = e.closest("[data-id]").dataset.id;
@@ -19,7 +27,7 @@ function castVote(evt) {
         method: is_set ? 'DELETE' : 'POST',
         credentials: 'include',
         headers: defaultRequestHeaders(),
-        body: JSON.stringify({"type": is_upvote ? "upvote" : "downvote"})
+        body: JSON.stringify({"type": vote_type})
     });
 }
 
@@ -42,11 +50,9 @@ function loadOwnVotes() {
             [postableElem.querySelector('.upvote-btn'), postableElem.querySelector('.downvote-btn')]
                 .forEach((elem, index) => {
                     elem.removeEventListener('click', loginAlert);
-                    elem.addEventListener('click', castVote);
-                    if (typeof votes !== 'undefined' && votes.includes(index))
-                        elem.classList.add('set')
-                }
-            )
+                    if (!elem.classList.contains('disabled')) elem.addEventListener('click', castVote)
+                    if (typeof votes !== 'undefined' && votes.includes(index)) elem.classList.add('set')
+                })
         }
     });
 }

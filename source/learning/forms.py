@@ -230,11 +230,11 @@ class QuestionForm(djf.ModelForm):
 
 class AnswerForm(djf.ModelForm):
     class Meta:
-        model = m.QuestionAnswer
+        model = m.Answer
         fields = ('content',)
 
 
 class CommentForm(djf.ModelForm):
     class Meta:
-        model = m.QuestionAnswer
+        model = m.Answer
         fields = ('content',)

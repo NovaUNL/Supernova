@@ -409,19 +409,15 @@ class Postable(feedback.Votable, djm.Model):
     #: Edit datetime
     edit_timestamp = djm.DateTimeField(null=True, blank=True)
 
-    votes = GenericRelation(
-        'feedback.Vote',
-        related_query_name='postable')
-
     class Meta:
-        ordering = ('creation_timestamp',)
+        abstract = True
 
     @property
     def content_html(self):
         return markdownify(self.content)
 
 
-class Question(users.Activity, users.Subscribable, Postable):
+class Question(users.Activity, Postable):
     """
     A generic question, usually about an exercise.
     """
@@ -452,6 +448,29 @@ class Question(users.Activity, users.Subscribable, Postable):
         null=True,
         on_delete=djm.SET_NULL,
         related_name='duplicates')
+    #: :py:class:`Answer` which answers this question
+    decided_answer = djm.OneToOneField(
+        'Answer',
+        null=True,
+        blank=True,
+        on_delete=djm.PROTECT,
+        related_name='answered_question')
+    #: :py:class:`Answer` which teachers decided on
+    teacher_decided_answer = djm.OneToOneField(
+        'Answer',
+        null=True,
+        blank=True,
+        on_delete=djm.PROTECT,
+        related_name='answered_question_teacher')
+    #: The teacher that accepted the teacher chosen answer
+    deciding_teacher = djm.ForeignKey(
+        college.Teacher,
+        null=True,
+        blank=True,
+        on_delete=djm.SET_NULL,
+        related_name='answered_questions')
+
+    votes = GenericRelation('feedback.Vote', related_query_name='question')
 
     def __str__(self):
         return f"questão '{self.title}'"
@@ -460,34 +479,17 @@ class Question(users.Activity, users.Subscribable, Postable):
         return chain(self.linked_classes.all(), self.linked_sections.all())
 
     def get_absolute_url(self):
-        return reverse('learning:question', args=[self.id])
+        return reverse('learning:question', args=[self.activity_id])
 
 
-class QuestionAnswer(users.Activity, users.Subscribable, Postable):
+class Answer(users.Activity, Postable):
     """
     An answer to a Question
     """
-    #: :py:class:`Postable` to which this answer refers
-    to = djm.ForeignKey(
-        Question,
-        on_delete=djm.PROTECT,
-        related_name='answers')
-    #: Signals if this answer is the accepted answer
-    accepted = djm.BooleanField(default=False)
+    #: :py:class:`Question` to which this answer refers
+    to = djm.ForeignKey(Question, on_delete=djm.PROTECT, related_name='answers')
+
+    votes = GenericRelation('feedback.Vote', related_query_name='answer')
 
     def __str__(self):
         return f"Resposta a {self.to}."
-
-
-class PostableComment(users.Activity, users.Subscribable, Postable):
-    """
-    A comment to any object which inherits from :py:class:`Postable`
-    """
-    #: :py:class:`Postable` to which this comment refers
-    to = djm.ForeignKey(
-        Postable,
-        on_delete=djm.PROTECT,
-        related_name='comments')
-
-    def __str__(self):
-        return f"Comentário em {self.to}."

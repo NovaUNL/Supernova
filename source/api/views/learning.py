@@ -2,9 +2,7 @@ import logging
 
 from django.db import transaction, IntegrityError
 from django.db.models import F, Max
-from elasticsearch_dsl import Q
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -16,6 +14,7 @@ from api.serializers.synopses import SectionRelationSerializer
 from learning import models as learning
 from college import models as college
 from feedback import models as feedback
+from users import models as users
 
 
 class Areas(APIView):
@@ -210,18 +209,19 @@ class ClassSections(APIView):
 
 
 class QuestionUserVotes(APIView):
-    def get(self, request, pk, format=None):
-        question = get_object_or_404(learning.Question, id=pk)
-        # FIXME TypeError: cannot unpack non-iterable MatchAll object
-        # feedback.Vote.objects\
-        #     .filter(Q(postable__questionanswer__to=question) | Q(postable__question=question))\
-        #     .values_list('object_id', 'type')
+    def get(self, request, pk):
+        """
+        Obtains the votes a used issued in a question thread
+        :param pk: Question id
+        :return: activity_id => [vote id's]
+        """
+        question = get_object_or_404(learning.Question, activity_id=pk)
         votes = {}
-        votes[question.id] = feedback.Vote.objects \
-            .filter(postable__question=question) \
+        votes[question.activity_id] = feedback.Vote.objects \
+            .filter(question__activity_id=question.activity_id) \
             .values_list('type', flat=True)
         answer_votes = feedback.Vote.objects \
-            .filter(postable__questionanswer__to=question).order_by('object_id') \
+            .filter(answer__to__activity_id=question.activity_id).order_by('object_id') \
             .values_list('object_id', 'type')
         last_postable = None
         last_list = None
@@ -235,29 +235,83 @@ class QuestionUserVotes(APIView):
 
 
 class PostableVotes(APIView):
-    def post(self, request, pk, format=None):
-        postable = get_object_or_404(learning.Postable, id=pk)
+    def post(self, request, pk):
+        """
+        Assigns a vote to a Postable object
+        :param pk: Object id
+        """
+        activity = get_object_or_404(
+            users.Activity.objects
+                .instance_of(learning.Question, learning.Answer)
+                .select_related('user'),
+            activity_id=pk)
         if 'type' in request.data:
             type = request.data['type']
-            if type == 'upvote':
-                postable.set_vote(request.user, feedback.Vote.UPVOTE)
-            elif type == 'downvote':
-                postable.set_vote(request.user, feedback.Vote.DOWNVOTE)
+            if type == 'up':
+                if activity.user == request.user:
+                    # One cannot vote in own content
+                    return Response(status=403)
+                activity.set_vote(request.user, feedback.Vote.UPVOTE)
+            elif type == 'down':
+                if activity.user == request.user:
+                    # One cannot vote in own content
+                    return Response(status=403)
+                activity.set_vote(request.user, feedback.Vote.DOWNVOTE)
+            elif type == 'fav':
+                activity.set_vote(request.user, feedback.Vote.FAVORITE)
+            elif type == 'ans':
+                if isinstance(learning.Question, activity):
+                    # Questions cannot be answers
+                    return Response(status=400)
+                question = activity.to
+                if question.user == request.user:
+                    question.chosen_answer = activity
+                    question.save()
+                elif request.user.is_teacher:
+                    question.chosen_teacher_answer = activity
+                    question.save()
+                else:
+                    return Response(status=403)
             else:
-                logging.error(f"Received an unknown type of vote: {type}")
+                logging.error(f"Unknown vote type: {type}")
                 return Response(status=400)
-        return Response("Ok")
+        return Response()
 
-    def delete(self, request, pk, format=None):
-        postable = get_object_or_404(learning.Postable, id=pk)
+    def delete(self, request, pk):
+        """
+        Deletes a vote from a Postable object
+        :param pk:
+        :return:
+        """
+        activity = get_object_or_404(
+            users.Activity.objects
+                .instance_of(learning.Question, learning.Answer)
+                .select_related('user'),
+            activity_id=pk)
         if 'type' in request.data:
-            del_type = None
-            if request.data['type'] == 'upvote':
-                del_type = feedback.Vote.UPVOTE
-            elif request.data['type'] == 'downvote':
-                del_type = feedback.Vote.DOWNVOTE
-
-            if del_type is not None:
-                postable.votes.filter(user=request.user, type=del_type).delete()
-                postable.cache_votes()
-        return Response("Ok")
+            if type == 'up':
+                if activity.user == request.user:
+                    # One cannot vote in own content
+                    return Response(status=403)
+                activity.unset_vote(request.user, feedback.Vote.UPVOTE)
+            elif type == 'down':
+                if activity.user == request.user:
+                    # One cannot vote in own content
+                    return Response(status=403)
+                activity.unset_vote(request.user, feedback.Vote.DOWNVOTE)
+            elif type == 'fav':
+                activity.unset_vote(request.user, feedback.Vote.FAVORITE)
+            elif type == 'ans':
+                if isinstance(learning.Question, activity):
+                    # Questions cannot be answers
+                    return Response(status=400)
+                question = activity.to
+                if question.user == request.user:
+                    question.chosen_answer = None
+                    question.save()
+                elif request.user.is_teacher:
+                    question.chosen_teacher_answer = None
+                    question.save()
+                else:
+                    return Response(status=403)
+        return Response()

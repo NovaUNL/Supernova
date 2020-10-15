@@ -40,35 +40,42 @@ class Votable(djm.Model):
         self.save()
 
     def set_vote(self, user, vote_type):
-        votes = self.votes.filter(user=user).all()
-        has_upvote = False
-        has_downvote = False
-        # Counted this way since more types of votes might be implemented
-        for vote in votes:
-            if vote.type == Vote.UPVOTE:
-                has_upvote = True
-            if vote.type == Vote.DOWNVOTE:
-                has_downvote = True
+        exists = self.votes.filter(user=user, type=Vote.UPVOTE).exists()
+        if exists:
+            return
 
-        if vote_type == Vote.UPVOTE or vote_type == Vote.DOWNVOTE:
-            upvote = vote_type == Vote.UPVOTE
-            if upvote:
-                if has_downvote:
-                    self.votes.filter(user=user, type=Vote.DOWNVOTE).update(type=Vote.UPVOTE)
-                    self.upvotes += 1
-                    self.downvotes -= 1
-                elif not has_upvote:
-                    Vote.objects.create(to=self, user=user, type=Vote.UPVOTE)
-                    self.upvotes += 1
-            else:
-                if has_upvote:
-                    self.votes.filter(user=user, type=Vote.UPVOTE).update(type=Vote.DOWNVOTE)
-                    self.upvotes -= 1
-                    self.downvotes += 1
-                elif not has_downvote:
-                    Vote.objects.create(to=self, user=user, type=Vote.DOWNVOTE)
-                    self.downvotes += 1
-            self.save()
+        if vote_type == Vote.UPVOTE:
+            deleted_opposite = self.votes.filter(user=user, type=Vote.DOWNVOTE).delete() > 0
+            Vote.objects.create(to=self, user=user, type=Vote.UPVOTE)
+            self.upvotes += 1
+            if deleted_opposite:
+                self.downvotes -= 1
+            self.save(update_fields=['upvotes', 'downvotes'])
+        elif vote_type == Vote.DOWNVOTE:
+            deleted_opposite = self.votes.filter(user=user, type=Vote.UPVOTE).delete() > 0
+            Vote.objects.create(to=self, user=user, type=Vote.DOWNVOTE)
+            self.downvotes += 1
+            if deleted_opposite:
+                self.upvotes -= 1
+            self.save(update_fields=['upvotes', 'downvotes'])
+        elif vote_type == Vote.FAVORITE:
+            # Delete any existing instances of this vote
+            deleted = self.votes.filter(user=user, type=vote_type).delete()
+            # None was deleted, this is a set, not an unset
+            if not deleted:
+                Vote.objects.create(to=self, user=user, type=vote_type)
+
+    def unset_vote(self, user, vote_type):
+        deleted = self.votes.filter(user=user, type=vote_type).delete() > 0
+        if not deleted:
+            return
+
+        if vote_type == Vote.UPVOTE:
+            self.upvotes -= 1
+            self.save(update_fields=['upvotes'])
+        elif vote_type == Vote.DOWNVOTE:
+            self.downvotes += 1
+            self.save(update_fields=['downvotes'])
 
 
 class Suggestion(Votable, users.Activity, users.Subscribable):

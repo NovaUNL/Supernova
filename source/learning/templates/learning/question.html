@@ -9,36 +9,45 @@
   <script src="{% static 'js/content-rendering.js' %}"></script>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
 {% endblock %}
 
 {% block content_wrapper %}
   <div class="col padded"
        data-voting-endpoint="{% url 'api:postable_votes' 0 %}"
-       data-question-votes-endpoint="{% url 'api:question_votes' question.id %}">
+       data-question-votes-endpoint="{% url 'api:question_votes' question.activity_id %}">
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>{{ question.title }}</h2></div>
-      <div class="pane-content postable" data-id="{{ question.id }}">
+      <div class="pane-content postable question" data-id="{{ question.activity_id }}">
         <div class="postable-main">
           <div class="postable-votes">
-            <a class="upvote-btn"></a>
+            <a class="upvote-btn big{% if question.user == user %} disabled{% endif %}" aria-label="Voto positivo" data-balloon-pos="right"></a>
             <span>{{ question.vote_balance }}</span>
-            <a class="downvote-btn"></a>
+            <a class="downvote-btn big{% if question.user == user %} disabled{% endif %}" aria-label="Voto negativo" data-balloon-pos="right"></a>
+            <a class="bookmark-btn small" aria-label="Adícionar aos favoritos" data-balloon-pos="right"></a>
           </div>
           <div class="postable-content">
             {{ question.content_html|safe }}
           </div>
         </div>
         <div class="postable-footer">
-          <div class="tags">
-            {% for class in question.linked_classes.all %}<span class="ui-tag"><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></span>{% endfor %}
-            {% for section in question.linked_sections.all %}<span class="ui-tag"><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></span>{% endfor %}
+          <div class="tag-actions-wrapper">
+            <div class="tags">
+              {% for class in question.linked_classes.all %}<span class="ui-tag"><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></span>{% endfor %}
+              {% for section in question.linked_sections.all %}<span class="ui-tag"><a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></span>{% endfor %}
+            </div>
+            <div class="actions">
+              <a class="disabled">Reportar</a>
+              <a class="disabled">Editar</a>
+              <a class="disabled">Histórico</a>
+            </div>
           </div>
-          <div class="actions">
-            {#            <a>Reportar</a>#}
-          </div>
-          <div class="author">
-            <span><a href="{% url 'users:profile' question.user.nickname %}">{{ question.user.nickname }}</a></span>
-            <span>{{ question.timestamp }}</span>
+          <div class="author user">
+            <span class="pic" style="background-image: url('{% if question.user.picture %}{{ question.user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
+            <div>
+              <span><a href="{% url 'users:profile' question.user.nickname %}">{{ question.user.nickname }}</a> ({{ question.user.points}} <img alt="Pontos" src="{% static 'img/icons/star.svg' %}">)</span>
+              <span>{{ question.timestamp }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -46,23 +55,30 @@
     {% for answer in question.answers.all %}
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
-        <div class="pane-content postable" data-id="{{ answer.id }}">
+        <div class="pane-content postable answer" data-id="{{ answer.activity_id }}">
           <div class="postable-main">
             <div class="postable-votes">
-              <a class="upvote-btn"></a>
+              <a class="upvote-btn big{% if answer.user == user %} disabled{% endif %}" aria-label="Voto positivo" data-balloon-pos="right"></a>
               <span>{{ answer.vote_balance }}</span>
-              <a class="downvote-btn"></a>
-              <a class="answer-btn{% if answer.accepted %} set{% endif %}"></a>
+              <a class="downvote-btn big{% if answer.user == user %} disabled{% endif %}" aria-label="Voto negativo" data-balloon-pos="right"></a>
+              <a class="answer-btn big {% if question.user == user %} for-author{% elif user.is_teacher %} for-teacher{% endif %}{% if answer == question.decided_answer %} set{% endif %}{% if answer == question.teacher_decided_answer %} teacher-set{% endif %}"{% if question.user == user or user.is_teacher %} onclick="castVote(event)"{% endif %} aria-label="Resposta certa" data-balloon-pos="right"></a>
             </div>
             <div class="postable-content">
               {{ answer.content_html|safe }}
             </div>
           </div>
           <div class="postable-footer">
-            <div class="actions"></div>
-            <div class="author">
-              <span><a href="{% url 'users:profile' answer.user.nickname %}">{{ answer.user.nickname }}</a></span>
-              <span>{{ answer.timestamp }}</span>
+            <div class="actions">
+              <a class="disabled">Reportar</a>
+              <a class="disabled">Editar</a>
+              <a class="disabled">Histórico de edições</a>
+            </div>
+            <div class="author user">
+              <span class="pic" style="background-image: url('{% if answer.user.picture %}{{ answer.user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
+              <div>
+                <span><a href="{% url 'users:profile' answer.user.nickname %}">{{ answer.user.nickname }}</a> ({{ question.user.points}} <img alt="Pontos" src="{% static 'img/icons/star.svg' %}">)</span>
+                <span>{{ answer.timestamp }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -72,7 +88,7 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Responder</h2></div>
         <div class="pane-content">
-          <form class="col" method="post" action="{% url 'learning:question' question.id %}?submit=answer">
+          <form class="col" method="post" action="{% url 'learning:question' question.activity_id %}?submit=answer">
             {% csrf_token %}
             {{ answer_form.content }}
             <input class="ui-btn end" type="submit" value="Submeter resposta"/>

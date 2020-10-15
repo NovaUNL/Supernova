@@ -621,7 +621,7 @@ def questions_view(request):
             .annotate(answer_count=Count('answers')) \
             .reverse()[:50]
     if request.user.has_perm('learning.add_question'):
-        context['create_url'] = reverse('learning:questions')
+        context['create_url'] = reverse('learning:question_create')
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')}]
     return render(request, 'supernova/recent_and_popular_lists.html', context)
 
@@ -665,9 +665,8 @@ def question_create_view(request):
 
 def question_view(request, question_id):
     question = get_object_or_404(
-        m.Question.objects
-            .prefetch_related('answers__comments', 'comments'),
-        id=question_id)
+        m.Question.objects.prefetch_related('answers'),
+        activity_id=question_id)
     answer_form = None
     status = 200
     if request.user.is_authenticated:
