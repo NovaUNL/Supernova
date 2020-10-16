@@ -119,7 +119,8 @@ def _upstream_sync_departments(upstream, recurse):
                 iid=clip_department['id'],
                 external_id=clip_department['id'],
                 frozen=False,
-                external_update=make_aware(datetime.now()))
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
             logger.info(f'Created department {clip_department}.')
             if recurse:
                 sync_department(department, recurse=True)
@@ -149,7 +150,7 @@ def _upstream_sync_department(upstream, department, recurse=False):
 
     if recurse:
         for ext_id in new:
-            sync_class(ext_id, recurse=True, department=department)
+            sync_class(ext_id, recurse=True)
 
     m.Class.objects.filter(external_id__in=new).update(department=department)
     m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
@@ -226,6 +227,9 @@ def _upstream_sync_class(upstream, external_id, recurse):
                 logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
                 obj.credits = upstream['ects']
                 changed = True
+            if obj.external_data != upstream:
+                obj.external_data = upstream
+                changed = True
             if changed:
                 obj.save()
     except ObjectDoesNotExist:
@@ -236,7 +240,8 @@ def _upstream_sync_class(upstream, external_id, recurse):
             iid=upstream['id'],
             external_id=external_id,
             frozen=False,
-            external_update=make_aware(datetime.now()))
+            external_update=make_aware(datetime.now()),
+            external_data={'upstream': upstream})
         logger.info(f"Created class {obj}")
 
     # ---------  Related Instances ---------
@@ -305,6 +310,11 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
             if obj.information is None:
                 obj.information = {'upstream': upstream['info']}
                 changed = True
+
+            if obj.external_data != upstream:
+                obj.external_data = upstream
+                changed = True
+
             elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
                 obj.information['upstream'] = upstream['info']
                 changed = True
@@ -320,7 +330,8 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
             external_id=external_id,
             information={'upstream': upstream['info']},
             frozen=False,
-            external_update=timezone.now())
+            external_update=timezone.now(),
+            external_data={'upstream': upstream})
         logger.info(f"Class instance {obj} created")
         if klass.department != department:
             if klass.instances.order_by('year', 'period').reverse().first() == obj:
@@ -426,9 +437,14 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
         upsteam_info = upstream[hash]
         downstream_file: m.ClassFile = downstream_files[hash]
         changed = False
-        if downstream_file.name != (name := upsteam_info['name']):
-            logger.warning(f"{downstream_file} name changed to {name}")
-            downstream_file.name = name
+        known_upsteam_name = None
+        if downstream_file.external_data and 'upstream' in downstream_file.external_data:
+            known_upsteam_name = downstream_file.external_data['upstream']['name']
+        file_name_diverged = downstream_file.name != known_upsteam_name
+        if known_upsteam_name != (upstream_name := upsteam_info['name']) and downstream_file.name != upstream_name:
+            logger.warning(f"{downstream_file} name changed to {upstream_name}")
+            if not file_name_diverged:
+                downstream_file.name = upstream_name
             changed = True
         upstream_date = make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True)
         if downstream_file.upload_datetime != upstream_date:
@@ -443,12 +459,17 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                            f"from {downstream_file.uploader_teacher} to {uploader_teacher}")
             downstream_file.uploader_teacher = uploader_teacher
             changed = True
+
+        if downstream_file.external_data != upsteam_info:
+            downstream_file.external_data = upsteam_info
+            changed = True
+
         if changed:
             downstream_file.save()
 
     for ifile in class_inst.files.filter(file__hash__in=removed):
         logger.warning(f"File {ifile} removed from {class_inst}")
-        ifile.delete()
+        ifile.update(disappeared=True)
         continue
 
     for hash in new:
@@ -464,17 +485,19 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                 mime=upsteam_info['mime'],
                 external_id=upsteam_info['id'],
                 # Obs: Files are being identified by hash, so there might be ignored IDs
-                iid=upsteam_info['id'])
+                iid=upsteam_info['id'],
+                external_data={'upstream': upsteam_info})
             logger.info(f"File {file} created")
 
         if not m.ClassFile.objects.filter(file=file, class_instance=class_inst).exists():
             m.ClassFile.objects.create(
                 file=file,
                 class_instance=class_inst,
-                type=upsteam_info['type'],
+                category=upsteam_info['type'],
                 name=upsteam_info['name'],
                 upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True),
-                uploader_teacher=uploader_teacher)
+                uploader_teacher=uploader_teacher,
+                external_id=upsteam_info['id'])
             logger.info(f"File {file} added to class {class_inst}")
 
 
@@ -566,6 +589,10 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
         if grades_changed:
             logger.warning(f"Grade changed from {current} to {new} in {obj}.")
 
+        if obj.external_data != upstream:
+            obj.external_data = upstream
+            changed = True
+
         if changed:
             obj.save()
 
@@ -585,7 +612,8 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
             grade=grade,
             external_id=external_id,
             frozen=False,
-            external_update=make_aware(datetime.now()))
+            external_update=make_aware(datetime.now()),
+            external_data={'upstream': upstream})
         logger.info(f"Inserted new enrollment {obj}")
 
 
@@ -633,7 +661,7 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
     upstream_details = {'state': upstream['state'], 'restrictions': upstream['restrictions']}
     try:
         obj = m.Shift.objects.get(class_instance=class_inst, external_id=external_id)
-        if not obj.frozen and obj.external_data != upstream_details:
+        if not obj.frozen and obj.external_data != upstream:
             obj.external_data = upstream_details
             obj.save()
     except ObjectDoesNotExist:
@@ -644,7 +672,7 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
             external_id=external_id,
             frozen=False,
             external_update=make_aware(datetime.now()),
-            external_data=upstream_details)
+            external_data={'upstream': upstream})
         logger.info(f"Shift {obj} created in {class_inst}")
 
     # ---------  Related shift instances ---------
@@ -739,6 +767,10 @@ def _upstream_sync_event(upstream, external_id, class_inst):
             class_event.type = upstream['season']
             changed = True
 
+        if class_event.external_data != upstream:
+            class_event.external_data = upstream
+            changed = True
+
         if changed:
             class_event.save()
 
@@ -753,7 +785,8 @@ def _upstream_sync_event(upstream, external_id, class_inst):
             info=info,
             external_id=external_id,
             frozen=False,
-            external_update=make_aware(datetime.now()))
+            external_update=make_aware(datetime.now()),
+            external_data={'upstream': upstream})
         logger.info(f"Inserted new class event {obj}")
 
 
@@ -842,6 +875,11 @@ def _upstream_sync_shift_instance(upstream, external_id, shift):
                                f"from {shift_instance.room.external_id} to {upstream['room']}")
                 shift_instance.room = upstream_room
                 changed = True
+
+        if shift_instance.external_data != upstream:
+            shift_instance.external_data = upstream
+            changed = True
+
         if changed:
             shift_instance.save()
     except m.ShiftInstance.DoesNotExist:
@@ -853,7 +891,8 @@ def _upstream_sync_shift_instance(upstream, external_id, shift):
             room=upstream_room,
             external_id=external_id,
             frozen=False,
-            external_update=make_aware(datetime.now()))
+            external_update=make_aware(datetime.now()),
+            external_data={'upstream': upstream})
         logger.info(f"Shift instance {shift_instance} created.")
 
 
@@ -914,6 +953,10 @@ def _upstream_sync_students(upstream_list):
                     obj.name = upstream_name
                     changed = True
 
+            if obj.external_data != upstream:
+                obj.external_data = upstream
+                changed = True
+
             if changed:
                 obj.save()
             continue
@@ -926,7 +969,7 @@ def _upstream_sync_students(upstream_list):
                 course=upstream_course,
                 external_id=upstream['id'],
                 external_update=make_aware(datetime.now()),
-                external_data={'name': upstream['name']})
+                external_data={'upstream': upstream})
             logger.info(f'Created student {obj}.')
 
 
@@ -959,20 +1002,29 @@ def _upstream_sync_teachers(upstream_list):
             continue
         if (ext_id := upstream['id']) in existing:
             obj = existing[ext_id]
+            changed = False
             if (upstream_name := upstream['name']) is not None:
-                if obj.name is None:  # Setting unknown is okay
+                if obj.name != upstream_name:
+                    if obj.name is not None:
+                        logger.warning(f"Teacher {obj} name changed from {obj.name} to {upstream_name}")
+
                     obj.name = upstream_name
-                    obj.save()
-                elif obj.name != upstream_name:  # Setting unknown is okay
-                    logger.error(f"Teacher {obj} name changed from {obj.name} to {upstream_name}")
-                    continue
+                    changed = True
+
+            if obj.external_data != upstream:
+                obj.external_data = upstream
+                changed = True
+
+            if changed:
+                obj.save()
+
         else:
             obj = m.Teacher.objects.create(
                 name=upstream['name'],
                 iid=upstream['id'],
                 external_id=upstream['id'],
                 external_update=make_aware(datetime.now()),
-                external_data={'name': upstream['name']})
+                external_data={'upstream': upstream})
             logger.info(f'Created teacher {obj}.')
 
         current_departments = obj.departments.all()
