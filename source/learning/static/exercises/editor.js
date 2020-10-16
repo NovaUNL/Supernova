@@ -49,18 +49,19 @@ function appendWriteQuestion(elem, enunciationVal, answerVal) {
     let enunciationLabel = document.createElement('span');
     enunciationLabel.textContent = "Questão:";
     exercisePart.appendChild(enunciationLabel);
-    let enunciation = document.createElement('textarea');
+    let enunciation = newMarkdownEditor();
     exercisePart.appendChild(enunciation);
     let answerLabel = document.createElement('span');
     answerLabel.textContent = "Resposta:";
     exercisePart.appendChild(answerLabel);
-    let answer = document.createElement('textarea');
+    let answer = newMarkdownEditor();
     exercisePart.appendChild(answer);
     elem.appendChild(exercisePart);
     if (enunciationVal !== undefined) {
         enunciation.value = enunciationVal;
         answer.value = answerVal;
     }
+    reloadMarkdownx();
 }
 
 function appendSelectQuestion(elem, enunciationVal, candidates, answerIndexes) {
@@ -76,7 +77,7 @@ function appendSelectQuestion(elem, enunciationVal, candidates, answerIndexes) {
     let label = document.createElement('span');
     label.textContent = "Questão:";
     exercisePart.appendChild(label);
-    let enunciation = document.createElement('textarea');
+    let enunciation = newMarkdownEditor();
     exercisePart.appendChild(enunciation);
     let addAnswer = document.createElement('a');
     addAnswer.innerText = "Adicionar resposta";
@@ -88,7 +89,6 @@ function appendSelectQuestion(elem, enunciationVal, candidates, answerIndexes) {
     correctAnswer.multiple = true;
     exercisePart.appendChild(correctAnswer);
     elem.appendChild(exercisePart);
-
 
     addAnswer.onclick = function () {
         let answerCount = parseInt(exercisePart.dataset.answers);
@@ -105,10 +105,7 @@ function appendSelectQuestion(elem, enunciationVal, candidates, answerIndexes) {
         option.value = answerCount.toString();
         option.innerText = "Alinea " + letter;
         correctAnswer.appendChild(option)
-
-        if (candidates !== undefined) {
-            newAnswer.value = candidates[answerCount];
-        }
+        if (candidates !== undefined) newAnswer.value = candidates[answerCount]
     };
 
     if (enunciationVal !== undefined) {
@@ -116,11 +113,12 @@ function appendSelectQuestion(elem, enunciationVal, candidates, answerIndexes) {
         for (let i = 0; i < candidates.length; i++)
             addAnswer.click();
         let options = correctAnswer.querySelectorAll('option');
-        answerIndexes.forEach((answerIndex) => {options[answerIndex].selected = true});
+        answerIndexes.forEach(answerIndex => options[answerIndex].selected = true);
     } else {
         addAnswer.click();
         addAnswer.click();
     }
+    reloadMarkdownx();
 }
 
 function appendGroupQuestion(elem, enunciationVal) {
@@ -135,7 +133,7 @@ function appendGroupQuestion(elem, enunciationVal) {
     let enunciationLabel = document.createElement('span');
     enunciationLabel.textContent = "Enunciado:";
     exercisePart.appendChild(enunciationLabel);
-    let enunciation = document.createElement('textarea');
+    let enunciation = newMarkdownEditor();
     exercisePart.appendChild(enunciation);
     let answerLabel = document.createElement('span');
     answerLabel.textContent = "Questões:";
@@ -147,6 +145,7 @@ function appendGroupQuestion(elem, enunciationVal) {
     elem.appendChild(exercisePart);
     if (enunciationVal !== undefined)
         enunciation.value = enunciationVal;
+    reloadMarkdownx();
     return subExercises;
 }
 
@@ -258,6 +257,22 @@ function loadNode(root, exercise) {
     }
 }
 
+/* Very very hacky way of doing things REWRITE ME PROPERLY WHEN POSSIBLE TODO */
+function newMarkdownEditor() {
+    // Copy the one that is hidden
+    let editor = $('.markdown-editor').clone()[0];
+    // Strip initialization attribute from the new node as it has no event handlers
+    editor.querySelector('textarea').removeAttribute("data-markdownx-init");
+    return editor;
+}
+
+function reloadMarkdownx() {
+    $('head').append($('<script src="/static/markdownx/js/markdownx.min.js"></script>')); // Reload script (inits)
+    setupMarkdownEnv(); // Bind MathJax and Prism events
+}
+
+/* end */
+
 (load = function () {
     let editor = document.getElementById("exercise-editor");
     let form = document.querySelector("form");
@@ -266,6 +281,7 @@ function loadNode(root, exercise) {
         appendExercisePicker(editor);
     } else {
         loadNode(editor, JSON.parse(dataField.value));
+        reloadMarkdownx();
         // previewExercise();
     }
     let submissionCleanup = function (e) {
@@ -275,9 +291,6 @@ function loadNode(root, exercise) {
         return true;
     }
 
-    if (form.attachEvent) {
-        form.attachEvent("submit", submissionCleanup);
-    } else {
-        form.addEventListener("submit", submissionCleanup);
-    }
+    if (form.attachEvent) form.attachEvent("submit", submissionCleanup)
+    else form.addEventListener("submit", submissionCleanup)
 })();

@@ -10,6 +10,9 @@ from django.db import models as djm, transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
+
+from markdownx.widgets import MarkdownxWidget
+
 import settings
 from supernova.views import build_base_context
 from learning import models as m
@@ -522,6 +525,8 @@ def create_exercise_view(request):
     context['pcode'] = 'l_exercises'
     context['title'] = 'Submeter exercício'
     context['form'] = form
+    editor = MarkdownxWidget().render(name='', value='', attrs=dict())
+    context['markdown_editor'] = editor
     context['sub_nav'] = [{'name': 'Exercícios', 'url': reverse('learning:exercises')},
                           {'name': 'Submeter exercício', 'url': reverse('learning:exercise_create')}]
     return render(request, 'learning/editor.html', context)
