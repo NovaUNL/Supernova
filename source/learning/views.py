@@ -1,8 +1,9 @@
+import json
 from dal import autocomplete
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q, F, Max
 from django.forms import HiddenInput
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import models as djm, transaction
@@ -701,6 +702,18 @@ def question_view(request, question_id):
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': question.title, 'url': reverse('learning:question', args=[question_id])}]
     return render(request, 'learning/question.html', context, status=status)
+
+
+def exercise_preview_view(request):
+    if request.method == 'POST':
+        context = build_base_context(request)
+        if 'content' in request.POST:
+            html = m.Exercise(content=json.loads(request.POST['content'])).render_html
+            context['content'] = html
+            return render(request, 'supernova/base_minimal.html', context)
+        return HttpResponse(status=400)
+    else:
+        return Http404()
 
 
 class AreaAutocomplete(autocomplete.Select2QuerySetView):

@@ -1,5 +1,5 @@
 <div id="exercise">
   {% include "django/forms/widgets/input.html" %}
-  <div id="exercise-editor"></div>
-  <input type="button" onclick="previewExercise()" value="Prever"> (Sem Markdown)
+  <div id="exercise-editor" data-preview-endpoint="{% url 'learning:exercise_preview' %}"></div>
+  <input type="button" onclick="previewExercise()" value="Prever">
 </div>

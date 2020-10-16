@@ -1,0 +1,41 @@
+{% load static %}
+{% load analytical %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  {% analytical_head_top %}
+  <meta charset="UTF-8">
+  <title>Supernova</title>
+  <link rel="icon" href="{% static 'supernova/images/favicon.png' %}" type="image/x-icon"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+  <script src="{% static 'js/script.js' %}"></script>
+  <script src="{% static 'learning/questions.js' %}"></script>
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
+  <script src="{% static 'prism.js' %}"></script>
+  <script src="{% static 'js/content-rendering.js' %}"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  {% block head %}
+  {% endblock %}
+  {% analytical_head_bottom %}
+</head>
+<body>
+<script>loadTheme(false);</script>
+{% analytical_body_top %}
+<nav id="top-wrapper" class="bg-grad"></nav>
+<div id="main-wrapper">
+  <div id="content-column">
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title"></div>
+        <div class="pane-content">
+          {{ content|safe }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% analytical_body_bottom %}
+</body>
+</html>

@@ -178,12 +178,24 @@ function extractSubProblem(node) {
 }
 
 function previewExercise() {
-    let exercise = extractSubProblem(document.getElementById("exercise-editor").querySelector(".exercise"));
+    let editor = document.getElementById("exercise-editor");
+    let exercise = extractSubProblem(editor.querySelector(".exercise"));
     let root = document.createElement('div');
     root.id = "exercise-preview";
-    let popup = window.open("", "Exercício", "width=800,height=640");
-    previewSubExercise(exercise, root, "1");
-    popup.document.querySelector('body').appendChild(root);
+    const previewURL = editor.dataset.previewEndpoint;
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = previewURL;
+    form.target = 'previewWindow'; // Specify the name of the window(second parameter to window.open method.)
+    let input = document.createElement("input");
+    input.id = input.name = "content";
+    input.type = "hidden";
+    input.value = JSON.stringify(exercise);
+    form.appendChild(input);
+    form.appendChild(document.querySelector('[name=csrfmiddlewaretoken]').cloneNode(true));
+    window.open("", "previewWindow", "location=no,toolbar=off,width=1200,height=800");
+    document.body.appendChild(form);
+    form.submit();
 }
 
 
