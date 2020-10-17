@@ -35,6 +35,7 @@ urlpatterns = [
     path('cadeira/i/<int:instance_id>/ficheiro/<str:class_file_id>', views.class_instance_file_view, name='class_instance_file'),
     path('cadeira/i/<int:instance_id>/ficheiro/<str:file_hash>/download', views.class_instance_file_download, name='class_instance_file_download'),
     path('ficheiro/<str:file_hash>/editar', views.file_edit_view, name='file_edit_view'),
+    path('ficheiro/novo/', views.file_upload_view, name='file_upload'),
     path('sala/<int:room_id>/', views.room_view, name='room'),
     path('cursos/', views.courses_view, name='courses'),
     path('curso/<int:course_id>/', views.course_view, name='course'),

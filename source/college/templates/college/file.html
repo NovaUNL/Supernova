@@ -7,7 +7,7 @@
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>Editar ficheiro</h2></div>
       <div class="pane-content">
-        <form class="col" method="post" action="{% url 'college:file_edit_view' form.instance.hash %}">
+        <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}
           <h3>Atributos</h3>
           <div class="form-row">
@@ -17,8 +17,8 @@
               <h4>Dimensão</h4>
               {% with form.instance.size as size %}
                 {% if size < 1024 %}{{ size }} Bytes
-                      {% elif size < 1048576 %}{% widthratio size 1024 1 %} KB
-                      {% else %}{% widthratio size 1048576 1 %} MB{% endif %}
+                  {% elif size < 1048576 %}{% widthratio size 1024 1 %} KB
+                  {% else %}{% widthratio size 1048576 1 %} MB{% endif %}
               {% endwith %}
             </div>
           </div>

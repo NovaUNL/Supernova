@@ -1,6 +1,7 @@
 import re
 from itertools import chain
 
+from dal import autocomplete
 from django import forms as djf
 from college import models as m
 
@@ -66,6 +67,17 @@ class FileForm(Loggable, djf.ModelForm):
         model = m.File
         fields = ('license', 'author', 'author_str', 'doi')
         loggable_fields = ('author_str', 'doi')
+
+
+class FileUploadForm(djf.ModelForm):
+    file = djf.FileField(required=True)
+
+    class Meta:
+        model = m.File
+        fields = ('license', 'author', 'author_str', 'doi')
+        widgets = {
+            'author': autocomplete.ModelSelect2(url='users:nickname_ac')
+        }
 
 
 ClassFileFormset = djf.inlineformset_factory(

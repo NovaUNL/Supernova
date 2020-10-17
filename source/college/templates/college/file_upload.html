@@ -1,0 +1,72 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  {% if class_instance %}
+    <div class="header-decorator">
+      <div>
+        <h1>{{ instance.parent.name }}</h1>
+        <h3>{{ instance.occasion }}</h3>
+      </div>
+    </div>
+  {% endif %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Novo ficheiro</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{{ request.get_full_path }}">
+          {% csrf_token %}
+          <div class="form-block">
+            <div class="form-row">
+              <div class="form-row-top"><h4>Ficheiro</h4>{{ form.file }}</div>
+              <div>O ficheiro a submeter.</div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>DOI (Opcional)</h4>
+                {{ form.doi }}
+              </div>
+              <div class="form-row-description">
+                O digital object identifier deste conteúdo.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Licensa</h4>
+                {{ form.license }}
+              </div>
+              <div class="form-row-description">
+                Licensa de utilização deste conteúdo.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Autor (Opcional)</h4>
+                {{ form.author }}
+              </div>
+              <div class="form-row-description">
+                O utilizador que detem autoria deste conteúdo.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Autor externo (Opcional)</h4>
+                {{ form.author_str }}
+              </div>
+              <div class="form-row-description">
+                O autor que detem autoria deste conteúdo, não estando no Supernova.
+              </div>
+            </div>
+          </div>
+          <input class="ui-btn end" type="submit" value="Enviar"/>
+          {{ form.media }}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

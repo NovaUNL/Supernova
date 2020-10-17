@@ -678,6 +678,37 @@ def file_edit_view(request, file_hash):
 
 
 @login_required
+@permission_required('users.teacher_access')
+def file_upload_view(request):
+    context = build_base_context(request)
+    if 'i' in request.GET:
+        try:
+            context['class_instance'] = get_object_or_404(
+                m.ClassInstance.objects.select_related('parent'),
+                id=int(request.GET['i']))
+        except:
+            pass
+
+    if request.method == 'POST':
+        form = f.FileUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            print()
+            # file = form.save(commit=False)
+            # hash = None
+            # if 'edicao' in request.GET:
+            #     return redirect('college:class_instance_file_attach', instance_id=request.GET['edicao'], file_hash=hash)
+            # else:
+            #     return redirect('college:file_edit', file_hash=hash)
+    else:
+        form = f.FileUploadForm(request.POST, request.FILES)
+
+    context['pcode'] = "c_file_upload"
+    context['title'] = f'Novo ficheiro'
+    context['form'] = form
+    return render(request, 'college/file_upload.html', context)
+
+
+@login_required
 @permission_required('users.student_access')
 def class_instance_reviews_view(request, instance_id):
     instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
