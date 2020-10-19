@@ -1,0 +1,82 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Editar ficheiro</h2></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{{ request.get_full_path }}">
+          {% csrf_token %}
+          <h3>Atributos</h3>
+          <div class="form-row">
+            <div class="form-row-top"><h4>MIME</h4>{{ form.instance.mime }}</div>
+            <div class="form-row-top"><h4>SHA-1</h4>{{ form.instance.hash }}</div>
+            {% if form.instance.name %}
+              <div class="form-row-top"><h4>Nome original</h4>{{ form.instance.name }}</div>{% endif %}
+            {% if form.instance.extension %}
+              <div class="form-row-top"><h4>Extensão</h4>{{ form.instance.extension }}</div>{% endif %}
+            <div class="form-row-top">
+              <h4>Dimensão</h4>
+              {% with form.instance.size as size %}
+                {% if size < 1024 %}{{ size }} Bytes
+                  {% elif size < 1048576 %}{% widthratio size 1024 1 %} KB
+                  {% else %}{% widthratio size 1048576 1 %} MB{% endif %}
+              {% endwith %}
+            </div>
+          </div>
+          <div class="form-block">
+            <h3>Informação</h3>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Autores</h4>
+                {{ form.authors }}
+              </div>
+              <div class="form-row-description">
+                O(s) utilizador(es) que detem autoria deste conteúdo.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Autor externo</h4>
+                {{ form.author_str }}
+              </div>
+              <div class="form-row-description">
+                O autor que detem autoria deste conteúdo, não estando no Supernova.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>Licensa</h4>
+                {{ form.license }}
+              </div>
+              <div class="form-row-description">
+                Licensa de utilização deste conteúdo.<br>
+                Aplica-se a todas as instâncias do ficheiro.
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top">
+                <h4>DOI (Opcional)</h4>
+                {{ form.doi }}
+              </div>
+              <div class="form-row-description">
+                O digital object identifier deste conteúdo.
+              </div>
+            </div>
+          </div>
+          {% if form.instance.external %}
+            {% include 'college/importable_edit.html' %}
+          {% endif %}
+          <input class="ui-btn end" type="submit" value="Gravar"/>
+          {{ form.media }}
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

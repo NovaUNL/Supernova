@@ -373,12 +373,19 @@ class ClassInstance(Importable):
         return f"{self.parent.abbreviation}, {self.get_period_display()} de {self.year}"
 
     @property
+    def full_str(self):
+        return f"{self.parent.name}, {self.get_period_display()} de {self.year}"
+
+    @property
     def occasion(self):
         return f'{self.get_period_display()}, {self.year - 1}/{self.year}'
 
     @property
     def short_occasion(self):
         return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
+
+    def get_absolute_url(self):
+        return reverse('college:class_instance', args=[self.id])
 
 
 class ClassInstanceEvent(Importable):
@@ -677,6 +684,13 @@ class File(Importable):
     def can_preview(self):
         return self.mime in PREVIEWABLE_MIMES
 
+    @property
+    def hash_tag(self):
+        return self.hash[:8]
+
+    def get_absolute_url(self):
+        return reverse('college:file', args=[self.hash])
+
 
 class ClassFile(Importable):
     """A file attachment which was shared to a class"""
@@ -713,6 +727,9 @@ class ClassFile(Importable):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('college:class_instance_file', args=[self.class_instance.id, self.id])
 
 
 class ClassInstanceAnnouncement(Importable):

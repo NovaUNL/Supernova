@@ -6,81 +6,84 @@
   <div class="header-decorator">
     <div class="header-decorator-options">
       <ul>
-        <li><a href="{% url 'college:class_instance_file_edit' class_file.class_instance.id class_file.id %}">Editar edição</a></li>
-        <li><a href="{% url 'college:file_edit_view' class_file.file.hash %}">Editar raiz</a></li>
+        <li>
+          <a href="{% url 'college:class_instance_file_edit' class_file.class_instance.id class_file.id %}">Editar edição</a>
+        </li>
+        <li><a href="{% url 'college:file_edit' file.hash %}">Editar ficheiro</a></li>
       </ul>
     </div>
     <div>
-      <h1>{{ instance.parent.name }}</h1>
-      <h3>{{ instance.occasion }}</h3>
+      <h1>{{ class_file.name }}</h1>
+      <h3>{{ instance.parent.name }} {{ instance.occasion }}</h3>
     </div>
   </div>
   <div class="col padded">
     <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>{{ class_file.name }}</h2></div>
-      <div class="pane-content">
-        {% if class_file.file.can_preview %}.
-          <object href="{% url 'college:class_instance_file_download' class_file.class_instance.id class_file.file.hash %}?inline="></object>
-        {% endif %}
-        <a class="ui-btn" href="{% url 'college:class_instance_file_download' class_file.class_instance.id class_file.file.hash %}">Download</a>
+      <div class="pane-title bg-grad"><h2></h2></div>
+      <div class="pane-content col">
+        <div class="preview"></div>
+        <div style="align-self: end">
+          {% if file.can_preview %}
+            <a class="ui-btn" href="{% url 'college:class_instance_file_download' class_file.class_instance.id file.hash %}">Prever</a>
+          {% endif %}
+          <a class="ui-btn" href="{% url 'college:class_instance_file_download' class_file.class_instance.id file.hash %}">Download</a>
+        </div>
       </div>
     </div>
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Metadados</h2></div>
-      <div class="pane-content">
-        <form class="col">
-          <div class="form-block">
-            <div class="form-row">
-              <div class="form-row-top"><h4>MIME</h4>{{ class_file.file.mime }}</div>
-            </div>
-            <div class="form-row">
-              <div class="form-row-top"><h4>SHA-1</h4>{{ class_file.file.hash }}</div>
-            </div>
-            <div class="form-row">
-              <div class="form-row-top">
-                <h4>Dimensão</h4>
-                {% with class_file.file.size as size %}
-                  {% if size < 1024 %}{{ size }} Bytes
-                    {% elif size < 1048576 %}{% widthratio size 1024 1 %} KB
-                    {% else %}{% widthratio size 1048576 1 %} MB{% endif %}
-                {% endwith %}
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-row-top">
-                <h4>Autor</h4>
-                {% if class_file.file.author_str %}{{ class_file.file.author }}{% elif class_file.file.author_str %}{{ class_file.file.author_str }}{% else %}Desconhecido{% endif %}
-              </div>
-              <div class="form-row-description">
-                O utilizador que detem autoria deste conteúdo.
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-row-top">
-                <h4>Licensa</h4>
-                {{ class_file.file.get_license_display }}
-              </div>
-              <div class="form-row-description">
-                Licensa de utilização deste conteúdo.
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-row-top">
-                <h4>DOI</h4>
-                {{ class_file.file.doi }}
-              </div>
-              <div class="form-row-description">
-                O digital object identifier deste conteúdo.
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-row-top">
-                <h4>Disponíbilidade</h4>
-                {{ class_file.get_visibility_display }}
-              </div>
+    <div class="row" style="align-items: flex-start;">
+      <div class="flex-pane grow">
+        <div class="pane-title bg-grad"><h2>Atributos de edição</h2></div>
+        <div class="pane-content col">
+          <div class="form-row">
+            <div class="form-row-top"><h4>Nome</h4>{{ class_file.name }}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Unidade curricular</h4>
+              <a href="{{ class_file.get_absolute_url }}">{{ class_file.class_instance }}</a></div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Oficial à unidade curricular</h4>
+              {% if class_file.official %}Sim{% else %}Não{% endif %}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Anexado por</h4>
+              {% if class_file.uploader %}
+                <a href="{{ class_file.uploader.get_absolute_url }}">{{ class_file.uploader }}</a>
+              {% elif class_file.uploader_teacher %}
+                <a href="{{ class_file.uploader_teacher.get_absolute_url }}">{{ class_file.uploader_teacher }}</a>
+              {% else %}
+                Desconhecido
+              {% endif %}
             </div>
           </div>
-        </form>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Categoria</h4>{{ class_file.get_category_display }}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Visibilidade</h4>{{ class_file.get_visibility_display }}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Data de anexo</h4>{{ class_file.upload_datetime }}</div>
+          </div>
+          {% if perms.college.change_classfile %}
+            <a class="ui-btn end" href="{% url 'college:class_instance_file_edit' instance.id class_file.id %}">Editar</a>
+          {% endif %}
+        </div>
+      </div>
+      {% include 'college/file_meta.html' %}
+    </div>
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Outras unidades curriculares</h2></div>
+      <div class="pane-content">
+        {% if other_class_instances|length == 0 %}
+          <span class="indented">Sem presença em mais unidades curriculares.</span>
+        {% else %}
+          <ul class="entity-list">
+            {% for other_instance in other_class_instances %}
+              <li><a href="{{ other_instance.get_absolute_url }}">{{ other_instance.full_str }}</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     </div>
   </div>

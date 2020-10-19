@@ -1,0 +1,95 @@
+<div class="flex-pane grow">
+  <div class="pane-title bg-grad"><h2>Atributos do ficheiro</h2></div>
+  <div class="pane-content col">
+    <div class="form-row">
+      <div class="form-row-top"><h4>SHA-1</h4><a href="{{ file.get_absolute_url }}">{{ file.hash }}</a></div>
+    </div>
+    <div class="form-row">
+      <div class="form-row-top"><h4>MIME</h4>{{ file.mime }}</div>
+    </div>
+    {% if file.name %}
+      <div class="form-row">
+        <div class="form-row-top"><h4>Nome original</h4>{{ file.name }}</div>
+      </div>
+    {% endif %}
+    {% if file.extension %}
+      <div class="form-row">
+        <div class="form-row-top"><h4>Extensão</h4>{{ file.extension }}</div>
+      </div>
+    {% endif %}
+    <div class="form-row">
+      <div class="form-row-top">
+        <h4>Dimensão</h4>
+        {% with file.size as size %}
+          {% if size < 1024 %}{{ size }} Bytes
+            {% elif size < 1048576 %}{% widthratio size 1024 1 %} KB
+            {% else %}{% widthratio size 1048576 1 %} MB{% endif %}
+        {% endwith %}
+      </div>
+    </div>
+    {% with file.authors.all as authors %}
+      <div class="form-row">
+        {% if authors|length > 1 %}
+          <div class="form-row-top">
+            <h4>Autores</h4>
+          </div>
+          <div class="form-row-description">
+            Os utilizadores que detem autoria deste conteúdo.
+          </div>
+          <ul class="entity-list">
+            {% for author in file.authors.all %}
+              <li><a href="{{ author.get_absolute_path }}">{{ author }}</a></li>{% endfor %}
+          </ul>
+        {% else %}
+          <div class="form-row-top">
+            <h4>Autor</h4>
+            {% if authors|length == 0 %}
+              Desconhecido
+            {% else %}
+              {% for author in file.authors.all %}
+                <a class="entity" href="{{ author.get_absolute_path }}">{{ author }}</a>
+              {% endfor %}
+            {% endif %}
+          </div>
+          <div class="form-row-description">
+            O utilizador que detem autoria deste conteúdo.
+          </div>
+        {% endif %}
+      </div>
+    {% endwith %}
+    {% if file.author_str %}
+      <div class="form-row">
+        <div class="form-row-top">
+          <h4>Autor externo</h4>
+          {{ file.author_str }}
+        </div>
+        <div class="form-row-description">
+          O autor deste conteúdo (exterior ao Supernova).
+        </div>
+      </div>
+    {% endif %}
+    <div class="form-row">
+      <div class="form-row-top">
+        <h4>Licensa</h4>
+        {{ file.get_license_display }}
+      </div>
+      <div class="form-row-description">
+        Licensa de utilização deste conteúdo.
+      </div>
+    </div>
+    <div class="form-row">
+        <div class="form-row-top">
+          <h4>DOI</h4>
+          {% if file.doi %}
+            <a href="{{ file.doi }}">{{ file.doi }}</a>
+          {% else %}
+            Sem/Desconhecido
+          {% endif %}
+        </div>
+        <div class="form-row-description">
+          O digital object identifier deste conteúdo.
+        </div>
+      </div>
+    {% if perms.college.change_file %}<a class="ui-btn end" href="{% url 'college:file_edit' file.hash %}">Editar</a>{% endif %}
+  </div>
+</div>

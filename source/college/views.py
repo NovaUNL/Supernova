@@ -548,12 +548,21 @@ def class_instance_file_view(request, instance_id, class_file_id):
         m.ClassFile.objects.select_related('file', 'class_instance__parent__department'),
         id=class_file_id,
         class_instance_id=instance_id)
-
+    class_instance = class_file.class_instance
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_file"
     context['title'] = f'Ficheiro {class_file}'
-    context['instance'] = class_file.class_instance
+    context['instance'] = class_instance
     context['class_file'] = class_file
+    context['file'] = class_file.file
+    context['other_class_instances'] = m.ClassInstance.objects \
+        .filter(files__file__hash=class_file.file.hash) \
+        .exclude(id=instance_id) \
+        .all()
+    sub_nav = _class_instance_nav(class_instance)
+    sub_nav.append({'name': 'Ficheiros', 'url': reverse('college:class_instance_files', args=[class_instance.id])})
+    sub_nav.append({'name': class_file.name, 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_file.html', context)
 
 
@@ -727,6 +736,25 @@ def class_instance_review_create_view(request, instance_id):
 
 @login_required
 @permission_required('users.teacher_access')
+def file_view(request, file_hash):
+    file = get_object_or_404(m.File.objects, hash=file_hash)
+    context = build_base_context(request)
+    context['pcode'] = "c_file"
+    context['title'] = f'Ficheiro {file_hash}'
+    context['file'] = file
+    context['class_files'] = m.ClassFile.objects \
+        .select_related('class_instance') \
+        .filter(file__hash=file.hash) \
+        .all()
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Ficheiros', 'url': reverse('college:campus')},
+        {'name': file.hash_tag, 'url': reverse('college:file', args=[file_hash])}]
+    return render(request, 'college/file.html', context)
+
+
+@login_required
+@permission_required('users.teacher_access')
 def file_edit_view(request, file_hash):
     file = get_object_or_404(m.File.objects, hash=file_hash)
 
@@ -760,7 +788,12 @@ def file_edit_view(request, file_hash):
     context['file'] = file
     context['duplicated'] = 'dupl' in request.GET
     context['form'] = form
-    return render(request, 'college/file.html', context)
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Ficheiros', 'url': reverse('college:campus')},
+        {'name': file.hash[:8], 'url': reverse('college:file', args=[file_hash])},
+        {'name': 'Editar', 'url': reverse('college:file_edit', args=[file_hash])}]
+    return render(request, 'college/file_edit.html', context)
 
 
 file_storage = HashedFilenameFileSystemStorage(location=settings.PROTECTED_FILE_ROOT)
