@@ -3,7 +3,18 @@
 {% load static %}
 
 {% block content_wrapper %}
-  {% include 'college/class_decorator.html' %}
+  <div class="header-decorator">
+    <div class="header-decorator-options">
+      <ul>
+        <li><a href="{% url 'college:file_upload' %}?i={{ instance.id }}">Inserir</a></li>
+        <li><a href="{% url 'college:class_instance_file_attach' instance.id %}">Importar</a></li>
+      </ul>
+    </div>
+    <div>
+      <h1>{{ instance.parent.name }}</h1>
+      <h3>{{ instance.occasion }}</h3>
+    </div>
+  </div>
   <div class="col padded">
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>Editar ficheiros</h2></div>
@@ -20,12 +31,12 @@
                 {{ form.name.errors }}
               </div>
               <div class="form-row">
-                <div class="form-row-top"><h4>Tipo</h4>{{ form.type }}</div>
-                {{ form.type.errors }}
+                <div class="form-row-top"><h4>Categoria</h4>{{ form.category }}</div>
+                {{ form.category.errors }}
               </div>
               <div class="form-row">
-                <div class="form-row-top"><h4>Disponíbilidade</h4>{{ form.availability }}</div>
-                {{ form.availability.errors }}
+                <div class="form-row-top"><h4>Visibilidade</h4>{{ form.visibility }}</div>
+                {{ form.visibility.errors }}
               </div>
             </div>
             <a href="{% url 'college:class_instance_file_edit' instance.id form.instance.id %}">Ver mais</a>

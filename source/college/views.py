@@ -19,10 +19,11 @@ from college import models as m
 from college import forms as f
 from college import schedules
 from college import choice_types as ctypes
-from college.utils import get_transportation_departures
+from college.utils import get_transportation_departures, get_file_name_parts, prettify_file_name
 from feedback.forms import ReviewForm
 from feedback import models as feedback
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD
+from supernova.storage import HashedFilenameFileSystemStorage
 from supernova.views import build_base_context
 from services.models import Service
 
@@ -470,6 +471,7 @@ def class_instance_enrolled_view(request, instance_id):
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_enrolled.html', context)
 
+
 @cache_page(3600)
 @cache_control(max_age=3600)
 @vary_on_cookie
@@ -481,7 +483,6 @@ def class_instance_events_view(request, instance_id):
         id=instance_id)
     parent = instance.parent
     department = parent.department
-
 
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_enrolled"
@@ -551,7 +552,6 @@ def class_instance_file_view(request, instance_id, class_file_id):
     context = build_base_context(request)
     context['pcode'] = "c_class_instance_file"
     context['title'] = f'Ficheiro {class_file}'
-    context['title'] = f'Ficheiro {class_file}'
     context['instance'] = class_file.class_instance
     context['class_file'] = class_file
     return render(request, 'college/class_instance_file.html', context)
@@ -591,6 +591,50 @@ def class_instance_files_edit_view(request, instance_id):
     sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_files_edit.html', context)
+
+
+@login_required
+@permission_required('users.teacher_access')
+def class_instance_file_attach_view(request, instance_id, file_hash=None):
+    instance = get_object_or_404(m.ClassInstance.objects, id=instance_id)
+    context = build_base_context(request)
+    referenced_file = None
+    if file_hash:
+        context['file'] = referenced_file = m.File.objects.filter(hash=file_hash).first()
+
+    if request.method == 'POST':
+        form = f.ClassFileForm(request.POST) if referenced_file else f.ClassFileCompleteForm(request.POST)
+
+        if form.is_valid():
+            class_file = form.save(commit=False)
+            if referenced_file:
+                class_file.file = referenced_file
+            class_file.uploader = request.user
+            class_file.class_instance = instance
+            user_is_teacher = m.ClassInstance.objects \
+                .filter(id=instance.id, shifts__teachers__user=request.user) \
+                .exists()
+            class_file.official = user_is_teacher
+            class_file.save()
+    else:
+        if referenced_file:
+            form = f.ClassFileForm(
+                initial={'name': prettify_file_name(context['file'].name),
+                         'visibility': m.ctypes.FileVisibility.PUBLIC})
+        else:
+            form = f.ClassFileCompleteForm(initial={'visibility': m.ctypes.FileVisibility.PUBLIC})
+
+    context['pcode'] = "c_class_files_upload"
+    context['title'] = f'Anexar ficheiro a {instance}'
+    context['instance'] = instance
+    context['form'] = form
+    sub_nav = _class_instance_nav(instance)
+    sub_nav.append({'name': 'Ficheiros', 'url': reverse('college:class_instance_files', args=[instance.id])})
+    sub_nav.append({'name': 'Editar',
+                    'url': reverse('college:class_instance_files_edit', args=[instance.id])})
+    sub_nav.append({'name': 'Anexar', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_instance_file_attach.html', context)
 
 
 @login_required
@@ -641,74 +685,6 @@ def class_instance_file_edit_view(request, instance_id, class_file_id):
 
 
 @login_required
-@permission_required('users.teacher_access')
-def file_edit_view(request, file_hash):
-    file = get_object_or_404(m.File.objects, hash=file_hash)
-
-    if request.method == 'POST':
-        form = f.FileForm(request.POST, request.FILES, instance=file)
-        if form.is_valid():
-            if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(file=file, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=file,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
-                    form.save()
-    else:
-        form = f.FileForm(instance=file)
-
-    context = build_base_context(request)
-    context['pcode'] = "c_file"
-    context['title'] = f'Edição do ficheiro {file_hash}'
-    context['file'] = file
-    context['form'] = form
-    return render(request, 'college/file.html', context)
-
-
-@login_required
-@permission_required('users.teacher_access')
-def file_upload_view(request):
-    context = build_base_context(request)
-    if 'i' in request.GET:
-        try:
-            context['class_instance'] = get_object_or_404(
-                m.ClassInstance.objects.select_related('parent'),
-                id=int(request.GET['i']))
-        except:
-            pass
-
-    if request.method == 'POST':
-        form = f.FileUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            print()
-            # file = form.save(commit=False)
-            # hash = None
-            # if 'edicao' in request.GET:
-            #     return redirect('college:class_instance_file_attach', instance_id=request.GET['edicao'], file_hash=hash)
-            # else:
-            #     return redirect('college:file_edit', file_hash=hash)
-    else:
-        form = f.FileUploadForm(request.POST, request.FILES)
-
-    context['pcode'] = "c_file_upload"
-    context['title'] = f'Novo ficheiro'
-    context['form'] = form
-    return render(request, 'college/file_upload.html', context)
-
-
-@login_required
 @permission_required('users.student_access')
 def class_instance_reviews_view(request, instance_id):
     instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
@@ -747,6 +723,100 @@ def class_instance_review_create_view(request, instance_id):
     sub_nav.append({'name': 'Ficheiros', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'feedback/review_create.html', context)
+
+
+@login_required
+@permission_required('users.teacher_access')
+def file_edit_view(request, file_hash):
+    file = get_object_or_404(m.File.objects, hash=file_hash)
+
+    if request.method == 'POST':
+        form = f.FileForm(request.POST, request.FILES, instance=file)
+        if form.is_valid():
+            if form.has_changed():
+                changes = form.get_changes()
+                margin = timezone.now() - timedelta(minutes=5)
+                last_edit = m.AcademicDataChange.objects \
+                    .filter(file=file, timestamp__gt=margin) \
+                    .order_by('timestamp') \
+                    .reverse() \
+                    .first()
+                with transaction.atomic():
+                    if last_edit is None or last_edit.user != request.user:
+                        m.AcademicDataChange.objects.create(
+                            user=request.user,
+                            changed_object=file,
+                            changes=changes)
+                    else:
+                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
+                        last_edit.save(update_fields=['changes'])
+                    form.save()
+    else:
+        form = f.FileForm(instance=file)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_file"
+    context['title'] = f'Edição do ficheiro {file_hash}'
+    context['file'] = file
+    context['duplicated'] = 'dupl' in request.GET
+    context['form'] = form
+    return render(request, 'college/file.html', context)
+
+
+file_storage = HashedFilenameFileSystemStorage(location=settings.PROTECTED_FILE_ROOT)
+
+
+@login_required
+@permission_required('users.teacher_access')
+def file_upload_view(request):
+    context = build_base_context(request)
+    class_instance = None
+    if 'i' in request.GET:
+        try:
+            context['class_instance'] = class_instance = get_object_or_404(
+                m.ClassInstance.objects.select_related('parent'),
+                id=int(request.GET['i']))
+        except:
+            pass
+
+    if request.method == 'POST':
+        form = f.FileUploadForm(request.POST, request.FILES, initial={'author': request.user})
+        if form.is_valid():
+            new_file = form.cleaned_data['file']
+            _, new_file_hash = file_storage.save(None, new_file)
+            existing = m.File.objects.filter(hash=new_file).first()
+            if existing:
+                return redirect(reverse('college:file_edit', args=[new_file_hash]) + "?dupl=")
+
+            file = form.save(commit=False)
+            file.name, file.extension = get_file_name_parts(new_file.name)
+            file.size = new_file.size
+            file.hash = new_file_hash
+            file.mime = new_file.content_type
+            file.uploader = request.user
+            file.external = False
+            file.save()
+            if class_instance:
+                return redirect(
+                    'college:class_instance_new_file_attach',
+                    instance_id=class_instance.id,
+                    file_hash=file.hash)
+            else:
+                return redirect('college:file_edit', file_hash=new_file_hash)
+    else:
+        form = f.FileUploadForm(initial={'authors': [request.user]})
+
+    context['pcode'] = "c_file_upload"
+    context['title'] = f'Novo ficheiro'
+    context['form'] = form
+    if True:
+        sub_nav = _class_instance_nav(class_instance)
+        sub_nav.append({'name': 'Ficheiros', 'url': reverse('college:class_instance_files', args=[class_instance.id])})
+        sub_nav.append({'name': 'Editar',
+                        'url': reverse('college:class_instance_files_edit', args=[class_instance.id])})
+        sub_nav.append({'name': 'Novo', 'url': request.get_raw_uri()})
+        context['sub_nav'] = sub_nav
+    return render(request, 'college/file_upload.html', context)
 
 
 @cache_page(3600 * 24)
@@ -987,6 +1057,7 @@ def available_places_view(request):
         {'name': 'Espaços', 'url': reverse('college:available_places')}]
     return render(request, 'college/available_places.html', context)
 
+
 @login_required
 def teacher_consent_view(request):
     context = build_base_context(request)
@@ -1064,3 +1135,11 @@ class UnregisteredStudentAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(filter, user=None)
             return qs
         return []
+
+
+class FileAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.File.objects.all()
+        if self.q:
+            qs = qs.filter(hash__istartswith=self.q)
+        return qs

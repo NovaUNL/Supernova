@@ -581,6 +581,12 @@ class Teacher(Importable):
     changes = GenericRelation('AcademicDataChange', related_query_name='teacher')
     #: Reviews that are linked to this object
     reviews = GenericRelation(feedback.Review)
+    #: The consent this teacher gave for uploaded files
+    file_consent = djm.IntegerField(
+        choices=ctypes.FileVisibility.CHOICES,
+        default=None,
+        null=True,
+        blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.iid})"
@@ -632,6 +638,10 @@ class File(Importable):
     size = djm.IntegerField()
     #: File mimetype
     mime = djm.CharField(null=True, max_length=256)
+    #: Name of the first upload
+    name = djm.CharField(null=True, max_length=256)
+    #: Extension as of the first upload
+    extension = djm.CharField(null=True, max_length=16)
     #: Whether the file is managed externally
     external = djm.BooleanField(default=False)
     #: License of the file being shared
@@ -649,14 +659,9 @@ class File(Importable):
         blank=True,
         on_delete=djm.SET_NULL,
         related_name='files')
-    #: User who authored the file
-    author = djm.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=djm.SET_NULL,
-        related_name='authored_files')
-    #: User who uploaded the file
+    #: Users who authored the file
+    authors = djm.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
+    #: Verbose authorship credit (for external authors)
     author_str = djm.CharField(max_length=256, null=True, blank=True)
     #: Digital object identifier
     doi = djm.URLField(null=True, blank=True)
@@ -664,6 +669,8 @@ class File(Importable):
     changes = GenericRelation('AcademicDataChange', related_query_name='file')
 
     def __str__(self):
+        if self.name:
+            return f"{self.name} ({self.hash})"
         return self.hash
 
     @property
@@ -683,6 +690,8 @@ class ClassFile(Importable):
     category = djm.IntegerField(choices=ctypes.FileType.CHOICES)
     #: Availability of this file (who can see it)
     visibility = djm.IntegerField(choices=ctypes.FileVisibility.CHOICES, default=ctypes.FileVisibility.NOBODY)
+    #: Whether this file is an official material to this class instance
+    official = djm.BooleanField(default=False)
     #: Datetime at which this file got inserted in this class
     upload_datetime = djm.DateTimeField(auto_now_add=True)
     #: User who inserted the file in this class
@@ -701,6 +710,9 @@ class ClassFile(Importable):
         related_name='class_files')
     #: Changes performed on this class file object
     changes = GenericRelation('AcademicDataChange', related_query_name='class_file')
+
+    def __str__(self):
+        return self.name
 
 
 class ClassInstanceAnnouncement(Importable):

@@ -59,24 +59,36 @@ class ClassFileForm(Loggable, djf.ModelForm):
     class Meta:
         model = m.ClassFile
         fields = ('name', 'category', 'visibility')
-        loggable_fields = ('name', 'type', 'availability')
+        loggable_fields = ('name', 'type', 'visibility')
+
+class ClassFileCompleteForm(Loggable, djf.ModelForm):
+    class Meta:
+        model = m.ClassFile
+        fields = ('file', 'name', 'category', 'visibility')
+        loggable_fields = ('name', 'type', 'visibility')
+        widgets = {
+            'file': autocomplete.ModelSelect2(url='college:file_ac')
+        }
 
 
 class FileForm(Loggable, djf.ModelForm):
     class Meta:
         model = m.File
-        fields = ('license', 'author', 'author_str', 'doi')
+        fields = ('license', 'authors', 'author_str', 'doi')
         loggable_fields = ('author_str', 'doi')
+        widgets = {
+            'authors': autocomplete.ModelSelect2Multiple(url='users:nickname_ac')
+        }
 
 
 class FileUploadForm(djf.ModelForm):
-    file = djf.FileField(required=True)
+    file = djf.FileField()
 
     class Meta:
         model = m.File
-        fields = ('license', 'author', 'author_str', 'doi')
+        fields = ('license', 'authors', 'author_str', 'doi')
         widgets = {
-            'author': autocomplete.ModelSelect2(url='users:nickname_ac')
+            'authors': autocomplete.ModelSelect2Multiple(url='users:nickname_ac')
         }
 
 

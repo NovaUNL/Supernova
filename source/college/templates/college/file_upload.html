@@ -10,8 +10,8 @@
   {% if class_instance %}
     <div class="header-decorator">
       <div>
-        <h1>{{ instance.parent.name }}</h1>
-        <h3>{{ instance.occasion }}</h3>
+        <h1>{{ class_instance.parent.name }}</h1>
+        <h3>{{ class_instance.occasion }}</h3>
       </div>
     </div>
   {% endif %}
@@ -19,18 +19,22 @@
     <div class="flex-pane">
       <div class="pane-title bg-grad"><h2>Novo ficheiro</h2></div>
       <div class="pane-content">
-        <form class="col" method="post" action="{{ request.get_full_path }}">
+        <form class="col" method="post" action="{{ request.get_full_path }}" enctype="multipart/form-data">
           {% csrf_token %}
+          {{ form.non_field_errors }}
           <div class="form-block">
             <div class="form-row">
               <div class="form-row-top"><h4>Ficheiro</h4>{{ form.file }}</div>
-              <div>O ficheiro a submeter.</div>
+              {{ form.file.errors }}
+              <div>Ficheiro a submeter.<br>
+                A submissão pressupõe autorização por parte do detentor dos direitos autorais.</div>
             </div>
             <div class="form-row">
               <div class="form-row-top">
                 <h4>DOI (Opcional)</h4>
                 {{ form.doi }}
               </div>
+            {{ form.doi.errors }}
               <div class="form-row-description">
                 O digital object identifier deste conteúdo.
               </div>
@@ -40,15 +44,18 @@
                 <h4>Licensa</h4>
                 {{ form.license }}
               </div>
+              {{ form.license.errors }}
               <div class="form-row-description">
-                Licensa de utilização deste conteúdo.
+                Licensa de utilização deste conteúdo.<br>
+                Compromete-se a ser veridico na escolha efetuada.
               </div>
             </div>
             <div class="form-row">
               <div class="form-row-top">
                 <h4>Autor (Opcional)</h4>
-                {{ form.author }}
+                {{ form.authors }}
               </div>
+              {{ form.authors.errors }}
               <div class="form-row-description">
                 O utilizador que detem autoria deste conteúdo.
               </div>
@@ -58,6 +65,7 @@
                 <h4>Autor externo (Opcional)</h4>
                 {{ form.author_str }}
               </div>
+              {{ form.author_str.errors }}
               <div class="form-row-description">
                 O autor que detem autoria deste conteúdo, não estando no Supernova.
               </div>

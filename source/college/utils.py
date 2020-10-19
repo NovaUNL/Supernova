@@ -27,3 +27,19 @@ def get_transportation_departures():
         except Exception:
             departures = []
     return departures
+
+
+def get_file_name_parts(name):
+    name_parts = name.split('.')
+    if len(name_parts) > 1:
+        extension = name_parts[-1]
+        if extension == '':
+            return name, None
+        else:
+            return name[:len(extension)], extension
+    return name, None
+
+
+def prettify_file_name(name):
+    name = name.replace('_', ' ').capitalize()
+    return name

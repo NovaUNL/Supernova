@@ -2,11 +2,15 @@
 
 {% load static %}
 
+{% block head %}
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="header-decorator">
     <div class="header-decorator-options">
       <ul>
-        <li><a href="{% url 'college:file_edit' form.instance.file.hash %}">Editar raiz</a></li>
+        {% if file %}<li><a href="{% url 'college:file_edit' file.hash %}">Editar raiz</a></li>{% endif %}
       </ul>
     </div>
     <div>
@@ -16,24 +20,36 @@
   </div>
   <div class="col padded">
     <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Editar edição</h2></div>
+      <div class="pane-title bg-grad"><h2>Anexar ficheiro</h2></div>
       <div class="pane-content">
-        <form class="col" method="post" action="{% url 'college:class_instance_file_edit' instance.id form.instance.id %}">
+        <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}
           <div class="form-block">
-            <h3>Informação </h3>
+            {% if form.file %}
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Ficheiro</h4>{{ form.file }}
+                </div>
+                {{ form.file.errors }}
+                <div class="form-row-description">
+                  O identificador do ficheiro a anexar.
+                </div>
+              </div>
+            {% endif %}
             <div class="form-row">
               <div class="form-row-top">
                 <h4>Nome</h4>{{ form.name }}
               </div>
+              {{ form.name.errors }}
               <div class="form-row-description">
-                O nome que o ficheiro apresenta.
+                O nome a apresentar neste ficheiro.
               </div>
             </div>
             <div class="form-row">
               <div class="form-row-top">
-                <h4>Tipo</h4>{{ form.category }}
+                <h4>Categoria</h4>{{ form.category }}
               </div>
+              {{ form.category.errors }}
               <div class="form-row-description">
                 A categoria em que o ficheiro se insere.
               </div>
@@ -42,6 +58,7 @@
               <div class="form-row-top">
                 <h4>Visibilidade</h4>{{ form.visibility }}
               </div>
+              {{ form.visibility.errors }}
               <div class="form-row-description">
                 A audiência que consegue visualizar este ficheiro.
               </div>
@@ -50,7 +67,8 @@
           {% if form.instance.external %}
             {% include 'college/importable_edit.html' %}
           {% endif %}
-          <input class="ui-btn end" type="submit" value="Gravar"/>
+          <input class="ui-btn end" type="submit" value="Anexar"/>
+          {{ form.media }}
         </form>
       </div>
     </div>
