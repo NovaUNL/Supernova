@@ -260,15 +260,16 @@ class PostableVotes(APIView):
             elif type == 'fav':
                 activity.set_vote(request.user, feedback.Vote.FAVORITE)
             elif type == 'ans':
-                if isinstance(learning.Question, activity):
+                if isinstance(activity, learning.Question):
                     # Questions cannot be answers
                     return Response(status=400)
                 question = activity.to
                 if question.user == request.user:
-                    question.chosen_answer = activity
+                    question.decided_answer = activity
                     question.save()
                 elif request.user.is_teacher:
-                    question.chosen_teacher_answer = activity
+                    question.teacher_decided_answer = activity
+                    question.deciding_teacher = request.user
                     question.save()
                 else:
                     return Response(status=403)
