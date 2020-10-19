@@ -731,6 +731,11 @@ class ClassFile(Importable):
     def get_absolute_url(self):
         return reverse('college:class_instance_file', args=[self.class_instance.id, self.id])
 
+    def short_name(self):
+        if len(self.name) > 70:
+            return self.name[:66] + '...'
+        return self.name
+
 
 class ClassInstanceAnnouncement(Importable):
     """Announcement which was broadcast to a class"""

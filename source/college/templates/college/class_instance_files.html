@@ -19,7 +19,11 @@
     <div class="header-decorator">
       <div class="header-decorator-options">
         <ul>
-          {% if perms.college.change_class_files %}
+          {% if perms.college.add_classfile %}
+            <li><a href="{% url 'college:file_upload' %}?i={{ instance.id }}">Inserir</a></li>
+            <li><a href="{% url 'college:class_instance_file_attach' instance.id %}">Importar</a></li>
+          {% endif %}
+          {% if perms.college.change_classfile %}
             <li><a href="{% url 'college:class_instance_files_edit' instance.id %}">Editar ficheiros</a></li>
           {% endif %}
         </ul>
@@ -31,48 +35,96 @@
     </div>
     <div class="row nowrap padded">
       <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Ficheiros</h2></div>
-          <div class="pane-content">
-            <div class="file-list">
-              {% if files|length == 0 %}
-                Esta unidade curricular não tem ficheiros públicos. <small>(<a class="disabled">Submeter</a>)</small>
-              {% endif %}
-              {% for ifile in files %}
-                <div class="file" data-mime="{{ ifile.file.mime }}">
-                  <div class="file-body">
-                    <h4>
-                      <a href="{% url 'college:class_instance_file' instance.id ifile.id %}">{{ ifile.name }}</a>
-                    </h4>
-                    <span>
+        <div class="row baseline">
+          <div class="flex-pane grow" style="flex-basis: 500px;">
+            <div class="pane-title bg-grad"><h2>Ficheiros oficiais</h2></div>
+            <div class="pane-content">
+              <div class="file-list">
+                {% if official_files|length == 0 %}
+                  Esta unidade curricular não tem ficheiros oficiais públicos.
+                {% endif %}
+                {% for ifile in official_files %}
+                  <div class="file" data-mime="{{ ifile.file.mime }}">
+                    <div class="file-body">
+                      <h4>
+                        <a href="{% url 'college:class_instance_file' instance.id ifile.id %}">{{ ifile.short_name }}</a>
+                      </h4>
+                      <span>
                       ({% if ifile.file.size < 1024 %}{{ ifile.file.size }} Bytes
-                      {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
-                      {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
-                    </span>
-                    <div class="info">
-                      {% if ifile.type %} <span class="ui-tag">{{ ifile.get_type_display }}</span>{% endif %}
-                      {% if ifile.uploader %}
-                        Por <span>{{ ifile.uploader.name }}</span>
-                      {% elif ifile.uploader_teacher %}
-                        Por <span>{{ ifile.uploader_teacher.short_name }}</span>
-                      {% endif %}
-                      em <span>{{ ifile.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</span>
+                        {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
+                        {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
+                      </span>
+                      <div class="info">
+                        {% if ifile.category %} <span class="ui-tag">{{ ifile.get_category_display }}</span>{% endif %}
+                        {% if ifile.uploader %}
+                          Por <a href="{{ ifile.uploader.get_absolute_url }}">{{ ifile.uploader.nickname }}</a>
+                        {% elif ifile.uploader_teacher %}
+                          Por
+                          <a href="{{ ifile.uploader_teacher.get_absolute_url }}">{{ ifile.uploader_teacher.short_name }}</a>
+                        {% endif %}
+                        em <span>{{ ifile.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</span>
+                      </div>
+                      <div class="preview"></div>
                     </div>
-                    <div class="preview"></div>
-                    <span class="clearfix"></span>
-                  </div>
-                  <div class="actions highres">
-                    {% if ifile.file.can_preview %}
-                      <a class="viewlink" href="javascript:void(0)" onclick='showFilePreview(this);'>
+                    <div class="actions highres">
+                      {% if ifile.file.can_preview %}
+                        <a class="viewlink" href="javascript:void(0)" onclick='showFilePreview(this);'>
+                          <span></span>
+                        </a>
+                      {% endif %}
+                      <a class="dllink" href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">
                         <span></span>
                       </a>
-                    {% endif %}
-                    <a class="dllink" href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">
-                      <span></span>
-                    </a>
+                    </div>
                   </div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="flex-pane grow" style="flex-basis: 400px;">
+            <div class="pane-title bg-grad"><h2>Ficheiros da comunidade</h2></div>
+            <div class="pane-content">
+              <div class="file-list">
+                {% if community_files|length == 0 %}
+                  A comunidade não adicionou ficheiros a esta unidade curricular.
+                  <small>(<a href="{% url 'college:file_upload' instance.id %}?i={{ instance.id }}">Submeter</a>)</small>
+                {% endif %}
+                {% for ifile in community_files %}
+                  <div class="file" data-mime="{{ ifile.file.mime }}">
+                    <div class="file-body">
+                      <h4>
+                        <a href="{% url 'college:class_instance_file' instance.id ifile.id %}">{{ ifile.short_name }}</a>
+                      </h4>
+                      <span>
+                        ({% if ifile.file.size < 1024 %}{{ ifile.file.size }} Bytes
+                        {% elif ifile.file.size < 1048576 %}{% widthratio ifile.file.size 1024 1 %} KB
+                        {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
+                      </span>
+                      <div class="info">
+                        {% if ifile.category %} <span class="ui-tag">{{ ifile.get_category_display }}</span>{% endif %}
+                        {% if ifile.uploader %}
+                          Por <a href="{{ ifile.uploader.get_absolute_url }}">{{ ifile.uploader.nickname }}</a>
+                        {% elif ifile.uploader_teacher %}
+                          Por
+                          <a href="{{ ifile.uploader_teacher.get_absolute_url }}">{{ ifile.uploader_teacher.short_name }}</a>
+                        {% endif %}
+                        em <span>{{ ifile.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</span>
+                      </div>
+                      <div class="preview"></div>
+                    </div>
+                    <div class="actions highres">
+                      {% if ifile.file.can_preview %}
+                        <a class="viewlink" href="javascript:void(0)" onclick='showFilePreview(this);'>
+                          <span></span>
+                        </a>
+                      {% endif %}
+                      <a class="dllink" href="{% url 'college:class_instance_file_download' instance.id ifile.file.hash %}">
+                        <span></span>
+                      </a>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
           </div>
         </div>
@@ -80,7 +132,8 @@
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Ficheiros restritos</h2></div>
             <div class="pane-content">
-              <p>Os seguintes ficheiros encontram-se restritos por <a href="{% url 'college:teachers_consent' %}">falta de permissão por parte do docente</a>.</p>
+              <p>Os seguintes ficheiros encontram-se restritos por
+                <a href="{% url 'college:teachers_consent' %}">falta de permissão por parte do docente</a>.</p>
               <div class="file-list">
                 {% for ifile, reason in denied_files %}
                   <div class="file" data-mime="{{ ifile.file.mime }}">
@@ -92,7 +145,7 @@
                         {% else %}{% widthratio ifile.file.size 1048576 1 %} MB{% endif %})
                     </span>
                       <div class="info">
-                        {% if ifile.type %} <span class="ui-tag">{{ ifile.get_type_display }}</span>{% endif %}
+                        {% if ifile.category %} <span class="ui-tag">{{ ifile.get_category_display }}</span>{% endif %}
                         {% if ifile.uploader %}
                           Por <span>{{ ifile.uploader.name }}</span>
                         {% elif ifile.uploader_teacher %}
@@ -102,7 +155,6 @@
                         {% endif %}
                         em <span>{{ ifile.upload_datetime | date:"SHORT_DATETIME_FORMAT" }}</span>
                       </div>
-                      <span class="clearfix"></span>
                     </div>
                   </div>
                 {% endfor %}

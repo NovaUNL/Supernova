@@ -520,19 +520,23 @@ def class_instance_files_view(request, instance_id):
                        .select_related('file', 'uploader_teacher') \
                        .order_by('upload_datetime') \
                        .reverse())
-    allowed_files = []
+    official_files = []
+    community_files = []
     denied_files = []
     for class_file in class_files:
-        if access_override:
-            allowed_files.append(class_file)
-        else:
+        if not access_override:
             if class_file.visibility == ctypes.FileVisibility.NOBODY:
                 denied_files.append((class_file, 'nobody'))
+                continue
             elif class_file.visibility == ctypes.FileVisibility.ENROLLED and not is_enrolled:
                 denied_files.append((class_file, 'enrolled'))
-            else:
-                allowed_files.append(class_file)
-    context['files'] = allowed_files
+                continue
+        if class_file.official:
+            official_files.append(class_file)
+        else:
+            community_files.append(class_file)
+    context['official_files'] = official_files
+    context['community_files'] = community_files
     context['denied_files'] = denied_files
     context['instance_files'] = class_files
     sub_nav = _class_instance_nav(instance)
@@ -808,7 +812,7 @@ def class_instance_review_create_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.teacher_access')
+@permission_required('users.student_access')
 def file_view(request, file_hash):
     file = get_object_or_404(m.File.objects, hash=file_hash)
     context = build_base_context(request)
