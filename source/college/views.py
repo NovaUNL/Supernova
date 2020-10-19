@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q, Count
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -573,16 +573,89 @@ def class_instance_file_download(request, instance_id, file_hash):
         m.ClassFile.objects.prefetch_related('file'),
         class_instance__id=instance_id,
         file__hash=file_hash)
+
+    permission = False
+
+    # Is staff or teacher?
+    if request.user.is_staff or request.user.is_teacher:
+        permission = True
+
+    # Is this file public in any of its instances?
+    if not permission:
+        if request.user.is_student:
+            public_groups = (m.ctypes.FileVisibility.PUBLIC, m.ctypes.FileVisibility.STUDENTS)
+        else:
+            public_groups = (m.ctypes.FileVisibility.PUBLIC,)
+        permission = class_file.visibility in public_groups
+
+    # Is this file_instance enrollment-public?
+    if not permission and class_file.visibility == m.ctypes.FileVisibility.ENROLLED:
+        permission = m.ClassFile.objects \
+            .filter(file=class_file,
+                    class_instance__student__user=request.user) \
+            .exists()
+
+    if not permission:
+        return HttpResponseForbidden()
+
     response = HttpResponse()
     response['Content-Type'] = class_file.file.mime
+    response['X-Frame-Options'] = 'SAMEORIGIN'
+
     if 'inline' not in request.GET:
         response['Content-Disposition'] = f'attachment; filename="{class_file.name}"'
 
     if class_file.file.external:
-        response['X-Accel-Redirect'] = f'{settings.EXTERNAL_URL}{file_hash[:2]}/{file_hash[2:]}'
-        response['X-Frame-Options'] = 'SAMEORIGIN'
+        response['X-Accel-Redirect'] = f'{settings.EXTERNAL_URL}/{file_hash[:2]}/{file_hash[2:]}'
     else:
-        raise Exception("Not implemented")
+        response['X-Accel-Redirect'] = f'{settings.PROTECTED_URL}/{file_hash[:2]}/{file_hash[2:]}'
+    return response
+
+
+@login_required
+@permission_required('users.student_access')
+def file_download(request, file_hash):
+    file = get_object_or_404(
+        m.File.objects.prefetch_related('file'),
+        hash=file_hash)
+    permission = False
+
+    # Is staff or teacher?
+    if request.user.is_staff or request.user.is_teacher:
+        permission = True
+
+    # Is this file public in any of its instances?
+    if not permission:
+        if request.user.is_student:
+            public_groups = (m.ctypes.FileVisibility.PUBLIC, m.ctypes.FileVisibility.STUDENTS)
+        else:
+            public_groups = (m.ctypes.FileVisibility.PUBLIC,)
+        permission = m.ClassFile.objects \
+            .filter(file=file, visibility__in=public_groups) \
+            .exists()
+
+    # Is this student enrolled to any instance with enrollment-public?
+    if not permission:
+        permission = m.ClassFile.objects \
+            .filter(file=file,
+                    class_instance__student__user=request.user,
+                    visibility=m.ctypes.FileVisibility.ENROLLED) \
+            .exists()
+
+    if not permission:
+        return HttpResponseForbidden()
+
+    # Permission granted, carry on
+    response = HttpResponse()
+    response['Content-Type'] = file.mime
+    response['X-Frame-Options'] = 'SAMEORIGIN'
+    if 'inline' not in request.GET:
+        response['Content-Disposition'] = f'attachment; filename="{file.hash}"'
+
+    if file.external:
+        response['X-Accel-Redirect'] = f'{settings.EXTERNAL_URL}/{file_hash[:2]}/{file_hash[2:]}'
+    else:
+        response['X-Accel-Redirect'] = f'{settings.PROTECTED_URL}/{file_hash[:2]}/{file_hash[2:]}'
     return response
 
 
@@ -796,7 +869,7 @@ def file_edit_view(request, file_hash):
     return render(request, 'college/file_edit.html', context)
 
 
-file_storage = HashedFilenameFileSystemStorage(location=settings.PROTECTED_FILE_ROOT)
+file_storage = HashedFilenameFileSystemStorage(location=settings.PROTECTED_ROOT)
 
 
 @login_required
