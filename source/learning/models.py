@@ -464,11 +464,11 @@ class Question(users.Activity, Postable):
         related_name='answered_question_teacher')
     #: The teacher that accepted the teacher chosen answer
     deciding_teacher = djm.ForeignKey(
-        college.Teacher,
+        settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
         on_delete=djm.SET_NULL,
-        related_name='answered_questions')
+        related_name='answered_questions_teacher')
 
     votes = GenericRelation('feedback.Vote', related_query_name='question')
 
@@ -480,6 +480,14 @@ class Question(users.Activity, Postable):
 
     def get_absolute_url(self):
         return reverse('learning:question', args=[self.activity_id])
+
+    @property
+    def answered(self):
+        return self.decided_answer is not None
+
+    @property
+    def teacher_answered(self):
+        return self.teacher_decided_answer is not None
 
 
 class Answer(users.Activity, Postable):

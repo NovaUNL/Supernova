@@ -21,7 +21,7 @@
               <div class="question">
                 <div class="info">
                   <div class="counter votes"><span>{{ obj.vote_balance }}</span></div>
-                  <div class="counter answers"><span>{{ obj.answer_count }}</span></div>
+                  <div class="counter answers{% if obj.answered %} answered{% endif %}{% if obj.teacher_answered %} teacher-answered{% endif %}"><span>{{ obj.answer_count }}</span></div>
                 </div>
                 <div class="summary">
                   <h2><a href="{{ obj.get_absolute_url }}">{{ obj.title }}</a></h2>
@@ -48,7 +48,7 @@
               <div class="question">
                 <div class="info">
                   <div class="counter votes"><span>{{ obj.vote_balance }}</span></div>
-                  <div class="counter answers"><span>{{ obj.answer_count }}</span></div>
+                  <div class="counter answers{% if obj.answered %} answered{% endif %}{% if obj.teacher_answered %} teacher-answered{% endif %}"><span>{{ obj.answer_count }}</span></div>
                 </div>
                 <div class="summary">
                   <h2><a href="{{ obj.get_absolute_url }}">{{ obj.title }}</a></h2>
