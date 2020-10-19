@@ -78,9 +78,9 @@ def get_user_stats(user):
         stats = dict()
         stats['exercise_count'] = user.contributed_exercises.count()
         stats['question_count'] = learning.Question.objects.filter(user=user).count()
-        stats['answer_count'] = answer_count = learning.QuestionAnswer.objects.filter(user=user).count()
+        stats['answer_count'] = answer_count = learning.Answer.objects.filter(user=user).count()
         stats['accepted_answer_count'] = \
-            accepted_count = learning.QuestionAnswer.objects.filter(user=user, accepted=True).count()
+            accepted_count = learning.Answer.objects.filter(user=user).exclude(answered_question=None).count()
         stats['accepted_answer_percentage'] = 100 if answer_count == 0 \
             else int((accepted_count / answer_count) * 100)
         stats['edited_section_count'] = learning.Section.objects.filter(log_entries__author=user).distinct().count()
@@ -95,7 +95,7 @@ def regen_user_stats(user):
 
 
 permissions = [
-    (0, ((learning.QuestionAnswer, 'add_questionanswer'),)),
+    (0, ((learning.Answer, 'add_answer'),)),
     (7, ((learning.Question, 'add_question'),)),
     (255, (
         (learning.Exercise, 'add_exercise'),
@@ -118,9 +118,9 @@ permissions = [
 def calculate_points(user):
     points = 0
     points += settings.REWARDS['post_question'] * learning.Question.objects.filter(user=user).count()
-    points += settings.REWARDS['post_answer'] * learning.QuestionAnswer.objects.filter(user=user).count()
+    points += settings.REWARDS['post_answer'] * learning.Answer.objects.filter(user=user).count()
     points += settings.REWARDS['accepted_answer'] \
-              * learning.QuestionAnswer.objects.filter(user=user, accepted=True).count()
+              * learning.Answer.objects.filter(user=user).exclude(answered_question=None).count()
 
     points += settings.REWARDS['upvoted'] \
               * feedback.Vote.objects.filter(user=user, type=feedback.Vote.UPVOTE).count()
