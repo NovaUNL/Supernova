@@ -486,6 +486,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                 external_id=upsteam_info['id'],
                 # Obs: Files are being identified by hash, so there might be ignored IDs
                 iid=upsteam_info['id'],
+                external=True,
                 external_data={'upstream': upsteam_info})
             logger.info(f"File {file} created")
 
@@ -495,6 +496,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                 class_instance=class_inst,
                 category=upsteam_info['type'],
                 name=upsteam_info['name'],
+                official=True,
                 upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True),
                 uploader_teacher=uploader_teacher,
                 external_id=upsteam_info['id'])
