@@ -41,6 +41,7 @@ urlpatterns = [
     # Generic views
     path('', views.index, name='index'),
     path('alterações', views.changelog_view, name='changelog'),
+    path('apoio', views.support_view, name='support'),
     # College views
     path('faculdade/', include('college.urls')),
     # Services views

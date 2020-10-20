@@ -1,6 +1,7 @@
 from datetime import datetime
 import random
 
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.db.models import Q, F, Count
 from django.shortcuts import render
@@ -11,6 +12,7 @@ import settings
 from scrapper.boinc import boincstats
 from services.utils import get_next_meal_items
 from supernova import models as m
+from supernova import forms as f
 from news import models as news
 from college import models as college
 from groups import models as groups
@@ -71,6 +73,32 @@ def changelog_view(request):
     context['changelog'] = m.Changelog.objects.order_by('date').reverse().all()
     context['sub_nav'] = [{'name': 'Alterações', 'url': reverse('news:index')}]
     return render(request, 'supernova/changes.html', context)
+
+
+@login_required
+def support_view(request):
+    context = build_base_context(request)
+    context['title'] = "Apoio"
+    context['pledge'] = m.SupportPledge.objects.filter(user=request.user)
+    context['pledges'] = m.SupportPledge.objects.all()
+    pledges = list(m.SupportPledge.objects.values_list('pledge_towards', flat=True))
+    context['pledge_count'] = len(pledges)
+    independent, independent_supp, association_compl, association_repl = \
+        pledges.count(m.SupportPledge.INDEPENDENT), pledges.count(m.SupportPledge.INDEPENDENT_SUPPORTED), \
+        pledges.count(m.SupportPledge.ASSOCIATION_COMPLEMENT), pledges.count(m.SupportPledge.ASSOCIATION_REPLACEMENT)
+    context['independent'], context['independent_supp'], context['association_compl'], context['association_repl'] = \
+        independent, independent_supp, association_compl, association_repl
+
+    if request.method == 'POST':
+        form = f.SupportPledgeForm(request.POST)
+        if form.is_valid():
+            pledge = form.save(commit=False)
+            pledge.user = request.user
+            pledge.save()
+    else:
+        form = f.SupportPledgeForm()
+    context['pledge_form'] = form
+    return render(request, 'supernova/pledge.html', context)
 
 
 def bad_request_view(request, exception=None):

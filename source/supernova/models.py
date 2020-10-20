@@ -3,6 +3,7 @@ from django.urls import reverse
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
+import settings
 from users.models import Notification
 
 
@@ -49,3 +50,20 @@ class ChangelogNotification(Notification):
 
     def __str__(self):
         return f'Nova versão do Supernova: {self.entry.title}'
+
+
+class SupportPledge(djm.Model):
+    INDEPENDENT = 0
+    INDEPENDENT_SUPPORTED = 1
+    ASSOCIATION_COMPLEMENT = 2
+    ASSOCIATION_REPLACEMENT = 3
+    CHOICES = [
+        (INDEPENDENT, 'Independente'),
+        (INDEPENDENT_SUPPORTED, 'Independente com suporte'),
+        (ASSOCIATION_COMPLEMENT, 'Associado em complemento'),
+        (ASSOCIATION_REPLACEMENT, 'Associado para substituição'),
+    ]
+    user = djm.OneToOneField(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='pledge')
+    pledge_towards = djm.IntegerField(choices=CHOICES)
+    anonymous = djm.BooleanField(default=False)
+    comment = djm.TextField(null=True, blank=True)

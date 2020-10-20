@@ -1,0 +1,126 @@
+{% extends 'supernova/base.html' %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <h1>Futuro</h1>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad">
+        <h2>Situação</h2>
+      </div>
+      <div class="pane-content">
+        <p>
+          O Supernova vai no seu 4º ano de desenvolvimento,
+          desenvolvimento esse que advém predominantemente de milhares de horas de trabalho voluntário de um único aluno.
+        </p>
+        <p>
+          O aluno em questão encontra-se de momento na reta final do respetivo curso e enquanto que está disposto a
+          continuar a suportar o Supernova, possivelmente deixara de ter o envolvimento que tem de momento com a UNL.
+          Alem disso manter o serviço a funcionar é dispendioso.
+        </p>
+        <p>
+          Neste sentido para o Supernova suceder tem de se tornar algo mais do que um projeto secundário.<br>
+          Ajuda-nos a decidir o futuro do Supernova assinando a seguinte petição com a opção que achares mais adequada.
+        </p>
+        <p>
+          <b>Nota</b>: Não existe qualquer vínculo por parte da UNL a corresponder ao peticionado. É puramente indicativo.
+        </p>z
+      </div>
+    </div>
+    {% if not pledge and not request.user.is_anonymous %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Peticionar</h2>
+        </div>
+        <div class="pane-content">
+          <form class="col" method="post" action="{{ request.get_full_path }}">
+            {% csrf_token %}
+            {{ pledge_form.media }}
+            <div class="form-row">
+              <div class="form-row-top"><h4>Anónimo</h4>{{ pledge_form.anonymous }}</div>
+              {{ pledge_form.anonymous.errors }}
+              <div class="form-row-description">Apesar de assinar, desejo que o meu nome não seja associado à assinatura.</div>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top"><h4>Direção desejada</h4></div>
+              {{ pledge_form.pledge_towards.errors }}
+              Indique o que considera ser o destino ideal do Supernova:
+              <ul>
+                <li>
+                  <b>{{ pledge_form.pledge_towards.1 }}</b><br>
+                  O Supernova deve de se manter inteiramente independente à UNL.
+                  Deve de ser movido pela comunidade e de depender só e apenas da comunidade.
+                </li>
+                <li>
+                  <b>{{ pledge_form.pledge_towards.2 }}</b><br>
+                  O Supernova deve de procurar formar um elo com a UNL de forma a obter suporte e financiamento.
+                </li>
+                <li>
+                  <b>{{ pledge_form.pledge_towards.3 }}</b><br>
+                  O Supernova deve de ser fundido à UNL, complementando assim os serviços existentes.
+                </li>
+                <li>
+                  <b>{{ pledge_form.pledge_towards.4 }}</b><br>
+                  O Supernova deve de ser fundido à UNL, e a UNL deve de se mover no sentido de substituir alguns
+                  serviços pelo Supernova ou por trabalhos derivados.
+                </li>
+              </ul>
+            </div>
+            <div class="form-row">
+              <div class="form-row-top"><h4>Comentário (Opcional)</h4></div>
+              <div class="form-row-description">Deixe algum comentário que deseje.</div>
+              {{ pledge_form.comment.errors }}
+              {{ pledge_form.comment }}
+            </div>
+            <input class="end" type="submit" value="Assinar">
+          </form>
+        </div>
+      </div>
+    {% endif %}
+    <div class="row baseline">
+      <div class="flex-pane grow">
+        <div class="pane-title bg-grad"><h2>Assínaturas</h2></div>
+        <div class="pane-content">
+          <ul class="entity-list">
+            {% for pledge in pledges %}
+              <li>
+                {% if pledge.anonymous %}
+                  (anónimo)
+                {% else %}
+                  <a href="{{ pledge.user.get_absolute_url }}">{{ pledge.user.get_full_name }}</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Resultados</h2></div>
+        <div class="pane-content">
+          <h3 style="text-align: center">{{ pledge_count }} assinaturas</h3>
+          <table class="stylized grow">
+            <tbody>
+            <tr>
+              <td>Independente</td>
+              <td>{{ independent }}</td>
+            </tr>
+            <tr>
+              <td>Independente com suporte</td>
+              <td>{{ independent_supp }}</td>
+            </tr>
+            <tr>
+              <td>Associado em complemento</td>
+              <td>{{ association_compl }}</td>
+            </tr>
+            <tr>
+              <td>Associado para substituição</td>
+              <td>{{ association_repl }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
