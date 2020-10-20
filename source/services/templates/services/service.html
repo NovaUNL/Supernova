@@ -1,15 +1,14 @@
 {% extends 'supernova/base.html' %}
 
+{% load static %}
+
 {% block head %}
   <style>
-      .left {
-          text-align: left;
-      }
-      {% if service.picture %}
-          .header-background:after {
-              background-image: url("{{ service.picture.url }}")
-          }
-      {% endif %}
+    {% if service.picture %}
+        .header-background:after {
+            background-image: url("{{ service.picture.url }}")
+        }
+    {% endif %}
   </style>
 {% endblock %}
 
@@ -30,20 +29,51 @@
       <div class="col">
         {% if service.serves_meals %}
           <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Ementa</h2></div>
+            <div class="pane-title bg-grad"><h2>Próximas ementas</h2></div>
             <div class="pane-content">
-              {% if meals %}
-                <table>
-                  <tr class="left">
-                  </tr>
-                  {% for entry in service.meal_items.all %}
-                    <tr>
-                      <td>{{ entry }}</td>
-                    </tr>
+              {% for occasion, meal_items in meal_occasions.items %}
+                <h3>{{ occasion.1 }} a {{ occasion.0 }}</h3>
+                <div class="meal-list">
+                  {% for item in meal_items %}
+                    <div class="meal-item">
+                      <div class="meal-type">
+                        {% if item.0 == 0 %}
+                          <img src="{% static 'services/soup.svg' %}">
+                        {% elif item.0 == 1 %}
+                          <img src="{% static 'services/meat.svg' %}">
+                        {% elif item.0 == 2 %}
+                          <img src="{% static 'services/fish.svg' %}">
+                        {% elif item.0 == 3 %}
+                          <img src="{% static 'services/veg.svg' %}">
+                        {% else %}
+                          <img src="{% static 'img/icons/unknown.svg' %}">
+                        {% endif %}
+                      </div>
+                      <h4>{{ item.1 }}</h4>
+                      <div class="attrs">
+                        <div class="highres">
+                          <small class="attr">Açucares</small>
+                          <span class="val">{% if item.2 %}{{ item.2 }}{% else %}?{% endif %}</span>
+                        </div>
+                        <div class="highres">
+                          <small class="attr">Lipidos</small>
+                          <span class="val">{% if item.3 %}{{ item.3 }}{% else %}?{% endif %}</span>
+                        </div>
+                        <div class="highres">
+                          <small class="attr">Proteinas</small>
+                          <span class="val">{% if item.4 %}{{ item.4 }}{% else %}?{% endif %}</span>
+                        </div>
+                        <div class="midhighres">
+                          <small class="attr">Calorias</small>
+                          <span class="val">{% if item.5 %}{{ item.5 }}{% else %}?{% endif %}</span>
+                        </div>
+                      </div>
+                    </div>
                   {% endfor %}
-                </table>
-              {% else %}
-                Sem ementa disponível.
+                </div>
+              {% endfor %}
+              {% if meal_occasions.items|length == 0 %}
+                <span class='indented'>Sem informação de ementas.</span>
               {% endif %}
             </div>
           </div>

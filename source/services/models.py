@@ -142,6 +142,15 @@ class MealItem(djm.Model):
     def __str__(self):
         return f'{self.name}, {self.service} ({self.date}/{self.time})'
 
+    @property
+    def values(self):
+        return (self.meal_part_type,
+                self.name,
+                float(self.sugars) // 10 if self.sugars else None,
+                float(self.fats) // 10 if self.fats else None,
+                float(self.proteins) // 10 if self.proteins else None,
+                float(self.calories) // 10 if self.calories else None)
+
 
 class ProductCategory(djm.Model):
     """A generic category for products"""

@@ -27,13 +27,23 @@ def get_next_meal_items(service=None):
             .filter(service=service, date=meal_date, time=time) \
             .order_by('meal_part_type')
 
-    meal_items = map(
-        lambda meal_item: (
-            meal_item.meal_part_type,
-            meal_item.name,
-            float(meal_item.sugars) / 10,
-            float(meal_item.fats) / 10,
-            float(meal_item.proteins) / 10,
-            float(meal_item.calories) / 10),
-        meal_items)
+    meal_items = list(map(lambda meal_item: meal_item.values, meal_items))
     return meal_items, meal_date, time
+
+
+def get_next_meals(service=None):
+    meal_items = MealItem.objects \
+        .filter(service=service, date__gte=datetime.now().date()) \
+        .order_by('date', 'time', 'meal_part_type')
+
+    meal_occasions = dict()
+    last_occasion_key = None
+    last_occasion_items = None
+    for item in meal_items:
+        key = (item.date, item.get_time_display())
+        if last_occasion_key != key:
+            last_occasion_items = []
+            meal_occasions[key] = last_occasion_items
+            last_occasion_key = key
+        last_occasion_items.append(item.values)
+    return meal_occasions
