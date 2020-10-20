@@ -11,7 +11,7 @@
           {{ building.location.coords.0|stringformat:"f" }}];
   </script>
   <script src="{% static 'college/map/map.js' %}"></script>
-  {% if  building.picture %}
+  {% if building.picture %}
     <style>
         .header-background:after {
             background-image: url("{{ building.picture.url }}");
@@ -23,16 +23,18 @@
 {% block content_wrapper %}
   <div class="col">
     {% if building.picture %}
-      <div class="header-background faded">
-        <div class="header-decorator">
-          <h1>{{ building.name }}</h1>
+      <div class="header-background faded">{% endif %}
+    <div class="header-decorator">
+      {% if perms.college.add_room %}
+        <div class="header-decorator-options">
+          <ul>
+            <li><a href="{% url 'college:room_create' building.id %}">Adicionar sala</a></li>
+          </ul>
         </div>
-      </div>
-    {% else %}
-      <div class="header-decorator">
-        <h1>{{ building.name }}</h1>
-      </div>
-    {% endif %}
+      {% endif %}
+      <h1>{{ building.name }}</h1>
+    </div>
+    {% if building.picture %}</div>{% endif %}
     <div class="row padded nowrap">
       <div class="col">
         <div class="row">

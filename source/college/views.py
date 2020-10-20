@@ -1117,7 +1117,7 @@ def building_view(request, building_id):
 
 
 def room_view(request, room_id):
-    room = get_object_or_404(m.Room, id=room_id)
+    room = get_object_or_404(m.Room.objects.select_related('building'), id=room_id)
     building = room.building
     shift_instances = room.shift_instances \
         .filter(shift__class_instance__year=COLLEGE_YEAR, shift__class_instance__period=COLLEGE_PERIOD) \
@@ -1126,15 +1126,66 @@ def room_view(request, room_id):
     context = build_base_context(request)
     context['pcode'] = "c_campus_building_room"
     context['title'] = str(room)
+    context['building'] = building
+    context['room'] = room
+    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(shift_instances)
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
         {'name': building.name, 'url': reverse('college:building', args=[building.id])},
         {'name': room.name, 'url': reverse('college:room', args=[room_id])}]
+    return render(request, 'college/room.html', context)
+
+
+@permission_required('college.add_room')
+def room_create_view(request, building_id):
+    building = get_object_or_404(m.Building, id=building_id)
+    if request.method == 'POST':
+        form = f.RoomForm(request.POST, request.FILES)
+        if form.is_valid():
+            room = form.save(commit=False)
+            room.building = building
+            room.save()
+            return redirect('college:room', room_id=room.id)
+    else:
+        form = f.RoomForm()
+    context = build_base_context(request)
+    context['pcode'] = "c_campus_building_room"
+    context['title'] = f"Criar sala em {building}"
+    context['building'] = building
+    context['form'] = form
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': building.name, 'url': reverse('college:building', args=[building.id])},
+        {'name': 'Criar sala', 'url': request.get_raw_uri()}]
+    return render(request, 'college/room_edit.html', context)
+
+
+@permission_required('college.change_room')
+def room_edit_view(request, room_id):
+    room = get_object_or_404(m.Room.objects.select_related('building'), id=room_id)
+    if request.method == 'POST':
+        form = f.RoomForm(request.POST, request.FILES, instance=room)
+        if form.is_valid():
+            room = form.save()
+            return redirect('college:room', room_id=room.id)
+    else:
+        form = f.RoomForm(instance=room)
+    building = room.building
+    context = build_base_context(request)
+    context['pcode'] = "c_campus_building_room"
+    context['title'] = str(room)
     context['building'] = building
     context['room'] = room
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(shift_instances)
-    return render(request, 'college/room.html', context)
+    context['form'] = form
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Campus', 'url': reverse('college:campus')},
+        {'name': building.name, 'url': reverse('college:building', args=[building.id])},
+        {'name': room.name, 'url': reverse('college:room', args=[room_id])},
+        {'name': 'Editar', 'url': request.get_raw_uri()}]
+    return render(request, 'college/room_edit.html', context)
 
 
 @login_required

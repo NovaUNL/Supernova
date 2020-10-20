@@ -2,19 +2,26 @@
 {% load static %}
 {% block head %}
   <style>
-    .room-feature {
-      font-weight: bold;
-      background-color: #FAFAFA;
-      border: 2px solid #ccc;
-      border-radius: 2px;
-      padding: 10px 5px;
-      margin: 5px;
-    }
+      .room-feature {
+          font-weight: bold;
+          background-color: #FAFAFA;
+          border: 2px solid #ccc;
+          border-radius: 2px;
+          padding: 10px 5px;
+          margin: 5px;
+      }
   </style>
 {% endblock %}
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
+      {% if perms.college.change_room %}
+        <div class="header-decorator-options">
+          <ul>
+            <li><a href="{% url 'college:room_edit' room.id %}">Editar</a></li>
+          </ul>
+        </div>
+      {% endif %}
       <h1>{{ room }}, <small><a href="{% url 'college:building' building.id %}">{{ building.name }}</a></small></h1>
       {% if room.description %}
         <h3>{{ room.description }}</h3>

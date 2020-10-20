@@ -1,0 +1,132 @@
+{% extends 'supernova/base.html' %}
+{% load static %}
+
+{% block head %}
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title"></div>
+      <div class="pane-content">
+        <form class="col" method="post" action="{{ request.get_full_path }}" enctype="multipart/form-data">
+          {{ form.media }}
+          <h3>Geral</h3>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Nome</h4>
+              {{ form.name }}
+            </div>
+            {{ form.name.errors }}
+            <div class="form-row-description">
+              O nome verboso desta sala<br>
+              (ex. "Máquinas", "123", ...)
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Descrição (Opcional)</h4>
+            </div>
+            <div class="form-row-description">
+              Uma descrição desta sala a explicar, por exemplo, para que serve.
+            </div>
+            {{ form.description.errors }}
+            {{ form.description }}
+          </div>
+          <h3>Localização</h3>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Localização</h4>
+            </div>
+            <div class="form-row-description">A localização física da sala.</div>
+            {{ form.location.errors }}
+            {{ form.location }}
+            <div class="clearfix"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Piso</h4>
+              {{ form.floor }}
+            </div>
+            {{ form.floor.errors }}
+            <div class="form-row-description">
+              O andar em que a sala se situa (sendo o rés-de-chão no andar 0).
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Número da porta</h4>
+              {{ form.door_number }}
+            </div>
+            {{ form.door_number.errors }}
+            <div class="form-row-description">
+              O numero da porta desta sala dentro do piso em se situa.
+            </div>
+          </div>
+          <h3>Detalhes</h3>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Aberta</h4>
+              {{ form.unlocked }}
+            </div>
+            {{ form.unlocked.errors }}
+            <div class="form-row-description">
+              A abertura ao público desta sala.<br>
+              Uma sala aberta implica que qualquer um pode aceder à sala.
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Departamento</h4>
+              {{ form.department }}
+            </div>
+            {{ form.department.errors }}
+            <div class="form-row-description">
+              O departamento que gere esta sala.
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Capacidade</h4>
+              {{ form.capacity }}
+            </div>
+            {{ form.capacity.errors }}
+            <div class="form-row-description">
+              A quantidade de pessoas que esta sala aloja em condições típicas de funcionamento.
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Carateristicas (Opcional)</h4>
+              {{ form.features }}
+            </div>
+            {{ form.features.errors }}
+            <div class="form-row-description">
+              As carateristicas ou perigos que esta sala apresenta.
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Tipo</h4>
+              {{ form.type }}
+            </div>
+            {{ form.type.errors }}
+            <div class="form-row-description">
+              O tipo de sala (de acordo com a sua utilização.)
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Equipamento (Opcional)</h4>
+            </div>
+            <div class="form-row-description">O equipamento que se encontra dentro desta sala.</div>
+            {{ form.equipment.errors }}
+            {{ form.equipment }}
+          </div>
+          <input class="ui-btn end" type="submit" value="Submeter">
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

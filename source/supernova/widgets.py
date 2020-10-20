@@ -1,3 +1,4 @@
+from django.contrib.gis.forms import OSMWidget
 from django.forms import Widget
 from django.forms.utils import to_current_timezone
 from django.forms.widgets import boolean_check, MultiWidget, DateInput, TimeInput
@@ -86,3 +87,8 @@ class NativeSplitDateTimeWidget(MultiWidget):
             value = to_current_timezone(value)
             return [value.date(), value.time()]
         return [None, None]
+
+class FCTMapWidget(OSMWidget):
+    default_lon = -9.2055
+    default_lat = 38.661
+    default_zoom = 17

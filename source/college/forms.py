@@ -4,6 +4,7 @@ from itertools import chain
 from dal import autocomplete
 from django import forms as djf
 from college import models as m
+from supernova.widgets import FCTMapWidget
 
 IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
 
@@ -61,6 +62,7 @@ class ClassFileForm(Loggable, djf.ModelForm):
         fields = ('name', 'category', 'visibility')
         loggable_fields = ('name', 'type', 'visibility')
 
+
 class ClassFileCompleteForm(Loggable, djf.ModelForm):
     class Meta:
         model = m.ClassFile
@@ -89,6 +91,20 @@ class FileUploadForm(djf.ModelForm):
         fields = ('license', 'authors', 'author_str', 'doi')
         widgets = {
             'authors': autocomplete.ModelSelect2Multiple(url='users:nickname_ac')
+        }
+
+
+class RoomForm(Loggable, djf.ModelForm):
+    class Meta:
+        model = m.Room
+        fields = ('name', 'floor', 'unlocked', 'location',
+                  'features', 'department', 'capacity', 'door_number',
+                  'type', 'description', 'equipment')
+        loggable_fields = ('name', 'type', 'visibility')
+        widgets = {
+            'location': FCTMapWidget(),
+            'department': autocomplete.Select2(),
+            'features': autocomplete.Select2Multiple(),
         }
 
 
