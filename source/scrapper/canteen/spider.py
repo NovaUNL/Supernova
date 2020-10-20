@@ -43,9 +43,21 @@ class CanteenSpider(scrapy.Spider):
                         fats = cols[3].text
                         proteins = cols[4].text
                         calories = cols[5].text
-                        sugars = int(float(sugars) * 10)
-                        fats = int(float(fats) * 10)
-                        proteins = int(float(proteins) * 10)
+                        try:
+                            sugars = int(float(sugars) * 10)
+                        except ValueError:
+                            sugars = None
+
+                        try:
+                            fats = int(float(fats) * 10)
+                        except ValueError:
+                            fats = None
+
+                        try:
+                            proteins = int(float(proteins) * 10)
+                        except ValueError:
+                            proteins = None
+
                         calories = int(float(calories) * 10)
                         cleaned_meal_item_name = re.sub('\(\d{1,2}\)', '', meal_item_name)
                         meal_item_type = meal_item_str_type_to_int(meal_item_type, cleaned_meal_item_name)
@@ -61,7 +73,7 @@ class CanteenSpider(scrapy.Spider):
                             item_type=meal_item_type,
                         )
                     else:
-                        print("Wrong number of columns found") # TODO log this
+                        print("Wrong number of columns found")  # TODO log this
 
 
 def meal_name_to_int(name):
@@ -74,7 +86,7 @@ def meal_name_to_int(name):
 
 
 known_meat = {'carne', 'porco', 'vaca', 'frango', 'galinha', 'peru', 'perna', 'asa', 'peito', 'bacon'}
-known_fish = {'peixe', 'pescada', 'bacalhau', 'filetes', 'atum', 'solha', 'douradinhos', 'marisco'}
+known_fish = {'peixe', 'pescada', 'bacalhau', 'filetes', 'atum', 'solha', 'douradinhos', 'marisco', 'fish'}
 
 
 def meal_item_str_type_to_int(type_str, name):
