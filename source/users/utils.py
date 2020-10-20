@@ -101,7 +101,7 @@ permissions = [
         (learning.Exercise, 'add_exercise'),
         (feedback.Review, 'add_review'),
     )),
-    (1024, ((learning.Question, 'add_question'),)),
+    (1024, ((m.Invite, 'add_invite'),)),
     (5730, (
         (learning.Exercise, 'change_exercise'),
         (learning.Section, 'add_section'),
