@@ -3,110 +3,108 @@
 {% load static %}
 
 {% block head %}
-  <style>
-    {% if service.picture %}
+  {% if service.picture %}
+    <style>
         .header-background:after {
-            background-image: url("{{ service.picture.url }}")
+            background-image: url("{{ service.picture.url}}");
         }
-    {% endif %}
-  </style>
+    </style>
+  {% endif %}
 {% endblock %}
 
 {% block content_wrapper %}
-  <div class="col">
-    {% if service.picture %}
-      <div class="header-background faded contain right">
-        <div class="header-decorator">
-          <h1>{{ service.name }}</h1>
-        </div>
-      </div>
-    {% else %}
+  {% if service.picture %}
+    <div class="header-background faded contain right">
       <div class="header-decorator">
         <h1>{{ service.name }}</h1>
       </div>
-    {% endif %}
-    <div class="row padded nowrap">
-      <div class="col">
-        {% if service.serves_meals %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Próximas ementas</h2></div>
-            <div class="pane-content">
-              {% for occasion, meal_items in meal_occasions.items %}
-                <h3>{{ occasion.1 }} a {{ occasion.0 }}</h3>
-                <div class="meal-list">
-                  {% for item in meal_items %}
-                    <div class="meal-item">
-                      <div class="meal-type">
-                        {% if item.0 == 0 %}
-                          <img src="{% static 'services/soup.svg' %}">
-                        {% elif item.0 == 1 %}
-                          <img src="{% static 'services/meat.svg' %}">
-                        {% elif item.0 == 2 %}
-                          <img src="{% static 'services/fish.svg' %}">
-                        {% elif item.0 == 3 %}
-                          <img src="{% static 'services/veg.svg' %}">
-                        {% else %}
-                          <img src="{% static 'img/icons/unknown.svg' %}">
-                        {% endif %}
+    </div>
+  {% else %}
+    <div class="header-decorator">
+      <h1>{{ service.name }}</h1>
+    </div>
+  {% endif %}
+  <div class="row padded nowrap">
+    <div class="col">
+      {% if service.serves_meals %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Próximas ementas</h2></div>
+          <div class="pane-content">
+            {% for occasion, meal_items in meal_occasions.items %}
+              <h3>{{ occasion.1 }} a {{ occasion.0 }}</h3>
+              <div class="meal-list">
+                {% for item in meal_items %}
+                  <div class="meal-item">
+                    <div class="meal-type">
+                      {% if item.0 == 0 %}
+                        <img src="{% static 'services/soup.svg' %}">
+                      {% elif item.0 == 1 %}
+                        <img src="{% static 'services/meat.svg' %}">
+                      {% elif item.0 == 2 %}
+                        <img src="{% static 'services/fish.svg' %}">
+                      {% elif item.0 == 3 %}
+                        <img src="{% static 'services/veg.svg' %}">
+                      {% else %}
+                        <img src="{% static 'img/icons/unknown.svg' %}">
+                      {% endif %}
+                    </div>
+                    <h4>{{ item.1 }}</h4>
+                    <div class="attrs">
+                      <div class="highres">
+                        <small class="attr">Açucares</small>
+                        <span class="val">{% if item.2 %}{{ item.2 }}{% else %}?{% endif %}</span>
                       </div>
-                      <h4>{{ item.1 }}</h4>
-                      <div class="attrs">
-                        <div class="highres">
-                          <small class="attr">Açucares</small>
-                          <span class="val">{% if item.2 %}{{ item.2 }}{% else %}?{% endif %}</span>
-                        </div>
-                        <div class="highres">
-                          <small class="attr">Lipidos</small>
-                          <span class="val">{% if item.3 %}{{ item.3 }}{% else %}?{% endif %}</span>
-                        </div>
-                        <div class="highres">
-                          <small class="attr">Proteinas</small>
-                          <span class="val">{% if item.4 %}{{ item.4 }}{% else %}?{% endif %}</span>
-                        </div>
-                        <div class="midhighres">
-                          <small class="attr">Calorias</small>
-                          <span class="val">{% if item.5 %}{{ item.5 }}{% else %}?{% endif %}</span>
-                        </div>
+                      <div class="highres">
+                        <small class="attr">Lipidos</small>
+                        <span class="val">{% if item.3 %}{{ item.3 }}{% else %}?{% endif %}</span>
+                      </div>
+                      <div class="highres">
+                        <small class="attr">Proteinas</small>
+                        <span class="val">{% if item.4 %}{{ item.4 }}{% else %}?{% endif %}</span>
+                      </div>
+                      <div class="midhighres">
+                        <small class="attr">Calorias</small>
+                        <span class="val">{% if item.5 %}{{ item.5 }}{% else %}?{% endif %}</span>
                       </div>
                     </div>
-                  {% endfor %}
-                </div>
-              {% endfor %}
-              {% if meal_occasions.items|length == 0 %}
-                <span class='indented'>Sem informação de ementas.</span>
-              {% endif %}
-            </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+            {% if meal_occasions.items|length == 0 %}
+              <span class='indented'>Sem informação de ementas.</span>
+            {% endif %}
           </div>
-        {% endif %}
-        {% if service.sells_goods %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Preçário</h2></div>
-            <div class="pane-content">
-              Sem preçário disponível.
-            </div>
-          </div>
-        {% endif %}
-      </div>
-      <div class="col nogrow noshrink">
+        </div>
+      {% endif %}
+      {% if service.sells_goods %}
         <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-title bg-grad"><h2>Preçário</h2></div>
           <div class="pane-content">
-            <h3>Horário</h3>
-            <table class="stylized grow">
-              <tr class="left">
-                <th></th>
-                <th>Abertura</th>
-                <th>Fecho</th>
-              </tr>
-              {% for entry in service.schedule.all %}
-                <tr>
-                  <td>{{ entry.get_weekday_display }}</td>
-                  <td>{{ entry.start }}</td>
-                  <td>{{ entry.end }}</td>
-                </tr>
-              {% endfor %}
-            </table>
+            Sem preçário disponível.
           </div>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col nogrow noshrink">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane-content">
+          <h3>Horário</h3>
+          <table class="stylized grow">
+            <tr class="left">
+              <th></th>
+              <th>Abertura</th>
+              <th>Fecho</th>
+            </tr>
+            {% for entry in service.schedule.all %}
+              <tr>
+                <td>{{ entry.get_weekday_display }}</td>
+                <td>{{ entry.start }}</td>
+                <td>{{ entry.end }}</td>
+              </tr>
+            {% endfor %}
+          </table>
         </div>
       </div>
     </div>
