@@ -189,5 +189,25 @@
         </div>
       </div>
     </div>
+    {% if request.user.is_staff %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad">
+          <h2>Debug</h2>
+        </div>
+        <div class="pane-content">
+          <h3>Perms</h3>
+          <span class="indented"><b>Is staff?</b> {{ profile_user.is_staff }}</span>
+          <span class="indented"><b>Is student?</b> {{ profile_user.is_student }}</span>
+          <span class="indented"><b>Is teacher?</b> {{ profile_user.is_teacher }}</span>
+          <ul>
+            {% for perm in profile_user.user_permissions.all %}
+              <li>{{ perm }}</li>
+            {% endfor %}
+          </ul>
+          <h3>Attributes</h3>
+          <span class="indented"><b>Points</b> {{ profile_user.points }}</span>
+        </div>
+      </div>
+    {% endif %}
   </div>
 {% endblock %}
