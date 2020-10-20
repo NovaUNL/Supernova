@@ -2,6 +2,10 @@
 
 {% load static %}
 
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="col profile">
     <div class="header-decorator">
@@ -36,7 +40,9 @@
                       <br>
                     {% endif %}
                     {% if student.avg_grade %}
-                      <b>Média:</b> <span>{{ student.avg_grade|floatformat }} (em {{ student.ects }} ECTS conhecidos)</span>
+                      <b>Média:</b>
+                      <span>{{ student.avg_grade|floatformat }}</span>
+                      <a><sup aria-label="Em {{ student.ects }} ECTS conhecidos. Sem melhorias." data-balloon-pos="down">*</sup></a>
                       <br>
                     {% endif %}
                     {% if student.course %}
@@ -52,7 +58,8 @@
                     <div>
                       <b>Numero: </b>{{ student.number }}<br>
                       {% if student.avg_grade %}
-                        <b>Média:</b> <span>{{ student.avg_grade|floatformat }} (em {{ student.ects }} ECTS conhecidos)</span>
+                        <b>Média:</b>
+                        <a><sup aria-label="Em {{ student.ects }} ECTS conhecidos. Sem melhorias." data-balloon-pos="down">*</sup></a>
                         <br>
                       {% endif %}
                       {% if student.course %}
