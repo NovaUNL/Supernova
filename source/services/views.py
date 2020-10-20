@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
-from services.utils import get_next_meals
+from services.utils import get_next_meals, get_products
 from supernova.views import build_base_context
 from services import models as m
 
@@ -31,6 +31,7 @@ def service_view(request, service_abbr):
     context['title'] = f"Serviço {service.name}"
     context['service'] = service
     context['meal_occasions'] = get_next_meals(service)
+    context['products'] = get_products(service)
     context['sub_nav'] = [
         {'name': 'Serviços', 'url': reverse('services:services')},
         {'name': service.name, 'url': reverse('services:service', args=[service_abbr])}]

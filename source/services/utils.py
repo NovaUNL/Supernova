@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from services.models import MealItem
+from services import models as m
 
 
 def get_next_meal_items(service=None):
@@ -19,11 +19,11 @@ def get_next_meal_items(service=None):
 
     meal_date = (now + timedelta(days=day_offset)).date()
     if service is None:
-        meal_items = MealItem.objects \
+        meal_items = m.MealItem.objects \
             .filter(service__name="Cantina", date=meal_date, time=time) \
             .order_by('meal_part_type')
     else:
-        meal_items = MealItem.objects \
+        meal_items = m.MealItem.objects \
             .filter(service=service, date=meal_date, time=time) \
             .order_by('meal_part_type')
 
@@ -31,8 +31,8 @@ def get_next_meal_items(service=None):
     return meal_items, meal_date, time
 
 
-def get_next_meals(service=None):
-    meal_items = MealItem.objects \
+def get_next_meals(service):
+    meal_items = m.MealItem.objects \
         .filter(service=service, date__gte=datetime.now().date()) \
         .order_by('date', 'time', 'meal_part_type')
 
@@ -47,3 +47,17 @@ def get_next_meals(service=None):
             last_occasion_key = key
         last_occasion_items.append(item.values)
     return meal_occasions
+
+
+def get_products(service):
+    products = m.Product.objects.filter(service=service).select_related('category').order_by('category').all()
+    categories = dict()
+    last_category = -1
+    category_items = None
+    for product in products:
+        if last_category != product.category:
+            category_items = []
+            categories[product.category] = category_items
+            last_category = product.category
+        category_items.append(product)
+    return categories

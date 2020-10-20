@@ -171,7 +171,7 @@ class Product(djm.Model):
     #: Price in cents
     price = djm.IntegerField()
     #: Category which holds this product
-    category = djm.ForeignKey(ProductCategory, on_delete=djm.PROTECT, related_name='products')
+    category = djm.ForeignKey(ProductCategory, null=True, blank=True, on_delete=djm.PROTECT, related_name='products')
     #: Availability
     has_stock = djm.BooleanField(default=True)
 
@@ -181,3 +181,7 @@ class Product(djm.Model):
 
     def __str__(self):
         return '%s, %0.2f€ (%s)' % (self.name, self.price / 100, self.service.name)
+
+    @property
+    def price_euros(self):
+        return f"{self.price / 100}€"

@@ -77,14 +77,34 @@
           </div>
         </div>
       {% endif %}
-      {% if service.sells_goods %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Preçário</h2></div>
-          <div class="pane-content">
-            Sem preçário disponível.
-          </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Preçário</h2></div>
+        <div class="pane-content">
+          {% if products %}
+            {% for category, sub_products in products.items %}
+              {% if category %}<h3>{{ category }}</h3>{% endif %}
+              <table class="stylized grow">
+                <thead>
+                <tr>
+                  <th>Artigo</th>
+                  <th>Preço</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product in sub_products %}
+                  <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price_euros }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            {% endfor %}
+          {% else %}
+            <span class="indented">Sem preçário disponível.</span>
+          {% endif %}
         </div>
-      {% endif %}
+      </div>
     </div>
     <div class="col nogrow noshrink">
       <div class="flex-pane">
