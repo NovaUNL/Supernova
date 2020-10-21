@@ -663,6 +663,13 @@ def question_create_view(request):
                     initial['linked_exercises'] = [section, ]
             except ValueError:
                 pass
+        if 'class' in request.GET:
+            try:
+                klass = college.Class.objects.filter(id=int(request.GET['class'])).first()
+                if klass is not None:
+                    initial['linked_classes'] = [klass, ]
+            except ValueError:
+                pass
         context['form'] = f.QuestionForm(initial=initial)
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': 'Colocar questão', 'url': reverse('learning:question_create')}]
