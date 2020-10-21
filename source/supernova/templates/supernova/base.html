@@ -14,7 +14,12 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
   {% endif %}
+  <meta name="description" content="De universitários para universitários.">
+  <meta name="keywords" content="FCT, UNL, NOVA, Lisboa, Universidade, Superior, Portal">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="Supernova | De universitários para universitários.">
+  <meta property="og:description" content="{{ title }}">
+  <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% static 'img/banner.webp' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
   <script src="{% static 'js/script.js' %}"></script>
   {% progressive_web_app_meta %}

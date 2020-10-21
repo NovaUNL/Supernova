@@ -26,7 +26,7 @@ def index(request):
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     minutes = (now - midnight).seconds // 60
 
-    context['title'] = "Perfeição nanométrica"
+    context['title'] = "De universitários para universitários"
     context['news'] = news.NewsItem.objects.order_by('datetime').reverse()[0:6]
     context['changelog'] = m.Changelog.objects.order_by('date').reverse().first()
     context['meal_items'], context['meal_date'], time = get_next_meal_items()
