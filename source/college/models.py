@@ -583,7 +583,7 @@ class Teacher(Importable):
     #:  A picture of this teacher
     picture = djm.ImageField(upload_to=teacher_pic_path, null=True, blank=True)
     #:  The room that a teacher occupies
-    room = djm.ForeignKey(Room, null=True, on_delete=djm.PROTECT, related_name='teachers')
+    room = djm.ForeignKey(Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='teachers')
     #: Changes performed on this teacher's object
     changes = GenericRelation('AcademicDataChange', related_query_name='teacher')
     #: Reviews that are linked to this object
