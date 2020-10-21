@@ -6,6 +6,8 @@
   <script src="{% static 'js/content-rendering.js' %}"></script>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
+  <script src="{% static 'prism.js' %}"></script>
   <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
 {% endblock %}
 
@@ -17,15 +19,10 @@
         <form class="col" method="post" action="{% url 'learning:question_create' %}">
           {% csrf_token %}
           {{ form.non_field_errors }}
-
-
           <div class="form-block">
             <div class="form-row">
-              <div class="form-row-top">
-                <h4>Título</h4>
-              </div>
+              <div class="form-row-top"><h4>Título</h4></div>
               <div class="form-row-description">
-
                 {{ form.title }}<br>
                 Uma descrição <b>concisa</b> do que se trata o problema.<br>
                 <q>Separação de termos em integral</q> ou <q>Adição de tipos distintos a vetor em Java.</q><br>
@@ -45,7 +42,7 @@
             </div>
             <div class="form-row">
               <div class="form-row-top">
-                <h4>Exercícios relacionados</h4>
+                <h4>Exercícios relacionados (Opcional)</h4>
                 {{ form.linked_exercises }}
               </div>
               <div class="form-row-description">
@@ -54,7 +51,7 @@
             </div>
             <div class="form-row">
               <div class="form-row-top">
-                <h4>Unidades curriculares relacionadas</h4>
+                <h4>Unidades curriculares relacionadas (Opcional)</h4>
                 {{ form.linked_classes }}
               </div>
               <div class="form-row-description">
@@ -63,7 +60,7 @@
             </div>
             <div class="form-row">
               <div class="form-row-top">
-                <h4>Secções relacionadas</h4>
+                <h4>Secções relacionadas (Opcional)</h4>
                 {{ form.linked_sections }}
               </div>
               <div class="form-row-description">
@@ -77,5 +74,5 @@
       </div>
     </div>
   </div>
-  <script>{% if not user.is_anonymous %}loadOwnVotes();{% endif %}setupMarkdownEnv();</script>
+  <script>setupMarkdownEnv()</script>
 {% endblock %}
