@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'polymorphic',
     'django_extensions',
     'analytical',
+    'pwa',
 ]
 
 MIDDLEWARE = [
@@ -250,6 +251,25 @@ MARKDOWNX_MARKDOWN_EXTENSION_CONFIGS = {
         'smart_dollar': False
     }
 }
+
+PWA_APP_NAME = 'Supernova'
+PWA_APP_DESCRIPTION = "A integrar o teu conteúdo"
+PWA_APP_THEME_COLOR = '#2b4268'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {
+        "src": "/static/img/icon.svg",
+        "sizes": "36x36 48x48 72x72 96x96 120x120 128x128 144x144 152x152 180x180 192x192 384x384 512x512"
+    }
+]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'pt-PT'
+PWA_APP_DEBUG_MODE = True
 
 DEBUG = True
 CSRF_COOKIE_SECURE = True
