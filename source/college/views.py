@@ -288,7 +288,13 @@ def class_view(request, class_id):
     context['title'] = klass.name
     context['klass'] = klass
     context['instances'] = klass.instances.order_by('year', 'period').reverse()
-    context['reviews'] = feedback.Review.objects.filter(class_instance__parent=klass).all()
+    context['reviews'] = feedback.Review.objects.filter(class_instance__parent=klass).all()[:5]
+    context['small_question_list'] = True
+    context['questions'] = klass.linked_questions \
+        .order_by('timestamp') \
+        .annotate(answer_count=Count('answers')) \
+        .reverse() \
+        .all()[:5]
     context['teachers'] = m.Teacher.objects \
         .filter(shifts__class_instance__parent=klass) \
         .order_by('name') \
@@ -334,6 +340,25 @@ def class_edit_view(request, class_id):
     sub_nav.append({'name': 'Editar', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_edit.html', context)
+
+
+@login_required
+@permission_required('users.student_access')
+def class_questions_view(request, class_id):
+    klass = get_object_or_404(m.Class.objects, id=class_id)
+    context = build_base_context(request)
+    context['title'] = f"Questões em {klass}"
+    context['pcode'] = "c_class_questions"
+    context['klass'] = klass
+    context['questions'] = klass.linked_questions \
+        .order_by('timestamp') \
+        .annotate(answer_count=Count('answers')) \
+        .reverse() \
+        .all()
+    sub_nav = _class__nav(klass)
+    sub_nav.append({'name': 'Questões', 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_questions.html', context)
 
 
 def _class_instance_nav(instance):

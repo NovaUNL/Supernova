@@ -1,0 +1,40 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    {% if perms.learning.add_question %}
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'learning:question_create' %}?class={{ klass.id }}">Colocar dúvida</a></li>
+        </ul>
+      </div>
+    {% endif %}
+    <div>
+      <h1>{{ klass.name }}</h1>
+      {% if klass.department %}
+        <h3>
+          <a href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
+        </h3>
+      {% else %}
+        <h3>Departamento desconhecido</h3>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Questões</h2></div>
+      <div class="pane-content question-list">
+        {% for obj in questions %}
+          {% include 'learning/question-list-item.html' %}
+          {% if not forloop.last %}
+            <hr>{% endif %}
+        {% endfor %}
+        {% if questions|length == 0 %}
+          <span class="indented">Sem dúvidas colocadas.</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

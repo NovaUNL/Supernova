@@ -3,6 +3,7 @@
 {% url 'college:class_instance_enrolled' instance.id as enrolled_url %}
 {% url 'college:class_instance_events' instance.id as events_url %}
 {% url 'college:class_instance_files' instance.id as files_url %}
+{% url 'college:class_questions' instance.parent.id as questions_url %}
 {% url 'learning:class' instance.parent.id as synopsis_url %}
 
 
@@ -45,15 +46,9 @@
           <a class="menu-entry" href="{{ files_url }}">Ficheiros</a>
         {% endif %}
       </li>
-      <li>
-        {#<a class="menu-entry">Sumários</a>#}
-        {#<a class="menu-entry">Notas</a>#}
-        {% if synopsis_url in request.path %}
-          Síntese
-        {% else %}
-          <a class="menu-entry" href="{{ synopsis_url }}">Síntese</a>
-        {% endif %}
-      </li>
+      <li><a class="menu-entry" href="{{ questions_url }}">Dúvidas</a></li>
+      <li><a class="menu-entry" href="{{ synopsis_url }}">Síntese</a></li>
+      {# TODO summaries & evaluations #}
     </ul>
   </div>
 </div>

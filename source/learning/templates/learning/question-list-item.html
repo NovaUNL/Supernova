@@ -1,0 +1,25 @@
+{% spaceless %}
+  <div class="question">
+    <div class="info">
+      <div class="counter votes"><span>{{ obj.vote_balance }}</span></div>
+      <div class="counter answers{% if obj.answered %} answered{% endif %}{% if obj.teacher_answered %} teacher-answered{% endif %}"><span>{{ obj.answer_count }}</span></div>
+    </div>
+    <div class="summary">
+      {% if small_question_list %}
+        <h3><a href="{{ obj.get_absolute_url }}">{{ obj.title }}</a></h3>
+      {% else %}
+        <h2><a href="{{ obj.get_absolute_url }}">{{ obj.title }}</a></h2>
+      {% endif %}
+      {% if not small_question_list %}
+        <div class="tags">
+          {% for tag in obj.tags %}
+            <span class="ui-tag"><a href="{{ tag.get_absolute_url }}">{{ tag.title }}</a></span>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="author">
+        <a href="{% url 'users:profile' obj.user.nickname %}">{{ obj.user }}</a>,{{ obj.timestamp|date:'d/m/Y H:i' }}
+      </div>
+    </div>
+  </div>
+{% endspaceless %}

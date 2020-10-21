@@ -25,6 +25,7 @@ urlpatterns = [
     path('professor/<int:teacher_id>/avaliações', views.teacher_reviews_view, name='teacher_reviews'),
     path('cadeira/<int:class_id>/', views.class_view, name='class'),
     path('cadeira/<int:class_id>/editar', views.class_edit_view, name='class_edit'),
+    path('cadeira/<int:class_id>/duvidas', views.class_questions_view, name='class_questions'),
     path('cadeira/i/<int:instance_id>/', views.class_instance_view, name='class_instance'),
     path('cadeira/i/<int:instance_id>/editar', views.class_instance_edit_view, name='class_instance_edit'),
     path('cadeira/i/<int:instance_id>/turnos', views.class_instance_shifts_view, name='class_instance_shifts'),
