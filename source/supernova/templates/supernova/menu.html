@@ -41,6 +41,7 @@
       {% url 'users:profile' user.nickname as profile %}
       {% url 'users:schedule' user.nickname as schedule %}
       {% url 'users:calendar' user.nickname as calendar %}
+      {% url 'users:evaluations' user.nickname as evaluations %}
       {% url 'users:reputation' user.nickname as reputation %}
       {% url 'users:settings' user.nickname as settings %}
       {% if pcode|startswith:'u' %}
@@ -50,7 +51,7 @@
             <li {% if pcode == 'u_profile' %}class="active"{% endif %}><a href="{{ profile }}">Perfil</a></li>
             <li {% if pcode == 'u_schedule' %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
-            <li><a class="disabled">Avaliações</a></li>
+            <li {% if pcode == 'u_evaluations' %}class="active"{% endif %}><a href="{{ evaluations }}">Avaliações</a></li>
             <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
             <li {% if pcode == 'u_reputation' %}class="active"{% endif %}><a href="{{ reputation }}">Reputação</a></li>
             <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
@@ -63,7 +64,7 @@
             <li><a href="{{ profile }}">Perfil</a></li>
             <li><a href="{{ schedule }}">Horário</a></li>
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
-            <li><a class="disabled">Avaliações</a></li>
+            <li><a href="{{ evaluations }}">Avaliações</a></li>
             <li><a href="{{ calendar }}">Calendário</a></li>
             <li><a href="{{ reputation }}">Reputação</a></li>
             <li><a href="{{ settings }}">Definições</a></li>
@@ -178,8 +179,8 @@
     <li {% if not pcode|startswith:'l' %}class="collapse"{% endif %}>
       <input type="checkbox" id="m3"/><label for="m3">Estudo</label>
       <ul>
-        <li {% if pcode|startswith:'l_synops' %}class="active"{% endif %}><a href="{{ synopses }}">Sinteses</a></li>
-        <li {% if pcode|startswith:'l_exercise' %}class="active"{% endif %}><a href="{{ exercises }}">Exercicios</a></li>
+        <li {% if pcode|startswith:'l_synops' %}class="active"{% endif %}><a href="{{ synopses }}">Sínteses</a></li>
+        <li {% if pcode|startswith:'l_exercise' %}class="active"{% endif %}><a href="{{ exercises }}">Exercícios</a></li>
         <li {% if pcode|startswith:'l_question' %}class="active"{% endif %}><a href="{{ questions }}">Dúvidas</a></li>
       </ul>
     </li>
@@ -188,6 +189,7 @@
     {% url 'faq' as faq %}
     {% url 'privacy' as privacy %}
     {% url 'terms' as terms %}
+    {% url 'support' as support %}
     <li {% if request.path != about and request.path != faq and request.path != terms and request.path != privacy %}class="collapse"{% endif %}>
       <input type="checkbox" id="m4"/><label for="m4">Supernova</label>
       <ul>
@@ -195,11 +197,11 @@
         <li {% if request.path == faq %}class="active"{% endif %}><a href="{{ faq }}">Perguntas frequentes</a></li>
         <li {% if request.path == terms %}class="active"{% endif %}><a href="{{ terms }}">Termos de utilização</a></li>
         <li {% if request.path == privacy %}class="active"{% endif %}><a href="{{ privacy }}">Politica de privacidade</a></li>
+        <li {% if request.path == support %}class="active"{% endif %}><a href="{{ support }}">Apoia-nos!</a></li>
         <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>
       </ul>
     </li>
   </ul>
-
   <div id="nav-end" class="midhighres">
     <div class="tiny-btn-widget">
       <a class="tiny-btn" href="javascript:showThemePicker();">
