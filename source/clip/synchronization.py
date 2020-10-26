@@ -1,8 +1,11 @@
 import re
 from datetime import date, datetime
+from functools import reduce
+
 import requests
 import logging
 
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.timezone import make_aware
 
@@ -1146,4 +1149,10 @@ def _closest_teacher(teachers, name):
         if c > max_correlation:
             uploader_teacher = teacher
             max_correlation = c
+    if uploader_teacher is None:
+        name_filter = reduce(lambda x, y: x & y, [Q(name__contains=word) for word in name.split(' ')])
+        matches = m.Teacher.objects.filter(name_filter).all()
+        if len(matches) == 1:
+            uploader_teacher = matches[0]
+
     return uploader_teacher
