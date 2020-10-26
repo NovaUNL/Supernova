@@ -279,13 +279,26 @@ def _upstream_sync_class(upstream, external_id, recurse):
         logger.warning(f"{instance} removed from {obj}.")
 
 
-def sync_class_instance(external_id, klass=None, recurse=False):
+def sync_class_instance(external_id, klass=None, update_info=False, update_enrollments=False, update_shifts=False,
+                        update_events=False, recurse=False):
     """
     Sync the information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
+    :param update_info: Whether to request CLIPy to update the class info from CLIP before updating Supernova's
+    :param update_enrollments: Whether to request CLIPy to update the class enrollments from CLIP before updating Supernova's
+    :param update_shifts: Whether to request CLIPy to update the class shifts from CLIP before updating Supernova's
+    :param update_events: Whether to request CLIPy to update the class events from CLIP before updating Supernova's
     :param klass: The class that is parent this class instance (optional)
     :param recurse: Whether to recurse to the derivative entities (shifts, enrollments and evaluations)
     """
+    if update_info:
+        _update(f"http://{CLIPY['host']}/update/class_info/{external_id}")
+    if update_enrollments:
+        _update(f"http://{CLIPY['host']}/update/class_enrollments/{external_id}")
+    if update_enrollments or update_shifts:
+        _update(f"http://{CLIPY['host']}/update/shifts/{external_id}")
+    if update_events:
+        _update(f"http://{CLIPY['host']}/update/events/{external_id}")
     upstream = _request_class_instance(external_id)
     _upstream_sync_class_instance(upstream, external_id, klass, recurse)
 
@@ -417,12 +430,15 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     # _related(evaluations, upstream['evaluations'], sync_evaluation, m.ClassEvaluation, recurse, class_inst=obj)
 
 
-def sync_class_instance_files(external_id, class_inst):
+def sync_class_instance_files(external_id, class_inst, update=False):
     """
     Sync the file information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
-    :param class_inst: The class instance (optional)
+    :param class_inst: The class instance
+    :param update: Whether to request CLIPy to update this information from CLIP before updating Supernova's
     """
+    if update:
+        _update(f"http://{CLIPY['host']}/update/class_files/{external_id}")
     upstream = _request_class_instance_files(external_id)
     _upstream_sync_class_instance_files(upstream, external_id, class_inst)
 
@@ -1072,6 +1088,11 @@ def calculate_active_classes():
         if changed:
             klass.extinguished = last_year < current_year - 1  # or max_enrollments < 5  # TODO get rid of magic number
             klass.save()
+
+
+def _update(url):
+    if requests.get(url).status_code != 200:
+        raise Exception(f"Endpoint {url} failed to update")
 
 
 def _upstream_diff(current_objs, clip_ids):
