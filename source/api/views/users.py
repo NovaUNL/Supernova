@@ -120,7 +120,6 @@ def notification_count_view(request):
 
 class UserNotificationList(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAdminUser,)
 
     def get(self, request):
         timestamp = int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
