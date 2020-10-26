@@ -46,6 +46,13 @@ def index(request):
         .exclude(Q(shift_instances__start__lt=minutes) & Q(shift_instances__end__gt=minutes)) \
         .distinct('building__abbreviation', 'name')
     context['free_rooms'] = random.sample(set(free_rooms), min(10, len(free_rooms))) if len(free_rooms) > 0 else []
+    context['student_count'] = college.Student.objects.exclude(user=None).count()
+    context['teacher_count'] = college.Teacher.objects.exclude(user=None).count()
+    context['allowing_teacher_count'] = college.Teacher.objects \
+        .exclude(file_consent=None) \
+        .exclude(file_consent=college.ctypes.FileVisibility.NOBODY) \
+        .count()
+    context['pledge_count'] = m.SupportPledge.objects.filter(pledge_towards__gt=m.SupportPledge.INDEPENDENT).count()
 
     context['activities'] = \
         groups.Activity.objects \

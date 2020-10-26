@@ -2,8 +2,6 @@ import logging
 import random
 import string
 
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.db import transaction
 from django.urls import reverse
@@ -116,12 +114,12 @@ def validate_token(email, token) -> users.User:
                                 'Poderá vir a ser contactado/a.')
 
             if registration.requested_student:
-                college.Student.objects\
-                    .filter(abbreviation=registration.requested_student.abbreviation)\
+                college.Student.objects \
+                    .filter(abbreviation=registration.requested_student.abbreviation) \
                     .update(user=user)
                 triggers.on_student_assignment(user, registration.requested_student)
-                students = college.Student.objects\
-                    .filter(abbreviation=registration.requested_student.abbreviation)\
+                students = college.Student.objects \
+                    .filter(abbreviation=registration.requested_student.abbreviation) \
                     .all()
                 if len(students) == 1:
                     student = students[0]
@@ -148,11 +146,14 @@ def validate_token(email, token) -> users.User:
                     reason='Primeiros 1000 utilizadores')
                 offset.issue_notification()
         except Exception as e:
-            logging.error(f'Failed to complete the additional steps in {registration}.\n{str(e)}')
+            logging.error(f'Failed to take intermediate steps in {registration}.\n{str(e)}')
         finally:
-            user.updated_cached()
-            calculate_points(user)
-            award_user(user)
+            try:
+                user.updated_cached()
+                calculate_points(user)
+                award_user(user)
+            except e:
+                logging.error(f'Failed to finalize the registration {registration}.\n{str(e)}')
             return user
 
 
