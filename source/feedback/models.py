@@ -45,14 +45,14 @@ class Votable(djm.Model):
             return
 
         if vote_type == Vote.UPVOTE:
-            deleted_opposite = self.votes.filter(user=user, type=Vote.DOWNVOTE).delete() > 0
+            deleted_opposite = self.votes.filter(user=user, type=Vote.DOWNVOTE).delete()[0] > 0
             Vote.objects.create(to=self, user=user, type=Vote.UPVOTE)
             self.upvotes += 1
             if deleted_opposite:
                 self.downvotes -= 1
             self.save(update_fields=['upvotes', 'downvotes'])
         elif vote_type == Vote.DOWNVOTE:
-            deleted_opposite = self.votes.filter(user=user, type=Vote.UPVOTE).delete() > 0
+            deleted_opposite = self.votes.filter(user=user, type=Vote.UPVOTE).delete()[0] > 0
             Vote.objects.create(to=self, user=user, type=Vote.DOWNVOTE)
             self.downvotes += 1
             if deleted_opposite:
@@ -66,7 +66,7 @@ class Votable(djm.Model):
                 Vote.objects.create(to=self, user=user, type=vote_type)
 
     def unset_vote(self, user, vote_type):
-        deleted = self.votes.filter(user=user, type=vote_type).delete() > 0
+        deleted = self.votes.filter(user=user, type=vote_type).delete()[0] > 0
         if not deleted:
             return
 
