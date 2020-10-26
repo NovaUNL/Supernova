@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 def assert_buildings_inserted():
     ignored = {2, 1191, 1197, 1198, 1632, 1653}
+    whitelisted = {
+        1176, 1177, 1178, 1179, 1180, 1181, 1183, 1184, 1185,
+        1186, 1188, 1189, 1190, 1238, 1395, 1561, 1564, 1663}
     r = requests.get("http://%s/buildings/" % CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch buildings")
@@ -31,7 +34,18 @@ def assert_buildings_inserted():
     missing = missing.difference(ignored)
     for building in clip_buildings:
         if building['id'] in missing:
-            logger.info(f'Building {building} missing.')
+            if building['id'] in whitelisted:
+                m.Building.objects.create(
+                    name=building['name'],
+                    iid=building['id'],
+                    external_id=building['id'],
+                    abbreviation=building['name'][:15],
+                    map_tag=building['name'][:15],
+                    frozen=False,
+                    external_update=make_aware(datetime.now()),
+                    external_data={'upstream': building})
+            else:
+                logger.info(f'Building {building} missing.')
 
 
 door_number_exp = re.compile('(?P<floor>\d)\.?(?P<door_number>\d+)')
