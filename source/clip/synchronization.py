@@ -577,8 +577,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                 name=upsteam_info['name'],
                 official=True,
                 upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True),
-                uploader_teacher=uploader_teacher,
-                external_id=upsteam_info['id'])
+                uploader_teacher=uploader_teacher)
             logger.info(f"File {file} added to class {class_inst}")
 
 
