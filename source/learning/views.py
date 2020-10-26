@@ -645,8 +645,7 @@ def question_create_view(request):
             question.user = request.user
             question.save()
             form.save_m2m()
-            question.set_vote(request.user, feedback.Vote.UPVOTE)
-            return redirect('learning:question', question_id=question.id)
+            return redirect('learning:question', question_id=question.activity_id)
     else:
         initial = {}
         if 'section' in request.GET:
