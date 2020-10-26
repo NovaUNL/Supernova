@@ -143,9 +143,13 @@ class RegistrationForm(djf.ModelForm):
                            | Q(abbreviation=nickname.lower()) \
                            | Q(abbreviation=username.lower())
         if requested_student:
+            if requested_student.abbreviation:
+                equivalent_filter = Q(abbreviation=requested_student.abbreviation)
+            else:
+                equivalent_filter = Q(id=requested_student.id)
             collided_students = college.Student.objects \
                 .filter(collision_filter) \
-                .exclude(user=None, id=requested_student.id)
+                .exclude(Q(user=None) | equivalent_filter)
             if requested_student.abbreviation != email_prefix:
                 raise djf.ValidationError("O email inserido aparentementa não pertencer ao aluno escolhido. "
                                           "Corrija a informação; se estiver certa faça o favor de nos contactar.")
@@ -156,9 +160,13 @@ class RegistrationForm(djf.ModelForm):
             raise djf.ValidationError("Os dados utilizados colidiram com outro estudante.")
 
         if requested_teacher:
+            if requested_student.abbreviation:
+                equivalent_filter = Q(abbreviation=requested_teacher.abbreviation)
+            else:
+                equivalent_filter = Q(id=requested_student.id)
             collided_teachers = college.Teacher.objects \
                 .filter(collision_filter) \
-                .exclude(user=None, id=requested_teacher.id)
+                .exclude(Q(user=None) | equivalent_filter)
         else:
             collided_teachers = college.Teacher.objects.filter(collision_filter).exclude(user=None)
 
