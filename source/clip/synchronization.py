@@ -106,9 +106,56 @@ def sync_rooms():
         room.save()
 
 
-def sync_departments(recurse=False):
+def sync_courses():
+    """
+    Fetches the most recent available info about courses.
+    Creates missing courses.
+    """
+    r = requests.get("http://%s/courses/" % CLIPY['host'])
+    if r.status_code != 200:
+        raise Exception("Unable to fetch courses")
+
+    existing = {course.external_id: course for course in m.Course.objects.all()}
+    for upstream_course in r.json():
+        course = existing.get(upstream_course['id'])
+
+        if course is None:  # New room
+            if upstream_course['deg'] is None:
+                logger.debug(f'Course {upstream_course["name"]} ignored due to null degree.')
+                continue
+            course = m.Course.objects.create(
+                name=upstream_course['name'],
+                degree=upstream_course['deg'],
+                abbreviation=upstream_course["abbr"],
+                external_id=upstream_course['id'],
+                iid=upstream_course['id'],
+                frozen=False,
+                external_update=make_aware(datetime.now()))
+            logger.info(f'Created course {course}.')
+        else:
+            logger.debug(f'Course {course} already exists.')
+            changed = False
+            if not course.frozen:
+                if course.name != upstream_course["name"]:
+                    logger.warning(f'Course {course} changed name to {upstream_course["name"]}.')
+                    course.name = upstream_course["name"]
+                    changed = True
+                if course.degree != upstream_course["deg"]:
+                    logger.warning(f'Course {course} changed degree to {upstream_course["deg"]}.')
+                    course.degree = upstream_course["deg"]
+                    changed = True
+                if course.abbreviation != upstream_course["abbr"]:
+                    logger.warning(f'Course {course} changed abbreviation to {upstream_course["abbr"]}.')
+                    course.abbreviation = upstream_course["abbr"]
+                    changed = True
+
+            if changed:
+                course.save()
+
+
+def sync_departments():
     upstream = _request_departments()
-    _upstream_sync_departments(upstream, recurse)
+    _upstream_sync_departments(upstream)
 
 
 def _request_departments():
@@ -118,7 +165,7 @@ def _request_departments():
     return r.json()
 
 
-def _upstream_sync_departments(upstream, recurse):
+def _upstream_sync_departments(upstream):
     current = m.Department.objects.exclude(external_id=None).all()
     clip_ids = {entry['id'] for entry in upstream}
     new, disappeared, mirrored = _upstream_diff(set(current), clip_ids)
@@ -138,9 +185,7 @@ def _upstream_sync_departments(upstream, recurse):
                 frozen=False,
                 external_update=make_aware(datetime.now()),
                 external_data={'upstream': upstream})
-            logger.info(f'Created department {clip_department}.')
-            if recurse:
-                sync_department(department, recurse=True)
+            logger.info(f'Created department {department}.')
 
 
 def sync_department(department, recurse=False):
@@ -161,20 +206,22 @@ def _request_department(department):
 
 
 def _upstream_sync_department(upstream, department, recurse=False):
+    pass
     # ---------  Related classes ---------
-    classes = department.classes.exclude(external_id=None).all()
-    new, disappeared, mirrored = _upstream_diff(set(classes), set(upstream['classes']))
-
-    if recurse:
-        for ext_id in new:
-            sync_class(ext_id, recurse=True)
-
-    m.Class.objects.filter(external_id__in=new).update(department=department)
-    m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
-    m.Class.objects.filter(external_id__in=disappeared).update(department=None)
-    disappeared = m.Class.objects.filter(external_id__in=disappeared)
-    for klass in disappeared.all():
-        logger.warning(f"{klass} removed from {department}.")
+    # TODO DEPRECATED
+    # classes = department.classes.exclude(external_id=None).all()
+    # new, disappeared, mirrored = _upstream_diff(set(classes), set(upstream['classes']))
+    #
+    # if recurse:
+    #     for ext_id in new:
+    #         sync_class(ext_id, recurse=True)
+    #
+    # m.Class.objects.filter(external_id__in=new).update(department=department)
+    # m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
+    # m.Class.objects.filter(external_id__in=disappeared).update(department=None)
+    # disappeared = m.Class.objects.filter(external_id__in=disappeared)
+    # for klass in disappeared.all():
+    #     logger.warning(f"{klass} removed from {department}.")
 
     # ---------  Related teachers ---------
     # Handled in the teacher function
@@ -213,7 +260,6 @@ def sync_class(external_id, recurse=False):
     """
     Sync the information in a class
     :param external_id: The foreign id of the class that is being sync'd
-    :param department: The parent department of this class (optional)
     :param recurse: Whether to recurse to the derivative entities (class instances)
     """
     upstream = _request_class(external_id)
