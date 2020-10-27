@@ -8,9 +8,9 @@
       Se vires o email mas o link não for visivel podes inserir aqui o token recebido:
     </p>
     <div id="content_form">
-      <form method="get" action="{{ request.get_full_path }}">
+      <form class="col" method="get" action="{{ request.get_full_path }}">
         {{ form.as_p }}
-        <input type="submit" value="Validar registo">
+        <input class="ui-btn end" type="submit" value="Validar registo">
       </form>
     </div>
   </div>
