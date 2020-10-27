@@ -4,6 +4,7 @@ import string
 
 from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -103,9 +104,7 @@ def validate_token(email, token) -> users.User:
                 # Teacher email is known and matches or names are very very close
                 if registration.email.split('@')[0] == registration.requested_teacher.abbreviation or \
                         (student_name and correlation(student_name, registration.requested_teacher.name) > 0.9):
-                    registration.requested_teacher.user = user
-                    registration.requested_teacher.save()
-                    triggers.on_teacher_assignment(user, registration.requested_teacher)
+                    triggers.teacher_assignment(user, registration.requested_teacher)
                 else:
                     # Do nothing, those need to be approved manually
                     users.GenericNotification.objects.create(
@@ -114,21 +113,21 @@ def validate_token(email, token) -> users.User:
                                 'Poderá vir a ser contactado/a.')
 
             if registration.requested_student:
-                college.Student.objects \
-                    .filter(abbreviation=registration.requested_student.abbreviation) \
-                    .update(user=user)
-                triggers.on_student_assignment(user, registration.requested_student)
-                students = college.Student.objects \
-                    .filter(abbreviation=registration.requested_student.abbreviation) \
-                    .all()
-                if len(students) == 1:
-                    student = students[0]
-                    if student.first_year == settings.COLLEGE_YEAR:
-                        offset = users.ReputationOffset.objects.create(
-                            amount=10,
-                            receiver=user,
-                            reason='Prémio para caloiros :)')
-                        offset.issue_notification()
+                if registration.requested_student.abbreviation:
+                    equivalent_student_filter = Q(abbreviation=registration.requested_student.abbreviation)
+                else:
+                    equivalent_student_filter = Q(id=registration.requested_student.id)
+
+                owned_students = college.Student.objects.filter(equivalent_student_filter).all()
+                for student in owned_students:
+                    triggers.student_assignment(user, student)
+
+                if len(owned_students) == 1 and owned_students[0].first_year == settings.COLLEGE_YEAR:
+                    offset = users.ReputationOffset.objects.create(
+                        amount=10,
+                        receiver=user,
+                        reason='Prémio para caloiros :)')
+                    offset.issue_notification()
 
             user.calculate_missing_info()
             user.updated_cached()
@@ -152,7 +151,7 @@ def validate_token(email, token) -> users.User:
                 user.updated_cached()
                 calculate_points(user)
                 award_user(user)
-            except e:
+            except Exception as e:
                 logging.error(f'Failed to finalize the registration {registration}.\n{str(e)}')
             return user
 

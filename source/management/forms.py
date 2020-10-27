@@ -38,10 +38,8 @@ class BindStudentToUserForm(djf.Form):
     def save(self):
         user: users.User = self.cleaned_data.get('user')
         student: college.Student = self.cleaned_data.get('student')
-        if student.user is None:
-            student.user = user
-            student.save(update_fields=['user'])
-            triggers.on_student_assignment(user, student)
+        if student.user is not None:
+            triggers.student_assignment(user, student)
         else:
             raise ValidationError(f"Student {student.name} is already assigned to user {student.user.nickname}")
 
@@ -62,9 +60,7 @@ class BindTeacherToUserForm(djf.Form):
         user: users.User = self.cleaned_data.get('user')
         teacher: college.Teacher = self.cleaned_data.get('teacher')
         if teacher.user is None:
-            teacher.user = user
-            teacher.save(update_fields=['user'])
-            triggers.on_teacher_assignment(user, teacher)
+            triggers.teacher_assignment(user, teacher)
         else:
             raise ValidationError(f"Teacher {teacher.name} is already assigned to user {teacher.user.nickname}")
 
