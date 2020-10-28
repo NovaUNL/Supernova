@@ -1,4 +1,6 @@
 import json
+
+import reversion
 from dal import autocomplete
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q, F, Max
@@ -9,7 +11,6 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.db import models as djm, transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-
 
 from markdownx.widgets import MarkdownxWidget
 
@@ -80,7 +81,9 @@ def subarea_create_view(request, area_id):
     if request.method == 'POST':
         form = f.SubareaForm(data=request.POST)
         if form.is_valid():
-            new_subarea = form.save()
+            with reversion.create_revision():
+                new_subarea = form.save()
+                reversion.set_user(request.user)
             return HttpResponseRedirect(reverse('learning:subarea', args=[new_subarea.id]))
     else:
         form = f.SubareaForm(initial={'area': area})
@@ -108,7 +111,9 @@ def subarea_edit_view(request, subarea_id):
     if request.method == 'POST':
         form = f.SubareaForm(data=request.POST, instance=subarea)
         if form.is_valid():
-            form.save()
+            with reversion.create_revision():
+                form.save()
+                reversion.set_user(request.user)
             return HttpResponseRedirect(reverse('learning:subarea', args=[subarea_id]))
     else:
         form = f.SubareaForm(instance=subarea)
@@ -246,12 +251,11 @@ def section_create_view(request, subarea_id=None, parent_id=None):
             if subarea:
                 # Save the new section atomically (all or nothing)
                 with transaction.atomic():
-                    section = section_form.save()
-                    section.subarea = subarea
-                    section.save()
-                    # Create an empty log entry for the author to be identifiable
-                    section_log = m.SectionLog(author=request.user, section=section)
-                    section_log.save()
+                    with reversion.create_revision():
+                        section = section_form.save()
+                        section.subarea = subarea
+                        section.save()
+                        reversion.set_user(request.user)
             else:
                 # Obtain the requested index
                 index = m.SectionSubsection.objects \
@@ -261,12 +265,11 @@ def section_create_view(request, subarea_id=None, parent_id=None):
 
                 # Save the new section atomically (all or nothing)
                 with transaction.atomic():
-                    section = section_form.save()
-                    section_parent_rel = m.SectionSubsection(parent=parent, section=section, index=index)
-                    section_parent_rel.save()
-                    # Create an empty log entry for the author to be identifiable
-                    section_log = m.SectionLog(author=request.user, section=section)
-                    section_log.save()
+                    with reversion.create_revision():
+                        section = section_form.save()
+                        section_parent_rel = m.SectionSubsection(parent=parent, section=section, index=index)
+                        section_parent_rel.save()
+                        reversion.set_user(request.user)
 
             sources_formset = f.SectionSourcesFormSet(
                 request.POST,
@@ -341,27 +344,13 @@ def section_edit_view(request, section_id):
                 and sources_formset.is_valid() \
                 and web_resources_formset.is_valid() \
                 and doc_resources_formset.is_valid():
-            # If the section content changed then log the change to prevent vandalism and allow reversion.
-            if section.content_ck is not None \
-                    and section.content_md is None \
-                    and section_form.cleaned_data['content_md'] is not None:
-                m.SectionLog.objects.create(author=request.user, section=section, previous_content=section.content_ck)
-            else:
-                if section.content_md != section_form.cleaned_data['content_md']:
-                    m.SectionLog.objects.create(
-                        author=request.user,
-                        section=section,
-                        previous_content=section.content_md)
-                if section.content_ck != section_form.cleaned_data['content_ck']:
-                    m.SectionLog.objects.create(
-                        author=request.user,
-                        section=section,
-                        previous_content=section.content_ck)
-            section = section_form.save()
-            sources_formset.save()
-            doc_resources_formset.save()
-            web_resources_formset.save()
-            section.compact_indexes()
+            with reversion.create_revision():
+                section = section_form.save()
+                sources_formset.save()
+                doc_resources_formset.save()
+                web_resources_formset.save()
+                section.compact_indexes()
+                reversion.set_user(request.user)
             # Redirect user to the updated section
             return HttpResponseRedirect(reverse('learning:section', args=[section.id]))
     else:
@@ -509,10 +498,12 @@ def create_exercise_view(request):
     if request.method == 'POST':
         form = f.ExerciseForm(request.POST)
         if form.is_valid():
-            exercise = form.save(commit=False)
-            exercise.author = request.user
-            exercise.save()
-            form.save_m2m()
+            with reversion.create_revision():
+                exercise = form.save(commit=False)
+                exercise.author = request.user
+                exercise.save()
+                form.save_m2m()
+                reversion.set_user(request.user)
             return redirect('learning:exercise', exercise_id=exercise.id)
     else:
         if 'section' in request.GET:
@@ -539,7 +530,9 @@ def edit_exercise_view(request, exercise_id):
     if request.method == 'POST':
         form = f.ExerciseForm(request.POST, instance=exercise)
         if form.is_valid():
-            exercise = form.save()
+            with reversion.create_revision():
+                exercise = form.save()
+                reversion.set_user(request.user)
             return redirect('learning:exercise', exercise_id=exercise.id)
     else:
         form = f.ExerciseForm(instance=exercise)
@@ -693,13 +686,15 @@ def question_view(request, question_id):
             if 'submit' in request.GET and request.GET['submit'] == 'answer':
                 answer_form = f.AnswerForm(request.POST)
                 if answer_form.is_valid():
-                    answer = answer_form.save(commit=False)
-                    answer.to = question
-                    answer.user = request.user
-                    answer.save()
-                    # Reload data, new form
-                    question.refresh_from_db()
-                    answer_form = f.AnswerForm()
+                    with reversion.create_revision():
+                        answer = answer_form.save(commit=False)
+                        answer.to = question
+                        answer.user = request.user
+                        answer.save()
+                        # Reload data, new form
+                        question.refresh_from_db()
+                        answer_form = f.AnswerForm()
+                        reversion.set_user(request.user)
             else:
                 status = 400
         else:

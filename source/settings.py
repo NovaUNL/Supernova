@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'rest_framework',
     'django_elasticsearch_dsl',
+    'reversion',
     'supernova',
     'users',
     'groups',

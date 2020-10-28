@@ -1,5 +1,6 @@
 from itertools import chain
 
+import reversion
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db.models import Max
@@ -22,6 +23,7 @@ def area_pic_path(area, filename):
     return f's/a/{area.id}/pic.{filename.split(".")[-1].lower()}'
 
 
+@reversion.register()
 class Area(djm.Model):
     """
     A field of knowledge
@@ -43,6 +45,7 @@ def subarea_pic_path(subarea, filename):
     return f's/sa/{subarea.id}/pic.{filename.split(".")[-1].lower()}'
 
 
+@reversion.register()
 class Subarea(djm.Model):
     """
     A category inside a field of knowledge (area)
@@ -64,6 +67,7 @@ class Subarea(djm.Model):
         return self.title
 
 
+@reversion.register()
 class Section(djm.Model):
     """
     A synopsis section, belonging either directly or indirectly to some subarea.
@@ -258,6 +262,7 @@ class SectionWebResource(SectionResource):
         return self.url
 
 
+@reversion.register()
 class Exercise(djm.Model):
     """
     An exercise anyone can try to solve
@@ -417,6 +422,7 @@ class Postable(feedback.Votable, djm.Model):
         return markdownify(self.content)
 
 
+@reversion.register()
 class Question(users.Activity, Postable):
     """
     A generic question, usually about an exercise.
@@ -490,6 +496,7 @@ class Question(users.Activity, Postable):
         return self.teacher_decided_answer is not None
 
 
+@reversion.register()
 class Answer(users.Activity, Postable):
     """
     An answer to a Question
