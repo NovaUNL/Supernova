@@ -683,7 +683,7 @@ def question_view(request, question_id):
     status = 200
     if request.user.is_authenticated:
         if request.method == 'POST':
-            if not request.user.has_perm('learning.add_questionanswer'):
+            if not request.user.has_perm('learning.add_question'):
                 context = build_base_context(request)
                 context['pcode'] = 'l_question'
                 context['title'] = context['msg_title'] = 'Insuficiência de permissões'
