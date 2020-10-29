@@ -33,6 +33,8 @@ urlpatterns = [
     path('duvidas', views.questions_view, name='questions'),
     path('duvida/colocar/', views.question_create_view, name='question_create'),
     path('duvida/<int:question_id>/', views.question_view, name='question'),
+    path('duvida/<int:question_id>/editar', views.question_edit_view, name='question_edit'),
+    path('duvida/resposta/<int:answer_id>/editar', views.answer_edit_view, name='answer_edit'),
     # Autocompletion helpers
     path('ac/area/', views.AreaAutocomplete.as_view(), name='area_ac'),
     path('ac/subarea/', views.SubareaAutocomplete.as_view(), name='subarea_ac'),

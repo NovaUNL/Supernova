@@ -38,8 +38,7 @@
             </div>
             <div class="actions">
               <a class="disabled">Reportar</a>
-              <a class="disabled">Editar</a>
-              <a class="disabled">Histórico</a>
+              <a href="{% url 'learning:question_edit' question.activity_id %}">Editar</a>
             </div>
           </div>
           <div class="author user">
@@ -70,8 +69,7 @@
           <div class="postable-footer">
             <div class="actions">
               <a class="disabled">Reportar</a>
-              <a class="disabled">Editar</a>
-              <a class="disabled">Histórico de edições</a>
+              <a href="{% url 'learning:answer_edit' answer.activity_id %}">Editar</a>
             </div>
             <div class="author user">
               <span class="pic" style="background-image: url('{% if answer.user.picture %}{{ answer.user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>

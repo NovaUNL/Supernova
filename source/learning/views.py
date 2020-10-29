@@ -634,10 +634,12 @@ def question_create_view(request):
     if request.method == 'POST':
         form = f.QuestionForm(request.POST)
         if form.is_valid():
-            question = form.save(commit=False)
-            question.user = request.user
-            question.save()
-            form.save_m2m()
+            with reversion.create_revision():
+                question = form.save(commit=False)
+                question.user = request.user
+                question.save()
+                form.save_m2m()
+                reversion.set_user(request.user)
             return redirect('learning:question', question_id=question.activity_id)
     else:
         initial = {}
@@ -662,7 +664,8 @@ def question_create_view(request):
                     initial['linked_classes'] = [klass, ]
             except ValueError:
                 pass
-        context['form'] = f.QuestionForm(initial=initial)
+        form = f.QuestionForm(initial=initial)
+    context['form'] = form
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': 'Colocar questão', 'url': reverse('learning:question_create')}]
     return render(request, 'learning/question_editor.html', context)
@@ -708,6 +711,59 @@ def question_view(request, question_id):
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': question.title, 'url': reverse('learning:question', args=[question_id])}]
     return render(request, 'learning/question.html', context, status=status)
+
+
+@login_required
+@permission_required('learning.add_question', raise_exception=True)
+def question_edit_view(request, question_id):
+    question = get_object_or_404(
+        m.Question.objects,
+        activity_id=question_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_question_edit'
+    context['title'] = f'Editar "{question.title}"'
+    if request.method == 'POST':
+        form = f.QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            with reversion.create_revision():
+                form.save()
+                reversion.set_user(request.user)
+            return redirect('learning:question', question_id=question.activity_id)
+    else:
+        form = f.QuestionForm(instance=question)
+
+    context['form'] = form
+    context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
+                          {'name': question.title, 'url': reverse('learning:question', args=[question_id])},
+                          {'name': 'Editar', 'url': reverse('learning:question_edit', args=[question.activity_id])}]
+    return render(request, 'learning/question_editor.html', context)
+
+
+@login_required
+@permission_required('learning.add_answer', raise_exception=True)
+def answer_edit_view(request, answer_id):
+    answer = get_object_or_404(
+        m.Answer.objects,
+        activity_id=answer_id)
+    context = build_base_context(request)
+    context['pcode'] = 'l_answer_edit'
+    context['title'] = 'Editar resposta'
+    if request.method == 'POST':
+        form = f.AnswerForm(request.POST, instance=answer)
+        if form.is_valid():
+            with reversion.create_revision():
+                answer = form.save()
+                reversion.set_user(request.user)
+            return redirect('learning:question', question_id=answer.to.activity_id)
+    else:
+        form = f.AnswerForm(instance=answer)
+
+    context['form'] = form
+    context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
+                          {'name': answer.to.title, 'url': reverse('learning:question', args=[answer.to.activity_id])},
+                          {'name': 'Editar resposta',
+                           'url': reverse('learning:question_edit', args=[answer.activity_id])}]
+    return render(request, 'learning/answer_editor.html', context)
 
 
 def exercise_preview_view(request):
