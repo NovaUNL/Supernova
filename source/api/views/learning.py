@@ -218,10 +218,11 @@ class QuestionUserVotes(APIView):
         question = get_object_or_404(learning.Question, activity_id=pk)
         votes = {}
         votes[question.activity_id] = feedback.Vote.objects \
-            .filter(question__activity_id=question.activity_id) \
+            .filter(question__activity_id=question.activity_id, user=request.user) \
             .values_list('type', flat=True)
         answer_votes = feedback.Vote.objects \
-            .filter(answer__to__activity_id=question.activity_id).order_by('object_id') \
+            .filter(answer__to__activity_id=question.activity_id, user=request.user)\
+            .order_by('object_id') \
             .values_list('object_id', 'type')
         last_postable = None
         last_list = None
