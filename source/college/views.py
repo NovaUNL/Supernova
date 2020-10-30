@@ -1164,9 +1164,10 @@ class ClassAutocomplete(autocomplete.Select2QuerySetView):
         qs = m.Class.objects.all()
         if self.q:
             try:
-                qs = qs.filter(Q(id=int(self.q)) | Q(name__istartswith=self.q))
+                qs = qs.filter(Q(id=int(self.q)) | Q(name__istartswith=self.q) | Q(abbreviation=self.q)) \
+                    .exclude(extinguished=True)
             except ValueError:
-                qs = qs.filter(title__contains=self.q)
+                qs = qs.filter(Q(name__contains=self.q) | Q(abbreviation=self.q)).exclude(extinguished=True)
         return qs
 
 
