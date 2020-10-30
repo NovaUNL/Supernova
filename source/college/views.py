@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from functools import reduce
 
+import reversion
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
@@ -113,23 +114,9 @@ def department_edit_view(request, department_id):
         form = f.DepartmentForm(request.POST, request.FILES, instance=department)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(department=department, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=department,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
             return redirect('college:department', department_id=department_id)
     else:
         form = f.DepartmentForm(instance=department)
@@ -183,23 +170,9 @@ def teacher_edit_view(request, teacher_id):
         form = f.TeacherForm(request.POST, request.FILES, instance=teacher)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=10)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(teacher=teacher, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=teacher,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
             return redirect('college:teacher', teacher_id=teacher_id)
     else:
         form = f.TeacherForm(instance=teacher)
@@ -310,23 +283,9 @@ def class_edit_view(request, class_id):
         form = f.ClassForm(request.POST, request.FILES, instance=klass)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(klass=klass, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=klass,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
             return redirect('college:class', class_id=class_id)
     else:
         form = f.ClassForm(instance=klass)
@@ -407,23 +366,9 @@ def class_instance_edit_view(request, instance_id):
         form = f.ClassInstanceForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(class_instance=instance, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=instance,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
             return redirect('college:class_instance', instance_id=instance_id)
     else:
         form = f.ClassInstanceForm(instance=instance)
@@ -760,23 +705,10 @@ def class_instance_file_edit_view(request, instance_id, class_file_id):
         form = f.ClassFileForm(request.POST, request.FILES, instance=class_file)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(class_file=class_file, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=class_file,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
+            return redirect('college:class_instance_file', instance_id=instance_id, class_file_id=class_file_id)
     else:
         form = f.ClassFileForm(instance=class_file)
 
@@ -864,23 +796,10 @@ def file_edit_view(request, file_hash):
         form = f.FileForm(request.POST, request.FILES, instance=file)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(file=file, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=file,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
+            return redirect('college:file', hash=file_hash)
     else:
         form = f.FileForm(instance=file)
 
@@ -1021,23 +940,9 @@ def course_edit_view(request, course_id):
         form = f.CourseForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
             if form.has_changed():
-                changes = form.get_changes()
-                margin = timezone.now() - timedelta(minutes=5)
-                last_edit = m.AcademicDataChange.objects \
-                    .filter(course=course, timestamp__gt=margin) \
-                    .order_by('timestamp') \
-                    .reverse() \
-                    .first()
-                with transaction.atomic():
-                    if last_edit is None or last_edit.user != request.user:
-                        m.AcademicDataChange.objects.create(
-                            user=request.user,
-                            changed_object=course,
-                            changes=changes)
-                    else:
-                        last_edit.changes = f.merge_changes(last_edit.changes, changes)
-                        last_edit.save(update_fields=['changes'])
+                with reversion.create_revision():
                     form.save()
+                    reversion.set_user(request.user)
             return redirect('college:course', course_id=course_id)
     else:
         form = f.CourseForm(instance=course)

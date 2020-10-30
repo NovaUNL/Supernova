@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
+import reversion
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -42,6 +43,7 @@ class Importable(djm.Model):
         abstract = True
 
 
+@reversion.register()
 class Student(Importable):
     """
     | A student instance.
@@ -127,6 +129,7 @@ def building_pic_path(building, filename):
     return f'c/b/{building.id}/pic.{filename.split(".")[-1].lower()}'
 
 
+@reversion.register()
 class Building(Importable):
     """A physical building withing the campus"""
     #: Full name
@@ -151,6 +154,7 @@ def department_pic_path(department, filename):
     return f'c/d/{department.id}/pic.{filename.split(".")[-1].lower()}'
 
 
+@reversion.register()
 class Department(Importable):
     """An (official) department"""
     #: Full name of the department
@@ -227,6 +231,7 @@ class PlaceFeature(djm.Model):
         return self.name
 
 
+@reversion.register()
 class Room(Place, Importable):
     """A physical room within the campus"""
     #: Department that manages this room
@@ -258,6 +263,7 @@ class Room(Place, Importable):
         return f'Ed {self.building.abbreviation}, {ctypes.RoomType.CHOICES[self.type - 1][1]} {self.name}'
 
 
+@reversion.register()
 class Course(Importable):
     """A course which is associated with a recognizable degree."""
     #: Course name
@@ -295,6 +301,7 @@ class Course(Importable):
         return markdownify(self.description)
 
 
+@reversion.register()
 class Class(Importable):
     """A class with is taught, usually once or twice a year. Abstract concept without temporal presence"""
     #: Name of the class
@@ -340,6 +347,7 @@ class Class(Importable):
         return reverse('college:class', args=[self.id])
 
 
+@reversion.register()
 class ClassInstance(Importable):
     """An instance of a class with an associated point in time"""
     #: Class this refers to
@@ -388,6 +396,7 @@ class ClassInstance(Importable):
         return reverse('college:class_instance', args=[self.id])
 
 
+@reversion.register()
 class ClassInstanceEvent(Importable):
     #: Class instance where this event happens
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.CASCADE, related_name='events')
@@ -413,6 +422,7 @@ class ClassInstanceEvent(Importable):
         return (datetime.combine(datetime.today(), self.time) + delta).time()
 
 
+@reversion.register()
 class Enrollment(Importable):
     """An enrollment of a student to a class"""
     #: Enrolled student
@@ -550,6 +560,7 @@ def teacher_pic_path(teacher, filename):
     return f'c/t/{teacher.id}/pic.{filename.split(".")[-1].lower()}'
 
 
+@reversion.register()
 class Teacher(Importable):
     """
     | A person who teaches or investigates.
@@ -637,6 +648,7 @@ PREVIEWABLE_MIMES = {
 }
 
 
+@reversion.register()
 class File(Importable):
     """A file in the filesystem"""
     #: File SHA1 hash
@@ -692,6 +704,7 @@ class File(Importable):
         return reverse('college:file', args=[self.hash])
 
 
+@reversion.register()
 class ClassFile(Importable):
     """A file attachment which was shared to a class"""
     #: Class instance where this size is featured
