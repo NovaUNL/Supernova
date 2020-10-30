@@ -672,6 +672,7 @@ def class_instance_file_attach_view(request, instance_id, file_hash=None):
                 .exists()
             class_file.official = user_is_teacher
             class_file.save()
+            return redirect('college:class_instance_files', instance_id=instance_id)
     else:
         if referenced_file:
             form = f.ClassFileForm(
