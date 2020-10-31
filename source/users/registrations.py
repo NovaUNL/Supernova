@@ -85,7 +85,7 @@ def validate_token(email, token) -> users.User:
 
     # Registration request accepted
     with transaction.atomic():
-        user = users.User.objects.create_user(
+        user = users.User.objects.create(
             username=registration.username,
             email=registration.email,
             nickname=registration.nickname,
