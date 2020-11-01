@@ -102,7 +102,7 @@ def validate_token(email, token) -> users.User:
                 if registration.requested_student:
                     student_name = registration.requested_student.name
                 # Teacher email is known and matches or names are very very close
-                if registration.email.split('@')[0] == registration.requested_teacher.abbreviation or \
+                if registration.email == registration.requested_teacher.email or \
                         (student_name and correlation(student_name, registration.requested_teacher.name) > 0.9):
                     triggers.teacher_assignment(user, registration.requested_teacher)
                 else:

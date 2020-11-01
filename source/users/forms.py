@@ -142,36 +142,26 @@ class RegistrationForm(djf.ModelForm):
         collision_filter = Q(abbreviation=email_prefix.lower()) \
                            | Q(abbreviation=nickname.lower()) \
                            | Q(abbreviation=username.lower())
+
+        # Check if there are any students (other than the requested one) which collide with inserted data
+        # (eg. by having abbreviations or ID's matching other students)
         if requested_student:
             if requested_student.abbreviation:
                 equivalent_filter = Q(abbreviation=requested_student.abbreviation)
             else:
                 equivalent_filter = Q(id=requested_student.id)
+            # A collision is a data match without counting equivalent students
             collided_students = college.Student.objects \
                 .filter(collision_filter) \
-                .exclude(Q(user=None) | equivalent_filter)
+                .exclude(equivalent_filter)
             if requested_student.abbreviation != email_prefix:
                 raise djf.ValidationError("O email inserido aparentementa não pertencer ao aluno escolhido. "
                                           "Corrija a informação; se estiver certa faça o favor de nos contactar.")
         else:
-            collided_students = college.Student.objects.filter(collision_filter).exclude(user=None)
+            collided_students = college.Student.objects.filter(collision_filter)
 
         if collided_students.exists():
             raise djf.ValidationError("Os dados utilizados colidiram com outro estudante.")
-
-        if requested_teacher:
-            if requested_student.abbreviation:
-                equivalent_filter = Q(abbreviation=requested_teacher.abbreviation)
-            else:
-                equivalent_filter = Q(id=requested_student.id)
-            collided_teachers = college.Teacher.objects \
-                .filter(collision_filter) \
-                .exclude(Q(user=None) | equivalent_filter)
-        else:
-            collided_teachers = college.Teacher.objects.filter(collision_filter).exclude(user=None)
-
-        if collided_teachers.exists():
-            raise djf.ValidationError("Os dados utilizados colidiram com outro docente.")
 
         enforce_password_policy(
             self.cleaned_data["username"],
@@ -180,7 +170,7 @@ class RegistrationForm(djf.ModelForm):
         return self.cleaned_data
 
 
-class TeacherRegistrationForm(djf.ModelForm):
+class TeacherRegistrationForm(RegistrationForm):
     password_confirmation = djf.CharField(
         label='Palavra-passe (confirmação)',
         widget=djf.PasswordInput(),
@@ -225,7 +215,6 @@ class StudentRegistrationForm(RegistrationForm):
             'username': djf.TextInput(),
             'email': djf.TextInput(attrs={'onChange': 'emailModified=true;'}),
             'password': djf.PasswordInput(),
-            'requested_teacher': autocomplete.ModelSelect2(url='college:unreg_teacher_ac'),
             'requested_student': autocomplete.ModelSelect2(url='college:unreg_student_ac'),
         }
 
