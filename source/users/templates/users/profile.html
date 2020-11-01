@@ -21,7 +21,7 @@
       </div>
       <h1>
         <img class="highres" src="{% if profile_user.picture %}{{ profile_user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}">
-        {{ profile_user.get_full_name }}
+        {% if profile_user.get_full_name %}{{ profile_user.get_full_name }}{% else %}{{ profile_user.nickname }}{% endif %}
       </h1>
     </div>
     <div class="row padded nowrap">
