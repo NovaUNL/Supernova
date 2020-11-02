@@ -1,4 +1,5 @@
 from difflib import SequenceMatcher
+import diff_match_patch as dmp_module
 from math import log
 
 
@@ -41,3 +42,38 @@ def correlation(a: str, b: str):
     :return: Correlation ratio
     """
     return SequenceMatcher(None, a, b).ratio()
+
+
+class _diff_match_patch(dmp_module.diff_match_patch):
+
+    def diff_prettyHtml(self, diffs):
+        """Convert a diff array into a pretty HTML report.
+
+        Args:
+          diffs: Array of diff tuples.
+
+        Returns:
+          HTML representation.
+        """
+        html = []
+        for (op, data) in diffs:
+            text = (
+                data.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\n", "&para;<br>")
+            )
+            if op == self.DIFF_INSERT:
+                html.append('<span class="insert">%s</span>' % text)
+            elif op == self.DIFF_DELETE:
+                html.append('<span class="delete">%s</span>' % text)
+            elif op == self.DIFF_EQUAL:
+                html.append("<span>%s</span>" % text)
+        return "".join(html)
+
+
+def comparison_html(a, b):
+    dmp = _diff_match_patch()
+    diff = dmp.diff_main(a, b)
+    dmp.diff_cleanupSemantic(diff)
+    return dmp.diff_prettyHtml(diff)

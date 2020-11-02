@@ -1,0 +1,15 @@
+{% spaceless %}
+  {% if changes %}
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Últimas alterações</h2></div>
+      <div class="pane-content diff-list">
+        {% for user, timestamp, diff in changes reversed %}
+          <p>{{ diff|safe }}</p>
+          Por <a href="{{ user.get_absolute_path }}">{{ user.nickname }}</a> em {{ timestamp }}.
+          {% if not forloop.last %}
+            <hr>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+{% endspaceless %}

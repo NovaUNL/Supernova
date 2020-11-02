@@ -13,12 +13,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
 from markdownx.widgets import MarkdownxWidget
+from reversion.models import Version
 
 import settings
+from supernova.utils import comparison_html
 from supernova.views import build_base_context
 from learning import models as m
 from learning import forms as f
 from college import models as college
+from users import models as users
 from feedback import models as feedback
 from users.utils import get_students
 
@@ -733,6 +736,28 @@ def question_edit_view(request, question_id):
         form = f.QuestionForm(instance=question)
 
     context['form'] = form
+
+    versions = Version.objects\
+        .select_related('revision__user')\
+        .order_by('revision__date_created')\
+        .get_for_object(question)
+
+    changes = []
+    for i in range(len(versions) - 1):
+        v_from = versions[i]
+        v_to = versions[i + 1]
+        content_from = v_from.field_dict['content']
+        content_to = v_to.field_dict['content']
+        if content_from == content_to:
+            content_diff = None
+        else:
+            content_diff = comparison_html(v_from.field_dict['content'], v_to.field_dict['content'])
+        changes.append(
+            (v_to.revision.user,
+             v_to.revision.date_created,
+             content_diff))
+    if len(changes) > 0:
+        context['changes'] = changes
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': question.title, 'url': reverse('learning:question', args=[question_id])},
                           {'name': 'Editar', 'url': reverse('learning:question_edit', args=[question.activity_id])}]
@@ -759,10 +784,26 @@ def answer_edit_view(request, answer_id):
         form = f.AnswerForm(instance=answer)
 
     context['form'] = form
+
+    versions = Version.objects\
+        .select_related('revision__user')\
+        .order_by('revision__date_created')\
+        .get_for_object(answer)
+
+    changes = []
+    for i in range(len(versions) - 1):
+        v_from = versions[i]
+        v_to = versions[i + 1]
+        changes.append(
+            (v_to.revision.user,
+             v_to.revision.date_created,
+             comparison_html(v_from.field_dict['content'], v_to.field_dict['content'])))
+    if len(changes) > 0:
+        context['changes'] = changes
     context['sub_nav'] = [{'name': 'Questões', 'url': reverse('learning:questions')},
                           {'name': answer.to.title, 'url': reverse('learning:question', args=[answer.to.activity_id])},
                           {'name': 'Editar resposta',
-                           'url': reverse('learning:question_edit', args=[answer.activity_id])}]
+                           'url': reverse('learning:answer_edit', args=[answer.activity_id])}]
     return render(request, 'learning/answer_editor.html', context)
 
 

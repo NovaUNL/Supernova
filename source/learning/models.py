@@ -422,7 +422,7 @@ class Postable(feedback.Votable, djm.Model):
         return markdownify(self.content)
 
 
-@reversion.register()
+@reversion.register(follow=['activity_ptr'])
 class Question(users.Activity, Postable):
     """
     A generic question, usually about an exercise.
@@ -496,7 +496,7 @@ class Question(users.Activity, Postable):
         return self.teacher_decided_answer is not None
 
 
-@reversion.register()
+@reversion.register(follow=['activity_ptr'])
 class Answer(users.Activity, Postable):
     """
     An answer to a Question
