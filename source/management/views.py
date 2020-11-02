@@ -29,6 +29,14 @@ def users_view(request):
         .reverse()
     context['suspended_users'] = users.User.objects.order_by('nickname').filter(is_active=False).all()
 
+    context['registrations_with_claimed_teachers'] = users.Registration.objects \
+        .order_by('creation') \
+        .select_related('requested_student', 'requested_teacher', 'resulting_user', 'invite') \
+        .exclude(requested_teacher=None) \
+        .exclude(resulting_user=None) \
+        .filter(requested_teacher__user=None) \
+        .reverse()
+
     reputation_offset_form = f.ReputationOffsetForm(prefix='reputation_offset_')
     assign_student_form = f.BindStudentToUserForm(prefix='assign_student_')
     assign_teacher_form = f.BindTeacherToUserForm(prefix='assign_teacher_')

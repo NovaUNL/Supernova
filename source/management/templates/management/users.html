@@ -37,18 +37,58 @@
             </tr>
             {% for registration in latest_registrations %}
               <tr>
-                <td>{% if registration.resulting_user %}
-                  <a href="{{ registration.resulting_user.get_absolute_url }}">{{ registration.username }}</a>{% else %}{{ registration.username }}{% endif %}
-                </td>
                 <td>
-                  {% if registration.nickname and registration.nickname != '' %}{{ registration.nickname }}{% else %}-{% endif %}</td>
+                  {% if registration.resulting_user %}
+                    <a href="{{ registration.resulting_user.get_absolute_url }}">{{ registration.username }}</a>
+                  {% else %}
+                    {{ registration.username }}
+                  {% endif %}
+                </td>
+                <td>{% if registration.nickname and registration.nickname != '' %}{{ registration.nickname }}{% else %}-{% endif %}</td>
                 <td>{{ registration.requested_student.abbreviation }}</td>
-                <td>{{ registration.requested_teacher.abbreviation }}</td>
+                <td>{% if registration.requested_teacher %}<a href="{{ registration.requested_teacher.get_absolute_url }}">Link</a>{% endif %}</td>
                 <td>{{ registration.email|cut:"campus.fct.unl.pt" }}</td>
                 <td>{{ registration.failed_attempts }}</td>
-                <td>{% if registration.invite %}
-                  <a href="{{ registration.invite.issuer.get_absolute_url }}">{{ registration.invite.issuer.nickname }}</a>{% else %} - {% endif %}
+                <td>{% if registration.invite %}<a href="{{ registration.invite.issuer.get_absolute_url }}">{{ registration.invite.issuer.nickname }}</a>{% else %} - {% endif %}</td>
+                <td>{{ registration.creation|date:'Y/m/d H:i' }}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Atribuições docentes pendentes</h2></div>
+        <div class="pane-content">
+          <table class="stylized grow">
+            <tr>
+              <th>Username</th>
+              <th>Alcunha</th>
+              <th>Professor</th>
+              <th>Email</th>
+              <th>Data</th>
+            </tr>
+            {% for registration in registrations_with_claimed_teachers %}
+              <tr>
+                <td>
+                  {% if registration.resulting_user %}
+                    <a href="{{ registration.resulting_user.get_absolute_url }}">{{ registration.username }}</a>
+                  {% else %}
+                    {{ registration.username }}
+                  {% endif %}
                 </td>
+                <td>
+                  {% if registration.nickname and registration.nickname != '' %}
+                    {{ registration.nickname }}
+                  {% else %}-{% endif %}
+                </td>
+                <td>
+                  {% if registration.requested_teacher %}
+                    <a href="{{ registration.requested_teacher.get_absolute_url }}">
+                      {{ registration.requested_teacher.name }}
+                    </a>
+                  {% endif %}
+                </td>
+                <td>{{ registration.email|cut:"fct.unl.pt" }}</td>
                 <td>{{ registration.creation|date:'Y/m/d H:i' }}</td>
               </tr>
             {% endfor %}
