@@ -110,7 +110,7 @@
             {% for other_user in users %}
               <tr>
                 <td>{{ other_user.username }}</td>
-                <td><a href="{% url 'users:profile' other_user.nickname %}">{{ other_user.nickname }}</a></td>
+                <td><a href="{{ other_user.get_absolute_url }}">{{ other_user.nickname }}</a></td>
                 <td>{{ other_user.points }}</td>
               </tr>
             {% endfor %}
@@ -150,10 +150,10 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Emitir diferencial de pontos</h2></div>
         <div class="pane-content">
-          <form method="post" action="{% url 'management:users' %}?reputation_offset=">
+          <form class="col" method="post" action="{% url 'management:users' %}?reputation_offset=">
             {% csrf_token %}
             {{ reputation_offset_form.as_p }}
-            <input style="float: right" type="submit" value="Emitir">
+            <input class="ui-btn end" type="submit" value="Emitir">
           </form>
         </div>
       </div>
@@ -163,7 +163,7 @@
           <form class="col" method="post" action="{% url 'management:users' %}?assign_teacher=">
             {% csrf_token %}
             {{ assign_teacher_form.as_p }}
-            <input class="end" type="submit" value="Atribuir">
+            <input class="ui-btn end" type="submit" value="Atribuir">
           </form>
         </div>
       </div>
@@ -173,7 +173,7 @@
           <form class="col" method="post" action="{% url 'management:users' %}?assign_student=">
             {% csrf_token %}
             {{ assign_student_form.as_p }}
-            <input class="end" type="submit" value="Atribuir">
+            <input class="ui-btn end" type="submit" value="Atribuir">
           </form>
         </div>
       </div>
@@ -186,7 +186,7 @@
               Password gerada: <b>{{ new_password }}</b>
             {% else %}
               {{ password_reset_form.as_p }}
-              <input class="end" type="submit" value="Gerar nova">
+              <input class="ui-btn end" type="submit" value="Gerar nova">
             {% endif %}
           </form>
         </div>
