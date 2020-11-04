@@ -1,6 +1,7 @@
 import re
 from datetime import date, datetime
 from functools import reduce
+from itertools import chain
 
 import requests
 import logging
@@ -18,6 +19,12 @@ from college import choice_types as ctypes
 from supernova.utils import correlation
 
 logger = logging.getLogger(__name__)
+
+
+class Recursivity:
+    NONE = 0
+    CREATION = 0
+    FULL = 0
 
 
 # TODO deduplicate code in _request methods
@@ -188,7 +195,7 @@ def _upstream_sync_departments(upstream):
             logger.info(f'Created department {department}.')
 
 
-def sync_department(department, recurse=False):
+def sync_department(department, recurse=Recursivity.NONE):
     """
     Sync the information in a department
     :param department: The department that is being sync'd
@@ -205,7 +212,7 @@ def _request_department(department):
     return r.json()
 
 
-def _upstream_sync_department(upstream, department, recurse=False):
+def _upstream_sync_department(upstream, department, recurse=Recursivity.NONE):
     pass
     # ---------  Related classes ---------
     # TODO DEPRECATED
@@ -227,7 +234,7 @@ def _upstream_sync_department(upstream, department, recurse=False):
     # Handled in the teacher function
 
 
-def sync_classes(recurse=False):
+def sync_classes(recurse=Recursivity.NONE):
     upstream = _request_classes()
     _upstream_sync_classes(upstream, recurse)
 
@@ -240,7 +247,11 @@ def _request_classes():
 
 
 def _upstream_sync_classes(upstream, recurse):
-    known_ids = set(m.Class.objects.exclude(external_id=None).values_list('external_id', flat=True))
+    known_ids = set(
+        m.Class.objects
+            .exclude(external_id=None)
+            .exclude(disappeared=True)
+            .values_list('external_id', flat=True))
     clip_ids = {entry['id'] for entry in upstream}
     disappeared = known_ids.difference(clip_ids)
     mirrored = known_ids.intersection(clip_ids)
@@ -256,7 +267,7 @@ def _upstream_sync_classes(upstream, recurse):
             _upstream_sync_class(clip_class, clip_class['id'], recurse)
 
 
-def sync_class(external_id, recurse=False):
+def sync_class(external_id, recurse=Recursivity.NONE):
     """
     Sync the information in a class
     :param external_id: The foreign id of the class that is being sync'd
@@ -316,10 +327,6 @@ def _upstream_sync_class(upstream, external_id, recurse):
     if m.ClassInstance.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some instances of class {obj} belong to another class: {new}")
 
-    if recurse:
-        for ext_id in new:
-            sync_class_instance(ext_id, recurse=True, klass=obj)
-
     m.ClassInstance.objects.filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
     m.ClassInstance.objects.filter(external_id__in=disappeared).update(disappeared=True)
@@ -327,27 +334,21 @@ def _upstream_sync_class(upstream, external_id, recurse):
     for instance in disappeared.all():
         logger.warning(f"{instance} removed from {obj}.")
 
+    if recurse == Recursivity.CREATION:
+        for ext_id in new:
+            sync_class_instance(ext_id, recurse=True, klass=obj)
+    elif recurse == Recursivity.FULL:
+        for ext_id in chain(new, mirrored):
+            sync_class_instance(ext_id, recurse=True, klass=obj)
 
-def sync_class_instance(external_id, klass=None, update_info=False, update_enrollments=False, update_shifts=False,
-                        update_events=False, recurse=False):
+
+def sync_class_instance(external_id, klass=None, recurse=Recursivity.NONE):
     """
     Sync the information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
-    :param update_info: Whether to request CLIPy to update the class info from CLIP before updating Supernova's
-    :param update_enrollments: Whether to request CLIPy to update the class enrollments from CLIP before updating Supernova's
-    :param update_shifts: Whether to request CLIPy to update the class shifts from CLIP before updating Supernova's
-    :param update_events: Whether to request CLIPy to update the class events from CLIP before updating Supernova's
     :param klass: The class that is parent this class instance (optional)
     :param recurse: Whether to recurse to the derivative entities (shifts, enrollments and evaluations)
     """
-    if update_info:
-        _update(f"http://{CLIPY['host']}/update/class_info/{external_id}")
-    if update_enrollments:
-        _update(f"http://{CLIPY['host']}/update/class_enrollments/{external_id}")
-    if update_enrollments or update_shifts:
-        _update(f"http://{CLIPY['host']}/update/shifts/{external_id}")
-    if update_events:
-        _update(f"http://{CLIPY['host']}/update/events/{external_id}")
     upstream = _request_class_instance(external_id)
     _upstream_sync_class_instance(upstream, external_id, klass, recurse)
 
@@ -423,10 +424,6 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     if m.Shift.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some shifts of class instance {obj} belong to another instance: {new}")
 
-    if recurse:
-        for ext_id in new:
-            sync_shift(ext_id, recurse=True, class_inst=obj)
-
     m.Shift.objects \
         .filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
@@ -435,14 +432,17 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     for shift in disappeared.all():
         logger.warning(f"{shift} removed from {obj}.")
 
+    if recurse == Recursivity.CREATION:
+        for ext_id in new:
+            sync_shift(ext_id, recurse=True, class_inst=obj)
+    elif recurse == Recursivity.FULL:
+        for ext_id in chain(new, mirrored):
+            sync_shift(ext_id, recurse=True, class_inst=obj)
+
+    # ---------  Related Events ---------
     events = obj.events.exclude(external_id=None).all()
     upstream_events = {event['id']: event for event in upstream['events']}
     new, disappeared, mirrored = _upstream_diff(set(events), set(upstream_events.keys()))
-
-    if recurse:
-        for ext_id in new:
-            upstream_data = upstream_events[ext_id]
-            _upstream_sync_event(upstream_data, ext_id, class_inst=obj)
 
     m.ClassInstanceEvent.objects.filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
@@ -450,6 +450,15 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     disappeared = m.ClassInstanceEvent.objects.filter(external_id__in=disappeared)
     for event in disappeared.all():
         logger.warning(f"{event} removed from {obj}.")
+
+    if recurse == Recursivity.CREATION:
+        for ext_id in new:
+            upstream_data = upstream_events[ext_id]
+            _upstream_sync_event(upstream_data, ext_id, class_inst=obj)
+    elif recurse == Recursivity.FULL:
+        for ext_id in chain(new, mirrored):
+            upstream_data = upstream_events[ext_id]
+            _upstream_sync_event(upstream_data, ext_id, class_inst=obj)
 
     # ---------  Related enrollments ---------
     enrollments = obj.enrollments.exclude(external_id=None).all()
@@ -459,10 +468,6 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     if m.Enrollment.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some enrollments of class instance {obj} belong to another instance: {new}")
 
-    if recurse:
-        for ext_id in new:
-            sync_enrollment(ext_id, class_inst=obj)
-
     m.Enrollment.objects.filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
     m.Enrollment.objects.filter(external_id__in=disappeared).update(disappeared=True)
@@ -470,24 +475,28 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     for enrollment in disappeared.all():
         logger.warning(f"{enrollment} removed from {obj}.")
 
+    if recurse == Recursivity.CREATION:
+        for ext_id in new:
+            sync_enrollment(ext_id, class_inst=obj)
+    elif recurse == Recursivity.FULL:
+        for ext_id in chain(new, mirrored):
+            sync_enrollment(ext_id, class_inst=obj)
+
     # ---------  OTHER TODO ---------
-    if recurse:
-        # Must happen after the shift sync to have the teachers known
-        sync_class_instance_files(external_id, class_inst=obj)
+    # if recurse:
+    #     # Must happen after the shift sync to have the teachers known
+    #     sync_class_instance_files(external_id, class_inst=obj)
     # TODO
     # evaluations = obj.enrollments.exclude(external_id=None).all()
     # _related(evaluations, upstream['evaluations'], sync_evaluation, m.ClassEvaluation, recurse, class_inst=obj)
 
 
-def sync_class_instance_files(external_id, class_inst, update=False):
+def sync_class_instance_files(external_id, class_inst):
     """
     Sync the file information in a class instance
     :param external_id: The foreign id of the class instance that is being sync'd
     :param class_inst: The class instance
-    :param update: Whether to request CLIPy to update this information from CLIP before updating Supernova's
     """
-    if update:
-        _update(f"http://{CLIPY['host']}/update/class_files/{external_id}")
     upstream = _request_class_instance_files(external_id)
     _upstream_sync_class_instance_files(upstream, external_id, class_inst)
 
@@ -505,7 +514,8 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
 
     upstream = {entry['hash']: entry for entry in upstream}
     upstream_ids = set(upstream.keys())
-    downstream_files = {ifile.file.hash: ifile for ifile in class_inst.files.all()}
+    downstream_files = {ifile.file.hash: ifile
+                        for ifile in class_inst.files.select_related('file').exclude(external_id=None).all()}
     downstream_ids = set(downstream_files.keys())
     new = upstream_ids.difference(downstream_ids)
     removed = downstream_ids.difference(upstream_ids)
@@ -611,7 +621,11 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
                   'attendance', 'attendance_date', 'improvement_grade', 'improvement_grade_date',
                   'continuous_grade', 'continuous_grade_date', 'recourse_grade', 'recourse_grade_date',
                   'special_grade', 'special_grade_date', 'approved'))
-    student = m.Student.objects.get(external_id=upstream['student'])
+    student_ext_id = upstream['student']
+    try:
+        student = m.Student.objects.get(external_id=student_ext_id)
+    except ObjectDoesNotExist:
+        student = sync_student(student_ext_id)
 
     if (student_year := upstream['student_year']) is not None:
         if student.year is None or student_year > student.year:
@@ -697,7 +711,7 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
         logger.info(f"Inserted new enrollment {obj}")
 
 
-def sync_shift(external_id, class_inst=None, recurse=False):
+def sync_shift(external_id, class_inst=None, recurse=Recursivity.NONE):
     """
     Sync the information in a shift
     :param external_id: The foreign id of the shift that is being sync'd
@@ -764,8 +778,11 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
         logger.critical(f"Some instances of shift {obj} belong to another shift: {new}")
         return
 
-    if recurse:
+    if recurse == Recursivity.CREATION:
         for ext_id in new:
+            sync_shift_instance(ext_id, shift=obj)
+    elif recurse == Recursivity.FULL:
+        for ext_id in chain(new, mirrored):
             sync_shift_instance(ext_id, shift=obj)
 
     m.ShiftInstance.objects.filter(external_id__in=mirrored). \
@@ -1008,49 +1025,74 @@ def _upstream_sync_students(upstream_list):
     existing = {student.external_id: student for student in m.Student.objects.exclude(external_id=None).all()}
 
     for upstream in upstream_list:
-        upstream_course = None
-        if upstream_course_id := upstream['course']:
-            try:
-                upstream_course = m.Course.objects.get(external_id=upstream_course_id)
-            except m.Course.DoesNotExist:
-                logger.error(f'Course {upstream_course} does not exist')
-
-        if (ext_id := upstream['id']) in existing:
-            obj = existing[ext_id]
-            changed = False
-            if (upstream_abbr := upstream['abbr']) is not None:
-                if obj.abbreviation != upstream_abbr:
-                    logger.warning(f'Student {obj} abbreviation changed ("{obj.abbreviation}" to "{upstream_abbr}").')
-                obj.abbreviation = upstream_abbr
-                changed = True
-            if upstream_course:
-                if not obj.course or obj.course != upstream_course:
-                    obj.course = upstream_course
-                    changed = True
-            if (upstream_name := upstream['name']) is not None:
-                if obj.name != upstream_name:
-                    logger.warning(f"Student {obj} name changed from {obj.external_data['name']} to {upstream_name}")
-                    obj.name = upstream_name
-                    changed = True
-
-            if obj.external_data != upstream:
-                obj.external_data = upstream
-                changed = True
-
-            if changed:
-                obj.save()
-            continue
+        ext_id = upstream['id']
+        if ext_id in existing:
+            _upstream_sync_student(upstream, student=existing[ext_id])
         else:
-            obj = m.Student.objects.create(
-                name=upstream['name'],
-                abbreviation=upstream['abbr'],
-                iid=upstream['id'],
-                number=upstream['id'],
-                course=upstream_course,
-                external_id=upstream['id'],
-                external_update=make_aware(datetime.now()),
-                external_data={'upstream': upstream})
-            logger.info(f'Created student {obj}.')
+            _upstream_sync_student(upstream)
+
+
+def sync_student(external_id):
+    """
+    Synchronizes a single student to the current upstream
+    """
+    upstream = _request_student(external_id)
+    return _upstream_sync_student(upstream)
+
+
+def _request_student(external_id):
+    r = requests.get(f"http://{CLIPY['host']}/student/{external_id}")
+    if r.status_code != 200:
+        raise Exception("Unable to fetch students")
+    return r.json()
+
+
+def _upstream_sync_student(upstream, student=None):
+    upstream_course = None
+    if upstream_course_id := upstream['course']:
+        try:
+            upstream_course = m.Course.objects.get(external_id=upstream_course_id)
+        except m.Course.DoesNotExist:
+            logger.error(f'Course {upstream_course} does not exist')
+
+    if student:
+        changed = False
+        if (upstream_abbr := upstream['abbr']) is not None:
+            if student.abbreviation != upstream_abbr:
+                logger.warning(f'Student {student} abbreviation changed '
+                               f'("{student.abbreviation}" to "{upstream_abbr}").')
+            student.abbreviation = upstream_abbr
+            changed = True
+        if upstream_course:
+            if not student.course or student.course != upstream_course:
+                student.course = upstream_course
+                changed = True
+        if (upstream_name := upstream['name']) is not None:
+            if student.name != upstream_name:
+                logger.warning(f"Student {student} name changed "
+                               f"from {student.external_data['name']} to {upstream_name}")
+                student.name = upstream_name
+                changed = True
+
+        if student.external_data != upstream:
+            student.external_data = upstream
+            changed = True
+
+        if changed:
+            student.save()
+        return student
+    else:
+        student = m.Student.objects.create(
+            name=upstream['name'],
+            abbreviation=upstream['abbr'],
+            iid=upstream['id'],
+            number=upstream['id'],
+            course=upstream_course,
+            external_id=upstream['id'],
+            external_update=make_aware(datetime.now()),
+            external_data={'upstream': upstream})
+        logger.info(f'Created student {student}.')
+        return student
 
 
 def sync_teachers():
@@ -1138,6 +1180,41 @@ def calculate_active_classes():
             klass.save()
 
 
+def request_admissions_update():
+    _update(f"http://{CLIPY['host']}/update/admissions/")
+
+
+def request_teachers_update():
+    _update(f"http://{CLIPY['host']}/update/teachers/")
+
+
+def request_classes_update():
+    _update(f"http://{CLIPY['host']}/update/classes/")
+
+
+def request_class_instance_update(external_id, update_info=False, update_enrollments=False, update_shifts=False,
+                                  update_events=False, update_files=False):
+    """
+    :param external_id: The foreign id of the class instance that is being sync'd
+    :param update_info: Whether to request CLIPy to update the class info from CLIP before updating Supernova's
+    :param update_enrollments: Whether to request CLIPy to update the class enrollments from CLIP before updating Supernova's
+    :param update_shifts: Whether to request CLIPy to update the class shifts from CLIP before updating Supernova's
+    :param update_events: Whether to request CLIPy to update the class events from CLIP before updating Supernova's
+    :param update_files: Whether to request CLIPy to update this information from CLIP before updating Supernova's
+    """
+
+    if update_info:
+        _update(f"http://{CLIPY['host']}/update/class_info/{external_id}")
+    if update_enrollments:
+        _update(f"http://{CLIPY['host']}/update/class_enrollments/{external_id}")
+    if update_shifts:
+        _update(f"http://{CLIPY['host']}/update/shifts/{external_id}")
+    if update_events:
+        _update(f"http://{CLIPY['host']}/update/events/{external_id}")
+    if update_files:
+        _update(f"http://{CLIPY['host']}/update/class_files/{external_id}")
+
+
 def _update(url):
     if requests.get(url).status_code != 200:
         raise Exception(f"Endpoint {url} failed to update")
@@ -1157,27 +1234,6 @@ def _upstream_diff(current_objs, clip_ids):
     disappeared = current_ids.difference(clip_ids)
     mirrored = inserted_ids.intersection(clip_ids)
     return new, disappeared, mirrored
-
-
-def _related(children, clip_children_ids, related_func, related_type, recurse, **recurse_kwargs):
-    """
-    Aux function to handle the children related info
-    :param children: Current children objects
-    :param clip_children_ids: Upstream children external ids
-    :param related_func: Function that handles every children (if recurse is true)
-    :param related_type: Type of the children objects
-    :param recurse: Whether to recurse the instantiation (same process for children and so forth)
-    :param recurse_kwargs: Args to pass to the related_func
-    """
-    new, disappeared, mirrored = _upstream_diff(set(children), set(clip_children_ids))
-
-    if recurse:
-        [related_func(ext_id, recurse=True, **recurse_kwargs) for ext_id in new]
-
-    disappeared = related_type.objects.filter(external_id__in=disappeared)
-    for disappeared_obj in disappeared.all():
-        logger.warning(f"{disappeared_obj} disappeared.")
-    related_type.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
 
 
 def _closest_teacher(teachers, name):
