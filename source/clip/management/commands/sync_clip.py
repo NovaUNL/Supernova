@@ -25,11 +25,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('type', nargs='+', type=str)
-
-        parser.add_argument(
-            '--no_upstream_update',
-            help='Do not request CLIPy to update itself when prompting for data',
-        )
+        parser.add_argument('--no_update', help='Do not request CLIPy to update itself when prompting for data')
+        parser.add_argument('--assert_buildings', action='store_true', help='Assert buildings are inserted')
+        parser.add_argument('--rooms', action='store_true', help='Synchronize rooms')
+        parser.add_argument('--departments', action='store_true', help='Synchronize departments')
+        parser.add_argument('--courses', action='store_true', help='Synchronize courses')
 
     def handle(self, *args, **options):
         sync_type = options['type'][0]
@@ -37,15 +37,28 @@ class Command(BaseCommand):
             print("Bad type. Available types are: 'fast', 'slow' and 'full'.")
             exit(-1)
 
-        update = not options['no_upstream_update']
+        update = not options['no_update']
+        assert_buildings = options['no_building_confirmation']
+        room_sync = options['rooms']
+        department_sync = options['departments']
+        course_sync = options['courses']
 
         # Very fast
-        sync.assert_buildings_inserted()
-        sync.sync_rooms()
-        log.info("Syncing courses")
-        sync.sync_courses()
-        log.info("Syncing teachers")
-        sync.sync_departments()
+        if assert_buildings:
+            sync.assert_buildings_inserted()
+        if room_sync:
+            if update:
+                sync.request_rooms_update()
+            log.info("Syncing rooms")
+            sync.sync_rooms()
+        if course_sync:
+            if update:
+                sync.request_courses_update()
+            log.info("Syncing courses")
+            sync.sync_courses()
+        if department_sync:
+            log.info("Syncing departments")
+            sync.sync_departments()
 
         if sync_type == "fast":
             # Update (upstream) particularly relevant class instances
@@ -69,6 +82,7 @@ class Command(BaseCommand):
             parallel_run(class_instances, fast_instance_update)
 
             propagate_disappearances()
+
         elif sync_type == "slow":
             # Update upstream class data, will create related data but it wont update existing data
             if update:
@@ -97,6 +111,11 @@ class Command(BaseCommand):
                         update_shifts=update,
                         update_events=update,
                         update_files=update))
+
+            # Synchronize found students
+            log.info("Syncing students")
+            sync.sync_students()
+
             logging.info("Syncing class instances")
             parallel_run(class_instances, slow_instance_update)
             propagate_disappearances()
@@ -106,6 +125,7 @@ class Command(BaseCommand):
             if update:
                 sync.request_teachers_update()
             sync.sync_teachers()
+
         elif sync_type == "full":
             if update:
                 # Update the National access contest, no dependencies
@@ -120,10 +140,6 @@ class Command(BaseCommand):
             current_class_instance_ids = m.ClassInstance.objects \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .values_list('id', flat=True)
-
-            # Synchronize leftover students
-            log.info("Syncing students")
-            sync.sync_students()
 
             # Sync classes with recursive creation
             parallel_run(
@@ -152,6 +168,10 @@ class Command(BaseCommand):
                         update_shifts=update,
                         update_events=update,
                         update_files=update))
+
+            # Synchronize leftover students
+            log.info("Syncing students")
+            sync.sync_students()
 
             logging.info("Syncing class instances")
             parallel_run(

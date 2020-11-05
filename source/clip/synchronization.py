@@ -1180,6 +1180,14 @@ def calculate_active_classes():
             klass.save()
 
 
+def request_courses_update():
+    _update(f"http://{CLIPY['host']}/update/courses/")
+
+
+def request_rooms_update():
+    _update(f"http://{CLIPY['host']}/update/rooms/")
+
+
 def request_admissions_update():
     _update(f"http://{CLIPY['host']}/update/admissions/")
 
