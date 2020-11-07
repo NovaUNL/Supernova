@@ -472,8 +472,6 @@
     display: block
     background-size: contain
     margin-bottom: 2px
-    cursor: pointer
-
 
   > a.big
     border: 2px solid var(--input-dark)
@@ -492,6 +490,9 @@
   > span
     font-weight: bold
     font-size: 1.2em
+
+  [aria-label][data-balloon-pos]
+    cursor: auto
 
   .upvote-btn
     background-image: url("/static/img/icons/up.svg")
@@ -544,6 +545,9 @@
 
   .answer-btn.for-teacher.set.teacher-set:hover
     background-image: url("/static/img/icons/check.svg")
+
+  .upvote-btn, .downvote-btn, .answer-btn.for-author, .answer-btn.for-teacher
+    cursor: pointer !important
 
 .postable-footer
   display: flex
