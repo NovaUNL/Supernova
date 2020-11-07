@@ -1224,8 +1224,9 @@ def request_class_instance_update(external_id, update_info=False, update_enrollm
 
 
 def _update(url):
-    if requests.get(url).status_code != 200:
-        raise Exception(f"Endpoint {url} failed to update")
+    status_code = requests.get(url).status_code
+    if status_code != 200:
+        logger.error(f"Endpoint {url} failed to update. Status code {status_code}")
 
 
 def _upstream_diff(current_objs, clip_ids):
