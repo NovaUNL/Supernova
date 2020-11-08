@@ -1,9 +1,9 @@
 <div class="header-decorator">
   <div class="header-decorator-options">
     <ul>
-      {% if perms.synopses.change_section %}
+      {% if perms.learning.change_section %}
         <li><a href="{% url 'learning:subarea_section_create' subarea.id %}">Criar nova secção</a></li>{% endif %}
-      {% if perms.synopses.add_section %}
+      {% if perms.learning.add_section %}
         <li><a href="{% url 'learning:subarea_edit' subarea.id %}">Editar</a></li>{% endif %}
     </ul>
   </div>
