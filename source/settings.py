@@ -287,10 +287,6 @@ assert os.path.isfile(CONFIG_PATH)
 ABS_CONFIG_PATH = os.path.abspath(CONFIG_PATH)
 CRONTAB_COMMAND_PREFIX = "SN_CONFIG=%s" % ABS_CONFIG_PATH
 
-CLIPY = {
-    'host': "clipy:5000",
-    'institution': 12345
-}
 
 INDEX_MESSAGE = None
 
@@ -312,6 +308,15 @@ REWARDS = {
     'downvoted': -15,
     'invited': 1000,
 }
+
+
+CLIPY = {
+    'host': "clipy:5000",
+}
+CLIPY_HOST = "clipy:5000"
+CLIPY_MIN_UPDATE_MARGIN = 6  # Hours
+CLIPY_MIN_EXPLICIT_UPDATE_MARGIN = 5  # Minutes
+CLIPY_RECENT_YEAR_MARGIN = 2  # Years
 
 with open(CONFIG_PATH) as file:
     locals().update(json.load(file))

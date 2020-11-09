@@ -38,7 +38,7 @@ class Command(BaseCommand):
             exit(-1)
 
         update = not options['no_update']
-        assert_buildings = options['no_building_confirmation']
+        assert_buildings = options['assert_buildings']
         room_sync = options['rooms']
         department_sync = options['departments']
         course_sync = options['courses']
@@ -98,11 +98,12 @@ class Command(BaseCommand):
             # the updated data with every class instance derivative
             class_instances = m.ClassInstance.objects \
                 .select_related('parent') \
-                .filter(year__gte=settings.COLLEGE_YEAR - 4, external_update__lt=timezone.now() - timedelta(days=1)) \
+                .filter(year__gte=settings.COLLEGE_YEAR - settings.CLIPY_RECENT_YEAR_MARGIN,
+                        external_update__lt=timezone.now() - timedelta(days=1)) \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .all()
-            logging.info("Updating class instances")
             if update:
+                log.info("Updating class instances")
                 parallel_run(
                     class_instances,
                     lambda i: sync.request_class_instance_update(
