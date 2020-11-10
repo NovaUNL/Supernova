@@ -1,20 +1,29 @@
 from datetime import datetime, time
 
+import reversion
 from django.conf import settings
 from django.db import models as djm
 from django.urls import reverse
+from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from pilkit.processors import ResizeToFit
 from polymorphic.models import PolymorphicModel
 
 from college.choice_types import WEEKDAY_CHOICES
+from settings import THUMBNAIL_SIZE, SMALL_ICON_SIZE, BIG_ICON_SIZE
 from users import models as users
 
 
-def group_profile_pic_path(group, filename):
-    return f'g/{group.id}/pic.{filename.split(".")[-1].lower()}'
+def group_icon_path(group, filename):
+    return f'g/{group.id}/icon.{filename.split(".")[-1].lower()}'
 
 
+def group_image_path(group, filename):
+    return f'g/{group.id}/image.{filename.split(".")[-1].lower()}'
+
+
+@reversion.register(follow=['subscribable_ptr'])
 class Group(users.Subscribable):
     """
     | A set of :py:class:`users.models.User` who represent a collective entity, such as an institutional division,
@@ -33,8 +42,23 @@ class Group(users.Subscribable):
     members = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='Membership', related_name='groups_custom')
     #: The place where this group is headquartered and commonly found.
     place = djm.ForeignKey('college.Place', on_delete=djm.SET_NULL, null=True, blank=True, related_name='groups')
-    #: An image that presents this group.
-    image = djm.ImageField(upload_to=group_profile_pic_path, null=True, blank=True)
+    #: This group's icon
+    icon = djm.ImageField(upload_to=group_icon_path, null=True, blank=True)
+    #: An image that illustrates this group
+    image = djm.ImageField(upload_to=group_image_path, null=True, blank=True)
+    icon_small = ImageSpecField(
+        source='icon',
+        processors=[ResizeToFit(*SMALL_ICON_SIZE)],
+        format='PNG')
+    icon_big = ImageSpecField(
+        source='icon',
+        processors=[ResizeToFit(*BIG_ICON_SIZE)],
+        format='PNG')
+    image_thumbnail = ImageSpecField(
+        source='image',
+        processors=[ResizeToFit(*THUMBNAIL_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
 
     #: The default role that users get assigned upon joining this group.
     default_role = djm.ForeignKey('Role', null=True, blank=True, on_delete=djm.SET_NULL, related_name='default_to')

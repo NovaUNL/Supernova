@@ -1,13 +1,16 @@
 from datetime import datetime, time
 from itertools import chain
 
+import reversion
 from django.core.cache import cache
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils.timezone import make_aware
+from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from pilkit.processors import SmartResize
 from polymorphic.models import PolymorphicModel
 
 import settings
@@ -25,6 +28,11 @@ class User(AbstractUser):
     last_activity = djm.DateTimeField(auto_now_add=True)
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
     picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
+    picture_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
     webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
 
     REQUIRED_FIELDS = ['email', 'nickname']

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'captcha',
     'ckeditor',
     'ckeditor_uploader',
+    'imagekit',
     'markdownx',
     'leaflet',
     'polymorphic',
@@ -135,6 +136,14 @@ PROTECTED_URL = '/protected'
 PROTECTED_ROOT = '/srv/protected'
 EXTERNAL_URL = '/external'
 EXTERNAL_ROOT = '/srv/external'
+
+
+
+THUMBNAIL_SIZE = (220, 150)
+COVER_SIZE = (1920, 500)
+BIG_ICON_SIZE = (256, 256)
+MEDIUM_ICON_SIZE = (128, 128)
+SMALL_ICON_SIZE = (64, 64)
 
 # CKEditor plugin
 CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'

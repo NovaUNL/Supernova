@@ -10,12 +10,14 @@ from django.contrib.gis.db import models as gis
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Sum, F
 from django.urls import reverse
+from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from pilkit.processors import SmartResize, ResizeToFit
 
 from users.models import Activity
 from feedback import models as feedback
-from settings import COLLEGE_YEAR, COLLEGE_PERIOD
+from settings import COLLEGE_YEAR, COLLEGE_PERIOD, THUMBNAIL_SIZE, COVER_SIZE, MEDIUM_ICON_SIZE
 from . import choice_types as ctypes
 
 logger = logging.getLogger(__name__)
@@ -142,6 +144,16 @@ class Building(Importable):
     location = gis.PointField(geography=True, null=True)
     #:  Picture illustrating this building
     picture = djm.ImageField(upload_to=building_pic_path, null=True, blank=True)
+    picture_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[ResizeToFit(*THUMBNAIL_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
+    picture_cover = ImageSpecField(
+        source='picture',
+        processors=[ResizeToFit(*COVER_SIZE)],
+        format='JPEG',
+        options={'quality': 80})
 
     class Meta:
         ordering = ['name']
@@ -167,6 +179,11 @@ class Department(Importable):
     extinguished = djm.BooleanField(default=True)
     #: Picture illustrating this department
     picture = djm.ImageField(upload_to=department_pic_path, null=True, blank=True)
+    picture_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*THUMBNAIL_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
     #: URL to this departments's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
     #: Phone number in the format +country number,extension
@@ -593,10 +610,13 @@ class Teacher(Importable):
     phone = djm.CharField(max_length=20, null=True, blank=True)
     #:  A picture of this teacher
     picture = djm.ImageField(upload_to=teacher_pic_path, null=True, blank=True)
+    picture_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*MEDIUM_ICON_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
     #:  The room that a teacher occupies
     room = djm.ForeignKey(Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='teachers')
-    #: Changes performed on this teacher's object
-    changes = GenericRelation('AcademicDataChange', related_query_name='teacher')
     #: Reviews that are linked to this object
     reviews = GenericRelation(feedback.Review)
     #: The consent this teacher gave for uploaded files
