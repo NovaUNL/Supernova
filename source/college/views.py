@@ -264,10 +264,10 @@ def class_view(request, class_id):
     context['reviews'] = feedback.Review.objects.filter(class_instance__parent=klass).all()[:5]
     context['small_question_list'] = True
     context['questions'] = klass.linked_questions \
-        .order_by('timestamp') \
-        .annotate(answer_count=Count('answers')) \
-        .reverse() \
-        .all()[:5]
+                               .order_by('timestamp') \
+                               .annotate(answer_count=Count('answers')) \
+                               .reverse() \
+                               .all()[:5]
     context['teachers'] = m.Teacher.objects \
         .filter(shifts__class_instance__parent=klass) \
         .order_by('name') \
@@ -565,7 +565,7 @@ def class_instance_file_download(request, instance_id, file_hash):
     # Is this file_instance enrollment-public?
     if not permission and class_file.visibility == m.ctypes.FileVisibility.ENROLLED:
         permission = m.ClassFile.objects \
-            .filter(file=class_file,
+            .filter(file=class_file.file,
                     class_instance__student__user=request.user) \
             .exists()
 
