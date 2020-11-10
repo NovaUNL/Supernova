@@ -124,6 +124,7 @@ class Group(users.Subscribable):
             subscriber.clear_notification_cache()
 
 
+@reversion.register()
 class Role(djm.Model):
     """
     | A role is both a title for users within a group and a set of permissions within that same group.
@@ -217,6 +218,7 @@ class Activity(PolymorphicModel):
         verbose_name_plural = "activities"
 
 
+@reversion.register()
 class Announcement(Activity):
     """The activity that represents the publishing of a textual information by a :py:class:`Group`"""
     #: Announcement title.
@@ -349,10 +351,8 @@ class ScheduleRevoke(Activity):
         null=True,
         related_name='replaced_revoked_entries')
 
-
     def __str__(self):
         return f"Cancelamento de {self.entry}"
-
 
     @property
     def activity_name(self):
