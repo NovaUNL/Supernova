@@ -15,7 +15,6 @@ from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 from pilkit.processors import SmartResize, ResizeToFit
 
-from users.models import Activity
 from feedback import models as feedback
 from settings import COLLEGE_YEAR, COLLEGE_PERIOD, THUMBNAIL_SIZE, COVER_SIZE, MEDIUM_ICON_SIZE
 from . import choice_types as ctypes
@@ -364,7 +363,7 @@ class ClassInstance(Importable):
     #: Class this refers to
     parent = djm.ForeignKey(Class, on_delete=djm.PROTECT, related_name='instances')
     #: Department this instance belonged to
-    department = djm.ForeignKey(Department, on_delete=djm.PROTECT, related_name='class_instances')
+    department = djm.ForeignKey(Department, null=True, on_delete=djm.PROTECT, related_name='class_instances')
     #: Period this happened on (enumeration)
     period = djm.IntegerField(choices=ctypes.Period.CHOICES)
     #: Year of lecturing
