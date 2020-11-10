@@ -197,8 +197,6 @@ class Department(Importable):
         blank=True,
         on_delete=djm.PROTECT,
         related_name='presided_departments')
-    #: Changes performed on this department object
-    changes = GenericRelation('AcademicDataChange', related_query_name='department')
 
     class Meta:
         ordering = ['name']
@@ -304,8 +302,6 @@ class Course(Importable):
         related_name='coordinated_courses')
     #: URL to this course's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
-    #: Changes performed on this course object
-    changes = GenericRelation('AcademicDataChange', related_query_name='course')
 
     class Meta:
         ordering = ['name']
@@ -335,8 +331,6 @@ class Class(Importable):
     department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
     #: URL to this classe's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
-    #: Changes performed on this class object
-    changes = GenericRelation('AcademicDataChange', related_query_name='klass')
     # Cached
     #: The average grade in this instance
     avg_grade = djm.FloatField(null=True, blank=True)
@@ -385,8 +379,6 @@ class ClassInstance(Importable):
     visibility = djm.IntegerField(choices=ctypes.FileVisibility.CHOICES, default=ctypes.FileVisibility.STUDENTS)
     #: Reviews that are linked to this object
     reviews = GenericRelation(feedback.Review, related_query_name='class_instance')
-    #: Changes performed on this class instance object
-    changes = GenericRelation('AcademicDataChange', related_query_name='class_instance')
     # Cached
     #: The average grade in this instance
     avg_grade = djm.FloatField(null=True, blank=True)
@@ -704,8 +696,6 @@ class File(Importable):
     author_str = djm.CharField(max_length=256, null=True, blank=True)
     #: Digital object identifier
     doi = djm.URLField(null=True, blank=True)
-    #: Changes performed on this file object
-    changes = GenericRelation('AcademicDataChange', related_query_name='file')
 
     def __str__(self):
         if self.name:
@@ -755,8 +745,6 @@ class ClassFile(Importable):
         blank=True,
         on_delete=djm.SET_NULL,
         related_name='class_files')
-    #: Changes performed on this class file object
-    changes = GenericRelation('AcademicDataChange', related_query_name='class_file')
 
     def __str__(self):
         return self.name
@@ -799,18 +787,3 @@ class Curriculum(djm.Model):
     class Meta:
         ordering = ['year', 'period_type', 'period']
         unique_together = ['course', 'corresponding_class']
-
-
-class AcademicDataChange(Activity):
-    """An activity is an action taken by a user at a given point in time."""
-    content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
-    object_id = djm.PositiveIntegerField()
-    changed_object = GenericForeignKey('content_type', 'object_id')
-    #: A dict describing changes {attrs=>[], new=>{attr=>val}, old=>{attr=>val}}
-    changes = djm.JSONField()
-
-    class Meta:
-        verbose_name_plural = "activities"
-
-    def __str__(self):
-        return f'Atributos {self.changes["attrs"]} alterados em {self.changed_object}.'
