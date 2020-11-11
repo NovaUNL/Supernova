@@ -1,6 +1,12 @@
 {% extends 'groups/base_simple.html' %}
 
+{% load static %}
+
 {% include 'groups/group_cover_image.html' %}
+
+{% block head %}
+  <script src="{% static 'js/content-rendering.js' %}"></script>
+{% endblock %}
 
 {% block content_wrapper %}
   <div class="col">
