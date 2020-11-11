@@ -112,7 +112,7 @@ def subarea_edit_view(request, subarea_id):
     area = subarea.area
 
     if request.method == 'POST':
-        form = f.SubareaForm(data=request.POST, instance=subarea)
+        form = f.SubareaForm(request.POST, request.FILES, instance=subarea)
         if form.is_valid():
             with reversion.create_revision():
                 form.save()

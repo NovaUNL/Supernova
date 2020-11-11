@@ -9,7 +9,7 @@
         <h2>{{ title }}</h2>
       </div>
       <div class="pane-content">
-        <form method="post" action="{{ action_page }}">
+        <form method="post" action="{{ action_page }}" enctype="multipart/form-data">
           {% csrf_token %}
           {{ form.non_field_errors }}
           {{ form.as_p }}
