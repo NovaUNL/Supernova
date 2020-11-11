@@ -111,6 +111,8 @@ CACHES = {
     }
 }
 
+FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10  # 10 MB
+
 # Internationalization
 LANGUAGE_CODE = 'pt-pt'
 TIME_ZONE = 'Europe/Lisbon'
