@@ -202,16 +202,6 @@ CKEDITOR_CONFIGS = {
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
 
-if os.path.isdir(f'{BASE_DIR}/.git/'):
-    VERSION = subprocess.check_output([
-        "git",
-        f"--git-dir={BASE_DIR}/.git/",
-        "rev-parse",
-        "HEAD"
-    ]).decode('ascii')
-else:
-    VERSION = "0.0"
-
 REGISTRATIONS_ENABLED = False
 REGISTRATIONS_ATTEMPTS_TOKEN = 3
 REGISTRATIONS_TIMEWINDOW = 60  # Minutes
