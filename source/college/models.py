@@ -224,6 +224,11 @@ class Place(djm.Model):
     features = djm.ManyToManyField('PlaceFeature', blank=True)
     #: Picture illustrating this place
     picture = djm.ImageField(upload_to=place_pic_path, null=True, blank=True)
+    picture_cover = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*COVER_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
 
     def __str__(self):
         return f'{self.name} ({self.building})'

@@ -48,7 +48,7 @@
                   {% if profile_user.picture %}
                     <div style="margin-right: 10px">
                       Fotografia atual:<br>
-                      <img alt="Fotografia de perfil" src="{% get_media_prefix %}{{ profile_user.picture }}"
+                      <img alt="Fotografia de perfil" src="{{ profile_user.picture.url }}"
                            style="max-width: 500px; max-height: 300px;">
                     </div>
                   {% endif %}

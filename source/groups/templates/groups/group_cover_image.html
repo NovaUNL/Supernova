@@ -1,0 +1,12 @@
+{% block head %}
+  {% spaceless %}
+    <style>
+      {{ block.super }}
+      {% if group.image %}
+          .header-background:after {
+              background-image: url("{{ group.icon_big.url}}");
+          }
+      {% endif %}
+    </style>
+  {% endspaceless %}
+{% endblock %}

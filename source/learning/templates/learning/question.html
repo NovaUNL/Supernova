@@ -42,7 +42,7 @@
             </div>
           </div>
           <div class="author user">
-            <span class="pic" style="background-image: url('{% if question.user.picture %}{{ question.user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
+            <span class="pic" style="background-image: url('{% if question.user.picture %}{{ question.user.picture_thumbnail.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
             <div>
               <span><a href="{% url 'users:profile' question.user.nickname %}">{{ question.user.nickname }}</a> ({{ question.user.points}} <img alt="Pontos" src="{% static 'img/icons/star.svg' %}">)</span>
               <span>{{ question.timestamp }}</span>
@@ -72,7 +72,7 @@
               <a href="{% url 'learning:answer_edit' answer.activity_id %}">Editar</a>
             </div>
             <div class="author user">
-              <span class="pic" style="background-image: url('{% if answer.user.picture %}{{ answer.user.picture.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
+              <span class="pic" style="background-image: url('{% if answer.user.picture %}{{ answer.user.picture_thumbnail.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
               <div>
                 <span><a href="{% url 'users:profile' answer.user.nickname %}">{{ answer.user.nickname }}</a> ({{ question.user.points}} <img alt="Pontos" src="{% static 'img/icons/star.svg' %}">)</span>
                 <span>{{ answer.timestamp }}</span>

@@ -21,7 +21,9 @@
         <div class="pane-content news">
           {% for news_item in news %}
             <div class="news-list-item">
-              {% if news_item.cover_img %}<img src="{% get_media_prefix %}{{ news_item.cover_img }}" alt="{{ news_item.title }}">{% endif %}
+              {% if news_item.cover_img %}
+                <img src="{{ news_item.cover_thumbnal.url }}" alt="{{ news_item.title }}">
+              {% endif %}
               <div>
                 <h3><a href="{% url 'news:item' news_item.id %}">{{ news_item.title }}</a></h3>
                 {% if news_item.author %}

@@ -1,6 +1,9 @@
 from django.db import models as djm
+from imagekit.models import ImageSpecField
+from pilkit.processors import ResizeToFit
 
 from college.models import Building, Place
+from settings import THUMBNAIL_SIZE, COVER_SIZE
 
 
 def service_pic_path(service, filename):
@@ -23,6 +26,16 @@ class Service(djm.Model):
     map_tag = djm.CharField(max_length=15)
     #: Picture that represents this service
     picture = djm.ImageField(upload_to=service_pic_path, null=True, blank=True)
+    picture_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[ResizeToFit(*THUMBNAIL_SIZE)],
+        format='JPEG',  # TODO change to WEBP once Big Sur is widespread
+        options={'quality': 60})
+    picture_cover = ImageSpecField(
+        source='picture',
+        processors=[ResizeToFit(*COVER_SIZE)],
+        format='PNG',  # TODO change to WEBP once Big Sur is widespread
+        options={'quality': 60})
 
     ACADEMIC = 0
     MEAL_PLACE = 1

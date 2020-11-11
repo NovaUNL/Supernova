@@ -13,7 +13,7 @@
       </ul>
     </div>
     {% if teacher.picture %}
-      <h1><img class="highres" src="{{ teacher.picture.url }}">{{ teacher.name }}</h1>
+      <h1><img class="highres" src="{{ teacher.picture_thumbnail.url }}">{{ teacher.name }}</h1>
     {% else %}
       <h1><img class="highres" src="{% static 'img/user.svg' %}">{{ teacher.name }}</h1>
     {% endif %}

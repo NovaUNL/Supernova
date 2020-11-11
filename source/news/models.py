@@ -2,8 +2,10 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.db import models as djm
 from django.urls import reverse
+from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from pilkit.processors import SmartResize
 
 
 class NewsTag(djm.Model):
@@ -37,6 +39,11 @@ class NewsItem(djm.Model):
     tags = djm.ManyToManyField(NewsTag, blank=True)
     source = djm.URLField(null=True, blank=True, max_length=256)
     cover_img = djm.ImageField(null=True, blank=True, max_length=256, upload_to=news_item_picture)
+    cover_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
     generated = djm.BooleanField(default=True)
 
     class Meta:

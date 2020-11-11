@@ -8,7 +8,7 @@
     {% for building in buildings %}
       <a href="{% url 'college:building' building.id %}">
         {% if building.picture %}
-          <div class="flex-grid-item" style="background-image: url({{ building.picture.url }})">
+          <div class="flex-grid-item" style="background-image: url({{ building.picture_thumbnail.url }})">
             <div class="flex-grid-item-top">
               <span>{{ building.name }}</span>
             </div>

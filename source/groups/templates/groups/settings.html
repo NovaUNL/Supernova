@@ -1,15 +1,6 @@
 {% extends 'groups/base_simple.html' %}
-{% block head %}
-  {% spaceless %}
-    <style>
-      {% if group.image %}
-          .header-background:after {
-              background-image: url("{{ group.image.url}}");
-          }
-      {% endif %}
-    </style>
-  {% endspaceless %}
-{% endblock %}
+
+{% include 'groups/group_cover_image.html' %}
 
 {% block content_wrapper %}
   <div class="col">

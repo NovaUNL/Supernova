@@ -1,14 +1,7 @@
 {% extends 'groups/base_simple.html' %}
 {% load static %}
-{% block head %}
-  <style>
-    {% if group.image %}
-        .header-background:after {
-            background-image: url("{{ group.image.url}}");
-        }
-    {% endif %}
-  </style>
-{% endblock %}
+
+{% include 'groups/group_cover_image.html' %}
 
 {% block group_content %}
   <div class="flex-pane">

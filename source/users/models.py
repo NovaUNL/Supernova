@@ -28,9 +28,14 @@ class User(AbstractUser):
     last_activity = djm.DateTimeField(auto_now_add=True)
     residence = djm.CharField(max_length=64, null=True, blank=True, verbose_name='Residência')
     picture = djm.ImageField(upload_to=user_profile_pic_path, null=True, blank=True, verbose_name='Foto')
-    picture_thumbnail = ImageSpecField(
+    picture_medium = ImageSpecField(
         source='picture',
         processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
+        format='JPEG',
+        options={'quality': 60})
+    picture_thumbnail = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*settings.SMALL_ICON_SIZE)],
         format='JPEG',
         options={'quality': 60})
     webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
