@@ -87,7 +87,7 @@
               <div class="file-list">
                 {% if community_files|length == 0 %}
                   A comunidade não adicionou ficheiros a esta unidade curricular.
-                  <small>(<a href="{% url 'college:file_upload' instance.id %}?i={{ instance.id }}">Submeter</a>)</small>
+                  <small>(<a href="{% url 'college:file_upload' %}?i={{ instance.id }}">Submeter</a>)</small>
                 {% endif %}
                 {% for ifile in community_files %}
                   <div class="file" data-mime="{{ ifile.file.mime }}">
