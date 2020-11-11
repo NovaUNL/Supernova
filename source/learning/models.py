@@ -111,6 +111,19 @@ class Section(djm.Model):
     #: Whether this section has been validated as correct by a teacher
     validated = djm.BooleanField(default=False)
 
+    #: Section type
+    TOPIC = 0
+    PERSONALITY = 1
+    APPLICATION = 2
+    type = djm.IntegerField(
+        choices=(
+            (TOPIC, 'Tópico'),
+            (PERSONALITY, 'Personalidade'),
+            (APPLICATION, 'Aplicação'),
+        ),
+        default=TOPIC,
+        verbose_name='tipo')
+
     class Meta:
         ordering = ('title',)
 

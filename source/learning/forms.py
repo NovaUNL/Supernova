@@ -29,7 +29,7 @@ class SubareaForm(djf.ModelForm):
 class SectionCreateForm(djf.ModelForm):
     class Meta:
         model = m.Section
-        fields = ('title', 'content_md', 'subarea', 'requirements')
+        fields = ('title', 'content_md', 'subarea', 'requirements', 'type')
         widgets = {
             'title': djf.TextInput(),
             'subarea': djf.HiddenInput(),
@@ -39,7 +39,7 @@ class SectionCreateForm(djf.ModelForm):
 class SectionEditForm(djf.ModelForm):
     class Meta:
         model = m.Section
-        fields = ('title', 'content_ck', 'content_md', 'subarea', 'parents', 'classes', 'requirements')
+        fields = ('title', 'content_ck', 'content_md', 'subarea', 'parents', 'classes', 'requirements', 'type')
         widgets = {
             'title': djf.TextInput(),
             'subarea': autocomplete.ModelSelect2(url='learning:subarea_ac'),
