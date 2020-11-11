@@ -6,6 +6,7 @@ from itertools import chain
 import requests
 import logging
 
+import reversion
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.timezone import make_aware
@@ -45,15 +46,16 @@ def assert_buildings_inserted():
     for building in clip_buildings:
         if building['id'] in missing:
             if building['id'] in whitelisted:
-                m.Building.objects.create(
-                    name=building['name'],
-                    iid=building['id'],
-                    external_id=building['id'],
-                    abbreviation=building['name'][:15],
-                    map_tag=building['name'][:15],
-                    frozen=False,
-                    external_update=make_aware(datetime.now()),
-                    external_data={'upstream': building})
+                with reversion.create_revision():
+                    m.Building.objects.create(
+                        name=building['name'],
+                        iid=building['id'],
+                        external_id=building['id'],
+                        abbreviation=building['name'][:15],
+                        map_tag=building['name'][:15],
+                        frozen=False,
+                        external_update=make_aware(datetime.now()),
+                        external_data={'upstream': building})
             else:
                 logger.info(f'Building {building} missing.')
 
@@ -72,45 +74,59 @@ def sync_rooms():
 
     existing = {room.external_id: room for room in m.Room.objects.all()}
     for clip_room in r.json():
-        building = m.Building.objects.filter(external_id=clip_room['building']).first()
-        if building is None:
-            logger.info(f"Skipped room {clip_room}")
+        try:
+            building = m.Building.objects.get(external_id=clip_room['building'])
+        except ObjectDoesNotExist:
+            logger.warning(f"Skipped room {clip_room} (building not found)")
             continue
 
         room = existing.get(clip_room['id'])
+
         if room is None:  # New room
-            room = m.Room(
-                name=clip_room['name'],
-                type=clip_room["type"],
-                building=building,
-                external_id=clip_room['id'],
-                iid=clip_room['id'],
-                frozen=False,
-                external_update=make_aware(datetime.now()))
-            logger.info(f'Created room {room}.')
-        else:
-            logger.debug(f'Room {room} already exists.')
-            if not room.frozen:
+            with reversion.create_revision():
+                room = m.Room.objects.create(
+                    name=clip_room['name'],
+                    type=clip_room["type"],
+                    building=building,
+                    external_id=clip_room['id'],
+                    iid=clip_room['id'],
+                    frozen=False,
+                    external_update=make_aware(datetime.now()))
+                logger.info(f'Created room {room}.')
+            continue
+
+        logger.debug(f'Room {room} already exists.')
+        if not room.frozen:
+            changed = False
+            with reversion.create_revision():
                 if room.building != building:
                     logger.warning(f'Building for room {room} changed to building {building}.')
                     room.building = building
+                    changed = True
 
                 if room.name != clip_room["name"]:
                     logger.warning(f'Room {room} changed name to {clip_room["name"]}.')
                     room.name = clip_room["name"]
+                    changed = True
 
                 if room.type != clip_room["type"]:
                     logger.warning(f'Room {room} type changed to {clip_room["type"]}.')
                     # room.type = clip_room["type"] TODO uncomment after freezing manually changed rooms
-
-        if not room.frozen:
-            door_matches = door_number_exp.search(clip_room['name'])
-            if door_matches:
-                room.floor = int(door_matches.group('floor'))
-                room.door_number = int(door_matches.group('door_number'))
+                    # changed = True
+                door_matches = door_number_exp.search(clip_room['name'])
+                if door_matches:
+                    floor = int(door_matches.group('floor'))
+                    if room.floor != floor:
+                        room.floor = floor
+                        changed = True
+                    door_number = int(door_matches.group('door_number'))
+                    if room.door_number != door_number:
+                        room.door_number = door_number
+                        changed = True
+                if changed:
+                    room.save()
             room.external_update = make_aware(datetime.now())
-
-        room.save()
+            room.save(update_fields=['external_update'])
 
 
 def sync_courses():
@@ -126,23 +142,26 @@ def sync_courses():
     for upstream_course in r.json():
         course = existing.get(upstream_course['id'])
 
-        if course is None:  # New room
+        if course is None:  # New course
             if upstream_course['deg'] is None:
                 logger.debug(f'Course {upstream_course["name"]} ignored due to null degree.')
                 continue
-            course = m.Course.objects.create(
-                name=upstream_course['name'],
-                degree=upstream_course['deg'],
-                abbreviation=upstream_course["abbr"],
-                external_id=upstream_course['id'],
-                iid=upstream_course['id'],
-                frozen=False,
-                external_update=make_aware(datetime.now()))
-            logger.info(f'Created course {course}.')
-        else:
-            logger.debug(f'Course {course} already exists.')
-            changed = False
-            if not course.frozen:
+            with reversion.create_revision():
+                course = m.Course.objects.create(
+                    name=upstream_course['name'],
+                    degree=upstream_course['deg'],
+                    abbreviation=upstream_course["abbr"],
+                    external_id=upstream_course['id'],
+                    iid=upstream_course['id'],
+                    frozen=False,
+                    external_update=make_aware(datetime.now()))
+                logger.info(f'Created course {course}.')
+            continue
+
+        logger.debug(f'Course {course} already exists.')
+        changed = False
+        if not course.frozen:
+            with reversion.create_revision():
                 if course.name != upstream_course["name"]:
                     logger.warning(f'Course {course} changed name to {upstream_course["name"]}.')
                     course.name = upstream_course["name"]
@@ -155,9 +174,11 @@ def sync_courses():
                     logger.warning(f'Course {course} changed abbreviation to {upstream_course["abbr"]}.')
                     course.abbreviation = upstream_course["abbr"]
                     changed = True
+                if changed:
+                    course.save()
 
-            if changed:
-                course.save()
+            course.external_update = make_aware(datetime.now())
+            course.save(update_fields=['external_update'])
 
 
 def sync_departments():
@@ -185,14 +206,15 @@ def _upstream_sync_departments(upstream):
 
     for clip_department in upstream:
         if clip_department['id'] in new:
-            department = m.Department.objects.create(
-                name=clip_department['name'],
-                iid=clip_department['id'],
-                external_id=clip_department['id'],
-                frozen=False,
-                external_update=make_aware(datetime.now()),
-                external_data={'upstream': upstream})
-            logger.info(f'Created department {department}.')
+            with reversion.create_revision():
+                department = m.Department.objects.create(
+                    name=clip_department['name'],
+                    iid=clip_department['id'],
+                    external_id=clip_department['id'],
+                    frozen=False,
+                    external_update=make_aware(datetime.now()),
+                    external_data={'upstream': upstream})
+                logger.info(f'Created department {department}.')
 
 
 def sync_department(department, recurse=Recursivity.NONE):
@@ -288,35 +310,37 @@ def _upstream_sync_class(upstream, external_id, recurse):
     try:
         obj = m.Class.objects.get(external_id=external_id)
         if not obj.frozen:
-            changed = False
-            if upstream['name'] != obj.name:
-                logger.warning(f"Class {obj} name changed from {obj.name} to {upstream['name']}")
-                obj.name = upstream['name']
-                changed = True
-            if upstream['abbr'] != obj.abbreviation:
-                logger.warning(f"Class {obj} abbreviation changed from {obj.abbreviation} to {upstream['abbr']}")
-                obj.abbreviation = upstream['abbr']
-                changed = True
-            if upstream['ects'] != obj.credits:
-                logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
-                obj.credits = upstream['ects']
-                changed = True
-            if obj.external_data != upstream:
-                obj.external_data = upstream
-                changed = True
-            if changed:
-                obj.save()
+            with reversion.create_revision():
+                changed = False
+                if upstream['name'] != obj.name:
+                    logger.warning(f"Class {obj} name changed from {obj.name} to {upstream['name']}")
+                    obj.name = upstream['name']
+                    changed = True
+                if upstream['abbr'] != obj.abbreviation:
+                    logger.warning(f"Class {obj} abbreviation changed from {obj.abbreviation} to {upstream['abbr']}")
+                    obj.abbreviation = upstream['abbr']
+                    changed = True
+                if upstream['ects'] != obj.credits:
+                    logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
+                    obj.credits = upstream['ects']
+                    changed = True
+                if obj.external_data != upstream:
+                    obj.external_data = upstream
+                    changed = True
+                if changed:
+                    obj.save()
     except ObjectDoesNotExist:
-        obj = m.Class.objects.create(
-            name=upstream['name'],
-            abbreviation=upstream['abbr'],
-            credits=upstream['ects'],
-            iid=upstream['id'],
-            external_id=external_id,
-            frozen=False,
-            external_update=make_aware(datetime.now()),
-            external_data={'upstream': upstream})
-        logger.info(f"Created class {obj}")
+        with reversion.create_revision():
+            obj = m.Class.objects.create(
+                name=upstream['name'],
+                abbreviation=upstream['abbr'],
+                credits=upstream['ects'],
+                iid=upstream['id'],
+                external_id=external_id,
+                frozen=False,
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
+            logger.info(f"Created class {obj}")
 
     # ---------  Related Instances ---------
     instances = obj.instances.exclude(external_id=None).all()
@@ -367,54 +391,57 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
     try:
         department = m.Department.objects.get(external_id=upstream['department_id'])
     except m.Department.DoesNotExist:
-        logger.error(f"Class instance {external_id} belongs to unknown department ({upstream['department_id']}")
-        return
+        department = None
 
     try:
         obj = m.ClassInstance.objects.get(parent=klass, external_id=external_id)
         if not obj.frozen:
-            changed = False
-            if upstream['year'] != obj.year:
-                logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream['year']}")
-                # obj.year = upstream['year']
-                # changed = True
+            with reversion.create_revision():
+                changed = False
+                if upstream['year'] != obj.year:
+                    logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream['year']}")
+                    # obj.year = upstream['year']
+                    # changed = True
 
-            if upstream['period'] != obj.period:
-                logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream['period']}")
-                # obj.period = upstream['period']
-                # changed = True
+                if upstream['period'] != obj.period:
+                    logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream['period']}")
+                    # obj.period = upstream['period']
+                    # changed = True
 
-            if obj.information is None:
-                obj.information = {'upstream': upstream['info']}
-                changed = True
+                if obj.information is None:
+                    obj.information = {'upstream': upstream['info']}
+                    changed = True
 
-            if obj.external_data != upstream:
-                obj.external_data = upstream
-                changed = True
+                if obj.external_data != upstream:
+                    obj.external_data = upstream
+                    changed = True
 
-            elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
-                obj.information['upstream'] = upstream['info']
-                changed = True
-
-            if changed:
-                obj.save()
+                elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
+                    obj.information['upstream'] = upstream['info']
+                    changed = True
+                if changed:
+                    obj.save()
     except ObjectDoesNotExist:
-        obj = m.ClassInstance.objects.create(
-            parent=klass,
-            year=upstream['year'],
-            period=upstream['period'],
-            department=department,
-            external_id=external_id,
-            information={'upstream': upstream['info']},
-            frozen=False,
-            external_update=timezone.now(),
-            external_data={'upstream': upstream})
-        logger.info(f"Class instance {obj} created")
-        if klass.department != department:
-            if klass.instances.order_by('year', 'period').reverse().first() == obj:
-                logger.warning(f'Changed class {klass} department from {klass.department} to {department}')
-                klass.department = department
-                klass.save()
+        with reversion.create_revision():
+            obj = m.ClassInstance.objects.create(
+                parent=klass,
+                year=upstream['year'],
+                period=upstream['period'],
+                department=department,
+                external_id=external_id,
+                information={'upstream': upstream['info']},
+                frozen=False,
+                external_update=timezone.now(),
+                external_data={'upstream': upstream})
+            logger.info(f"Class instance {obj} created")
+            if klass.department != department:
+                if department is None:
+                    logger.warning(f'Attempted to change class {klass} department from {klass.department} to none.')
+                else:
+                    if klass.instances.order_by('year', 'period').reverse().first() == obj:
+                        logger.info(f'Changed class {klass} department from {klass.department} to {department}')
+                        klass.department = department
+                        klass.save()
 
     # ---------  Related shifts ---------
     shifts = obj.shifts.exclude(external_id=None).all()
@@ -525,41 +552,45 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
     for hash in mirrored:
         upsteam_info = upstream[hash]
         downstream_file: m.ClassFile = downstream_files[hash]
-        changed = False
-        known_upsteam_name = None
-        if downstream_file.external_data and 'upstream' in downstream_file.external_data:
-            known_upsteam_name = downstream_file.external_data['upstream']['name']
-        file_name_diverged = downstream_file.name != known_upsteam_name
-        if known_upsteam_name != (upstream_name := upsteam_info['name']) and downstream_file.name != upstream_name:
-            logger.warning(f"{downstream_file} name changed to {upstream_name}")
-            if not file_name_diverged:
-                downstream_file.name = upstream_name
-            changed = True
-        upstream_date = make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True)
-        if downstream_file.upload_datetime != upstream_date:
-            logger.warning(f"{downstream_file} upload date changed "
-                           f"from {downstream_file.upload_datetime} to {upstream_date}")
-            downstream_file.upload_datetime = upstream_date
-            changed = True
+        if not downstream_file.frozen:
+            changed = False
+            with reversion.create_revision():
+                known_upsteam_name = None
+                if downstream_file.external_data and 'upstream' in downstream_file.external_data:
+                    known_upsteam_name = downstream_file.external_data['upstream']['name']
+                file_name_diverged = downstream_file.name != known_upsteam_name
+                if known_upsteam_name != (upstream_name := upsteam_info['name']) \
+                        and downstream_file.name != upstream_name:
+                    logger.warning(f"{downstream_file} name changed to {upstream_name}")
+                    if not file_name_diverged:
+                        downstream_file.name = upstream_name
+                    changed = True
+                upstream_date = make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True)
+                if downstream_file.upload_datetime != upstream_date:
+                    logger.warning(f"{downstream_file} upload date changed "
+                                   f"from {downstream_file.upload_datetime} to {upstream_date}")
+                    downstream_file.upload_datetime = upstream_date
+                    changed = True
 
-        uploader_teacher = _closest_teacher(teachers, upsteam_info['uploader'])
-        if downstream_file.uploader_teacher != uploader_teacher:
-            logger.warning(f"{downstream_file} uploader changed "
-                           f"from {downstream_file.uploader_teacher} to {uploader_teacher}")
-            downstream_file.uploader_teacher = uploader_teacher
-            changed = True
+                uploader_teacher = _closest_teacher(teachers, upsteam_info['uploader'])
+                if downstream_file.uploader_teacher != uploader_teacher:
+                    logger.warning(f"{downstream_file} uploader changed "
+                                   f"from {downstream_file.uploader_teacher} to {uploader_teacher}")
+                    downstream_file.uploader_teacher = uploader_teacher
+                    changed = True
 
-        if downstream_file.external_data != upsteam_info:
-            downstream_file.external_data = upsteam_info
-            changed = True
+                if downstream_file.external_data != upsteam_info:
+                    downstream_file.external_data = upsteam_info
+                    changed = True
 
-        if changed:
-            downstream_file.save()
+                if changed:
+                    downstream_file.save()
 
     for ifile in class_inst.files.filter(file__hash__in=removed):
         logger.warning(f"File {ifile} removed from {class_inst}")
         ifile.update(disappeared=True)
         continue
+    class_inst.files.filter(file__hash__in=removed).update(disappeared=True)
 
     for hash in new:
         upsteam_info = upstream[hash]
@@ -568,27 +599,29 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
         try:
             file = m.File.objects.get(hash=upsteam_info['hash'])
         except ObjectDoesNotExist:
-            file = m.File.objects.create(
-                size=upsteam_info['size'],
-                hash=upsteam_info['hash'],
-                mime=upsteam_info['mime'],
-                external_id=upsteam_info['id'],
-                # Obs: Files are being identified by hash, so there might be ignored IDs
-                iid=upsteam_info['id'],
-                external=True,
-                external_data={'upstream': upsteam_info})
-            logger.info(f"File {file} created")
+            with reversion.create_revision():
+                file = m.File.objects.create(
+                    size=upsteam_info['size'],
+                    hash=upsteam_info['hash'],
+                    mime=upsteam_info['mime'],
+                    external_id=upsteam_info['id'],
+                    # Obs: Files are being identified by hash, so there might be ignored IDs
+                    iid=upsteam_info['id'],
+                    external=True,
+                    external_data={'upstream': upsteam_info})
+                logger.info(f"File {file} created")
 
         if not m.ClassFile.objects.filter(file=file, class_instance=class_inst).exists():
-            m.ClassFile.objects.create(
-                file=file,
-                class_instance=class_inst,
-                category=upsteam_info['type'],
-                name=upsteam_info['name'],
-                official=True,
-                upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True),
-                uploader_teacher=uploader_teacher)
-            logger.info(f"File {file} added to class {class_inst}")
+            with reversion.create_revision():
+                m.ClassFile.objects.create(
+                    file=file,
+                    class_instance=class_inst,
+                    category=upsteam_info['type'],
+                    name=upsteam_info['name'],
+                    official=True,
+                    upload_datetime=make_aware(datetime.fromisoformat(upsteam_info['upload_datetime']), is_dst=True),
+                    uploader_teacher=uploader_teacher)
+                logger.info(f"File {file} added to class {class_inst}")
 
 
 def sync_enrollment(external_id, class_inst=None):
@@ -638,7 +671,6 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
     attendance_date = upstream['attendance_date']
     if attendance_date:
         make_aware(datetime.fromisoformat(attendance_date), is_dst=True)
-
     normal_grade = upstream['continuous_grade']
     if normal_grade:
         grade = normal_grade
@@ -665,50 +697,52 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
     try:
         obj = m.Enrollment.objects.get(external_id=external_id)
         changed = False
-        for attr in ('normal_grade_date', 'recourse_grade_date', 'special_grade_date', 'attendance', 'approved'):
-            current = getattr(obj, attr)
-            new = locals()[attr]
-            if current != new:
-                setattr(obj, attr, new)
+        with reversion.create_revision():
+            for attr in ('normal_grade_date', 'recourse_grade_date', 'special_grade_date', 'attendance', 'approved'):
+                current = getattr(obj, attr)
+                new = locals()[attr]
+                if current != new:
+                    setattr(obj, attr, new)
+                    changed = True
+            grades_changed = False
+            for attr in ('normal_grade', 'recourse_grade', 'special_grade', 'grade'):
+                current = getattr(obj, attr)
+                new = locals()[attr]
+
+                if current != new:
+                    grades_changed = True
+                    setattr(obj, attr, new)
+                    changed = True
+            if grades_changed:
+                logger.warning(f"Grade changed from {current} to {new} in {obj}.")
+
+            if obj.external_data != upstream:
+                obj.external_data = upstream
                 changed = True
-        grades_changed = False
-        for attr in ('normal_grade', 'recourse_grade', 'special_grade', 'grade'):
-            current = getattr(obj, attr)
-            new = locals()[attr]
 
-            if current != new:
-                grades_changed = True
-                setattr(obj, attr, new)
-                changed = True
-        if grades_changed:
-            logger.warning(f"Grade changed from {current} to {new} in {obj}.")
-
-        if obj.external_data != upstream:
-            obj.external_data = upstream
-            changed = True
-
-        if changed:
-            obj.save()
+            if changed:
+                obj.save()
 
     except m.Enrollment.DoesNotExist:
-        obj = m.Enrollment.objects.create(
-            student=student,
-            class_instance=class_inst,
-            attendance=attendance,
-            attendance_date=attendance_date,
-            normal_grade=normal_grade,
-            normal_grade_date=normal_grade_date,
-            recourse_grade=recourse_grade,
-            recourse_grade_date=recourse_grade_date,
-            special_grade=special_grade,
-            special_grade_date=special_grade_date,
-            approved=approved,
-            grade=grade,
-            external_id=external_id,
-            frozen=False,
-            external_update=make_aware(datetime.now()),
-            external_data={'upstream': upstream})
-        logger.info(f"Inserted new enrollment {obj}")
+        with reversion.create_revision():
+            obj = m.Enrollment.objects.create(
+                student=student,
+                class_instance=class_inst,
+                attendance=attendance,
+                attendance_date=attendance_date,
+                normal_grade=normal_grade,
+                normal_grade_date=normal_grade_date,
+                recourse_grade=recourse_grade,
+                recourse_grade_date=recourse_grade_date,
+                special_grade=special_grade,
+                special_grade_date=special_grade_date,
+                approved=approved,
+                grade=grade,
+                external_id=external_id,
+                frozen=False,
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
+            logger.info(f"Inserted new enrollment {obj}")
 
 
 def sync_shift(external_id, class_inst=None, recurse=Recursivity.NONE):
@@ -756,18 +790,20 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
     try:
         obj = m.Shift.objects.get(class_instance=class_inst, external_id=external_id)
         if not obj.frozen and obj.external_data != upstream:
-            obj.external_data = upstream_details
-            obj.save()
+            with reversion.create_revision():
+                obj.external_data = upstream_details
+                obj.save()
     except ObjectDoesNotExist:
-        obj = m.Shift.objects.create(
-            class_instance=class_inst,
-            shift_type=shift_type,
-            number=upstream['number'],
-            external_id=external_id,
-            frozen=False,
-            external_update=make_aware(datetime.now()),
-            external_data={'upstream': upstream})
-        logger.info(f"Shift {obj} created in {class_inst}")
+        with reversion.create_revision():
+            obj = m.Shift.objects.create(
+                class_instance=class_inst,
+                shift_type=shift_type,
+                number=upstream['number'],
+                external_id=external_id,
+                frozen=False,
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
+            logger.info(f"Shift {obj} created in {class_inst}")
 
     # ---------  Related shift instances ---------
     instances = obj.instances.exclude(external_id=None).all()
@@ -841,50 +877,52 @@ def _upstream_sync_event(upstream, external_id, class_inst):
     try:
         class_event = m.ClassInstanceEvent.objects.get(external_id=external_id)
         changed = False
-        if from_time is not None and (class_event.time is None or class_event.time != from_time):
-            logger.info(f"Event {class_event} time changed")
-            class_event.time = from_time
-            if to_time is not None:
-                class_event.duration = duration
-            # TODO notify users
-            changed = True
+        with reversion.create_revision():
+            if from_time is not None and (class_event.time is None or class_event.time != from_time):
+                logger.info(f"Event {class_event} time changed")
+                class_event.time = from_time
+                if to_time is not None:
+                    class_event.duration = duration
+                # TODO notify users
+                changed = True
 
-        if class_event.info != info:
-            logger.info(f"Event {class_event} info changed to {info}")
-            class_event.info = info
-            changed = True
+            if class_event.info != info:
+                logger.info(f"Event {class_event} info changed to {info}")
+                class_event.info = info
+                changed = True
 
-        if class_event.type != upstream['type']:
-            logger.info(f"Event {class_event} type changed")
-            class_event.type = upstream['type']
-            changed = True
+            if class_event.type != upstream['type']:
+                logger.info(f"Event {class_event} type changed")
+                class_event.type = upstream['type']
+                changed = True
 
-        if class_event.type != upstream['season']:
-            logger.info(f"Event {class_event} season changed")
-            class_event.type = upstream['season']
-            changed = True
+            if class_event.type != upstream['season']:
+                logger.info(f"Event {class_event} season changed")
+                class_event.type = upstream['season']
+                changed = True
 
-        if class_event.external_data != upstream:
-            class_event.external_data = upstream
-            changed = True
+            if class_event.external_data != upstream:
+                class_event.external_data = upstream
+                changed = True
 
-        if changed:
-            class_event.save()
+            if changed:
+                class_event.save()
 
     except m.ClassInstanceEvent.DoesNotExist:
-        obj = m.ClassInstanceEvent.objects.create(
-            class_instance=class_inst,
-            duration=duration,
-            date=date,
-            time=from_time,
-            type=upstream['type'],
-            season=upstream['season'],
-            info=info,
-            external_id=external_id,
-            frozen=False,
-            external_update=make_aware(datetime.now()),
-            external_data={'upstream': upstream})
-        logger.info(f"Inserted new class event {obj}")
+        with reversion.create_revision():
+            obj = m.ClassInstanceEvent.objects.create(
+                class_instance=class_inst,
+                duration=duration,
+                date=date,
+                time=from_time,
+                type=upstream['type'],
+                season=upstream['season'],
+                info=info,
+                external_id=external_id,
+                frozen=False,
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
+            logger.info(f"Inserted new class event {obj}")
 
 
 def sync_shift_instance(external_id, shift):
@@ -939,58 +977,61 @@ def _upstream_sync_shift_instance(upstream, external_id, shift):
     try:
         shift_instance = m.ShiftInstance.objects.get(shift=shift, external_id=external_id)
         changed = False
-        if upstream_start != shift_instance.start:
-            logger.warning(f"Shift instance {shift_instance} start changed "
-                           f"from {shift_instance.start} to {upstream_start}")
-            shift_instance.start = upstream_start
-            changed = True
-
-        if upstream_duration != shift_instance.duration:
-            if shift_instance.duration is not None:
-                logger.warning(f"Shift instance {shift_instance} duration changed "
-                               f"from {shift_instance.duration} to {upstream_duration}")
-            shift_instance.duration = upstream_duration
-            changed = True
-
-        if upstream_weekday != shift_instance.weekday:
-            logger.warning(f"Shift instance {shift_instance} weekday changed "
-                           f"from {shift_instance.weekday} to {upstream_weekday}")
-            shift_instance.weekday = upstream_weekday
-            changed = True
-
-        if upstream_room is None:
-            if shift_instance.room is not None:
-                logger.warning(f"Shift instance {shift_instance} is no longer in a room (was in {shift_instance.room})")
-                shift_instance.room = None
-                changed = True
-        else:
-            if shift_instance.room is None:
-                shift_instance.room = upstream_room
-                changed = True
-            elif shift_instance.room != upstream_room:
-                logger.warning(f"Shift instance {shift_instance} room changed "
-                               f"from {shift_instance.room.external_id} to {upstream['room']}")
-                shift_instance.room = upstream_room
+        with reversion.create_revision():
+            if upstream_start != shift_instance.start:
+                logger.warning(f"Shift instance {shift_instance} start changed "
+                               f"from {shift_instance.start} to {upstream_start}")
+                shift_instance.start = upstream_start
                 changed = True
 
-        if shift_instance.external_data != upstream:
-            shift_instance.external_data = upstream
-            changed = True
+            if upstream_duration != shift_instance.duration:
+                if shift_instance.duration is not None:
+                    logger.warning(f"Shift instance {shift_instance} duration changed "
+                                   f"from {shift_instance.duration} to {upstream_duration}")
+                shift_instance.duration = upstream_duration
+                changed = True
 
-        if changed:
-            shift_instance.save()
+            if upstream_weekday != shift_instance.weekday:
+                logger.warning(f"Shift instance {shift_instance} weekday changed "
+                               f"from {shift_instance.weekday} to {upstream_weekday}")
+                shift_instance.weekday = upstream_weekday
+                changed = True
+
+            if upstream_room is None:
+                if shift_instance.room is not None:
+                    logger.warning(
+                        f"Shift instance {shift_instance} is no longer in a room (was in {shift_instance.room})")
+                    shift_instance.room = None
+                    changed = True
+            else:
+                if shift_instance.room is None:
+                    shift_instance.room = upstream_room
+                    changed = True
+                elif shift_instance.room != upstream_room:
+                    logger.warning(f"Shift instance {shift_instance} room changed "
+                                   f"from {shift_instance.room.external_id} to {upstream['room']}")
+                    shift_instance.room = upstream_room
+                    changed = True
+
+            if shift_instance.external_data != upstream:
+                shift_instance.external_data = upstream
+                changed = True
+
+            if changed:
+                shift_instance.save()
     except m.ShiftInstance.DoesNotExist:
-        shift_instance = m.ShiftInstance.objects.create(
-            shift=shift,
-            weekday=upstream_weekday,
-            start=upstream_start,
-            duration=upstream_duration,
-            room=upstream_room,
-            external_id=external_id,
-            frozen=False,
-            external_update=make_aware(datetime.now()),
-            external_data={'upstream': upstream})
-        logger.info(f"Shift instance {shift_instance} created.")
+        with reversion.create_revision():
+            shift_instance = m.ShiftInstance.objects.create(
+                shift=shift,
+                weekday=upstream_weekday,
+                start=upstream_start,
+                duration=upstream_duration,
+                room=upstream_room,
+                external_id=external_id,
+                frozen=False,
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
+            logger.info(f"Shift instance {shift_instance} created.")
 
 
 def sync_evaluation(external_id, class_inst=None):
@@ -1057,41 +1098,43 @@ def _upstream_sync_student(upstream, student=None):
 
     if student:
         changed = False
-        if (upstream_abbr := upstream['abbr']) is not None:
-            if student.abbreviation != upstream_abbr:
-                logger.warning(f'Student {student} abbreviation changed '
-                               f'("{student.abbreviation}" to "{upstream_abbr}").')
-            student.abbreviation = upstream_abbr
-            changed = True
-        if upstream_course:
-            if not student.course or student.course != upstream_course:
-                student.course = upstream_course
+        with reversion.create_revision():
+            if (upstream_abbr := upstream['abbr']) is not None:
+                if student.abbreviation != upstream_abbr:
+                    logger.warning(f'Student {student} abbreviation changed '
+                                   f'("{student.abbreviation}" to "{upstream_abbr}").')
+                student.abbreviation = upstream_abbr
                 changed = True
-        if (upstream_name := upstream['name']) is not None:
-            if student.name != upstream_name:
-                logger.warning(f"Student {student} name changed "
-                               f"from {student.external_data['name']} to {upstream_name}")
-                student.name = upstream_name
+            if upstream_course:
+                if not student.course or student.course != upstream_course:
+                    student.course = upstream_course
+                    changed = True
+            if (upstream_name := upstream['name']) is not None:
+                if student.name != upstream_name:
+                    logger.warning(f"Student {student} name changed "
+                                   f"from {student.external_data['name']} to {upstream_name}")
+                    student.name = upstream_name
+                    changed = True
+
+            if student.external_data != upstream:
+                student.external_data = upstream
                 changed = True
 
-        if student.external_data != upstream:
-            student.external_data = upstream
-            changed = True
-
-        if changed:
-            student.save()
+            if changed:
+                student.save()
         return student
     else:
-        student = m.Student.objects.create(
-            name=upstream['name'],
-            abbreviation=upstream['abbr'],
-            iid=upstream['id'],
-            number=upstream['id'],
-            course=upstream_course,
-            external_id=upstream['id'],
-            external_update=make_aware(datetime.now()),
-            external_data={'upstream': upstream})
-        logger.info(f'Created student {student}.')
+        with reversion.create_revision():
+            student = m.Student.objects.create(
+                name=upstream['name'],
+                abbreviation=upstream['abbr'],
+                iid=upstream['id'],
+                number=upstream['id'],
+                course=upstream_course,
+                external_id=upstream['id'],
+                external_update=make_aware(datetime.now()),
+                external_data={'upstream': upstream})
+            logger.info(f'Created student {student}.')
         return student
 
 
@@ -1125,29 +1168,31 @@ def _upstream_sync_teachers(upstream_list):
         if (ext_id := upstream['id']) in existing:
             obj = existing[ext_id]
             changed = False
-            if (upstream_name := upstream['name']) is not None:
-                if obj.name != upstream_name:
-                    if obj.name is not None:
-                        logger.warning(f"Teacher {obj} name changed from {obj.name} to {upstream_name}")
+            with reversion.create_revision():
+                if (upstream_name := upstream['name']) is not None:
+                    if obj.name != upstream_name:
+                        if obj.name is not None:
+                            logger.warning(f"Teacher {obj} name changed from {obj.name} to {upstream_name}")
 
-                    obj.name = upstream_name
+                        obj.name = upstream_name
+                        changed = True
+
+                if obj.external_data != upstream:
+                    obj.external_data = upstream
                     changed = True
 
-            if obj.external_data != upstream:
-                obj.external_data = upstream
-                changed = True
-
-            if changed:
-                obj.save()
+                if changed:
+                    obj.save()
 
         else:
-            obj = m.Teacher.objects.create(
-                name=upstream['name'],
-                iid=upstream['id'],
-                external_id=upstream['id'],
-                external_update=make_aware(datetime.now()),
-                external_data={'upstream': upstream})
-            logger.info(f'Created teacher {obj}.')
+            with reversion.create_revision():
+                obj = m.Teacher.objects.create(
+                    name=upstream['name'],
+                    iid=upstream['id'],
+                    external_id=upstream['id'],
+                    external_update=make_aware(datetime.now()),
+                    external_data={'upstream': upstream})
+                logger.info(f'Created teacher {obj}.')
 
         current_departments = obj.departments.all()
         new, disappeared, _ = _upstream_diff(current_departments, upstream_dept_ids)
