@@ -48,6 +48,10 @@ def get_team_projects(team_id):
         name = name.text
         if name == 'World Community Grid':
             name = 'WCG'
+        elif name == 'MilkyWay@home':
+            name = 'MilkyWay'
+        elif name == 'Rosetta@Home':
+            name = 'Rosetta'
         projects.append({
             'name': name,
             'points': int(float(points.text.replace(',', ''))),
