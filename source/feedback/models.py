@@ -79,7 +79,7 @@ class Votable(djm.Model):
             self.save(update_fields=['downvotes'])
 
 
-class Suggestion(Votable, users.Activity, users.Subscribable):
+class Suggestion(Votable, users.Activity):
     title = djm.CharField(max_length=300)
     content = MarkdownxField(max_length=2000)
     towards_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
