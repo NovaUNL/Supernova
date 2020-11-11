@@ -2,6 +2,7 @@ from datetime import datetime, time
 
 import reversion
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models as djm
 from django.urls import reverse
 from imagekit.models import ImageSpecField
@@ -59,6 +60,12 @@ class Group(djm.Model):
         processors=[ResizeToFit(*THUMBNAIL_SIZE)],
         format='JPEG',
         options={'quality': 60})
+
+    subscriptions = GenericRelation(
+        users.Subscription,
+        content_type_field='to_content_type',
+        object_id_field='to_object_id',
+        related_query_name='group')
 
     #: The default role that users get assigned upon joining this group.
     default_role = djm.ForeignKey('Role', null=True, blank=True, on_delete=djm.SET_NULL, related_name='default_to')

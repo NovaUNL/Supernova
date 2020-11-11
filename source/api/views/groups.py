@@ -42,12 +42,12 @@ class GroupSubscription(APIView):
 
     def get(self, request, abbr):
         group = get_object_or_404(m.Group, abbreviation=abbr)
-        is_subscribed = users.Subscription.objects.filter(to=group, subscriber=request.user).exists()
+        is_subscribed = users.Subscription.objects.filter(group=group, subscriber=request.user).exists()
         return Response(is_subscribed)
 
     def post(self, request, abbr):
         group = get_object_or_404(m.Group, abbreviation=abbr)
-        is_subscribed = users.Subscription.objects.filter(to=group, subscriber=request.user).exists()
+        is_subscribed = users.Subscription.objects.filter(group=group, subscriber=request.user).exists()
         if not is_subscribed:
             try:
                 users.Subscription.objects.create(to=group, subscriber=request.user)
@@ -57,7 +57,7 @@ class GroupSubscription(APIView):
 
     def delete(self, request, abbr):
         group = get_object_or_404(m.Group, abbreviation=abbr)
-        users.Subscription.objects.filter(to=group, subscriber=request.user).delete()
+        users.Subscription.objects.filter(group=group, subscriber=request.user).delete()
         return Response()
 
 
