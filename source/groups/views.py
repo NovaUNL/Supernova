@@ -275,12 +275,12 @@ def settings_view(request, group_abbr):
     context['group'] = group
 
     if request.method == 'POST':
-        group_form = f.GroupForm(group, request.POST, instance=group)
+        group_form = f.GroupForm(request.POST, request.FILES, instance=group)
         if group_form.is_valid():
             group_form.save()
             return redirect('groups:group', group_abbr=group_abbr)
     else:
-        group_form = f.GroupForm(group, instance=group)
+        group_form = f.GroupForm(instance=group)
 
     context['group_form'] = group_form
     return render(request, 'groups/settings.html', context)

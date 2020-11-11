@@ -6,9 +6,9 @@ from supernova.widgets import SliderInput, NativeTimeInput
 
 
 class GroupForm(djf.ModelForm):
-    def __init__(self, group, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
-        self.fields['default_role'].queryset = group.roles
+        self.fields['default_role'].queryset = kwargs['instance'].roles
 
     class Meta:
         model = m.Group

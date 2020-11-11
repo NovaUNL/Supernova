@@ -16,7 +16,7 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Definições</h2></div>
         <div class="pane-content">
-          <form class="col" method="post" action="{% url 'groups:settings' group.abbreviation %}">
+          <form class="col" method="post" action="{% url 'groups:settings' group.abbreviation %}" enctype="multipart/form-data">
             {% csrf_token %}
             {{ group_form.errors }}
             <div class="form-block">
