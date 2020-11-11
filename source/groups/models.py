@@ -31,8 +31,8 @@ class Group(djm.Model):
       students nuclei, working group, ...
     | Groups are meant to be self-administered with each user having one :py:class:`Role`,
     """
-    #: A short textual identifier.
-    abbreviation = djm.CharField(max_length=64, null=True, blank=True)
+    #: A short textual descriptor. Used as a group identifier.
+    abbreviation = djm.CharField(max_length=64, unique=True)
     #: The group's full name.
     name = djm.CharField(max_length=65)
     #: A description that defines the group.
