@@ -17,6 +17,7 @@ from users import models as users
 from college import models as college
 from documents import models as documents
 from feedback import models as feedback
+from users.models import Notification
 
 
 def area_pic_path(area, filename):
@@ -508,3 +509,26 @@ class Answer(users.Activity, Postable):
 
     def __str__(self):
         return f"Resposta a {self.to}."
+
+    def get_absolute_url(self):
+        # TODO insert anchors in the template, point to the correct anchor
+        return reverse('learning:question', args=[self.to.activity_id])
+
+
+class AnswerNotification(Notification):
+    """A notification about a new answer"""
+    #: The answer associated with this notification
+    answer = djm.ForeignKey(Answer, on_delete=djm.CASCADE)
+
+    def to_api(self):
+        result = super(AnswerNotification, self).to_api()
+        result['message'] = f'Nova resposta a "{self.answer.to.title}"'
+        result['url'] = self.answer.get_absolute_url()
+        result['type'] = 'Resposta'
+        return result
+
+    def to_url(self):
+        return self.answer.get_absolute_url()
+
+    def __str__(self):
+        return f'Nova resposta em: {self.answer.question.title}'

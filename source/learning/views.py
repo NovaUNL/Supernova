@@ -699,8 +699,9 @@ def question_view(request, question_id):
                         answer.save()
                         # Reload data, new form
                         question.refresh_from_db()
-                        answer_form = f.AnswerForm()
                         reversion.set_user(request.user)
+                    m.AnswerNotification.objects.create(receiver=question.user, answer=answer)
+                    return HttpResponseRedirect(answer.get_absolute_url())
             else:
                 status = 400
         else:
