@@ -41,7 +41,7 @@ class Votable(djm.Model):
         self.save()
 
     def set_vote(self, user, vote_type):
-        exists = self.votes.filter(user=user, type=Vote.UPVOTE).exists()
+        exists = self.votes.filter(user=user, type=vote_type).exists()
         if exists:
             return
 
