@@ -25,7 +25,7 @@ def users_view(request):
     context['users'] = users.User.objects.all()
     context['latest_registrations'] = users.Registration.objects \
         .order_by('creation') \
-        .select_related('requested_student', 'requested_teacher', 'resulting_user', 'invite') \
+        .select_related('requested_student', 'requested_teacher', 'resulting_user', 'invite__issuer') \
         .reverse()
     context['suspended_users'] = users.User.objects.order_by('nickname').filter(is_active=False).all()
 
