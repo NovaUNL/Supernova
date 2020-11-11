@@ -8,7 +8,7 @@
     <style>
         .header-background:after {
             background-image:
-                {% if area.image %}url("{{ area.image.url }}"){% else %}url("{{ area.img_url}}"){% endif %}
+                {% if area.image %}url("{{ area.image_cover.url }}"){% else %}url("{{ area.img_url}}"){% endif %}
         }
     </style>
   {% endif %}
@@ -35,7 +35,7 @@
             {% for subarea in subareas %}
               <a href="{% url 'learning:subarea' subarea.id %}">
                 {% if subarea.image %}
-                  <div class="flex-grid-item" style="background-image: url({{ subarea.image.url }})">
+                  <div class="flex-grid-item" style="background-image: url({{ subarea.image_thumbnail.url }})">
                 {% elif subarea.img_url %}
                   <div class="flex-grid-item" style="background-image: url({{ subarea.img_url }})">
                 {% else %}

@@ -6,6 +6,8 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db.models import Max
 from django.urls import reverse
 from django.db import models as djm
+from imagekit.models import ImageSpecField
+from pilkit.processors import SmartResize
 from polymorphic.models import PolymorphicModel
 
 from functools import reduce
@@ -33,6 +35,16 @@ class Area(djm.Model):
     title = djm.CharField(max_length=64)
     #: An image that illustrates the area
     image = djm.ImageField(null=True, blank=True, upload_to=area_pic_path)
+    image_thumbnail = ImageSpecField(
+        source='image',
+        processors=[SmartResize(*settings.THUMBNAIL_SIZE)],
+        format='JPEG',
+        options={'quality': 80})
+    image_cover = ImageSpecField(
+        source='image',
+        processors=[SmartResize(*settings.COVER_SIZE)],
+        format='JPEG',
+        options={'quality': 80})
     img_url = djm.TextField(null=True, blank=True)  # TODO deleteme
 
     class Meta:
@@ -59,6 +71,16 @@ class Subarea(djm.Model):
     area = djm.ForeignKey(Area, on_delete=djm.PROTECT, related_name='subareas')
     #: An image that illustrates the subarea
     image = djm.ImageField(null=True, blank=True, upload_to=subarea_pic_path, verbose_name='imagem')
+    image_thumbnail = ImageSpecField(
+        source='image',
+        processors=[SmartResize(*settings.THUMBNAIL_SIZE)],
+        format='JPEG',
+        options={'quality': 80})
+    image_cover = ImageSpecField(
+        source='image',
+        processors=[SmartResize(*settings.COVER_SIZE)],
+        format='JPEG',
+        options={'quality': 80})
     img_url = djm.TextField(null=True, blank=True, verbose_name='imagem (url)')  # TODO deleteme
 
     class Meta:

@@ -16,7 +16,9 @@
         <div class="flex-wrapper">
           {% for area in areas %}
             <a href="{% url 'learning:area' area.id %}">
-              {% if area.img_url %}
+              {% if area.image %}
+                <div class="flex-grid-item" style="background-image:url({{ area.image_thumbnail.url }}); background-size:cover">
+              {% elif area.img_url %}
                 <div class="flex-grid-item" style="background-image:url({{ area.img_url }}); background-size:cover">
               {% else %}
                 <div class="flex-grid-item">
