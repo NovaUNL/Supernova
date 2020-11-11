@@ -139,7 +139,7 @@ PROTECTED_ROOT = '/srv/protected'
 EXTERNAL_URL = '/external'
 EXTERNAL_ROOT = '/srv/external'
 
-
+IMAGEKIT_CACHEFILE_DIR = 'cache/images'
 
 THUMBNAIL_SIZE = (220, 150)
 COVER_SIZE = (1920, 500)
