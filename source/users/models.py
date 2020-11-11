@@ -2,6 +2,8 @@ from datetime import datetime, time
 from itertools import chain
 
 import reversion
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
@@ -286,35 +288,29 @@ class Invite(djm.Model):
         return self.expiration < make_aware(datetime.now(), is_dst=True)
 
 
-class Subscribable(djm.Model):
+class Subscription(djm.Model):
     """
-    | A data type which can be subscribed to
-    | (Meant to be inherited)
+    User subscription to an object. Used for tasks such as notification delivery.
     """
-    #: The id field, but renamed to avoid collisions upon multiple inheritance
-    subscribable_id = djm.AutoField(primary_key=True)
-    #: :py:class:`users.models.User` that subscribe to this object.
-    subscribers = djm.ManyToManyField(User, through='Subscription', related_name='subscribables')
-
-
-class Subscription(PolymorphicModel):
-    """
-    A notification points to unknown past actions with a particular relevance.
-    """
-    #: :py:class:`Subscribable` that this subscription targets
-    to = djm.ForeignKey(Subscribable, on_delete=djm.CASCADE, related_name='subscriptions')
+    #: ContentType of the subscribable object that is targeted by this subscription
+    to_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
+    #: Id of the subscribable object that is targeted by this subscription
+    to_object_id = djm.PositiveIntegerField()
+    #: Subscribable object that this subscription targets
+    to = GenericForeignKey('to_content_type', 'to_object_id')
     #: :py:class:`users.models.User` that wishes to be notified.
     subscriber = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='subscriptions')
     #: Datetime at which the activity happened
     issue_timestamp = djm.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['to', 'subscriber']
+        unique_together = ['to_content_type', 'to_object_id', 'subscriber']
 
     def __str__(self):
-        return f'{self.issue_timestamp}({self.destinatary})'
+        return f'{self.issue_timestamp}({self.to})'
 
 
+@reversion.register()
 class Activity(PolymorphicModel):
     """An activity is an action taken by a user at a given point in time."""
     #: :py:class:`User` that made this activity.
@@ -383,7 +379,7 @@ class ScheduleEntry(PolymorphicModel):
 
 
 class ScheduleOnce(ScheduleEntry):
-    """Represents a one-time entry in this :py:class:`Group` 's activity schedule."""
+    """Represents a one-time entry in this :py:class:`User` 's activity schedule."""
     #: The date at which this event is set to happen
     datetime = djm.DateTimeField()
     #: The predicted duration of this event interval

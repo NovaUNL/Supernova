@@ -23,8 +23,8 @@ def group_image_path(group, filename):
     return f'g/{group.id}/image.{filename.split(".")[-1].lower()}'
 
 
-@reversion.register(follow=['subscribable_ptr'])
-class Group(users.Subscribable):
+@reversion.register()
+class Group(djm.Model):
     """
     | A set of :py:class:`users.models.User` who represent a collective entity, such as an institutional division,
       students nuclei, working group, ...
