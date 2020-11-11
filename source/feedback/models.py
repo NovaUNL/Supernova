@@ -1,3 +1,4 @@
+import reversion
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
@@ -114,6 +115,7 @@ class Vote(users.Activity):
         return f'Voto {self.get_type_display()} de {self.user} em "{self.to.title}"'
 
 
+@reversion.register(follow=['activity_ptr'])
 class Review(users.Activity):
     content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
     object_id = djm.PositiveIntegerField()
