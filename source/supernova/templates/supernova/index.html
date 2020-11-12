@@ -112,8 +112,21 @@
               {{ changelog.content_html | safe }}
             </div>
           </div>
+          <div class="flex-pane">
+            <div class="pane-title bg-grad"><h2>Os astros</h2></div>
+            <div class="pane-content">
+            O Supernova tem hoje <big>{{ student_count }}</big> alunos e <big>{{ teacher_count }}</big> professores.<br>
+            <big>{{ allowing_teacher_count }}</big> professores <a href="{% url 'college:teachers_consent' %}">autorizaram</a> que utilizassemos os seus materiais.
+            <hr>
+            <div style="text-align: center">
+              <span>{{ pledge_count }}</span> membros que <a href="{% url 'support' %}">peticionaram</a> a UNL para apoiar o Supernova.<br>
+              <b><a href="{% url 'support' %}">Manifesta o teu apoio!</a></b>
+            </div>
+            </div>
+          </div>
         </div>
       </div>
+      <img class="main-footer lowres" src="{% static 'img/banner.svg' %}">
     </div>
     <div class="col medium nogrow">
       <div class="flex-pane">
@@ -227,7 +240,7 @@
       </div>
     </div>
   </div>
-
+  <img class="main-footer highres" src="{% static 'img/banner.svg' %}">
   <script>
       particlesJS.load('particles', "{% static 'particles.json' %}");
   </script>
