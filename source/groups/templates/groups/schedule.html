@@ -1,7 +1,10 @@
 {% extends 'groups/base_simple.html' %}
 {% load static %}
 
-{% include 'groups/group_cover_image.html' %}
+{% block head %}
+  {{ block.super }}
+  {% include 'groups/group_cover_image.html' %}
+{% endblock %}
 
 {% block group_content %}
   <div class="flex-pane">

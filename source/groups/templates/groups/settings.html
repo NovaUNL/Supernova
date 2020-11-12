@@ -2,10 +2,10 @@
 
 {% load static %}
 
-{% include 'groups/group_cover_image.html' %}
-
 {% block head %}
+  {{ block.super }}
   <script src="{% static 'js/content-rendering.js' %}"></script>
+  {% include 'groups/group_cover_image.html' %}
 {% endblock %}
 
 {% block content_wrapper %}
