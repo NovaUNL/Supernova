@@ -24,25 +24,22 @@
   <div class="col padded">
     <div class="flex-pane">
       <div class="pane-title bg-grad"></div>
-      <div class="pane-content">
+      <div class="pane-content col">
         <ul id="sortable-list" data-endpoint="{% url 'api:synopses_class_section' synopsis_class.id %}"></ul>
-        <script>
-            let list = document.getElementById("sortable-list");
-            var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
-            populateCollection(list);
-            let element = document.querySelectorAll('.markdownx');
-            Object.keys(element).map(key =>
-                element[key].addEventListener('markdownx.update', event => {
-                    console.log(event.detail);
-                    MathJax.typeset();
-                })
-            );
-        </script>
-        <b>Adicionar: </b>
-        <select name="section" required id="id_area" data-autocomplete-light-url="{% url 'learning:section_ac' %}"
-                data-autocomplete-light-function="select2" onchange="addToCollectionEvt(this);"></select>
-        <a class="ui-btn save-button" href="javascript:saveCollectionOrder(list);">Guardar</a>
+        <div class="form-row col">
+          <h4>Adicionar</h4>
+          <select name="section"
+                  data-autocomplete-light-url="{% url 'learning:section_ac' %}"
+                  data-autocomplete-light-function="select2"
+                  onchange="addToCollectionEvt(this);"></select>
+        </div>
+        <a class="ui-btn end" href="javascript:saveCollectionOrder(list);">Guardar ordem</a>
       </div>
     </div>
   </div>
+  <script>
+      let list = document.getElementById("sortable-list");
+      var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
+      populateCollection(list);
+  </script>
 {% endblock %}
