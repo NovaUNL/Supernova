@@ -12,7 +12,6 @@ from pilkit.processors import ResizeToFit
 from polymorphic.models import PolymorphicModel
 
 from college.choice_types import WEEKDAY_CHOICES
-from settings import THUMBNAIL_SIZE, SMALL_ICON_SIZE, BIG_ICON_SIZE
 from users import models as users
 
 
@@ -49,17 +48,17 @@ class Group(djm.Model):
     image = djm.ImageField(upload_to=group_image_path, null=True, blank=True)
     icon_small = ImageSpecField(
         source='icon',
-        processors=[ResizeToFit(*SMALL_ICON_SIZE)],
+        processors=[ResizeToFit(*settings.SMALL_ICON_SIZE)],
         format='PNG')
     icon_big = ImageSpecField(
         source='icon',
-        processors=[ResizeToFit(*BIG_ICON_SIZE)],
+        processors=[ResizeToFit(*settings.BIG_ICON_SIZE)],
         format='PNG')
     image_thumbnail = ImageSpecField(
         source='image',
-        processors=[ResizeToFit(*THUMBNAIL_SIZE)],
+        processors=[ResizeToFit(*settings.THUMBNAIL_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
 
     subscriptions = GenericRelation(
         users.Subscription,

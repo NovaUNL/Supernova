@@ -40,10 +40,10 @@ class NewsItem(djm.Model):
     source = djm.URLField(null=True, blank=True, max_length=256)
     cover_img = djm.ImageField(null=True, blank=True, max_length=256, upload_to=news_item_picture)
     cover_thumbnail = ImageSpecField(
-        source='picture',
+        source='cover_img',
         processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     generated = djm.BooleanField(default=True)
 
     class Meta:

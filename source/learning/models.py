@@ -39,12 +39,12 @@ class Area(djm.Model):
         source='image',
         processors=[SmartResize(*settings.THUMBNAIL_SIZE)],
         format='JPEG',
-        options={'quality': 80})
+        options={'quality': settings.HIGH_QUALITY})
     image_cover = ImageSpecField(
         source='image',
         processors=[SmartResize(*settings.COVER_SIZE)],
         format='JPEG',
-        options={'quality': 80})
+        options={'quality': settings.HIGH_QUALITY})
     img_url = djm.TextField(null=True, blank=True)  # TODO deleteme
 
     class Meta:
@@ -75,12 +75,12 @@ class Subarea(djm.Model):
         source='image',
         processors=[SmartResize(*settings.THUMBNAIL_SIZE)],
         format='JPEG',
-        options={'quality': 80})
+        options={'quality': settings.HIGH_QUALITY})
     image_cover = ImageSpecField(
         source='image',
         processors=[SmartResize(*settings.COVER_SIZE)],
         format='JPEG',
-        options={'quality': 80})
+        options={'quality': settings.HIGH_QUALITY})
     img_url = djm.TextField(null=True, blank=True, verbose_name='imagem (url)')  # TODO deleteme
 
     class Meta:

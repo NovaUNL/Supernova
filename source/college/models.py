@@ -16,7 +16,6 @@ from markdownx.utils import markdownify
 from pilkit.processors import SmartResize, ResizeToFit
 
 from feedback import models as feedback
-from settings import COLLEGE_YEAR, COLLEGE_PERIOD, THUMBNAIL_SIZE, COVER_SIZE, MEDIUM_ICON_SIZE
 from . import choice_types as ctypes
 
 logger = logging.getLogger(__name__)
@@ -145,14 +144,14 @@ class Building(Importable):
     picture = djm.ImageField(upload_to=building_pic_path, null=True, blank=True)
     picture_thumbnail = ImageSpecField(
         source='picture',
-        processors=[ResizeToFit(*THUMBNAIL_SIZE)],
+        processors=[ResizeToFit(*settings.THUMBNAIL_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     picture_cover = ImageSpecField(
         source='picture',
-        processors=[ResizeToFit(*COVER_SIZE)],
+        processors=[ResizeToFit(*settings.COVER_SIZE)],
         format='JPEG',
-        options={'quality': 80})
+        options={'quality': settings.HIGH_QUALITY})
 
     class Meta:
         ordering = ['name']
@@ -180,9 +179,9 @@ class Department(Importable):
     picture = djm.ImageField(upload_to=department_pic_path, null=True, blank=True)
     picture_thumbnail = ImageSpecField(
         source='picture',
-        processors=[SmartResize(*THUMBNAIL_SIZE)],
+        processors=[SmartResize(*settings.THUMBNAIL_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     #: URL to this departments's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
     #: Phone number in the format +country number,extension
@@ -226,9 +225,9 @@ class Place(djm.Model):
     picture = djm.ImageField(upload_to=place_pic_path, null=True, blank=True)
     picture_cover = ImageSpecField(
         source='picture',
-        processors=[SmartResize(*COVER_SIZE)],
+        processors=[SmartResize(*settings.COVER_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
 
     def __str__(self):
         return f'{self.name} ({self.building})'
@@ -547,7 +546,8 @@ class ShiftInstance(Importable):
 
     def happening(self):
         now = datetime.now()
-        if not (self.shift.class_instance.year == COLLEGE_YEAR and self.shift.class_instance.period == COLLEGE_PERIOD):
+        if not (self.shift.class_instance.year == settings.COLLEGE_YEAR
+                and self.shift.class_instance.period == settings.COLLEGE_PERIOD):
             return False
 
         # same weekday and within current time interval
@@ -608,9 +608,9 @@ class Teacher(Importable):
     picture = djm.ImageField(upload_to=teacher_pic_path, null=True, blank=True)
     picture_thumbnail = ImageSpecField(
         source='picture',
-        processors=[SmartResize(*MEDIUM_ICON_SIZE)],
+        processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     #:  The room that a teacher occupies
     room = djm.ForeignKey(Room, null=True, blank=True, on_delete=djm.PROTECT, related_name='teachers')
     #: Reviews that are linked to this object

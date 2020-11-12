@@ -1,9 +1,9 @@
+from django.conf import settings
 from django.db import models as djm
 from imagekit.models import ImageSpecField
 from pilkit.processors import ResizeToFit
 
 from college.models import Building, Place
-from settings import THUMBNAIL_SIZE, COVER_SIZE
 
 
 def service_pic_path(service, filename):
@@ -28,14 +28,14 @@ class Service(djm.Model):
     picture = djm.ImageField(upload_to=service_pic_path, null=True, blank=True)
     picture_thumbnail = ImageSpecField(
         source='picture',
-        processors=[ResizeToFit(*THUMBNAIL_SIZE)],
+        processors=[ResizeToFit(*settings.THUMBNAIL_SIZE)],
         format='JPEG',  # TODO change to WEBP once Big Sur is widespread
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     picture_cover = ImageSpecField(
         source='picture',
-        processors=[ResizeToFit(*COVER_SIZE)],
+        processors=[ResizeToFit(*settings.COVER_SIZE)],
         format='PNG',  # TODO change to WEBP once Big Sur is widespread
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
 
     ACADEMIC = 0
     MEAL_PLACE = 1

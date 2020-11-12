@@ -34,12 +34,12 @@ class User(AbstractUser):
         source='picture',
         processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     picture_thumbnail = ImageSpecField(
         source='picture',
         processors=[SmartResize(*settings.SMALL_ICON_SIZE)],
         format='JPEG',
-        options={'quality': 60})
+        options={'quality': settings.MEDIUM_QUALITY})
     webpage = djm.URLField(null=True, blank=True, verbose_name='Página pessoal')
 
     REQUIRED_FIELDS = ['email', 'nickname']
@@ -137,7 +137,7 @@ class User(AbstractUser):
             return permissions
 
         # Without profile visibility most people can do nothing
-        if not (self.profile_visibility == User.EVERYBODY \
+        if not (self.profile_visibility == User.EVERYBODY
                 or (self.profile_visibility == User.USERS and not user.is_anonymous)):
             permissions['checksum'] = 0
             return permissions

@@ -147,6 +147,9 @@ BIG_ICON_SIZE = (256, 256)
 MEDIUM_ICON_SIZE = (128, 128)
 SMALL_ICON_SIZE = (64, 64)
 
+MEDIUM_QUALITY = 70
+HIGH_QUALITY = 85
+
 # CKEditor plugin
 CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
 CKEDITOR_UPLOAD_PATH = 'uploads/'
