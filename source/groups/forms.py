@@ -5,14 +5,14 @@ from supernova.fields import NativeSplitDateTimeField
 from supernova.widgets import SliderInput, NativeTimeInput
 
 
-class GroupForm(djf.ModelForm):
+class GroupSettingsForm(djf.ModelForm):
     def __init__(self, *args, **kwargs):
-        super(GroupForm, self).__init__(*args, **kwargs)
+        super(GroupSettingsForm, self).__init__(*args, **kwargs)
         self.fields['default_role'].queryset = kwargs['instance'].roles
 
     class Meta:
         model = m.Group
-        fields = ('description', 'image', 'outsiders_openness', 'default_role', 'place')
+        fields = ('description', 'image', 'icon', 'outsiders_openness', 'default_role', 'place')
         widgets = {
             'place': autocomplete.ModelSelect2(url='college:place_ac')
         }
