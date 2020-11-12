@@ -1,16 +1,14 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import reduce
 
 import reversion
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from django.db.models import Q, Count
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from django.utils import timezone
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.vary import vary_on_cookie
 
