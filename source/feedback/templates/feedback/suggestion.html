@@ -1,0 +1,51 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script src="{% static 'learning/questions.js' %}"></script>
+  <link type="text/css" rel="stylesheet" href="{% static 'prism.css' %}">
+  <script src="{% static 'prism.js' %}"></script>
+  <script src="{% static 'js/content-rendering.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded"
+{#       data-voting-endpoint="{% url 'api:postable_votes' 0 %}"#}
+{#       data-question-votes-endpoint="{% url 'api:question_votes' question.activity_id %}"#}
+  >
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>{{ suggestion.title }}</h2></div>
+      <div class="pane-content postable question" data-id="{{ suggestion.activity_id }}">
+        <div class="postable-main">
+          <div class="postable-votes">
+            <a class="upvote-btn big{% if suggestion.user == user %} disabled{% endif %}" aria-label="Voto positivo" data-balloon-pos="right"></a>
+            <span>{{ suggestion.vote_balance }}</span>
+            <a class="downvote-btn big{% if suggestion.user == user %} disabled{% endif %}" aria-label="Voto negativo" data-balloon-pos="right"></a>
+            <a class="bookmark-btn small" aria-label="Adícionar aos favoritos" data-balloon-pos="right"></a>
+          </div>
+          <div class="postable-content">
+            {{ suggestion.content_html|safe }}
+          </div>
+        </div>
+        <div class="postable-footer">
+          <div class="tag-actions-wrapper">
+            <div class="actions">
+              <a class="disabled">Reportar</a>
+              <a class="disabled">Editar</a>
+            </div>
+          </div>
+          <div class="author user">
+            <span class="pic" style="background-image: url('{% if suggestion.user.picture %}{{ suggestion.user.picture_thumbnail.url }}{% else %}{% static 'img/user.svg' %}{% endif %}')"></span>
+            <div>
+              <span><a href="{% url 'users:profile' suggestion.user.nickname %}">{{ suggestion.user.nickname }}</a> ({{ suggestion.user.points}} <img alt="Pontos" src="{% static 'img/icons/star.svg' %}">)</span>
+              <span>{{ suggestion.timestamp }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>{% if not user.is_anonymous %}loadOwnVotes();{% endif %}setupMarkdownEnv();</script>
+{% endblock %}

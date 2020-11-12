@@ -1,0 +1,43 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'synopses/synopses.css' %}"/>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <link href="{% static 'autocomplete_light/vendor/select2/dist/css/select2.min.css' %}" type="text/css" rel="stylesheet"/>
+  <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" rel="stylesheet"/>
+  <script src="{% static 'js/content-rendering.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Nova sugestão</h2></div>
+      <div class="pane-content">
+        <form class="col" action="{{ request.get_full_path }}" method="post">
+          {% csrf_token %}
+          {{ form.media }}
+          <div class="form-row">
+            <div class="form-row-top"><h4>Título</h4></div>
+            {{ form.title }}
+            {{ form.title.errors }}
+            <div class="form-row-description">
+              Breve descritivo do sugerido.
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Descrição</h4></div>
+            {{ form.content.errors }}
+            <div class="form-row-description">
+              Explicação extensa do proposto.
+            </div>
+            {{ form.content }}
+          </div>
+          <input class="ui-btn end" type="submit" value="Submeter"/>
+        </form>
+      </div>
+    </div>
+  </div>
+  {#  <script>setupMarkdownEnv();</script>#}
+{% endblock %}

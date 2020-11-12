@@ -224,6 +224,20 @@ REST_FRAMEWORK = {
 
 LOGIN_URL = '/entrar'
 
+REVIEWABLE_ENTITIES = (
+    ('college', 'teacher'),
+    ('college', 'class'),
+    ('college', 'classinstance'),
+    ('groups', 'group'),
+    ('services', 'service'),
+)
+
+SUGGESTABLE_ENTITIES = (
+    ('college', 'teacher'),
+    ('groups', 'group'),
+    ('services', 'service'),
+)
+
 LEAFLET_CONFIG = {
     'SPATIAL_EXTENT': (-9.20209, 38.65727, -9.20955, 38.66384),
     'DEFAULT_CENTER': (38.6608, -9.205576),

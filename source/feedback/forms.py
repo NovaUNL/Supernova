@@ -8,7 +8,7 @@ from supernova.widgets import StarInput, SliderInput
 class SuggestionForm(djf.ModelForm):
     class Meta:
         model = m.Suggestion
-        fields = '__all__'
+        fields = ('title', 'content')
 
 
 class ReviewForm(djf.ModelForm):

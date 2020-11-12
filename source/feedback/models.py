@@ -2,7 +2,9 @@ import reversion
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
+from django.urls import reverse
 from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 
 import settings
 from users import models as users
@@ -82,16 +84,26 @@ class Votable(djm.Model):
 class Suggestion(Votable, users.Activity):
     title = djm.CharField(max_length=300)
     content = MarkdownxField(max_length=2000)
-    towards_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
-    towards_object_id = djm.PositiveIntegerField()
+    towards_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE, null=True)
+    towards_object_id = djm.PositiveIntegerField(null=True)
     towards_object = GenericForeignKey('towards_content_type', 'towards_object_id')
     status = djm.IntegerField(default=SuggestionStatus.PROPOSED, choices=SuggestionStatus.CHOICES)
 
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('feedback:suggestion', args=[self.activity_id])
+
     def tags(self):
-        return [self.towards_object]
+        if self.towards_object_id:
+            return [self.towards_object]
+        else:
+            return []
+
+    @property
+    def content_html(self):
+        return markdownify(self.content)
 
 
 class Vote(users.Activity):
@@ -126,6 +138,9 @@ class Review(users.Activity):
 
     def __str__(self):
         return f'Opinião sobre {self.content_object}.'
+
+    def get_absolute_url(self):
+        return reverse('feedback:review', args=[self.activity_id])
 
     @property
     def text_short(self):
