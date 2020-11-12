@@ -24,66 +24,140 @@
         <form class="col" method="post" action="{{ action_page }}">
           {% csrf_token %}
           {{ form.non_field_errors }}
-          {{ form.as_p }}
-          <h3>Fontes:</h3>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Título</h4>{{ form.title }}</div>
+            {{ form.title.errors }}
+            <div class="form-row-description">
+              Um título que brevemente identifica esta secção com o mínimo de contexto<br>
+              (ex. <q>Operações elementares em matrizes</q> em vez de <q>Operações elementares</q>)<br>
+              <i>Nota</i>: Um título com conjunções pode indicar uma secção repartível em múltiplas.
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Conteúdo (Markdown)</h4></div>
+            {{ form.content_md }}
+            {{ form.content_md.errors }}
+          </div>
+          <div class="form-row" style="display: none">
+            <div class="form-row-top"><h4>Conteúdo (Formato descontinuado, ignorar)</h4></div>
+            {{ form.content_ck }}
+            {{ form.content_ck.errors }}
+          </div>
+          <h3>Metadados</h3>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Tipo</h4>{{ form.type }}</div>
+            <div class="form-row-description">
+              A classe em que se insere esta secção.<br>
+              Um <b>tópico</b> é uma area de estudo, uma <b>personalidade</b> é um individuo ou colectividade e uma <b>aplicação</b>
+              descreve um procedimento (como um algoritmo).
+            </div>
+            {{ form.type.errors }}
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Subarea (Opcional)</h4>{{ form.subarea }}</div>
+            <div class="form-row-description">
+              A subárea pai desta secção. Apenas as secções que são raízes de áreas de estudo devem de ter uma subárea.
+            </div>
+            {{ form.subarea.errors }}
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Parentes</h4>{{ form.parents }}</div>
+            <div class="form-row-description">
+              As secções que enraizam <b>directamente</b> esta secção.
+              (ex. <q>Limite</q> é parente de <q>Limites notáveis</q>)<br>
+              Adições são anexadas ao fim dos filhos, a reordenação é feita editando o pai.
+            </div>
+            {{ form.parents.errors }}
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Unidades curriculares</h4>{{ form.classes }}</div>
+            <div class="form-row-description">
+              As unidades curriculares em que esta secção se insere.<br>
+              Adições são anexadas ao fim das únidade curriculares, a reordenação é feita na unidade curricular.
+            </div>
+            {{ form.classes.errors }}
+          </div>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Requisitos</h4>{{ form.requirements }}</div>
+            <div class="form-row-description">
+              Requisitos à compreensão desta secção.<br>
+              Devem de listadas todas as secções das quais esta secção depende sem
+              que haja transitividade entre requisitos (ie. não listar requisitos de requisitos).
+            </div>
+            {{ form.requirements.errors }}
+          </div>
           {{ sources_formset.management_form }}
-          {{ sources_formset.non_form_errors }}
-          <table>
-            {% for subform in sources_formset.forms %}
-              {% if subform.non_field_errors %}
-                <tr>{{ subform.non_field_errors }}</tr>
-              {% endif %}
-              <tr>
-                {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
-                <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
-                <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
-                {% if subform.instance.pk %}
-                  <td>Apagar: {{ subform.DELETE }}</td>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Fontes</h4></div>
+            {{ sources_formset.non_form_errors }}
+            <div class="form-row-description">
+              Origens ou locais de validação do conteúdo desta secção.
+            </div>
+            <table>
+              {% for subform in sources_formset.forms %}
+                {% if subform.non_field_errors %}
+                  <tr>{{ subform.non_field_errors }}</tr>
                 {% endif %}
-              </tr>
-            {% endfor %}
-          </table>
-          <h3>Recursos web:</h3>
+                <tr>
+                  {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
+                  <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
+                  <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
+                  {% if subform.instance.pk %}
+                    <td>Apagar: {{ subform.DELETE }}</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </table>
+            {{ form.classes.errors }}
+          </div>
           {{ web_resources_formset.management_form }}
-          {{ web_resources_formset.non_form_errors }}
-          <table>
-            {% for subform in web_resources_formset.forms %}
-              {% if subform.non_field_errors %}
-                <tr>{{ subform.non_field_errors }}</tr>
-              {% endif %}
-              <tr>
-                {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
-                <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
-                <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
-                {% if subform.instance.pk %}
-                  <td>Apagar: {{ subform.DELETE }}</td>
+          <div class="form-row">
+            <div class="form-row-top"><h4>Recursos web</h4></div>
+            {{ web_resources_formset.non_form_errors }}
+            <div class="form-row-description">
+              Recursos complementares à secção, estando
+            </div>
+            <table>
+              {% for subform in web_resources_formset.forms %}
+                {% if subform.non_field_errors %}
+                  <tr>{{ subform.non_field_errors }}</tr>
                 {% endif %}
-              </tr>
-            {% endfor %}
-          </table>
-          <h3>Documentos:</h3>
-          {{ doc_resources_formset.management_form }}
-          {{ doc_resources_formset.non_form_errors }}
-          <table>
-            {% for subform in doc_resources_formset.forms %}
-              {% if subform.non_field_errors %}
-                <tr>{{ subform.non_field_errors }}</tr>
-              {% endif %}
-              <tr>
-                {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
-                <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
-                <td>{{ subform.document }} <span style="color:red;">{{ subform.document.errors }}</span></td>
-                {% if subform.instance.pk %}
-                  <td>Apagar: {{ subform.DELETE }}</td>
-                {% endif %}
-              </tr>
-            {% endfor %}
-          </table>
-          <p>* - Opcional</p>
+                <tr>
+                  {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}
+                  <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>
+                  <td>{{ subform.url }} <span style="color:red;">{{ subform.url.errors }}</span></td>
+                  {% if subform.instance.pk %}
+                    <td>Apagar: {{ subform.DELETE }}</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+          {#          {{ doc_resources_formset.management_form }}#}
+          {#          <div class="form-row">#}
+          {#            <div class="form-row-top"><h4>Documentos</h4></div>#}
+          {#            {{ doc_resources_formset.non_form_errors }}#}
+          {#            <table>#}
+          {#              {% for subform in doc_resources_formset.forms %}#}
+          {#                {% if subform.non_field_errors %}#}
+          {#                  <tr>{{ subform.non_field_errors }}</tr>#}
+          {#                {% endif %}#}
+          {#                <tr>#}
+          {#                  {% for hidden in subform.hidden_fields %}{{ hidden }}{% endfor %}#}
+          {#                  <td>{{ subform.title }} <span style="color:red;">{{ subform.title.errors }}</span></td>#}
+          {#                  <td>{{ subform.document }} <span style="color:red;">{{ subform.document.errors }}</span></td>#}
+          {#                  {% if subform.instance.pk %}#}
+          {#                    <td>Apagar: {{ subform.DELETE }}</td>#}
+          {#                  {% endif %}#}
+          {#                </tr>#}
+          {#              {% endfor %}#}
+          {#            </table>#}
+          {#          </div>#}
+          <p><i>* - Opcional</i></p>
           {% if section %}
-            <input type="submit" value="Editar"/>
+            <input class="ui-btn end" type="submit" value="Editar"/>
           {% else %}
-            <input type="submit" value="Criar"/>
+            <input class="ui-btn end" type="submit" value="Criar"/>
           {% endif %}
           {{ form.media }}
         </form>
@@ -91,20 +165,24 @@
     </div>
     {% if section %}
       <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
-        <div class="pane-content">
+        <div class="pane-title bg-grad"><h2>Filhos</h2></div>
+        <div class="pane-content col">
           <ul id="sortable-list" data-endpoint="{% url 'api:synopses_section_children' section.id %}"></ul>
-          <script>
-              let list = document.getElementById("sortable-list");
-              var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
-              populateCollection(list);
-          </script>
-          <span style="font-weight: bold">Adicionar: </span>
-          <select name="section" required id="id_area" data-autocomplete-light-url="{% url 'learning:section_ac' %}"
-                  data-autocomplete-light-function="select2" onchange="addToCollectionEvt(this);"></select>
-          <a class="ui-btn save-button" href="javascript:saveCollectionOrder(list);">Guardar</a>
+          <div class="form-row col">
+            <h4>Adicionar</h4>
+            <select name="section"
+                    data-autocomplete-light-url="{% url 'learning:section_ac' %}"
+                    data-autocomplete-light-function="select2"
+                    onchange="addToCollectionEvt(this);"></select>
+          </div>
+          <a class="ui-btn end" href="javascript:saveCollectionOrder(list);">Guardar ordem</a>
         </div>
       </div>
+      <script>
+          let list = document.getElementById("sortable-list");
+          var sorter = Sortable.create(list, {animation: 150, draggable: ".sortable-line"});
+          populateCollection(list);
+      </script>
     {% endif %}
   </div>
   <script>setupMarkdownEnv();</script>

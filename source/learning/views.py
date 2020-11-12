@@ -247,7 +247,7 @@ def section_create_view(request, subarea_id=None, parent_id=None):
 
     sources_formset = f.SectionSourcesFormSet(prefix="sources")
     web_resources_formset = f.SectionWebpageResourcesFormSet(prefix="wp_resources")
-    doc_resources_formset = f.SectionDocumentResourcesFormSet(prefix="doc_resources")
+    # doc_resources_formset = f.SectionDocumentResourcesFormSet(prefix="doc_resources")
     if request.method == 'POST':
         section_form = f.SectionCreateForm(data=request.POST)
         if section_form.is_valid():
@@ -282,20 +282,20 @@ def section_create_view(request, subarea_id=None, parent_id=None):
                 request.POST,
                 prefix="wp_resources",
                 instance=section)
-            doc_resources_formset = f.SectionDocumentResourcesFormSet(
-                request.POST,
-                prefix="doc_resources",
-                instance=section)
+            # doc_resources_formset = f.SectionDocumentResourcesFormSet(
+            #     request.POST,
+            #     prefix="doc_resources",
+            #     instance=section)
             if sources_formset.is_valid():
                 sources_formset.save()
             if web_resources_formset.is_valid():
                 # for form in web_resources_formset:  # For some reason this passes the unit tests
                 #     form.save()
                 web_resources_formset.save()  # While this doesn't... go figure!
-            if doc_resources_formset.is_valid():
-                # for form in doc_resources_formset:  # For some reason this passes the unit tests
-                #     form.save()
-                doc_resources_formset.save()
+            # if doc_resources_formset.is_valid():
+            #     # for form in doc_resources_formset:  # For some reason this passes the unit tests
+            #     #     form.save()
+            #     doc_resources_formset.save()
 
             # Redirect to the newly created section
             if subarea:
@@ -310,7 +310,7 @@ def section_create_view(request, subarea_id=None, parent_id=None):
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['web_resources_formset'] = web_resources_formset
-    context['doc_resources_formset'] = doc_resources_formset
+    # context['doc_resources_formset'] = doc_resources_formset
     if subarea:
         area = subarea.area
         context['title'] = 'Criar secção em "%s"' % subarea.title
@@ -341,16 +341,16 @@ def section_edit_view(request, section_id):
             request.POST, instance=section, prefix="sources")
         web_resources_formset = f.SectionWebpageResourcesFormSet(
             request.POST, instance=section, prefix="wp_resources")
-        doc_resources_formset = f.SectionDocumentResourcesFormSet(
-            request.POST, instance=section, prefix="doc_resources")
+        # doc_resources_formset = f.SectionDocumentResourcesFormSet(
+        #     request.POST, instance=section, prefix="doc_resources")
         if section_form.is_valid() \
                 and sources_formset.is_valid() \
-                and web_resources_formset.is_valid() \
-                and doc_resources_formset.is_valid():
+                and web_resources_formset.is_valid():
+                # and doc_resources_formset.is_valid():
             with reversion.create_revision():
                 section = section_form.save()
                 sources_formset.save()
-                doc_resources_formset.save()
+                # doc_resources_formset.save()
                 web_resources_formset.save()
                 section.compact_indexes()
                 reversion.set_user(request.user)
@@ -369,7 +369,7 @@ def section_edit_view(request, section_id):
     context['form'] = section_form
     context['sources_formset'] = sources_formset
     context['web_resources_formset'] = web_resources_formset
-    context['doc_resources_formset'] = doc_resources_formset
+    # context['doc_resources_formset'] = doc_resources_formset
     context['action_page'] = reverse('learning:section_edit', args=[section_id])
     context['action_name'] = 'Editar'
     context['sub_nav'] = [{'name': 'Sínteses', 'url': reverse('learning:areas')},
@@ -738,9 +738,9 @@ def question_edit_view(request, question_id):
 
     context['form'] = form
 
-    versions = Version.objects\
-        .select_related('revision__user')\
-        .order_by('revision__date_created')\
+    versions = Version.objects \
+        .select_related('revision__user') \
+        .order_by('revision__date_created') \
         .get_for_object(question)
 
     changes = []
@@ -786,9 +786,9 @@ def answer_edit_view(request, answer_id):
 
     context['form'] = form
 
-    versions = Version.objects\
-        .select_related('revision__user')\
-        .order_by('revision__date_created')\
+    versions = Version.objects \
+        .select_related('revision__user') \
+        .order_by('revision__date_created') \
         .get_for_object(answer)
 
     changes = []
