@@ -1,6 +1,9 @@
 diff-match-patch
 beautifulsoup4
 Django==3.1
+daphne
+channels
+channels-redis
 djangorestframework
 django-analytical
 django-autocomplete-light==3.5.0
@@ -29,4 +32,4 @@ sphinx-rtd-theme
 scrapy
 scrapy-djangoitem
 sphinx-rtd-theme
-uWSGI
+Twisted[tls,http2]

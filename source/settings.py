@@ -86,6 +86,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'wsgi.application'
+ASGI_APPLICATION = "asgi.application"
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
