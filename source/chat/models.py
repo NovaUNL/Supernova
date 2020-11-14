@@ -1,39 +1,112 @@
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
-from groups.models import Group
+from markdownx.models import MarkdownxField
+from polymorphic.models import PolymorphicModel
+
+from users import models as users
+from groups import models as groups
 
 
-class Conversation(djm.Model):
+class Conversation(PolymorphicModel):
+    """
+    A private conversation
+    """
+    #: The user which instantiated this conversation
     creator = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT, related_name='creator')
-    date = djm.DateField(auto_now_add=True)
+    #: The datetime when this room was created
+    creation = djm.DateTimeField(auto_now_add=True)
+    #: Users engaging in this conversation
     users = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationUser')
 
 
 class Message(djm.Model):
-    author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)  # TODO consider user deletion
-    datetime = djm.DateTimeField(auto_now_add=True)
+    """
+    A message in a conversation
+    """
+    #: User who authored this message
+    author = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)
+    #: The datetime when this message was sent
+    creation = djm.DateTimeField(auto_now_add=True)
+    #: This message's textual content
     content = djm.TextField()
+    #: Conversation to which this message belongs
     conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
+    #: Datetime of the last message
+    last_message_creation = djm.DateTimeField(null=True)
 
     class Meta:
-        unique_together = ['author', 'datetime', 'content', 'conversation']
+        unique_together = ['author', 'creation', 'content', 'conversation']
 
 
-# A user relation to a conversation
 class ConversationUser(djm.Model):
+    """
+    The presence of an user in a conversation
+    """
+    #: Conversation in this relationship
     conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
-    user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)  # TODO consider user deletion
+    #: User in this relationship
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)
+    #: The last message this user read
     last_read_message = djm.ForeignKey(Message, null=True, blank=True, on_delete=djm.PROTECT)
 
 
-# A conversation from an outsider to a group
+class Room(Conversation):
+    """
+    A thematic chat room
+    """
+    #: A textual identifier for this room
+    identifier = djm.CharField(max_length=32)
+    #: The name of this conversation (creator designated textual identifier)
+    name = djm.CharField(max_length=300)
+    #: A description of what this conversation is about
+    description = djm.TextField(null=True, blank=True)
+    #: Whether anonymous users are allowed
+    anonymous_allowed = djm.BooleanField(default=False)
+
+
 class GroupExternalConversation(Conversation):
-    group = djm.ForeignKey(Group, on_delete=djm.PROTECT)
-    user_ack = djm.BooleanField()
-    group_ack = djm.BooleanField()
+    """
+    A conversation between a user the members of a group, meant to be used as a mean to provide support.
+    """
+    #: Conversation title
+    title = djm.CharField(max_length=300)
+    #: The group where a conversation happened
+    group = djm.ForeignKey(groups.Group, on_delete=djm.PROTECT)
+    #: Flag signaling conversation closure
     closed = djm.BooleanField()
+    # Cached fields
+    #: Whether the user has read the last message
+    user_ack = djm.BooleanField()
+    #: Whether a group member has read the last message
+    group_ack = djm.BooleanField()
 
 
-# A conversation within a group
 class GroupInternalConversation(Conversation):
-    group = djm.ForeignKey(Group, on_delete=djm.PROTECT)
+    """
+    A conversation within the members of a group, possibly to discuss topics internally
+    """
+    #: Conversation title
+    title = djm.CharField(max_length=300)
+    #: The group where a conversation happened
+    group = djm.ForeignKey(groups.Group, on_delete=djm.PROTECT)
+
+
+class Comment(users.Activity):
+    """
+    A comment to an arbitrary object
+    """
+    to_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE)
+    to_object_id = djm.PositiveIntegerField()
+    #: Object to which this comment refers
+    to_object = GenericForeignKey('to_content_type', 'to_object_id')
+    #: Posted content
+    content = MarkdownxField()
+    #: Creation datetime
+    creation_timestamp = djm.DateTimeField(auto_now_add=True)
+    #: Edit datetime
+    edit_timestamp = djm.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comentário em '{self.to_object}'"
