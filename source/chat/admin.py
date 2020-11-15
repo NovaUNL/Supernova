@@ -1,8 +1,9 @@
 from django.contrib import admin
-from chat.models import Conversation, Message, ConversationUser, GroupExternalConversation, GroupInternalConversation
+from chat import models as m
 
-admin.site.register(Conversation)
-admin.site.register(Message)
-admin.site.register(ConversationUser)
-admin.site.register(GroupExternalConversation)
-admin.site.register(GroupInternalConversation)
+admin.site.register(m.Conversation)
+admin.site.register(m.ConversationUser)
+admin.site.register(m.GroupExternalConversation)
+admin.site.register(m.GroupInternalConversation)
+admin.site.register(m.Message)
+admin.site.register(m.Room)

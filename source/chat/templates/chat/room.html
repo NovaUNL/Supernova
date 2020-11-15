@@ -1,0 +1,34 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <script async src="{% static 'chat/chat.js' %}" onload="initChats()"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <div>
+      <h3>Sala de conversa</h3>
+      <h1>{{ room.name }}</h1>
+    </div>
+  </div>
+  <div class="row padded nowrap">
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          {% include 'chat/widget.html' %}
+        </div>
+      </div>
+    </div>
+    <div class="col nogrow noshrink" style="flex-basis: 300px">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+        <div class="pane-content">
+          <p>{{ room.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

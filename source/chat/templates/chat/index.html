@@ -1,0 +1,31 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="header-decorator">
+    <h1>Salas de conversa</h1>
+  </div>
+  <div class="row nowrap padded">
+    <div class="col nogrow noshrink">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Salas</h2></div>
+        <div class="pane-content">
+          <ul>
+            {% for room in rooms %}
+              <li>{{ room.name }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          {% include 'chat/widget.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
