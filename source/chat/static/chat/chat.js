@@ -4,11 +4,11 @@ function initChats() {
 }
 
 function initChat(elem, focus = false) {
-    const endpoint = elem.dataset.endpoint;
+    const room = elem.dataset.room;
     const chatLog = elem.querySelector('.chat-log');
     const textInput = elem.querySelector('.chat-message-input');
     const btn = elem.querySelector('.chat-message-submit');
-    const socket = new WebSocket('ws://' + window.location.host + endpoint);
+    const socket = new WebSocket('ws://' + window.location.host + "/ws/chat");
 
     if (focus) textInput.focus();
 
@@ -21,10 +21,11 @@ function initChat(elem, focus = false) {
     btn.onclick = function (e) {
         const message = textInput.value;
         if (message.trim() === '') return;
-        socket.send(JSON.stringify({
-            'message': message,
-            'testerinoo': "fooo"
-        }));
+        socket.send(JSON.stringify([{
+            'type': "room_send",
+            'room': room,
+            'message': message
+        }]));
         textInput.value = '';
     };
 

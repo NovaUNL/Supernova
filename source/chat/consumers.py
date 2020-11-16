@@ -1,52 +1,70 @@
+import asyncio
 import json
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.utils import timezone
+
+from chat import models as chat
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
     async def connect(self):
         self.user = self.scope["user"]
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = 'chat_%s' % self.room_name
-
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name)
+        self.rooms = dict()
+        self.lock = asyncio.Lock()
 
         await self.accept()
 
     async def disconnect(self, close_code):
         # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name)
+        async with self.lock:
+            for room_identifier in self.rooms.keys():
+                room_group_name = 'room_%s' % room_identifier
+                # Leave room group
+                await self.channel_layer.group_discard(
+                    room_group_name,
+                    self.channel_name)
+                print(f"Disconnected {self.channel_name}")
 
     # Receive message from WebSocket
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        request_data = json.loads(text_data)
+        if not isinstance(request_data, list):
+            await self.send(text_data=json.dumps({
+                "error": "Invalid message format",
+            }))
+            return
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': {
-                    'id': 12345678,  # TODO
-                    'content': message,
-                    'author': {
-                        'id': self.user.id,
-                        'nickname': self.user.nickname,
-                        'pic': self.user.picture_thumbnail.url,  # TODO
-                        'url': self.user.get_absolute_url(),
-                    },
-                    'timestamp': 123456789, # TODO
-                    'datetime': '2020/03/02 01:00'  # TODO
-                }
-            }
-        )
+        for action in request_data:
+            if 'type' not in action:
+                await self.send(text_data=json.dumps({
+                    "error": f"Invalid message format: {action}",
+                }))
+                return
+            type = action['type']
+            if type == 'room_send':
+                if 'room' in action and 'message' in action:
+                    room_identifier = action['room']
+                    room_group_name = 'room_%s' % room_identifier
+                    async with self.lock:
+                        if room_identifier not in self.rooms:
+                            self.rooms[room_identifier] = await self.get_room(room_identifier)
+                            # Join room group
+                            await self.channel_layer.group_add(
+                                room_group_name,
+                                self.channel_name)
+                            print(f"Joined {room_group_name} - {room_identifier}")
+                        room = self.rooms[room_identifier]
+                    await self.channel_layer.group_send(
+                        room_group_name,
+                        {
+                            'type': 'chat.message',
+                            'message': await self.store_message(action['message'], room)
+                        }
+                    )
+                    print(f"Broadcasted")
 
     # Receive message from room group
     async def chat_message(self, event):
@@ -58,5 +76,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def store_message(self):
-        pass
+    def get_room(self, room_name):
+        return chat.Room.objects.get(identifier=room_name)
+
+    @database_sync_to_async
+    def store_message(self, message, conversation):
+        return message_serialize(
+            chat.Message.objects.create(
+                author=self.user,
+                content=message,
+                creation=timezone.now(),
+                conversation=conversation))
+
+
+def message_serialize(message):
+    return {
+        'id': message.id,
+        'content': message.content,
+        'author': {
+            'id': message.author.id,
+            'nickname': message.author.nickname,
+            'pic': message.author.picture_thumbnail.url if message.author.picture else None,
+            'url': message.author.get_absolute_url() if not message.author.is_anonymous else None,
+        },
+        'timestamp': message.creation.timestamp(),
+        'datetime': message.creation.strftime('%y/%m/%d %H:%M')
+    }
