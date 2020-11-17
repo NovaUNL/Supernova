@@ -35,9 +35,9 @@ class Message(djm.Model):
     #: This message's textual content
     content = djm.TextField()
     #: Conversation to which this message belongs
-    conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE)
-    #: Datetime of the last message
-    last_message_creation = djm.DateTimeField(null=True)
+    conversation = djm.ForeignKey(Conversation, on_delete=djm.CASCADE, related_name='messages')
+    #: Datetime of the last edit
+    last_message_edition = djm.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ['author', 'creation', 'content', 'conversation']
