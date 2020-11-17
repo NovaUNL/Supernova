@@ -55,18 +55,43 @@ class ConversationUser(djm.Model):
     last_read_message = djm.ForeignKey(Message, null=True, blank=True, on_delete=djm.PROTECT)
 
 
-class Room(Conversation):
+class DMChat(Conversation):
     """
-    A thematic chat room
+    A direct message chat between two users
+    """
+    pass
+
+    def __str__(self):
+        users = [self.users]
+        return f"{users[0].nickname} <-> {users[1].nickname}"
+
+
+class PrivateRoom(Conversation):
+    """
+    A private, many-to-many user chat
+    """
+    #: The name of this conversation
+    name = djm.CharField(max_length=100, db_index=True)
+
+    def __str__(self):
+        return self.name
+
+
+class PublicRoom(Conversation):
+    """
+    A public and possibly thematic chat room
     """
     #: A textual identifier for this room
-    identifier = djm.CharField(max_length=32)
-    #: The name of this conversation (creator designated textual identifier)
-    name = djm.CharField(max_length=300)
+    identifier = djm.CharField(max_length=32, db_index=True)
+    #: The name of this conversation
+    name = djm.CharField(max_length=100)
     #: A description of what this conversation is about
     description = djm.TextField(null=True, blank=True)
     #: Whether anonymous users are allowed
     anonymous_allowed = djm.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
 
 
 class GroupExternalConversation(Conversation):
@@ -74,7 +99,7 @@ class GroupExternalConversation(Conversation):
     A conversation between a user the members of a group, meant to be used as a mean to provide support.
     """
     #: Conversation title
-    title = djm.CharField(max_length=300)
+    title = djm.CharField(max_length=100)
     #: The group where a conversation happened
     group = djm.ForeignKey(groups.Group, on_delete=djm.PROTECT)
     #: Flag signaling conversation closure
@@ -85,15 +110,21 @@ class GroupExternalConversation(Conversation):
     #: Whether a group member has read the last message
     group_ack = djm.BooleanField()
 
+    def __str__(self):
+        return self.title
+
 
 class GroupInternalConversation(Conversation):
     """
     A conversation within the members of a group, possibly to discuss topics internally
     """
     #: Conversation title
-    title = djm.CharField(max_length=300)
+    title = djm.CharField(max_length=100)
     #: The group where a conversation happened
     group = djm.ForeignKey(groups.Group, on_delete=djm.PROTECT)
+
+    def __str__(self):
+        return self.title
 
 
 class Comment(users.Activity):
