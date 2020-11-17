@@ -19,6 +19,9 @@ class Conversation(PolymorphicModel):
     creation = djm.DateTimeField(auto_now_add=True)
     #: Users engaging in this conversation
     users = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationUser')
+    # Cached
+    #: Timestamp of the last activity
+    last_activity = djm.DateTimeField(null=True)
 
 
 class Message(djm.Model):
