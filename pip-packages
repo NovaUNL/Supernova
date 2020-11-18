@@ -20,6 +20,7 @@ django-redis
 django-reversion
 django-simple-captcha
 elasticsearch-dsl>=7.0.0,<8.0.0
+gunicorn
 html2text
 Jinja2
 Pillow
@@ -33,3 +34,4 @@ scrapy
 scrapy-djangoitem
 sphinx-rtd-theme
 Twisted[tls,http2]
+uvicorn[standard]
