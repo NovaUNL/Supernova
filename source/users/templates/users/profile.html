@@ -129,7 +129,7 @@
             <div class="pane-content">
               {% for group in profile_user.groups_custom.all %}
                 <a href="{% url 'groups:group' group.abbreviation %}">
-                <span class="group"{% if group.image %} style="background-image: url({{ group.icon_small.url }})"{% endif %}>
+                <span class="group"{% if group.icon %} style="background-image: url({{ group.icon_small.url }})"{% endif %}>
                   {{ group.abbreviation }}
                 </span>
                 </a>
