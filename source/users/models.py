@@ -24,7 +24,7 @@ def user_profile_pic_path(user, filename):
 
 
 class User(AbstractUser):
-    nickname = djm.CharField(null=False, max_length=20, unique=True, verbose_name='Alcunha')
+    nickname = djm.CharField(null=False, max_length=20, unique=True, verbose_name='Alcunha', db_index=True)
     last_nickname_change = djm.DateField(default=datetime(2000, 1, 1).date())
     birth_date = djm.DateField(null=True, blank=True, verbose_name='Nascimento')
     last_activity = djm.DateTimeField(auto_now_add=True)
@@ -316,7 +316,7 @@ class Activity(PolymorphicModel):
     #: :py:class:`User` that made this activity.
     user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='activities')
     #: The id field, but renamed to avoid collisions upon multiple inheritance
-    activity_id = djm.AutoField(primary_key=True)
+    activity_id = djm.AutoField(primary_key=True, db_index=True)
     #: Datetime at which the activity happened
     timestamp = djm.DateTimeField(auto_now_add=True)
 

@@ -6,18 +6,26 @@ from chat import models as m
 from supernova.views import build_base_context
 
 
-def index(request):
+def index_view(request):
     context = build_base_context(request)
     context['pcode'] = "t_chat"
     context['title'] = "Salas de conversa"
-    context['rooms'] = m.Room.objects.all()
+    context['rooms'] = m.PublicRoom.objects.all()
     context['sub_nav'] = [
         {'name': 'Conversas', 'url': reverse('college:index')}]
     return render(request, 'chat/index.html', context)
 
 
-def room(request, room_name):
-    room = get_object_or_404(m.Room.objects, identifier=room_name)
+def messages_view(request):
+    context = build_base_context(request)
+    context['pcode'] = "u_chat"
+    context['title'] = f"Mensagens"
+    context['conversations'] = m.Conversation.objects.filter().all()
+    return render(request, 'chat/messages.html', context)
+
+
+def room_view(request, room_name):
+    room = get_object_or_404(m.PublicRoom.objects, identifier=room_name)
     context = build_base_context(request)
     context['pcode'] = "t_chat_room"
     context['title'] = f"Sala de conversa {room.name}"

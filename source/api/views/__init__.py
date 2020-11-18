@@ -1,5 +1,6 @@
 from api.views import college
 from api.views import groups
+from api.views import chat
 from api.views import news
 from api.views import services
 from api.views import store

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class Importable(djm.Model):
     """Objects which were imported from other supernova-alike systems trough some driver."""
     #: The ID for this object in an external system (its primary key)
-    external_id = djm.IntegerField(null=True, blank=True, unique=True)
+    external_id = djm.IntegerField(null=True, blank=True, unique=True, db_index=True)
     #: The item internal ID its origin (not in the driver).
     # Usually the same as external_id, but for some things can be something else
     iid = djm.CharField(null=True, blank=True, max_length=64)
@@ -54,9 +54,9 @@ class Student(Importable):
     #: User this student is associated with
     user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.CASCADE, related_name='students')
     #: The public number which identifies this student
-    number = djm.IntegerField(null=True, blank=True, unique=True)
+    number = djm.IntegerField(null=True, blank=True, unique=True, db_index=True)
     #: The public textual abbreviation which identifies this student
-    abbreviation = djm.CharField(null=True, blank=True, max_length=64)
+    abbreviation = djm.CharField(null=True, blank=True, max_length=64, db_index=True)
     #: This student's course
     course = djm.ForeignKey('Course', on_delete=djm.PROTECT, related_name='students', null=True, blank=True)
     #: Shifts this student is enrolled to
@@ -135,7 +135,7 @@ class Building(Importable):
     #: Full name
     name = djm.CharField(max_length=32, unique=True)
     #: Abbreviated name
-    abbreviation = djm.CharField(max_length=16, unique=True, null=True)
+    abbreviation = djm.CharField(max_length=16, unique=True, null=True, db_index=True)
     #: Tag in the campus map
     map_tag = djm.CharField(max_length=20, unique=True)
     #: Geographical center
@@ -580,7 +580,7 @@ class Teacher(Importable):
     | Note that there is an intersection between students and teachers. A student might become a teacher.
     """
     #: Full teacher name (eventually redundant, useful for registrations)
-    name = djm.TextField(max_length=200)
+    name = djm.TextField(max_length=200, db_index=True)
     #: This teacher's rank
     rank = djm.ForeignKey(TeacherRank, on_delete=djm.PROTECT, null=True, blank=True)
     #: Departments this teacher has worked for
@@ -597,7 +597,7 @@ class Teacher(Importable):
     #: Cache field which stores the last year on which this teacher was seen as active
     last_year = djm.IntegerField(null=True, blank=True)
     #: The textual abbreviation which identifies this teacher (speculated)
-    abbreviation = djm.CharField(null=True, blank=True, max_length=64)
+    abbreviation = djm.CharField(null=True, blank=True, max_length=64, db_index=True)
     #: URL to this teacher's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
     #: This teacher's email

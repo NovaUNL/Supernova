@@ -31,7 +31,7 @@ class Group(djm.Model):
     | Groups are meant to be self-administered with each user having one :py:class:`Role`,
     """
     #: A short textual descriptor. Used as a group identifier.
-    abbreviation = djm.CharField(max_length=64, unique=True)
+    abbreviation = djm.CharField(max_length=64, unique=True, db_index=True)
     #: The group's full name.
     name = djm.CharField(max_length=65)
     #: A description that defines the group.

@@ -1,0 +1,54 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  <link href="{% static  'vendor/select2/dist/css/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <link href="{% static  'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <link href="{% static  'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet">
+  <script src="{% static  'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static  'autocomplete_light/jquery.init.js' %}"></script>
+  <script src="{% static  'vendor/select2/dist/js/select2.full.min.js' %}"></script>
+  <script src="{% static  'vendor/select2/dist/js/i18n/pt.js' %}"></script>
+  <script async src="{% static 'chat/chat.js' %}" onload="loadChats()"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  {{ request.user.id |json_script:"chat-uid" }}
+  <div class="header-decorator">
+    <h1>Mensagens</h1>
+  </div>
+  <div class="row padded nowrap">
+    <div class="col nogrow noshrink" style="flex-basis: 300px">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          <select id="chat-selector" onchange="selectChat(this);"></select>
+          <h3>Últimas mensagens</h3>
+          <div id="chat-list">
+            <img class="spinner" src="{% static 'img/spinner.svg' %}">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div id="chat-container" class="pane-content">
+          <img class="spinner" style="display: none" src="{% static 'img/spinner.svg' %}">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+      $('#chat-selector').select2({
+          ajax: {
+              url: '{% url 'api:chat_query' %}',
+              dataType: 'json',
+              delay: 250,
+              minimumInputLength: 3,
+              placeholder: 'Abrir conversa'
+          }
+      });
+  </script>
+{% endblock %}

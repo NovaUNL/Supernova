@@ -23,6 +23,11 @@ class Conversation(PolymorphicModel):
     #: Timestamp of the last activity
     last_activity = djm.DateTimeField(null=True)
 
+    def has_access(self, user) -> bool:
+        if user in self.users.all():
+            return True
+        return False
+
 
 class Message(djm.Model):
     """
@@ -53,17 +58,22 @@ class ConversationUser(djm.Model):
     user = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.PROTECT)
     #: The last message this user read
     last_read_message = djm.ForeignKey(Message, null=True, blank=True, on_delete=djm.PROTECT)
+    # #: Whether this user desires to receive notifications
+    # muted = djm.BooleanField(default=False)
 
 
 class DMChat(Conversation):
     """
     A direct message chat between two users
     """
-    pass
 
     def __str__(self):
         users = [self.users]
         return f"{users[0].nickname} <-> {users[1].nickname}"
+
+    @property
+    def chat_type(self):
+        return "dm"
 
 
 class PrivateRoom(Conversation):
@@ -76,13 +86,17 @@ class PrivateRoom(Conversation):
     def __str__(self):
         return self.name
 
+    @property
+    def chat_type(self):
+        return "room"
+
 
 class PublicRoom(Conversation):
     """
     A public and possibly thematic chat room
     """
     #: A textual identifier for this room
-    identifier = djm.CharField(max_length=32, db_index=True)
+    identifier = djm.CharField(max_length=32, db_index=True, unique=True)
     #: The name of this conversation
     name = djm.CharField(max_length=100)
     #: A description of what this conversation is about
@@ -92,6 +106,13 @@ class PublicRoom(Conversation):
 
     def __str__(self):
         return self.name
+
+    def has_access(self, user) -> bool:
+        return True
+
+    @property
+    def chat_type(self):
+        return "room"
 
 
 class GroupExternalConversation(Conversation):
