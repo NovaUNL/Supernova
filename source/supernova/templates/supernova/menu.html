@@ -43,6 +43,7 @@
       {% url 'users:calendar' user.nickname as calendar %}
       {% url 'users:evaluations' user.nickname as evaluations %}
       {% url 'users:reputation' user.nickname as reputation %}
+      {% url 'chat:messages' as messages %}
       {% url 'users:settings' user.nickname as settings %}
       {% if pcode|startswith:'u' %}
         <li>
@@ -53,6 +54,7 @@
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li {% if pcode == 'u_evaluations' %}class="active"{% endif %}><a href="{{ evaluations }}">Avaliações</a></li>
             <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
+            <li {% if pcode == 'u_chat' %}class="active"{% endif %}><a href="{{ messages }}">Mensagens</a></li>
             <li {% if pcode == 'u_reputation' %}class="active"{% endif %}><a href="{{ reputation }}">Reputação</a></li>
             <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
           </ul>
@@ -66,6 +68,7 @@
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li><a href="{{ evaluations }}">Avaliações</a></li>
             <li><a href="{{ calendar }}">Calendário</a></li>
+            <li><a href="{{ messages }}">Mensagens</a></li>
             <li><a href="{{ reputation }}">Reputação</a></li>
             <li><a href="{{ settings }}">Definições</a></li>
           </ul>
