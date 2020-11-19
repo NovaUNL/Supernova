@@ -216,7 +216,7 @@ function loadTheme(promptIfUnset) {
         if (theme != null)
             document.body.setAttribute("data-theme", theme);
         else if (promptIfUnset)
-            showThemePicker();
+            document.body.setAttribute("data-theme", "quasar");
     } else {
         console.log("O navegador está a bloquear o armazenamento.");
     }
