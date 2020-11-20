@@ -151,14 +151,17 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
 
 // Opens the chat that was requested by the user in the selector
 function selectChat(selector) {
+    const conversationID = selector.value;
     delChildren(selector);
-    fetch(`/api/chat/${selector.value}/join`, {
+    fetch(`/api/chat/${conversationID}/join`, {
         method: 'GET',
         credentials: 'include',
         headers: defaultRequestHeaders()
     }).then(function (response) {
         return response.json();
-    }).then(function (chat) {
+    }).then(function (chatInfo) {
+        const chat = {'meta': chatInfo};
+        chats[chatInfo.id] = chat;
         listChat(chat);
         openChat(chat);
     });
