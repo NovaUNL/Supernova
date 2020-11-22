@@ -1,18 +1,25 @@
-from django.core.management.base import BaseCommand
 import logging
+from io import StringIO
+from django.core.management.base import BaseCommand
 import datetime
 from pdfminer import pdfparser
+from pdfminer.converter import TextConverter, PDFPageAggregator
 from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
-import pdfminer.high_level
-import pdfminer.layout
-from elasticsearch import Elasticsearch
+from pdfminer.layout import LTFigure, LTImage, LAParams
+import pdfplumber
 from bs4 import UnicodeDammit
+from PIL import Image
+from elasticsearch import Elasticsearch
 from college import models as college
-
 
 logging.basicConfig()
 logging.getLogger("pdfminer").setLevel(logging.WARNING)
+es_logger = logging.getLogger('elasticsearch')
+es_logger.propagate = False
+es_logger.setLevel(logging.WARNING)
 
 
 class Command(BaseCommand):
@@ -29,7 +36,7 @@ class Command(BaseCommand):
                         "bool": {
                             "must": [
                                 {"match": {"hash": file.hash}},
-                                # Deduplication criteria, perhaps?
+                                # More deduplication criteria, perhaps?
                             ]
                         }
                     }
@@ -37,22 +44,17 @@ class Command(BaseCommand):
             hits = results['hits']['hits']
 
             if 'error' in results or len(hits) == 0:
-                file_path = f"/files/{file.hash[:2]}/{file.hash[2:]}"
-                with open(file_path, 'rb') as fp:
-                    parser = PDFParser(fp)
-                    doc = PDFDocument(parser)
+                file_path = f"/s/clipy/files/{file.hash[:2]}/{file.hash[2:]}"
+
+                document_data = pdfplumber_parse(file_path, file.hash)
+                if document_data is None:
+                    continue
+                print(document_data)
+
                 try:
-                    text = pdfminer.high_level.extract_text(file_path, codec='utf-8')
-                    document_meta = {
-                        'hash': file.hash,
-                        'text': text,
-                        'meta': flaten_and_unicode(doc.info)
-                    }
-                    indexed = elastic.index(index='document_data', body=document_meta, op_type='index')
+                    indexed = elastic.index(index='document_data', body=document_data, op_type='index')
                     print(f"{i} - {datetime.datetime.now()}")
                     i += 1
-                except pdfparser.PDFSyntaxError:
-                    print(f"{file.hash} is not a PDF")
                 except Exception as e:
                     print(f"{file.hash} had exception {e}")
             elif len(hits) > 1:
@@ -61,7 +63,91 @@ class Command(BaseCommand):
                 pass
 
 
-def flaten_and_unicode(data):
+def pdfplumber_parse(file_path, file_hash):
+    text = []
+    links = []
+    images = []
+    width = 0
+    height = 0
+
+    try:
+        with pdfplumber.open(file_path) as pdf:
+            meta = pdf.metadata
+            if len(pdf.pages) > 300:
+                print(f"Skipped {file_hash}")
+                return None
+            for i, page in enumerate(pdf.pages):
+                if i == 0:
+                    width = page.width
+                    height = page.height
+                try:
+                    for link in page.hyperlinks:
+                        links.append(link['uri'])
+                except Exception as e:
+                    print(e)
+                # for image in page.images:
+                #     im = Image.frombytes(
+                #         mode="1",
+                #         data=image['stream'].get_data(),
+                #         size=image['srcsize'],
+                #         decoder_name='raw')
+                page = page.dedupe_chars(tolerance=1)
+                _text = page.extract_text()
+                if _text is not None:
+                    text.append(_text)
+    except pdfparser.PDFSyntaxError:
+        print(f"{file_hash} is not a PDF")
+        return None
+
+
+    return {
+        'hash': file_hash,
+        'text': "\n".join(text),
+        'links': links,
+        'images': images,
+        'meta': meta,
+        'width': width,
+        'height': height,
+    }
+
+
+def pdfminer_parse(file_path, file_hash):
+    output_string = StringIO()
+    try:
+        with open(file_path, 'rb') as fp:
+            parser = PDFParser(fp)
+            doc = PDFDocument(parser)
+
+            laparams = LAParams()
+            rsrcmgr = PDFResourceManager(caching=True)
+            txt_device = TextConverter(rsrcmgr, output_string, codec='utf-8', laparams=laparams)
+            aggr_device = PDFPageAggregator(rsrcmgr, laparams=laparams)
+            txt_interpreter = PDFPageInterpreter(rsrcmgr, txt_device)
+            aggr_interpreter = PDFPageInterpreter(rsrcmgr, aggr_device)
+            from pdfminer.high_level import extract_pages
+            extract_pages("test.pdf")
+            for page in PDFPage.get_pages(fp, caching=True):
+                txt_interpreter.process_page(page)
+                aggr_interpreter.process_page(page)
+                layout = aggr_device.get_result()
+                for element in layout:
+                    if isinstance(element, LTImage):
+                        print()
+                    elif isinstance(element, LTFigure):
+                        print()
+                # Complete
+    except pdfparser.PDFSyntaxError:
+        print(f"{file_hash} is not a PDF")
+        return None
+
+    return {
+        'hash': file_hash,
+        'text': output_string.getvalue(),
+        'meta': flatten_and_unicode(doc.info)
+    }
+
+
+def flatten_and_unicode(data):
     result = dict()
     for subinfo in data:
         for (key, value) in subinfo.items():
