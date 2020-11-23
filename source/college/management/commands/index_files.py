@@ -1,8 +1,13 @@
 import logging
+import queue
+import traceback
 from io import StringIO
+from multiprocessing import Process
+from multiprocessing import Queue
+
 from django.core.management.base import BaseCommand
 import datetime
-from pdfminer import pdfparser
+from pdfminer import pdfparser, pdfdocument
 from pdfminer.converter import TextConverter, PDFPageAggregator
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -21,11 +26,13 @@ es_logger = logging.getLogger('elasticsearch')
 es_logger.propagate = False
 es_logger.setLevel(logging.WARNING)
 
+PROCESS_COUNT = 4
+
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        i = 1
+        input_queue = Queue()  # File hashes
         elastic = Elasticsearch()
         elastic.indices.create(index='document_data', ignore=400)
         for file in college.File.objects.filter(external=True, mime='application/pdf').all():
@@ -44,23 +51,38 @@ class Command(BaseCommand):
             hits = results['hits']['hits']
 
             if 'error' in results or len(hits) == 0:
-                file_path = f"/s/clipy/files/{file.hash[:2]}/{file.hash[2:]}"
+                input_queue.put(file.hash)
 
-                document_data = pdfplumber_parse(file_path, file.hash)
-                if document_data is None:
-                    continue
-                print(document_data)
+        i = 1
+        processes = []
+        output_queue = Queue()
 
-                try:
-                    indexed = elastic.index(index='document_data', body=document_data, op_type='index')
-                    print(f"{i} - {datetime.datetime.now()}")
-                    i += 1
-                except Exception as e:
-                    print(f"{file.hash} had exception {e}")
-            elif len(hits) > 1:
-                raise Exception()
-            else:
+        for _ in range(PROCESS_COUNT):
+            p = Process(target=process_exec, args=(input_queue, output_queue))
+            p.start()
+            processes.append(p)
+
+        while True:  # output_queue.qsize() > 0 or any(map(lambda p: p.is_alive(), processes)):
+            try:
+                document_data = output_queue.get(timeout=30)
+                indexed = elastic.index(index='document_data', body=document_data, op_type='index')
+                print(f"{i} - {datetime.datetime.now()}")
+                i += 1
+            except Exception:  # queue.Empty:
                 pass
+
+
+def process_exec(input: Queue, output: Queue):
+    while input.qsize() > 0:
+        file_hash = input.get()
+        file_path = f"/s/clipy/files/{file_hash[:2]}/{file_hash[2:]}"
+        try:
+            document_data = pdfplumber_parse(file_path, file_hash)
+            if document_data is not None:
+                output.put(document_data)
+        except Exception as e:
+            print(f"File {file_hash} had an exception: {e}")
+            traceback.print_exc()
 
 
 def pdfplumber_parse(file_path, file_hash):
