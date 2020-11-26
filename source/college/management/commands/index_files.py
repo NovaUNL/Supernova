@@ -95,7 +95,8 @@ def pdfplumber_parse(file_path, file_hash):
     try:
         with pdfplumber.open(file_path) as pdf:
             meta = pdf.metadata
-            if len(pdf.pages) > 300:
+            pages_cont = len(pdf.pages)
+            if pages_cont > 300:
                 print(f"Skipped {file_hash}")
                 return None
             for i, page in enumerate(pdf.pages):
@@ -125,6 +126,7 @@ def pdfplumber_parse(file_path, file_hash):
     return {
         'hash': file_hash,
         'text': "\n".join(text),
+        'pages': pages_cont,
         'links': links,
         'images': images,
         'meta': meta,
