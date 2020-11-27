@@ -1,7 +1,8 @@
 const socket = new WebSocket('ws://' + window.location.host + "/ws/chat");
 let chats = {};
 let currentChat;
-let chatUID; // User ID
+let chatUID, defaultUserPic; // User ID
+let startingChat = false;
 // let chatUsers = {};
 
 socket.onmessage = function (e) {
@@ -35,18 +36,20 @@ function openChat(chat) {
                 'room': chat.meta.id
             }]));
             chat.joined = true;
-            return;
         }
         if (currentChat != null) {
             currentChat.listing.removeClass('set');
             currentChat.widget.css('display', 'none');
         }
+        currentChat = chat;
         chat.listing.addClass("set");
         chat.widget.css('display', 'grid');
-        currentChat = chat;
     }
     if (chat.widget === undefined) {
-        instantiateChatWidget(chat, true, afterInstantiated);
+        if (!startingChat) {
+            startingChat = true;
+            instantiateChatWidget(chat, true, afterInstantiated);
+        }
     } else {
         afterInstantiated.apply();
     }
@@ -89,12 +92,12 @@ function listChat(chat) {
     switch (meta.type) {
         case 'dm':
             let otherUser = meta.users[0].id === chatUID ? meta.users[1] : meta.users[0];
-            $thumb.attr("src", otherUser.thumbnail);
+            $thumb.attr("src", otherUser.thumbnail ? otherUser.thumbnail : defaultUserPic);
             $title.text(otherUser.name);
             $desc.text(otherUser.nickname);
             break
         case 'room':
-            $thumb.attr("src", meta.thumbnail);
+            $thumb.attr("src", meta.thumbnail ? otherUser.thumbnail : defaultUserPic); //TODO Substitute by group pic
             $title.text(meta.name);
             $desc.append(meta.users.length + (usrCnt > 1 ? " utilizadores." : " utilizador."));
             break
@@ -144,6 +147,7 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
         });
         chat.widget = $chatBox;
         $('#chat-container').append($chatBox);
+        startingChat = false;
         if (afterInstantiated !== undefined)
             afterInstantiated.apply()
     });
@@ -199,6 +203,8 @@ function messageToChatLog(msg, $log) {
     $block.append($msg);
 }
 
-$(document).ready(function () {
+window.addEventListener("load", () => {
     chatUID = JSON.parse(document.getElementById('chat-uid').textContent);
+    defaultUserPic = JSON.parse(document.getElementById('default-img-path').textContent);
+    loadChats();
 });
