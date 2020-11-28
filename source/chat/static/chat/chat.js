@@ -44,6 +44,7 @@ function openChat(chat) {
         currentChat = chat;
         chat.listing.addClass("set");
         chat.widget.css('display', 'grid');
+        window.location.hash = chat.meta.id;
     }
     if (chat.widget === undefined) {
         if (!startingChat) {
@@ -70,7 +71,11 @@ function loadChats() {
             chats[entry.id] = chat;
             listChat(chat);
         }
-        $('#chat-list .chat-conversation').first().click();
+        const anchor = window.location.hash.substr(1);
+        if (anchor !== '')
+            $(`#chat-list .chat-conversation[data-id=${anchor}]`).click()
+        if (currentChat == null)
+            $('#chat-list .chat-conversation').first().click()
     });
 }
 
