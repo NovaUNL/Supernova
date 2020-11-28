@@ -70,6 +70,7 @@ function loadChats() {
             chats[entry.id] = chat;
             listChat(chat);
         }
+        $('#chat-list .chat-conversation').first().click();
     });
 }
 
@@ -77,7 +78,7 @@ function loadChats() {
 function listChat(chat) {
     const meta = chat.meta;
     const $chatList = $('#chat-list');
-    const $existing = $chatList.find(`.room[data-id=${meta.id}]`);
+    const $existing = $chatList.find(`.chat-conversation[data-id=${meta.id}]`);
     if ($existing.length !== 0)
         return;
     const $listing = $(
@@ -105,7 +106,7 @@ function listChat(chat) {
 
     // $listing.find(".chat-description").text(meta.description);
     $chatList.prepend($listing);
-    $listing.data('id', meta.id);
+    $listing[0].dataset.id = meta.id;
     $listing.click(() => openChat(chat));
     chat.listing = $listing
 }
