@@ -14,8 +14,6 @@
 {% endblock %}
 
 {% block content_wrapper %}
-{% static 'img/user.svg' as def_img%}
-{{ def_img |json_script:"default-img-path" }}
 {{ request.user.id |json_script:"chat-uid" }}
 <div class="header-decorator">
     <h1>Mensagens</h1>

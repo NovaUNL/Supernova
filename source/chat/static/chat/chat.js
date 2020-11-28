@@ -1,7 +1,7 @@
 const socket = new WebSocket('ws://' + window.location.host + "/ws/chat");
 let chats = {};
 let currentChat;
-let chatUID, defaultUserPic; // User ID
+let chatUID; // User ID
 let startingChat = false;
 // let chatUsers = {};
 
@@ -92,12 +92,12 @@ function listChat(chat) {
     switch (meta.type) {
         case 'dm':
             let otherUser = meta.users[0].id === chatUID ? meta.users[1] : meta.users[0];
-            $thumb.attr("src", otherUser.thumbnail ? otherUser.thumbnail : defaultUserPic);
+            $thumb.attr("src", otherUser.thumbnail ? otherUser.thumbnail : '/static/img/user.svg');
             $title.text(otherUser.name);
             $desc.text(otherUser.nickname);
             break
         case 'room':
-            $thumb.attr("src", meta.thumbnail ? otherUser.thumbnail : defaultUserPic); //TODO Substitute by group pic
+            $thumb.attr("src", meta.thumbnail ? meta.thumbnail : '/static/img/user.svg'); //TODO Substitute by group pic
             $title.text(meta.name);
             $desc.append(meta.users.length + (usrCnt > 1 ? " utilizadores." : " utilizador."));
             break
@@ -178,7 +178,6 @@ function messageToChatLog(msg, $log) {
     const date = `${datetime.getFullYear()}/${datetime.getMonth() + 1}/${datetime.getDate()}`;
     const time = `${datetime.getHours()}:${(datetime.getMinutes() < 10 ? "0" : "") + datetime.getMinutes()}`;
     const $lastBlk = $log.children().last();
-    // $log.find(`[data-id=${msg.id}]`).length
     let $block;
     if ($lastBlk.length && !($lastBlk.data("author") === msg.author.id && Number($lastBlk.data("timestamp")) + 600 > msg.timestamp)) {
         $block = $lastBlk;
@@ -205,6 +204,5 @@ function messageToChatLog(msg, $log) {
 
 window.addEventListener("load", () => {
     chatUID = JSON.parse(document.getElementById('chat-uid').textContent);
-    defaultUserPic = JSON.parse(document.getElementById('default-img-path').textContent);
     loadChats();
 });
