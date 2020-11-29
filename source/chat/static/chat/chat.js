@@ -3,18 +3,18 @@ let chats = {};
 let currentChat;
 let chatUID; // User ID
 let startingChat = false;
-// let chatUsers = {};
 
 socket.onmessage = function (e) {
-    const msg = JSON.parse(e.data);
-    switch (msg.type) {
+    const data = JSON.parse(e.data);
+    switch (data.type) {
         case 'message':
-            if (!msg.room in chats) {
+            const msg = data.message;
+            if (!data.conversation in chats) {
                 console.log("Received a message for an unknown room.");
                 return;
             }
-            const $widget = (chats[msg.room].widget);
-            const $chatLog = $widget.find("chat-log");
+            const $widget = chats[msg.conversation].widget;
+            const $chatLog = $widget.find(".chat-log");
             messageToChatLog(msg, $chatLog)
             break;
         case 'status':
@@ -32,8 +32,8 @@ function openChat(chat) {
     const afterInstantiated = () => {
         if (!chat.joined) {
             socket.send(JSON.stringify([{
-                'type': "join",
-                'room': chat.meta.id
+                'type': 'join',
+                'conversation': chat.meta.id
             }]));
             chat.joined = true;
         }
@@ -71,11 +71,16 @@ function loadChats() {
             chats[entry.id] = chat;
             listChat(chat);
         }
+        let conversations = $('#chat-list .chat-conversation');
+        conversations.sort(function (a, b) {
+            return a.dataset.lastActivity < b.dataset.lastActivity;
+        }).appendTo('#chat-list');
+
         const anchor = window.location.hash.substr(1);
         if (anchor !== '')
             $(`#chat-list .chat-conversation[data-id=${anchor}]`).click()
         if (currentChat == null)
-            $('#chat-list .chat-conversation').first().click()
+            conversations.first().click()
     });
 }
 
@@ -112,6 +117,7 @@ function listChat(chat) {
     // $listing.find(".chat-description").text(meta.description);
     $chatList.prepend($listing);
     $listing[0].dataset.id = meta.id;
+    $listing[0].dataset.lastActivity = meta.lastActivity == null ? meta.creation : meta.lastActivity;
     $listing.click(() => openChat(chat));
     chat.listing = $listing
 }
@@ -145,8 +151,8 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
             const message = $text.val();
             if (message.trim() === '') return;
             socket.send(JSON.stringify([{
-                'type': "send",
-                'room': chat.meta.id,
+                'type': 'send',
+                'conversation': chat.meta.id,
                 'message': message
             }]));
             $text.val('');
@@ -209,6 +215,6 @@ function messageToChatLog(msg, $log) {
 }
 
 window.addEventListener("load", () => {
-    chatUID = JSON.parse(document.getElementById('chat-uid').textContent);
+    chatUID = JSON.parse($('#chat-uid')[0].textContent);
     loadChats();
 });
