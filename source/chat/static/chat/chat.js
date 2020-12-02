@@ -189,11 +189,30 @@ function messageToChatLog(msg, $log) {
     const datetime = new Date(timestamp);
     const date = `${datetime.getFullYear()}/${datetime.getMonth() + 1}/${datetime.getDate()}`;
     const time = `${datetime.getHours()}:${(datetime.getMinutes() < 10 ? "0" : "") + datetime.getMinutes()}`;
-    const $lastBlk = $log.children().last();
-    let $block;
-    if ($lastBlk.length && !($lastBlk.data("author") === msg.author.id && Number($lastBlk.data("timestamp")) + 600 > msg.timestamp)) {
-        $block = $lastBlk;
-    } else {
+    const authorID = msg.author.id;
+
+    const [pred, succ] = findNearestMessages($log, timestamp);
+    let $block = null;
+    if (pred) {
+        const $parent = $(pred.parentNode);
+        const pTS = Number($parent.data("timestamp"));
+        const pDate = new Date(timestamp);
+        if(!($parent.data("author") === authorID && pTS - 600 < timestamp && pDate.getDay() === datetime.getDay())){
+            $block = $parent;
+        }
+    }
+
+    if (!$block && succ) {
+        const $parent = $(succ.parentNode);
+        const pTS = Number($parent.data("timestamp"));
+        const pDate = new Date(timestamp);
+        if(!($parent.data("author") === authorID && pTS + 600 < timestamp && pDate.getDay() === datetime.getDay())){
+            $parent.data("timestamp", timestamp); // Update block timestamp to the current message timestamp
+            $block = $parent;
+        }
+    }
+
+    if (!$block) {
         $block = $(
             '<div class="message-block">' +
             '<div class="meta">' +
@@ -206,12 +225,46 @@ function messageToChatLog(msg, $log) {
         if (msg.author.profile)
             authorName.attr("href", msg.author.profile);
         $block.find(".datetime").text(date);
+        $block.data('timestamp', timestamp);
+        $block.data('author', authorID);
         $log.append($block);
     }
+
     let $msg = $('<div class="message"><span class="time"></span><span class="content"></span></div>');
     $msg.find(".time").text(time);
     $msg.find(".content").text(msg.content);
+    $msg.data("timestamp", timestamp);
     $block.append($msg);
+
+    $block.find(".message").sort(function (a, b) {
+        return $(a).data("timestamp") > $(b).data("timestamp");
+    }).appendTo($block);
+}
+
+function findNearestMessages($log, timestamp) {
+    const msgs = $log.find(".message");
+
+    let start = 0, end = msgs.length - 1;
+    if (start === end) {
+        const m = msgs[0];
+        if ($(m).data("timestamp") < timestamp)
+            return [m, null]
+        else
+            return [null, m]
+    }
+    while (start <= end) {
+        const mid = Math.floor((start + end) / 2);
+        const m = msgs[mid];
+        const mTS = $(m).data("timestamp");
+        if (mTS === timestamp)
+            return [m, msgs[mid + 1]]
+        else if (mTS < timestamp)
+            start = mid + 1
+        else
+            end = mid - 1
+    }
+    // Nearest lower and nearest higher
+    return [msgs[start], msgs[start + 1]];
 }
 
 window.addEventListener("load", () => {
