@@ -1,3 +1,4 @@
+from django.db.models import Count
 from rest_framework import authentication
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.exceptions import PermissionDenied
@@ -14,8 +15,9 @@ from users import models as users
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_presence(request):
-    conversations = chat.Conversation.objects \
-        .filter(users=request.user) \
+    conversations = chat.Conversation.objects\
+        .annotate(message_count=Count('messages'))\
+        .filter(users=request.user, message_count__gt=0) \
         .order_by('last_activity') \
         .reverse() \
         .all()
