@@ -241,7 +241,7 @@ class Registration(djm.Model):
         on_delete=djm.CASCADE,
         related_name='registrations')
     #: User to which this registration led
-    resulting_user = djm.OneToOneField('User', null=True, on_delete=djm.CASCADE)
+    resulting_user = djm.OneToOneField('User', null=True, blank=True, on_delete=djm.CASCADE)
     #: Creation timestamp
     creation = djm.DateTimeField(auto_now_add=True)
     #: Validation token

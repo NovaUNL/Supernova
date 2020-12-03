@@ -21,7 +21,7 @@ class Conversation(PolymorphicModel):
     users = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationUser')
     # Cached
     #: Timestamp of the last activity
-    last_activity = djm.DateTimeField(null=True)
+    last_activity = djm.DateTimeField(null=True, blank=True)
 
     def has_access(self, user) -> bool:
         if user in self.users.all():

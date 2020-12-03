@@ -84,8 +84,8 @@ class Votable(djm.Model):
 class Suggestion(Votable, users.Activity):
     title = djm.CharField(max_length=300)
     content = MarkdownxField(max_length=2000)
-    towards_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE, null=True)
-    towards_object_id = djm.PositiveIntegerField(null=True)
+    towards_content_type = djm.ForeignKey(ContentType, on_delete=djm.CASCADE, null=True, blank=True)
+    towards_object_id = djm.PositiveIntegerField(null=True, blank=True)
     towards_object = GenericForeignKey('towards_content_type', 'towards_object_id')
     status = djm.IntegerField(default=SuggestionStatus.PROPOSED, choices=SuggestionStatus.CHOICES)
 

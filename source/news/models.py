@@ -85,5 +85,5 @@ class NewsVote(djm.Model):
         (CLICKBAIT, 'clickbait')
     )
     news_item = djm.ForeignKey(NewsItem, on_delete=djm.CASCADE)
-    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=djm.SET_NULL)
+    user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
     vote_type = djm.IntegerField(choices=VOTE_TYPE_CHOICES)
