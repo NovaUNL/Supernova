@@ -1,9 +1,10 @@
 from django.db import models as djm
 from django.urls import reverse
+from django.conf import settings
+
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
-import settings
 from users.models import Notification
 
 

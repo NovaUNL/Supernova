@@ -4,8 +4,8 @@ from django.contrib import auth
 from django.core import mail
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.conf import settings
 
-import settings
 from users import models as m, forms as f
 from college import models as college
 

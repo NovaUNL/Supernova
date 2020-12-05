@@ -1,8 +1,10 @@
 from datetime import datetime
-from django.utils import timezone
 
+from django.utils import timezone
 from django.core.cache import cache
 from django.db.models import F
+from django.conf import settings
+
 from rest_framework import authentication
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -12,7 +14,6 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-import settings
 from api.serializers import users as serializers
 from api import permissions
 from api.schedule_utils import get_weekday_occurrences, append_shift_instances, append_schedule_entries, \

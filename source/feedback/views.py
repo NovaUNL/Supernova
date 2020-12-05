@@ -1,12 +1,13 @@
-import reversion
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import F
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.conf import settings
 
-import settings
+import reversion
+
 from supernova.views import build_base_context
 from feedback import forms as f
 from feedback import models as m

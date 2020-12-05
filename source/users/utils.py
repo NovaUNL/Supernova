@@ -4,8 +4,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.db.models import Sum
+from django.conf import settings
 
-import settings
 from users import models as m
 from learning import models as learning
 from college import models as college

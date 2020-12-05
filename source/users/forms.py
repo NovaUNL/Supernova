@@ -2,24 +2,23 @@ import hashlib
 import re
 from datetime import datetime
 
-from dal import autocomplete
 from django import forms as djf
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from django.conf import settings
 
-import settings
+from dal import autocomplete
+
 from college import models as college
-from settings import REGISTRATIONS_TOKEN_LENGTH, VULNERABILITY_CHECKING
 from supernova.fields import NativeSplitDateTimeField
 from supernova.utils import password_strength, correlation
 from supernova.widgets import SliderInput, NativeTimeInput
 from users import models as m
 from learning import models as learning
 from feedback import models as feedback
-from settings import CAMPUS_EMAIL_SUFFIX
 
 IDENTIFIER_EXP = re.compile('(?!^\d+$)^[\da-zA-Z-_.]+$')
 
@@ -84,8 +83,8 @@ class RegistrationForm(djf.ModelForm):
             raise djf.ValidationError("Formato inválido de email.")
 
         prefix, suffix = email.split('@')
-        if CAMPUS_EMAIL_SUFFIX not in suffix:
-            raise djf.ValidationError(f"Só são aceites emails @{CAMPUS_EMAIL_SUFFIX}")
+        if settings.CAMPUS_EMAIL_SUFFIX not in suffix:
+            raise djf.ValidationError(f"Só são aceites emails @{settings.CAMPUS_EMAIL_SUFFIX}")
 
         if m.User.objects.filter(email=email).exists():
             raise djf.ValidationError("Já existe uma conta registada com o email fornecido.")
@@ -221,7 +220,7 @@ class StudentRegistrationForm(RegistrationForm):
 
 class RegistrationValidationForm(djf.ModelForm):
     email = djf.CharField(label='Email', max_length=50)
-    token = djf.CharField(label='Código', max_length=REGISTRATIONS_TOKEN_LENGTH)
+    token = djf.CharField(label='Código', max_length=settings.REGISTRATIONS_TOKEN_LENGTH)
 
     class Meta:
         model = m.Registration
@@ -460,7 +459,7 @@ def enforce_password_policy(username, nickname, password):
     if len(password) < 7:
         raise djf.ValidationError("A palava-passe tem que ter no mínimo 7 carateres.")
 
-    if VULNERABILITY_CHECKING:
+    if settings.VULNERABILITY_CHECKING:
         sha1 = hashlib.sha1(password.encode()).hexdigest().upper()  # Produces clean SHA1 of the password
         if m.VulnerableHash.objects.using('vulnerabilities').filter(hash=sha1).exists():
             # Refuse the vulnerable password and tell user about it

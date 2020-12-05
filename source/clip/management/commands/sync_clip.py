@@ -7,8 +7,8 @@ from time import sleep
 from django.core.management.base import BaseCommand
 from django.db.models import Q, Count
 from django.utils import timezone
+from django.conf import settings
 
-import settings
 from clip import synchronization as sync
 from college import models as m
 

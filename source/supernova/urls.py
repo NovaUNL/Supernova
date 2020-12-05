@@ -6,11 +6,11 @@ from django.contrib.flatpages import views as flatpages
 from django.contrib.sitemaps import views as sitemaps_views
 from django.views.decorators.cache import cache_page
 from django.urls import path, include, reverse
+from django.conf import settings
 
 import users.views as users
 import documents.views as documents
 from news.urls import NewsSitemap
-from settings import DEBUG, MEDIA_URL, MEDIA_ROOT
 from . import views
 
 app_name = 'supernova'
@@ -86,6 +86,7 @@ urlpatterns = [
          name='django.contrib.sitemaps.views.sitemap')
 ]
 
-if DEBUG:
-    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns = [path('__debug__/', include(debug_toolbar.urls)), ] + urlpatterns

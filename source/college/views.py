@@ -1,8 +1,6 @@
 from datetime import datetime
 from functools import reduce
 
-import reversion
-from dal import autocomplete
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q, Count
@@ -11,8 +9,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.decorators.vary import vary_on_cookie
+from django.conf import settings
 
-import settings
+import reversion
+from dal import autocomplete
+
 from college.choice_types import Degree, RoomType
 from college import models as m
 from college import forms as f
@@ -21,7 +22,6 @@ from college import choice_types as ctypes
 from college.utils import get_transportation_departures, get_file_name_parts, prettify_file_name
 from feedback.forms import ReviewForm
 from feedback import models as feedback
-from settings import COLLEGE_YEAR, COLLEGE_PERIOD
 from supernova.storage import HashedFilenameFileSystemStorage
 from supernova.views import build_base_context
 from services.models import Service
@@ -1035,7 +1035,10 @@ def building_view(request, building_id):
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = building.departments
     context['room_occupation'] = schedules.build_building_occupation_table(
-        COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday(), building)
+        settings.COLLEGE_PERIOD,
+        settings.COLLEGE_YEAR,
+        datetime.today().weekday(),
+        building)
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},
@@ -1049,7 +1052,8 @@ def room_view(request, room_id):
     room = get_object_or_404(m.Room.objects.select_related('building'), id=room_id)
     building = room.building
     shift_instances = room.shift_instances \
-        .filter(shift__class_instance__year=COLLEGE_YEAR, shift__class_instance__period=COLLEGE_PERIOD) \
+        .filter(shift__class_instance__year=settings.COLLEGE_YEAR,
+                shift__class_instance__period=settings.COLLEGE_PERIOD) \
         .exclude(disappeared=True) \
         .all()
     context = build_base_context(request)
@@ -1140,7 +1144,10 @@ def available_places_view(request):
         return render(request, 'college/available_places.html', context)
 
     context['weekend'] = False
-    context['occupation'] = schedules.build_occupation_table(COLLEGE_PERIOD, COLLEGE_YEAR, datetime.today().weekday())
+    context['occupation'] = schedules.build_occupation_table(
+        settings.COLLEGE_PERIOD,
+        settings.COLLEGE_YEAR,
+        datetime.today().weekday())
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},

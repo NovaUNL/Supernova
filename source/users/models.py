@@ -1,7 +1,6 @@
 from datetime import datetime, time
 from itertools import chain
 
-import reversion
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
@@ -9,13 +8,15 @@ from django.db import models as djm
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils.timezone import make_aware
+from django.conf import settings
+
+import reversion
 from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 from pilkit.processors import SmartResize
 from polymorphic.models import PolymorphicModel
 
-import settings
 from college.choice_types import WEEKDAY_CHOICES
 
 

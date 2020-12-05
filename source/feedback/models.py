@@ -1,12 +1,13 @@
-import reversion
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
 from django.urls import reverse
+from django.conf import settings
+
+import reversion
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
-import settings
 from users import models as users
 
 

@@ -7,15 +7,15 @@ from django.db import transaction
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
+
+import jinja2
 
 import college.models as college
 import users.models as users
-import settings
 from supernova.utils import correlation
 from users import triggers
 from users.exceptions import InvalidToken, ExpiredRegistration, AccountExists
-import jinja2
-
 from users.utils import calculate_points, award_user
 
 

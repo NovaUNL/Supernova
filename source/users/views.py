@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+import logging
 
 from dal import autocomplete
 from django.contrib.auth import login, logout
@@ -10,15 +11,15 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.conf import settings
 
-import settings
 from users import models as m
 from users import forms as f
 from users import registrations, exceptions
 from college import models as college
 from college import schedules
 from supernova.views import build_base_context
-from .utils import get_students, get_user_stats, calculate_points
+from .utils import get_students, get_user_stats, award_user, calculate_points
 
 
 def login_view(request):

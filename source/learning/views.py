@@ -6,23 +6,20 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q, F, Max
 from django.forms import HiddenInput
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-
 from django.contrib.auth.decorators import permission_required, login_required
 from django.db import models as djm, transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.conf import settings
 
 from markdownx.widgets import MarkdownxWidget
 from reversion.models import Version
 
-import settings
 from supernova.utils import comparison_html
 from supernova.views import build_base_context
 from learning import models as m
 from learning import forms as f
 from college import models as college
-from users import models as users
-from feedback import models as feedback
 from users.utils import get_students
 
 

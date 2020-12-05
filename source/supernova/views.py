@@ -7,8 +7,8 @@ from django.db.models import Q, F, Count
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 
-import settings
 from scrapper.boinc import boincstats
 from services.utils import get_next_meal_items
 from supernova import models as m

@@ -2,21 +2,18 @@ import re
 from datetime import date, datetime
 from functools import reduce
 from itertools import chain
-
-import requests
 import logging
 
-import reversion
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.timezone import make_aware
-
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
-from settings import CLIPY
+import requests
+import reversion
 
-from college import models as m
-from college import choice_types as ctypes
+from college import models as m, choice_types as ctypes
 from supernova.utils import correlation
 
 logger = logging.getLogger(__name__)
@@ -36,7 +33,7 @@ def assert_buildings_inserted():
     whitelisted = {
         1176, 1177, 1178, 1179, 1180, 1181, 1183, 1184, 1185,
         1186, 1188, 1189, 1190, 1238, 1395, 1561, 1564, 1663}
-    r = requests.get("http://%s/buildings/" % CLIPY['host'])
+    r = requests.get("http://%s/buildings/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch buildings")
     clip_buildings = r.json()
@@ -68,7 +65,7 @@ def sync_rooms():
     Fetches the most recent available info about rooms.
     Creates missing rooms.
     """
-    r = requests.get("http://%s/rooms/" % CLIPY['host'])
+    r = requests.get("http://%s/rooms/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch rooms")
 
@@ -134,7 +131,7 @@ def sync_courses():
     Fetches the most recent available info about courses.
     Creates missing courses.
     """
-    r = requests.get("http://%s/courses/" % CLIPY['host'])
+    r = requests.get("http://%s/courses/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch courses")
 
@@ -187,7 +184,7 @@ def sync_departments():
 
 
 def _request_departments():
-    r = requests.get("http://%s/departments/" % CLIPY['host'])
+    r = requests.get("http://%s/departments/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch departments")
     return r.json()
@@ -228,7 +225,7 @@ def sync_department(department, recurse=Recursivity.NONE):
 
 
 def _request_department(department):
-    r = requests.get(f"http://{CLIPY['host']}/department/{department.external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/department/{department.external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch department {department.external_id}")
     return r.json()
@@ -262,7 +259,7 @@ def sync_classes(recurse=Recursivity.NONE):
 
 
 def _request_classes():
-    r = requests.get("http://%s/classes/" % CLIPY['host'])
+    r = requests.get("http://%s/classes/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch classes")
     return r.json()
@@ -300,7 +297,7 @@ def sync_class(external_id, recurse=Recursivity.NONE):
 
 
 def _request_class(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/class/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/class/{external_id}")
     if r.status_code != 200:
         raise Exception("Unable to fetch class")
     return r.json()
@@ -378,7 +375,7 @@ def sync_class_instance(external_id, klass=None, recurse=Recursivity.NONE):
 
 
 def _request_class_instance(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/class_inst/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/class_inst/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch class instance {external_id}")
     return r.json()
@@ -529,7 +526,7 @@ def sync_class_instance_files(external_id, class_inst):
 
 
 def _request_class_instance_files(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/files/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/files/{external_id}")
     if r.status_code != 200:
         raise Exception("Unable to fetch class instance files")
     return r.json()
@@ -639,7 +636,7 @@ def sync_enrollment(external_id, class_inst=None):
 
 
 def _request_enrollment(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/enrollment/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/enrollment/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch enrollment {external_id}")
     return r.json()
@@ -758,7 +755,7 @@ def sync_shift(external_id, class_inst=None, recurse=Recursivity.NONE):
 
 
 def _request_shift_info(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/shift/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/shift/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch shift {external_id}")
     return r.json()
@@ -939,7 +936,7 @@ def sync_shift_instance(external_id, shift):
 
 
 def _request_shift_instance(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/shift_inst/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/shift_inst/{external_id}")
     if r.status_code != 200:
         raise Exception(f"Unable to fetch shift instance {external_id}")
     return r.json()
@@ -1056,7 +1053,7 @@ def sync_students():
 
 
 def _request_students():
-    r = requests.get("http://%s/students/" % CLIPY['host'])
+    r = requests.get("http://%s/students/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch students")
     return r.json()
@@ -1082,7 +1079,7 @@ def sync_student(external_id):
 
 
 def _request_student(external_id):
-    r = requests.get(f"http://{CLIPY['host']}/student/{external_id}")
+    r = requests.get(f"http://{settings.CLIPY['host']}/student/{external_id}")
     if r.status_code != 200:
         raise Exception("Unable to fetch students")
     return r.json()
@@ -1148,7 +1145,7 @@ def sync_teachers():
 
 
 def _request_teachers():
-    r = requests.get("http://%s/teachers/" % CLIPY['host'])
+    r = requests.get("http://%s/teachers/" % settings.CLIPY['host'])
     if r.status_code != 200:
         raise Exception("Unable to fetch teachers")
     return r.json()
@@ -1226,23 +1223,23 @@ def calculate_active_classes():
 
 
 def request_courses_update():
-    _update(f"http://{CLIPY['host']}/update/courses/")
+    _update(f"http://{settings.CLIPY['host']}/update/courses/")
 
 
 def request_rooms_update():
-    _update(f"http://{CLIPY['host']}/update/rooms/")
+    _update(f"http://{settings.CLIPY['host']}/update/rooms/")
 
 
 def request_admissions_update():
-    _update(f"http://{CLIPY['host']}/update/admissions/")
+    _update(f"http://{settings.CLIPY['host']}/update/admissions/")
 
 
 def request_teachers_update():
-    _update(f"http://{CLIPY['host']}/update/teachers/")
+    _update(f"http://{settings.CLIPY['host']}/update/teachers/")
 
 
 def request_classes_update():
-    _update(f"http://{CLIPY['host']}/update/classes/")
+    _update(f"http://{settings.CLIPY['host']}/update/classes/")
 
 
 def request_class_instance_update(external_id, update_info=False, update_enrollments=False, update_shifts=False,
@@ -1257,15 +1254,15 @@ def request_class_instance_update(external_id, update_info=False, update_enrollm
     """
 
     if update_info:
-        _update(f"http://{CLIPY['host']}/update/class_info/{external_id}")
+        _update(f"http://{settings.CLIPY['host']}/update/class_info/{external_id}")
     if update_enrollments:
-        _update(f"http://{CLIPY['host']}/update/class_enrollments/{external_id}")
+        _update(f"http://{settings.CLIPY['host']}/update/class_enrollments/{external_id}")
     if update_shifts:
-        _update(f"http://{CLIPY['host']}/update/shifts/{external_id}")
+        _update(f"http://{settings.CLIPY['host']}/update/shifts/{external_id}")
     if update_events:
-        _update(f"http://{CLIPY['host']}/update/events/{external_id}")
+        _update(f"http://{settings.CLIPY['host']}/update/events/{external_id}")
     if update_files:
-        _update(f"http://{CLIPY['host']}/update/class_files/{external_id}")
+        _update(f"http://{settings.CLIPY['host']}/update/class_files/{external_id}")
 
 
 def _update(url):
