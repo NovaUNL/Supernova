@@ -3,6 +3,7 @@ let chats = {};
 let currentChat;
 let chatUID; // User ID
 let startingChat = false;
+let warnedHistoryLoadingIncomplete = false;
 
 socket.onmessage = function (e) {
     const data = JSON.parse(e.data);
@@ -13,9 +14,8 @@ socket.onmessage = function (e) {
                 console.log("Received a message for an unknown room.");
                 return;
             }
-            const $widget = chats[msg.conversation].widget;
-            const $chatLog = $widget.find(".chat-log");
-            messageToChatLog(msg, $chatLog)
+            const chat = chats[msg.conversation];
+            messageToChat(msg, chat)
             break;
         case 'status':
             break;
@@ -139,8 +139,9 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
     }).then(function (response) {
         return response.json();
     }).then(function (history) {
+        chat.widget = $chatBox;
         for (let msg of history)
-            messageToChatLog(msg, $chatLog)
+            messageToChat(msg, chat)
         const $text = $chatBox.find('.chat-message-input');
         const $btn = $chatBox.find('.chat-message-submit');
         if (focus) $text.focus();
@@ -157,11 +158,22 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
             }]));
             $text.val('');
         });
-        chat.widget = $chatBox;
         $('#chat-container').append($chatBox);
         startingChat = false;
         if (afterInstantiated !== undefined)
             afterInstantiated.apply()
+    });
+
+    if (chat.scroll)
+        $chatLog.animate({ scrollTop: $chatLog.prop('scrollHeight')})
+
+    $chatLog.scroll(() => {
+        chat.scroll = $chatLog.prop('scrollHeight') - $chatLog.height() - $chatLog.scrollTop() === 0;
+        if (!chat.scroll && $chatLog.scrollTop() < 10 && !warnedHistoryLoadingIncomplete) {
+            // TODO
+            alert("O carregamento do histórico ainda não foi implementado.");
+            warnedHistoryLoadingIncomplete = true;
+        }
     });
 }
 
@@ -184,7 +196,9 @@ function selectChat(selector) {
 }
 
 // Appends a message to a chat log
-function messageToChatLog(msg, $log) {
+function messageToChat(msg, chat) {
+    const $log = chat.widget.find(".chat-log");
+
     const timestamp = Date.parse(msg.creation);
     const datetime = new Date(timestamp);
     const date = `${datetime.getFullYear()}/${datetime.getMonth() + 1}/${datetime.getDate()}`;
@@ -197,7 +211,7 @@ function messageToChatLog(msg, $log) {
         const $parent = $(pred.parentNode);
         const pTS = Number($parent.data("timestamp"));
         const pDate = new Date(timestamp);
-        if(!($parent.data("author") === authorID && pTS - 600 < timestamp && pDate.getDay() === datetime.getDay())){
+        if (!($parent.data("author") === authorID && pTS - 600 < timestamp && pDate.getDay() === datetime.getDay())) {
             $block = $parent;
         }
     }
@@ -206,7 +220,7 @@ function messageToChatLog(msg, $log) {
         const $parent = $(succ.parentNode);
         const pTS = Number($parent.data("timestamp"));
         const pDate = new Date(timestamp);
-        if(!($parent.data("author") === authorID && pTS + 600 < timestamp && pDate.getDay() === datetime.getDay())){
+        if (!($parent.data("author") === authorID && pTS + 600 < timestamp && pDate.getDay() === datetime.getDay())) {
             $parent.data("timestamp", timestamp); // Update block timestamp to the current message timestamp
             $block = $parent;
         }
@@ -239,6 +253,8 @@ function messageToChatLog(msg, $log) {
     $block.find(".message").sort(function (a, b) {
         return $(a).data("timestamp") > $(b).data("timestamp");
     }).appendTo($block);
+    if (chat.scroll)
+        $log.animate({ scrollTop: $log.prop('scrollHeight')})
 }
 
 function findNearestMessages($log, timestamp) {
