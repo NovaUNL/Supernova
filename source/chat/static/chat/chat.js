@@ -4,6 +4,8 @@ let currentChat;
 let chatUID; // User ID
 let startingChat = false;
 let warnedHistoryLoadingIncomplete = false;
+const msgBlockTimestampThreshold = 600000;
+const defaultUserPic = '/static/img/user.svg';
 
 socket.onmessage = function (e) {
     const data = JSON.parse(e.data);
@@ -103,12 +105,12 @@ function listChat(chat) {
     switch (meta.type) {
         case 'dm':
             let otherUser = meta.users[0].id === chatUID ? meta.users[1] : meta.users[0];
-            $thumb.attr("src", otherUser.thumbnail ? otherUser.thumbnail : '/static/img/user.svg');
+            $thumb.attr("src", otherUser.thumbnail ? otherUser.thumbnail : defaultUserPic);
             $title.text(otherUser.name);
             $desc.text(otherUser.nickname);
             break
         case 'room':
-            $thumb.attr("src", meta.thumbnail ? meta.thumbnail : '/static/img/user.svg'); //TODO Substitute by group pic
+            $thumb.attr("src", meta.thumbnail ? meta.thumbnail : defaultUserPic); //TODO Substitute with group pic
             $title.text(meta.name);
             $desc.append(meta.users.length + (usrCnt > 1 ? " utilizadores." : " utilizador."));
             break
@@ -160,20 +162,18 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
         });
         $('#chat-container').append($chatBox);
         startingChat = false;
+        if (chat.scroll)
+            $chatLog.animate({scrollTop: $chatLog.prop('scrollHeight')})
+        $chatLog.scroll(() => {
+            chat.scroll = $chatLog.prop('scrollHeight') - $chatLog.height() - $chatLog.scrollTop() === 0;
+            if (!chat.scroll && $chatLog.scrollTop() < 10 && !warnedHistoryLoadingIncomplete) {
+                // TODO
+                alert("O carregamento do histórico ainda não foi implementado.");
+                warnedHistoryLoadingIncomplete = true;
+            }
+        });
         if (afterInstantiated !== undefined)
             afterInstantiated.apply()
-    });
-
-    if (chat.scroll)
-        $chatLog.animate({ scrollTop: $chatLog.prop('scrollHeight')})
-
-    $chatLog.scroll(() => {
-        chat.scroll = $chatLog.prop('scrollHeight') - $chatLog.height() - $chatLog.scrollTop() === 0;
-        if (!chat.scroll && $chatLog.scrollTop() < 10 && !warnedHistoryLoadingIncomplete) {
-            // TODO
-            alert("O carregamento do histórico ainda não foi implementado.");
-            warnedHistoryLoadingIncomplete = true;
-        }
     });
 }
 
@@ -188,7 +188,7 @@ function selectChat(selector) {
     }).then(function (response) {
         return response.json();
     }).then(function (chatInfo) {
-        const chat = {'meta': chatInfo};
+        const chat = {'meta': chatInfo, 'scroll': true};
         chats[chatInfo.id] = chat;
         listChat(chat);
         openChat(chat);
@@ -206,21 +206,22 @@ function messageToChat(msg, chat) {
     const authorID = msg.author.id;
 
     const [pred, succ] = findNearestMessages($log, timestamp);
+
     let $block = null;
     if (pred) {
-        const $parent = $(pred.parentNode);
+        const $parent = $(pred.parentNode); // Message block
         const pTS = Number($parent.data("timestamp"));
-        const pDate = new Date(timestamp);
-        if (!($parent.data("author") === authorID && pTS - 600 < timestamp && pDate.getDay() === datetime.getDay())) {
+        const pDate = new Date(pTS);
+        if ($parent.data("author") === authorID && pTS > timestamp - msgBlockTimestampThreshold && pDate.getDay() === datetime.getDay()) {
             $block = $parent;
         }
     }
 
     if (!$block && succ) {
-        const $parent = $(succ.parentNode);
+        const $parent = $(succ.parentNode); // Message block
         const pTS = Number($parent.data("timestamp"));
-        const pDate = new Date(timestamp);
-        if (!($parent.data("author") === authorID && pTS + 600 < timestamp && pDate.getDay() === datetime.getDay())) {
+        const pDate = new Date(pTS);
+        if ($parent.data("author") === authorID && pTS < timestamp + msgBlockTimestampThreshold && pDate.getDay() === datetime.getDay()) {
             $parent.data("timestamp", timestamp); // Update block timestamp to the current message timestamp
             $block = $parent;
         }
@@ -233,7 +234,7 @@ function messageToChat(msg, chat) {
             '<img class="author-pic"/><a class="author-name"></a><span class="datetime"></span>' +
             '</div>' +
             '</div>');
-        $block.find(".author-pic").attr("src", msg.author.thumbnail);
+        $block.find(".author-pic").attr("src", msg.author.thumbnail ? msg.author.thumbnail : defaultUserPic)
         let authorName = $block.find(".author-name");
         authorName.text(msg.author.nickname);
         if (msg.author.profile)
@@ -242,6 +243,9 @@ function messageToChat(msg, chat) {
         $block.data('timestamp', timestamp);
         $block.data('author', authorID);
         $log.append($block);
+        $log.find(".message-block").sort(function (a, b) {
+            return $(a).data("timestamp") > $(b).data("timestamp");
+        }).appendTo($log);
     }
 
     let $msg = $('<div class="message"><span class="time"></span><span class="content"></span></div>');
@@ -254,33 +258,28 @@ function messageToChat(msg, chat) {
         return $(a).data("timestamp") > $(b).data("timestamp");
     }).appendTo($block);
     if (chat.scroll)
-        $log.animate({ scrollTop: $log.prop('scrollHeight')})
+        $log.animate({scrollTop: $log.prop('scrollHeight')})
 }
 
 function findNearestMessages($log, timestamp) {
     const msgs = $log.find(".message");
 
     let start = 0, end = msgs.length - 1;
-    if (start === end) {
-        const m = msgs[0];
-        if ($(m).data("timestamp") < timestamp)
-            return [m, null]
-        else
-            return [null, m]
-    }
+    let prev = null, succ = null;
     while (start <= end) {
-        const mid = Math.floor((start + end) / 2);
-        const m = msgs[mid];
+        const mi = Math.floor((start + end) / 2);
+        const m = msgs[mi];
         const mTS = $(m).data("timestamp");
-        if (mTS === timestamp)
-            return [m, msgs[mid + 1]]
-        else if (mTS < timestamp)
-            start = mid + 1
-        else
-            end = mid - 1
+        if (mTS <= timestamp) {
+            prev = m;
+            start = mi + 1;
+        } else {
+            succ = m;
+            end = mi - 1;
+        }
     }
     // Nearest lower and nearest higher
-    return [msgs[start], msgs[start + 1]];
+    return [prev, succ];
 }
 
 window.addEventListener("load", () => {
