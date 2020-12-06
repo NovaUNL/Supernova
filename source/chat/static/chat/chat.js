@@ -201,8 +201,15 @@ function messageToChat(msg, chat) {
 
     const timestamp = Date.parse(msg.creation);
     const datetime = new Date(timestamp);
-    const date = `${datetime.getFullYear()}/${datetime.getMonth() + 1}/${datetime.getDate()}`;
+    const now = new Date(Date.now());
     const time = `${datetime.getHours()}:${(datetime.getMinutes() < 10 ? "0" : "") + datetime.getMinutes()}`;
+    let date;
+    if (now.getDate() === datetime.getDate())
+        date = `Hoje ás ${time}`
+    else if (now.getDate() === datetime.getDate() - 1)
+        date = `Ontem ás ${time}`
+    else
+        date = `${datetime.getFullYear()}/${datetime.getMonth() + 1}/${datetime.getDate()} ${time}`;
     const authorID = msg.author.id;
 
     const [pred, succ] = findNearestMessages($log, timestamp);
