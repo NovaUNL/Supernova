@@ -44,9 +44,11 @@ function openChat(chat) {
             currentChat.widget.css('display', 'none');
         }
         currentChat = chat;
-        chat.listing.addClass("set");
+        if (chat.listing) {
+            chat.listing.addClass("set");
+            window.location.hash = chat.meta.id;
+        }
         chat.widget.css('display', 'grid');
-        window.location.hash = chat.meta.id;
     }
     if (chat.widget === undefined) {
         if (!startingChat) {
@@ -56,6 +58,23 @@ function openChat(chat) {
     } else {
         afterInstantiated.apply();
     }
+}
+
+
+// Loads the chats that the user has been enrolled to
+function loadChat(id) {
+    fetch(`/api/chat/${id}/info`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: defaultRequestHeaders(),
+    }).then((response) => {
+        return response.json();
+    }).then((meta) => {
+        $('#chat-list .spinner').remove();
+        const chat = {'meta': meta};
+        chats[meta.id] = chat;
+        openChat(chat);
+    });
 }
 
 // Loads the chats that the user has been enrolled to
@@ -75,7 +94,7 @@ function loadChats() {
         }
         let conversations = $('#chat-list .chat-conversation');
         conversations.sort(function (a, b) {
-            return a.dataset.lastActivity < b.dataset.lastActivity;
+            return $(b).data('lastActivity') - $(a).data('lastActivity');
         }).appendTo('#chat-list');
 
         const anchor = window.location.hash.substr(1);
@@ -116,10 +135,11 @@ function listChat(chat) {
             break
     }
 
-    // $listing.find(".chat-description").text(meta.description);
+    $desc.text(meta.lastActivity == null ? meta.creation : meta.lastActivity);
+
     $chatList.prepend($listing);
-    $listing[0].dataset.id = meta.id;
-    $listing[0].dataset.lastActivity = meta.lastActivity == null ? meta.creation : meta.lastActivity;
+    $listing.data('id', meta.id);
+    $listing.data('lastActivity', Date.parse(meta.lastActivity == null ? meta.creation : meta.lastActivity));
     $listing.click(() => openChat(chat));
     chat.listing = $listing
 }
@@ -162,8 +182,6 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
         });
         $('#chat-container').append($chatBox);
         startingChat = false;
-        if (chat.scroll)
-            $chatLog.animate({scrollTop: $chatLog.prop('scrollHeight')})
         $chatLog.scroll(() => {
             chat.scroll = $chatLog.prop('scrollHeight') - $chatLog.height() - $chatLog.scrollTop() === 0;
             if (!chat.scroll && $chatLog.scrollTop() < 10 && !warnedHistoryLoadingIncomplete) {
@@ -172,6 +190,7 @@ function instantiateChatWidget(chat, focus = false, afterInstantiated) {
                 warnedHistoryLoadingIncomplete = true;
             }
         });
+        scrollChat(chat);
         if (afterInstantiated !== undefined)
             afterInstantiated.apply()
     });
@@ -251,7 +270,7 @@ function messageToChat(msg, chat) {
         $block.data('author', authorID);
         $log.append($block);
         $log.find(".message-block").sort(function (a, b) {
-            return $(a).data("timestamp") > $(b).data("timestamp");
+            return $(a).data("timestamp") - $(b).data("timestamp");
         }).appendTo($log);
     }
 
@@ -262,10 +281,15 @@ function messageToChat(msg, chat) {
     $block.append($msg);
 
     $block.find(".message").sort(function (a, b) {
-        return $(a).data("timestamp") > $(b).data("timestamp");
+        return $(a).data("timestamp") - $(b).data("timestamp");
     }).appendTo($block);
     if (chat.scroll)
         $log.animate({scrollTop: $log.prop('scrollHeight')})
+}
+
+function scrollChat(chat) {
+    const $log = chat.widget.find(".chat-log");
+    $log.animate({scrollTop: $log.prop('scrollHeight')});
 }
 
 function findNearestMessages($log, timestamp) {
@@ -290,6 +314,5 @@ function findNearestMessages($log, timestamp) {
 }
 
 window.addEventListener("load", () => {
-    chatUID = JSON.parse($('#chat-uid')[0].textContent);
-    loadChats();
+    chatUID = JSON.parse($('#chat-uid').text());
 });
