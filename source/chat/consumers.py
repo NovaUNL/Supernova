@@ -4,6 +4,7 @@ import logging
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.db.models import Count
 from django.utils import timezone
 
 from chat import models as chat
@@ -72,20 +73,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     log.error(f'Received a join action (by {self.user.nickname}) without a conversation: {action}')
                     continue
                 conversation_id = action['conversation']
-                conversation_group_name = 'conversation_%s' % conversation_id
+                if conversation_id == '__all__':
+                    conversations = await self.get_presence()
+                else:
+                    conversations = [await self.get_conversation(conversation_id)]
                 async with self.lock:
-                    if conversation_id not in self.conversations:
-                        self.conversations[conversation_id] = await self.get_conversation(conversation_id)
-                        # Join conversation group
-                        await self.channel_layer.group_add(
-                            conversation_group_name,
-                            self.channel_name)
-                        log.info(f"{self.user.nickname} joined {conversation_group_name} - {conversation_id}")
-                    else:
-                        log.info(f"{self.user.nickname} join request to {conversation_group_name} ignored "
-                                 "(duplicated join or no permissions).")
+                    for conversation in conversations:
+                        conversation_group_name = 'conversation_%s' % conversation.id
+                        if conversation.id not in self.conversations:
+                            self.conversations[conversation.id] = conversation
+                            # Join conversation group
+                            await self.channel_layer.group_add(
+                                conversation_group_name,
+                                self.channel_name)
+                            log.info(f"{self.user} joined {conversation_group_name} - {conversation_id}")
+                        else:
+                            log.info(f"{self.user} join request to {conversation_group_name} ignored "
+                                     "(duplicated join or no permissions).")
             else:
-                log.error(f'Unknown action (by {self.user.nickname}): {action}')
+                log.error(f'Unknown action (by {self.user}): {action}')
 
     # Receive message from room group
     async def chat_message(self, event):
@@ -100,6 +106,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_conversation(self, conversation_id):
         return chat.Conversation.objects.get(id=conversation_id)
+
+    @database_sync_to_async
+    def get_presence(self):
+        return list(chat.Conversation.objects \
+                    .annotate(message_count=Count('messages')) \
+                    .filter(users=self.user) \
+                    .all())
 
     @database_sync_to_async
     def store_message(self, message, conversation):
