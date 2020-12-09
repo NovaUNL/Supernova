@@ -150,8 +150,8 @@ def message_serialize(message):
         'author': {
             'id': message.author.id,
             'nickname': message.author.nickname,
-            'pic': message.author.picture_thumbnail.url if message.author.picture else None,
-            'url': message.author.get_absolute_url() if not message.author.is_anonymous else None,
+            'thumbnail': message.author.picture_thumbnail.url if message.author.picture else None,
+            'profile': message.author.get_absolute_url() if not message.author.is_anonymous else None,
         },
         'creation': message.creation.isoformat(),
     }
