@@ -21,12 +21,12 @@ class ConversationSerializer(serializers.HyperlinkedModelSerializer):
     creation = serializers.DateTimeField()
     name = serializers.CharField(required=False)
     type = serializers.CharField(required=False, source='chat_type')
-    last_activity = serializers.DateTimeField()
+    lastActivity = serializers.DateTimeField(source='last_activity')
     users = ConversationUserSerializer(many=True)
 
     class Meta:
         model = m.Conversation
-        fields = ('id', 'identifier', 'name', 'type', 'creation', 'users', 'last_activity')
+        fields = ('id', 'identifier', 'name', 'type', 'creation', 'users', 'lastActivity')
 
 
 class SimpleConversationSerializer(serializers.HyperlinkedModelSerializer):
@@ -35,12 +35,12 @@ class SimpleConversationSerializer(serializers.HyperlinkedModelSerializer):
     creation = serializers.DateTimeField()
     name = serializers.CharField(required=False)
     type = serializers.CharField(required=False, source='chat_type')
-    last_activity = serializers.DateTimeField()
-    user_count = serializers.IntegerField(source='users.count')
+    lastActivity = serializers.DateTimeField(source='last_activity')
+    userCount = serializers.IntegerField(source='users.count')
 
     class Meta:
         model = m.Conversation
-        fields = ('id', 'identifier', 'name', 'type', 'creation', 'user_count', 'last_activity')
+        fields = ('id', 'identifier', 'name', 'type', 'creation', 'userCount', 'lastActivity')
 
 
 class SimplePrivateRoomSerializer(serializers.Serializer):
