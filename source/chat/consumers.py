@@ -30,7 +30,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_discard(
                     room_group_name,
                     self.channel_name)
-                print(f"Disconnected {self.channel_name}")
 
     # Receive message from WebSocket
     async def receive(self, text_data):
@@ -59,7 +58,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     if conversation_id in self.conversations:
                         conversation = self.conversations[conversation_id]
                     else:
-                        conversation = None
+                        conversation = await self.get_conversation(conversation_id)
+                        joined = await self.join_conversation(conversation)
+                        if joined:
+                            self.conversations[conversation_id] = conversation
+                            await self.channel_layer.group_add(
+                                conversation_group_name,
+                                self.channel_name)
+                        else:
+                            continue
                 if conversation:
                     await self.channel_layer.group_send(
                         conversation_group_name,
@@ -86,7 +93,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             await self.channel_layer.group_add(
                                 conversation_group_name,
                                 self.channel_name)
-                            log.info(f"{self.user} joined {conversation_group_name} - {conversation_id}")
+                            log.info(f"{self.user} joined {conversation_group_name} - {conversation.id}")
                         else:
                             log.info(f"{self.user} join request to {conversation_group_name} ignored "
                                      "(duplicated join or no permissions).")
@@ -113,6 +120,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     .annotate(message_count=Count('messages')) \
                     .filter(users=self.user) \
                     .all())
+
+    @database_sync_to_async
+    def join_conversation(self, conversation):
+        if conversation.has_access(self.user):
+            conversation.users.add(self.user)
+            return True
+        return False
 
     @database_sync_to_async
     def store_message(self, message, conversation):
