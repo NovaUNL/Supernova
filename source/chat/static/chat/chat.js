@@ -2,12 +2,11 @@ const socket = new WebSocket('ws://' + window.location.host + "/ws/chat");
 let chats = {};
 let currentChat;
 const chatUID = JSON.parse($('#chat-uid').text());
-let warnedHistoryLoadingIncomplete = false;
 const msgBlockTimestampThreshold = 600000; // 10 minutes
 const defaultUserPic = '/static/img/user.svg';
 const spinner = $('<img class="spinner" src="/static/img/spinner.svg">');
 
-socket.onmessage = (e) =>  {
+socket.onmessage = (e) => {
     const data = JSON.parse(e.data);
     switch (data.type) {
         case 'message':
@@ -19,7 +18,8 @@ socket.onmessage = (e) =>  {
             const chat = chats[msg.conversation];
             if (chat !== currentChat)
                 addNotification(chat);
-            messageToChat(msg, chat.log, chat.scroll);
+            if (chat.loaded)
+                messageToChat(msg, chat.log, chat.scroll);
             break;
         case 'status':
             break;
@@ -63,7 +63,11 @@ function openChat(chat) {
         $('#chat-container').append($chatBox);
         $log.scroll(() => {
             chat.scroll = $log.prop('scrollHeight') - $log.height() - $log.scrollTop() === 0;
-            if (chat.loaded && $log.scrollTop() === 0 && !warnedHistoryLoadingIncomplete) {
+            if (chat.loaded && $log.scrollTop() === 0 && !chat.loadingMore) {
+                chat.loadingMore = true;
+                $log.find('.spinner').remove();
+                let loadSpinner = spinner.clone();
+                $log.prepend(loadSpinner);
                 fetch(`/api/chat/${chat.meta.id}/history?to=${chat.minMsgID}`, {
                     method: 'GET',
                     credentials: 'include',
@@ -72,6 +76,7 @@ function openChat(chat) {
                     return response.json();
                 }).then((history) => {
                     const firstMsg = chat.log[0].querySelector(".message");
+                    loadSpinner.remove();
                     for (let msg of history) {
                         if (!chat.minMsgID || chat.minMsgID > msg.id)
                             chat.minMsgID = msg.id;
@@ -79,8 +84,8 @@ function openChat(chat) {
                     }
                     if (firstMsg)
                         firstMsg.parentNode.scrollIntoView(true)
+                    chat.loadingMore = false;
                 })
-                warnedHistoryLoadingIncomplete = true;
             }
         });
     }
@@ -176,7 +181,7 @@ function listChat(chat) {
     const $existing = $chatList.find(`.chat-conversation[data-id=${meta.id}]`);
     if ($existing.length !== 0)
         return;
-    const $listing = $(
+    const $listing = chat.listing = $(
         '<div class="chat-conversation">' +
         '<img class="chat-thumb" src="">' +
         '<div><span class="chat-title"></span><span class="chat-description"></span></div>' +
@@ -206,8 +211,7 @@ function listChat(chat) {
     $listing.click(() => {
         openChat(chat);
         $listing.find(".chat-notif").removeClass('set');
-    });
-    chat.listing = $listing
+    })
 }
 
 // Opens the chat that was requested by the user in the selector
@@ -293,7 +297,9 @@ function messageToChat(msg, $log, scroll = false) {
     $block.append($msg);
 
     $block.find(".message")
-        .sort((a, b) => {return $(a).data("timestamp") - $(b).data("timestamp");})
+        .sort((a, b) => {
+            return $(a).data("timestamp") - $(b).data("timestamp");
+        })
         .appendTo($block);
     if (scroll)
         $log.animate({scrollTop: $log.prop('scrollHeight')})
@@ -306,6 +312,7 @@ function scrollChat(chat) {
 function addNotification(chat) {
     if (!chat.listing) return;
     chat.listing.find(".chat-notif").addClass('set');
+    chat.listing.parent().prepend(chat.listing)
 }
 
 function findNearestMessages($log, timestamp) {
