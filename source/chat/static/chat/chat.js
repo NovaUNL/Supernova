@@ -1,13 +1,13 @@
 const socket = new WebSocket('ws://' + window.location.host + "/ws/chat");
 let chats = {};
 let currentChat;
-let chatUID; // User ID
-let startingChat = false;
+const chatUID = JSON.parse($('#chat-uid').text());
 let warnedHistoryLoadingIncomplete = false;
-const msgBlockTimestampThreshold = 600000;
+const msgBlockTimestampThreshold = 600000; // 10 minutes
 const defaultUserPic = '/static/img/user.svg';
+const spinner = $('<img class="spinner" src="/static/img/spinner.svg">');
 
-socket.onmessage = function (e) {
+socket.onmessage = (e) =>  {
     const data = JSON.parse(e.data);
     switch (data.type) {
         case 'message':
@@ -17,7 +17,9 @@ socket.onmessage = function (e) {
                 return;
             }
             const chat = chats[msg.conversation];
-            messageToChat(msg, chat)
+            if (chat !== currentChat)
+                addNotification(chat);
+            messageToChat(msg, chat.log, chat.scroll);
             break;
         case 'status':
             break;
@@ -26,40 +28,94 @@ socket.onmessage = function (e) {
     }
 };
 
-socket.onclose = function (e) {
+socket.onclose = (e) => {
     console.error('Chat socket closed.');
 };
 
 function openChat(chat) {
-    const afterInstantiated = () => {
-        if (!chat.joined) {
-            socket.send(JSON.stringify([{
-                'type': 'join',
-                'conversation': chat.meta.id
-            }]));
-            chat.joined = true;
-        }
-        if (currentChat != null) {
-            currentChat.listing.removeClass('set');
-            currentChat.widget.css('display', 'none');
-        }
-        currentChat = chat;
-        if (chat.listing) {
-            chat.listing.addClass("set");
-            window.location.hash = chat.meta.id;
-        }
-        chat.widget.css('display', 'grid');
-    }
     if (chat.widget === undefined) {
-        if (!startingChat) {
-            startingChat = true;
-            instantiateChatWidget(chat, true, afterInstantiated);
-        }
-    } else {
-        afterInstantiated.apply();
+        const $chatBox = chat.widget = $(
+            '<div class="chatbox">' +
+            '<div class="chat-log"></div>' +
+            '<input class="chat-message-input" type="text" style="min-width: 80px">' +
+            '<input class="chat-message-submit" type="button" value="»">' +
+            '</div>');
+        const $log = chat.log = $chatBox.find('.chat-log');
+        $log.append(spinner.clone());
+
+        const $text = $chatBox.find('.chat-message-input');
+        const $btn = $chatBox.find('.chat-message-submit');
+        if (focus)
+            $text.focus();
+        $text.keyup((e) => {
+            if (e.keyCode === 13) $btn.click()
+        });
+        $btn.click(() => {
+            const message = $text.val();
+            if (message.trim() === '') return;
+            socket.send(JSON.stringify([{
+                'type': 'send',
+                'conversation': chat.meta.id,
+                'message': message
+            }]));
+            $text.val('');
+        });
+        $('#chat-container').append($chatBox);
+        $log.scroll(() => {
+            chat.scroll = $log.prop('scrollHeight') - $log.height() - $log.scrollTop() === 0;
+            if (chat.loaded && $log.scrollTop() === 0 && !warnedHistoryLoadingIncomplete) {
+                fetch(`/api/chat/${chat.meta.id}/history?to=${chat.minMsgID}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: defaultRequestHeaders(),
+                }).then((response) => {
+                    return response.json();
+                }).then((history) => {
+                    const firstMsg = chat.log[0].querySelector(".message");
+                    for (let msg of history) {
+                        if (!chat.minMsgID || chat.minMsgID > msg.id)
+                            chat.minMsgID = msg.id;
+                        messageToChat(msg, chat.log)
+                    }
+                    if (firstMsg)
+                        firstMsg.parentNode.scrollIntoView(true)
+                })
+                warnedHistoryLoadingIncomplete = true;
+            }
+        });
+    }
+
+    if (currentChat != null) {
+        currentChat.listing.removeClass('set');
+        currentChat.widget.css('display', 'none');
+    }
+    currentChat = chat;
+    if (chat.listing) {
+        chat.listing.addClass("set");
+        window.location.hash = chat.meta.id;
+    }
+    chat.widget.css('display', 'grid');
+
+    if (!chat.loaded) {
+        fetch(`/api/chat/${chat.meta.id}/history`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: defaultRequestHeaders(),
+        }).then((response) => {
+            return response.json();
+        }).then((history) => {
+            if (chat.loaded) return; // Double load
+            for (let msg of history) {
+                if (!chat.minMsgID || chat.minMsgID > msg.id)
+                    chat.minMsgID = msg.id;
+                messageToChat(msg, chat.log, chat.scroll);
+            }
+            scrollChat(chat);
+            chat.widget.find('.spinner').remove();
+            chat.loaded = true;
+        });
     }
 }
-
 
 // Loads the chats that the user has been enrolled to
 function loadChat(id) {
@@ -70,6 +126,10 @@ function loadChat(id) {
     }).then((response) => {
         return response.json();
     }).then((meta) => {
+        socket.send(JSON.stringify([{
+            'type': 'join',
+            'conversation': id
+        }]));
         $('#chat-list .spinner').remove();
         const chat = {'meta': meta};
         chats[meta.id] = chat;
@@ -83,17 +143,21 @@ function loadChats() {
         method: 'GET',
         credentials: 'include',
         headers: defaultRequestHeaders(),
-    }).then(function (response) {
+    }).then((response) => {
         return response.json();
-    }).then(function (presence) {
+    }).then((presence) => {
         $('#chat-list .spinner').remove();
         for (let entry of presence) {
             const chat = {'meta': entry};
             chats[entry.id] = chat;
             listChat(chat);
         }
+        socket.send(JSON.stringify([{
+            'type': 'join',
+            'conversation': '__all__'
+        }]));
         let conversations = $('#chat-list .chat-conversation');
-        conversations.sort(function (a, b) {
+        conversations.sort((a, b) => {
             return $(b).data('lastActivity') - $(a).data('lastActivity');
         }).appendTo('#chat-list');
 
@@ -116,6 +180,7 @@ function listChat(chat) {
         '<div class="chat-conversation">' +
         '<img class="chat-thumb" src="">' +
         '<div><span class="chat-title"></span><span class="chat-description"></span></div>' +
+        '<span class="chat-notif"></span>' +
         '</div>');
     const $thumb = $listing.find(".chat-thumb");
     const $title = $listing.find(".chat-title");
@@ -135,65 +200,14 @@ function listChat(chat) {
             break
     }
 
-    $desc.text(meta.lastActivity == null ? meta.creation : meta.lastActivity);
-
     $chatList.prepend($listing);
     $listing.data('id', meta.id);
     $listing.data('lastActivity', Date.parse(meta.lastActivity == null ? meta.creation : meta.lastActivity));
-    $listing.click(() => openChat(chat));
-    chat.listing = $listing
-}
-
-// Creates a new chat widget
-function instantiateChatWidget(chat, focus = false, afterInstantiated) {
-    const $chatBox = $(
-        '<div class="chatbox">' +
-        '<div class="chat-log"></div>' +
-        '<input class="chat-message-input" type="text" style="min-width: 80px">' +
-        '<input class="chat-message-submit" type="button" value="»">' +
-        '</div>');
-    const $chatLog = $chatBox.find('.chat-log');
-
-    fetch(`/api/chat/${chat.meta.id}/history`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: defaultRequestHeaders(),
-    }).then(function (response) {
-        return response.json();
-    }).then(function (history) {
-        chat.widget = $chatBox;
-        for (let msg of history)
-            messageToChat(msg, chat)
-        const $text = $chatBox.find('.chat-message-input');
-        const $btn = $chatBox.find('.chat-message-submit');
-        if (focus) $text.focus();
-        $text.keyup((e) => {
-            if (e.keyCode === 13) $btn.click()
-        });
-        $btn.click(() => {
-            const message = $text.val();
-            if (message.trim() === '') return;
-            socket.send(JSON.stringify([{
-                'type': 'send',
-                'conversation': chat.meta.id,
-                'message': message
-            }]));
-            $text.val('');
-        });
-        $('#chat-container').append($chatBox);
-        startingChat = false;
-        $chatLog.scroll(() => {
-            chat.scroll = $chatLog.prop('scrollHeight') - $chatLog.height() - $chatLog.scrollTop() === 0;
-            if (!chat.scroll && $chatLog.scrollTop() < 10 && !warnedHistoryLoadingIncomplete) {
-                // TODO
-                alert("O carregamento do histórico ainda não foi implementado.");
-                warnedHistoryLoadingIncomplete = true;
-            }
-        });
-        scrollChat(chat);
-        if (afterInstantiated !== undefined)
-            afterInstantiated.apply()
+    $listing.click(() => {
+        openChat(chat);
+        $listing.find(".chat-notif").removeClass('set');
     });
+    chat.listing = $listing
 }
 
 // Opens the chat that was requested by the user in the selector
@@ -204,9 +218,9 @@ function selectChat(selector) {
         method: 'GET',
         credentials: 'include',
         headers: defaultRequestHeaders()
-    }).then(function (response) {
+    }).then((response) => {
         return response.json();
-    }).then(function (chatInfo) {
+    }).then((chatInfo) => {
         const chat = {'meta': chatInfo, 'scroll': true};
         chats[chatInfo.id] = chat;
         listChat(chat);
@@ -215,9 +229,7 @@ function selectChat(selector) {
 }
 
 // Appends a message to a chat log
-function messageToChat(msg, chat) {
-    const $log = chat.widget.find(".chat-log");
-
+function messageToChat(msg, $log, scroll = false) {
     const timestamp = Date.parse(msg.creation);
     const datetime = new Date(timestamp);
     const now = new Date(Date.now());
@@ -257,7 +269,7 @@ function messageToChat(msg, chat) {
         $block = $(
             '<div class="message-block">' +
             '<div class="meta">' +
-            '<img class="author-pic"/><a class="author-name"></a><span class="datetime"></span>' +
+            '<img alt="autor" class="author-pic"/><a class="author-name"></a><span class="datetime"></span>' +
             '</div>' +
             '</div>');
         $block.find(".author-pic").attr("src", msg.author.thumbnail ? msg.author.thumbnail : defaultUserPic)
@@ -269,7 +281,7 @@ function messageToChat(msg, chat) {
         $block.data('timestamp', timestamp);
         $block.data('author', authorID);
         $log.append($block);
-        $log.find(".message-block").sort(function (a, b) {
+        $log.find(".message-block").sort((a, b) => {
             return $(a).data("timestamp") - $(b).data("timestamp");
         }).appendTo($log);
     }
@@ -280,16 +292,20 @@ function messageToChat(msg, chat) {
     $msg.data("timestamp", timestamp);
     $block.append($msg);
 
-    $block.find(".message").sort(function (a, b) {
-        return $(a).data("timestamp") - $(b).data("timestamp");
-    }).appendTo($block);
-    if (chat.scroll)
+    $block.find(".message")
+        .sort((a, b) => {return $(a).data("timestamp") - $(b).data("timestamp");})
+        .appendTo($block);
+    if (scroll)
         $log.animate({scrollTop: $log.prop('scrollHeight')})
 }
 
 function scrollChat(chat) {
-    const $log = chat.widget.find(".chat-log");
-    $log.animate({scrollTop: $log.prop('scrollHeight')});
+    chat.log.animate({scrollTop: chat.log.prop('scrollHeight')});
+}
+
+function addNotification(chat) {
+    if (!chat.listing) return;
+    chat.listing.find(".chat-notif").addClass('set');
 }
 
 function findNearestMessages($log, timestamp) {
@@ -312,7 +328,3 @@ function findNearestMessages($log, timestamp) {
     // Nearest lower and nearest higher
     return [prev, succ];
 }
-
-window.addEventListener("load", () => {
-    chatUID = JSON.parse($('#chat-uid').text());
-});

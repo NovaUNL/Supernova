@@ -27,37 +27,30 @@ def chat_presence(request):
 
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
-def chat_history(request, chat_id, from_id=None, to_id=None):
+def chat_history(request, chat_id):
     conversation = get_object_or_404(chat.Conversation, id=chat_id)
     if not conversation.has_access(request.user):
         raise PermissionDenied()
 
-    if from_id is not None:
+    if 'to' in request.GET:
         try:
-            minor = chat.Message.objects.get(id=from_id, conversation=conversation)
-            messages = chat.Message.objects \
-                           .filter(conversation=conversation, id__gte=minor.id) \
-                           .select_related('author') \
-                           .order_by('creation')[:50]
-        except chat.Message.DoesNotExist:
-            return Response({'field': 'from_id', 'error': 'unknown message'}, status=400)
-    elif to_id is not None:
-        try:
-            major = chat.Message.objects.get(id=to_id, conversation=conversation)
+            major = chat.Message.objects.get(id=int(request.GET['to']), conversation=conversation)
 
             messages = chat.Message.objects \
                            .filter(conversation=conversation, id__lt=major.id) \
                            .select_related('author') \
                            .order_by('creation') \
                            .reverse()[:50]
-        except chat.Message.DoesNotExist:
+        except (chat.Message.DoesNotExist, ValueError):
             return Response({'field': 'to_id', 'error': 'unknown message'}, status=400)
+
     else:
         messages = chat.Message.objects \
                        .filter(conversation=conversation) \
                        .select_related('author') \
                        .order_by('creation') \
                        .reverse()[:50]
+
     serialized = serializers.MessageSerializer(messages, many=True)
     return Response(serialized.data)
 
