@@ -103,12 +103,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def store_message(self, message, conversation):
-        return message_serialize(
+        timestamp = timezone.now()
+        serialized_msg = message_serialize(
             chat.Message.objects.create(
                 author=self.user,
                 content=message,
                 creation=timezone.now(),
                 conversation=conversation))
+        conversation.last_activity = timestamp
+        conversation.save(update_fields=['last_activity'])
+        return serialized_msg
 
 
 def message_serialize(message):
@@ -122,5 +126,5 @@ def message_serialize(message):
             'pic': message.author.picture_thumbnail.url if message.author.picture else None,
             'url': message.author.get_absolute_url() if not message.author.is_anonymous else None,
         },
-        'timestamp': message.creation.isoformat(),
+        'creation': message.creation.isoformat(),
     }
