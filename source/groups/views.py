@@ -1,5 +1,6 @@
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -72,12 +73,11 @@ def group_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
     context = build_base_context(request)
-    membership_perms = {
+    context['membership_perms'] = {
         'is_admin': permission_flags & permissions.IS_ADMIN,
         'can_announce': permission_flags & permissions.CAN_ANNOUNCE,
         'can_modify_roles': permission_flags & permissions.CAN_MODIFY_ROLES,
         'can_change_schedule': permission_flags & permissions.CAN_CHANGE_SCHEDULE}
-    context['membership_perms'] = membership_perms
     context['title'] = group.name
     context['group'] = group
     context['is_member'] = False if request.user.is_anonymous else group in request.user.groups_custom.all()
@@ -239,16 +239,24 @@ def membership_request_view(request, group_abbr):
 @login_required
 def conversations_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
+    can_read_conversations = permission_flags & permissions.CAN_READ_CONVERSATIONS
     context = build_base_context(request)
     context['title'] = f'Contactos com {group.name}'
     context['group'] = group
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_cnt'
-    context['conversations'] = chat.GroupExternalConversation.objects \
-        .filter(group=group, creator=request.user) \
-        .order_by('creation') \
-        .select_related('last_activity_user') \
-        .reverse()
+    if can_read_conversations:
+        context['conversations'] = chat.GroupExternalConversation.objects \
+            .filter(group=group) \
+            .order_by('-creation') \
+            .select_related('last_activity_user')
+    else:
+        context['conversations'] = chat.GroupExternalConversation.objects \
+            .filter(group=group, creator=request.user) \
+            .exclude(creator=request.user) \
+            .order_by('-creation') \
+            .select_related('last_activity_user')
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
@@ -300,7 +308,20 @@ def conversation_create_view(request, group_abbr):
 def conversation_view(request, group_abbr, conversation_id):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     conversation = get_object_or_404(chat.GroupExternalConversation, id=conversation_id, group=group)
+
+    permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
+    is_author = conversation.creator == request.user  # TODO: Change creator to is member of (use the conversation m2m)
+    read_acc = permission_flags & permissions.CAN_READ_CONVERSATIONS
+    write_acc = permission_flags & permissions.CAN_WRITE_CONVERSATIONS
+    if not is_author and not read_acc:
+        # FIXME this allows finding that this conversation exists (as it does not 404)
+        # maybe change conversation identifiers to URL slugs to make it inviable to brute force URLs.
+        raise PermissionDenied("No authorization to view this conversation.")
+
     if request.method == 'POST':
+        if not (is_author or write_acc):
+            raise PermissionDenied("No authorization to post in this conversation.")
+
         message_form = chat_f.MessageForm(request.POST)
         if message_form.is_valid():
             message = message_form.save(commit=False)
@@ -321,7 +342,8 @@ def conversation_view(request, group_abbr, conversation_id):
     context['group'] = group
     context['conversation'] = conversation
     context['messages'] = messages
-    context['message_form'] = message_form
+    if write_acc:
+        context['message_form'] = message_form
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_cnt'
     context['sub_nav'] = [
