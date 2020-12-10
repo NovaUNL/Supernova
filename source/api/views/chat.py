@@ -4,13 +4,21 @@ from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from api.serializers import chat as serializers
 
 from chat import models as chat
 from users import models as users
 
+
+@api_view(['GET'])
+@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
+def chat_info(request, chat_id):
+    conversation = get_object_or_404(chat.Conversation, id=chat_id)
+    if not conversation.has_access(request.user):
+        raise PermissionDenied()
+    serialized = serializers.ConversationSerializer(conversation)
+    return Response(serialized.data)
 
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))

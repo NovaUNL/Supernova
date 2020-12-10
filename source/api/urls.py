@@ -16,6 +16,7 @@ urlpatterns = [
     # path('chat/list', views.chat.chat_list, name='chat_list'),
     path('chat/presence', views.chat.chat_presence, name='chat_presence'),
     path('chat/query', views.chat.chat_query, name='chat_query'),
+    path('chat/<int:chat_id>/info', views.chat.chat_info, name='chat_info'),
     path('chat/<str:reference>/join', views.chat.chat_join_request, name='chat_join'),
     path('chat/<int:chat_id>/history', views.chat.chat_history, name='chat_history'),
     path('chat/<int:user_id>/dmrequest', views.chat.dm_request, name='chat_dm_request'),
