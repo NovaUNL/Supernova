@@ -1,0 +1,41 @@
+{% extends 'groups/base_simple.html' %}
+
+{% load static %}
+
+{# TODO make the role selectable here (ideally without risking selecting the wrong role)#}
+{% block group_content %}
+  {% if not default_role %}
+    <div class="flex-pane">
+      <div class="pane-title bg-grad"><h2>Aviso!</h2></div>
+      <div class="pane-content">
+        Este grupo não tem um cargo a aplicar por defeito.
+        É necessário que o administrador do grupo seleccione um na página de definições para proceder à aceitação de
+        eventuais candidatos.
+      </div>
+    </div>
+  {% endif %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"><h2>Candidatos</h2></div>
+    <div class="pane-content">
+      {% if candidates|length == 0 %}
+        <p>Sem candidatos de momento.</p>
+      {% else %}
+        <ul>
+          {% for candidate in candidates %}
+            <li>
+              {{ candidate.user.get_full_name }}
+              <a href="{{ candidate.user.get_absolute_url }}">{{ candidate.user.nickname }}</a>
+              {% if candidate.message %}
+                <blockquote>{{ candidate.message|linebreaksbr }}</blockquote>
+              {% endif %}
+              {% if default_role %}
+                - <a href="{% url 'groups:candidates' group.abbreviation %}?accept={{ candidate.id }}">Aceitar</a> /
+                <a href="{% url 'groups:candidates' group.abbreviation %}?deny={{ candidate.id }}">Rejeitar</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

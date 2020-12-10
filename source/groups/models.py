@@ -3,7 +3,7 @@ from datetime import datetime, time
 import reversion
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
-from django.db import models as djm
+from django.db import models as djm, transaction
 from django.urls import reverse
 from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
@@ -199,6 +199,16 @@ class MembershipRequest(djm.Model):
 
     def __str__(self):
         return f'{self.user.nickname} membership request to {self.group}'
+
+    def accept(self):
+        with transaction.atomic():
+            self.granted = True
+            self.save(update_fields=['granted'])
+            Membership.objects.create(group=self.group, member=self.user, role=self.group.default_role)
+
+    def deny(self):
+        self.granted = False
+        self.save(update_fields=['granted'])
 
 
 class Activity(PolymorphicModel):

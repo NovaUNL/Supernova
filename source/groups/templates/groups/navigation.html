@@ -20,11 +20,11 @@
         <li><a href="{{ announcements_url }}">Anúncios</a></li>
       {% endif %}
 
-      {% if request.path == documents_url %}
-        <li>Documentos</li>
-      {% else %}
-        <li><a href="{{ documents_url }}">Documentos</a></li>
-      {% endif %}
+{#      {% if request.path == documents_url %} TODO#}
+{#        <li>Documentos</li>#}
+{#      {% else %}#}
+{#        <li><a href="{{ documents_url }}">Documentos</a></li>#}
+{#      {% endif %}#}
 
       {% if request.path == members_url %}
         <li>Membros</li>
@@ -37,20 +37,22 @@
       {% else %}
         <li><a href="{{ conversations_url }}">Contactar</a></li>
       {% endif %}
-      {# TODO - Schedule, Calendar #}
+      {# TODO - Schedule, Calendar, Documents #}
     </ul>
   </div>
 </div>
 
 {% if is_member %}
   <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Ações</h2></div>
+    <div class="pane-title bg-grad"><h2>Administração</h2></div>
     <div class="pane-content">
       <ul class="menu">
         {% if  membership_perms.can_announce %}
           <li><a href="{% url 'groups:announce' group.abbreviation %}">Anúnciar</a></li>{% endif %}
         {% if  membership_perms.can_modify_roles %}
           <li><a href="{% url 'groups:roles' group.abbreviation %}">Gerir cargos</a></li>{% endif %}
+        {% if  membership_perms.can_modify_roles %}
+          <li><a href="{% url 'groups:candidates' group.abbreviation %}">Analisar candidaturas</a></li>{% endif %}
         {% if  membership_perms.can_change_schedule %}
           <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
         {% if  membership_perms.is_admin %}

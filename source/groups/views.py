@@ -206,7 +206,8 @@ def members_view(request, group_abbr):
     return render(request, 'groups/members.html', context)
 
 
-def membership_request_req_view(request, group_abbr):
+@login_required
+def group_membership_request_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
 
     if m.Membership.objects.filter(member=request.user, group=group).exists():
@@ -271,6 +272,40 @@ def membership_request_req_view(request, group_abbr):
         {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
         {'name': 'Solicitar admissão', 'url': reverse('groups:membership_req', args=[group_abbr])}]
     return render(request, 'groups/membership_request.html', context)
+
+
+@login_required
+def group_candidates_view(request, group_abbr):
+    group = get_object_or_404(m.Group.objects.select_related('default_role'), abbreviation=group_abbr)
+
+    # Check for permissions
+    permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
+    roles_acc = permission_flags & permissions.CAN_ASSIGN_ROLES
+    if not roles_acc:
+        raise PermissionDenied("No permission to manage roles.")
+
+    accepted = request.GET.get('accept')
+    denied = request.GET.get('deny')
+    try:
+        if accepted:
+            m.MembershipRequest.objects.get(id=int(accepted)).accept()
+        elif denied:
+            m.MembershipRequest.objects.get(id=int(accepted)).deny()
+    except ValueError:
+        pass
+
+    pcode, nav_type = resolve_group_type(group)
+    context = build_base_context(request)
+    context['title'] = f'Candidaturas a {group.name}'
+    context['default_role'] = group.default_role
+    context['candidates'] = m.MembershipRequest.objects.filter(group=group, granted=None).select_related('user').all()
+    context['group'] = group
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Candidatos', 'url': reverse('groups:candidates', args=[group_abbr])}]
+    return render(request, 'groups/membership_requests.html', context)
 
 
 @login_required
