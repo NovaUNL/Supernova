@@ -72,6 +72,8 @@ def communities_view(request):
 def group_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
+    is_member = not request.user.is_anonymous and group in request.user.groups_custom.all()
+
     context = build_base_context(request)
     context['membership_perms'] = {
         'is_admin': permission_flags & permissions.IS_ADMIN,
@@ -80,9 +82,20 @@ def group_view(request, group_abbr):
         'can_change_schedule': permission_flags & permissions.CAN_CHANGE_SCHEDULE}
     context['title'] = group.name
     context['group'] = group
-    context['is_member'] = False if request.user.is_anonymous else group in request.user.groups_custom.all()
     context['pcode'], nav_type = resolve_group_type(group)
     context['activities'] = m.Activity.objects.filter(group=group).order_by('datetime').reverse()
+
+    if is_member:
+        context['actions'] = [
+            {'name': 'Sair do grupo', 'url': '#TODO'}]  # TODO
+    else:
+        if group.outsiders_openness == m.Group.REQUEST:
+            context['actions'] = [
+                {'name': 'Solicitar admissão', 'url': reverse('groups:membership_req', args=[group_abbr])}]
+        elif group.outsiders_openness == m.Group.OPEN:
+            context['actions'] = [
+                {'name': 'Entrar no grupo', 'url': reverse('groups:membership_req', args=[group_abbr])}]
+
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,

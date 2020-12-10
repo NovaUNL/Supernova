@@ -4,11 +4,11 @@
 <div class="header-decorator">
   <div class="header-decorator-options">
     <ul>
+      {% for action in actions %}
+        <li><a href="{{ action.url }}">{{ action.name }}</a></li>
+      {% endfor %}
       {% if not user.is_anonymous %}
         <li><a id="subscribe-btn" href="javascript: void(0)" data-endpoint="{% url 'api:group_subscription' group.abbreviation %}"></a></li>
-        {% if not is_member and group.outsiders_openness <= group.CLOSED %}
-          <li><a href="{% url 'groups:membership_req' group.abbreviation %}">Solicitar admissão</a></li>
-        {% endif %}
       {% endif %}
     </ul>
   </div>
