@@ -21,6 +21,8 @@ urlpatterns = [
     path('<str:group_abbr>/anunciar/', views.announce_view, name='announce'),
     path('<str:group_abbr>/anuncio/<str:announcement_id>/', views.announcement_view, name='announcement'),
     path('<str:group_abbr>/agenda/', views.schedule_view, name='schedule'),
-    path('<str:group_abbr>/contactar/', views.contact_view, name='contact'),
+    path('<str:group_abbr>/conversas/', views.conversations_view, name='conversations'),
+    path('<str:group_abbr>/conversas/criar', views.conversation_create_view, name='conversation_create'),
+    path('<str:group_abbr>/conversas/<str:conversation_id>', views.conversation_view, name='conversation'),
     path('ac/group_role', views.GroupRolesAutocomplete.as_view(), name='group_role_ac'),
 ]

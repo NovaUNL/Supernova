@@ -1,6 +1,9 @@
 from dal import autocomplete
 from django import forms as djf
+from markdownx.fields import MarkdownxFormField
+
 from groups import models as m
+from chat import models as chat
 from supernova.fields import NativeSplitDateTimeField
 from supernova.widgets import SliderInput, NativeTimeInput
 
@@ -94,3 +97,11 @@ class SchedulePeriodicForm(djf.ModelForm):
 
 GroupSchedulePeriodicFormset = djf.inlineformset_factory(m.Group, m.SchedulePeriodic, extra=1,
                                                          form=SchedulePeriodicForm)
+
+
+class GroupExternalConversationCreation(djf.ModelForm):
+    message = MarkdownxFormField()
+
+    class Meta:
+        model = chat.GroupExternalConversation
+        fields = ('title', 'public')

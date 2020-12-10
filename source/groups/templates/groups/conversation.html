@@ -1,0 +1,38 @@
+{% extends 'groups/base_simple.html' %}
+
+{% block group_content %}
+  {% for message in messages %}
+    {% if forloop.first %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>{{ conversation.title }}</h2></div>
+        <div class="pane-content">
+          {{ message.content_html|safe }}
+          <small>Por <a href="{{ message.author.get_absolute_url }}">{{ message.author.get_full_name }}</a>
+            a {{ message.creation }}.</small>
+        </div>
+      </div>
+    {% else %}
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"></div>
+        <div class="pane-content">
+          {{ message.content_html|safe }}
+          <small>Por <a href="{{ message.author.get_absolute_url }}">{{ message.author.get_full_name }}</a>
+            a {{ message.creation }}.</small>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+  <div class="flex-pane">
+    <div class="pane-title bg-grad"></div>
+    <div class="pane-content">
+      <form class="col" method="post" action="{% url 'groups:conversation' group.abbreviation conversation.id %}">
+        {% csrf_token %}
+        {{ message_form.media }}
+        {{ message_form.non_field_errors }}
+        {{ message_form.content.errors }}
+        <div>{{ message_form.content }}</div>
+        <input class="ui-btn end" type="submit" value="Responder"/>
+      </form>
+    </div>
+  </div>
+{% endblock %}

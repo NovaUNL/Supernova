@@ -2,9 +2,32 @@
 
 {% block group_content %}
   <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Contactos</h2></div>
+    <div class="pane-title bg-grad"><h2>Conversas</h2></div>
     <div class="pane-content">
-      TODO
+      {% if conversations|length == 0 %}
+        <p>
+          Sem conversas entre si e este grupo.<br>
+          <a>Criar uma conversa.</a>
+        </p>
+      {% else %}
+        <div>
+          {% for conversation in conversations %}
+            <div>
+              <h3>
+                <a href="{{ conversation.get_absolute_url }}">{{ conversation.title }}</a>
+                {% if conversation.closed %}<span>(Resolvido)</span>{% endif %}
+              </h3>
+              <small>
+                Ultima mensagem por
+                <a href="{{ conversation.last_activity_user.get_absolute_url }}">{{ conversation.last_activity_user.get_full_name }}</a>
+                em {{ conversation.last_activity }}.
+              </small>
+            </div>
+            {% if not forloop.last %}
+              <hr>{% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

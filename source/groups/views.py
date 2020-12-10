@@ -5,12 +5,13 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from chat.models import GroupExternalConversation
+from chat import models as chat
 from documents.models import Document
 from groups import permissions
 from supernova.views import build_base_context
 from groups import models as m
 from groups import forms as f
+from chat import forms as chat_f
 
 
 def index_view(request):
@@ -236,21 +237,100 @@ def membership_request_view(request, group_abbr):
 
 
 @login_required
-def contact_view(request, group_abbr):
+def conversations_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     context = build_base_context(request)
-    context['title'] = f'Contactar {group.name}'
+    context['title'] = f'Contactos com {group.name}'
     context['group'] = group
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_cnt'
-    context['conversations'] = GroupExternalConversation.objects.filter(
-        group=group, creator=request.user).order_by('date').reverse()
+    context['conversations'] = chat.GroupExternalConversation.objects \
+        .filter(group=group, creator=request.user) \
+        .order_by('creation') \
+        .select_related('last_activity_user') \
+        .reverse()
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
         {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
-        {'name': 'Contactar', 'url': reverse('groups:contact', args=[group_abbr])}]
+        {'name': 'Conversas', 'url': reverse('groups:conversations', args=[group_abbr])}]
     return render(request, 'groups/conversations.html', context)
+
+
+@login_required
+def conversation_create_view(request, group_abbr):
+    group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    context = build_base_context(request)
+
+    if request.method == "POST":
+        form = f.GroupExternalConversationCreation(request.POST)
+        if form.is_valid():
+            message = form.cleaned_data['message']
+            if isinstance(message, str):
+                message = message.strip()
+            conversation = form.save(commit=False)
+            conversation.group = group
+            conversation.creator = request.user
+            conversation.last_activity_user = request.user
+            conversation.save()
+            conversation.users.add(request.user)
+            chat.Message.objects.create(author=request.user, content=message, conversation=conversation)
+            if not group.official:
+                # TODO Redirect message elsewhere
+                pass
+            return redirect('groups:conversation', group_abbr=group_abbr, conversation_id=conversation.id)
+    else:
+        form = f.GroupExternalConversationCreation()
+
+    context['title'] = f'Contactar {group.name}'
+    context['group'] = group
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_cnt'
+    context['form'] = form
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Conversas', 'url': reverse('groups:conversations', args=[group_abbr])},
+        {'name': 'Nova conversa', 'url': reverse('groups:conversation_create', args=[group_abbr])}]
+    return render(request, 'groups/conversation_create.html', context)
+
+
+@login_required
+def conversation_view(request, group_abbr, conversation_id):
+    group = get_object_or_404(m.Group, abbreviation=group_abbr)
+    conversation = get_object_or_404(chat.GroupExternalConversation, id=conversation_id, group=group)
+    if request.method == 'POST':
+        message_form = chat_f.MessageForm(request.POST)
+        if message_form.is_valid():
+            message = message_form.save(commit=False)
+            message.author = request.user
+            message.conversation = conversation
+            message.save()
+            message_form = chat_f.MessageForm()
+    else:
+        message_form = chat_f.MessageForm()
+
+    messages = chat.Message.objects \
+        .filter(conversation=conversation) \
+        .order_by('creation') \
+        .select_related('author') \
+        .all()
+    context = build_base_context(request)
+    context['title'] = f'Contactar {group.name}'
+    context['group'] = group
+    context['conversation'] = conversation
+    context['messages'] = messages
+    context['message_form'] = message_form
+    pcode, nav_type = resolve_group_type(group)
+    context['pcode'] = pcode + '_cnt'
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Conversas', 'url': reverse('groups:conversations', args=[group_abbr])},
+        {'name': conversation.title, 'url': reverse('groups:conversation', args=[group_abbr, conversation_id])}]
+    return render(request, 'groups/conversation.html', context)
 
 
 @login_required

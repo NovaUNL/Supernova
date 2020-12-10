@@ -2,7 +2,10 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models as djm
+from django.urls import reverse
+
 from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
 from polymorphic.models import PolymorphicModel
 
 from users import models as users
@@ -21,7 +24,12 @@ class Conversation(PolymorphicModel):
     users = djm.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationUser')
     # Cached
     #: Timestamp of the last activity
-    last_activity = djm.DateTimeField(null=True, blank=True)
+    last_activity = djm.DateTimeField(auto_now=True)
+    #: User which caused the last activity
+    last_activity_user = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=djm.PROTECT,
+        related_name='_conversation_last_messages')
 
     def has_access(self, user) -> bool:
         if user in self.users.all():
@@ -47,6 +55,9 @@ class Message(djm.Model):
     class Meta:
         unique_together = ['author', 'creation', 'content', 'conversation']
 
+    @property
+    def content_html(self):
+        return markdownify(self.content)
 
 class ConversationUser(djm.Model):
     """
@@ -110,6 +121,9 @@ class PublicRoom(Conversation):
     def has_access(self, user) -> bool:
         return True
 
+    def get_absolute_url(self):
+        return reverse('chat:room', args=[str(self.identifier)])
+
     @property
     def chat_type(self):
         return "room"
@@ -123,16 +137,16 @@ class GroupExternalConversation(Conversation):
     title = djm.CharField(max_length=100)
     #: The group where a conversation happened
     group = djm.ForeignKey(groups.Group, on_delete=djm.PROTECT)
+    #: Whether a conversation is meant to be publicly readable
+    public = djm.BooleanField(default=False)
     #: Flag signaling conversation closure
-    closed = djm.BooleanField()
-    # Cached fields
-    #: Whether the user has read the last message
-    user_ack = djm.BooleanField()
-    #: Whether a group member has read the last message
-    group_ack = djm.BooleanField()
+    closed = djm.BooleanField(default=False)
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('groups:conversation', args=[self.group.abbreviation, self.id])
 
 
 class GroupInternalConversation(Conversation):

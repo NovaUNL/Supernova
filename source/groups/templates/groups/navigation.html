@@ -2,7 +2,7 @@
 {% url 'groups:announcements' group.abbreviation  as announcements_url %}
 {% url 'groups:documents' group.abbreviation  as documents_url %}
 {% url 'groups:members' group.abbreviation  as members_url %}
-{% url 'groups:contact' group.abbreviation  as contact_url %}
+{% url 'groups:conversations' group.abbreviation  as conversations_url %}
 
 <div class="flex-pane">
   <div class="pane-title bg-grad"><h2>Páginas</h2></div>
@@ -32,12 +32,12 @@
         <li><a href="{{ members_url }}">Membros</a></li>
       {% endif %}
 
-      {% if request.path == contact_url %}
+      {% if request.path == conversations_url %}
         <li>Contactar</li>
       {% else %}
-        <li class="disabled"><a href="{{ contact_url }}">Contactar</a></li>
+        <li><a href="{{ conversations_url }}">Contactar</a></li>
       {% endif %}
-      {# TODO - Schedule, Calendar#}
+      {# TODO - Schedule, Calendar #}
     </ul>
   </div>
 </div>

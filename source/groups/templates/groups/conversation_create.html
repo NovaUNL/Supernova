@@ -1,0 +1,65 @@
+{% extends 'supernova/base.html' %}
+
+{% load static %}
+
+{% block head %}
+  {% include 'groups/group_cover_image.html' %}
+  <script src="{% static 'js/content-rendering.js' %}"></script>
+{% endblock %}
+
+{% block content_wrapper %}
+  <div class="col">
+    {% include 'groups/header.html' %}
+    <div class="col padded">
+      <div class="flex-pane">
+        <div class="pane-title bg-grad"><h2>Criar conversa</h2></div>
+        <div class="pane-content">
+          {% if not group.official %}
+            <p style="text-align: center">
+              <b style="text-decoration: underline; text-decoration-color: red">
+                Este grupo não tem uma presença oficial no Supernova.
+              </b><br>
+              A sua mensagem poderá ser encaminhada para os canais oficiais do grupo juntamente com o seu contacto.
+            </p>
+          {% endif %}
+          <form class="col" method="post" action="{% url 'groups:conversation_create' group.abbreviation %}">
+            {% csrf_token %}
+            {{ form.media }}
+            {{ form.non_field_errors }}
+            <div class="form-block">
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Título</h4>
+                </div>
+                {{ form.title.errors }}
+                <div>{{ form.title }}</div>
+                <div class="form-row-description">
+                  Um título breve e descritivo que identifique a conversa.
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Mensagem</h4>
+                </div>
+                {{ form.message.errors }}
+                <div>{{ form.message }}</div>
+              </div>
+              <div class="form-row">
+                <div class="form-row-top">
+                  <h4>Pública {{ form.public }}</h4>
+                </div>
+                {{ form.public.errors }}
+                <div class="form-row-description">
+                  Se esta conversa tiver conteúdo de intresse público e não se importar que os restantes utilizadores
+                  do Supernova participem na mesma, poderá listar a conversa como pública.
+                </div>
+              </div>
+            </div>
+            <input class="ui-btn end" type="submit" value="Enviar"/>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>setupMarkdownEnv()</script>
+{% endblock %}
