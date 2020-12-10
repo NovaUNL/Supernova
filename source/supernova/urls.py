@@ -62,6 +62,8 @@ urlpatterns = [
     path('noticias/', include('news.urls')),
     # Learning views
     path('estudo/', include('learning.urls')),
+    # Chat views
+    path('chat/', include('chat.urls')),
     # Management view
     path('manage/', include('management.urls')),
     # path('loja/', include('store.urls')),
