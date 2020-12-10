@@ -24,14 +24,18 @@ MathJax = {
 
 function setupMarkdownEnv() {
     let element = document.querySelectorAll('.markdownx');
+    const update = () => {
+        if (typeof (MathJax.typeset) != "undefined")
+            MathJax.typeset()
+        if (typeof (Prism) != "undefined")
+            Prism.highlightAll()
+    }
     Object.keys(element).map(key =>
         element[key].addEventListener('markdownx.update', event => {
-            MathJax.typeset();
-            Prism.highlightAll();
+            update.apply()
         })
     );
-    MathJax.typeset();
-    Prism.highlightAll();
+    update();
 }
 
 
