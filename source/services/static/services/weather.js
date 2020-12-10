@@ -6,25 +6,25 @@ let fieldTranslation = {
     'rain': "P(Chuva)",
     'wind_strength': "Vento(km/h)",
 };
-function chart(data) {
-    // var keys = data.columns.slice(1);
-    var keys = ["temperature", "humidity", "rain", "wind_strength"];
-    var formatValue = d3.format(",.0f");
-    var bisectDate = d3.bisector(d => d.hour).left;
 
-    var svg = d3.select("#chart"),
-        margin = {top: 15, right: 10, bottom: 5, left: 15},
+function chart(data) {
+    const keys = ["temperature", "humidity", "rain", "wind_strength"];
+    const formatValue = d3.format(",.0f");
+    const bisectDate = d3.bisector(d => d.hour).left;
+
+    const svg = d3.select("#chart"),
+        margin = {top: 15, right: 10, bottom: 5, left: 25},
         width = +svg.attr("width"),
         height = +svg.attr("height") - margin.top - margin.bottom;
 
-    var x = d3.scaleTime()
+    const x = d3.scaleTime()
         .rangeRound([margin.left, width - margin.right])
         .domain(d3.extent(data, d => d.hour));
 
-    var y = d3.scaleLinear().rangeRound([height - margin.bottom, margin.top]);
-    var z = d3.scaleOrdinal(["#990011", "#003dbf", "#003dbf", "#515967"]);
+    const y = d3.scaleLinear().rangeRound([height - margin.bottom, margin.top]);
+    const z = d3.scaleOrdinal(["#990011", "#003dbf", "#003dbf", "#515967"]);
 
-    var line = d3.line()
+    const line = d3.line()
         .curve(d3.curveCardinal)
         .x(d => x(d.hour))
         .y(d => y(d.val));
@@ -38,12 +38,13 @@ function chart(data) {
         .attr("class", "y-axis")
         .attr("transform", "translate(" + margin.left + ",0)");
 
-    var focus = svg.append("g")
+    const focus = svg.append("g")
         .attr("class", "focus")
         .style("display", "none");
 
 
-    var overlay = svg.append("rect")
+    // Overlay
+    svg.append("rect")
         .attr("class", "overlay")
         .attr("x", margin.left)
         .attr("width", width - margin.right - margin.left)
