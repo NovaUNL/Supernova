@@ -57,7 +57,7 @@ urlpatterns = [
     path('profile/<str:nickname>/socialnetworks/', views.users.UserSocialNetworks.as_view(), name='social_networks'),
     path('user/<str:nickname>/current_shifts', views.college.UserShiftInstances.as_view()),
     path('user/<str:nickname>/schedule/<str:from_date>/<str:to_date>', views.users.user_schedule, name='user_schedule'),
-    path('notification/count', views.users.notification_count_view, name='notifications'),
-    path('notification/list', views.users.UserNotificationList.as_view(), name='notifications'),
+    path('notification/count', views.users.notification_count_view, name='notification_count'),
+    path('notification/list', views.users.UserNotificationList.as_view(), name='notification_list'),
     path('moderate/<int:user_id>/', views.users.UserModeration.as_view(), name='user_moderation'),
 ]
