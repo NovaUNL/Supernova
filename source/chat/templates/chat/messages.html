@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block head %}
+  {{ request.user.id |json_script:"chat-uid" }}
   <link href="{% static  'vendor/select2/dist/css/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
   <link href="{% static  'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet">
   <link href="{% static  'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet">
@@ -10,14 +11,11 @@
   <script src="{% static  'autocomplete_light/jquery.init.js' %}"></script>
   <script src="{% static  'vendor/select2/dist/js/select2.full.min.js' %}"></script>
   <script src="{% static  'vendor/select2/dist/js/i18n/pt.js' %}"></script>
-  <script src="{% static 'chat/chat.js' %}" ></script>
+  <script src="{% static 'chat/chat.js' %}"></script>
 {% endblock %}
 
 {% block content_wrapper %}
-{{ request.user.id |json_script:"chat-uid" }}
-<div class="header-decorator">
-    <h1>Mensagens</h1>
-  </div>
+  <div class="header-decorator"><h1>Mensagens</h1></div>
   <div class="row padded nowrap">
     <div class="col nogrow noshrink" style="flex-basis: 300px">
       <div class="flex-pane">
@@ -50,5 +48,6 @@
               placeholder: 'Abrir conversa'
           }
       });
+      loadChats();
   </script>
 {% endblock %}
