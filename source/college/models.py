@@ -261,9 +261,9 @@ class Room(Place, Importable):
     #: Type of room (enumeration)
     type = djm.IntegerField(choices=ctypes.RoomType.CHOICES, default=0)
     #: Verbose description for this room
-    description = djm.TextField(max_length=2048, null=True, blank=True)
+    description = djm.TextField(null=True, blank=True)
     #: Verbose description of equipment in this room
-    equipment = djm.TextField(max_length=2048, null=True, blank=True)
+    equipment = djm.TextField(null=True, blank=True)
     #: Whether the room still exists as referred to by this object
     extinguished = djm.BooleanField(default=False)
 
