@@ -2,7 +2,6 @@ from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -72,7 +71,6 @@ def communities_view(request):
 def group_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
-    is_member = not request.user.is_anonymous and group in request.user.groups_custom.all()
 
     context = build_base_context(request)
     context['membership_perms'] = {
@@ -84,6 +82,7 @@ def group_view(request, group_abbr):
     context['group'] = group
     context['pcode'], nav_type = resolve_group_type(group)
     context['activities'] = m.Activity.objects.filter(group=group).order_by('datetime').reverse()
+    context['is_member'] = is_member = not request.user.is_anonymous and group in request.user.groups_custom.all()
 
     if is_member:
         context['actions'] = [
@@ -207,38 +206,63 @@ def members_view(request, group_abbr):
     return render(request, 'groups/members.html', context)
 
 
-def membership_request_view(request, group_abbr):
+def membership_request_req_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
 
     if m.Membership.objects.filter(member=request.user, group=group).exists():
         return redirect('groups:group', group_abbr=group_abbr)
 
-    previously_requested = m.MembershipRequest.objects.filter(user=request.user, group=group).exists()
-    if previously_requested:
-        return HttpResponse(status=403)
-
-    if group.outsiders_openness == m.Group.OPEN:
-        if group.default_role_id is not None:
-            m.Membership.objects.create(member=request.user, group=group, role_id=group.default_role_id)
-            redirect('groups:group', group_abbr=group_abbr)
-    elif group.outsiders_openness != m.Group.REQUEST:
-        return HttpResponse(status=403)
-
-    if request.method == "POST":
-        form = f.MembershipRequestForm(request.POST)
-        if form.is_valid():
-            message = form.cleaned_data['message']
-            if isinstance(message, str):
-                message = message.strip()
-            m.MembershipRequest.objects.create(user=request.user, group=group, message=message)
-            return redirect('groups:group', group_abbr=group_abbr)
-    else:
-        form = f.MembershipRequestForm()
+    # Find existing for past requests that have not been granted (pending + denied)
+    existing_request = m.MembershipRequest.objects \
+        .filter(user=request.user, group=group) \
+        .exclude(granted=True) \
+        .first()
 
     context = build_base_context(request)
-    context['form'] = form
+    if previously_requested := (existing_request is not None):
+        if existing_request.granted is not None:  # Has been denied once, can no longer request
+            raise PermissionDenied("Membership has been refused.")
+
+        # \/ Deletion secret. Not the best secret, but this is unlikely to get attacked
+        secret = str(existing_request.id)
+        if 'remove' in request.GET:
+            # Deleting existing request (pending request without neither approval nor disapproval)
+            if request.GET['remove'] == secret:
+                existing_request.delete()
+                return redirect('groups:group', group_abbr=group_abbr)
+            else:
+                raise PermissionDenied("No authorization to post in this conversation.")
+        # Warning the user that a pending request exists, show no form
+        form = None
+        context['secret'] = secret
+        context['pending'] = existing_request.granted is None
+    else:  # First request
+
+        # Requests towards open groups are translated to a direct membership
+        if group.outsiders_openness == m.Group.OPEN:
+            if group.default_role_id is not None:
+                m.Membership.objects.create(member=request.user, group=group, role_id=group.default_role_id)
+                return redirect('groups:group', group_abbr=group_abbr)
+
+        # Can't request membership to closed groups
+        if group.outsiders_openness != m.Group.REQUEST:
+            raise PermissionDenied("Membership requested in a closed or secret group.")
+
+        if request.method == "POST":
+            form = f.MembershipRequestForm(request.POST)
+            if form.is_valid():
+                message = form.cleaned_data['message']
+                if isinstance(message, str):
+                    message = message.strip()
+                m.MembershipRequest.objects.create(user=request.user, group=group, message=message)
+                return redirect('groups:membership_req', group_abbr=group_abbr)
+        else:
+            form = f.MembershipRequestForm()
+
     context['title'] = f'Solicitar admissão em {group.name}'
     context['group'] = group
+    context['form'] = form
+    context['previously_requested'] = previously_requested
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_memb_req'
     context['sub_nav'] = [

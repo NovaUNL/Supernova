@@ -3,21 +3,31 @@
 {% block group_content %}
   <div class="flex-pane">
     <div class="pane-title bg-grad"><h2>Solicitar admissão</h2></div>
-    <div class="pane-content">
-      <form class="col" method="post" action="{% url 'groups:membership_req' group.abbreviation %}">
-        {% csrf_token %}
-        {{ form.errors }}
-        <div class="form-row">
-          <div class="form-row-top">
-            <h4>Mensagem (Opcional)</h4>
+    <div class="pane-content col">
+      {% if previously_requested %}
+        <p>
+          Submeteu com sucesso um pedido a este grupo.
+          {% if pending %}<br>
+            Caso tenha sido um engano, deseja <a href="{% url 'groups:membership_req' group.abbreviation %}?remove={{ secret }}">remove-lo</a>?
+          {% endif %}
+        </p>
+        <a class="ui-btn end" href="{% url 'groups:group' group.abbreviation %}">Voltar</a>
+      {% else %}
+        <form class="col" method="post" action="{% url 'groups:membership_req' group.abbreviation %}">
+          {% csrf_token %}
+          {{ form.errors }}
+          <div class="form-row">
+            <div class="form-row-top">
+              <h4>Mensagem (Opcional)</h4>
+            </div>
+            {{ form.message }}
+            <div class="form-row-description">
+            </div>
           </div>
-          {{ form.message }}
-          <div class="form-row-description">
-          </div>
-        </div>
-        <input class="ui-btn end" type="submit" value="Solicitar"/>
-        {{ form.media }}
-      </form>
+          <input class="ui-btn end" type="submit" value="Solicitar"/>
+          {{ form.media }}
+        </form>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

@@ -190,7 +190,7 @@ class MembershipRequest(djm.Model):
     #: Datetime when the trigger happened
     datetime = djm.DateTimeField(auto_now_add=True)
     #: Whether the request was granted and the user gained a membership
-    granted = djm.BooleanField(default=None)
+    granted = djm.BooleanField(default=None, null=True, blank=True)
     #: Some message that was left with the request
     message = djm.TextField(default=None, blank=True, null=True, max_length=1000)
 
