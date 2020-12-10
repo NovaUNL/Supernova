@@ -253,13 +253,13 @@ def membership_request_view(request, group_abbr):
 def conversations_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
     permission_flags = 0 if request.user.is_anonymous else permissions.get_user_group_permissions(request.user, group)
-    can_read_conversations = permission_flags & permissions.CAN_READ_CONVERSATIONS
+    read_acc = permission_flags & permissions.CAN_READ_CONVERSATIONS
     context = build_base_context(request)
     context['title'] = f'Contactos com {group.name}'
     context['group'] = group
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_cnt'
-    if can_read_conversations:
+    if read_acc:
         context['conversations'] = chat.GroupExternalConversation.objects \
             .filter(group=group) \
             .order_by('-creation') \
@@ -270,6 +270,8 @@ def conversations_view(request, group_abbr):
             .exclude(creator=request.user) \
             .order_by('-creation') \
             .select_related('last_activity_user')
+    context['actions'] = [
+        {'name': 'Criar nova', 'url': reverse('groups:conversation_create', args=[group_abbr])}]
     context['sub_nav'] = [
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
