@@ -1,3 +1,4 @@
+from django.conf.urls.static import static
 from rest_framework import serializers
 
 from chat import models as m
@@ -7,7 +8,7 @@ class ConversationUserSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField()
     nickname = serializers.CharField()
     name = serializers.CharField(required=False, source='get_full_name')
-    thumbnail = serializers.ImageField(source='picture_thumbnail')
+    thumbnail = serializers.ImageField(source='picture_thumbnail', default=static('img/user.svg'))
     profile = serializers.URLField(source='get_absolute_url')
 
     class Meta:
