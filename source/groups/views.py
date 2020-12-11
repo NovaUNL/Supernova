@@ -613,9 +613,9 @@ class GroupRolesAutocomplete(autocomplete.Select2QuerySetView):
         group = self.forwarded.get('group', None)
         if group is None or group == '':
             return []
-        qs = m.Role.objects.filter(group=group).all()
+        qs = m.Role.objects.filter(group=group)
         if self.q:
-            qs = qs.filter(name__contains=self.q)
+            qs = qs.filter(name__icontains=self.q)
         return qs
 
 
