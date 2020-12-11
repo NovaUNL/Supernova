@@ -1,3 +1,5 @@
+@import "variables"
+
 .entity
   font-weight: 600
 
@@ -513,12 +515,15 @@
   // General view
   .answer-btn
     background-image: url("/static/img/icons/check-nofill.svg")
+    display: none
 
   .answer-btn.set
     background-image: url("/static/img/icons/check.svg")
+    display: unset
 
-  .answer-btn.set.teacher-set
+  .answer-btn.teacher-set
     background-image: url("/static/img/icons/check-gold.svg")
+    display: unset
 
   // Author view
   .answer-btn.for-author:hover
