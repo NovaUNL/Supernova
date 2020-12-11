@@ -6,6 +6,7 @@ from groups import models as m
 from chat import models as chat
 from supernova.fields import NativeSplitDateTimeField
 from supernova.widgets import SliderInput, NativeTimeInput
+from groups import permissions
 
 
 class GroupSettingsForm(djf.ModelForm):
@@ -59,9 +60,41 @@ class MembershipRequestForm(djf.ModelForm):
         fields = ('message',)
 
 
+class BaseGroupMembershipFormSet(djf.BaseInlineFormSet):
+    def __init__(self, changing_user, *args, **kwargs):
+        super(BaseGroupMembershipFormSet, self).__init__(*args, **kwargs)
+        self.current_user = changing_user
+
+    def clean(self):
+        super().clean()
+        current_permissions = permissions.get_user_group_permissions(self.current_user, self.instance)
+        for form in self.forms:
+            if not form.has_changed():
+                continue
+            if form.instance:
+                old_role_permissions = permissions.roles_combined((form.instance.role,))
+                if not permissions.can_handle_permissions(current_permissions, old_role_permissions):
+                    raise djf.ValidationError("O cargo anterior tinha mais permissões do que o utilizador atual.")
+
+                new_role = form.cleaned_data.get('role')
+                new_role_permissions = permissions.roles_combined((new_role,))
+                if not permissions.can_handle_permissions(current_permissions, new_role_permissions):
+                    raise djf.ValidationError("O cargo definido tem mais permissões que o utilizador atual.")
+
+        for form in self.deleted_forms:
+            old_role_permissions = permissions.roles_combined((form.instance.role,))
+            if not permissions.can_handle_permissions(current_permissions, old_role_permissions):
+                raise djf.ValidationError("Não pode remover membros com mais do que as suas permissões.")
+
+
 # TODO figure how to limit a form field queryset through this
 # to prevent attacks such as asking for a role from other group
-GroupMembershipFormSet = djf.inlineformset_factory(m.Group, m.Membership, extra=3, form=MembershipForm)
+GroupMembershipFormSet = djf.inlineformset_factory(
+    m.Group,
+    m.Membership,
+    extra=3,
+    form=MembershipForm,
+    formset=BaseGroupMembershipFormSet)
 
 
 class AnnounceForm(djf.ModelForm):

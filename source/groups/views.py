@@ -485,20 +485,20 @@ def roles_view(request, group_abbr):
     context['can_edit'] = permission_flags & permissions.CAN_MODIFY_ROLES
     if request.method == 'POST':
         membership_formset = f.GroupMembershipFormSet(
+            request.user,
             request.POST,
             instance=group,
             queryset=group.memberships)
         if membership_formset.is_valid():
-            # TODO forbid assignment of roles more permissive than the issuer has
-            membership = membership_formset.save(commit=False)
-            # Delete any tagged object
-            for association in membership_formset.deleted_objects:
-                association.delete()
-            # Add new objects
-            for association in membership:
-                association.save()
+            membership_formset.save()
+            # Reset formset data to remove deleted
+            membership_formset = f.GroupMembershipFormSet(
+                request.user,
+                instance=group,
+                queryset=group.memberships)
     else:
         membership_formset = f.GroupMembershipFormSet(
+            request.user,
             instance=group,
             queryset=group.memberships)
 

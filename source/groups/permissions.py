@@ -50,7 +50,27 @@ def roles_combined(roles):
 
 
 def get_user_group_permissions(user, group):
+    """
+    Compiles a binary mask with the permissions a user has on a given group.
+    :param user: User to whom the permissions refer
+    :param group: Group to which the permissions refer
+    :return: Permission mask
+    """
     roles = m.Role.objects.filter(
         memberships__member=user,
         memberships__group=group)
     return roles_combined(roles)
+
+
+def can_handle_permissions(handler_permissions, handled_permissions):
+    """
+    Checks if a given set of permissions can modify users with another set of permissions.
+    :param handler_permissions: Modifier user permissions
+    :param handled_permissions: Modified user permissions
+    :return: Bool value confirming allowance
+    """
+    if not handler_permissions & CAN_ASSIGN_ROLES:
+        return False
+
+    # permissions must have at least all of the role permissions
+    return handled_permissions == handler_permissions & handled_permissions

@@ -120,7 +120,10 @@
     <div class="pane-title bg-grad"><h2>Afiliações</h2></div>
     <div class="pane-content">
       <form class="col" method="post" action="{% url 'groups:roles' group.abbreviation %}">
+        {% csrf_token %}
+        {{ membership_formset.media }}
         {{ membership_formset.management_form }}
+        {{ membership_formset.management_form.errors }}
         <table class="stylized grow">
           <thead>
           <th>Membro</th>
@@ -129,12 +132,14 @@
           </thead>
           <tbody>
           {% for form in membership_formset %}
+            {% if form.errors %}<tr>{{ form.errors }}</tr>{% endif %}
             <tr>
+              {{ form.id }}
               {{ form.group }}
               <td>{{ form.member }}</td>
               <td>{{ form.role }}</td>
-              {% if form.instance.id %}
-                <td><a href="#{{ form.instance.member.nickname }}">Desassociar</a></td>{# TODO #}
+              {% if membership_formset.can_delete %}
+                <td>{{ form.DELETE }}</td>
               {% endif %}
             </tr>
           {% endfor %}
