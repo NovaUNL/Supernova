@@ -10,21 +10,25 @@ from api.serializers import chat as serializers
 from chat import models as chat
 from users import models as users
 
+LIVE_CONVERSATIONS = (chat.DMChat, chat.PublicRoom, chat.PrivateRoom)
+
 
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_info(request, chat_id):
-    conversation = get_object_or_404(chat.Conversation, id=chat_id)
+    conversation = get_object_or_404(chat.Conversation.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
     if not conversation.has_access(request.user):
         raise PermissionDenied()
     serialized = serializers.ConversationSerializer(conversation)
     return Response(serialized.data)
 
+
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_presence(request):
-    conversations = chat.Conversation.objects\
-        .annotate(message_count=Count('messages'))\
+    conversations = chat.Conversation.objects \
+        .instance_of(*LIVE_CONVERSATIONS) \
+        .annotate(message_count=Count('messages')) \
         .filter(users=request.user, message_count__gt=0) \
         .order_by('last_activity') \
         .reverse() \
@@ -36,7 +40,7 @@ def chat_presence(request):
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_history(request, chat_id):
-    conversation = get_object_or_404(chat.Conversation, id=chat_id)
+    conversation = get_object_or_404(chat.Conversation.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
     if not conversation.has_access(request.user):
         raise PermissionDenied()
 
@@ -140,7 +144,11 @@ def dm_request(request, user_id):
 def chat_join_request(request, reference):
     try:
         conversation_id = int(reference)
-        conversation = get_object_or_404(chat.Conversation.objects.prefetch_related('users'), id=conversation_id)
+        conversation = get_object_or_404(
+            chat.Conversation.objects
+                .instance_of(*LIVE_CONVERSATIONS)
+                .prefetch_related('users'),
+            id=conversation_id)
     except ValueError:
         if not reference.startswith('u_'):
             raise Exception()
