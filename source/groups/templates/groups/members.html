@@ -1,17 +1,36 @@
 {% extends 'groups/base.html' %}
 
+{% load static %}
+
+{% block head %}
+  {{ block.super }}
+  <style>
+    .group-member .name{
+      flex-grow: 1;
+    }
+  </style>
+{% endblock %}
+
 {% block group_content %}
   <div class="flex-pane">
     <div class="pane-title bg-grad"><h2>Membros</h2></div>
     <div class="pane-content">
-      <ul>
-        {% for membership in group.memberships.all %}
-          <li>
-            <a href="{% url 'users:profile' membership.member.nickname %}">{{ membership.member.get_full_name }}</a>
-            , enquanto {{ membership.role.name }}
-          </li>
-        {% endfor %}
-      </ul>
+      {% for membership in group.memberships.all %}
+        <div class="user group-member">
+          <img class="pic" src="{% if membership.member.picture %}{{ membership.member.picture_medium.url }}{% else %}{% static 'img/user.svg' %}{% endif %}">
+          <div class="name">
+            {% if membership.member.get_full_name %}
+              <h3>{{ membership.member.get_full_name }}
+                (<a href="{% url 'users:profile' membership.member.nickname %}">{{ membership.member.nickname }}</a>)
+              </h3>
+            {% else %}
+              <h3><a href="{% url 'users:profile' membership.member.nickname %}">{{ membership.member.nickname }}</a></h3>
+            {% endif %}
+            <span>{{ membership.role.name }}</span>
+          </div>
+          <span class="midhighres">Desde {{ membership.since.date }}</span>
+        </div>
+      {% endfor %}
     </div>
   </div>
 {% endblock %}

@@ -176,6 +176,11 @@ class Membership(djm.Model):
     member = djm.ForeignKey(settings.AUTH_USER_MODEL, on_delete=djm.CASCADE, related_name='memberships')
     #: :py:class:`Role` conferred
     role = djm.ForeignKey(Role, on_delete=djm.PROTECT, related_name='memberships')
+    #: Membership start
+    since = djm.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['group', 'member']]
 
     def __str__(self):
         return f'{self.member.nickname} -> {self.role} -> {self.group}'
