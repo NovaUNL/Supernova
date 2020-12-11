@@ -258,6 +258,7 @@ MARKDOWNX_MARKDOWN_EXTENSIONS = [
     'pymdownx.arithmatex',
     'pymdownx.details',
     'pymdownx.inlinehilite',
+    'pymdownx.highlight',
     'pymdownx.keys',
     'pymdownx.mark',
     'pymdownx.smartsymbols',
@@ -269,8 +270,21 @@ MARKDOWNX_MARKDOWN_EXTENSIONS = [
 MARKDOWNX_MARKDOWN_EXTENSION_CONFIGS = {
     'pymdownx.arithmatex': {
         'smart_dollar': False
-    }
+    },
+    'pymdownx.superfences': {
+        'css_class': '',
+    },
+    'pymdownx.highlight': {
+        'use_pygments': False,
+        'guess_lang': True,
+    },
 }
+MARKDOWNX_UPLOAD_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
+MARKDOWNX_IMAGE_MAX_SIZE = {'size': (1500, 1500), 'quality': 90}
+
+MARKDOWNX_SERVER_CALL_LATENCY = 1000
+# MARKDOWNX_URLS_PATH = '/md/markdownify/'
+# MARKDOWNX_UPLOAD_URLS_PATH = '/md/upload/'
 
 PWA_APP_NAME = 'Supernova'
 PWA_APP_DESCRIPTION = "A integrar o teu conteúdo"
