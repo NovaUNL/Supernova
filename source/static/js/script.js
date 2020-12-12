@@ -122,6 +122,83 @@ function loadTransportation() {
         });
 }
 
+
+function loadBOINC() {
+    const widget = $('#boinc');
+    const spin = spinner.clone();
+    widget.append(spin);
+
+    fetch(widget.data("endpoint"), {credentials: 'include'})
+        .then((r) => {
+            return r.json()
+        })
+        .then((stats) => {
+            const t = $(
+                "<table>" +
+                "<thead><tr><td></td><th>Utilizador</th><th>Última semana</th></tr></thead>" +
+                "<tbody class='user-data'></tbody>" +
+                "<thead><tr><td></td><th>Projeto</th><th>Última semana</th></tr></thead>" +
+                "<tbody class='project-data'></tbody>" +
+                "</table>");
+            const picNames = ['first', 'second', 'third'];
+            const userRoot = t.find('.user-data');
+            stats.users.sort((a, b) => b.weekly - a.weekly);
+            stats.projects.sort((a, b) => b.weekly - a.weekly);
+            for (const [i, u] of Object.entries(stats.users.slice(0, 3))) {
+                const r = $(`<tr><td><img src="static/img/icons/${picNames[i]}.svg"></td><td>${u.name}</td><td>${u.weekly}</td></tr>`);
+                userRoot.append(r);
+            }
+            const projectRoot = t.find('.project-data');
+            for (const [i, p] of Object.entries(stats.projects.slice(0, 3))) {
+                const r = $(`<tr><td><td>${p.name}</td><td>${p.weekly}</td></tr>`);
+                projectRoot.append(r);
+            }
+            widget.append(t);
+            spin.remove();
+        });
+
+    // '          <table>\n' +
+    // '            <thead>\n' +
+    // '            <tr>\n' +
+    // '              <td></td>\n' +
+    // '              <th>Utilizador</th>\n' +
+    // '              <th>Última semana</th>\n' +
+    // '            </tr>\n' +
+    // '            </thead>\n' +
+    // '            <tbody></tbody>\n' +
+    // '            {% for user in boinc_users %}\n' +
+    // '              <tr>\n' +
+    // '                {% if forloop.counter == 1 %}\n' +
+    // '                  <td><img src="{% static \'img/icons/first.svg\' %}"></td>\n' +
+    // '                {% elif forloop.counter == 2 %}\n' +
+    // '                  <td><img src="{% static \'img/icons/second.svg\' %}"></td>\n' +
+    // '                {% elif forloop.counter == 3 %}\n' +
+    // '                  <td><img src="{% static \'img/icons/third.svg\' %}"></td>\n' +
+    // '                {% else %}\n' +
+    // '                  <td></td>\n' +
+    // '                {% endif %}\n' +
+    // '                <td>{{ user.name }}</td>\n' +
+    // '                <td>{{ user.weekly }}</td>\n' +
+    // '              </tr>\n' +
+    // '            {% endfor %}\n' +
+    // '            <thead>\n' +
+    // '            <tr>\n' +
+    // '              <td></td>\n' +
+    // '              <th>Projeto</th>\n' +
+    // '              <th>Última semana</th>\n' +
+    // '            </tr>\n' +
+    // '            <tbody></tbody>\n' +
+    // '            {% for project in boinc_projects %}\n' +
+    // '              <tr>\n' +
+    // '                <td></td>\n' +
+    // '                <td>{{ project.name }}</td>\n' +
+    // '                <td>{{ project.weekly }}</td>\n' +
+    // '              </tr>\n' +
+    // '            {% endfor %}\n' +
+    // '            </thead>\n' +
+    // '          </table>'
+}
+
 Date.prototype.addDays = function (days) {
     let date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);

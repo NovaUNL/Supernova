@@ -2,6 +2,12 @@
 {% load static %}
 {% load misc %}
 
+{% block head %}
+  <script src="{% static 'js/lib/particles.min.js' %}"></script>
+  <script async>particlesJS.load('particles', "{% static 'particles.json' %}");</script>
+  <script src="{% static 'js/lib/d3.min.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
   <div id="particles"></div>
   <div class="row padded nowrap">
@@ -133,9 +139,7 @@
         <div class="pane-title bg-grad">
           <h2><a href="{% url 'college:transportation' %}">Transportes</a></h2>
         </div>
-        <div id="transportation-widget" class="pane-content">
-          <img class="spinner" src="{% static 'img/spinner.svg' %}">
-        </div>
+        <div id="transportation-widget" class="pane-content" data-endpoint="{% url 'api:transportation_upcoming' %}"></div>
       </div>
       <div class="flex-pane">
         <div class="pane-title bg-grad">
@@ -233,22 +237,19 @@
           <a href="{{ mastodon_url }}">
             <img src="{% static 'img/third-party/mastodon.svg' %}" alt="mastodon" width="64px" height="64px">
           </a>
-          <a href="{{ gitlab_url }}">
-            <img src="{% static 'img/third-party/gitlab.svg' %}" alt="gitlab" width="64px" height="64px">
-          </a>
+          {#          <a href="{{ gitlab_url }}">#}
+          {#            <img src="{% static 'img/third-party/gitlab.svg' %}" alt="gitlab" width="64px" height="64px">#}
+          {#          </a>#}
         </div>
       </div>
     </div>
   </div>
   <img class="main-footer highres" src="{% static 'img/banner.svg' %}">
-  <script>
-      particlesJS.load('particles', "{% static 'particles.json' %}");
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/d3@5.14.2/dist/d3.min.js"
-          integrity="sha256-M2M+sgC2bZ4r73FO1LV5JmHiS5COwEb2Uqw7EbsHmBY="
-          crossorigin="anonymous"></script>
-  <script src="{% static "services/weather.js" %}"></script>
-  <script>
-      loadTransportation(document.getElementById("transportation-widget"), '{% url 'api:transportation_upcoming' %}');
+  <script async src="{% static "services/weather.js" %}"></script>
+  <script async>
+      window.addEventListener("load", () => {
+          loadTransportation();
+          loadBOINC();
+      });
   </script>
 {% endblock %}

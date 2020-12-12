@@ -31,13 +31,6 @@ def index(request):
     context['changelog'] = m.Changelog.objects.order_by('date').reverse().first()
     context['meal_items'], context['meal_date'], time = get_next_meal_items()
     context['meal_name'] = 'Almoço' if time == 2 else 'Jantar'
-    boinc_users = boincstats.get_team_users(2068385380)
-    boinc_users.sort(key=lambda x: -x['weekly'])
-    context['boinc_users'] = boinc_users[:3]
-    boinc_projects = boincstats.get_team_projects(2068385380)
-    boinc_projects.sort(key=lambda x: -x['weekly'])
-    context['boinc_projects'] = boinc_projects[:3]
-
     free_rooms = college.Room.objects \
         .annotate(shift_instances__end=F('shift_instances__start') + F('shift_instances__duration')) \
         .filter(unlocked=True) \
