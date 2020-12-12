@@ -8,11 +8,11 @@
   {% analytical_head_top %}
   <meta charset="UTF-8">
   <title>Supernova - {{ title }}</title>
-  <link rel="icon" href="{% static 'supernova/images/favicon.png' %}" type="image/x-icon"/>
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="{% static 'js/lib/jquery.min.js' %}"></script>
+  <script src="{% static 'js/lib/particles.min.js' %}"></script>
+  <script src="{% static 'js/lib/js.cookie.min.js' %}"></script>
   {% if not request.user.is_anonymous %}
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="{% static 'js/lib/popper.min.js' %}"></script>
   {% endif %}
   <meta name="description" content="De universitários para universitários.">
   <meta name="keywords" content="FCT, UNL, NOVA, Lisboa, Universidade, Superior, Portal">
@@ -47,16 +47,14 @@
     <div id="top-main-right">
       <div id="search">
         <input type="checkbox" id="search-toggler">
-        <label for="search-toggler"></label>
+        <label class="icon" for="search-toggler"></label>
         <input type="search" class="search-bar">
-        <input type="submit" value="">
+        <input class="icon" type="submit" value="">
       </div>
       {% if not request.user.is_anonymous %}
         <div id="notifications">
-          <a id="notification-btn" href="{% url 'users:notifications' %}"><span id="notification-count"></span></a>
+          <a id="notification-btn" class="icon" href="{% url 'users:notifications' %}"><span id="notification-count"></span></a>
           <div id="notification-list" class="popover" role="tooltip">
-            <a class="clear" href="javascript: void(0)">Limpar notifícações</a>
-            <div class="arrow" data-popper-arrow></div>
           </div>
         </div>
         <script>

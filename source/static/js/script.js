@@ -1,10 +1,18 @@
-function delChildren(elem) {
-    while (elem.firstChild) {
-        elem.removeChild(elem.firstChild);
-    }
+const spinner = $('<img class="spinner" src="/static/img/spinner.svg">');
+const themes = ["Quasar", "Tokamak", "Nebula"];
+
+function delChildren(e) {
+    /**
+     * Deletes every child of an element
+     * (TODO deprecate)
+     */
+    $(e).children().remove();
 }
 
 function defaultRequestHeaders() {
+    /**
+     * Headers used in most requests, with the csrf token attached to pass server protections
+     */
     return {
         'Content-Type': 'application/json',
         'X-CSRFToken': Cookies.get('csrftoken')
@@ -12,115 +20,105 @@ function defaultRequestHeaders() {
 }
 
 function toggleMenu() {
-    let element = document.getElementById("nav-column");
-    if (element.style.display !== 'block') {
-        element.style.display = 'block';
-    } else {
-        element.style.display = 'none';
-    }
+    /**
+     * Toggles the main navigation menu (when browsing on a phone screen)
+     */
+    const s = $("#nav-column")[0].style;
+    s.display = s.display !== 'block' ? 'block' : s.display = 'none';
 }
 
 let notificationLoadTimestamp;
 
+
 function loadNotifications() {
-    const listElem = document.getElementById('notification-list');
-    const clearBtn = listElem.querySelector('.clear');
+    /**
+     * Inserts notifications (n) inside the notification list (l)
+     */
+    const l = $('#notification-list');
     notificationLoadTimestamp = +new Date();
-    fetch("/api/notification/list", {credentials: 'include'}
-    ).then((r) => r.json()
-    ).then((r) => {
-        for (let entry of r.notifications) {
-            let notification = document.createElement('a');
-            notification.className = 'notification';
-            let top = document.createElement('span');
-            let bottom = document.createElement('span');
-            let message = document.createElement('span');
-            message.innerText = entry.message;
-            let type = document.createElement('b');
-            type.innerText = entry.type;
-            let entity = document.createElement('b');
-            entity.innerText = entry.entity;
-            let timestamp = document.createElement('span');
-            timestamp.innerText = entry.timestamp;
-            if (entry.url !== undefined) notification.href = entry.url;
-            top.appendChild(type);
-            bottom.append(entity, timestamp);
-            notification.append(top, message, bottom);
-            listElem.insertBefore(notification, clearBtn);
-            listElem.insertBefore(document.createElement('hr'), clearBtn)
-        }
-        notificationLoadTimestamp = r.timestamp;
-    });
-    clearBtn.addEventListener('click', clearNotifications);
+    fetch("/api/notification/list", {credentials: 'include'})
+        .then((r) => r.json())
+        .then((r) => {
+            for (let n of r.notifications) {
+                let e = $('<a class="notification">' +
+                    `<span><b>${n.type ? n.type : ''}</b></span>` +
+                    `<span>${n.message}</span>` +
+                    `<span><b>${n.entity ? n.entity : ''}</b><span>${n.timestamp}</span></span>` +
+                    '</a><hr>');
+                l.append(e);
+                if (n.url !== undefined) e.attr("href", n.url);
+            }
+            notificationLoadTimestamp = r.timestamp;
+            l.append('<a class="clear" href="javascript: void(0)">Limpar notifícações</a><div class="arrow" data-popper-arrow></div>')
+                .find('.clear').click(clearNotifications);
+        });
 }
 
 function clearNotifications() {
-    const e = document.getElementById('notifications');
+    /**
+     * Tags the shown notifications as seen and clears them.
+     * FIXME: Prevent this from deleting yet unseen notifications
+     */
     fetch("/api/notification/list", {
         method: 'DELETE',
         credentials: 'include',
         headers: defaultRequestHeaders(),
         body: JSON.stringify({'timestamp': notificationLoadTimestamp})
-    }).then(() => {
-        e.remove();
-    });
+    }).then(() => $('#notifications').remove());
 }
 
-function setupPopover(button) {
-    const popover = button.parentNode.querySelector('.popover');
+function setupPopover() {
+    const b = $('#notification-btn');
+    const p = $('#notifications').find('.popover')[0];
     let popperInstance = null;
 
-    function show() {
-        popover.setAttribute('data-show', '');
-        popperInstance = Popper.createPopper(button, popover, {
+    b.click(() => {
+        p.setAttribute('data-show', '');
+        popperInstance = Popper.createPopper(b[0], p, {
             modifiers: [
                 {name: 'offset', options: {offset: [0, 8]}},
             ],
         });
-    }
+    });
 
-    function hide(e) {
-        if (e.target === popover || e.target.nodeName === 'A') return;
-        popover.removeAttribute('data-show');
+    document.addEventListener('click', (e) => {
+        if (e.target === p || e.target.nodeName === 'A') return;
+        p.removeAttribute('data-show');
         if (popperInstance) {
             popperInstance.destroy();
             popperInstance = null;
         }
-    }
+    }, true);
 
-    button.addEventListener('click', show);
-    document.addEventListener('click', hide, true);
+    b.attr("href", "javascript: void(0)");
 }
 
-function loadTransportation(element, url) {
-    fetch(url, {credentials: 'include'})
-        .then(function (response) {
-            return response.json();
+function loadTransportation() {
+    /**
+     * Loads data to the transportation widget
+     */
+    const widget = $("#transportation-widget");
+    const loadSpinner = spinner.clone()
+    loadSpinner.appendTo(widget);
+    fetch(widget.data("endpoint"), {credentials: 'include'})
+        .then((r) => {
+            return r.json()
         })
-        .then(function (departures) {
+        .then((departures) => {
             for (departure of departures) {
-                let entry = document.createElement("div");
-                entry.classList.add("pt-line");
-                if (departure["name"] === "3") {
-                    entry.classList.add("metro");
-                } else {
-                    entry.classList.add("bus");
-                }
-                let number = document.createElement("span");
-                number.classList.add("number");
-                number.textContent = departure["name"];
-                entry.appendChild(number);
-                let time = document.createElement("span");
-                time.classList.add("time");
-                time.textContent = departure["time"].substring(0, 5);
-                entry.appendChild(time);
-                let direction = document.createElement("span");
-                direction.classList.add("direction");
-                direction.textContent = departure["destination"];
-                entry.appendChild(direction);
-                element.appendChild(entry);
+                const entry = $(
+                    '<div class="pt-line">' +
+                    `<span class="number">${departure["name"]}</span>` +
+                    `<span class="time">${departure["time"].substring(0, 5)}</span>` +
+                    `<span class="direction">${departure["destination"]}</span>` +
+                    '</div>');
+                if (departure["name"] === "3")
+                    entry.addClass("metro")
+                else
+                    entry.addClass("bus")
+                widget.append(entry);
             }
-            element.firstElementChild.remove();
+            loadSpinner.remove();
         });
 }
 
@@ -130,99 +128,75 @@ Date.prototype.addDays = function (days) {
     return date;
 };
 
-const themes = ["Quasar", "Tokamak", "Nebula"];
 
 function showThemePicker() {
+    /**
+     * Exhibits the prompt where the user can pick themes
+     */
     const cuts = [
         "0 0, 20% 0, 40% 100%, 0 100%",
         "20% 0, 50% 0, 75% 100%, 39.5% 100%",
         "50% 0, 100% 0, 100% 100%, 75% 100%"];
-    let overlay = document.getElementById("overlay");
-    delChildren(overlay);
-    let container = document.createElement("div");
-    container.style.position = "relative";
-    container.style.marginTop = "10px";
+    const overlay = $("#overlay");
+    delChildren(overlay[0]);
+
+    const container = $("<div class='theme-picker'></div>");
     for (const [i, theme] of themes.entries()) {
-        let themeDiv = document.createElement("div");
-        themeDiv.classList.add("flex-pane");
-        themeDiv.style.marginTop = "0";
-        let titleContainer = document.createElement("div");
-        titleContainer.classList.add("pane-title", "bg-grad");
-        let title = document.createElement("h2");
-        title.innerText = "Escolha o seu tema";
-        titleContainer.appendChild(title);
-        let contentContainer = document.createElement("div");
-        contentContainer.classList.add("pane-content");
-        let contentSpan = document.createElement("span");
-        contentSpan.innerText = "Seleccione o tema que quer utilizar no supernova.";
-
-        let picker = document.createElement("div");
-        picker.style.display = "flex";
-        picker.style.justifyContent = "space-between";
-        picker.style.padding = "5px 0";
-
+        let themeDiv = $(
+            "<div class='flex-pane'>" +
+            "<div class='pane-title bg-grad'><h2>Escolha o seu tema</h2></div>" +
+            "<div class='pane-content'><span>Seleccione o tema que quer utilizar no supernova.</span></div>" +
+            "</div>");
+        const picker = $("<div class='theme-inputs'></div>");
         for (const [j, other] of themes.entries()) {
-            let btn = document.createElement("input");
-            btn.type = "button";
-            btn.value = other;
-            if (i === j) {
-                btn.onmouseover = function (e) {
-                    showThemePreview(e)
-                };
-                btn.onclick = function (e) {
-                    setTheme(e)
-                };
-            }
-            picker.appendChild(btn);
+            const btn = $('<input type="button">');
+            btn.val(other);
+            if (i === j)
+                btn.mouseover((e) => {
+                    $("body").attr("data-theme", e.target.value.toLowerCase())
+                }).click((e) => {
+                    let theme = e.target.value.toLowerCase();
+                    if (typeof (Storage) !== "undefined") {
+                        localStorage.setItem("theme", theme);
+                        $("#overlay").css("display", "none");
+                    } else {
+                        alert("O navegador está a bloquear o armazenamento.");
+                    }
+                });
+            picker.append(btn);
         }
-        contentContainer.appendChild(contentSpan);
-        contentContainer.appendChild(picker);
-        themeDiv.appendChild(titleContainer);
-        themeDiv.appendChild(contentContainer);
+        themeDiv.find('.pane-content').append(picker);
 
-        let themeWrapper = document.createElement("div");
-        themeWrapper.setAttribute("data-theme", theme.toLowerCase());
-        themeWrapper.style.clipPath = "polygon(" + cuts[i] + ")";
-        themeWrapper.style.padding = "5px";
-        if (i > 0) {
-            themeWrapper.style.position = "absolute";
-            themeWrapper.style.top = "0";
-        }
-        themeWrapper.appendChild(themeDiv);
-        container.appendChild(themeWrapper);
+        const wrap = $(`<div data-theme="${theme.toLowerCase()}" style="clip-path: polygon(${cuts[i]}); padding: 5px"></div>`);
+        if (i > 0)
+            wrap.css("position", "absolute").css("top", "0");
+
+        wrap.append(themeDiv);
+        container.append(wrap);
     }
-    overlay.appendChild(container);
-    overlay.style.display = "inherit";
+    overlay.css("display", "inherit").append(container);
 }
 
-function showThemePreview(e) {
-    let theme = e.target.value.toLowerCase();
-    document.body.setAttribute("data-theme", theme);
-}
-
-function setTheme(e) {
-    let theme = e.target.value.toLowerCase();
-    if (typeof (Storage) !== "undefined") {
-        localStorage.setItem("theme", theme);
-        document.getElementById("overlay").style.display = "none";
-    } else {
-        alert("O navegador está a bloquear o armazenamento.");
-    }
-}
-
-function loadTheme(promptIfUnset) {
+function loadTheme(prompt) {
+    /**
+     * Loads the user theme
+     * @param prompt: Prompt for a theme if the user has no explicitly set theme
+     */
     if (typeof (Storage) !== "undefined") {
         let theme = localStorage.getItem("theme");
-        if (theme != null)
-            document.body.setAttribute("data-theme", theme);
-        else if (promptIfUnset)
-            document.body.setAttribute("data-theme", "quasar");
+        if (theme == null)
+            $('body').attr("data-theme", "quasar");
+        else
+            $('body').attr("data-theme", theme);
     } else {
         console.log("O navegador está a bloquear o armazenamento.");
     }
 }
 
 function showFilePreview(elem) {
+    /**
+     * Shows a preview for a file in a file listing
+     */
     let fileElem = elem.closest('.file');
     let dlElem = fileElem.querySelector('.dllink')
     let previewElem = fileElem.querySelector('.preview')
@@ -235,7 +209,7 @@ function showFilePreview(elem) {
             container = document.createElement("div");
             break;
         case "application":
-            if (mime === "application/pdf") {
+            if (mime !== "application/pdf") {
                 container = document.createElement("object");
                 container.data = src;
                 container.mime = mime;
@@ -259,37 +233,29 @@ function showFilePreview(elem) {
 }
 
 function setSubscribeButton() {
-    const b = document.getElementById("subscribe-btn")
-    fetch(b.dataset.endpoint, {credentials: 'include', method: 'GET'})
-        .then((response) => response.json())
+    /**
+     * Loads a group subscribe button
+     * @type {jQuery|HTMLElement}
+     */
+    const b = $("#subscribe-btn")
+    fetch(b.data("endpoint"), {credentials: 'include', method: 'GET'})
+        .then((r) => r.json())
         .then((val) => {
-            b.innerText = val ? "Dessubscrever" : "Subscrever";
-            b.dataset.val = val;
-            b.addEventListener('click', clickSubscribe);
-        }).catch(() => {
-        b.remove()
-    });
+            b.text(val ? "Dessubscrever" : "Subscrever")
+                .data("val", val)
+                .click(clickSubscribe);
+        }).catch(() => b.remove());
 }
 
 function clickSubscribe(e) {
-    const b = e.target;
-    if (b.dataset.val === "true") {
-        fetch(b.dataset.endpoint, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: defaultRequestHeaders()
-        }).then(() => {
-            b.innerText = "Subscrever"
-            b.dataset.val = "false";
-        });
-    } else {
-        fetch(b.dataset.endpoint, {
-            method: 'POST',
-            credentials: 'include',
-            headers: defaultRequestHeaders()
-        }).then(() => {
-            b.innerText = "Dessubscrever";
-            b.dataset.val = "true";
-        });
-    }
+    /**
+     * Toggles a group subscription
+     */
+    const b = $(e.target);
+    const val = b.data("val");
+    fetch(b.data("endpoint"), {
+        method: val ? 'DELETE' : 'POST',
+        credentials: 'include',
+        headers: defaultRequestHeaders()
+    }).then(() => b.text(val ? "Subscrever" : "Dessubscrever").data("val", !val));
 }
