@@ -44,6 +44,14 @@ def boinc_projects(request):
 
 @api_view(['GET'])
 @cache_page(3600)
+def boinc_view(request):
+    users = boincstats.get_team_users(2068385380)
+    projects = boincstats.get_team_projects(2068385380)
+    return Response({'users': users, 'projects': projects})
+
+
+@api_view(['GET'])
+@cache_page(3600)
 def github_stars(request):
     response = github.get_repo_stars()
     return Response(response)

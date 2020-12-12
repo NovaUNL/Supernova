@@ -35,6 +35,7 @@ urlpatterns = [
     path('transportation/next', views.third_party.transportation_upcoming, name="transportation_upcoming"),
     path('weather/', views.third_party.weather, name="weather"),
     path('weather/chart/', views.third_party.weather_chart, name="weather_chart"),
+    path('boinc/', views.third_party.boinc_view, name="boinc"),
     path('boinc/users/', views.third_party.boinc_users, name="boinc_users"),
     path('boinc/projects/', views.third_party.boinc_projects, name="boinc_projects"),
     path('stars/gitlab/', views.third_party.gitlab_stars, name="gitlab_stars"),
