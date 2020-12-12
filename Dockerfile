@@ -1,4 +1,4 @@
-FROM python:3.8-buster
+FROM python:3.9-buster
 
 LABEL maintainer="Cláudio Pereira <supernova@claudiop.com>"
 
@@ -6,9 +6,12 @@ LABEL maintainer="Cláudio Pereira <supernova@claudiop.com>"
 # but this way is better for development as source changes do not affect cached image layers
 COPY pip-packages /
 RUN apt update \
-&& apt install  -y --no-install-recommends sqlite libgdal20 \
+&& DEBIAN_FRONTEND=noninteractive apt install  -y --no-install-recommends sqlite libgdal20 locales \
 && pip install --no-cache-dir --trusted-host pypi.python.org -r /pip-packages \
-&& rm -rf /var/lib/apt/lists/* /pip-packages
+&& rm -rf /var/lib/apt/lists/* /pip-packages \
+&& sed -i -e 's/# pt_PT.UTF-8 UTF-8/pt_PT.UTF-8 UTF-8/' /etc/locale.gen \
+&& dpkg-reconfigure --frontend=noninteractive locales \
+&& update-locale LANG=pt_PT.UTF-8
 
 VOLUME  ["/conf", "/http"]
 WORKDIR /source
