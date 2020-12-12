@@ -1,7 +1,10 @@
+from channels.db import database_sync_to_async
+
 from services.models import MealItem, Service
 
 
 class CanteenPipeline(object):
+    @database_sync_to_async
     def process_item(self, item, spider):
         name = item['name']
         date = item['date']

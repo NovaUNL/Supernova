@@ -1,6 +1,7 @@
 import io
 import logging
 
+from channels.db import database_sync_to_async
 from django.core.files import File
 from django.db.models import Q
 
@@ -8,6 +9,7 @@ from news.models import NewsItem
 
 
 class NewsItemPipeline(object):
+    @database_sync_to_async
     def process_item(self, item, spider):
         image = item.get('image_data', None)
         image_filename = item.get('image_filename', None)
