@@ -9,9 +9,11 @@
   <meta charset="UTF-8">
   <title>Supernova - {{ title }}</title>
   <script src="{% static 'js/lib/jquery.min.js' %}"></script>
-  <script src="{% static 'js/lib/particles.min.js' %}"></script>
   <script src="{% static 'js/lib/js.cookie.min.js' %}"></script>
-  {% if not request.user.is_anonymous %}
+  {% if request.user.is_anonymous %}
+    {{ -1 |json_script:"uid" }}
+  {% else %}
+    {{ request.user.id |json_script:"uid" }}
     <script src="{% static 'js/lib/popper.min.js' %}"></script>
   {% endif %}
   <meta name="description" content="De universitários para universitários.">
