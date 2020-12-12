@@ -1,6 +1,6 @@
 d3.json("/api/weather/chart/").then(d => chart(d));
 
-let fieldTranslation = {
+const fieldTranslation = {
     'temperature': "Temperatura",
     'humidity': "Humidade",
     'rain': "P(Chuva)",
@@ -53,9 +53,8 @@ function chart(data) {
     update();
 
     function update() {
-        var copy = keys;
-
-        var metrics = copy.map(function (id) {
+        const copy = keys;
+        const metrics = copy.map((id) => {
             return {
                 id: id,
                 values: data.map(d => {
@@ -73,7 +72,7 @@ function chart(data) {
             .transition()
             .call(d3.axisLeft(y).tickSize(-width + margin.right + margin.left));
 
-        var metric = svg.selectAll(".cities").data([metrics[0]]);
+        let metric = svg.selectAll(".cities").data([metrics[0]]);
 
         metric.enter().insert("g", ".focus").append("path")
             .attr("class", "line").style("stroke", d => z(d.id)).merge(metric)
@@ -82,7 +81,7 @@ function chart(data) {
     }
 
     function tooltip(copy) {
-        var labels = focus.selectAll(".lineHoverText").data(copy);
+        const labels = focus.selectAll(".lineHoverText").data(copy);
 
         labels.enter().append("text")
             .attr("class", "lineHoverText")
@@ -92,7 +91,7 @@ function chart(data) {
             .attr("dy", (_, i) => 1 + i * 2 + "em")
             .merge(labels);
 
-        var circles = focus.selectAll(".hoverCircle").data(copy);
+        const circles = focus.selectAll(".hoverCircle").data(copy);
 
         circles.enter().append("circle")
             .attr("class", "hoverCircle")
@@ -101,46 +100,44 @@ function chart(data) {
             .merge(circles);
 
         svg.selectAll(".overlay")
-            .on("mouseover", function () {
+            .on("mouseover", () => {
                 focus.style("display", null);
             })
-            .on("mouseout", function () {
+            .on("mouseout", () => {
                 focus.style("display", "none");
             })
-            .on("mousemove", mousemove);
+            .on("mousemove", (e) => {
+                const x0 = x.invert(d3.pointer(e)[0]),
+                    i = bisectDate(data, x0, 1),
+                    d0 = data[i - 1],
+                    d1 = data[i],
+                    d = x0 - d0.hour > d1.hour - x0 ? d1 : d0;
 
-        function mousemove() {
-            var x0 = x.invert(d3.mouse(this)[0]),
-                i = bisectDate(data, x0, 1),
-                d0 = data[i - 1],
-                d1 = data[i],
-                d = x0 - d0.hour > d1.hour - x0 ? d1 : d0;
+                focus.select(".lineHover")
+                    .attr("transform", "translate(" + x(d.hour) + "," + height + ")");
 
-            focus.select(".lineHover")
-                .attr("transform", "translate(" + x(d.hour) + "," + height + ")");
+                focus.select(".lineHoverDate")
+                    .attr("transform", "translate(" + x(d.hour) + "," + (height + margin.bottom) + ")")
+                    .text(d.hour);
 
-            focus.select(".lineHoverDate")
-                .attr("transform", "translate(" + x(d.hour) + "," + (height + margin.bottom) + ")")
-                .text(d.hour);
+                focus.selectAll(".hoverCircle")
+                    .attr("cy", e => y(d[e]))
+                    .attr("cx", x(d.hour));
 
-            focus.selectAll(".hoverCircle")
-                .attr("cy", e => y(d[e]))
-                .attr("cx", x(d.hour));
+                focus.selectAll(".lineHoverText")
+                    .attr("transform",
+                        "translate(" + (x(d.hour)) + "," + height / 2.5 + ")")
+                    .text(e => e === 'temperature' ?
+                        fieldTranslation[e] + " " + formatValue(d[e]) + "º" :
+                        fieldTranslation[e] + ":" + formatValue(d[e]));
 
-            focus.selectAll(".lineHoverText")
-                .attr("transform",
-                    "translate(" + (x(d.hour)) + "," + height / 2.5 + ")")
-                .text(e => e === 'temperature' ?
-                    fieldTranslation[e] + " " + formatValue(d[e]) + "º" :
-                    fieldTranslation[e] + ":" + formatValue(d[e]));
-
-            x(d.hour) > (width - width / 4)
-                ? focus.selectAll("text.lineHoverText")
-                    .attr("text-anchor", "end")
-                    .attr("dx", -10)
-                : focus.selectAll("text.lineHoverText")
-                    .attr("text-anchor", "start")
-                    .attr("dx", 10)
-        }
+                x(d.hour) > (width - width / 4)
+                    ? focus.selectAll("text.lineHoverText")
+                        .attr("text-anchor", "end")
+                        .attr("dx", -10)
+                    : focus.selectAll("text.lineHoverText")
+                        .attr("text-anchor", "start")
+                        .attr("dx", 10)
+            });
     }
 }
