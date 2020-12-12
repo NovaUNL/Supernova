@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'api',
     'management',
     'clip',
-    'debug_toolbar',
     'captcha',
     'ckeditor',
     'ckeditor_uploader',
@@ -50,6 +49,7 @@ INSTALLED_APPS = [
     'polymorphic',
     'django_extensions',
     'analytical',
+    'channels',
     'pwa',
 ]
 
@@ -62,7 +62,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'supernova.urls'
@@ -104,13 +103,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-MAX_PASSWORD_CORRELATION = 0.7
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('localhost', 6379)],
+        },
+    },
+}
+
+MAX_PASSWORD_CORRELATION = 0.7
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 10  # 10 MB
 
@@ -209,7 +217,7 @@ CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
 REGISTRATIONS_ENABLED = False
 REGISTRATIONS_ATTEMPTS_TOKEN = 3
 REGISTRATIONS_TIMEWINDOW = 60  # Minutes
-REGISTRATIONS_TOKEN_LENGTH = 6
+REGISTRATIONS_TOKEN_LENGTH = 10
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -336,15 +344,9 @@ CAMPUS_EMAIL_SUFFIX = ''
 
 INTERNAL_IPS = ['127.0.0.1', ]
 
-assert 'SN_CONFIG' in os.environ
-CONFIG_PATH = os.environ['SN_CONFIG']
-assert os.path.isfile(CONFIG_PATH)
-
-ABS_CONFIG_PATH = os.path.abspath(CONFIG_PATH)
-CRONTAB_COMMAND_PREFIX = "SN_CONFIG=%s" % ABS_CONFIG_PATH
-
-
 INDEX_MESSAGE = None
+
+GENERAL_CHAT = 'geral'
 
 MATRIX_URL = "https://app.element.io/#/room/#room:matrix.example.com"
 MASTODON_URL = "https://example.com/@supernova"
@@ -365,7 +367,6 @@ REWARDS = {
     'invited': 1000,
 }
 
-
 CLIPY = {
     'host': "clipy:5000",
 }
@@ -374,9 +375,22 @@ CLIPY_MIN_UPDATE_MARGIN = 6  # Hours
 CLIPY_MIN_EXPLICIT_UPDATE_MARGIN = 5  # Minutes
 CLIPY_RECENT_YEAR_MARGIN = 2  # Years
 
+# Load config from external settings, overriding current settings
+assert 'SN_CONFIG' in os.environ
+CONFIG_PATH = os.environ['SN_CONFIG']
+assert os.path.isfile(CONFIG_PATH)
+
+ABS_CONFIG_PATH = os.path.abspath(CONFIG_PATH)
+CRONTAB_COMMAND_PREFIX = "SN_CONFIG=%s" % ABS_CONFIG_PATH
+
 with open(CONFIG_PATH) as file:
     locals().update(json.load(file))
 
 if DEBUG:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
+
+    INSTALLED_APPS += ["silk", 'debug_toolbar']
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        "silk.middleware.SilkyMiddleware"]
