@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block head %}
-  <script async src="{% static 'chat/chat.js' %}" onload="initChats()"></script>
+  <script src="{% static 'chat/chat.js' %}" onload="loadChat({{ room.id }})"></script>
 {% endblock %}
 
 {% block content_wrapper %}
@@ -17,8 +17,7 @@
     <div class="col">
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
-        <div class="pane-content">
-          {% include 'chat/widget.html' %}
+        <div id="chat-container" class="pane-content">
         </div>
       </div>
     </div>

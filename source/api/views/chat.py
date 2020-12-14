@@ -40,7 +40,7 @@ def chat_presence(request):
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_history(request, chat_id):
-    conversation = get_object_or_404(chat.Conversation.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
+    conversation = get_object_or_404(chat.Conversation.objects.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
     if not conversation.has_access(request.user):
         raise PermissionDenied()
 

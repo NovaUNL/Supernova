@@ -1,10 +1,8 @@
 const socket = new WebSocket('ws://' + window.location.host + "/ws/chat");
 let chats = {};
 let currentChat;
-const chatUID = JSON.parse($('#chat-uid').text());
 const msgBlockTimestampThreshold = 600000; // 10 minutes
 const defaultUserPic = '/static/img/user.svg';
-const spinner = $('<img class="spinner" src="/static/img/spinner.svg">');
 
 socket.onmessage = (e) => {
     const data = JSON.parse(e.data);
@@ -193,7 +191,7 @@ function listChat(chat) {
     const usrCnt = meta.users.length;
     switch (meta.type) {
         case 'dm':
-            let otherUser = meta.users[0].id === chatUID ? meta.users[1] : meta.users[0];
+            let otherUser = meta.users[0].id === UID ? meta.users[1] : meta.users[0];
             $thumb.attr("src", otherUser.thumbnail ? otherUser.thumbnail : defaultUserPic);
             $title.text(otherUser.name);
             $desc.text(otherUser.nickname);
