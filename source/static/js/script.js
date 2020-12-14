@@ -205,6 +205,10 @@ Date.prototype.addDays = function (days) {
     return date;
 };
 
+Date.prototype.addMinutes = function (minutes) {
+    this.setMinutes(this.getMinutes() + minutes);
+    return this;
+};
 
 function showThemePicker() {
     /**

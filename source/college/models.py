@@ -426,12 +426,35 @@ class ClassInstanceEvent(Importable):
     info = djm.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.info} {self.time}- {self.class_instance}'
+        if self.type == ctypes.EventType.TEST:
+            return f'Teste de {self.class_instance.parent.abbreviation} ({self.get_season_display()})'
+        elif self.type == ctypes.EventType.EXAM:
+            return f'Exame de {self.class_instance.parent.abbreviation} ({self.get_season_display()})'
+        elif self.type == ctypes.EventType.DISCUSSION:
+            return f'Discussão de {self.class_instance.parent.abbreviation}'
+        elif self.type == ctypes.EventType.PROJECT_DELIVERY:
+            return f'Entrega de {self.class_instance.parent.abbreviation}'
+        elif self.type == ctypes.EventType.TALK:
+            return f'Palestra em {self.class_instance.parent.abbreviation}'
+        elif self.type == ctypes.EventType.FIELD_TRIP:
+            return f'Visita, {self.class_instance.parent.abbreviation}'
+        elif self.type == ctypes.EventType.ADDITIONAL_CLASS:
+            return f'Aula extra, {self.class_instance.parent.abbreviation}'
+        else:
+            if (self.info):
+                info = self.info if(len(self.info) < 30) else self.info[:27] + "..."
+            else:
+                info = "Desconhecido"
+            return f'{self.class_instance.parent.abbreviation}: {info}'
 
     @property
     def to_time(self):
         delta = timedelta(minutes=self.duration)
         return (datetime.combine(datetime.today(), self.time) + delta).time()
+
+    @property
+    def datetime_str(self):
+        return datetime.combine(self.date, self.time).isoformat() if self.time else self.date.isoformat()
 
 
 @reversion.register()
@@ -535,15 +558,19 @@ class ShiftInstance(Importable):
                self.start < shift_instance.start + shift_instance.duration and \
                shift_instance.start < self.start + self.duration
 
+    @property
     def weekday_pt(self):
         return ctypes.WEEKDAY_CHOICES[self.weekday][1]
 
+    @property
     def start_str(self):
         return self.minutes_to_str(self.start)
 
+    @property
     def end_str(self):
         return self.minutes_to_str(self.start + self.duration)
 
+    @property
     def happening(self):
         now = datetime.now()
         if not (self.shift.class_instance.year == settings.COLLEGE_YEAR
@@ -552,6 +579,10 @@ class ShiftInstance(Importable):
 
         # same weekday and within current time interval
         return self.weekday == now.isoweekday() and self.start < now.hour * 60 + now.min < self.start + self.duration
+
+    @property
+    def title(self):
+        return f"{self.shift.get_shift_type_display()} {self.shift.class_instance.parent.abbreviation}"
 
     @staticmethod
     def minutes_to_str(minutes):

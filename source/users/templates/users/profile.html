@@ -4,6 +4,10 @@
 
 {% block head %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
+  <script src="{% static 'js/lib/fullcalendar/main.min.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/locales/pt-br.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'js/lib/fullcalendar/main.min.css' %}"/>
+  <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock %}
 
 {% block content_wrapper %}
@@ -25,7 +29,7 @@
       </h1>
     </div>
     <div class="row padded nowrap">
-      <div class="col nogrow" style="flex-basis: 400px">
+      <div class="col nogrow" style="flex-shrink: 0">
         {% if permissions.info_visibility %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Informação</h2></div>
@@ -140,7 +144,7 @@
       </div>
       <div class="col">
         <div class="row">
-          <div class="col">
+          <div class="col" style="flex-basis: 500px">
             {% if permissions.schedule_visibility %}
               <div class="flex-pane">
                 <div class="pane-title bg-grad">
@@ -148,7 +152,8 @@
                 </div>
                 <div class="pane-content">
                   {% if schedule %}
-                    {% include 'college/schedule.html' %}
+                    <div id="schedule"></div>
+                    <script>loadSchedule("{{ profile_user.nickname }}", true)</script>
                   {% else %}
                     O teu horário encontra-se vazio. A aparição de inscrições recentes pode levar até 48 horas.
                   {% endif %}
@@ -156,7 +161,7 @@
               </div>
             {% endif %}
           </div>
-          <div class="col" style="flex-basis: 350px">
+          <div class="col" style="max-width: 500px">
             {% if permissions.enrollments_visibility and current_class_instances.exists %}
               <div class="flex-pane">
                 <div class="pane-title bg-grad">

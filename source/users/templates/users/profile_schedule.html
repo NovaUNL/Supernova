@@ -2,6 +2,13 @@
 
 {% load static %}
 
+{% block head %}
+  <script src="{% static 'js/lib/fullcalendar/main.min.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/locales/pt-br.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'js/lib/fullcalendar/main.min.css' %}"/>
+  <script src="{% static 'js/calendar.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="col">
     <div class="header-decorator">
@@ -9,11 +16,16 @@
     </div>
     <div class="col padded">
       <div class="flex-pane">
-        <div class="pane-content bg-grad"></div>
         <div class="pane-content">
-          {% include 'college/schedule.html' %}
+          <div id="schedule"></div>
         </div>
       </div>
     </div>
   </div>
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          loadSchedule("{{ profile_user.nickname }}");
+      });
+  </script>
 {% endblock %}
+

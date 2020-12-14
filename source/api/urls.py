@@ -22,8 +22,7 @@ urlpatterns = [
     path('chat/<int:user_id>/dmrequest', views.chat.dm_request, name='chat_dm_request'),
     # Groups
     path('groups/', views.groups.GroupList.as_view(), name="groups"),
-    path('groups/<str:abbr>/schedule/<str:from_date>/<str:to_date>', views.groups.group_schedule,
-         name='group_schedule'),
+    path('groups/<str:abbr>/schedule', views.calendar.group_schedule, name='group_schedule'),
     path('group/<str:abbr>/subscribe', views.groups.GroupSubscription.as_view(), name='group_subscription'),
     path('group/<str:abbr>/subscribe', views.groups.GroupMembershipRequest.as_view(), name='group_membership_request'),
     # News
@@ -57,7 +56,8 @@ urlpatterns = [
     path('profile/<str:nickname>/', views.users.ProfileDetailed.as_view(), name="user_profile"),
     path('profile/<str:nickname>/socialnetworks/', views.users.UserSocialNetworks.as_view(), name='social_networks'),
     path('user/<str:nickname>/current_shifts', views.college.UserShiftInstances.as_view()),
-    path('user/<str:nickname>/schedule/<str:from_date>/<str:to_date>', views.users.user_schedule, name='user_schedule'),
+    path('user/<str:nickname>/calendar', views.calendar.user_calendar, name='user_calendar'),
+    path('user/<str:nickname>/schedule', views.calendar.user_schedule, name='user_schedule'),
     path('notification/count', views.users.notification_count_view, name='notification_count'),
     path('notification/list', views.users.UserNotificationList.as_view(), name='notification_list'),
     path('moderate/<int:user_id>/', views.users.UserModeration.as_view(), name='user_moderation'),

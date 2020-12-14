@@ -1,267 +1,119 @@
-var calendar;
-let calendarPage = 0;
-let calendarPageLim = 4;
-let calendarDate;
-
-
-const themeConfig = {
-    'common.border': '1px solid #e5e5e5',
-    'common.backgroundColor': 'white',
-    'common.holiday.color': '#ff4040',
-    'common.saturday.color': '#333',
-    'common.dayname.color': '#333',
-    'common.today.color': '#333',
-    // creation guide style
-    'common.creationGuide.backgroundColor': 'rgba(81, 92, 230, 0.05)',
-    'common.creationGuide.border': '1px solid #515ce6',
-    // month header 'dayname'
-    'month.dayname.height': '31px',
-    'month.dayname.borderLeft': '1px solid #e5e5e5',
-    'month.dayname.paddingLeft': '10px',
-    'month.dayname.paddingRight': '10px',
-    'month.dayname.backgroundColor': 'inherit',
-    'month.dayname.fontSize': '12px',
-    'month.dayname.fontWeight': 'normal',
-    'month.dayname.textAlign': 'left',
-    // month day grid cell 'day'
-    'month.holidayExceptThisMonth.color': 'rgba(255, 64, 64, 0.4)',
-    'month.dayExceptThisMonth.color': 'rgba(51, 51, 51, 0.4)',
-    'month.weekend.backgroundColor': 'inherit',
-    'month.day.fontSize': '14px',
-    // month schedule style
-    'month.schedule.borderRadius': '2px',
-    'month.schedule.height': '24px',
-    'month.schedule.marginTop': '2px',
-    'month.schedule.marginLeft': '8px',
-    'month.schedule.marginRight': '8px',
-    // month more view
-    'month.moreView.border': '1px solid #d5d5d5',
-    'month.moreView.boxShadow': '0 2px 6px 0 rgba(0, 0, 0, 0.1)',
-    'month.moreView.backgroundColor': 'white',
-    'month.moreView.paddingBottom': '17px',
-    'month.moreViewTitle.height': '44px',
-    'month.moreViewTitle.marginBottom': '12px',
-    'month.moreViewTitle.backgroundColor': 'inherit',
-    'month.moreViewTitle.borderBottom': 'none',
-    'month.moreViewTitle.padding': '12px 17px 0 17px',
-    'month.moreViewList.padding': '0 17px',
-    // week header 'dayname'
-    'week.dayname.height': '42px',
-    'week.dayname.borderTop': '1px solid #e5e5e5',
-    'week.dayname.borderBottom': '1px solid #e5e5e5',
-    'week.dayname.borderLeft': 'inherit',
-    'week.dayname.paddingLeft': '0',
-    'week.dayname.backgroundColor': 'inherit',
-    'week.dayname.textAlign': 'left',
-    'week.today.color': '#333',
-    'week.pastDay.color': '#bbb',
-    // week vertical panel 'vpanel'
-    'week.vpanelSplitter.border': '1px solid #e5e5e5',
-    'week.vpanelSplitter.height': '3px',
-    // week daygrid 'daygrid'
-    'week.daygrid.borderRight': '1px solid #e5e5e5',
-    'week.daygrid.backgroundColor': 'inherit',
-
-    'week.daygridLeft.width': '72px',
-    'week.daygridLeft.backgroundColor': 'inherit',
-    'week.daygridLeft.paddingRight': '8px',
-    'week.daygridLeft.borderRight': '1px solid #e5e5e5',
-
-    'week.today.backgroundColor': 'rgba(81, 92, 230, 0.05)',
-    'week.weekend.backgroundColor': 'inherit',
-    // week timegrid 'timegrid'
-    'week.timegridLeft.width': '72px',
-    'week.timegridLeft.backgroundColor': 'inherit',
-    'week.timegridLeft.borderRight': '1px solid #e5e5e5',
-    'week.timegridLeft.fontSize': '11px',
-    'week.timegridLeftTimezoneLabel.height': '40px',
-    'week.timegridLeftAdditionalTimezone.backgroundColor': 'white',
-
-    'week.timegridOneHour.height': '52px',
-    'week.timegridHalfHour.height': '26px',
-    'week.timegridHalfHour.borderBottom': 'none',
-    'week.timegridHorizontalLine.borderBottom': '1px solid #e5e5e5',
-
-    'week.timegrid.paddingRight': '8px',
-    'week.timegrid.borderRight': '1px solid #e5e5e5',
-    'week.timegridSchedule.borderRadius': '2px',
-    'week.timegridSchedule.paddingLeft': '2px',
-
-    'week.currentTime.color': '#515ce6',
-    'week.currentTime.fontSize': '11px',
-    'week.currentTime.fontWeight': 'normal',
-
-    'week.pastTime.color': '#bbb',
-    'week.pastTime.fontWeight': 'normal',
-
-    'week.futureTime.color': '#333',
-    'week.futureTime.fontWeight': 'normal',
-
-    'week.currentTimeLinePast.border': '1px dashed #515ce6',
-    'week.currentTimeLineBullet.backgroundColor': '#515ce6',
-    'week.currentTimeLineToday.border': '1px solid #515ce6',
-    'week.currentTimeLineFuture.border': 'none',
-    // week creation guide style
-    'week.creationGuide.color': '#515ce6',
-    'week.creationGuide.fontSize': '11px',
-    'week.creationGuide.fontWeight': 'bold',
-    // week daygrid schedule style
-    'week.dayGridSchedule.borderRadius': '2px',
-    'week.dayGridSchedule.height': '24px',
-    'week.dayGridSchedule.marginTop': '2px',
-    'week.dayGridSchedule.marginLeft': '8px',
-    'week.dayGridSchedule.marginRight': '8px'
+const sources = {
+    'T': {'events': [], color: "#a3be8caa"},
+    'P': {'events': [], color: "#bf616aaa"},
+    'TP': {'events': [], color: "#d08770aa"},
+    'CE': {'events': [], color: "#8fbcbbaa"},
+    'G': {'events': [], color: "#b48eadaa"},
+    'U': {'events': [], color: "#5e81acaa"},
 };
-const templates = {
-    // popupDetailDate: function (isAllDay, start, end) {
-    //     var isSameDate = moment(start).isSame(end);
-    //     var endFormat = (isSameDate ? '' : 'DD-MM') + 'hh:mm';
-    //
-    //     if (isAllDay) {
-    //         return moment(start).format('DD-MM') + (isSameDate ? '' : ' - ' + moment(end).format('DD-MM'));
-    //     }
-    //
-    //     return (moment(start).format('DD-MM hh:mm a') + ' - ' + moment(end).format(endFormat));
-    // },
-    timegridDisplayPrimaryTime: function (time) {
-        return time.hour + ':' + ('' + time.minutes).padStart(2, '0');
-    }
-};
-const calendars = [
-    {
-        id: 'T',
-        name: 'Teóricas',
-        color: '#ffffff',
-        bgColor: '#bbdc00',
-        dragBgColor: '#00a9ff',
-        borderColor: '#00a9ff'
-    },
-    {
-        id: 'P',
-        name: 'Teorico-Práticas',
-        color: '#ffffff',
-        bgColor: '#ffbb3b',
-        dragBgColor: '#ffbb3b',
-        borderColor: '#ffbb3b'
-    },
-    {
-        id: 'TP',
-        name: 'Práticas',
-        color: '#ffffff',
-        bgColor: '#bbdc00',
-        dragBgColor: '#bbdc00',
-        borderColor: '#bbdc00'
-    },
-    {
-        id: 'GO',
-        name: 'Eventos grupos',
-        color: '#ffffff',
-        bgColor: '#bbdc00',
-        dragBgColor: '#bbdc00',
-        borderColor: '#bbdc00'
-    },
-    {
-        id: 'GP',
-        name: 'Funcionamento grupos',
-        color: '#ffffff',
-        bgColor: '#bbdc00',
-        dragBgColor: '#bbdc00',
-        borderColor: '#bbdc00'
-    },
-];
-const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 
-function loadCalendar(element, url, start, duration, view) {
-    let end = start.addDays(duration);
-    let startDateStr = start.toISOString().split('T')[0];
-    let endDateStr = end.toISOString().split('T')[0];
-    url = url.replace("from", startDateStr).replace("to", endDateStr);
-    fetch(url, {credentials: 'include'})
-        .then(function (response) {
-            return response.json();
+function loadCalendar(nickname) {
+    let calendarEl = document.getElementById('calendar');
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        slotMinTime: "07:00:00",
+        slotMaxTime: "24:00:00",
+        footerToolbar: {
+            start: 'title',
+            center: '',
+            end: 'today prev,next'
+        },
+        headerToolbar: false,
+        nowIndicator: true,
+        dayMinWidth: 150,
+        contentHeight: 'auto',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        locale: 'pt-br',
+    });
+    calendar.render();
+    fetch(`/api/user/${nickname}/calendar`, {credentials: 'include'})
+        .then((r) => {
+            return r.json();
         })
-        .then(function (schedule) {
-            calendar = new tui.Calendar('#calendar', {
-                usageStatistics: false,
-                isReadOnly: true,
-                defaultView: view,
-                taskView: 'task',
-                scheduleView: ['time'],
-                disableClick: true,
-                disableDblClick: true,
-                calendars: calendars,
-                theme: themeConfig,
-                template: templates,
-                useDetailPopup: true,
-                week: {
-                    daynames: dayNames,
-                    startDayOfWeek: start.getUTCDay(),
-                    narrowWeekend: true,
-                    hourStart: 7,
-                    hourEnd: 20,
-                },
-                month: {
-                    daynames: dayNames,
-                    visibleWeeksCount: 4,
-                }
-            });
-            calendar.date = start;
-            for (entry of schedule) {
-                calendar.createSchedules([
-                    {
-                        id: entry.id,
-                        calendarId: entry.type,
-                        title: entry.title,
-                        category: 'time',
-                        dueDateClass: '',
-                        start: entry.start,
-                        end: entry.end,
-                        isReadOnly: true,
-                    }
-                ], true);
-            }
+        .then((entries) => {
+            entries.forEach(e => addToCalendarSources(sources, e));
+            Object.entries(sources).forEach(es => calendar.addEventSource(es[1]));
             calendar.render();
-            updateDateRangeLabel(start, end);
-        });
+        })
 }
 
-function calendarNext() {
-    calendar.next();
-    if (calendarPage === 0) {
-        let calPrevBtn = document.getElementById("cal-prev");
-        calPrevBtn.style.visibility = 'visible';
-    }
-    calendarPage++;
-    if (calendarPage === calendarPageLim - 1) {
-        let calNextBtn = document.getElementById("cal-next");
-        calNextBtn.style.visibility = 'hidden';
-    }
-    updateDateRangeLabel(calendar.date.addDays(calendarPage * 7), calendar.date.addDays(calendarPage * 7 + 7));
+function loadGroupCalendar(group) {
+    let calendarEl = document.getElementById('calendar');
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'listYear',
+        slotMinTime: "08:00:00",
+        slotMaxTime: "24:00:00",
+        headerToolbar: {
+            start: 'dayGridMonth,listYear',
+            center: 'title',
+            end: 'today prev,next'
+        },
+        contentHeight: 'auto',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        locale: 'pt-br',
+    });
+    calendar.render();
+    fetch(`/api/group/${group}/calendar`, {credentials: 'include'})
+        .then((r) => {
+            return r.json();
+        })
+        .then((entries) => {
+            entries.forEach(e => addToCalendarSources(sources, e));
+            Object.entries(sources).forEach(es => calendar.addEventSource(es[1]));
+            calendar.render();
+        })
 }
 
-function calendarPrev() {
-    calendar.prev();
-    if (calendarPage === calendarPageLim - 1) {
-        let calNextBtn = document.getElementById("cal-next");
-        calNextBtn.style.visibility = 'visible';
-    }
-    calendarPage--;
-    if (calendarPage === 0) {
-        let calPrevBtn = document.getElementById("cal-prev");
-        calPrevBtn.style.visibility = 'hidden';
-    }
-    calendar.date = calendar.date.addDays(-7);
-    updateDateRangeLabel(calendar.date.addDays(calendarPage * 7), calendar.date.addDays(calendarPage * 7 + 7));
+function loadSchedule(nickname, tiny) {
+    let calendarEl = document.getElementById('schedule');
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        slotMinTime: "08:00:00",
+        slotMaxTime: "20:00:00",
+        allDaySlot: !tiny,
+        dayHeaderFormat: {
+            weekday: 'short'
+        },
+        slotLabelFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            omitZeroMinute: true,
+            meridiem: false
+        },
+        weekends: false,
+        headerToolbar: false,
+        nowIndicator: true,
+        dayMinWidth: tiny ? 0 : 150,
+        contentHeight: 'auto',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        locale: 'pt-br'
+    });
+    calendar.render();
+    fetch(`/api/user/${nickname}/schedule`, {credentials: 'include'})
+        .then((r) => {
+            return r.json();
+        })
+        .then((entries) => {
+            entries.forEach(e => addToCalendarSources(sources, e));
+            Object.entries(sources).forEach(es => calendar.addEventSource(es[1]));
+            calendar.render();
+        })
 }
 
-function dateToSlashSeparatedStr(date) {
-    let dateStr = date.toISOString().split('T')[0];
-    return dateStr.split('-').join('/')
+function addToCalendarSources(sources, entry) {
+    let e = {'title': entry.title};
+    if (entry.url) e.url = entry.url;
+    if ('weekday' in entry) { // Periodic events
+        e.daysOfWeek = [(entry.weekday + 8) % 7];
+        e.startTime = entry.time;
+        e.endTime = new Date(`1970-01-01 ${entry.time}`).addMinutes(entry.duration).toTimeString();
+    } else { // "Once" events
+        e.start = entry.datetime;
+        e.end = new Date(new Date(entry.datetime).addMinutes(entry.duration));
+    }
+    if (entry.type in sources) sources[entry.type].events.push(e);
 }
 
-function updateDateRangeLabel(start, end) {
-    let elem = document.getElementById('cal-range-label');
-    if (elem != null) {
-        elem.innerText = dateToSlashSeparatedStr(start) + ' - ' + dateToSlashSeparatedStr(end);
-    }
+function addMinutesToTime(time, minutes) {
+    return new Date(`1970-01-01 ${time}`).addMinutes(minutes).toTimeString();
 }

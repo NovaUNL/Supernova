@@ -2,68 +2,30 @@ from datetime import datetime
 
 from django.utils import timezone
 from django.core.cache import cache
-from django.db.models import F
-from django.conf import settings
 
-from rest_framework import authentication
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.serializers import users as serializers
 from api import permissions
-from api.schedule_utils import get_weekday_occurrences, append_shift_instances, append_schedule_entries, \
-    append_periodic_schedule_entries_in_extension
-from users.utils import get_network_identifier, get_students
+from users.utils import get_network_identifier
 from users import models as users
-from college import models as college
-from groups import models as groups
 
 
 class ProfileDetailed(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (permissions.SelfOnly,)
 
-    def get(self, request, nickname, format=None):  # TODO authentication
+    def get(self, request, nickname):  # TODO authentication
         user = users.User.objects.get(nickname=nickname)
         serializer = serializers.ProfileDetailedSerializer(user)
         return Response(serializer.data)
 
 
-@api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
-@permission_classes((permissions.SelfOnly,))
-def user_schedule(_, nickname, from_date, to_date):
-    weekday_occurrences = get_weekday_occurrences(from_date, to_date)
-    user = get_object_or_404(users.User.objects.prefetch_related('students', 'memberships'), nickname=nickname)
-    primary_students, _ = get_students(user)
-
-    shift_instances = college.ShiftInstance.objects \
-        .select_related('shift__class_instance__parent') \
-        .prefetch_related('room__building') \
-        .filter(shift__student__in=primary_students,
-                shift__class_instance__year=settings.COLLEGE_YEAR,
-                shift__class_instance__period=settings.COLLEGE_PERIOD) \
-        .annotate(end=F('start') - F('duration')) \
-        .all()
-    schedule_entries = []
-
-    append_shift_instances(schedule_entries, shift_instances, weekday_occurrences)
-    user_groups = user.groups_custom.all()
-    once_schedule_entries = users.ScheduleOnce.objects.filter(user=user)
-    periodic_schedule_entries = users.SchedulePeriodic.objects.filter(user=user)
-    append_schedule_entries(schedule_entries, once_schedule_entries)
-    append_periodic_schedule_entries_in_extension(schedule_entries, periodic_schedule_entries, weekday_occurrences)
-    once_schedule_entries = groups.ScheduleOnce.objects.filter(group__in=user_groups)
-    periodic_schedule_entries = groups.SchedulePeriodic.objects.filter(group__in=user_groups)
-    append_schedule_entries(schedule_entries, once_schedule_entries)
-    append_periodic_schedule_entries_in_extension(schedule_entries, periodic_schedule_entries, weekday_occurrences)
-    schedule_entries = sorted(schedule_entries, key=lambda occurrence: occurrence['start'])
-    return Response(schedule_entries)
 
 
 class UserSocialNetworks(APIView):

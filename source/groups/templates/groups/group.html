@@ -5,7 +5,9 @@
 
 {% block head %}
   {{ block.super }}
-  <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.css"/>
+  <script src="{% static 'js/lib/fullcalendar/main.min.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/locales/pt-br.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'js/lib/fullcalendar/main.min.css' %}"/>
   <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock %}
 
@@ -78,15 +80,6 @@
       <span class="indented">{{ group.members.count }} membros</span>
     </div>
   </div>
-  <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.js"></script>
-  <script src="https://uicdn.toast.com/tui.dom/v3.0.0/tui-dom.js"></script>
-  <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
-  <script src="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.js"></script>
-  <script>
-      let currentDate = new Date(Date.now());
-      loadCalendar(
-          '#calendar',
-          "{% url 'api:group_schedule' group.abbreviation 'from' 'to'%}",
-          currentDate, 28, 'month');
-  </script>
+  <script>loadGroupCalendar("{{ group.abbreviation }}")</script>
+
 {% endblock %}
