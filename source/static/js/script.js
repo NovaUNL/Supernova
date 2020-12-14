@@ -156,47 +156,6 @@ function loadBOINC() {
             widget.append(t);
             spin.remove();
         });
-
-    // '          <table>\n' +
-    // '            <thead>\n' +
-    // '            <tr>\n' +
-    // '              <td></td>\n' +
-    // '              <th>Utilizador</th>\n' +
-    // '              <th>Última semana</th>\n' +
-    // '            </tr>\n' +
-    // '            </thead>\n' +
-    // '            <tbody></tbody>\n' +
-    // '            {% for user in boinc_users %}\n' +
-    // '              <tr>\n' +
-    // '                {% if forloop.counter == 1 %}\n' +
-    // '                  <td><img src="{% static \'img/icons/first.svg\' %}"></td>\n' +
-    // '                {% elif forloop.counter == 2 %}\n' +
-    // '                  <td><img src="{% static \'img/icons/second.svg\' %}"></td>\n' +
-    // '                {% elif forloop.counter == 3 %}\n' +
-    // '                  <td><img src="{% static \'img/icons/third.svg\' %}"></td>\n' +
-    // '                {% else %}\n' +
-    // '                  <td></td>\n' +
-    // '                {% endif %}\n' +
-    // '                <td>{{ user.name }}</td>\n' +
-    // '                <td>{{ user.weekly }}</td>\n' +
-    // '              </tr>\n' +
-    // '            {% endfor %}\n' +
-    // '            <thead>\n' +
-    // '            <tr>\n' +
-    // '              <td></td>\n' +
-    // '              <th>Projeto</th>\n' +
-    // '              <th>Última semana</th>\n' +
-    // '            </tr>\n' +
-    // '            <tbody></tbody>\n' +
-    // '            {% for project in boinc_projects %}\n' +
-    // '              <tr>\n' +
-    // '                <td></td>\n' +
-    // '                <td>{{ project.name }}</td>\n' +
-    // '                <td>{{ project.weekly }}</td>\n' +
-    // '              </tr>\n' +
-    // '            {% endfor %}\n' +
-    // '            </thead>\n' +
-    // '          </table>'
 }
 
 Date.prototype.addDays = function (days) {
