@@ -86,7 +86,7 @@ def meal_name_to_int(name):
 
 
 known_meat = {'carne', 'porco', 'vaca', 'frango', 'galinha', 'peru', 'perna', 'asa', 'peito', 'bacon', 'alheira',
-              'salsicha'}
+              'salsicha', 'almôndegas com'}
 known_fish = {'peixe', 'pescada', 'bacalhau', 'filetes', 'atum', 'solha', 'douradinhos', 'marisco', 'fish', 'paloco',
               'carapau', 'calamares'}
 
