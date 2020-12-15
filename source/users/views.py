@@ -8,8 +8,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.conf import settings
 
@@ -262,14 +262,24 @@ def user_calendar_view(request, nickname):
 def user_calendar_management_view(request, nickname):
     if request.user.nickname != nickname:
         raise PermissionDenied()
-    context = build_base_context(request)
     profile_user = get_object_or_404(m.User.objects, nickname=nickname)
-    context['profile_user'] = profile_user
-    context['pcode'] = "u_calendar_manage"
-    context['title'] = "Gerir calendário"
+
+    if 'del' in request.GET:
+        try:
+            del_id = int(request.GET['del'])
+            m.ScheduleEntry.objects.get(id=del_id, user=profile_user).delete()
+            return redirect('users:calendar_manage', nickname=nickname)
+        except (ValueError, m.ScheduleOnce.DoesNotExist):
+            return HttpResponse(status=400)
+
 
     once_schedule_entries = m.ScheduleOnce.objects.filter(user=profile_user)
     periodic_schedule_entries = m.SchedulePeriodic.objects.filter(user=profile_user)
+
+    context = build_base_context(request)
+    context['profile_user'] = profile_user
+    context['pcode'] = "u_calendar_manage"
+    context['title'] = "Gerir calendário"
     context['once_entries'] = once_schedule_entries
     context['periodic_entries'] = periodic_schedule_entries
 
@@ -301,7 +311,7 @@ def user_calendar_management_view(request, nickname):
     context['sub_nav'] = [
         {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
         {'name': "Calendário", 'url': reverse('users:calendar', args=[nickname])},
-        {'name': "Gerir", 'url': reverse('users:calendar_manage', args=[nickname])}]
+        {'name': "Agenda", 'url': reverse('users:calendar_manage', args=[nickname])}]
     return render(request, 'users/calendar_manage.html', context)
 
 

@@ -9,17 +9,19 @@
         <div class="pane-title bg-grad"><h2>Agenda pontual</h2></div>
         <div class="pane-content">
           {% if once_entries.exists %}
-            <table>
+            <table class="stylized grow">
               <tr>
                 <th>Titulo</th>
                 <th>Dia</th>
                 <th>Duração</th>
+                <th></th>
               </tr>
               {% for entry in once_entries %}
                 <tr>
                   <td>{{ entry.title }}</td>
                   <td>{{ entry.datetime }}</td>
                   <td>{{ entry.duration }} minutos</td>
+                  <td><a href="{{ request.path }}?del={{ entry.id }}">Remover</a></td>
                 </tr>
               {% endfor %}
             </table>
@@ -32,13 +34,14 @@
         <div class="pane-title bg-grad"><h2>Agenda recorrente</h2></div>
         <div class="pane-content">
           {% if periodic_entries.exists %}
-            <table>
+            <table class="stylized grow">
               <tr>
                 <th>Titulo</th>
                 <th>Dia</th>
                 <th>Duração</th>
                 <th>Valido de</th>
-                <th>até</th>
+                <th>Até</th>
+                <th></th>
               </tr>
               {% for entry in periodic_entries %}
                 <tr>
@@ -47,6 +50,7 @@
                   <td>{{ entry.duration }} minutos</td>
                   <td>{{ entry.start_date }}</td>
                   <td>{{ entry.end_date }}</td>
+                  <td><a href="{{ request.path }}?del={{ entry.id }}">Remover</a></td>
                 </tr>
               {% endfor %}
             </table>
