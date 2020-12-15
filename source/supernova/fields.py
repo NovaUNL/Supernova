@@ -1,7 +1,15 @@
 from django.forms import SplitDateTimeField
 
-from supernova.widgets import NativeSplitDateTimeWidget
+from supernova import widgets
 
 
 class NativeSplitDateTimeField(SplitDateTimeField):
-    widget = NativeSplitDateTimeWidget
+    widget = widgets.NativeSplitDateTimeWidget
+
+
+class NativeDateField(SplitDateTimeField):
+    widget = widgets.NativeDateInput
+
+
+class NativeTimeField(SplitDateTimeField):
+    widget = widgets.NativeTimeInput
