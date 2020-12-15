@@ -15,7 +15,7 @@ from dal import autocomplete
 from college import models as college
 from supernova.fields import NativeSplitDateTimeField
 from supernova.utils import password_strength, correlation
-from supernova.widgets import SliderInput, NativeTimeInput
+from supernova.widgets import SliderInput, NativeTimeInput, NativeDateInput
 from users import models as m
 from learning import models as learning
 from feedback import models as feedback
@@ -423,15 +423,14 @@ UserScheduleOnceFormset = djf.inlineformset_factory(m.User, m.ScheduleOnce, extr
 
 
 class SchedulePeriodicForm(djf.ModelForm):
-    start_date = NativeSplitDateTimeField()
-    end_date = NativeSplitDateTimeField()
-
     class Meta:
         model = m.SchedulePeriodic
         fields = ('title', 'weekday', 'time', 'duration', 'start_date', 'end_date')
         widgets = {
             'time': NativeTimeInput(),
-            'duration': djf.NumberInput(attrs={'min': 0, 'max': 24 * 60, 'size': 3})
+            'duration': djf.NumberInput(attrs={'min': 0, 'max': 24 * 60, 'size': 3}),
+            'start_date': NativeDateInput(),
+            'end_date': NativeDateInput()
         }
 
 
