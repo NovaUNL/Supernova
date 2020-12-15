@@ -65,7 +65,7 @@
     <div class="flex-pane grow">
       <div class="pane-title bg-grad"><h2>Adicionar evento recorrente</h2></div>
       <div class="pane-content">
-        <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=periodic">
+        <form class="col" method="post" action="{% url 'groups:calendar_manage' group.abbreviation %}?type=periodic">
           {% csrf_token %}
           {{ periodic_form.errors }}
           <div class="form-block">
@@ -113,7 +113,7 @@
     <div class="flex-pane grow">
       <div class="pane-title bg-grad"><h2>Adicionar evento pontual</h2></div>
       <div class="pane-content">
-        <form class="col" method="post" action="{% url 'groups:schedule' group.abbreviation %}?type=once">
+        <form class="col" method="post" action="{% url 'groups:calendar_manage' group.abbreviation %}?type=once">
           {% csrf_token %}
           {{ once_form.errors }}
           <div class="form-block">

@@ -355,7 +355,7 @@ class ScheduleSuspension(Activity):
 
     @property
     def link_to(self):
-        return reverse('groups:schedule', args=[self.entry.group.abbreviation])
+        return reverse('groups:calendar_manage', args=[self.entry.group.abbreviation])
 
 
 class ScheduleRevoke(Activity):
@@ -381,7 +381,7 @@ class ScheduleRevoke(Activity):
 
     @property
     def link_to(self):
-        return reverse('groups:schedule', args=[self.entry.group.abbreviation])
+        return reverse('groups:calendar_manage', args=[self.entry.group.abbreviation])
 
 
 class Event(djm.Model):

@@ -22,9 +22,9 @@ urlpatterns = [
     path('chat/<int:user_id>/dmrequest', views.chat.dm_request, name='chat_dm_request'),
     # Groups
     path('groups/', views.groups.GroupList.as_view(), name="groups"),
-    path('groups/<str:abbr>/schedule', views.calendar.group_schedule, name='group_schedule'),
+    path('group/<str:abbr>/calendar', views.calendar.group_calendar, name='group_calendar'),
     path('group/<str:abbr>/subscribe', views.groups.GroupSubscription.as_view(), name='group_subscription'),
-    path('group/<str:abbr>/subscribe', views.groups.GroupMembershipRequest.as_view(), name='group_membership_request'),
+    path('group/<str:abbr>/membership', views.groups.GroupMembershipRequest.as_view(), name='group_membership_request'),
     # News
     path('news/', views.news.NewsList.as_view(), name="news"),
     path('news/<int:pk>/', views.news.News.as_view(), name="news_item"),

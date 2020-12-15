@@ -156,7 +156,7 @@ def user_calendar(_, nickname):
 
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
-def group_schedule(_, abbr):
+def group_calendar(_, abbr):
     group = get_object_or_404(groups.Group, abbreviation=abbr)
 
     schedule_entries = []

@@ -556,7 +556,7 @@ def role_view(request, group_abbr, role_id):
 
 
 @login_required
-def schedule_view(request, group_abbr):
+def calendar_management_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
 
     if 'del' in request.GET:
@@ -613,9 +613,9 @@ def schedule_view(request, group_abbr):
         {'name': 'Grupos', 'url': reverse('groups:index')},
         nav_type,
         {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
-        {'name': 'Agenda', 'url': reverse('groups:schedule', args=[group_abbr])}]
+        {'name': 'Agenda', 'url': reverse('groups:calendar_manage', args=[group_abbr])}]
 
-    return render(request, 'groups/schedule.html', context)
+    return render(request, 'groups/calendar_manage.html', context)
 
 
 class GroupRolesAutocomplete(autocomplete.Select2QuerySetView):

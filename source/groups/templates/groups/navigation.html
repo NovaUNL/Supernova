@@ -54,7 +54,7 @@
         {% if  membership_perms.can_modify_roles %}
           <li><a href="{% url 'groups:candidates' group.abbreviation %}">Analisar candidaturas</a></li>{% endif %}
         {% if  membership_perms.can_change_schedule %}
-          <li><a href="{% url 'groups:schedule' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
+          <li><a href="{% url 'groups:calendar_manage' group.abbreviation %}">Alterar agenda</a></li>{% endif %}
         {% if  membership_perms.is_admin %}
           <li><a href="{% url 'groups:settings' group.abbreviation %}">Definições</a></li>{% endif %}
       </ul>
