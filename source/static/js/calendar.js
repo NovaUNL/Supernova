@@ -40,11 +40,11 @@ function loadCalendar(nickname) {
 function loadGroupCalendar(group) {
     let calendarEl = document.getElementById('calendar');
     let calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'listYear',
+        initialView: 'listMonth',
         slotMinTime: "08:00:00",
         slotMaxTime: "24:00:00",
         headerToolbar: {
-            start: 'dayGridMonth,listYear',
+            start: 'dayGridMonth,listMonth',
             center: 'title',
             end: 'today prev,next'
         },
