@@ -679,3 +679,31 @@
 
   span
     font-size: 2em
+
+// Full calendar tweaks
+#calendar a, #schedule a
+  color: var(--text-hc)
+
+.fc-direction-ltr .fc-timegrid-col-events
+  margin: unset !important
+
+.fc-timegrid-event
+  border-left-width: 3px !important
+
+.select2-container--default .select2-selection--single
+  background-color: unset !important
+  border: 1px solid var(--input-dark) !important
+  border-radius: 5px !important
+
+.select2-dropdown
+  color: var(--text) !important
+  background: var(--input-dark) !important
+  border: 1px solid var(--input-dark) !important
+  box-shadow: 1px 1px 5px var(--shadow) !important
+
+.select2-search__field
+  border: 1px solid var(--input-dark) !important
+
+.select2-container--default .select2-results__option--highlighted[aria-selected]
+  background-color: var(--pane-bg-highlight) !important
+  color: var(--text) !important
