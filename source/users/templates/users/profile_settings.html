@@ -4,7 +4,8 @@
 
 {% block head %}
   {{ block.super }}
-  <script type="text/javascript" src="{% static 'users/socialNetworks.js' %}"></script>
+  <script type="text/javascript" src="{% static 'users/management.js' %}"></script>
+  <script src="{% static 'js/content-rendering.js' %}"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'users/profile.css' %}"/>
 {% endblock %}
 
@@ -219,24 +220,18 @@
         </div>
       </div>
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Na internet</h2></div>
+        <div class="pane-title bg-grad"><h2>Páginas externas</h2></div>
         <div class="pane-content">
+          <p>
+            Podes adicionar páginas externas ao teu perfil (admitindo o respeito pela lei).
+          </p>
+          <ul id="external-page-list"></ul>
           <div>
-            <ul id="social-network-list">
-            </ul>
-            <select id="network">
-              {% for network in social_networks %}
-                <option value="{{ network.0 }}" selected="">{{ network.1 }}</option>
-              {% endfor %}
-            </select>
-            <input id="network-link" type="text" placeholder="Endereço do perfil">
-            <input type="button" value="Adicionar" onclick="addNetwork()"><br>
-            Entra em contacto connosco para adicionar mais plataformas.<br>
-            PS: Não vamos adicionar plataformas cujo modelo de negócio assente no comércio de dados pessoais.
+            <input id="external-url-input" type="text" placeholder="https://plataforma.pt/euzinho">
+            <input id="external-url-submit" type="button" value="Adicionar">
           </div>
           <script>
-              let apiURL = "{% url 'api:social_networks' profile_user.nickname %}";
-              populateSocialNetworks(apiURL, edit = true);
+              loadExternalPageSettings("{% url 'api:user_external_pages' profile_user.nickname %}");
           </script>
           <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
         </div>

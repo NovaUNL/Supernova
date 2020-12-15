@@ -113,20 +113,6 @@
             </div>
           </div>
         {% endif %}
-        {% if permissions.social_visibility and profile_user.social_networks.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2>Perfis</h2>
-            </div>
-            <div class="pane-content">
-              <ul id="social-network-list" class="menu">
-                {% for social_network in profile_user.social_networks.all %}
-                  <li><a href="{{ social_network.profile }} ">{{ social_network.network_str }}</a></li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-        {% endif %}
         {% if permissions.groups_visibility and profile_user.groups_custom.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Grupos</h2></div>
@@ -138,6 +124,20 @@
                 </span>
                 </a>
               {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        {% if permissions.social_visibility and profile_user.external_pages.exists %}
+          <div class="flex-pane">
+            <div class="pane-title bg-grad">
+              <h2>Páginas externas</h2>
+            </div>
+            <div class="pane-content">
+              <ul id="social-network-list" class="menu">
+                {% for page in profile_user.external_pages.all %}
+                  <li><a href="{{ page.url }} ">{{ page.title_short }}</a></li>
+                {% endfor %}
+              </ul>
             </div>
           </div>
         {% endif %}

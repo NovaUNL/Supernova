@@ -9,6 +9,7 @@ from rest_framework.exceptions import ParseError, ValidationError, PermissionDen
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
 
 from api.serializers import users as serializers
 from api import permissions
@@ -21,52 +22,36 @@ class ProfileDetailed(APIView):
     permission_classes = (permissions.SelfOnly,)
 
     def get(self, request, nickname):  # TODO authentication
-        user = users.User.objects.get(nickname=nickname)
+        user = get_object_or_404(users.User, nickname=nickname)
         serializer = serializers.ProfileDetailedSerializer(user)
         return Response(serializer.data)
 
 
-
-
-class UserSocialNetworks(APIView):
+class UserExternalPages(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (permissions.SelfOnly,)
 
-    def get(self, request, nickname, format=None):  # TODO restrict to privacy level
-        user = users.User.objects.get(nickname=nickname)
-        serializer = serializers.SocialNetworksSerializer(user.social_networks, many=True)
+    def get(self, request, nickname):  # TODO restrict to privacy level
+        user = get_object_or_404(users.User, nickname=nickname)
+        serializer = serializers.ExternalPageSerializer(user.external_pages, many=True)
         return Response(serializer.data)
 
-    def put(self, request, nickname, format=None):  # TODO restrict to owner
-        user = users.User.objects.get(nickname=nickname)
-        if 'profile' not in request.data or 'network' not in request.data:
-            raise ParseError()
-        try:
-            network = int(request.data['network'])
-        except TypeError:
-            raise ParseError()
-        if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
-            raise ValidationError("Unknown network")
-        profile = get_network_identifier(network, request.data['profile'])
-        if profile is None:
-            raise ValidationError(f"Bad profile ('{request.data['profile']}')")
-        if users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
-            raise ValidationError("Duplicated network")
+    def put(self, request, nickname):  # TODO restrict to owner
+        user = get_object_or_404(users.User, nickname=nickname)
+        if 'url' not in request.data:
+            raise Response(status=400)
 
-        users.SocialNetworkAccount(user=user, network=network, profile=profile).save()
-        return Response({'profile': profile, 'network': network})
+        page = users.ExternalPage.objects.create(user=user, url=request.data['url'])
+        serializer = serializers.ExternalPageSerializer(page)
+        return Response(serializer.data)
 
-    def delete(self, request, nickname, format=None):
-        user = users.User.objects.get(nickname=nickname)
-        if 'profile' not in request.data or 'network' not in request.data:
-            raise ParseError()
-        network = request.data['network']
-        if network >= len(users.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES):
-            raise ValidationError("Unknown network")
-        profile = get_network_identifier(request.data['network'], request.data['profile'])
-        if not users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).exists():
-            raise ValidationError("Not found")
-        users.SocialNetworkAccount.objects.filter(user=user, network=network, profile=profile).delete()
+    def delete(self, request, nickname):
+        user = get_object_or_404(users.User, nickname=nickname)
+        if 'id' not in request.data:
+            raise Response(status=400)
+        page = get_object_or_404(users.ExternalPage, id=request.data['id'], user=user)
+        page.delete()
+        return Response()
 
 
 @api_view(['GET'])

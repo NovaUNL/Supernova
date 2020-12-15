@@ -10,6 +10,6 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(m.User, UserAdmin)
 admin.site.register(m.Badge)
 admin.site.register(m.UserBadge)
-admin.site.register(m.SocialNetworkAccount)
+admin.site.register(m.ExternalPage)
 admin.site.register(m.Registration)
 admin.site.register(m.Invite)

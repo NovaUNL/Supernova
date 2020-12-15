@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, time
 from itertools import chain
 
@@ -179,43 +180,71 @@ class UserBadge(djm.Model):
     receive_date = djm.DateField(auto_created=True)
 
 
-class SocialNetworkAccount(djm.Model):
+class ExternalPage(djm.Model):
     GITLAB = 0
     GITHUB = 1
-    LINKEDIN = 2
+    GITEA = 2
     MASTODON = 3
-    VIMEO = 4
-    YOUTUBE = 5
-    DEVIANTART = 6
-    FLICKR = 7
-    THINGIVERSE = 8
-    WIKIPEDIA = 9
+    DIASPORA = 4
+    PEERTUBE = 5
+    VIMEO = 6
+    DEVIANTART = 7
+    FLICKR = 8
+    THINGIVERSE = 9
+    WIKIPEDIA = 10
+    OTHER = 1000
 
-    SOCIAL_NETWORK_CHOICES = (
+    PLATFORM_CHOICES = (
         (GITLAB, 'GitLab'),
         (GITHUB, 'GitHub'),
-        (LINKEDIN, 'Linkedin'),
         (MASTODON, 'Mastodon'),
+        (DIASPORA, 'Diaspora'),
+        (PEERTUBE, 'Peertube'),
         (VIMEO, 'Vimeo'),
-        (YOUTUBE, 'Youtube'),
         (DEVIANTART, 'DeviantArt'),
         (FLICKR, 'Flickr'),
         (THINGIVERSE, 'Thingiverse'),
         (WIKIPEDIA, 'Wikipedia'),
+        (OTHER, 'Outro'),
     )
 
-    user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='social_networks')
-    network = djm.IntegerField(choices=SOCIAL_NETWORK_CHOICES)
-    profile = djm.CharField(max_length=128)
+    user = djm.ForeignKey(User, on_delete=djm.CASCADE, related_name='external_pages')
+    #: The platform this page matched with
+    platform = djm.IntegerField(choices=PLATFORM_CHOICES, null=True, blank=True)
+    #: Ideally the username in profile pages
+    name = djm.CharField(max_length=64, null=True, blank=True)
+    #: The page URL
+    url = djm.URLField(max_length=128, unique=True)
 
     def __str__(self):
-        return f'{self.SOCIAL_NETWORK_CHOICES[self.network][1]}: {self.profile} ({self.user})'
+        return f'{self.get_platform_display()}: {self.url}'
 
-    def network_str(self):
-        return self.SOCIAL_NETWORK_CHOICES[self.network][1]
+    url_exp = re.compile("^(http[s]?://)?((\w+\.)*(?P<domain>\w+\.\w+))(/.*)$")
+    known_domains = {
+        'gitlab.com': GITLAB,
+        'github.com': GITHUB,
+        'mastodon.social': MASTODON,
+        'vimeo.com': VIMEO,
+        'deviantart.com': DEVIANTART,
+        'flickr.com': FLICKR,
+        'thingiverse.com': THINGIVERSE,
+        'wikipedia.org': WIKIPEDIA,
+    }
 
-    class Meta:
-        unique_together = ['user', 'network', 'profile']
+    def save(self, *args, **kwargs):
+        if self.platform is None:
+            match = ExternalPage.url_exp.match(self.url)
+            if match:
+                domain = match.group('domain')
+                if domain in ExternalPage.known_domains:
+                    self.platform = ExternalPage.known_domains[domain]
+        super(ExternalPage, self).save(*args, **kwargs)
+
+    @property
+    def title_short(self):
+        if self.name:
+            return f'{self.name[:27]}...' if len(self.name) > 30 else self.name
+        return f'{self.url[:27]}...' if len(self.url) > 30 else self.url
 
 
 class Registration(djm.Model):

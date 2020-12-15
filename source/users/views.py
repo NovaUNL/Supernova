@@ -395,7 +395,6 @@ def user_profile_settings_view(request, nickname):
                 return HttpResponseRedirect(reverse('users:profile', args=[profile_user.nickname]))
 
     context['settings_form'] = settings_form
-    context['social_networks'] = m.SocialNetworkAccount.SOCIAL_NETWORK_CHOICES
     context['pcode'] = 'u_settings'
     context['title'] = 'Definições da conta'
     context['profile_user'] = profile_user

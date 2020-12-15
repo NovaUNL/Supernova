@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from api.serializers.college import StudentSerializer
-from users.models import SocialNetworkAccount
+from users.models import ExternalPage
 
 
 class ProfileMinimalSerializer(serializers.Serializer):
@@ -13,10 +13,10 @@ class ProfileMinimalSerializer(serializers.Serializer):
 class ProfileDetailedSerializer(serializers.Serializer):
     nickname = serializers.CharField()
     name = serializers.CharField()
-    student_set = StudentSerializer(many=True)
+    students = StudentSerializer(many=True)
 
 
-class SocialNetworksSerializer(serializers.ModelSerializer):
+class ExternalPageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SocialNetworkAccount
-        fields = ['network', 'profile']
+        model = ExternalPage
+        fields = ['id', 'platform', 'url', 'name']

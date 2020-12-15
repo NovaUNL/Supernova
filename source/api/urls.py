@@ -54,7 +54,7 @@ urlpatterns = [
     path('learning/question/<int:pk>/votes', views.learning.QuestionUserVotes.as_view(), name="question_votes"),
     # Users
     path('profile/<str:nickname>/', views.users.ProfileDetailed.as_view(), name="user_profile"),
-    path('profile/<str:nickname>/socialnetworks/', views.users.UserSocialNetworks.as_view(), name='social_networks'),
+    path('profile/<str:nickname>/external_pages', views.users.UserExternalPages.as_view(), name='user_external_pages'),
     path('user/<str:nickname>/current_shifts', views.college.UserShiftInstances.as_view()),
     path('user/<str:nickname>/calendar', views.calendar.user_calendar, name='user_calendar'),
     path('user/<str:nickname>/schedule', views.calendar.user_schedule, name='user_schedule'),
