@@ -2,6 +2,7 @@ from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -557,14 +558,18 @@ def role_view(request, group_abbr, role_id):
 @login_required
 def schedule_view(request, group_abbr):
     group = get_object_or_404(m.Group, abbreviation=group_abbr)
+
+    if 'del' in request.GET:
+        try:
+            del_id = int(request.GET['del'])
+            m.ScheduleEntry.objects.get(id=del_id, group=group).delete()
+            return redirect('users:calendar_manage', abbreviation=group_abbr)
+        except (ValueError, m.ScheduleOnce.DoesNotExist):
+            return HttpResponse(status=400)
+
     context = build_base_context(request)
     pcode, nav_type = resolve_group_type(group)
     context['pcode'] = pcode + '_cal_man'
-    context['sub_nav'] = [
-        {'name': 'Grupos', 'url': reverse('groups:index')},
-        nav_type,
-        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
-        {'name': 'Agenda', 'url': reverse('groups:schedule', args=[group_abbr])}]
 
     permission_flags = permissions.get_user_group_permissions(request.user, group)
     if not permission_flags & permissions.CAN_CHANGE_SCHEDULE:
@@ -604,6 +609,11 @@ def schedule_view(request, group_abbr):
 
     context['once_form'] = once_form
     context['periodic_form'] = periodic_form
+    context['sub_nav'] = [
+        {'name': 'Grupos', 'url': reverse('groups:index')},
+        nav_type,
+        {'name': group.abbreviation, 'url': reverse('groups:group', args=[group_abbr])},
+        {'name': 'Agenda', 'url': reverse('groups:schedule', args=[group_abbr])}]
 
     return render(request, 'groups/schedule.html', context)
 

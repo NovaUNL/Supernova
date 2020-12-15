@@ -5,7 +5,7 @@ from markdownx.fields import MarkdownxFormField
 from groups import models as m
 from chat import models as chat
 from supernova.fields import NativeSplitDateTimeField
-from supernova.widgets import SliderInput, NativeTimeInput
+from supernova.widgets import SliderInput, NativeTimeInput, NativeDateInput
 from groups import permissions
 
 
@@ -116,15 +116,14 @@ GroupScheduleOnceFormset = djf.inlineformset_factory(m.Group, m.ScheduleOnce, ex
 
 
 class SchedulePeriodicForm(djf.ModelForm):
-    start_date = NativeSplitDateTimeField()
-    end_date = NativeSplitDateTimeField()
-
     class Meta:
         model = m.SchedulePeriodic
         fields = ('title', 'weekday', 'time', 'duration', 'start_date', 'end_date')
         widgets = {
             'time': NativeTimeInput(),
-            'duration': djf.NumberInput(attrs={'min': 0, 'max': 24 * 60, 'size': 3})
+            'duration': djf.NumberInput(attrs={'min': 0, 'max': 24 * 60, 'size': 3}),
+            'start_date': NativeDateInput(),
+            'end_date': NativeDateInput()
         }
 
 
