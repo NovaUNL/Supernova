@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.conf import settings
 
@@ -421,7 +422,7 @@ class ScheduleOnceForm(djf.ModelForm):
 
 UserScheduleOnceFormset = djf.inlineformset_factory(m.User, m.ScheduleOnce, extra=1, form=ScheduleOnceForm)
 
-
+# TODO deduplicate this (see groups.forms)
 class SchedulePeriodicForm(djf.ModelForm):
     class Meta:
         model = m.SchedulePeriodic
@@ -432,6 +433,25 @@ class SchedulePeriodicForm(djf.ModelForm):
             'start_date': NativeDateInput(),
             'end_date': NativeDateInput()
         }
+
+    def clean(self):
+        start_date = self.cleaned_data.get("start_date")
+        end_date = self.cleaned_data.get("end_date")
+        weekday = self.cleaned_data.get("weekday")
+        if start_date and end_date:
+            if start_date > end_date:
+                raise ValidationError("O evento termina antes de começar.")
+
+            # Days before the first event occurrence
+            uncounted = weekday - start_date.weekday() \
+                if start_date.weekday() <= weekday \
+                else weekday + 7 - start_date.weekday()
+            uncounted += end_date.weekday() - weekday \
+                if weekday <= end_date.weekday() \
+                else end_date.weekday() - weekday + 7
+
+            if (end_date - start_date).days - uncounted < 7:
+                raise ValidationError("Este evento não tem periodicidade, deveria de ser pontual.")
 
 
 UserSchedulePeriodicFormset = djf.inlineformset_factory(m.User, m.SchedulePeriodic, extra=1, form=SchedulePeriodicForm)

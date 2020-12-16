@@ -1,5 +1,6 @@
 from dal import autocomplete
 from django import forms as djf
+from django.core.exceptions import ValidationError
 from markdownx.fields import MarkdownxFormField
 
 from groups import models as m
@@ -125,6 +126,25 @@ class SchedulePeriodicForm(djf.ModelForm):
             'start_date': NativeDateInput(),
             'end_date': NativeDateInput()
         }
+
+    def clean(self):
+        start_date = self.cleaned_data.get("start_date")
+        end_date = self.cleaned_data.get("end_date")
+        weekday = self.cleaned_data.get("weekday")
+        if start_date and end_date:
+            if start_date > end_date:
+                raise ValidationError("O evento termina antes de começar.")
+
+            # Days before the first event occurrence
+            uncounted = weekday - start_date.weekday() \
+                if start_date.weekday() <= weekday \
+                else weekday + 7 - start_date.weekday()
+            uncounted += end_date.weekday() - weekday \
+                if weekday <= end_date.weekday() \
+                else end_date.weekday() - weekday + 7
+
+            if (end_date - start_date).days - uncounted < 7:
+                raise ValidationError("Este evento não tem periodicidade, deveria de ser pontual.")
 
 
 GroupSchedulePeriodicFormset = djf.inlineformset_factory(m.Group, m.SchedulePeriodic, extra=1,
