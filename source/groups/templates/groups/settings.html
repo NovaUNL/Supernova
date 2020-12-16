@@ -30,26 +30,50 @@
                 <div class="form-row-top">
                   <h4>Logotipo</h4>
                 </div>
+                {% if group.icon %}
+                  <div style="margin-right: 10px">
+                    Fotografia atual:<br>
+                    <img alt="Icon" src="{{ group.icon_big.url }}"
+                         style="max-width: 500px; max-height: 300px;">
+                  </div>
+                {% endif %}
+                {{ group_form.icon.errors }}
                 {{ group_form.icon }}
+                <div class="form-row-description">
+                  O logotipo aparece nas páginas pertencentes ao grupo. Pode ter transparência.
+                </div>
               </div>
               <hr>
               <div class="form-row">
                 <div class="form-row-top">
                   <h4>Imagem</h4>
                 </div>
+                {% if group.image %}
+                  <div style="margin-right: 10px">
+                    Fotografia atual:<br>
+                    <img alt="Icon" src="{{ group.image_thumbnail.url }}"
+                         style="max-width: 500px; max-height: 300px;">
+                  </div>
+                {% endif %}
+                {{ group_form.image.errors }}
                 {{ group_form.image }}
+                <div class="form-row-description">
+                  A imagem aparece na listagem dos grupos.
+                </div>
               </div>
               <hr>
               <div class="form-row">
                 <div class="form-row-top">
                   <h4>Descrição do grupo</h4>
                 </div>
+                {{ group_form.description.errors }}
                 <div class="form-row-description">
                   {{ group_form.description }}
                 </div>
               </div>
               <hr>
               <div class="form-row">
+                {{ group_form.place.errors }}
                 <div class="form-row-top">
                   <h4>Localização do grupo</h4>
                   {{ group_form.place }}
@@ -64,6 +88,7 @@
                   <h4>Abertura</h4>
                   {{ group_form.outsiders_openness }}
                 </div>
+                {{ group_form.outsiders_openness.errors }}
                 <div class="form-row-description">
                   Capacidade dos utilizadores externos ao grupo de ganharem conhecimento e aderirem ao grupo.
                   <ul>
@@ -80,6 +105,7 @@
                   <h4>Cargo por defeito</h4>
                   {{ group_form.default_role }}
                 </div>
+                {{ group_form.default_role.errors }}
                 <div class="form-row-description">
                   Cargo a atribuir a novos membros que sejam resultado de auto-admissões.
                 </div>
