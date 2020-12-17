@@ -65,7 +65,7 @@
           <div class="pane-content">
             <form class="col" method="post" action="{% url 'users:calendar_manage' profile_user.nickname %}?type=periodic">
               {% csrf_token %}
-              {{ periodic_form.errors }}
+              {% for error in periodic_form.errors %}{{ error }}{% endfor %}
               <div class="form-block">
                 <div class="form-row">
                   <div class="form-row-top">
@@ -73,7 +73,7 @@
                     {{ periodic_form.title }}
                   </div>
                   <div class="form-row-description">
-                    Um título curto e claro para o evento, como "Atendimento presencial", "Treino", ...
+                    Um título curto e claro para o evento, como "Estudo", "Treino", ...
                   </div>
                 </div>
                 <hr>
@@ -85,6 +85,9 @@
                     Altura em que se estima a ocorrência.<br>
                     Durações de 0 minutos implicam desconhecimento.
                   </div>
+                  {{ periodic_form.weekday.errors }}
+                  {{ periodic_form.time.errors }}
+                  {{ periodic_form.duration.errors }}
                   <div>
                     {{ periodic_form.weekday }} ás {{ periodic_form.time }} durante {{ periodic_form.duration }} minutos
                   </div>
@@ -97,6 +100,8 @@
                   <div class="form-row-description">
                     Bloco calendário no qual o evento ocorre recorrentemente.
                   </div>
+                  {{ periodic_form.start_date.errors }}
+                  {{ periodic_form.end_date.errors }}
                   <div>
                     De {{ periodic_form.start_date }}
                     até {{ periodic_form.end_date }}
@@ -120,6 +125,7 @@
                     <h4>Título</h4>
                     {{ once_form.title }}
                   </div>
+                  {{ once_form.title.errors }}
                   <div class="form-row-description">
                     Um título curto e claro para o evento, como "Palestra abc", "Workshop xyz", ...
                   </div>
@@ -130,6 +136,7 @@
                     <h4>Dia</h4>
                     <div>{{ once_form.datetime }}</div>
                   </div>
+                  {{ once_form.datetime.errors }}
                 </div>
                 <hr>
                 <div class="form-row">
@@ -137,6 +144,7 @@
                     <h4>Duração estimada</h4>
                     <div>{{ once_form.duration }} minutos</div>
                   </div>
+                  {{ once_form.duration.errors }}
                   <div class="form-row-description">
                     Durações de 0 minutos implicam desconhecimento.
                   </div>
