@@ -124,10 +124,10 @@ class Group(djm.Model):
         return markdownify(self.description)
 
     def notify_subscribers(self, activity):
-        for subscriber in self.subscribers.all():
+        for subscription in self.subscriptions.all():
             # TODO bulk insert
-            GroupActivityNotification.objects.create(activity=activity, receiver=subscriber)
-            subscriber.clear_notification_cache()
+            GroupActivityNotification.objects.create(activity=activity, receiver=subscription.subscriber)
+            subscription.subscriber.clear_notification_cache()
 
 
 @reversion.register()
