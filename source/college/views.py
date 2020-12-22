@@ -3,7 +3,7 @@ from functools import reduce
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -385,6 +385,7 @@ def class_instance_edit_view(request, instance_id):
 @cache_page(3600)
 @cache_control(max_age=3600)
 @vary_on_cookie
+@login_required
 @permission_required('users.student_access')
 def class_instance_shifts_view(request, instance_id):
     # TODO optimize queries (4 duplicated in the schedule building)
@@ -409,6 +410,34 @@ def class_instance_shifts_view(request, instance_id):
     sub_nav.append({'name': 'Turnos', 'url': request.get_raw_uri()})
     context['sub_nav'] = sub_nav
     return render(request, 'college/class_instance_shifts.html', context)
+
+
+@cache_page(3600)
+@cache_control(max_age=3600)
+@vary_on_cookie
+@login_required
+@permission_required('users.student_access')
+def class_instance_shift_view(request, instance_id, shift_id):
+    shift = get_object_or_404(
+        m.Shift.objects
+            .annotate(cumulative_duration=Sum('instances__duration'))
+            .prefetch_related('instances__room__building', 'teachers')
+            .select_related('class_instance__parent'),
+        id=shift_id, class_instance=instance_id)
+
+    context = build_base_context(request)
+    context['pcode'] = "c_class_instance_shift"
+    context['title'] = f"{shift.short_abbreviation}"
+    context['shift'] = shift
+    context['instances'] = shift.instances.all()
+    context['students'] = shift.students.all()
+    context['teachers'] = shift.teachers.all()
+    class_instance = shift.class_instance
+    sub_nav = _class_instance_nav(class_instance)
+    sub_nav.append({'name': 'Turnos', 'url': reverse('college:class_instance_shifts', args=[instance_id])})
+    sub_nav.append({'name': shift.short_abbreviation, 'url': request.get_raw_uri()})
+    context['sub_nav'] = sub_nav
+    return render(request, 'college/class_instance_shift.html', context)
 
 
 @cache_page(3600 * 24)

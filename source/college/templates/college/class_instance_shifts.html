@@ -35,7 +35,7 @@
           <div class="pane-content flex-wrapper">
             {% for shift in shifts %}
               <div class="shift-list shift-{{ shift.type_abbreviation|lower }}">
-                <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="#">
+                <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="{{ shift.get_absolute_url }}">
                   {{ shift.type_abbreviation }}{{ shift.number }}
                 </a>
                 <div style="display: inline-block;">

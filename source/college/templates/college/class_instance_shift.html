@@ -1,0 +1,72 @@
+{% extends 'supernova/base.html' %}
+{% load static %}
+
+{% block content_wrapper %}
+  <div class="col">
+    <div class="header-decorator">
+      <div>
+        <h1>{{ shift.class_instance.full_str }}</h1>
+        <h3>{{ shift.long_abbreviation }}</h3>
+      </div>
+    </div>
+    <div class="row padded nowrap">
+      <div class="col nogrow noshrink">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane-content">
+            <h3>Instâncias</h3>
+            {% for instance in shift.instances.all %}
+              <span class="indented">
+                {{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}
+                {% if instance.room %}, <a href="{% url 'college:room' instance.room.id %}">{{ instance.room.short_str }}</a>{% endif %}
+              </span>
+              {% if not forloop.last %}
+                <hr>{% endif %}
+            {% endfor %}
+            <h3>Docentes</h3>
+            <ul class="entity-list">
+            {% for teacher in teachers %}
+              <li><a href="{{ teacher.get_absolute_url }}">{{ teacher.name }}</a></li>
+            {% endfor %}
+            </ul>
+            <h3>Inscritos</h3>
+            <span class="indented">{{ students|length }} alunos</span>
+            <h3>Carga horária</h3>
+            <span class="indented">{{ shift.cumulative_duration }} minutos/semana</span>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>Inscritos</h2></div>
+          <div class="pane-content">
+            <table class="stylized grow">
+              <thead>
+              <td>Nome</td>
+              <td class="highres">Identificador</td>
+              <td>Numero</td>
+              <td>Curso</td>
+              </thead>
+              {% for student in students %}
+                <tr>
+                  <td>
+                    {% if student.user %}
+                      <a href="{% url 'users:profile' student.user.nickname %}">{{ student.user.get_full_name }}</a>
+                    {% else %}
+                      {{ student.external_data.name }}
+                    {% endif %}
+                  </td>
+                  <td class="highres">{% if student.abbreviation %}{{ student.abbreviation }}{% endif %}</td>
+                  <td>{% if student.number %}{{ student.number }}{% endif %}</td>
+                  <td>{% if student.course %}
+                    <a href="{% url 'college:course' student.course.id %}">{{ student.course.abbreviation }}</a>{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

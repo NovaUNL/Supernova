@@ -274,11 +274,14 @@ class Room(Place, Importable):
     def __str__(self):
         return f'{self.building.abbreviation} {self.name}'
 
-    def long__str(self):
-        return f'{self.building}, {ctypes.RoomType.CHOICES[self.type - 1][1]} {self.name}'
+    def short_str(self):
+        return f'{self.building.abbreviation} {self.name}'
+
+    def long_str(self):
+        return f'{self.building.name}, {self.get_type_display()} {self.name}'
 
     def schedule_str(self):
-        return f'Ed {self.building.abbreviation}, {ctypes.RoomType.CHOICES[self.type - 1][1]} {self.name}'
+        return f'{self.building.abbreviation}, {self.get_type_display()} {self.name}'
 
 
 @reversion.register()
@@ -442,7 +445,7 @@ class ClassInstanceEvent(Importable):
             return f'Aula extra, {self.class_instance.parent.abbreviation}'
         else:
             if (self.info):
-                info = self.info if(len(self.info) < 30) else self.info[:27] + "..."
+                info = self.info if (len(self.info) < 30) else self.info[:27] + "..."
             else:
                 info = "Desconhecido"
             return f'{self.class_instance.parent.abbreviation}: {info}'
@@ -517,6 +520,17 @@ class Shift(Importable):
     @property
     def type_abbreviation(self):
         return ctypes.ShiftType.abbreviation(self.shift_type)
+
+    @property
+    def short_abbreviation(self):
+        return f"{self.type_abbreviation}{self.number}"
+
+    @property
+    def long_abbreviation(self):
+        return f"{self.get_shift_type_display()} {self.number}"
+
+    def get_absolute_url(self):
+        return reverse('college:class_instance_shift', args=[self.class_instance_id, self.id])
 
 
 class ShiftStudents(djm.Model):
