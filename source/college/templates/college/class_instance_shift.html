@@ -18,7 +18,7 @@
             {% for instance in shift.instances.all %}
               <span class="indented">
                 {{ instance.weekday_pt }}, {{ instance.start_str }}-{{ instance.end_str }}
-                {% if instance.room %}, <a href="{% url 'college:room' instance.room.id %}">{{ instance.room.short_str }}</a>{% endif %}
+                {% if instance.room %}, <a href="{{ instance.room.get_absolute_url  }}">{{ instance.room.short_str }}</a>{% endif %}
               </span>
               {% if not forloop.last %}
                 <hr>{% endif %}
@@ -42,27 +42,31 @@
           <div class="pane-content">
             <table class="stylized grow">
               <thead>
-              <td>Nome</td>
-              <td class="highres">Identificador</td>
-              <td>Numero</td>
-              <td>Curso</td>
+              <tr>
+                <th>Numero</th>
+                <th>Nome</th>
+                <th>Identificador</th>
+                <th class="midhighres">Curso</th>
+              </tr>
               </thead>
-              {% for student in students %}
-                <tr>
-                  <td>
-                    {% if student.user %}
-                      <a href="{% url 'users:profile' student.user.nickname %}">{{ student.user.get_full_name }}</a>
-                    {% else %}
-                      {{ student.external_data.name }}
-                    {% endif %}
-                  </td>
-                  <td class="highres">{% if student.abbreviation %}{{ student.abbreviation }}{% endif %}</td>
-                  <td>{% if student.number %}{{ student.number }}{% endif %}</td>
-                  <td>{% if student.course %}
-                    <a href="{% url 'college:course' student.course.id %}">{{ student.course.abbreviation }}</a>{% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
+              <tbody>
+                {% for student in students %}
+                  <tr>
+                    <td>{% if student.number %}<a href="{{ student.get_absolute_url }}">{{ student.number }}</a>{% endif %}</td>
+                    <td>
+                      {% if student.user %}
+                        <a href="{{ student.user.get_absolute_url }}">{{ student.user.get_full_name }}</a>
+                      {% else %}
+                        {{ student.external_data.name }}
+                      {% endif %}
+                    </td>
+                    <td>{% if student.abbreviation %}{{ student.abbreviation }}{% endif %}</td>
+                    <td class="midhighres">{% if student.course %}
+                      <a href="{{ student.course.get_absolute_url }}">{{ student.course.abbreviation }}</a>{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
             </table>
           </div>
         </div>

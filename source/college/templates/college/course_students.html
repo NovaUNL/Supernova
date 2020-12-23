@@ -1,4 +1,5 @@
 {% extends 'supernova/base.html' %}
+
 {% load static %}
 
 {% block content_wrapper %}
@@ -11,33 +12,30 @@
           <tr>
             <th>Numero</th>
             <th>Nome</th>
-            <th>Desde</th>
-            <th>Até</th>
-            <th>Matriculas</th>
-            <th>ECTS</th>
+            <th class="midhighres">Desde</th>
+            <th class="midhighres">Até</th>
+            <th class="midhighres">Ano</th>
+            <th class="midhighres">ECTS</th>
           </tr>
           </thead>
+          <tbody>
           {% for student in students %}
-            {% if student.user_id %}
-              <tr>
-                <td>{{ student.number }}</td>
-                <td><a href="{% url 'users:profile' student.user.nickname %}">{{ student.user.get_full_name }}</a></td>
-                <td>{{ student.first_year|add:"-1" }}</td>
-                <td>{{ student.last_year }}</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-            {% else %}
-              <tr>
-                <td>{{ student.number }}</td>
-                <td>{{ student.external_data.name }}</td>
-                <td>{{ student.first_year|add:"-1" }}</td>
-                <td>{{ student.last_year }}</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-            {% endif %}
+            <tr>
+              <td><a href="{{ student.get_absolute_url }}">{{ student.number }}</a></td>
+              <td>
+                {% if student.user %}
+                  <a href="{{ student.user.get_absolute_url }}">{{ student.name }}</a>
+                {% else %}
+                  {{ student.name }}
+                {% endif %}
+              </td>
+              <td class="midhighres">{% if student.first_year %}{{ student.first_year|add:"-1" }}{% else %}?{% endif %}</td>
+              <td class="midhighres">{% if student.last_year %}{{ student.last_year }}{% else %}?{% endif %}</td>
+              <td class="midhighres">{% if student.year %}{{ student.year }}{% else %}?{% endif %}</td>
+              <td class="midhighres">{% if student.ects %}{{ student.ects }}{% else %}?{% endif %}</td>
+            </tr>
           {% endfor %}
+          </tbody>
         </table>
       </div>
     </div>

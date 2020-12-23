@@ -86,6 +86,9 @@ class Student(Importable):
             return f'{self.number} - {self.abbreviation} ({self.user})'
         return f'{self.number} - {self.abbreviation}'
 
+    def get_absolute_url(self):
+        return reverse('college:student', args=[self.id])
+
     def update_progress_info(self):
         years = list(self.class_instances.distinct('year').values_list('year', flat=True))
         if len(years) > 0:
@@ -405,7 +408,11 @@ class ClassInstance(Importable):
         unique_together = ['parent', 'period', 'year']
 
     def __str__(self):
-        return f"{self.parent.abbreviation}, {self.get_period_display()} de {self.year}"
+        return f"{self.parent.abbreviation}, {self.short_occasion}"
+
+    @property
+    def short_str(self):
+        return f"{self.parent.name}, {self.short_occasion}"
 
     @property
     def full_str(self):

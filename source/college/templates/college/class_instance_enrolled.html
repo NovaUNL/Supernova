@@ -11,24 +11,30 @@
           <div class="pane-title bg-grad"><h2>Inscritos</h2></div>
           <div class="pane-content">
             <table class="stylized grow">
-              <thead><td>Nome</td><td class="highres">Identificador</td><td>Numero</td><td>Curso</td><td>Resultado</td></thead>
+              <thead>
+              <tr>
+                <th>Numero</th>
+                <th>Nome</th>
+                <th class="midhighres">Identificador</th>
+                <th class="midhighres">Curso</th>
+                <th>Resultado</th>
+              </tr>
+              </thead>
               {% for enrollment in enrollments %}
                 <tr>
+                  <td>{% if enrollment.student.number %}<a href="{{ enrollment.student.get_absolute_url }}">{{ enrollment.student.number }}</a>{% endif %}</td>
                   <td>
                     {% if enrollment.student.user %}
-                      <a href="{% url 'users:profile' enrollment.student.user.nickname %}">{{ enrollment.student.user.get_full_name }}</a>
+                      <a href="{{ enrollments.student.user.get_absolute_url }}">
+                        {{ enrollment.student.user.get_full_name }}
+                      </a>
                     {% else %}
-                      {{ enrollment.student.external_data.name }}
+                      {{ enrollment.student.name }}
                     {% endif %}
                   </td>
-                  <td class="highres">{% if enrollment.student.abbreviation %}{{ enrollment.student.abbreviation }}{% endif %}</td>
-                  <td>{% if enrollment.student.number %}{{ enrollment.student.number }}{% endif %}</td>
-                  <td>{% if enrollment.student.course %}<a href="{% url 'college:course' enrollment.student.course.id %}">{{ enrollment.student.course.abbreviation }}</a>{% endif %}</td>
-                  {% if enrollment.grade %}
-                    <td>{{ enrollment.grade }}</td>
-                  {% else %}
-                    <td>?</td>
-                  {% endif %}
+                  <td class="midhighres">{% if enrollment.student.abbreviation %}{{ enrollment.student.abbreviation }}{% endif %}</td>
+                  <td class="midhighres">{% if enrollment.student.course %}<a href="{{ enrollment.student.course.get_absolute_url }}">{{ enrollment.student.course.abbreviation }}</a>{% endif %}</td>
+                  <td>{% if enrollment.grade %}{{ enrollment.grade }}{% else %}?{% endif %}</td>
                 </tr>
               {% endfor %}
             </table>

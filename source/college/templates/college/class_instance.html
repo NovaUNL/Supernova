@@ -82,7 +82,7 @@
             <h3>Docentes</h3>
             <ul class="entity-list">
               {% for teacher in teachers %}
-                <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+                <li><a href="{{ teacher.get_absolute_url }}">{{ teacher.name }}</a></li>
               {% endfor %}
             </ul>
             <h3>Inscritos</h3>
