@@ -159,6 +159,9 @@ class Building(Importable):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('college:building', args=[self.id])
+
 
 def department_pic_path(department, filename):
     return f'c/d/{department.id}/pic.{filename.split(".")[-1].lower()}'
@@ -201,6 +204,9 @@ class Department(Importable):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('college:department', args=[self.id])
 
 
 def place_pic_path(room, filename):
@@ -283,6 +289,9 @@ class Room(Place, Importable):
     def schedule_str(self):
         return f'{self.building.abbreviation}, {self.get_type_display()} {self.name}'
 
+    def get_absolute_url(self):
+        return reverse('college:room', args=[self.id])
+
 
 @reversion.register()
 class Course(Importable):
@@ -314,6 +323,9 @@ class Course(Importable):
 
     def __str__(self):
         return f'{ctypes.Degree.name(self.degree)} em {self.name}'
+
+    def get_absolute_url(self):
+        return reverse('college:course', args=[self.id])
 
     @property
     def description_html(self):
