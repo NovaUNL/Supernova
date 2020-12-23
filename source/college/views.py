@@ -134,6 +134,50 @@ def department_edit_view(request, department_id):
 
 @login_required
 @permission_required('users.student_access')
+def student_view(request, student_id):
+    student = get_object_or_404(m.Student.objects.select_related('user'), id=student_id)
+    context = build_base_context(request)
+
+    context['pcode'] = "c_student"
+    context['title'] = f'Aluno - {student.name}'
+
+    user = student.user
+    if user is None:
+        permissions = {
+            'profile_visibility': False,
+            'info_visibility': False,
+            'enrollments_visibility': False,
+            'schedule_visibility': False
+        }
+    else:
+        permissions = user.profile_permissions_for(request.user)
+    context['profile_user'] = user
+
+    context['student'] = student
+
+    context['permissions'] = permissions
+    if permissions['enrollments_visibility']:
+        context['current_class_instances'] = current_class_instances = m.ClassInstance.objects \
+            .select_related('parent') \
+            .order_by('parent__name', '-parent__period') \
+            .filter(student=student,
+                    year=settings.COLLEGE_YEAR,
+                    period__gte=settings.COLLEGE_PERIOD)
+        context['past_classes'] = m.Class.objects \
+            .filter(instances__enrollments__student=student) \
+            .exclude(instances__in=current_class_instances) \
+            .order_by('name') \
+            .distinct('name')
+
+    context['sub_nav'] = [
+        {'name': 'Faculdade', 'url': reverse('college:index')},
+        {'name': 'Alunos', 'url': '#'},
+        {'name': student.number, 'url': reverse('college:student', args=[student_id])}]
+    return render(request, 'college/student.html', context)
+
+
+@login_required
+@permission_required('users.student_access')
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher.objects.select_related('rank'), id=teacher_id)
     context = build_base_context(request)

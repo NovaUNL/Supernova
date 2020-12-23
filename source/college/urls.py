@@ -18,6 +18,7 @@ urlpatterns = [
     path('departamentos/', views.departments_view, name='departments'),
     path('departamento/<int:department_id>/', views.department_view, name='department'),
     path('departamento/<int:department_id>/editar', views.department_edit_view, name='department_edit'),
+    path('aluno/<int:student_id>', views.student_view, name='student'),
     path('professores/consentimento', views.teacher_consent_view, name='teachers_consent'),
     path('professor/<int:teacher_id>', views.teacher_view, name='teacher'),
     path('professor/<int:teacher_id>/editar', views.teacher_edit_view, name='teacher_edit'),
