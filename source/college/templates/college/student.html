@@ -14,7 +14,7 @@
     <img class="highres avatar" src="{% static 'img/user.svg' %}">
     <div>
       <h1>{{ student.name }}</h1>
-      <h3>{{ student.abbreviation }}, {{ student.number }}</h3>
+      <h3>{{ student.abbreviation }}, {{ student.number }}{% if student.course %}<a href="{{ student.course.get_absolute_url }}">, {{ student.course.abbreviation }}</a>{% endif %}</h3>
     </div>
   </div>
   <div class="row padded nowrap">
@@ -59,7 +59,7 @@
       {% else %}
         <div class="flex-pane">
           <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
-          <div class="pane-content">Este utilizador optou por ocultar o percurso académico.</div>
+          <div class="pane-content"><p>Este utilizador optou por ocultar o percurso académico.</p></div>
         </div>
       {% endif %}
     </div>
@@ -71,10 +71,24 @@
           <span class="indented">{{ student.abbreviation }}</span>
           <h3>Número</h3>
           <span class="indented">{{ student.number }}</span>
-          <h3>Ano</h3>
-          <span class="indented">{{ student.year }}º ano</span>
-          <h3>Média</h3>
-          <span class="indented">{{ student.avg_grade|floatformat }} valores em {{ student.ects }} ECTS.</span>
+          {% if student.course %}
+            <h3>Curso</h3>
+            <a class="indented" href="{{ student.course.get_absolute_url }}">{{ student.course.abbreviation }}</a>
+          {% endif %}
+          {% if permissions.info_visibility %}
+            <h3>Ano</h3>
+            <span class="indented">{{ student.year }}º ano</span>
+            <h3>Média</h3>
+            <span class="indented">{{ student.avg_grade|floatformat }} valores em {{ student.ects }} ECTS.</span>
+            {% if student.first_year %}
+              <h3>Actividade</h3>
+              <span class="indented">{{ student.first_year|add:"-1" }} - {{ student.last_year }}</span>
+            {% endif %}
+          {% else %}
+            <hr>
+            <span class="indented">Informações suprimidas devido ás definições de privacidade do utilizador.</span>
+            <hr>
+          {% endif %}
           {% if student.user %}
             <h3><a href="{{ student.user.get_absolute_url }}">Perfil</a></h3>
           {% else %}

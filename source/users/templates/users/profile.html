@@ -38,22 +38,10 @@
                 {% for student in primary_students %}
                   <div>
                     <b>CLIP ID: </b>{{ student.abbreviation }}<br>
-                    <b>Numero: </b>{{ student.number }}<br>
-                    {% if student.year %}
-                      <b>Ano:</b> <span>{{ student.year }}º</span>
-                      <br>
-                    {% endif %}
-                    {% if student.avg_grade %}
-                      <b>Média:</b>
-                      <span>{{ student.avg_grade|floatformat }}</span>
-                      <a><sup aria-label="Em {{ student.ects }} ECTS conhecidos. Sem melhorias." data-balloon-pos="down">*</sup></a>
-                      <br>
-                    {% endif %}
+                    <b>Numero: </b><a href="{{ student.get_absolute_url }}">{{ student.number }}</a><br>
                     {% if student.course %}
                       <b>Curso: </b>
-                      <a href="{% url 'college:course' student.course.id %}">{{ student.course.abbreviation }}</a>
-                    {% else %}
-                      Desconhecido
+                      <a href="{{ course.get_absolute_url }}">{{ student.course.abbreviation }}</a>
                     {% endif %}
                   </div>
                 {% endfor %}
@@ -61,16 +49,9 @@
                   {% if student != primary_student %}
                     <div>
                       <b>Numero: </b>{{ student.number }}<br>
-                      {% if student.avg_grade %}
-                        <b>Média:</b>
-                        <a><sup aria-label="Em {{ student.ects }} ECTS conhecidos. Sem melhorias." data-balloon-pos="down">*</sup></a>
-                        <br>
-                      {% endif %}
                       {% if student.course %}
                         <b>Curso: </b>
-                        <a href="{% url 'college:course' student.course.id %}">
-                          {{ student.course.abbreviation }}
-                        </a>
+                        <a href="{{ course.get_absolute_url }}">{{ student.course.abbreviation }}</a>
                       {% endif %}
                     </div>
                   {% endif %}

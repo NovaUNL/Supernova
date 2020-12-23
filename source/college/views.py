@@ -137,6 +137,7 @@ def department_edit_view(request, department_id):
 def student_view(request, student_id):
     student = get_object_or_404(m.Student.objects.select_related('user'), id=student_id)
     context = build_base_context(request)
+    staff_access = request.user.is_staff
 
     context['pcode'] = "c_student"
     context['title'] = f'Aluno - {student.name}'
@@ -144,10 +145,10 @@ def student_view(request, student_id):
     user = student.user
     if user is None:
         permissions = {
-            'profile_visibility': False,
-            'info_visibility': False,
-            'enrollments_visibility': False,
-            'schedule_visibility': False
+            'profile_visibility': staff_access,
+            'info_visibility': staff_access,
+            'enrollments_visibility': staff_access,
+            'schedule_visibility': staff_access
         }
     else:
         permissions = user.profile_permissions_for(request.user)
