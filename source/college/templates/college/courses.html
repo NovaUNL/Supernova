@@ -1,18 +1,40 @@
 {% extends 'supernova/base.html' %}
 
+{% load static %}
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
+{% endblock %}
+
 {% block content_wrapper %}
-  <div class="col padded">
-    {% for degree in degrees %}
+  <div class="row padded nowrap">
+    <div class="col grow">
+      {% for degree, courses in courses_by_degree.items %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad"><h2>{{ degree }}</h2></div>
+          <div class="pane-content">
+            {% for course in courses %}
+              <ul class="entity-list">
+                <li class="entity">
+                  <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>
+                  {% if not course.active %}<sup>(<a aria-label="Inativo" data-balloon-pos="up">*</a>)</sup>{% endif %}
+                </li>
+              </ul>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="col noshrink nogrow">
       <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>{{ degree.0 }}</h2></div>
+        <div class="pane-title bg-grad"><h2>Estatística</h2></div>
         <div class="pane-content">
-          {% for course in degree.1 %}
-            <div style="padding-left: 10px">
-              <h3><a href="{% url 'college:course' course.id %}"><span>{{ course.name }}</span></a></h3>
-            </div>
-          {% endfor %}
+          <h3>Cursos</h3>
+          <span class="indented">{{ active_count }} cursos ativos e {{ inactive_count }} cursos inativos{% if not show_all %} (<a href="?all">Ver</a>){% endif %}.</span>
+          <h3>Estudantes</h3>
+          <span class="indented">Os cursos activos detem atualmente {{ active_student_count }}<sup><a aria-label="pelo menos" data-balloon-pos="up">+</a></sup> alunos.</span>
         </div>
       </div>
-    {% endfor %}
+    </div>
   </div>
 {% endblock %}

@@ -1,5 +1,6 @@
 from datetime import datetime
 from functools import reduce
+from itertools import groupby
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
@@ -950,19 +951,31 @@ def file_upload_view(request):
 @cache_control(max_age=3600 * 24)
 @vary_on_cookie
 def courses_view(request):
-    # FIXME this could be a single query instead of a dozen
-    degrees = sorted(map(lambda degree: degree[0],
-                         set(m.Course.objects.filter(active=True).values_list('degree'))))
-    courses_by_degree = list(
-        map(lambda degree:
-            (Degree.name(degree),
-             m.Course.objects.filter(active=True, degree=degree).all()),
-            degrees))
+    show_all = 'all' in request.GET
+    courses = m.Course.objects.order_by('degree', 'name').all()
+    count = len(courses)
+    active_count = reduce(lambda t, c: int(c.active) + t, courses, 0)
+    inactive_count = count - active_count
+
+    if show_all:
+        courses_by_degree = {deg: list(_courses)
+                             for deg, _courses in groupby(courses, lambda c: c.get_degree_display())}
+    else:
+        courses_by_degree = {
+            deg: list(_courses)
+            for deg, _courses in groupby(filter(lambda c: c.active, courses), lambda c: c.get_degree_display())}
+
+    active_student_count = m.Student.objects.filter(course__active=True, last_year=settings.COLLEGE_YEAR).count()
 
     context = build_base_context(request)
     context['pcode'] = "c_courses"
     context['title'] = "Cursos"
-    context['degrees'] = courses_by_degree
+    context['show_all'] = show_all
+    context['active_count'] = active_count
+    context['inactive_count'] = inactive_count
+    context['total_count'] = count
+    context['courses_by_degree'] = courses_by_degree
+    context['active_student_count'] = active_student_count
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Cursos', 'url': reverse('college:courses')}]
