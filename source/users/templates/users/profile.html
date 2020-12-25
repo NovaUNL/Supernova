@@ -72,11 +72,11 @@
             </div>
           </div>
         {% endif %}
-        {% if permissions.about_visibility and profile_user.bio %}
+        {% if permissions.about_visibility and profile_user.about %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Sobre mim</h2></div>
             <div class="pane-content">
-              {{ profile_user.bio_html | safe }}
+              {{ profile_user.about_html | safe }}
             </div>
           </div>
         {% endif %}
@@ -99,7 +99,7 @@
             <div class="pane-title bg-grad"><h2>Grupos</h2></div>
             <div class="pane-content">
               {% for group in profile_user.groups_custom.all %}
-                <a href="{% url 'groups:group' group.abbreviation %}">
+                <a href="{{ group.get_absolute_url }}">
                 <span class="group"{% if group.icon %} style="background-image: url({{ group.icon_small.url }})"{% endif %}>
                   {{ group.abbreviation }}
                 </span>
@@ -132,12 +132,8 @@
                   <h2>Horário</h2>
                 </div>
                 <div class="pane-content">
-                  {% if schedule %}
-                    <div id="schedule"></div>
-                    <script>loadSchedule("{{ profile_user.nickname }}", true)</script>
-                  {% else %}
-                    O teu horário encontra-se vazio. A aparição de inscrições recentes pode levar até 48 horas.
-                  {% endif %}
+                  <div id="schedule"></div>
+                  <script>loadSchedule("{{ profile_user.nickname }}", true)</script>
                 </div>
               </div>
             {% endif %}
@@ -149,9 +145,9 @@
                   <h2>Inscrições atuais</h2>
                 </div>
                 <div class="pane-content">
-                  <ul class="menu">
+                  <ul class="entity-list">
                     {% for instance in current_class_instances %}
-                      <li><a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }}</a></li>
+                      <li class="entity"><a href="{{ instance.get_absolute_url }}">{{ instance.parent.name }}</a></li>
                     {% endfor %}
                   </ul>
                 </div>
@@ -163,9 +159,9 @@
                   <h2>Inscrições prévias</h2>
                 </div>
                 <div class="pane-content">
-                  <ul class="menu">
+                  <ul class="entity-list">
                     {% for class in past_classes %}
-                      <li><a href="{% url 'college:class' class.id %}">{{ class.name }}</a></li>
+                      <li class="entity"><a href="{{ class.get_absolute_url }}">{{ class.name }}</a></li>
                     {% endfor %}
                   </ul>
                 </div>

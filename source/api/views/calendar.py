@@ -41,6 +41,7 @@ def user_schedule(_, nickname):
             'weekday': instance.weekday,
             'time': instance.start_str,
             'duration': instance.duration,
+            'url': instance.shift.get_absolute_url(),
         })
 
     own_periodic_schedule_entries = users.SchedulePeriodic.objects.filter(user=user)
@@ -100,6 +101,7 @@ def user_calendar(_, nickname):
             'weekday': instance.weekday,
             'time': instance.start_str,
             'duration': instance.duration,
+            'url': instance.shift.get_absolute_url(),
         })
     own_once_schedule_entries = users.ScheduleOnce.objects.filter(user=user)
     for entry in own_once_schedule_entries:
