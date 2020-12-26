@@ -43,8 +43,17 @@ class Importable(djm.Model):
         abstract = True
 
 
+class CachedEntity(djm.Model):
+    """ Aid meta class for entities(or children) which present last_modified headers """
+    #: Last update timestamp
+    last_save = djm.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
 @reversion.register()
-class Student(Importable):
+class Student(Importable, CachedEntity):
     """
     | A student instance.
     | Each user can have multiple instances if the user enrolled multiple times to multiple courses.
@@ -133,7 +142,7 @@ def building_pic_path(building, filename):
 
 
 @reversion.register()
-class Building(Importable):
+class Building(Importable, CachedEntity):
     """A physical building withing the campus"""
     #: Full name
     name = djm.CharField(max_length=32, unique=True)
@@ -171,7 +180,7 @@ def department_pic_path(department, filename):
 
 
 @reversion.register()
-class Department(Importable):
+class Department(Importable, CachedEntity):
     """An (official) department"""
     #: Full name of the department
     name = djm.CharField(max_length=128)
@@ -216,8 +225,11 @@ def place_pic_path(room, filename):
     return f'c/b/{room.id}/pic.{filename.split(".")[-1].lower()}'
 
 
-class Place(djm.Model):
-    """A generic geographical place"""
+class Place(CachedEntity):
+    """
+    A generic geographical place
+    TODO: Change to include building
+    """
     #: Name of the place
     name = djm.CharField(max_length=128)
     #: Building it is located at
@@ -297,7 +309,7 @@ class Room(Place, Importable):
 
 
 @reversion.register()
-class Course(Importable):
+class Course(Importable, CachedEntity):
     """A course which is associated with a recognizable degree."""
     #: Course name
     name = djm.CharField(max_length=256)
@@ -336,7 +348,7 @@ class Course(Importable):
 
 
 @reversion.register()
-class Class(Importable):
+class Class(Importable, CachedEntity):
     """A class with is taught, usually once or twice a year. Abstract concept without temporal presence"""
     #: Name of the class
     name = djm.CharField(max_length=256)
@@ -380,7 +392,7 @@ class Class(Importable):
 
 
 @reversion.register()
-class ClassInstance(Importable):
+class ClassInstance(Importable, CachedEntity):
     """An instance of a class with an associated point in time"""
     #: Class this refers to
     parent = djm.ForeignKey(Class, on_delete=djm.PROTECT, related_name='instances')
@@ -638,7 +650,7 @@ def teacher_pic_path(teacher, filename):
 
 
 @reversion.register()
-class Teacher(Importable):
+class Teacher(Importable, CachedEntity):
     """
     | A person who teaches or investigates.
     | Note that there is an intersection between students and teachers. A student might become a teacher.

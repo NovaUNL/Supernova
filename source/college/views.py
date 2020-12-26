@@ -8,7 +8,9 @@ from django.db.models import Q, Count, Sum
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.http import last_modified
 from django.views.decorators.vary import vary_on_cookie
 from django.conf import settings
 
@@ -17,6 +19,7 @@ from dal import autocomplete
 
 from college.choice_types import Degree, RoomType
 from college import models as m
+from college import changes
 from college import forms as f
 from college import schedules
 from college import choice_types as ctypes
@@ -36,7 +39,6 @@ def index_view(request):
         {'name': 'Faculdade', 'url': reverse('college:index')}]
     return render(request, 'college/college.html', context)
 
-
 def map_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_campus_map"
@@ -49,6 +51,8 @@ def map_view(request):
     return render(request, 'college/campus.html', context)
 
 
+@vary_on_cookie
+@cache_page(10)  # To limit impatient users
 def transportation_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_campus_tranportation"
@@ -61,17 +65,24 @@ def transportation_view(request):
     return render(request, 'college/transportation.html', context)
 
 
+@cache_control(private=True)
+@vary_on_cookie
+@last_modified(changes.plural_modification_for(m.Department))
 def departments_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_departments"
     context['title'] = "Departamentos"
-    context['departments'] = m.Department.objects.order_by('name').filter(extinguished=False).all()
+    context['departments'] = m.Department.objects.order_by('name').all()
+    # context['departments'] = m.Department.objects.order_by('name').exclude(extinguished=True).all()
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Departamentos', 'url': reverse('college:departments')}]
     return render(request, 'college/departments.html', context)
 
 
+@cache_control(private=True)
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Department))
 def department_view(request, department_id):
     department = get_object_or_404(
         m.Department.objects,
@@ -135,6 +146,9 @@ def department_edit_view(request, department_id):
 
 @login_required
 @permission_required('users.student_access')
+@cache_control(private=True, max_age=60 * 60)
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Student))
 def student_view(request, student_id):
     student = get_object_or_404(m.Student.objects.select_related('user'), id=student_id)
     context = build_base_context(request)
@@ -180,6 +194,9 @@ def student_view(request, student_id):
 
 @login_required
 @permission_required('users.student_access')
+@cache_control(private=True, max_age=60 * 60)
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Teacher))
 def teacher_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher.objects.select_related('rank'), id=teacher_id)
     context = build_base_context(request)
@@ -236,6 +253,8 @@ def teacher_edit_view(request, teacher_id):
 
 @login_required
 @permission_required('users.student_access')
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Teacher))
 def teacher_reviews_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher.objects, id=teacher_id)
     context = build_base_context(request)
@@ -266,6 +285,8 @@ def teacher_review_create_view(request, teacher_id):
             review.object_id = teacher_id
             review.content_type = ContentType.objects.get_for_model(m.Teacher)
             review.save()
+            teacher.last_save = timezone.now()
+            teacher.save(update_fields='last_save')
             return redirect('college:teacher_reviews', teacher_id=teacher_id)
     else:
         form = ReviewForm()
@@ -290,10 +311,11 @@ def _class__nav(klass):
         {'name': klass.name, 'url': reverse('college:class', args=[klass.id])}]
 
 
-@cache_page(3600)
-@cache_control(private=True, max_age=3600)
-@vary_on_cookie
 @login_required
+@cache_control(private=True, max_age=60 * 60)
+@vary_on_cookie
+# TODO this is not enough as there are external elements such as questions and reviews in the template
+# @last_modified(changes.singular_modification_for(m.Class))
 def class_view(request, class_id):
     klass = get_object_or_404(
         m.Class.objects
@@ -347,6 +369,11 @@ def class_edit_view(request, class_id):
 
 @login_required
 @permission_required('users.student_access')
+@cache_page(60 * 2)
+@vary_on_cookie
+# @cache_control(private=True, max_age=60)
+# TODO this is not enough as answers and votes don't change question timestamps
+# @last_modified(changes.last_class_question_modification)
 def class_questions_view(request, class_id):
     klass = get_object_or_404(m.Class.objects, id=class_id)
     context = build_base_context(request)
@@ -376,11 +403,13 @@ def _class_instance_nav(instance):
         {'name': instance.occasion, 'url': reverse('college:class_instance', args=[instance.id])}]
 
 
-@cache_page(3600)
-@cache_control(private=True, max_age=3600)
-@vary_on_cookie
 @login_required
 @permission_required('users.student_access')
+@cache_page(60 * 5)
+@vary_on_cookie
+# TODO this is not enough as there are external elements such as questions and reviews in the template
+# @cache_control(private=True, max_age=60 * 5)
+# @last_modified(changes.singular_modification_for(m.Class))
 def class_instance_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects
@@ -428,11 +457,10 @@ def class_instance_edit_view(request, instance_id):
     return render(request, 'college/class_instance_edit.html', context)
 
 
-@cache_page(3600)
-@cache_control(max_age=3600)
-@vary_on_cookie
 @login_required
 @permission_required('users.student_access')
+@cache_control(private=True, max_age=60 * 5)
+@vary_on_cookie
 def class_instance_shifts_view(request, instance_id):
     # TODO optimize queries (4 duplicated in the schedule building)
     instance = get_object_or_404(
@@ -458,11 +486,11 @@ def class_instance_shifts_view(request, instance_id):
     return render(request, 'college/class_instance_shifts.html', context)
 
 
-@cache_page(3600)
-@cache_control(max_age=3600)
-@vary_on_cookie
 @login_required
 @permission_required('users.student_access')
+@cache_control(private=True, max_age=60 * 30)
+@vary_on_cookie
+@last_modified(changes.last_class_instance_modification)
 def class_instance_shift_view(request, instance_id, shift_id):
     shift = get_object_or_404(
         m.Shift.objects
@@ -486,11 +514,13 @@ def class_instance_shift_view(request, instance_id, shift_id):
     return render(request, 'college/class_instance_shift.html', context)
 
 
-@cache_page(3600 * 24)
-@cache_control(max_age=3600 * 24)
-@vary_on_cookie
 @login_required
 @permission_required('users.student_access')
+@vary_on_cookie
+@cache_page(60 * 2)
+# TODO complete
+# @last_modified(changes.singular_modification_for(m.ClassInstance))
+# @cache_control(private=True, max_age=60 * 5)
 def class_instance_enrolled_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent', 'department'),
@@ -515,9 +545,6 @@ def class_instance_enrolled_view(request, instance_id):
     return render(request, 'college/class_instance_enrolled.html', context)
 
 
-@cache_page(3600)
-@cache_control(max_age=3600)
-@vary_on_cookie
 @login_required
 @permission_required('users.student_access')
 def class_instance_events_view(request, instance_id):
@@ -947,9 +974,9 @@ def file_upload_view(request):
     return render(request, 'college/file_upload.html', context)
 
 
-@cache_page(3600 * 24)
-@cache_control(max_age=3600 * 24)
+@cache_control(private=True)
 @vary_on_cookie
+@last_modified(changes.plural_modification_for(m.Course))
 def courses_view(request):
     show_all = 'all' in request.GET
     courses = m.Course.objects.order_by('degree', 'name').all()
@@ -993,9 +1020,9 @@ def _course__nav(course):
         {'name': str(course), 'url': reverse('college:course', args=[course.id])}]
 
 
-@cache_page(3600 * 24)
-@cache_control(max_age=3600 * 24)
+@cache_control(private=True)
 @vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Course))
 def course_view(request, course_id):
     course = get_object_or_404(
         m.Course.objects.select_related('department', 'coordinator'),
@@ -1044,10 +1071,10 @@ def course_edit_view(request, course_id):
     return render(request, 'college/course_edit.html', context)
 
 
-@cache_page(3600 * 24)
-@cache_control(max_age=3600 * 24)
-@vary_on_cookie
 @permission_required('users.student_access')
+@cache_control(private=True, max_age=60 * 60 * 6)
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Course))
 def course_students_view(request, course_id):
     course = get_object_or_404(m.Course.objects, id=course_id)
     department = course.department
@@ -1091,6 +1118,9 @@ def course_curriculum_view(request, course_id):
     return render(request, 'college/course_curriculum.html', context)
 
 
+@cache_control(private=True)
+@vary_on_cookie
+@last_modified(changes.plural_modification_for(m.Building))
 def buildings_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_campus_buildings"
@@ -1103,6 +1133,9 @@ def buildings_view(request):
     return render(request, 'college/buildings.html', context)
 
 
+@cache_control(private=True, max_age=60 * 60)
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Building))
 def building_view(request, building_id):
     # TODO This view can probably be optimized
     building = get_object_or_404(
@@ -1135,6 +1168,9 @@ def building_view(request, building_id):
     return render(request, 'college/building.html', context)
 
 
+@cache_control(private=True, max_age=60 * 60)
+@vary_on_cookie
+@last_modified(changes.singular_modification_for(m.Room))
 def room_view(request, room_id):
     room = get_object_or_404(m.Room.objects.select_related('building'), id=room_id)
     building = room.building
@@ -1157,6 +1193,7 @@ def room_view(request, room_id):
     return render(request, 'college/room.html', context)
 
 
+@login_required
 @permission_required('college.add_room')
 def room_create_view(request, building_id):
     building = get_object_or_404(m.Building, id=building_id)
@@ -1182,6 +1219,7 @@ def room_create_view(request, building_id):
     return render(request, 'college/room_edit.html', context)
 
 
+@login_required
 @permission_required('college.change_room')
 def room_edit_view(request, room_id):
     room = get_object_or_404(m.Room.objects.select_related('building'), id=room_id)
@@ -1209,6 +1247,9 @@ def room_edit_view(request, room_id):
 
 
 @login_required
+@cache_control(private=True, max_age=60 * 60)
+@vary_on_cookie
+@last_modified(changes.plural_modification_for(m.ClassInstance))
 def available_places_view(request):
     context = build_base_context(request)
     if not request.user.has_perm('users.student_access'):
@@ -1243,6 +1284,9 @@ def available_places_view(request):
 
 
 @login_required
+@vary_on_cookie
+@cache_control(private=True, max_age=60 * 10)
+@last_modified(changes.plural_modification_for(m.Teacher))
 def teacher_consent_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_teacher_consent"
