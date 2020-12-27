@@ -81,7 +81,6 @@ def registration_view(request):
             registration = form.save(commit=False)
             invite = form.cleaned_data['invite']
             token = registrations.generate_token(settings.REGISTRATIONS_TOKEN_LENGTH)
-            print(token)
             registration.token = token
             try:
                 try:
@@ -161,7 +160,13 @@ def registration_validation_view(request):
 
 
 def profile_view(request, nickname):
-    profile_user = get_object_or_404(m.User.objects, nickname=nickname)
+    profile_user = cache.get(f'profile_{nickname}')
+    if profile_user is None:
+        profile_user = get_object_or_404(
+            m.User.objects
+                .prefetch_related('students', 'teachers', 'groups_custom', 'awards', 'external_pages'),
+            nickname=nickname)
+        cache.set(f'profile_{nickname}', profile_user, timeout=60 * 10)
     permissions = profile_user.profile_permissions_for(request.user)
 
     context = build_base_context(request)
@@ -170,11 +175,6 @@ def profile_view(request, nickname):
         context['msg_content'] = 'O perfil deste utilizador está definido como oculto.'
         return render(request, 'supernova/message.html', context)
 
-    cached_context = cache.get(f'profile_{nickname}_{permissions["checksum"]}')
-    if False and cached_context is not None:
-        # Override cached with the base context
-        context = {**cached_context, **context}
-        return render(request, 'users/profile.html', context)
     context['pcode'] = "u_profile"
     page_name = f"Perfil de {profile_user.get_full_name()}"
     context['title'] = page_name
@@ -197,18 +197,7 @@ def profile_view(request, nickname):
             .order_by('name') \
             .distinct('name')
 
-        if permissions['schedule_visibility']:
-            shift_instances = college.ShiftInstance.objects \
-                .select_related('shift__class_instance__parent') \
-                .prefetch_related('room__building') \
-                .filter(shift__student__in=primary_students,
-                        shift__class_instance__year=settings.COLLEGE_YEAR,
-                        shift__class_instance__period=settings.COLLEGE_PERIOD) \
-                .exclude(disappeared=True)
-            context['weekday_spans'], context['schedule'], context['unsortable'] = \
-                schedules.build_schedule(shift_instances)
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
-    cache.set(f'profile_{nickname}_{permissions["checksum"]}_context', context, timeout=600)
 
     return render(request, 'users/profile.html', context)
 
@@ -275,7 +264,6 @@ def user_calendar_management_view(request, nickname):
         except (ValueError, m.ScheduleOnce.DoesNotExist):
             return HttpResponse(status=400)
 
-
     once_schedule_entries = m.ScheduleOnce.objects.filter(user=profile_user)
     periodic_schedule_entries = m.SchedulePeriodic.objects.filter(user=profile_user)
 
@@ -329,6 +317,7 @@ def user_reputation_view(request, nickname):
     context['title'] = f"Reputação de {profile_user.get_full_name()}"
     stats = get_user_stats(profile_user)
     context.update(stats)
+
     context['profile_user'] = profile_user
     context['sub_nav'] = [{'name': profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
                           {'name': 'Reputação', 'url': reverse('users:reputation', args=[nickname])}]
@@ -344,12 +333,12 @@ def user_evaluations_view(request, nickname):
     context['pcode'] = "u_evaluations"
     context['title'] = f"Avaliações de {profile_user.get_full_name()}"
     context['profile_user'] = profile_user
-    context['enrollments'] = college.Enrollment.objects\
+    context['enrollments'] = college.Enrollment.objects \
         .filter(student__user=profile_user) \
         .exclude(class_instance__year=settings.COLLEGE_YEAR, class_instance__period__gte=settings.COLLEGE_PERIOD) \
         .select_related('class_instance__parent') \
-        .order_by('class_instance__year', 'class_instance__period')\
-        .reverse()\
+        .order_by('class_instance__year', 'class_instance__period') \
+        .reverse() \
         .all()
     events = college.ClassInstanceEvent.objects \
         .filter(date__gte=datetime.today().date(), class_instance__student__user=profile_user) \
@@ -371,7 +360,6 @@ def user_profile_settings_view(request, nickname):
 
     if request.user.nickname != nickname and request.user.is_staff:
         context['permissions_form'] = f.AccountPermissionsForm(profile_user)
-
     settings_form = f.AccountSettingsForm(instance=profile_user)
 
     if request.method == 'POST':
@@ -395,6 +383,8 @@ def user_profile_settings_view(request, nickname):
                     # Prevent logout locally
                     if profile_user == request.user:
                         login(request, profile_user)
+
+                cache.delete(f'profile_{nickname}')
                 return HttpResponseRedirect(reverse('users:profile', args=[profile_user.nickname]))
 
     context['settings_form'] = settings_form
