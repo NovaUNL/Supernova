@@ -38,7 +38,7 @@ class BindStudentToUserForm(djf.Form):
     def save(self):
         user: users.User = self.cleaned_data.get('user')
         student: college.Student = self.cleaned_data.get('student')
-        if student.user is not None:
+        if student.user is None:
             triggers.student_assignment(user, student)
         else:
             raise ValidationError(f"Student {student.name} is already assigned to user {student.user.nickname}")
