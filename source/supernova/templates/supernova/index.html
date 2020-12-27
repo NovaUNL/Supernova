@@ -194,46 +194,7 @@
         <div class="pane-title bg-grad">
           <h2>BOINC (<a href="https://www.boincstats.com/stats/-1/team/detail/2068385380/overview">NOVA Lisboa</a>)</h2>
         </div>
-        <div class="pane-content boinc">
-          <table>
-            <thead>
-            <tr>
-              <td></td>
-              <th>Utilizador</th>
-              <th>Última semana</th>
-            </tr>
-            </thead>
-            {% for user in boinc_users %}
-              <tr>
-                {% if forloop.counter == 1 %}
-                  <td><img src="{% static 'img/icons/first.svg' %}"></td>
-                {% elif forloop.counter == 2 %}
-                  <td><img src="{% static 'img/icons/second.svg' %}"></td>
-                {% elif forloop.counter == 3 %}
-                  <td><img src="{% static 'img/icons/third.svg' %}"></td>
-                {% else %}
-                  <td></td>
-                {% endif %}
-                <td>{{ user.name }}</td>
-                <td>{{ user.weekly }}</td>
-              </tr>
-            {% endfor %}
-            <thead>
-            <tr>
-              <td></td>
-              <th>Projeto</th>
-              <th>Última semana</th>
-            </tr>
-            {% for project in boinc_projects %}
-              <tr>
-                <td></td>
-                <td>{{ project.name }}</td>
-                <td>{{ project.weekly }}</td>
-              </tr>
-            {% endfor %}
-            </thead>
-          </table>
-        </div>
+        <div id="boinc" class="pane-content" data-endpoint="{% url 'api:boinc' %}"></div>
       </div>
       <div class="flex-pane">
         <div class="pane-title bg-grad">
