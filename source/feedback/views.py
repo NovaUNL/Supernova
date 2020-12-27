@@ -45,7 +45,7 @@ def suggestion_view(request, suggestion_id):
 
 
 @login_required
-@permission_required('feedback.add_suggestion')
+@permission_required('feedback.add_suggestion', raise_exception=True)
 def suggestion_create_view(request, content_type_id=None, object_id=None):
     obj = None
     if object_id is not None:
@@ -80,7 +80,7 @@ def suggestion_create_view(request, content_type_id=None, object_id=None):
 
 
 @login_required
-@permission_required('feedback.add_review')
+@permission_required('feedback.add_review', raise_exception=True)
 def review_create_view(request, content_type_id, object_id):
     try:
         object_type = ContentType.objects.get_for_id(content_type_id)

@@ -399,7 +399,7 @@ def user_profile_settings_view(request, nickname):
 
 
 @login_required
-@permission_required('users.add_invite')
+@permission_required('users.add_invite', raise_exception=True)
 def invites_view(request, nickname):
     if request.user.nickname != nickname and not request.user.is_staff:
         raise PermissionDenied()
@@ -414,7 +414,7 @@ def invites_view(request, nickname):
 
 
 @login_required
-@permission_required('users.add_invite')
+@permission_required('users.add_invite', raise_exception=True)
 def create_invite_view(request, nickname):
     if request.user.nickname != nickname:
         raise PermissionDenied()
