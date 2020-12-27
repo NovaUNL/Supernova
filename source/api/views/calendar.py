@@ -1,10 +1,14 @@
 from django.db.models import F
 from django.conf import settings
+from django.core.cache import cache
 
 from rest_framework import authentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
 from api import permissions
 from users.utils import get_students
 from users import models as users
@@ -14,14 +18,27 @@ from groups import models as groups
 
 @api_view(['GET'])
 @authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
-@permission_classes((permissions.SelfOnly,))
-def user_schedule(_, nickname):
+@permission_classes((IsAuthenticated,))
+def user_schedule(request, nickname):
     """
     Exposes the periodic events that are related to a user
     :param nickname: User nickname
     :return: Response with the current and historical events
     """
-    user = get_object_or_404(users.User.objects.prefetch_related('students', 'groups_custom'), nickname=nickname)
+    cache_key = f'user_{nickname}_schedule'
+    user_schedule = cache.get(cache_key)
+    if user_schedule is None:
+        user = get_object_or_404(users.User.objects.prefetch_related('students', 'groups_custom'), nickname=nickname)
+    else:
+        user = get_object_or_404(users.User, nickname=nickname)
+
+    permissions = user.profile_permissions_for(request.user)
+    if not permissions['schedule_visibility']:
+        raise PermissionDenied(detail=f'{request.user.nickname} atempted to view {user.nickname} schedule.')
+
+    if user_schedule:
+        return Response(user_schedule)
+
     primary_students, _ = get_students(user)
     user_groups = user.groups_custom.all()
     schedule_entries = []
@@ -68,6 +85,7 @@ def user_schedule(_, nickname):
             'end': entry.end_date,
         })
 
+    cache.set(cache_key, schedule_entries, timeout=60 * 60)
     return Response(schedule_entries)
 
 
@@ -153,7 +171,6 @@ def user_calendar(_, nickname):
         })
 
     return Response(schedule_entries)
-
 
 
 @api_view(['GET'])
