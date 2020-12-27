@@ -5,20 +5,20 @@
 {% block content_wrapper %}
   <div class="col padded">
     <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Informação dramática</h2></div>
-      <div class="pane-content">
-        Este serviço <b style="color: red">NÃO</b> é o CLIP.
-        Apesar de fazer muito do que o CLIP faz por ti, estás numa plataforma diferente.<br>
-        Não és obrigado a registar-te com a password do CLIP, até porque <b>não se reutilizam passwords</b>.<br><br>
-        Lê os <a href="{% url 'terms' %}">termos de serviço</a> e a <a href="{% url 'privacy' %}">politica de
-        privacidade</a> antes de te
-        registares. Se prosseguires é assumido o teu consentimento.<br>
-        (Resumidamente: Esta plataforma não tem propósito comercial nem te vai vender a alma, mas não somos responsáveis
-        se te roubarem o queijo do frigorífico).<br>
-        Se não concordas ou o que querias mesmo era ter o CLIP bonito, espreita a aplicação do NEEC.
+      <div class="pane-title bg-grad"><h2>Pressupostos</h2></div>
+      <div class="pane-content col">
+        <p>Este serviço <b style="color: red">NÃO</b> é o CLIP.
+          Apesar de fazer muito do que o CLIP faz por ti, estás numa plataforma diferente.<br>
+          Não és obrigado a registar-te com a password do CLIP.
+        </p>
+        <p>
+          Lê os <a href="{% url 'terms' %}">termos de serviço</a> e a <a href="{% url 'privacy' %}">politica de
+          privacidade</a> antes de te registares. Se prosseguires é assumido o teu consentimento.
+        </p>
+        <input class="ui-btn end" type="button" value="Prosseguir" onclick="registrationProceed(this)">
       </div>
     </div>
-    <div class="flex-pane">
+    <div id="registration-form" class="flex-pane" style="display: none">
       <div class="pane-title bg-grad"><h2>Criar conta</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{{ request.get_full_path }}">
@@ -119,7 +119,8 @@
               {% endif %}
               <div class="form-row-description">
                 Uma palavra-passe razoavelmente longa e preferencialmente diversa (letras, números, pontuação).<br>
-                Não pode ser excessivamente curta, pouco diversa ou estar fortemente relacionada com um dos atributos públicos da conta.
+                Não pode ser excessivamente curta, pouco diversa ou estar fortemente relacionada com um dos atributos
+                públicos da conta.
               </div>
             </div>
           </div>
@@ -131,12 +132,9 @@
   </div>
   </div>
   <script>
-      let emailModified = false;
-
-      function studentIDChanged(student) {
-          if (emailModified) return;
-          let element = document.getElementById('id_email');
-          element.value = student.value + "@campus.fct.unl.pt"
+      function registrationProceed(e) {
+          e.closest('.flex-pane').remove();
+          $('#registration-form').css('display', 'block');
       }
   </script>
 {% endblock %}
