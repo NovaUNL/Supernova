@@ -145,7 +145,7 @@ def department_edit_view(request, department_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_control(private=True, max_age=60 * 60)
 @vary_on_cookie
 @last_modified(changes.singular_modification_for(m.Student))
@@ -193,7 +193,7 @@ def student_view(request, student_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_control(private=True, max_age=60 * 60)
 @vary_on_cookie
 @last_modified(changes.singular_modification_for(m.Teacher))
@@ -252,7 +252,7 @@ def teacher_edit_view(request, teacher_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @vary_on_cookie
 @last_modified(changes.singular_modification_for(m.Teacher))
 def teacher_reviews_view(request, teacher_id):
@@ -270,7 +270,7 @@ def teacher_reviews_view(request, teacher_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def teacher_review_create_view(request, teacher_id):
     teacher = get_object_or_404(m.Teacher.objects, id=teacher_id)
 
@@ -368,7 +368,7 @@ def class_edit_view(request, class_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_page(60 * 2)
 @vary_on_cookie
 # @cache_control(private=True, max_age=60)
@@ -404,7 +404,7 @@ def _class_instance_nav(instance):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_page(60 * 5)
 @vary_on_cookie
 # TODO this is not enough as there are external elements such as questions and reviews in the template
@@ -458,7 +458,7 @@ def class_instance_edit_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_control(private=True, max_age=60 * 5)
 @vary_on_cookie
 def class_instance_shifts_view(request, instance_id):
@@ -487,7 +487,7 @@ def class_instance_shifts_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_control(private=True, max_age=60 * 30)
 @vary_on_cookie
 @last_modified(changes.last_class_instance_modification)
@@ -515,7 +515,7 @@ def class_instance_shift_view(request, instance_id, shift_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @vary_on_cookie
 @cache_page(60 * 2)
 # TODO complete
@@ -546,7 +546,7 @@ def class_instance_enrolled_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def class_instance_events_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent', 'department'),
@@ -573,7 +573,7 @@ def class_instance_events_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def class_instance_files_view(request, instance_id):
     instance = get_object_or_404(
         m.ClassInstance.objects.select_related('parent', 'department'),
@@ -616,7 +616,7 @@ def class_instance_files_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def class_instance_file_view(request, instance_id, class_file_id):
     class_file = get_object_or_404(
         m.ClassFile.objects.select_related('file', 'class_instance__parent__department'),
@@ -641,7 +641,7 @@ def class_instance_file_view(request, instance_id, class_file_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def class_instance_file_download(request, instance_id, file_hash):
     class_file = get_object_or_404(
         m.ClassFile.objects.prefetch_related('file'),
@@ -687,7 +687,7 @@ def class_instance_file_download(request, instance_id, file_hash):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def file_download(request, file_hash):
     file = get_object_or_404(
         m.File.objects.prefetch_related('file'),
@@ -734,7 +734,7 @@ def file_download(request, file_hash):
 
 
 @login_required
-@permission_required('users.teacher_access')
+@permission_required('users.teacher_access', raise_exception=True)
 def class_instance_files_edit_view(request, instance_id):
     instance = get_object_or_404(m.ClassInstance.objects, id=instance_id)
     context = build_base_context(request)
@@ -750,7 +750,7 @@ def class_instance_files_edit_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.teacher_access')
+@permission_required('users.teacher_access', raise_exception=True)
 def class_instance_file_attach_view(request, instance_id, file_hash=None):
     instance = get_object_or_404(m.ClassInstance.objects, id=instance_id)
     context = build_base_context(request)
@@ -795,7 +795,7 @@ def class_instance_file_attach_view(request, instance_id, file_hash=None):
 
 
 @login_required
-@permission_required('users.teacher_access')
+@permission_required('users.teacher_access', raise_exception=True)
 def class_instance_file_edit_view(request, instance_id, class_file_id):
     class_file = get_object_or_404(
         m.ClassFile.objects.select_related('class_instance__parent__department'),
@@ -829,7 +829,7 @@ def class_instance_file_edit_view(request, instance_id, class_file_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def class_instance_reviews_view(request, instance_id):
     instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
 
@@ -844,7 +844,7 @@ def class_instance_reviews_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def class_instance_review_create_view(request, instance_id):
     instance = get_object_or_404(m.ClassInstance.objects.select_related('parent'), id=instance_id)
     context = build_base_context(request)
@@ -870,7 +870,7 @@ def class_instance_review_create_view(request, instance_id):
 
 
 @login_required
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 def file_view(request, file_hash):
     file = get_object_or_404(m.File.objects, hash=file_hash)
     context = build_base_context(request)
@@ -889,7 +889,7 @@ def file_view(request, file_hash):
 
 
 @login_required
-@permission_required('users.teacher_access')
+@permission_required('users.teacher_access', raise_exception=True)
 def file_edit_view(request, file_hash):
     file = get_object_or_404(m.File.objects, hash=file_hash)
 
@@ -922,7 +922,7 @@ file_storage = HashedFilenameFileSystemStorage(location=settings.PROTECTED_ROOT)
 
 
 @login_required
-@permission_required('users.teacher_access')
+@permission_required('users.teacher_access', raise_exception=True)
 def file_upload_view(request):
     context = build_base_context(request)
     class_instance = None
@@ -1071,7 +1071,7 @@ def course_edit_view(request, course_id):
     return render(request, 'college/course_edit.html', context)
 
 
-@permission_required('users.student_access')
+@permission_required('users.student_access', raise_exception=True)
 @cache_control(private=True, max_age=60 * 60 * 6)
 @vary_on_cookie
 @last_modified(changes.singular_modification_for(m.Course))
@@ -1194,7 +1194,7 @@ def room_view(request, room_id):
 
 
 @login_required
-@permission_required('college.add_room')
+@permission_required('college.add_room', raise_exception=True)
 def room_create_view(request, building_id):
     building = get_object_or_404(m.Building, id=building_id)
     if request.method == 'POST':
@@ -1220,7 +1220,7 @@ def room_create_view(request, building_id):
 
 
 @login_required
-@permission_required('college.change_room')
+@permission_required('college.change_room', raise_exception=True)
 def room_edit_view(request, room_id):
     room = get_object_or_404(m.Room.objects.select_related('building'), id=room_id)
     if request.method == 'POST':
