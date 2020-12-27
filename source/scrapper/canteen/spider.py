@@ -85,10 +85,10 @@ def meal_name_to_int(name):
         return 4
 
 
-known_meat = {'carne', 'porco', 'vaca', 'frango', 'galinha', 'peru', 'perna', 'asa', 'peito', 'bacon', 'alheira',
-              'salsicha', 'almôndegas com'}
+known_meat = {'carne', 'porco', 'vaca', 'frango', 'galinha', 'peru', 'aves', 'perna', 'asa', 'peito', 'bacon',
+              'alheira', 'salsicha', 'almôndegas com', 'carbonara'}
 known_fish = {'peixe', 'pescada', 'bacalhau', 'filetes', 'atum', 'solha', 'douradinhos', 'marisco', 'fish', 'paloco',
-              'carapau', 'calamares'}
+              'carapau', 'calamares', 'rissóis de camarão'}
 
 
 def meal_item_str_type_to_int(type_str, name):
