@@ -27,6 +27,8 @@ def login_view(request):
     context['title'] = "Autenticação"
 
     if request.user.is_authenticated:
+        if 'next' in request.GET:
+            return HttpResponseRedirect(request.GET['next'])
         return HttpResponseRedirect(reverse('users:profile', args=[request.user]))
 
     if request.method == 'POST':
@@ -35,6 +37,7 @@ def login_view(request):
             user: m.User = form.get_user()
             login(request, user)
 
+            # First login (TODO change to some sort of tutorial)
             if user.last_login is None:
                 return HttpResponseRedirect(reverse('users:profile', args=[user.username]))
 
