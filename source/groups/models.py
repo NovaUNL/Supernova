@@ -119,6 +119,9 @@ class Group(djm.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('groups:group', args=[self.abbreviation])
+
     @property
     def description_html(self):
         return markdownify(self.description)
