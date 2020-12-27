@@ -1,11 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import logging
 
 from dal import autocomplete
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, HttpResponse
@@ -19,7 +17,7 @@ from users import registrations, exceptions
 from college import models as college
 from college import schedules
 from supernova.views import build_base_context
-from .utils import get_students, get_user_stats, award_user, calculate_points
+from .utils import get_students, get_user_stats
 
 
 def login_view(request):
@@ -181,6 +179,10 @@ def profile_view(request, nickname):
     context['profile_user'] = profile_user
 
     context['permissions'] = permissions
+    if permissions['info_visibility'] and profile_user.birth_date:
+        now = date.today()
+        birth = profile_user.birth_date
+        context['age'] = now.year - birth.year - ((now.month, now.day) < (birth.month, birth.day))
     if permissions['enrollments_visibility']:
         primary_students, context['secondary_students'] = get_students(profile_user)
         context['primary_students'] = primary_students

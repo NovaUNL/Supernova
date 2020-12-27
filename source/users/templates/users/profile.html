@@ -57,18 +57,22 @@
                   {% endif %}
                 {% endfor %}
               </div>
+              {% if age %}
+                <h4>Idade:</h4>
+                <span class="indented">{{ age }} anos</span>
+              {% endif %}
               {% if profile_user.residence %}
                 <h4>Zona de residência:</h4>
                 <span class="indented">{{ profile_user.residence }}</span>
+              {% endif %}
+              {% if profile_user.webpage %}
+                <h4>Página:</h4>
+                <a class="indented" href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a>
               {% endif %}
               <h4>Utilizador desde:</h4>
               <span class="indented">{{ profile_user.date_joined }}</span>
               <h4>Última atividade:</h4>
               <span class="indented">{{ profile_user.last_activity }}</span>
-              {% if profile_user.webpage %}
-                <h4>Página:</h4>
-                <a class="indented" href="{{ profile_user.webpage }}">{{ profile_user.webpage }}</a>
-              {% endif %}
             </div>
           </div>
         {% endif %}
