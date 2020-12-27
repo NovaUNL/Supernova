@@ -94,6 +94,12 @@ class User(AbstractUser):
         return reverse('users:profile', args=[self.nickname])
 
     @property
+    def name(self):
+        if self.first_name:
+            return self.get_full_name()
+        return self.nickname
+
+    @property
     def about_html(self):
         return markdownify(self.about)
 

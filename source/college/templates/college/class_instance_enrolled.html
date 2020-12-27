@@ -26,7 +26,7 @@
                   <td>
                     {% if enrollment.student.user %}
                       <a href="{{ enrollments.student.user.get_absolute_url }}">
-                        {{ enrollment.student.user.get_full_name }}
+                        {{ enrollment.student.name }}
                       </a>
                     {% else %}
                       {{ enrollment.student.name }}

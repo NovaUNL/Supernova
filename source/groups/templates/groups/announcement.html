@@ -9,7 +9,7 @@
       {{ announcement.content_html|safe }}
       <hr>
       Colocado em {{ announcement.datetime }} por
-      <a href="{% url 'users:profile' announcement.author.nickname %}">{{ announcement.author.get_full_name }}</a>
+      <a href="{% url 'users:profile' announcement.author.nickname %}">{{ announcement.author.name }}</a>
     </div>
   </div>
 {% endblock %}

@@ -7,7 +7,7 @@
         <div class="pane-title bg-grad"><h2>{{ conversation.title }}</h2></div>
         <div class="pane-content">
           {{ message.content_html|safe }}
-          <small>Por <a href="{{ message.author.get_absolute_url }}">{{ message.author.get_full_name }}</a>
+          <small>Por <a href="{{ message.author.get_absolute_url }}">{{ message.author.name }}</a>
             a {{ message.creation }}.</small>
         </div>
       </div>
@@ -16,7 +16,7 @@
         <div class="pane-title bg-grad"></div>
         <div class="pane-content">
           {{ message.content_html|safe }}
-          <small>Por <a href="{{ message.author.get_absolute_url }}">{{ message.author.get_full_name }}</a>
+          <small>Por <a href="{{ message.author.get_absolute_url }}">{{ message.author.name }}</a>
             a {{ message.creation }}.</small>
         </div>
       </div>

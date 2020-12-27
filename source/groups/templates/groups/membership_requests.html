@@ -23,7 +23,7 @@
         <ul>
           {% for candidate in candidates %}
             <li>
-              {{ candidate.user.get_full_name }}
+              {{ candidate.user.name }}
               <a href="{{ candidate.user.get_absolute_url }}">{{ candidate.user.nickname }}</a>
               {% if candidate.message %}
                 <blockquote>{{ candidate.message|linebreaksbr }}</blockquote>

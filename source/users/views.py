@@ -174,7 +174,7 @@ def profile_view(request, nickname):
         return render(request, 'supernova/message.html', context)
 
     context['pcode'] = "u_profile"
-    page_name = f"Perfil de {profile_user.get_full_name()}"
+    page_name = f"Perfil de {profile_user.name}"
     context['title'] = page_name
     context['profile_user'] = profile_user
 
@@ -219,7 +219,7 @@ def user_schedule_view(request, nickname):
         return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
 
     context['pcode'] = "u_schedule"
-    context['title'] = "Horário de " + profile_user.get_full_name()
+    context['title'] = f"Horário de {profile_user.name}"
     context['profile_user'] = profile_user
 
     shift_instances = college.ShiftInstance.objects \
@@ -232,7 +232,7 @@ def user_schedule_view(request, nickname):
 
     context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(shift_instances)
     context['sub_nav'] = [
-        {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Perfil de " + profile_user.name, 'url': reverse('users:profile', args=[nickname])},
         {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
     return render(request, 'users/profile_schedule.html', context)
 
@@ -247,7 +247,7 @@ def user_calendar_view(request, nickname):
     context['pcode'] = "u_calendar"
     context['title'] = "Calendário de " + nickname
     context['sub_nav'] = [
-        {'name': "Perfil de " + user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Perfil de " + user.name, 'url': reverse('users:profile', args=[nickname])},
         {'name': "Calendário", 'url': reverse('users:calendar', args=[nickname])}]
     return render(request, 'users/calendar.html', context)
 
@@ -302,7 +302,7 @@ def user_calendar_management_view(request, nickname):
     context['periodic_form'] = periodic_form
 
     context['sub_nav'] = [
-        {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Perfil de " + profile_user.name, 'url': reverse('users:profile', args=[nickname])},
         {'name': "Calendário", 'url': reverse('users:calendar', args=[nickname])},
         {'name': "Agenda", 'url': reverse('users:calendar_manage', args=[nickname])}]
     return render(request, 'users/calendar_manage.html', context)
@@ -316,12 +316,12 @@ def user_reputation_view(request, nickname):
 
     context = build_base_context(request)
     context['pcode'] = "u_reputation"
-    context['title'] = f"Reputação de {profile_user.get_full_name()}"
+    context['title'] = f"Reputação de {profile_user.name}"
     stats = get_user_stats(profile_user)
     context.update(stats)
 
     context['profile_user'] = profile_user
-    context['sub_nav'] = [{'name': profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+    context['sub_nav'] = [{'name': profile_user.name, 'url': reverse('users:profile', args=[nickname])},
                           {'name': 'Reputação', 'url': reverse('users:reputation', args=[nickname])}]
     return render(request, 'users/reputation.html', context)
 
@@ -333,7 +333,7 @@ def user_evaluations_view(request, nickname):
     profile_user = get_object_or_404(m.User.objects, nickname=nickname)
     context = build_base_context(request)
     context['pcode'] = "u_evaluations"
-    context['title'] = f"Avaliações de {profile_user.get_full_name()}"
+    context['title'] = f"Avaliações de {profile_user.name}"
     context['profile_user'] = profile_user
     context['enrollments'] = college.Enrollment.objects \
         .filter(student__user=profile_user) \
@@ -348,7 +348,7 @@ def user_evaluations_view(request, nickname):
     context['next_evaluations'] = next_evaluations \
         = list(filter(lambda e: e.type in (college.ctypes.EventType.TEST, college.ctypes.EventType.EXAM), events))
     context['next_events'] = list(filter(lambda e: e not in next_evaluations, events))
-    context['sub_nav'] = [{'name': profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+    context['sub_nav'] = [{'name': profile_user.name, 'url': reverse('users:profile', args=[nickname])},
                           {'name': 'Eventos', 'url': request.get_raw_uri()}]
     return render(request, 'users/profile_evaluations.html', context)
 
@@ -394,7 +394,7 @@ def user_profile_settings_view(request, nickname):
     context['title'] = 'Definições da conta'
     context['profile_user'] = profile_user
     context['sub_nav'] = [
-        {'name': "Perfil de " + profile_user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+        {'name': "Perfil de " + profile_user.name, 'url': reverse('users:profile', args=[nickname])},
         {'name': "Definições da conta", 'url': reverse('users:settings', args=[nickname])}]
 
     return render(request, 'users/profile_settings.html', context)
@@ -408,9 +408,9 @@ def invites_view(request, nickname):
     user = get_object_or_404(m.User.objects.prefetch_related('invites'), nickname=nickname)
     context = build_base_context(request)
     context['pcode'] = "u_invites"
-    context['title'] = f"Convites emitidos por {user.get_full_name()}"
+    context['title'] = f"Convites emitidos por {user.name}"
     context['profile_user'] = user
-    context['sub_nav'] = [{'name': user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+    context['sub_nav'] = [{'name': user.name, 'url': reverse('users:profile', args=[nickname])},
                           {'name': 'Convites', 'url': reverse('users:invites', args=[nickname])}]
     return render(request, 'users/invites.html', context)
 
@@ -428,9 +428,9 @@ def create_invite_view(request, nickname):
 
     context = build_base_context(request)
     context['pcode'] = "u_invites"
-    context['title'] = f"Convites emitidos por {user.get_full_name()}"
+    context['title'] = f"Convites emitidos por {user.name}"
     context['profile_user'] = user
-    context['sub_nav'] = [{'name': user.get_full_name(), 'url': reverse('users:profile', args=[nickname])},
+    context['sub_nav'] = [{'name': user.name, 'url': reverse('users:profile', args=[nickname])},
                           {'name': 'Convites', 'url': reverse('users:invites', args=[nickname])}]
     return render(request, 'users/invite_new.html', context)
 

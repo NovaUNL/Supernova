@@ -7,7 +7,7 @@ from chat import models as m
 class ConversationUserSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField()
     nickname = serializers.CharField()
-    name = serializers.CharField(required=False, source='get_full_name')
+    name = serializers.CharField()
     thumbnail = serializers.ImageField(source='picture_thumbnail', default=static('img/user.svg'))
     profile = serializers.URLField(source='get_absolute_url')
 

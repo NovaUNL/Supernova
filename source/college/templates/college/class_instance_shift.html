@@ -55,7 +55,7 @@
                     <td>{% if student.number %}<a href="{{ student.get_absolute_url }}">{{ student.number }}</a>{% endif %}</td>
                     <td>
                       {% if student.user %}
-                        <a href="{{ student.user.get_absolute_url }}">{{ student.user.get_full_name }}</a>
+                        <a href="{{ student.user.get_absolute_url }}">{{ student.name }}</a>
                       {% else %}
                         {{ student.external_data.name }}
                       {% endif %}
