@@ -215,22 +215,9 @@ def user_schedule_view(request, nickname):
         profile_user = get_object_or_404(m.User.objects.prefetch_related('students'), nickname=nickname)
 
     primary_students, _ = get_students(profile_user)
-    if len(primary_students) == 0:
-        return HttpResponseRedirect(reverse('users:profile', args=[nickname]))
-
     context['pcode'] = "u_schedule"
     context['title'] = f"Horário de {profile_user.name}"
     context['profile_user'] = profile_user
-
-    shift_instances = college.ShiftInstance.objects \
-        .select_related('shift__class_instance__parent') \
-        .prefetch_related('room__building') \
-        .filter(shift__student__in=primary_students,
-                shift__class_instance__year=settings.COLLEGE_YEAR,
-                shift__class_instance__period=settings.COLLEGE_PERIOD) \
-        .exclude(disappeared=True)
-
-    context['weekday_spans'], context['schedule'], context['unsortable'] = schedules.build_schedule(shift_instances)
     context['sub_nav'] = [
         {'name': "Perfil de " + profile_user.name, 'url': reverse('users:profile', args=[nickname])},
         {'name': "Horário", 'url': reverse('users:schedule', args=[nickname])}]
