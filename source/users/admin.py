@@ -8,8 +8,8 @@ class UserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(m.User, UserAdmin)
-admin.site.register(m.Badge)
-admin.site.register(m.UserBadge)
+admin.site.register(m.Award)
+admin.site.register(m.UserAward)
 admin.site.register(m.ExternalPage)
 admin.site.register(m.Registration)
 admin.site.register(m.Invite)
