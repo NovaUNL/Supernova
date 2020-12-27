@@ -135,6 +135,18 @@
       <img class="main-footer lowres" src="{% static 'img/banner.svg' %}">
     </div>
     <div class="col medium nogrow">
+      {% if pinned_news|length > 0 %}
+        <div class="flex-pane">
+          <div class="pane-title bg-grad">
+            <h2>Avisos</h2>
+          </div>
+          <ul style="list-style: square">
+            {% for entry in pinned_news %}
+              <li class="entity"><a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
       <div class="flex-pane">
         <div class="pane-title bg-grad">
           <h2><a href="{% url 'college:transportation' %}">Transportes</a></h2>

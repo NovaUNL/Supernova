@@ -1,0 +1,13 @@
+{% extends 'supernova/content_only_formatted.html' %}
+
+{% load static %}
+
+{% block title %}
+  <h2>{{ item.title }}</h2>
+{% endblock %}
+
+{% block content %}
+  <p>{{ item.content_html|safe }}</p>
+  <hr>
+  <small>Publicado a {{ item.datetime }}</small>
+{% endblock %}

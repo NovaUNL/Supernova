@@ -1,7 +1,8 @@
 from django.contrib import admin
 
-from news.models import NewsTag, NewsItem, NewsVote
+from news import models as m
 
-admin.site.register(NewsTag)
-admin.site.register(NewsItem)
-admin.site.register(NewsVote)
+admin.site.register(m.NewsTag)
+admin.site.register(m.NewsItem)
+admin.site.register(m.NewsVote)
+admin.site.register(m.PinnedNewsItem)

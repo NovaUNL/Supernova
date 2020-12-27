@@ -2,11 +2,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from supernova.views import build_base_context
-from news.models import NewsItem
+from news import models as m
 
 
-def index(request):
-    paginator = Paginator(NewsItem.objects.order_by('datetime').reverse(), 10)
+def index_view(request):
+    """
+    Lists news items with a pagination feature.
+    """
+    paginator = Paginator(m.NewsItem.objects.order_by('datetime').reverse(), 10)
     p = 1
     if 'p' in request.GET:
         try:
@@ -25,8 +28,12 @@ def index(request):
     return render(request, 'news/list.html', context)
 
 
-def item(request, news_item_id):
-    news_item = get_object_or_404(NewsItem, id=news_item_id)
+def item_view(request, news_item_id):
+    """
+    Show a news item.
+    :param news_item_id: The id of the news item
+    """
+    news_item = get_object_or_404(m.NewsItem, id=news_item_id)
     context = build_base_context(request)
     context['pcode'] = 'c_news_item'
     context['title'] = 'Notícia:' + news_item.title
@@ -39,3 +46,16 @@ def item(request, news_item_id):
         {'name': 'Noticias', 'url': reverse('news:index')},
         {'name': short_title, 'url': reverse('news:item', args=[news_item_id])}]
     return render(request, 'news/item.html', context)
+
+
+def pinned_item_view(request, pinned_item_id):
+    """
+    Show a pinned news item in a simple page.
+    :param pinned_item_id: The id of the pinned news item
+    """
+    item = get_object_or_404(m.PinnedNewsItem, id=pinned_item_id)
+    context = build_base_context(request)
+    context['pcode'] = 'c_news'
+    context['title'] = item.title
+    context['item'] = item
+    return render(request, 'news/simple_item.html', context)

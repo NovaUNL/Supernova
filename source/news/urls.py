@@ -19,6 +19,7 @@ class NewsSitemap(Sitemap):
 
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('<str:news_item_id>/', views.item, name='item'),
+    path('', views.index_view, name='index'),
+    path('aviso/<str:pinned_item_id>/', views.pinned_item_view, name='pinned_item'),
+    path('<str:news_item_id>/', views.item_view, name='item'),
 ]

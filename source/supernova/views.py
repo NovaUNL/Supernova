@@ -9,7 +9,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
 
-from scrapper.boinc import boincstats
 from services.utils import get_next_meal_items
 from supernova import models as m
 from supernova import forms as f
@@ -59,6 +58,7 @@ def index(request):
             .annotate(answer_count=Count('answers')) \
             .order_by('timestamp') \
             .reverse()[:5]
+    context['pinned_news'] = news.PinnedNewsItem.objects.filter(active=True).order_by('title').all()
     context['message'] = settings.INDEX_MESSAGE
     context['matrix_url'] = settings.MATRIX_URL
     context['mastodon_url'] = settings.MASTODON_URL

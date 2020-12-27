@@ -29,13 +29,13 @@ class NewsItem(djm.Model):
         blank=True,
         null=True,
         on_delete=djm.SET_NULL,
-        related_name='author')
+        related_name='authored_news_items')
     edit_author = djm.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
         on_delete=djm.SET_NULL,
-        related_name='edit_author')
+        related_name='edited_news_items')
     tags = djm.ManyToManyField(NewsTag, blank=True)
     source = djm.URLField(null=True, blank=True, max_length=256)
     cover_img = djm.ImageField(null=True, blank=True, max_length=256, upload_to=news_item_picture)
@@ -54,7 +54,7 @@ class NewsItem(djm.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('news:item', args=[str(self.id)])
+        return reverse('news:item', args=[self.id])
 
     @property
     def content_html(self):
@@ -87,3 +87,33 @@ class NewsVote(djm.Model):
     news_item = djm.ForeignKey(NewsItem, on_delete=djm.CASCADE)
     user = djm.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=djm.SET_NULL)
     vote_type = djm.IntegerField(choices=VOTE_TYPE_CHOICES)
+
+
+class PinnedNewsItem(djm.Model):
+    title = djm.CharField(max_length=256)
+    content = MarkdownxField()
+    datetime = djm.DateTimeField()
+    author = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=djm.SET_NULL,
+        related_name='authored_pinned_item')
+    edit_datetime = djm.DateTimeField(null=True, blank=True, default=None)
+    edit_author = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=djm.SET_NULL,
+        related_name='edited_pinned_item')
+    active = djm.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.title}{'' if self.active else ' (inactive)'}"
+
+    def get_absolute_url(self):
+        return reverse('news:pinned_item', args=[self.id])
+
+    @property
+    def content_html(self):
+        return markdownify(self.content)
