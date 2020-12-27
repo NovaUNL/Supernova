@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.conf import settings
+from django.utils import timezone
 
 from dal import autocomplete
 
@@ -277,7 +278,7 @@ class AccountSettingsForm(djf.ModelForm):
 
         days_since_change = (datetime.now().date() - self.instance.last_nickname_change).days
         if days_since_change < 180:
-            raise djf.ValidationError(f"Mudou a sua alcunha há menos de 6 meses (passaram {days_since_change} dias)")
+            raise djf.ValidationError(f"Mudou a sua alcunha recentemente (passaram {days_since_change} dias)")
         enforce_name_policy(nickname)
 
         if m.User.objects \
@@ -339,6 +340,13 @@ class AccountSettingsForm(djf.ModelForm):
                 self.instance.nickname,
                 self.cleaned_data["new_password"])
         return self.cleaned_data
+
+    def save(self, commit=False):
+        user = super(AccountSettingsForm, self).save(commit=False)
+        if 'nickname' in self.changed_data:
+            user.last_nickname_change = timezone.now()
+        user.save()
+        return user
 
 
 class AccountPermissionsForm(djf.Form):
