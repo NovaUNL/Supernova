@@ -168,15 +168,25 @@ class User(AbstractUser):
         cache.delete_many(['%s_notification_count' % self.id, '%s_notification_list' % self.id])
 
 
-class Badge(djm.Model):
+def award_pic_path(award, filename):
+    return f'badges/pic.{filename.split(".")[-1].lower()}'
+
+
+class Award(djm.Model):
     name = djm.CharField(max_length=32, unique=True)
     style = djm.CharField(max_length=15, null=True, default=None)
-    users = djm.ManyToManyField(User, through='UserBadge', related_name='badges')
+    points = djm.IntegerField(default=0)
+    users = djm.ManyToManyField(User, through='UserAward', related_name='awards')
+    picture = djm.ImageField(upload_to=award_pic_path, null=True)
+    picture_icon = ImageSpecField(
+        source='picture',
+        processors=[SmartResize(*settings.MEDIUM_ICON_SIZE)],
+        format='PNG')
 
 
-class UserBadge(djm.Model):
+class UserAward(djm.Model):
     user = djm.ForeignKey(User, on_delete=djm.CASCADE)
-    badge = djm.ForeignKey(Badge, on_delete=djm.PROTECT)
+    award = djm.ForeignKey(Award, on_delete=djm.PROTECT)
     receive_date = djm.DateField(auto_created=True)
 
 

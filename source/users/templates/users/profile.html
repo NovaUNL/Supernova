@@ -80,15 +80,15 @@
             </div>
           </div>
         {% endif %}
-        {% if profile_user.badges.exists %}
+        {% if profile_user.awards.exists %}
           <div class="flex-pane">
             <div class="pane-title bg-grad">
-              <h2>Conquistas</h2>
+              <h2>Prémios</h2>
             </div>
             <div class="pane-content">
               <ul>
-                {% for badge in profile_user.badges.all %}
-                  <span class="archievement {{ badge.style }}">{{ badge.name }}</span>
+                {% for award in profile_user.awards.all %}
+                  <span class="archievement {{ award.style }}">{{ award.name }}</span>
                 {% endfor %}
               </ul>
             </div>
