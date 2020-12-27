@@ -1,6 +1,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.core.cache import cache
 
 from supernova import models as m
 from management import forms as f
@@ -81,6 +82,8 @@ def announcements_view(request):
                 for receiver in users.User.objects.all():
                     # This cannot be bulk created as it has multiple inheritance
                     m.ChangelogNotification(receiver=receiver, entry=entry)
+            cache.set('changelog_last', entry, timeout=60 * 60)
+            return redirect('changelog')
     else:
         changelog_form = f.ChangelogForm()
     context['changelog_form'] = changelog_form
