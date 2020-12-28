@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 class Recursivity:
     NONE = 0
-    CREATION = 0
-    FULL = 0
+    CREATION = 1
+    FULL = 2
 
 
 # TODO deduplicate code in _request methods
