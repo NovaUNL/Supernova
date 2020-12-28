@@ -46,16 +46,16 @@ class InviteRegistrationTest(TestCase):
             'password': 'queijo-123',
             'password_confirmation': 'queijo-123'}
 
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertTrue(form.is_valid())
         registration_data['email'] = 'campusemailtest@subdomain.' + settings.CAMPUS_EMAIL_SUFFIX
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertTrue(form.is_valid())
         registration_data['email'] = 'campusemailtest@' + settings.CAMPUS_EMAIL_SUFFIX
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertTrue(form.is_valid())
         registration_data['email'] = 'campusemailtest@xmail.pom'
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
 
     def test_name_policy(self):
@@ -76,61 +76,61 @@ class InviteRegistrationTest(TestCase):
             'password_confirmation': 'queijo-123'}
 
         # Valid data
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertTrue(form.is_valid())
         # Nickname conflict
         registration_data['nickname'] = self.student_free.abbreviation
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['nickname'] = unused_identifier
         # Username conflict
         registration_data['username'] = self.student_free.abbreviation
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         # Bad username
         registration_data['username'] = unused_identifier + ' space'
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['username'] = '>' + unused_identifier
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['username'] = '12345'
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['username'] = ''
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['username'] = unused_identifier
         # Bad nickname
         registration_data['nickname'] = unused_identifier + ' space'
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['nickname'] = '>' + unused_identifier
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['nickname'] = '12345'
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['nickname'] = ''
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertTrue(form.is_valid())
         registration_data['nickname'] = unused_identifier
         # Test with email conflict
         registration_data['email'] = f"{self.student_associated.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['email'] = f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
         registration_data['requested_student'] = str(self.student_associated.id)
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['student'] = str(student.id)
         # Test with student-email mismatch
         registration_data['requested_student'] = str(self.student_free.id)
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['requested_student'] = str(student.id)
         registration_data['email'] = f"{self.student_free.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         registration_data['email'] = f"{student.abbreviation}@{settings.CAMPUS_EMAIL_SUFFIX}"
 
@@ -156,11 +156,11 @@ class InviteRegistrationTest(TestCase):
             'password': 'queijo-123',
             'password_confirmation': 'queijo-123'}
         # Register with revoked invite
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
         # Register with old invite
         registration_data['registration_data'] = old_invite.token
-        form = f.RegistrationForm(data=registration_data)
+        form = f.StudentRegistrationForm(data=registration_data)
         self.assertFalse(form.is_valid())
 
     def test_registration(self):
