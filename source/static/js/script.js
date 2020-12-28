@@ -23,8 +23,16 @@ function toggleMenu() {
     /**
      * Toggles the main navigation menu (when browsing on a phone screen)
      */
-    const s = $("#nav-column")[0].style;
-    s.display = s.display !== 'block' ? 'block' : s.display = 'none';
+    const menu = $("#nav-column");
+    const content = $("#content-column");
+    const display = menu.css('display');
+    if (display === 'block'){
+        menu.css('display', 'none');
+        content.css('display', 'block');
+    } else {
+        menu.css('display', 'block');
+        content.css('display', 'none');
+    }
 }
 
 let notificationLoadTimestamp;
