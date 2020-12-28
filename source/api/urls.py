@@ -39,8 +39,6 @@ urlpatterns = [
     path('boinc/projects/', views.third_party.boinc_projects, name="boinc_projects"),
     path('stars/gitlab/', views.third_party.gitlab_stars, name="gitlab_stars"),
     path('stars/github/', views.third_party.github_stars, name="github_stars"),
-    # Store
-    path('store/', views.store.Store.as_view(), name="store"),
     # Synopses
     path('learning/areas/', views.learning.Areas.as_view(), name="synopses_areas"),
     path('learning/area/<int:pk>/', views.learning.Area.as_view(), name="synopses_area"),
