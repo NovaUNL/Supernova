@@ -9,30 +9,37 @@
       <div class="flex-pane">
         <div class="pane-title bg-grad"></div>
         <div class="pane-content col">
-          <table style="min-width: 100%">
+          <table class="stylized grow">
+            <thead>
             <tr>
               <th>Convite</th>
-              <th>Gerado a</th>
+              <th class="highres">Gerado a</th>
               <th>Data de validade</th>
               <th>Link</th>
             </tr>
+            </thead>
+            <tbody>
             {% for invite in profile_user.invites.all %}
               <tr>
                 <td>{{ invite.token }}</td>
-                <td>De {{ invite.created }}</td>
-                  <td>Até {{ invite.expiration }}</td>
-                {% if invite.registration %}
-                  <td>Utilizado</td>
-                {% elif invite.expired %}
-                  <td>Caducado</td>
-                {% else %}
-                  <td><a href="{% url 'registration' %}?t={{ invite.token }}">Link de registo</a></td>
-                {% endif %}
+                <td class="highres">{{ invite.created }}</td>
+                <td>{{ invite.expiration }}</td>
+                <td>
+                  {% if invite.registration %}
+                    Utilizado
+                  {% elif invite.expired %}
+                    Caducado
+                  {% else %}
+                    <a href="{% url 'registration' %}?t={{ invite.token }}">Aluno</a> /
+                    <a href="{% url 'registration' %}?t={{ invite.token }}&professor">Docente</a>
+                  {% endif %}
+                </td>
               </tr>
             {% endfor %}
           </table>
+          </tbody>
           {% if profile_user.invites.all|length == 0 %}
-            <span>Sem convites emitidos.</span>
+            <p>Sem convites emitidos.</p>
           {% endif %}
           {% if profile_user == request.user %}
             <a class="ui-btn end" href="{% url 'users:create_invite' profile_user.nickname %}">Criar novo</a>
