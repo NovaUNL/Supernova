@@ -1,5 +1,4 @@
 __pycache__
-migrations
 supernova/static/supernova/images/
 *.svg
 *.jpg
