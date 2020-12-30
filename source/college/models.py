@@ -14,6 +14,7 @@ from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 from pilkit.processors import SmartResize, ResizeToFit
+from polymorphic.models import PolymorphicModel
 
 from feedback import models as feedback
 from . import choice_types as ctypes
@@ -855,15 +856,211 @@ class ClassInstanceAnnouncement(Importable):
     datetime = djm.DateTimeField()
 
 
-class Curriculum(djm.Model):
-    # TODO redo this. Ain't going to work like this.
-    course = djm.ForeignKey(Course, on_delete=djm.CASCADE)
-    corresponding_class = djm.ForeignKey(Class, on_delete=djm.PROTECT)  # Guess I can't simply call it 'class'
-    period_type = djm.CharField(max_length=1, null=True, blank=True)  # 's' => semester, 't' => trimester, 'a' => anual
-    period = djm.IntegerField(null=True, blank=True)
-    year = djm.IntegerField()
-    required = djm.BooleanField()
+# Course curriculum related classes
+
+class CurricularComponent(PolymorphicModel):
+    """ A component in the construction of a curricular plan. """
+    #: The year on which this class is suggested to happen
+    suggested_year = djm.IntegerField()
+    #: The period on which this class is suggested to happen
+    suggested_period = djm.IntegerField(choices=ctypes.Period.CHOICES)
+    #: The amount of credits one is suggested to perform in this component during this occasion
+    suggested_credits = djm.IntegerField()
+    #: Whether this component is required
+    required = djm.BooleanField(default=True)
+    #: Cached field, the aggregation of curricular plan until this component
+    aggregation = djm.JSONField()
 
     class Meta:
-        ordering = ['year', 'period_type', 'period']
-        unique_together = ['course', 'corresponding_class']
+        ordering = ['suggested_year', 'suggested_period']
+
+    def update_aggregation(self):
+        raise NotImplementedError()
+
+    def get_leaves(self):
+        raise NotImplementedError()
+
+
+class CurricularClassComponent(CurricularComponent):
+    """ A class in a curricular plan. """
+    #: The class this component refers to
+    klass = djm.ForeignKey(Class, on_delete=djm.PROTECT, related_name='curricular_components')
+
+    def update_aggregation(self):
+        self.aggregation = {
+            'id': self.id,
+            'type': 'class',
+            # 'class': {self.klass_id},
+            'class': {
+                'id': self.klass_id,
+                'name': self.klass.name,
+                'credits': self.klass.ects/2,
+                'url': self.klass.get_absolute_url(),
+            },
+            'filtered': False,
+        }
+        self.save(update_fields=['aggregation'])
+        for parent in self.parents.all():
+            parent.update_aggregation()
+
+    def __str__(self):
+        return f'{self.klass}'
+
+    def get_leaves(self):
+        return [self]
+
+
+class AbstractCurricularBlockComponent(djm.Model):
+    """ Generic fields that block-alike components. """
+    #: A verbal name for this block
+    name = djm.CharField(max_length=100)
+    #: The minimum number of subcomponents of this block that must be completed
+    min_components = djm.IntegerField(default=1)
+    #: The minimum number of credits that a student must obtain from this block
+    min_credits = djm.IntegerField()
+
+    class Meta:
+        abstract = True
+
+    def _partial_aggregation(self):
+        return {
+            'name': self.name,
+            'min_components': self.min_components,
+            'min_credits': self.min_credits,
+        }
+
+
+class CurricularBlockComponent(AbstractCurricularBlockComponent, CurricularComponent):
+    """ A group of class components. """
+    #: Subcomponents that are a part of this block
+    children = djm.ManyToManyField(CurricularComponent, related_name='parents')
+
+    def __str__(self):
+        return f'{self.name}'
+
+    def update_aggregation(self):
+        children = list(map(lambda child: child.aggregation, self.children.all()))
+        self.aggregated = {
+            'id': self.id,
+            'type': 'block',
+            'children': children,
+            **self._partial_aggregation(),
+        }
+        self.save(update_fields=['aggregation'])
+        for parent in self.parents.all():
+            parent.update_aggregation()
+
+    def get_leaves(self):
+        return [leaf for child in self.children.all() for leaf in child.get_leaves()]
+
+
+class CurricularBlockVariantComponent(AbstractCurricularBlockComponent, CurricularComponent):
+    """ A variant of a class block, with additional restrictions. """
+    #: Subcomponents that are to be ignored in the children
+    blocked_components = djm.ManyToManyField(CurricularComponent, related_name='curricular_blocks')
+    #: The subcomponent this variant overrides
+    block = djm.ForeignKey(CurricularBlockComponent, on_delete=djm.PROTECT, related_name='block_variants')
+
+    def __str__(self):
+        return f'{self.name}'
+
+    def update_aggregation(self):
+        block_aggregation = self.block.aggregation
+        blocked_component_ids = self.blocked_components.values_list('id', flat=True)
+        CurricularBlockVariantComponent.__aggregation_filter(block_aggregation, blocked_component_ids)
+        self.aggregated = {
+            'id': self.id,
+            'type': 'block_variant',
+            'block': block_aggregation,
+            **self._partial_aggregation,
+        }
+
+        self.save(update_fields=['aggregation'])
+        for parent in self.parents:
+            parent.update_aggregation()
+
+    def get_leaves(self):
+        return self.subcomponent.get_leaves()
+
+    @staticmethod
+    def __aggregation_filter(node, component_ids):
+        """
+        Filters components from a component node
+        :param node: component node being filtered
+        :param component_ids: undesired ids
+        """
+        for child in node['children']:
+            if node['id'] in component_ids:
+                node['filtered']: True
+
+            if (ctype := node['type']) == 'block_variant':
+                CurricularBlockVariantComponent.__aggregation_filter(child['block'], component_ids)
+            elif ctype == 'block':
+                CurricularBlockVariantComponent.__aggregation_filter(child, component_ids)
+
+
+class Curriculum(djm.Model):
+    """
+    The declaration of classes that make a course structure.
+    Ideally this is a tree that connects to nodes shared among courses and applies filters to them.
+    """
+    #: The course tho which this curriculum belongs
+    course = djm.ForeignKey(Course, on_delete=djm.CASCADE, related_name='curriculums')
+    #: The year on which this curricular plan started to apply
+    from_year = djm.IntegerField(null=True, blank=True)
+    #: The year on which this curricular plan stopped applying
+    to_year = djm.IntegerField(null=True, blank=True)
+    #: The root block that describes the course curriculum
+    root = djm.ForeignKey(CurricularBlockComponent, on_delete=djm.PROTECT, related_name='curriculums')
+    #: Cached field, the aggregation of the simplified curricular plan
+    aggregation = djm.JSONField()
+
+    def update_aggregation(self):
+        leaves = self.root.get_leaves()
+        for leaf in leaves:
+            leaf.update_aggregation()
+
+        self.root.update_aggregation()
+        aggregation = self.root.aggregation
+        while Curriculum.__clean_aggregation(aggregation):
+            pass  # Reapply function while there are changes being made
+        id_set = set()
+        class_set = set()
+        Curriculum.__collect_ids(aggregation, id_set, class_set)
+        aggregation['_ids'] = list(id_set)
+        aggregation['_classes'] = list(class_set)
+        self.aggregation = aggregation
+        self.save(update_fields=['aggregation'])
+
+    @staticmethod
+    def __clean_aggregation(root):
+        if (rtype := root['type']) == 'block_variant':
+            if (child_block := root['block'])['filtered']:
+                root.pop('block')
+                root['filtered'] = True
+                return 1
+            else:
+                return Curriculum.__clean_aggregation(child_block)
+        elif rtype == 'block':
+            removed_count = 0
+            for child in root['children']:
+                if child['filtered']:
+                    removed_count += 1
+                    root['children'].remove(child)
+                else:
+                    removed_count += Curriculum.__clean_aggregation(child)
+            if len(root['children']) == 0:
+                root['filtered'] = True
+            return removed_count
+        return 0
+
+    @staticmethod
+    def __collect_ids(root, node_id_set, class_id_set):
+        node_id_set.add(root['id'])
+        if (rtype := root['type']) == 'block_variant':
+            Curriculum.__collect_ids(root['block'], node_id_set, class_id_set)
+        elif rtype == 'block':
+            for child in root['children']:
+                Curriculum.__collect_ids(child, node_id_set, class_id_set)
+        elif rtype == 'class':
+            class_id_set.add(root['class'])
