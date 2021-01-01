@@ -76,7 +76,7 @@
         <div class="pane-title bg-grad"><h2>Estrutura Curricular</h2></div>
         <div class="pane-content curriculum">
           {% if curriculum %}
-            {% with curriculum as level %}
+            {% with level=curriculum.aggregation  %}
               {% for child in level.children %}
                 {% with child as level %}
                   {% include 'college/curriculum_level.html' %}

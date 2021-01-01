@@ -3,112 +3,97 @@
 {% if level.type == 'block' %}
   <div class="block">
     <div style="display: flex; justify-content: space-between">
-      <h4>{{ level.name }}</h4>
-      {% with curriculum_components|dict_key:level.id as component %}
+      {% with component=curriculum_components|dict_key:level.id %}
+        <h4>{{ level.name }}</h4>
         <div class="attrs">
-          <div>
-            <small class="attr">Requisito</small>
-            <span class="val">{% if component.min_year %}{{ component.min_year }}º ano{% else %}---{% endif %}</span>
-          </div>
-          <div>
-            <small class="attr">Sugerido</small>
-            <span class="val">
-                {% if component.suggested_year %}
-                  {{ component.suggested_year }}º ano
-                  {% if component.suggested_period %}{{ component.get_suggested_period_display }}{% endif %}
+          {% if level.min_year %}
+            <div>
+              <small class="attr">Requisito</small>
+              <span class="val">
+                {{ level.min_year }}º ano
+            </span>
+            </div>
+          {% endif %}
+          {% if level.suggested_year %}
+            <div>
+              <small class="attr">Sugerido</small>
+              <span class="val">
+                {% if level.suggested_year %}
+                  {{ level.suggested_year }}º ano
+                  {% if level.suggested_period %}
+                    {# FIXME, not nearly ideal #}
+                    {% if component.suggested_period %}{{ component.get_suggested_period_display }}{% else %}?{% endif %}
+                  {% endif %}
                 {% else %}
                   ---
                 {% endif %}
               </span>
-          </div>
-          <div>
-            <small class="attr">Objectivos</small>
-            <span class="val">
-              {% if component.min_credits %}
-                {{ component.min_credits }} <small>ECTS</small>
-                {% if component.min_components %} / {{ component.min_components }} <small>escolhas</small>{% endif %}
-              {% elif component.min_components %}
-                {{ component.min_components }} <small>blocos</small>
+            </div>
+          {% endif %}
+          {% if level.min_credits or level.min_components %}
+            <div>
+              <small class="attr">Objectivos</small>
+              <span class="val">
+              {% if level.min_credits %}
+                {{ level.min_credits }} <small>ECTS</small>
+                {% if level.min_components %}
+                  / {{ level.min_components }} <small>escolhas</small>
+                {% endif %}
               {% else %}
-                ---
+                {{ level.min_components }} <small>escolhas</small>
               {% endif %}
             </span>
-          </div>
+            </div>
+          {% endif %}
         </div>
       {% endwith %}
     </div>
     <div class="indented">
       {% for child in level.children %}
-        {% with child as level %}
+        {% with level=child variant=None %}
           {% include 'college/curriculum_level.html' %}
         {% endwith %}
       {% endfor %}
     </div>
   </div>
 {% elif level.type == 'block_variant' %}
-  <div class="block">
-    {% with curriculum_components|dict_key:level.id as component %}
-      <div class="attrs">
-        {% if component.suggested_year or True %}
-          <div>
-            <small class="attr">Ano</small>
-            <span class="val">{{ component.suggested_year }}º</span>
-          </div>
-        {% endif %}
-        {% if component.suggested_year or True %}
-          <div>
-            <small class="attr">Periodo</small>
-            <span class="val">{{ component.get_suggested_period_display }}</span>
-          </div>
-        {% endif %}
-        {% if component.ects or True %}
-          <div>
-            <small class="attr">ECTS</small>
-            <span class="val">{{ class.ects }}</span>
-          </div>
-        {% endif %}
-      </div>
-      {% with level.block as level %}
-        {% include 'college/curriculum_level.html' %}
-      {% endwith %}
-    {% endwith %}
-  </div>
+  {% with variant=curriculum_components|dict_key:level.id level=level.block %}
+    {% include 'college/curriculum_level.html' %}
+  {% endwith %}
 {% elif level.type == 'class' %}
   <div class="class">
-    {% with curriculum_components|dict_key:level.id as component %}
-      {% with curriculum_classes|dict_key:level.class as class %}
-        <h4>
-          <a href="{{ class.get_absolute_url }}">{{ class.name }}</a>
-          <span class="midhighres">({{ class.iid }})</span>
-        </h4>
-        <div class="attrs">
-          {% if component.min_year %}
-            <div>
-              <small class="attr">Requisito</small>
-              <span class="val">{{ component.min_year }}º ano</span>
-            </div>
-          {% endif %}
-          {% if component.suggested_year %}
-            <div>
-              <small class="attr">Sugerido</small>
-              <span class="val">
+    {% with component=curriculum_components|dict_key:level.id  class=curriculum_classes|dict_key:level.class %}
+      <h4>
+        <a href="{{ class.get_absolute_url }}">{{ class.name }}</a>
+        <span class="midhighres">({{ class.iid }})</span>
+      </h4>
+      <div class="attrs">
+        {% if component.min_year %}
+          <div>
+            <small class="attr">Requisito</small>
+            <span class="val">{{ component.min_year }}º ano</span>
+          </div>
+        {% endif %}
+        {% if component.suggested_year %}
+          <div>
+            <small class="attr">Sugerido</small>
+            <span class="val">
                 {{ component.suggested_year }}º ano
                 {% if component.suggested_period %}{{ component.get_suggested_period_display }}{% endif %}
               </span>
-            </div>
-          {% endif %}
-          <div>
-            <small class="attr">ECTS</small>
-            <span class="val">
+          </div>
+        {% endif %}
+        <div>
+          <small class="attr">ECTS</small>
+          <span class="val">
               {% if class.ects %}
                 {{ class.ects }}
               {% else %}
                 ---
               {% endif %}
             </span>
-          </div>
         </div>
-      {% endwith %}
+      </div>
     {% endwith %}
   </div>
 {% endif %}

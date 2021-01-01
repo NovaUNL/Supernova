@@ -889,6 +889,10 @@ class CurricularComponent(PolymorphicModel):
     def get_leaves(self):
         raise NotImplementedError()
 
+    def update_leaves(self):
+        """ Can be used to fix broken aggregation chains """
+        [leaf.update_aggregation() for leaf in self.get_leaves()]
+
     @property
     def short_min_period(self):
         return ctypes.Period.SHORT_CHOICES[self.min_period - 1]
@@ -903,19 +907,29 @@ class CurricularClassComponent(CurricularComponent):
     #: The class this component refers to
     klass = djm.ForeignKey(Class, on_delete=djm.PROTECT, related_name='curricular_components')
 
-    def update_aggregation(self):
-        self.aggregation = {
+    def __str__(self):
+        return f'{self.klass.name} ({self.klass.iid};{self.text_id})'
+
+    def save(self, *args, **kwargs):
+        super(CurricularClassComponent, self).save(*args, **kwargs)
+        if kwargs.get('update_fields') != ['aggregation']:
+            self.update_aggregation()
+
+    def calc_aggregation(self):
+        return {
             'id': self.id,
             'type': 'class',
             'class': self.klass_id,
             'filtered': False,
         }
-        self.save(update_fields=['aggregation'])
+
+    def update_aggregation(self):
+        aggregation = self.calc_aggregation()
+        if self.aggregation != aggregation:
+            self.aggregation = aggregation
+            self.save(update_fields=['aggregation'])
         for parent in self.parents.all():
             parent.update_aggregation()
-
-    def __str__(self):
-        return f'{self.klass.name} ({self.klass.iid};{self.text_id})'
 
     def get_leaves(self):
         return [self]
@@ -940,6 +954,7 @@ class AbstractCurricularBlockComponent(djm.Model):
             'name': self.name,
             'min_components': self.min_components,
             'min_credits': self.min_credits,
+            'suggested_credits': self.suggested_credits,
             'filtered': False
         }
 
@@ -952,17 +967,33 @@ class CurricularBlockComponent(AbstractCurricularBlockComponent, CurricularCompo
     def __str__(self):
         return f'{self.name} ({self.text_id})'
 
-    def update_aggregation(self):
-        children = list(map(lambda child: child.aggregation, self.children.all()))
-        self.aggregation = {
+    def save(self, *args, **kwargs):
+        super(CurricularBlockComponent, self).save(*args, **kwargs)
+        if kwargs.get('update_fields') != ['aggregation']:
+            self.update_aggregation()
+
+    def calc_aggregation(self):
+        # TODO get rid of filter after the aggregation is automatically performed on creation
+        children = list(filter(lambda c: len(c) > 0, map(lambda child: child.aggregation, self.children.all())))
+        return {
             'id': self.id,
             'type': 'block',
             'children': children,
             **self._partial_aggregation()
         }
-        self.save(update_fields=['aggregation'])
+
+    def update_aggregation(self):
+        aggregation = self.calc_aggregation()
+        if self.aggregation != aggregation:
+            self.aggregation = aggregation
+            self.save(update_fields=['aggregation'])
         for parent in self.parents.all():
             parent.update_aggregation()
+        [parent.update_aggregation() for parent in self.parents.all()]
+        for variant in self.block_variants.all():
+            variant.update_aggregation()
+        for curriculums in self.curriculums.all():
+            curriculums.update_aggregation()
 
     def get_leaves(self):
         return [leaf for child in self.children.all() for leaf in child.get_leaves()]
@@ -983,30 +1014,39 @@ class CurricularBlockComponent(AbstractCurricularBlockComponent, CurricularCompo
 class CurricularBlockVariantComponent(AbstractCurricularBlockComponent, CurricularComponent):
     """ A variant of a class block, with additional restrictions. """
     #: Subcomponents that are to be ignored in the children
-    blocked_components = djm.ManyToManyField(CurricularComponent, related_name='curricular_blocks')
+    blocked_components = djm.ManyToManyField(CurricularComponent, blank=True, related_name='curricular_blocks')
     #: The subcomponent this variant overrides
     block = djm.ForeignKey(CurricularBlockComponent, on_delete=djm.PROTECT, related_name='block_variants')
 
     def __str__(self):
         return f'{self.name} ({self.text_id})'
 
-    def update_aggregation(self):
+    def save(self, *args, **kwargs):
+        super(CurricularBlockVariantComponent, self).save(*args, **kwargs)
+        if kwargs.get('update_fields') != ['aggregation']:
+            self.update_aggregation()
+
+    def calc_aggregation(self):
         block_aggregation = self.block.aggregation
         blocked_component_ids = self.blocked_components.values_list('id', flat=True)
         CurricularBlockVariantComponent.__aggregation_filter(block_aggregation, blocked_component_ids)
-        self.aggregation = {
+        return {
             'id': self.id,
             'type': 'block_variant',
             'block': block_aggregation,
-            **self._partial_aggregation,
+            **self._partial_aggregation(),
         }
 
-        self.save(update_fields=['aggregation'])
-        for parent in self.parents:
+    def update_aggregation(self):
+        aggregation = self.calc_aggregation()
+        if self.aggregation != aggregation:
+            self.aggregation = aggregation
+            self.save(update_fields=['aggregation'])
+        for parent in self.parents.all():
             parent.update_aggregation()
 
     def get_leaves(self):
-        return self.subcomponent.get_leaves()
+        return self.block.get_leaves()
 
     @staticmethod
     def __aggregation_filter(node, component_ids):
@@ -1016,10 +1056,10 @@ class CurricularBlockVariantComponent(AbstractCurricularBlockComponent, Curricul
         :param component_ids: undesired ids
         """
         for child in node['children']:
-            if node['id'] in component_ids:
-                node['filtered']: True
+            if child['id'] in component_ids:
+                child['filtered']: True
 
-            if (ctype := node['type']) == 'block_variant':
+            if (ctype := child['type']) == 'block_variant':
                 CurricularBlockVariantComponent.__aggregation_filter(child['block'], component_ids)
             elif ctype == 'block':
                 CurricularBlockVariantComponent.__aggregation_filter(child, component_ids)
@@ -1044,12 +1084,7 @@ class Curriculum(djm.Model):
     def __str__(self):
         return f'{self.course} ({self.from_year} - {self.to_year})'
 
-    def update_aggregation(self):
-        leaves = self.root.get_leaves()
-        for leaf in leaves:
-            leaf.update_aggregation()
-
-        self.root.update_aggregation()
+    def calc_aggregation(self):
         aggregation = self.root.aggregation
         while Curriculum.__clean_aggregation(aggregation):
             pass  # Reapply function while there are changes being made
@@ -1058,8 +1093,16 @@ class Curriculum(djm.Model):
         Curriculum.__collect_ids(aggregation, id_set, class_set)
         aggregation['_ids'] = list(id_set)
         aggregation['_classes'] = list(class_set)
-        self.aggregation = aggregation
-        self.save(update_fields=['aggregation'])
+        return aggregation
+
+    def update_aggregation(self):
+        aggregation = self.calc_aggregation()
+        if self.aggregation != aggregation:
+            self.aggregation = aggregation
+            self.save(update_fields=['aggregation'])
+
+    def update_leaves(self):
+        [leaf.update_aggregation() for leaf in self.root.get_leaves()]
 
     @staticmethod
     def __clean_aggregation(root):
@@ -1069,7 +1112,15 @@ class Curriculum(djm.Model):
                 root['filtered'] = True
                 return 1
             else:
-                return Curriculum.__clean_aggregation(child_block)
+                changes = Curriculum.__clean_aggregation(child_block)
+                root['id'] = child_block['id']
+                root['children'] = child_block['children']
+                root['type'] = 'block'
+                for attr in ('name', 'min_components', 'min_credits', 'min_components', 'suggested_credits'):
+                    if not root[attr]:
+                        root[attr] = child_block[attr]
+                root.pop('block')
+                return changes + 1
         elif rtype == 'block':
             removed_count = 0
             for child in root['children']:
