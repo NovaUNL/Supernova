@@ -132,3 +132,30 @@ def merge_changes(old_changes, new_changes):
         'new': original,
         'attrs': attrs
     }
+
+
+class CurriculumClassComponentForm(djf.ModelForm):
+    class Meta:
+        model = m.CurricularClassComponent
+        fields = ('__all__')
+        widgets = {
+            'klass': autocomplete.Select2(url='college:class_ac'),
+        }
+
+
+class CurriculumBlockComponentForm(djf.ModelForm):
+    class Meta:
+        model = m.CurricularBlockComponent
+        fields = ('__all__')
+        widgets = {
+            'children': autocomplete.Select2Multiple(url='college:curr_component_ac'),
+        }
+
+
+class CurriculumBlockVariantComponentForm(djf.ModelForm):
+    class Meta:
+        model = m.CurricularBlockVariantComponent
+        fields = ('__all__')
+        widgets = {
+            'children': autocomplete.Select2Multiple(url='college:curr_block_ac'),
+        }

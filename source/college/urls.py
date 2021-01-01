@@ -72,4 +72,8 @@ urlpatterns = [
     path('ac/student', views.StudentAutocomplete.as_view(), name='student_ac'),
     path('ac/unreg_student', views.UnregisteredStudentAutocomplete.as_view(), name='unreg_student_ac'),
     path('ac/file', views.FileAutocomplete.as_view(), name='file_ac'),
+    path('ac/curr/component', views.CurricularComponentAutocomplete.as_view(), name='curr_component_ac'),
+    path('ac/curr/class', views.CurricularClassAutocomplete.as_view(), name='curr_class_ac'),
+    path('ac/curr/block', views.CurricularBlockAutocomplete.as_view(), name='curr_block_ac'),
+    path('ac/curr/blockvariant', views.CurricularBlockVariantAutocomplete.as_view(), name='curr_block_variant_ac'),
 ]

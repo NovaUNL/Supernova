@@ -324,6 +324,8 @@ class Course(Importable, CachedEntity):
     active = djm.BooleanField(default=False)
     #: Department that manages this course
     department = djm.ForeignKey('Department', null=True, blank=True, on_delete=djm.PROTECT, related_name='courses')
+    #: The current de facto curriculum for this course
+    curriculum = djm.ForeignKey('Curriculum', null=True, blank=True, on_delete=djm.PROTECT, related_name='courses')
     #: Teacher which coordinates this course
     coordinator = djm.ForeignKey(
         'Teacher',
@@ -374,7 +376,7 @@ class Class(Importable, CachedEntity):
         verbose_name_plural = 'classes'
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.iid})"
 
     @property
     def title(self):
@@ -860,25 +862,40 @@ class ClassInstanceAnnouncement(Importable):
 
 class CurricularComponent(PolymorphicModel):
     """ A component in the construction of a curricular plan. """
+    #: Verbose name that identifies this component
+    text_id = djm.CharField(null=True, blank=True, max_length=100, db_index=True, unique=True)
+    #: The minimum year a student must be on to be allowed to have this component
+    min_year = djm.IntegerField(default=0)
+    #: The period of min_year a student must be on to be allowed to have this component
+    min_period = djm.IntegerField(null=True, blank=True, choices=ctypes.Period.CHOICES, default=None)
     #: The year on which this class is suggested to happen
-    suggested_year = djm.IntegerField()
+    suggested_year = djm.IntegerField(null=True, blank=True)
     #: The period on which this class is suggested to happen
-    suggested_period = djm.IntegerField(choices=ctypes.Period.CHOICES)
-    #: The amount of credits one is suggested to perform in this component during this occasion
-    suggested_credits = djm.IntegerField()
+    suggested_period = djm.IntegerField(null=True, blank=True, choices=ctypes.Period.CHOICES)
     #: Whether this component is required
     required = djm.BooleanField(default=True)
     #: Cached field, the aggregation of curricular plan until this component
-    aggregation = djm.JSONField()
+    aggregation = djm.JSONField(blank=True, default=dict)
 
     class Meta:
         ordering = ['suggested_year', 'suggested_period']
+
+    def __str__(self):
+        return f'{self.text_id}'
 
     def update_aggregation(self):
         raise NotImplementedError()
 
     def get_leaves(self):
         raise NotImplementedError()
+
+    @property
+    def short_min_period(self):
+        return ctypes.Period.SHORT_CHOICES[self.min_period - 1]
+
+    @property
+    def short_suggested_period(self):
+        return ctypes.Period.SHORT_CHOICES[self.suggested_period - 1]
 
 
 class CurricularClassComponent(CurricularComponent):
@@ -890,13 +907,7 @@ class CurricularClassComponent(CurricularComponent):
         self.aggregation = {
             'id': self.id,
             'type': 'class',
-            # 'class': {self.klass_id},
-            'class': {
-                'id': self.klass_id,
-                'name': self.klass.name,
-                'credits': self.klass.ects/2,
-                'url': self.klass.get_absolute_url(),
-            },
+            'class': self.klass_id,
             'filtered': False,
         }
         self.save(update_fields=['aggregation'])
@@ -904,7 +915,7 @@ class CurricularClassComponent(CurricularComponent):
             parent.update_aggregation()
 
     def __str__(self):
-        return f'{self.klass}'
+        return f'{self.klass.name} ({self.klass.iid};{self.text_id})'
 
     def get_leaves(self):
         return [self]
@@ -915,9 +926,11 @@ class AbstractCurricularBlockComponent(djm.Model):
     #: A verbal name for this block
     name = djm.CharField(max_length=100)
     #: The minimum number of subcomponents of this block that must be completed
-    min_components = djm.IntegerField(default=1)
+    min_components = djm.IntegerField(default=0)
     #: The minimum number of credits that a student must obtain from this block
-    min_credits = djm.IntegerField()
+    min_credits = djm.IntegerField(default=0)
+    #: The amount of credits one is suggested to perform in this component during this occasion
+    suggested_credits = djm.IntegerField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -927,6 +940,7 @@ class AbstractCurricularBlockComponent(djm.Model):
             'name': self.name,
             'min_components': self.min_components,
             'min_credits': self.min_credits,
+            'filtered': False
         }
 
 
@@ -936,15 +950,15 @@ class CurricularBlockComponent(AbstractCurricularBlockComponent, CurricularCompo
     children = djm.ManyToManyField(CurricularComponent, related_name='parents')
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.name} ({self.text_id})'
 
     def update_aggregation(self):
         children = list(map(lambda child: child.aggregation, self.children.all()))
-        self.aggregated = {
+        self.aggregation = {
             'id': self.id,
             'type': 'block',
             'children': children,
-            **self._partial_aggregation(),
+            **self._partial_aggregation()
         }
         self.save(update_fields=['aggregation'])
         for parent in self.parents.all():
@@ -952,6 +966,18 @@ class CurricularBlockComponent(AbstractCurricularBlockComponent, CurricularCompo
 
     def get_leaves(self):
         return [leaf for child in self.children.all() for leaf in child.get_leaves()]
+
+
+# # With relationship data separated from the entity
+# class CurricularBlockSubcomponent(djm.Model):
+#     parent = djm.ForeignKey(CurricularBlockComponent, on_delete=djm.PROTECT, related_name='children_rel')
+#     child = djm.ForeignKey(CurricularComponent, on_delete=djm.CASCADE, related_name='parent_rel')
+#     required = djm.BooleanField(default=True)
+#     #: Cached field, the aggregation of curricular plan until this component
+#     aggregation = djm.JSONField(blank=True, default=dict)
+#
+#     class Meta:
+#         unique_together = [('parent', 'child')]
 
 
 class CurricularBlockVariantComponent(AbstractCurricularBlockComponent, CurricularComponent):
@@ -962,13 +988,13 @@ class CurricularBlockVariantComponent(AbstractCurricularBlockComponent, Curricul
     block = djm.ForeignKey(CurricularBlockComponent, on_delete=djm.PROTECT, related_name='block_variants')
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.name} ({self.text_id})'
 
     def update_aggregation(self):
         block_aggregation = self.block.aggregation
         blocked_component_ids = self.blocked_components.values_list('id', flat=True)
         CurricularBlockVariantComponent.__aggregation_filter(block_aggregation, blocked_component_ids)
-        self.aggregated = {
+        self.aggregation = {
             'id': self.id,
             'type': 'block_variant',
             'block': block_aggregation,
@@ -1013,7 +1039,10 @@ class Curriculum(djm.Model):
     #: The root block that describes the course curriculum
     root = djm.ForeignKey(CurricularBlockComponent, on_delete=djm.PROTECT, related_name='curriculums')
     #: Cached field, the aggregation of the simplified curricular plan
-    aggregation = djm.JSONField()
+    aggregation = djm.JSONField(default=dict)
+
+    def __str__(self):
+        return f'{self.course} ({self.from_year} - {self.to_year})'
 
     def update_aggregation(self):
         leaves = self.root.get_leaves()

@@ -39,6 +39,7 @@ def index_view(request):
         {'name': 'Faculdade', 'url': reverse('college:index')}]
     return render(request, 'college/college.html', context)
 
+
 def map_view(request):
     context = build_base_context(request)
     context['pcode'] = "c_campus_map"
@@ -1025,7 +1026,9 @@ def _course__nav(course):
 @last_modified(changes.singular_modification_for(m.Course))
 def course_view(request, course_id):
     course = get_object_or_404(
-        m.Course.objects.select_related('department', 'coordinator'),
+        m.Course.objects
+            .select_related('department', 'coordinator', 'curriculum')
+            .prefetch_related('curriculums'),
         id=course_id)
 
     context = build_base_context(request)
@@ -1033,6 +1036,13 @@ def course_view(request, course_id):
     context['title'] = str(course)
     context['course'] = course
     context['student_count'] = course.students.count()
+    context['curriculum'] = curriculum = course.curriculum
+    if curriculum:
+        curriculum.update_aggregation()  # TODO do this when the curriculum is changed, not everytime
+        context['curriculum_components'] = \
+            {klass.id: klass for klass in m.CurricularComponent.objects.filter(id__in=curriculum.aggregation['_ids'])}
+        context['curriculum_classes'] = \
+            {klass.id: klass for klass in m.Class.objects.filter(id__in=curriculum.aggregation['_classes'])}
     context['active_student_count'] = course.students.filter(last_year=settings.COLLEGE_YEAR).count()
     context['new_students_count'] = \
         course.students \
@@ -1300,10 +1310,10 @@ class ClassAutocomplete(autocomplete.Select2QuerySetView):
         qs = m.Class.objects.all()
         if self.q:
             try:
-                qs = qs.filter(Q(id=int(self.q)) | Q(name__istartswith=self.q) | Q(abbreviation=self.q)) \
+                qs = qs.filter(Q(id=int(self.q)) | Q(name__icontains=self.q) | Q(abbreviation__iexact=self.q)) \
                     .exclude(extinguished=True)
             except ValueError:
-                qs = qs.filter(Q(name__contains=self.q) | Q(abbreviation=self.q)).exclude(extinguished=True)
+                qs = qs.filter(Q(name__icontains=self.q) | Q(abbreviation__iexact=self.q)).exclude(extinguished=True)
         return qs
 
 
@@ -1371,4 +1381,48 @@ class FileAutocomplete(autocomplete.Select2QuerySetView):
         qs = m.File.objects.all()
         if self.q:
             qs = qs.filter(hash__istartswith=self.q)
+        return qs
+
+
+class CurricularComponentAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.CurricularComponent.objects.all()
+        if self.q:
+            try:
+                qs = qs.filter(Q(id=self.q) | Q(text_id__icontains=self.q))
+            except ValueError:
+                qs = qs.filter(text_id__icontains=self.q)
+        return qs
+
+
+class CurricularClassAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.CurricularClassComponent.objects.all()
+        if self.q:
+            qs = qs.filter(
+                Q(text_id__icontains=self.q) |
+                Q(klass__name__icontains=self.q) |
+                Q(klass__abbreviation__icontains=self.q) |
+                Q(klass__iid=self.q))
+            return qs
+
+
+class CurricularBlockAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.CurricularBlockComponent.objects.all()
+        if self.q:
+            qs = qs.filter(
+                Q(text_id__icontains=self.q) |
+                Q(name__icontains=self.q) |
+                Q(children__klass__name__icontains=self.q) |
+                Q(children__klass__abbreviation__icontains=self.q) |
+                Q(children__klass__iid=self.q))
+        return qs
+
+
+class CurricularBlockVariantAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = m.CurricularBlockVariantComponent.objects.all()
+        if self.q:
+            qs = qs.filter(Q(name__icontains=self.q) | Q(block__name__icontains=self.q))
         return qs

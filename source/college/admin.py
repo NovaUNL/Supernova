@@ -1,9 +1,28 @@
-from college import models as m
 from django.contrib import admin
+
 from leaflet.admin import LeafletGeoAdmin
+
+from college import models as m
+from college import forms as f
+
+
+class CurriculumClassComponentAdmin(admin.ModelAdmin):
+    form = f.CurriculumClassComponentForm
+
+
+class CurriculumBlockComponentAdmin(admin.ModelAdmin):
+    form = f.CurriculumBlockComponentForm
+
+
+class CurriculumBlockVariantComponentAdmin(admin.ModelAdmin):
+    form = f.CurriculumBlockVariantComponentForm
+
 
 admin.site.register(m.Building, LeafletGeoAdmin)
 admin.site.register(m.Course)
+admin.site.register(m.CurricularClassComponent, CurriculumClassComponentAdmin)
+admin.site.register(m.CurricularBlockComponent, CurriculumBlockComponentAdmin)
+admin.site.register(m.CurricularBlockVariantComponent, CurriculumBlockVariantComponentAdmin)
 admin.site.register(m.Curriculum)
 admin.site.register(m.Class)
 admin.site.register(m.ClassInstance)

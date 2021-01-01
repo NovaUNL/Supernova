@@ -2,6 +2,42 @@
 
 {% load static %}
 
+{% block head %}
+  <style>
+      .curriculum .block, .curriculum .class {
+          border: 1px solid var(--pane-bg-highlight);
+          border-left: 2px solid var(--highlight);
+      }
+
+      .curriculum .class {
+          display: flex;
+      }
+
+      .curriculum .class h4, .curriculum .block h4 {
+          display: inline-block;
+          flex-grow: 1;
+          margin-left: 5px;
+      }
+
+      .attrs {
+          display: flex;
+      }
+
+      .attrs div {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 5px;
+          background-color: var(--input-light);
+          border-left: 1px solid var(--primary4),
+      }
+
+      .attrs .val {
+          font-weight: bold;
+      }
+  </style>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="header-decorator">
     {% if perms.college.change_course %}
@@ -38,7 +74,19 @@
       </div>
       <div class="flex-pane">
         <div class="pane-title bg-grad"><h2>Estrutura Curricular</h2></div>
-        <div class="pane-content construction"></div>
+        <div class="pane-content curriculum">
+          {% if curriculum %}
+            {% with curriculum as level %}
+              {% for child in level.children %}
+                {% with child as level %}
+                  {% include 'college/curriculum_level.html' %}
+                {% endwith %}
+              {% endfor %}
+            {% endwith %}
+          {% else %}
+            <p>Estrutura curricular por definir.</p>
+          {% endif %}
+        </div>
       </div>
     </div>
     <div class="col nogrow noshrink">
