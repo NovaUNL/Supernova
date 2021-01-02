@@ -1,7 +1,7 @@
 {% load misc %}
 
 {% if level.type == 'block' %}
-  <div class="block">
+  <div class="block" onclick="showChildren(this)">
     <div style="display: flex; justify-content: space-between">
       {% with component=curriculum_components|dict_key:level.id %}
         <h4>{{ level.name }}</h4>
@@ -22,7 +22,8 @@
                   {{ level.suggested_year }}º ano
                   {% if level.suggested_period %}
                     {# FIXME, not nearly ideal #}
-                    {% if component.suggested_period %}{{ component.get_suggested_period_display }}{% else %}?{% endif %}
+                    {% if component.suggested_period %}{{ component.get_suggested_period_display }}{% else %}?
+                    {% endif %}
                   {% endif %}
                 {% else %}
                   ---
@@ -48,7 +49,7 @@
         </div>
       {% endwith %}
     </div>
-    <div class="indented">
+    <div class="indented" style="display: none;">
       {% for child in level.children %}
         {% with level=child variant=None %}
           {% include 'college/curriculum_level.html' %}
@@ -65,7 +66,7 @@
     {% with component=curriculum_components|dict_key:level.id  class=curriculum_classes|dict_key:level.class %}
       <h4>
         <a href="{{ class.get_absolute_url }}">{{ class.name }}</a>
-        <span class="midhighres">({{ class.iid }})</span>
+        <sup class="midhighres">({{ class.iid }})</sup>
       </h4>
       <div class="attrs">
         {% if component.min_year %}
@@ -74,11 +75,11 @@
             <span class="val">{{ component.min_year }}º ano</span>
           </div>
         {% endif %}
-        {% if component.suggested_year %}
+        {% if component.suggested_year and component.suggested_year != component.min_year or component.suggested_period %}
           <div>
             <small class="attr">Sugerido</small>
             <span class="val">
-                {{ component.suggested_year }}º ano
+                {% if  component.suggested_year != component.min_year %}{{ component.suggested_year }}º ano{% endif %}
                 {% if component.suggested_period %}{{ component.get_suggested_period_display }}{% endif %}
               </span>
           </div>
