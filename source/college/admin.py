@@ -13,6 +13,12 @@ class CurriculumClassComponentAdmin(admin.ModelAdmin):
 class CurriculumBlockComponentAdmin(admin.ModelAdmin):
     form = f.CurriculumBlockComponentForm
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        # Update aggregation cache and propagate changes to parents
+        obj = form.instance
+        obj.aggregation = obj.update_aggregation()
+
 
 class CurriculumBlockVariantComponentAdmin(admin.ModelAdmin):
     form = f.CurriculumBlockVariantComponentForm
