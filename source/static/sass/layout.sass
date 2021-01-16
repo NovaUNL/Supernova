@@ -1,51 +1,47 @@
 @import "variables"
 
-#top-wrapper
+body
+  display: grid
+  grid-template-areas: "header header" "sidebar content"
+  grid-template-rows: 0fr 1fr
+  grid-template-columns: 0fr 1fr
+
+#header
+  grid-area: header
+  display: grid
+  grid-template-areas: "hamburger none logo none2 actions user"
+  grid-template-columns: 0fr 0fr 0fr 1fr 0fr 0fr
+  min-height: $top-height
   border-bottom: 2px solid var(--primary1-alt)
   color: var(--text-alt)
-  display: flex
   position: relative
   z-index: 3
-  // v Needed for Safari v
-  flex-shrink: 0
-
-#top-main
-  flex-grow: 1
-  display: flex
-  min-height: $top-height
-  justify-content: space-between
-  flex-wrap: nowrap
+  white-space: nowrap
 
   a
     color: var(--text-alt)
     text-decoration: none
-    font-weight: bold
     font-size: 18px
 
-  .user
-    background-color: var(--primary2-alt)
-
-  @media #{$lowmidres}
-    flex-wrap: wrap
-
-#top-main-left
-  display: flex
-
-#top-main-right
-  display: flex
-
-#hamburger
-  display: flex
-  align-items: center
-  padding: 5px 10px
+#wrapper
+  grid-area: header
 
 #logo
-  padding: 5px
+  grid-area: logo
+  display: grid
+  grid-template-rows: 1fr 0fr
+  grid-template-columns: 115px 0fr
+  width: 280px
+  position: relative
+  overflow: hidden
 
   img
-    height: 100%
-    // Hack due to some SVG padding glitch
-    max-width: unset !important
+    grid-row: 1/3
+    grid-column: 1/3
+    width: 280px
+    top: -10px
+    position: absolute
+    max-width: unset
     display: none
 
     [data-theme="quasar"] &.light-only
@@ -54,12 +50,32 @@
     [data-theme="tokamak"] &.dark-only, [data-theme="nebula"] &.dark-only
       display: block
 
+#slogan
+  grid-area: slogan
+  grid-row: 2/3
+  grid-column: 2/3
+  color: var(--text-alt-hc)
+  white-space: nowrap
+  font-size: 12px
+
+#actions
+  grid-area: actions
+  display: grid
+  grid-template-areas: "search theme notifications"
+  align-content: center
+
 .user
-  display: flex
+  grid-area: user
+  display: grid
   align-items: center
   justify-content: space-between
+  background-color: var(--primary2-alt)
+  grid-template-columns: 42px auto 50px
+  padding-left: 5px
+  font-weight: bold
 
   &.lowres
+    grid-area: unset
     align-items: stretch
 
   .pic
@@ -80,106 +96,61 @@
 
   .login, .logout
     background-color: var(--red)
-    width: 50px
     display: flex
     justify-content: center
+    height: 100%
 
     img
       width: 24px
       height: 24px
       align-self: center
 
-  &.midhighres
-    .login, .logout
-      height: 100%
-
   .login
     background-color: var(--green)
 
-#slogan-pos
-  width: 0
-  height: 0
-  left: -80px
-  position: relative
-  align-self: flex-end
+.action
+  width: 32px
+  height: 32px
+  filter: brightness(var(--icon-brightness))
+  background-size: contain !important
+  background: transparent no-repeat center
+  background-origin: content-box
+  border: none
+  padding: 10px
+  margin-right: 10px
+  box-shadow: unset
 
-#slogan
-  position: absolute
-  left: 0
-  bottom: 0
-  color: var(--text-alt-hc)
-  white-space: nowrap
+
+#hamburger
+  align-self: center
+  margin: 10px 20px
+  background-image: url("../img/icons/menu.svg")
 
 #search
-  display: flex
-  align-items: center
+  grid-area: search
+  background-image: url("../img/icons/search.svg")
+//background-size: contain
 
-  label
-    background: transparent url("../img/icons/search.svg") no-repeat center
-    background-size: contain
-    filter: brightness(var(--icon-brightness))
-    width: 32px
-    height: 32px
-    margin-left: 5px
-    margin-right: 10px
-    display: inline-block
+#theme
+  grid-area: theme
+  background-image: url("../img/icons/dim.svg")
 
-  input[type=search]
-    max-width: 0
-    overflow-x: hidden
-    transition: 0.5s
-    border: 0
-    padding: 0
-    font-weight: bold
-    font-size: 22px
-    line-height: 30px
-
-  input[type=submit]
-    border: none
-    background: transparent url("../img/icons/search.svg") no-repeat center
-    background-size: contain
-    filter: brightness(var(--icon-brightness))
-    box-shadow: unset
-    padding: 0 10px
-    margin-left: 5px
-    margin-right: 10px
-    width: 32px
-    height: 32px
-    display: none
-
-#search-toggler
-  display: none
-
-#search-toggler:checked
-  ~ label
-    width: 24px
-    height: 24px
-    background: transparent url("../img/icons/right.svg") no-repeat center
-    background-size: cover
-
-  ~ input[type=search]
-    max-width: 250px
-
-  ~ input[type=submit]
-    display: inline-block
 
 #notifications
+  grid-area: notifications
   display: flex
   align-items: center
 
 #notification-btn
   position: relative
-  margin: 0 10px
-  width: 32px
-  height: 32px
 
   // Needed until backdrop-feature finds its way to the mainstream browsers
   &:after
     position: absolute
     display: inline-block
     left: 0
-    width: 100%
-    height: 100%
+    width: calc(100% - 20px)
+    height: calc(100% - 20px)
     background: transparent url("../img/icons/bell.svg") no-repeat center
     background-size: contain
     content: ''
@@ -232,22 +203,20 @@
     z-index: -1
     background-color: var(--pane-bg)
 
-
 .notification > span
   display: flex
   justify-content: space-between
 
 #main-wrapper
+  grid-area: content
   display: flex
   flex-grow: 1
   width: 100%
   // v Needed for Safari v
   flex-shrink: 0
 
-  @media #{$lowres}
-    scroll-snap-type: x mandatory
-
 #nav-column
+  grid-area: sidebar
   color: var(--text-alt-hc)
   display: flex
   flex-direction: column
@@ -255,16 +224,6 @@
 
   @media #{$midres}
     flex-basis: 0
-
-  @media #{$lowres}
-    display: none
-    position: fixed
-    z-index: 9999
-    top: $top-height
-    bottom: 0
-    left: 0
-    right: 0
-    overflow-y: auto
 
   @media #{$midhighres}
     width: 200px
@@ -347,6 +306,7 @@
   background-attachment: fixed
 
 #content-column
+  grid-area: content
   display: flex
   flex-flow: column
   flex-grow: 1
@@ -359,6 +319,8 @@
     padding: 10px
     box-shadow: 0 0 20px var(--bg)
     background-color: var(--bg)
+    max-height: 100px
+    opacity: 0.4
 
 #breadcrumbs
   font-size: 1.0em
@@ -419,22 +381,17 @@
   &.noshrink
     flex-shrink: 0
 
-  @media #{$lowres}
-    padding: 0 !important
-    max-width: 100vw
-    scroll-snap-align: none start
 
 .flex-pane
+  display: grid
+  grid-template-rows: 0fr 1fr
   // v Needed for theme prompt
   color: var(--text)
   border-radius: 5px
   background-color: var(--pane-bg)
   margin: 10px
   box-shadow: 1px 1px 5px var(--shadow)
-
-  @media #{$lowres}
-    margin: 10px 5px 10px 5px
-    width: calc(100vw - 10px)
+  max-width: 100%
 
 .row
   display: flex
@@ -465,9 +422,6 @@
   > .full
     flex-basis: 100%
 
-  @media #{$lowres}
-    padding: 0 !important
-
     &.nowrap
       overflow: auto
       scroll-snap-type: x mandatory
@@ -480,6 +434,8 @@
   color: var(--pane-title)
   background-color: var(--pane-title-bg)
   text-shadow: 0px -1px 0px var(--primary2-alt), 0px 0px 5px var(--primary2-alt)
+  display: flex
+  justify-content: space-between
 
   a
     color: var(--pane-title-link)
@@ -487,6 +443,19 @@
   h2
     margin: 0
     font-family: 'Merriweather', serif
+
+  .close
+    background-color: var(--red)
+    box-shadow: 2px 2px 2px var(--pane-title-border)
+    border-radius: 5px
+    width: 32px
+    text-align: center
+    text-shadow: none
+    font-family: sans-serif
+    font-size: 22px
+    cursor: pointer
+    background-image: url("/static/img/icons/close.svg")
+    background-size: cover
 
 .pane-content
   padding: 5px 10px 10px 10px
@@ -532,6 +501,9 @@
     font-size: 3em
     display: inline
 
+    /* TODO remove */
+
+
     > img
       width: 100px
       height: 100px
@@ -542,19 +514,17 @@
   h3
     font-size: 2em
 
+  .avatar
+    width: 100px
+    height: 100px
+    clip-path: circle(50px at center)
+    vertical-align: middle
+    padding: 0 10px
+
 
   @media #{$highres}
     min-height: 150px
 
-  @media #{$lowres}
-    background-color: var(--header-bg) !important
-    background-image: none !important
-
-    h1
-      font-size: 2.2em
-
-    h3
-      font-size: 1.6em
 
 .header-background
   background-color: var(--header-bg)
@@ -620,16 +590,146 @@
   bottom: 0
   position: fixed
 
-#overlay
+.overlay
   position: fixed
   z-index: 10000
   width: 100%
   height: 100%
   background-color: #333335cf
-  display: none
 
   > div
     margin-left: auto
     margin-right: auto
     width: max-content
-    max-width: 800px
+    max-height: calc(100% - 100px)
+
+.search
+  min-width: 80vw
+  min-height: 80vh
+  transition: 1s
+
+  .pane-content
+    display: grid
+    grid-template-areas: "categories inputs" "categories results"
+    grid-template-columns: 128px auto
+    grid-template-rows: 30px 1fr
+    overflow: auto
+
+  .inputs
+    display: flex
+    grid-area: inputs
+
+    input[type=search]
+      flex-grow: 1
+
+    input[type=button]
+      flex-grow: 1
+
+  .categories
+    display: flex
+    flex-direction: column
+    flex-wrap: nowrap
+    font-size: 14px
+    overflow: auto
+    grid-area: categories
+
+  .category
+    cursor: pointer
+    display: flex
+    flex-direction: column
+    border: 2px solid var(--pane-bg-highlight)
+    border-bottom: 0
+    border-right: 0
+    border-radius: 10px 0 0 10px
+    text-align: center
+
+    &.set
+      background-color: var(--pane-bg-highlight)
+
+    img
+      width: 64px
+      height: 64px
+      align-self: center
+      position: relative
+      bottom: -5px
+
+  .results
+    padding: 10px
+    grid-area: results
+    overflow: auto
+    border: 2px solid var(--pane-bg-highlight)
+    border-top: 0
+    border-bottom-right-radius: 5px
+
+@media #{$lowres}
+  #header
+    grid-template-columns: 0fr 1fr 0fr 1fr 0fr 0fr
+    min-height: unset
+
+  #logo
+    overflow: unset
+    width: 150px
+    grid-template-columns: unset
+
+    img
+      width: unset
+      position: unset
+      height: 100%
+      max-width: 100%
+
+  #slogan
+    display: none
+
+  .user
+    grid-area: user-alt !important
+
+  .action
+    width: 32px
+    height: 32px
+    padding: 5px
+
+  #notification-btn:after
+      width: calc(100% - 10px)
+      height: calc(100% - 10px)
+
+  #main-wrapper
+    scroll-snap-type: x mandatory
+
+  #nav-column
+    display: none
+    position: fixed
+    z-index: 9999
+    top: $top-height
+    bottom: 0
+    left: 0
+    right: 0
+    overflow-y: auto
+
+  .header-decorator
+    background-color: var(--header-bg) !important
+    background-image: none !important
+
+    h1
+      font-size: 2.2em
+
+    h3
+      font-size: 1.6em
+
+  .flex-pane
+    margin: 10px 5px 10px 5px
+    width: calc(100vw - 10px)
+
+  .col
+    padding: 0 !important
+    max-width: 100vw
+    scroll-snap-align: none start
+
+  .row
+    padding: 0 !important
+
+  .search .category
+    font-size: 14px
+
+    img
+      width: 42px
+      height: 42px

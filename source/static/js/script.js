@@ -26,7 +26,7 @@ function toggleMenu() {
     const menu = $("#nav-column");
     const content = $("#content-column");
     const display = menu.css('display');
-    if (display === 'block'){
+    if (display === 'block') {
         menu.css('display', 'none');
         content.css('display', 'block');
     } else {
@@ -99,6 +99,18 @@ function setupPopover() {
     }, true);
 
     b.attr("href", "javascript: void(0)");
+}
+
+function createOverlay() {
+    const o = $('<div class="overlay"></div>').appendTo('body');
+    let p = $(
+        "<div class='flex-pane'>" +
+        "<div class='pane-title bg-grad'><h2></h2><span class='close'></span></div>" +
+        "<div class='pane-content'></div>" +
+        "</div>");
+    o.append(p);
+    p.find('.close').click(() => o.remove());
+    return p;
 }
 
 function loadTransportation() {
@@ -185,7 +197,11 @@ function showThemePicker() {
         "0 0, 20% 0, 40% 100%, 0 100%",
         "20% 0, 50% 0, 75% 100%, 39.5% 100%",
         "50% 0, 100% 0, 100% 100%, 75% 100%"];
-    const overlay = $("#overlay");
+
+    const p = createOverlay();
+    const overlay = p.parent();
+    p.remove();
+
     delChildren(overlay[0]);
 
     const container = $("<div class='theme-picker'></div>");
@@ -206,7 +222,7 @@ function showThemePicker() {
                     let theme = e.target.value.toLowerCase();
                     if (typeof (Storage) !== "undefined") {
                         localStorage.setItem("theme", theme);
-                        $("#overlay").css("display", "none");
+                        $(".overlay").css("display", "none");
                     } else {
                         alert("O navegador está a bloquear o armazenamento.");
                     }

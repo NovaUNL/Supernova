@@ -2,27 +2,26 @@
 {% load strutils %}
 
 {% spaceless %}
-  <div class="lowres">
-    <div class="user lowres">
+  <div class="user lowres">
       {% if user.is_authenticated %}
-        <a class="name" href="{% url 'users:profile' user.nickname %}">
-          {% if user.picture %}
-            <span class="pic" style="background-image: url('{{ user.picture_thumbnail.url }}')"></span>
-          {% else %}
-            <span class="pic"></span>
-          {% endif %}
-          {{ user.nickname }}
-        </a>
-        <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
-          <img alt="logout" src="{% static 'img/icons/logout.svg' %}">
-        </a>
-      {% else %}
-        <a class="name">Não autenticado</a>
-        <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
-          <img alt="login" src="{% static 'img/icons/login.svg' %}">
-        </a>
-      {% endif %}
-    </div>
+            {% if user.picture %}
+              <span class="pic" style="background-image: url('{{ user.picture_thumbnail.url }}')"></span>
+            {% else %}
+              <span class="pic"></span>
+        {% endif %}
+      <a class="name" href="{% url 'users:profile' user.nickname %}">
+        {{ user.nickname }}
+      </a>
+      <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
+        <img src="{% static 'img/icons/logout.svg' %}">
+      </a>
+    {% else %}
+      <span class="pic"></span>
+      <a class="name">Não autenticado</a>
+      <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
+        <img src="{% static 'img/icons/login.svg' %}">
+      </a>
+    {% endif %}
   </div>
   <ul>
     {% if user.is_staff %}
