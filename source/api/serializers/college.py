@@ -26,7 +26,6 @@ class RoomSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     building = serializers.CharField()
-    degree = DegreeSerializer()
     url = serializers.CharField(source='get_absolute_url')
 
 

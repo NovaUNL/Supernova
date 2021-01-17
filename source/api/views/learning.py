@@ -9,8 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.serializers import synopses as serializers
-from api.serializers.synopses import SectionRelationSerializer
+from api.serializers import learning as serializers
+from api.serializers.learning import SectionRelationSerializer
 from learning import models as learning
 from college import models as college
 from feedback import models as feedback

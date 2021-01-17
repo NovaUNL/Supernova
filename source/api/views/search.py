@@ -3,6 +3,10 @@ from rest_framework import authentication
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from college import documents as college_search
+from learning import documents as learning_search
+from groups import documents as groups_search
+from services import documents as services_search
+from news import documents as news_search
 from api import serializers
 
 mapping = {
@@ -21,7 +25,7 @@ mapping = {
     'building': {
         'class': college_search.BuildingDocument,
         'serializer': serializers.college.BuildingSerializer,
-        'fields': ['name', ],
+        'fields': ['name', 'abbreviation'],
         'private': False
     },
     'room': {
@@ -45,7 +49,43 @@ mapping = {
     'department': {
         'class': college_search.DepartmentDocument,
         'serializer': serializers.college.DepartmentSerializer,
-        'fields': ['name', ],
+        'fields': ['name', 'description'],
+        'private': False
+    },
+    'service': {
+        'class': services_search.ServiceDocument,
+        'serializer': serializers.services.ServiceSerializer,
+        'fields': ['name'],
+        'private': False
+    },
+    'synopsis': {
+        'class': learning_search.SectionDocument,
+        'serializer': serializers.learning.SectionPreviewSerializer,
+        'fields': ['title', 'content'],
+        'private': False
+    },
+    'exercise': {
+        'class': learning_search.ExerciseDocument,
+        'serializer': serializers.learning.ExercisePreviewSerializer,
+        'fields': ['content'],
+        'private': False
+    },
+    'question': {
+        'class': learning_search.QuestionDocument,
+        'serializer': serializers.learning.QuestionSerializer,
+        'fields': ['title', 'content', 'answers'],
+        'private': False
+    },
+    'news': {
+        'class': news_search.NewsItemDocument,
+        'serializer': serializers.news.NewsMinimalSerializer,
+        'fields': ['title', 'content'],
+        'private': False
+    },
+    'group': {
+        'class': groups_search.GroupDocument,
+        'serializer': serializers.groups.GroupMinimalSerializer,
+        'fields': ['title', 'content'],
         'private': False
     },
 }

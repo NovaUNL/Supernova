@@ -336,6 +336,18 @@ PWA_APP_DIR = 'ltr'
 PWA_APP_LANG = 'pt-PT'
 PWA_APP_DEBUG_MODE = True
 
+# Ignore auto updating of Elasticsearch when a model is saved or deleted:
+ELASTIC_IGNORE_SIGNALS = True
+# Don't perform an index refresh after every update (overrides global setting):
+ELASTIC_AUTO_REFRESH = False
+# Paginate the django queryset used to populate the index with the specified size
+# (by default it uses the database driver's default setting)
+ELASTIC_QUERYSET_PAGINATION = 5000
+ELASTIC_INDEX_SETTINGS = {
+    'number_of_shards': 1,
+    'number_of_replicas': 0
+}
+
 DEBUG = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True

@@ -397,6 +397,24 @@ class Exercise(djm.Model):
         else:
             raise Exception("Attempted to render an exercise which is not fully implemented")
 
+    @property
+    def raw_text(self):
+        substrings = []
+        Exercise.__raw_text_aux(substrings, self.content)
+        return " ".join(substrings)
+
+    @staticmethod
+    def __raw_text_aux(substrings, problem):
+        if (type := problem['type']) == 'group':
+            substrings.append(problem["enunciation"])
+            [Exercise.__raw_text_aux(substrings, subproblem) for subproblem in problem['subproblems']]
+        elif type == 'write':
+            substrings.append(problem["enunciation"])
+            substrings.append(problem['answer'])
+        elif type == 'select':
+            substrings.append(problem["enunciation"])
+            substrings.append(" ". join(problem['candidates']))
+
 
 class UserExerciseLog:
     """

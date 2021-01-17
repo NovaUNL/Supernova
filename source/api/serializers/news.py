@@ -6,6 +6,7 @@ class NewsMinimalSerializer(serializers.Serializer):
     title = serializers.CharField()
     summary = serializers.CharField()
     datetime = serializers.DateTimeField()
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class NewsSerializer(serializers.Serializer):
@@ -15,3 +16,4 @@ class NewsSerializer(serializers.Serializer):
     content = serializers.CharField()
     datetime = serializers.DateTimeField()
     # author = TODO
+    url = serializers.CharField(source='get_absolute_url')

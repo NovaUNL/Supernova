@@ -5,6 +5,7 @@ class GroupMinimalSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     abbreviation = serializers.CharField()
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class GroupTypeSerializer(serializers.Serializer):

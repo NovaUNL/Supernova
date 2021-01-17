@@ -5,11 +5,13 @@ import reversion
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.fields import ArrayField
 from django.db import models as djm
 from django.contrib.gis.db import models as gis
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Sum, F
 from django.urls import reverse
+from django.utils import timezone
 from imagekit.models import ImageSpecField
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
@@ -17,6 +19,7 @@ from pilkit.processors import SmartResize, ResizeToFit
 from polymorphic.models import PolymorphicModel
 
 from feedback import models as feedback
+from scrapper import files
 from . import choice_types as ctypes
 
 logger = logging.getLogger(__name__)
@@ -780,6 +783,16 @@ class File(Importable):
     #: Digital object identifier
     doi = djm.URLField(null=True, blank=True)
 
+    # Processed fields
+    #: Timestamp of last analysis
+    process_date = djm.DateTimeField(null=True, blank=True)
+    #: The pages in text documents
+    pages = ArrayField(djm.TextField(), null=True, blank=True)
+    #: External links in this file
+    links = ArrayField(djm.URLField(), null=True, blank=True)
+    #: Parsing meta
+    meta = djm.JSONField(null=True, blank=True)
+
     def __str__(self):
         if self.name:
             return f"{self.name} ({self.hash})"
@@ -796,6 +809,20 @@ class File(Importable):
     def get_absolute_url(self):
         return reverse('college:file', args=[self.hash])
 
+    def analyse(self):
+        if self.external:
+            file_path = f"/{settings.EXTERNAL_ROOT}/{self.hash[:2]}/{self.hash[2:]}"
+            data = files.parse(file_path, self.hash)
+            if data:
+                data.pop('images')
+                self.links = data.pop('links')
+                self.pages = data.pop('pages')
+                self.meta = data
+                self.process_date = timezone.now()
+
+        else:
+            raise NotImplementedError()
+
 
 @reversion.register()
 class ClassFile(Importable):
@@ -805,7 +832,7 @@ class ClassFile(Importable):
     #: Class instance where this size is featured
     class_instance = djm.ForeignKey(ClassInstance, on_delete=djm.PROTECT, related_name='files')
     #: File name
-    name = djm.CharField(null=True, blank=True, max_length=256)
+    name = djm.CharField(max_length=256)
     #: Type of file being shared
     category = djm.IntegerField(choices=ctypes.FileType.CHOICES)
     #: Availability of this file (who can see it)

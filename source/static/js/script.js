@@ -314,7 +314,7 @@ const searchCols = {
         'icon': 'pencil.svg',
         'public': true
     },
-    'questions': {
+    'question': {
         'loc': {'en': 'Question', 'pt': 'Questão'},
         'icon': 'question.svg',
         'public': true

@@ -1,188 +1,141 @@
-from django_elasticsearch_dsl import Document
+from django.conf import settings
+from django_elasticsearch_dsl import Document, TextField
 from django_elasticsearch_dsl.registries import registry
 from college import models as m
-
-# Ignore auto updating of Elasticsearch when a model is saved or deleted:
-_ignore_signals = True
-# Don't perform an index refresh after every update (overrides global setting):
-_auto_refresh = False
-# Paginate the django queryset used to populate the index with the specified size
-# (by default it uses the database driver's default setting)
-_queryset_pagination = 5000
-_index_settings = {'number_of_shards': 1,
-                   'number_of_replicas': 0}
 
 
 @registry.register_document
 class StudentDocument(Document):
     class Index:
         name = 'students'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Student
-
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            'name',
-            'number',
-            'abbreviation',
-            'year',
-            'first_year',
-            'last_year',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
+        fields = ['name', 'number', 'abbreviation', 'year', 'first_year', 'last_year']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
 @registry.register_document
 class TeacherDocument(Document):
     class Index:
         name = 'teachers'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Teacher
-
-        fields = [
-            'name',
-            'abbreviation',
-            'first_year',
-            'last_year',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
+        fields = ['name', 'abbreviation', 'first_year', 'last_year']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
 @registry.register_document
 class BuildingDocument(Document):
     class Index:
         name = 'buildings'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Building
-
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            'name',
-            'abbreviation',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
+        fields = ['name', 'abbreviation']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
 @registry.register_document
 class DepartmentDocument(Document):
+    description = TextField()
+
+    def prepare_description(self, instance):
+        # TODO remove markdown
+        return str(instance.description)
 
     class Index:
         name = 'departments'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Department
-
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            'name',
-            # 'description',
-            # 'url',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
-
-    # def prepare_description(self, instance):
-    #     return instance.description
+        fields = ['name']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
 @registry.register_document
 class RoomDocument(Document):
     class Index:
         name = 'rooms'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Room
-
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            'name',
-            'floor',
-            'description',
-            'door_number',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
+        fields = ['name', 'floor', 'description', 'door_number']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
 @registry.register_document
 class CourseDocument(Document):
+    description = TextField()
+
+    def prepare_description(self, instance):
+        # TODO remove markdown
+        return str(instance.description)
+
     class Index:
         name = 'course'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Course
-
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            'name',
-            'abbreviation',
-            # 'description',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
+        fields = ['name', 'abbreviation']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
 @registry.register_document
 class ClassDocument(Document):
+    description = TextField()
+
+    def prepare_description(self, instance):
+        # TODO remove markdown
+        return str(instance.description)
+
     class Index:
         name = 'classes'
-        settings = _index_settings
+        settings = settings.ELASTIC_INDEX_SETTINGS
 
     class Django:
         model = m.Class
-
-        # The fields of the model you want to be indexed in Elasticsearch
-        fields = [
-            'name',
-            'abbreviation',
-            # 'description',
-            'credits',
-        ]
-
-        ignore_signals = _ignore_signals
-        auto_refresh = _auto_refresh
-        queryset_pagination = _queryset_pagination
+        fields = ['name', 'abbreviation', 'credits']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
 
 
-# @registry.register_document
-# class FileDocument(Document):
-#     class Index:
-#         name = 'files'
-#         settings = _index_settings
-#
-#     class Django:
-#         model = m.File
-#
-#         # The fields of the model you want to be indexed in Elasticsearch
-#         fields = [
-#             'hash',
-#             'name',
-#         ]
-#
-#         ignore_signals = _ignore_signals
-#         auto_refresh = _auto_refresh
-#         queryset_pagination = _queryset_pagination
+@registry.register_document
+class FileDocument(Document):
+    names = TextField()
+
+    def prepare_names(self, instance):
+        names = set(filter(lambda n: n, instance.class_files.values_list('name', flat=True)))
+        if len(names):
+            return " ".join(names)
+
+    class Index:
+        name = 'files'
+        settings = settings.ELASTIC_INDEX_SETTINGS
+
+    class Django:
+        model = m.File
+        fields = ['hash', 'name']
+        ignore_signals = settings.ELASTIC_IGNORE_SIGNALS
+        auto_refresh = settings.ELASTIC_AUTO_REFRESH
+        queryset_pagination = settings.ELASTIC_QUERYSET_PAGINATION
