@@ -13,6 +13,7 @@ class BuildingSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     abbreviation = serializers.CharField(required=False)
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class BuildingUsageSerializer(serializers.Serializer):
@@ -21,11 +22,12 @@ class BuildingUsageSerializer(serializers.Serializer):
     relevant = serializers.BooleanField()
 
 
-# class RoomMinimalSerializer(serializers.Serializer):
-#     id = serializers.IntegerField()
-#     name = serializers.CharField()
-#     building = serializers.CharField()
-#     degree = DegreeSerializer()
+class RoomSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    building = serializers.CharField()
+    degree = DegreeSerializer()
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class ClassMinimalSerializer(serializers.ModelSerializer):
@@ -38,7 +40,7 @@ class CourseMinimalSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     abbreviation = serializers.CharField()
-    degree = DegreeSerializer()
+    # degree = DegreeSerializer()
 
 
 class DepartmentMinimalSerializer(serializers.Serializer):
@@ -53,7 +55,8 @@ class CourseSerializer(serializers.Serializer):
     description = serializers.CharField()
     department = DepartmentMinimalSerializer()
     degree = DegreeSerializer()
-    url = serializers.CharField()
+    external_url = serializers.CharField(source='url')
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class DepartmentSerializer(serializers.Serializer):
@@ -61,8 +64,9 @@ class DepartmentSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
     building = BuildingSerializer()
-    class_set = ClassMinimalSerializer(many=True)
-    course_set = CourseMinimalSerializer(many=True)
+    classes = ClassMinimalSerializer(many=True)
+    courses = CourseMinimalSerializer(many=True)
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class ClassSerializer(serializers.Serializer):
@@ -71,12 +75,23 @@ class ClassSerializer(serializers.Serializer):
     abbreviation = serializers.CharField()
     credits = serializers.IntegerField()
     department = DepartmentMinimalSerializer()
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class StudentSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
     abbreviation = serializers.CharField()
     number = serializers.IntegerField()
     course = CourseMinimalSerializer()
+    url = serializers.CharField(source='get_absolute_url')
+
+
+class TeacherSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    abbreviation = serializers.CharField()
+    url = serializers.CharField(source='get_absolute_url')
 
 
 class ScheduleSerializer(serializers.ModelSerializer):

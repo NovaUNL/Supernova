@@ -257,6 +257,134 @@ function loadTheme(prompt) {
     }
 }
 
+
+const searchCols = {
+    'teacher': {
+        'loc': {'en': 'Teacher', 'pt': 'Professor'},
+        'icon': 'teacher.svg',
+        'public': false
+    },
+    'student': {
+        'loc': {'en': 'Student', 'pt': 'Estudante'},
+        'icon': 'student.svg',
+        'public': false
+    },
+    'building': {
+        'loc': {'en': 'Building', 'pt': 'Edifício'},
+        'icon': 'building.svg',
+        'public': true
+    },
+    'room': {
+        'loc': {'en': 'Room', 'pt': 'Sala'},
+        'icon': 'door.svg',
+        'public': true
+    },
+    'class': {
+        'loc': {'en': 'Classe', 'pt': 'U.Curricular'},
+        'icon': 'books.svg',
+        'public': true
+    },
+    'course': {
+        'loc': {'en': 'Course', 'pt': 'Curso'},
+        'icon': 'scientist.svg',
+        'public': true
+    },
+    'department': {
+        'loc': {'en': 'Department', 'pt': 'Dept.'},
+        'icon': 'flagbuilding.svg',
+        'public': true
+    },
+    'document': {
+        'loc': {'en': 'Document', 'pt': 'Documento'},
+        'icon': 'document.svg',
+        'public': false
+    },
+    'group': {
+        'loc': {'en': 'Group', 'pt': 'Grupo'},
+        'icon': 'collaboration.svg',
+        'public': true
+    },
+    'synopsis': {
+        'loc': {'en': 'Synopsis', 'pt': 'Síntese'},
+        'icon': 'notes.svg',
+        'public': true
+    },
+    'exercise': {
+        'loc': {'en': 'Exercise', 'pt': 'Exercício'},
+        'icon': 'pencil.svg',
+        'public': true
+    },
+    'questions': {
+        'loc': {'en': 'Question', 'pt': 'Questão'},
+        'icon': 'question.svg',
+        'public': true
+    },
+    'service': {
+        'loc': {'en': 'Service', 'pt': 'Serviço'},
+        'icon': 'services.svg',
+        'public': true
+    },
+    'news': {
+        'loc': {'en': 'News Item', 'pt': 'Notícia'},
+        'icon': 'newspaper.svg',
+        'public': true
+    },
+}
+
+function showSearch() {
+    /**
+     * Shows the search prompt
+     */
+    let selectedCategory = null;
+
+    const p = createOverlay();
+    p.addClass('search');
+    p.find('h2').text('Pesquisar');
+    const textInp = $('<input type="search">');
+    const btn = $('<input type="button" value="🔍">');
+    const inputs = $('<div class="inputs"></div>').append(textInp).append(btn);
+    const results = $('<div class="results"></div>').css('flex-grow', 1);
+    const categories = $('<div class="categories"></div>');
+    p.find('.pane-content').append(inputs).append(results).append(categories);
+    for (const [key, category] of Object.entries(searchCols)) {
+        const disabled = UID === -1 && !category.public;
+        const elem = $(`<div id="search-category-${key}" class="category ${disabled ? "disabled" : ""}">
+            <img src="/static/img/icons/${category.icon}">
+            <h3>${category.loc.pt}</h3>
+            </div>`);
+        categories.append(elem);
+        if (disabled) continue;
+        elem.click(() => {
+            categories.find('.category').removeClass('set');
+            elem.addClass('set');
+            categories.addClass('picked');
+            selectedCategory = key;
+        });
+    }
+
+    btn.click(() => {
+        results.css('display', 'block');
+        results.children().remove();
+        const loadSpinner = spinner.clone()
+        results.append(loadSpinner);
+        const query = textInp.val();
+        fetch(`/api/search?q=${query}&e=${selectedCategory}`,
+            {credentials: 'include', method: 'GET'})
+            .then((r) => r.json())
+            .then((val) => {
+                loadSpinner.remove();
+                for (const [key, subset] of Object.entries(val.results)) {
+                    results.append($(`<h3>${searchCols[key].loc.pt}</h3>`));
+                    for (const entry of subset) {
+                        let elem = $(`<div class="result"><h3><a href="${entry.url}">${entry.name}</a></h3></div>`);
+                        // TODO Add picture and summary
+                        results.append(elem);
+                    }
+                }
+            });
+    })
+}
+
 function showFilePreview(elem) {
     /**
      * Shows a preview for a file in a file listing

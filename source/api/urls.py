@@ -5,6 +5,7 @@ from api import views
 app_name = 'api'
 
 urlpatterns = [
+    path('search/', views.search.search_view, name="search"),
     # College
     path('buildings/', views.college.BuildingList.as_view(), name="buildings"),
     path('building/<int:pk>/', views.college.BuildingDetailed.as_view(), name="building"),

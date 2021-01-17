@@ -6,4 +6,5 @@ from api.views import services
 from api.views import learning
 from api.views import users
 from api.views import calendar
+from api.views import search
 from api.views import third_party

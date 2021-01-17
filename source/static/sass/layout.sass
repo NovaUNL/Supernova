@@ -604,47 +604,41 @@ body
     max-height: calc(100% - 100px)
 
 .search
-  min-width: 80vw
-  min-height: 80vh
+  max-width: min(1100px, 100%)
   transition: 1s
 
   .pane-content
     display: grid
-    grid-template-areas: "categories inputs" "categories results"
-    grid-template-columns: 128px auto
-    grid-template-rows: 30px 1fr
+    grid-template-areas: "categories" "inputs" "results"
+    //grid-template-columns: 128px auto
+    grid-template-rows: 0fr 30px 0fr
     overflow: auto
 
-  .inputs
-    display: flex
-    grid-area: inputs
-
-    input[type=search]
-      flex-grow: 1
-
-    input[type=button]
-      flex-grow: 1
 
   .categories
-    display: flex
-    flex-direction: column
-    flex-wrap: nowrap
-    font-size: 14px
-    overflow: auto
     grid-area: categories
+    display: flex
+    flex-wrap: wrap
+    font-size: 14px
+    justify-content: space-between
 
   .category
     cursor: pointer
     display: flex
     flex-direction: column
     border: 2px solid var(--pane-bg-highlight)
-    border-bottom: 0
-    border-right: 0
-    border-radius: 10px 0 0 10px
+    border-radius: 10px
     text-align: center
+    min-width: 120px
+    margin: 10px
+    flex-grow: 1
 
     &.set
       background-color: var(--pane-bg-highlight)
+
+    &.disabled
+      filter: blur(2px)
+      cursor: not-allowed
 
     img
       width: 64px
@@ -653,13 +647,23 @@ body
       position: relative
       bottom: -5px
 
+  .inputs
+    display: flex
+    grid-area: inputs
+
+    input[type=search]
+      flex-grow: 9
+
+    input[type=button]
+      flex-grow: 1
+
   .results
     padding: 10px
     grid-area: results
-    overflow: auto
     border: 2px solid var(--pane-bg-highlight)
     border-top: 0
     border-bottom-right-radius: 5px
+    display: none
 
 @media #{$lowres}
   #header
@@ -689,8 +693,8 @@ body
     padding: 5px
 
   #notification-btn:after
-      width: calc(100% - 10px)
-      height: calc(100% - 10px)
+    width: calc(100% - 10px)
+    height: calc(100% - 10px)
 
   #main-wrapper
     scroll-snap-type: x mandatory
@@ -727,9 +731,17 @@ body
   .row
     padding: 0 !important
 
-  .search .category
-    font-size: 14px
+  .search
+    .picked
+      .category
+        display: none
 
-    img
-      width: 42px
-      height: 42px
+      .set
+        display: block !important
+
+    .category
+      font-size: 14px
+
+      img
+        width: 42px
+        height: 42px
