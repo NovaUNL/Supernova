@@ -262,72 +262,210 @@ const searchCols = {
     'teacher': {
         'loc': {'en': 'Teacher', 'pt': 'Professor'},
         'icon': 'teacher.svg',
-        'public': false
+        'public': false,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img class="pic circle" src="${entry.url}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'student': {
         'loc': {'en': 'Student', 'pt': 'Estudante'},
         'icon': 'student.svg',
-        'public': false
+        'public': false,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img class="pic circle" src="${entry.url}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'building': {
         'loc': {'en': 'Building', 'pt': 'Edifício'},
         'icon': 'building.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img src="${entry.thumb}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'room': {
         'loc': {'en': 'Room', 'pt': 'Sala'},
         'icon': 'door.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img src="${entry.thumb}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'class': {
         'loc': {'en': 'Classe', 'pt': 'U.Curricular'},
         'icon': 'books.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                elem.append($(`<span>2015-2020, Dept. Informática, 50 alunos.</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'course': {
         'loc': {'en': 'Course', 'pt': 'Curso'},
         'icon': 'scientist.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                elem.append($(`<span>2015-2020, Dept. Informática, 50 alunos.</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'department': {
         'loc': {'en': 'Department', 'pt': 'Dept.'},
         'icon': 'flagbuilding.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            items.forEach((entry) =>
+                container.append($(`<div class="result"><h3><a href="${entry.url}">${entry.name}</a></h3></div>`)));
+            return container;
+        }
     },
     'document': {
         'loc': {'en': 'Document', 'pt': 'Documento'},
         'icon': 'document.svg',
-        'public': false
+        'public': false,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                elem.append($(`<span>foo.zip; bar.zip</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'group': {
         'loc': {'en': 'Group', 'pt': 'Grupo'},
         'icon': 'collaboration.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img src="${entry.thumb}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                elem.append($(`<span>${entry.abbreviation}</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'synopsis': {
         'loc': {'en': 'Synopsis', 'pt': 'Síntese'},
         'icon': 'notes.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                elem.append($(`<span>Parent; Classes</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'exercise': {
         'loc': {'en': 'Exercise', 'pt': 'Exercício'},
         'icon': 'pencil.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<h3><a href="${entry.url}">${entry.id}</a></h3>`));
+                elem.append($(`<span>Foo, Bar, Baz</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'question': {
         'loc': {'en': 'Question', 'pt': 'Questão'},
         'icon': 'question.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<h3><a href="${entry.url}">${entry.title}</a></h3>`));
+                elem.append($(`<span>Foo, Bar, Baz</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'service': {
         'loc': {'en': 'Service', 'pt': 'Serviço'},
         'icon': 'services.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img src="${entry.thumb}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
     'news': {
         'loc': {'en': 'News Item', 'pt': 'Notícia'},
         'icon': 'newspaper.svg',
-        'public': true
+        'public': true,
+        'display': function (items) {
+            const container = $('<div class="indented"></div>');
+            for (const entry of items) {
+                const elem = $('<div class="result"></div>');
+                elem.append($(`<img src="${entry.thumb}">`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.title}</a></h3>`));
+                elem.append($(`<span>${entry.summary}</span>`));
+                container.append(elem);
+            }
+            return container;
+        }
     },
 }
 
@@ -368,21 +506,20 @@ function showSearch() {
         const loadSpinner = spinner.clone()
         results.append(loadSpinner);
         const query = textInp.val();
-        fetch(`/api/search?q=${query}&e=${selectedCategory}`,
+        fetch(`/api/search?q=${query}${selectedCategory ? "&e=" + selectedCategory : ""}`,
             {credentials: 'include', method: 'GET'})
             .then((r) => r.json())
             .then((val) => {
                 loadSpinner.remove();
                 for (const [key, subset] of Object.entries(val.results)) {
+                    if(!selectedCategory && UID === -1)
+                        results.append($(`<b>Utilizadores não autenticados tem visibilidade reduzida.</b>`));
                     results.append($(`<h3>${searchCols[key].loc.pt}</h3>`));
-                    for (const entry of subset) {
-                        let elem = $(`<div class="result"><h3><a href="${entry.url}">${entry.name}</a></h3></div>`);
-                        // TODO Add picture and summary
-                        results.append(elem);
-                    }
+                    results.append(searchCols[key].display(subset));
                 }
             });
-    })
+    }
+)
 }
 
 function showFilePreview(elem) {
