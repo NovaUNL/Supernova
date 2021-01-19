@@ -6,6 +6,7 @@ class GroupMinimalSerializer(serializers.Serializer):
     name = serializers.CharField()
     abbreviation = serializers.CharField()
     url = serializers.CharField(source='get_absolute_url')
+    thumb = serializers.URLField(source='thumbnail_or_default')
 
 
 class GroupTypeSerializer(serializers.Serializer):

@@ -736,6 +736,11 @@ class Teacher(Importable, CachedEntity):
     def get_absolute_url(self):
         return reverse('college:teacher', args=[self.id])
 
+    @property
+    def thumbnail_or_default(self):
+        if self.picture:
+            return self.picture_thumbnail.url
+
 
 def file_upload_path(file, _):
     return f'file/{file.hash}'

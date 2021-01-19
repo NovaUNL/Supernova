@@ -71,6 +71,11 @@ class NewsItem(djm.Model):
         if summary != self.summary:
             self.summary = summary
 
+    @property
+    def thumbnail_or_default(self):
+        if self.cover_img:
+            return self.cover_thumbnail.url
+
 
 class NewsVote(djm.Model):
     UPVOTE = 1

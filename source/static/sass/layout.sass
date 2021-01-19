@@ -665,6 +665,28 @@ body
     border-bottom-right-radius: 5px
     display: none
 
+  .result
+    display: grid
+    grid-template-areas: "pic title" "pic subtitle"
+    grid-template-columns: 64px auto
+    grid-template-rows: 1fr 0fr
+    align-items: center
+
+    h3
+      grid-area: title
+
+    img
+      grid-area: pic
+      width: 56px
+      padding: 4px
+      background-size: contain
+
+      &.circle
+        border-radius: 24px
+
+    span
+      grid-area: subtitle
+
 @media #{$lowres}
   #header
     grid-template-columns: 0fr 1fr 0fr 1fr 0fr 0fr

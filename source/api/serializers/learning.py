@@ -23,7 +23,7 @@ class SectionSerializer(serializers.Serializer):
 
 
 class SectionPreviewSerializer(serializers.Serializer):
-    id = serializers.IntegerField(source='activity_id')
+    id = serializers.IntegerField()
     title = serializers.CharField()
     content = serializers.CharField(source='content_md')
     url = serializers.CharField(source='get_absolute_url')

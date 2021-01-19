@@ -267,7 +267,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img class="pic circle" src="${entry.url}">`));
+                if (entry.thumb)
+                    elem.append($(`<img class="circle" src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
                 container.append(elem);
             }
@@ -282,7 +283,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img class="pic circle" src="${entry.url}">`));
+                if (entry.thumb)
+                    elem.append($(`<img class="circle" src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
                 container.append(elem);
             }
@@ -297,7 +299,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img src="${entry.thumb}">`));
+                if (entry.thumb)
+                    elem.append($(`<img src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
                 container.append(elem);
             }
@@ -312,7 +315,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img src="${entry.thumb}">`));
+                if (entry.thumb)
+                    elem.append($(`<img src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
                 container.append(elem);
             }
@@ -328,7 +332,7 @@ const searchCols = {
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
-                elem.append($(`<span>2015-2020, Dept. Informática, 50 alunos.</span>`));
+                // elem.append($(`<span>2015-2020, Dept. Informática, 50 alunos.</span>`));
                 container.append(elem);
             }
             return container;
@@ -383,7 +387,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img src="${entry.thumb}">`));
+                if (entry.thumb)
+                    elem.append($(`<img src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
                 elem.append($(`<span>${entry.abbreviation}</span>`));
                 container.append(elem);
@@ -399,8 +404,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
-                elem.append($(`<span>Parent; Classes</span>`));
+                elem.append($(`<h3><a href="${entry.url}">${entry.title}</a></h3>`));
+                // elem.append($(`<span>Parent; Classes</span>`));
                 container.append(elem);
             }
             return container;
@@ -415,7 +420,7 @@ const searchCols = {
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
                 elem.append($(`<h3><a href="${entry.url}">${entry.id}</a></h3>`));
-                elem.append($(`<span>Foo, Bar, Baz</span>`));
+                // elem.append($(`<span>Foo, Bar, Baz</span>`));
                 container.append(elem);
             }
             return container;
@@ -444,7 +449,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img src="${entry.thumb}">`));
+                if (entry.thumb)
+                    elem.append($(`<img src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
                 container.append(elem);
             }
@@ -459,7 +465,8 @@ const searchCols = {
             const container = $('<div class="indented"></div>');
             for (const entry of items) {
                 const elem = $('<div class="result"></div>');
-                elem.append($(`<img src="${entry.thumb}">`));
+                if (entry.thumb)
+                    elem.append($(`<img src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.title}</a></h3>`));
                 elem.append($(`<span>${entry.summary}</span>`));
                 container.append(elem);

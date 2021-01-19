@@ -116,10 +116,8 @@ class User(AbstractUser):
         course_candidates = set()
 
         for student in self.students.filter(last_year=settings.COLLEGE_YEAR).all():
-            course_candidates.add(student.course)
-        for teacher in self.teachers.filter(last_year=settings.COLLEGE_YEAR).all():
-            course_candidates.add(teacher.course)
-        course_candidates.discard(None)
+            if student.course:
+                course_candidates.add(student.course)
         if len(course_candidates) == 1:
             self.course = course_candidates.pop()
             changed = True

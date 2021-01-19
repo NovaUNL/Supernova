@@ -22,6 +22,12 @@ mapping = {
         'fields': ['name', 'abbreviation'],  # TODO number
         'private': True
     },
+    'group': {
+        'class': groups_search.GroupDocument,
+        'serializer': serializers.groups.GroupMinimalSerializer,
+        'fields': ['title', 'abbreviation', 'content'],
+        'private': False
+    },
     'building': {
         'class': college_search.BuildingDocument,
         'serializer': serializers.college.BuildingSerializer,
@@ -79,12 +85,6 @@ mapping = {
     'news': {
         'class': news_search.NewsItemDocument,
         'serializer': serializers.news.NewsMinimalSerializer,
-        'fields': ['title', 'content'],
-        'private': False
-    },
-    'group': {
-        'class': groups_search.GroupDocument,
-        'serializer': serializers.groups.GroupMinimalSerializer,
         'fields': ['title', 'content'],
         'private': False
     },

@@ -132,6 +132,11 @@ class Group(djm.Model):
             GroupActivityNotification.objects.create(activity=activity, receiver=subscription.subscriber)
             subscription.subscriber.clear_notification_cache()
 
+    @property
+    def thumbnail_or_default(self):
+        if self.image:
+            return self.image_thumbnail.url
+
 
 @reversion.register()
 class Role(djm.Model):

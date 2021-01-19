@@ -341,6 +341,9 @@ class Exercise(djm.Model):
     def __str__(self):
         return f'Exercício #{self.id}'
 
+    def get_absolute_url(self):
+        return reverse('learning:exercise', args=[self.id])
+
     def count_problems(self):
         return Exercise._count_problems(self.content)
 
@@ -413,7 +416,7 @@ class Exercise(djm.Model):
             substrings.append(problem['answer'])
         elif type == 'select':
             substrings.append(problem["enunciation"])
-            substrings.append(" ". join(problem['candidates']))
+            substrings.append(" ".join(problem['candidates']))
 
 
 class UserExerciseLog:
