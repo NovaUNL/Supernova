@@ -506,7 +506,7 @@ function showSearch() {
             selectedCategory = key;
         });
     }
-
+    textInp.on('keyup', (e) => {if (e.key === 'Enter' || e.keyCode === 13) btn.click()});
     btn.click(() => {
         results.css('display', 'block');
         results.children().remove();
