@@ -11,14 +11,7 @@
 {% block content_wrapper %}
   <div class="col profile">
     <div class="header-decorator">
-      <h1>
-        {% if profile_user.picture %}
-          <img src="{{ profile_user.picture_medium.url }}">
-        {% else %}
-          <img src="{% static 'img/user.svg' %}">
-        {% endif %}
-        {{ profile_user.get_full_name }}
-      </h1>
+      <h1>Reputação</h1>
     </div>
     <div class="row padded nowrap">
       <div class="col">
@@ -68,7 +61,7 @@
             </div>
             <div class="link{% if profile_user.points >= 1024 %} done{% endif %}"></div>
             <div class="milestone">
-              <div class="circle{% if profile_user.points >= 5730 %} done{% endif %}" style="background: url('{% static 'img/icons/books.svg' %}')"></div>
+              <div class="circle{% if profile_user.points >= 5730 %} done{% endif %}" style="background: url('{% static 'img/icons/books.p.svg' %}')"></div>
               <div class="info">
                 <h3>Sábio, $t_{1/2}({}^{14}\text{C})$ pontos</h3>
                 <ul class="unlock-list">
@@ -93,7 +86,7 @@
             </div>
             <div class="link{% if profile_user.points >= 10000000 %} done{% endif %}"></div>
             <div class="milestone">
-              <div class="circle{% if profile_user.points >= 149587871 %} done{% endif %}" style="background: url('{% static 'img/icons/collaboration.svg' %}')"></div>
+              <div class="circle{% if profile_user.points >= 149587871 %} done{% endif %}" style="background: url('{% static 'img/icons/collaboration.p.svg' %}')"></div>
               <div class="info">
                 <h3>Representante, $1,49597871 \cdot 10^8$ pontos</h3>
                 <ul class="unlock-list">
