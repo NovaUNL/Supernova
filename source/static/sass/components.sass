@@ -321,6 +321,34 @@
       > .val
         font-weight: bold
 
+.curriculum
+  .block, .class
+    border: 1px solid var(--pane-bg-highlight)
+    border-left: 2px solid var(--highlight)
+
+  .class
+    display: flex
+
+  .class h4, .block h4
+    display: inline-block
+    flex-grow: 1
+    margin-left: 5px
+
+  .attrs
+    display: flex
+    white-space: nowrap
+
+    div
+      display: flex
+      flex-direction: column
+      align-items: center
+      padding: 5px
+      background-color: var(--pane-bg-highlight)
+      border-left: 1px solid var(--separator)
+
+    .val
+      font-weight: bold
+
 .diff-list
   .insert
     background-color: var(--green)

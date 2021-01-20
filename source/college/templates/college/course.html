@@ -2,41 +2,42 @@
 
 {% load static %}
 
-{% block head %}
-  <style>
-      .curriculum .block, .curriculum .class {
-          border: 1px solid var(--pane-bg-highlight);
-          border-left: 2px solid var(--highlight);
-      }
-
-      .curriculum .class {
-          display: flex;
-      }
-
-      .curriculum .class h4, .curriculum .block h4 {
-          display: inline-block;
-          flex-grow: 1;
-          margin-left: 5px;
-      }
-
-      .attrs {
-          display: flex;
-      }
-
-      .attrs div {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 5px;
-          background-color: var(--input-light);
-          border-left: 1px solid var(--primary4),
-      }
-
-      .attrs .val {
-          font-weight: bold;
-      }
-  </style>
-{% endblock %}
+{#{% block head %}#}
+{#  <style>#}
+{#      .curriculum .block, .curriculum .class {#}
+{#          border: 1px solid var(--pane-bg-highlight);#}
+{#          border-left: 2px solid var(--highlight);#}
+{#      }#}
+{##}
+{#      .curriculum .class {#}
+{#          display: flex;#}
+{#      }#}
+{##}
+{#      .curriculum .class h4, .curriculum .block h4 {#}
+{#          display: inline-block;#}
+{#          flex-grow: 1;#}
+{#          margin-left: 5px;#}
+{#      }#}
+{##}
+{#      .attrs {#}
+{#          display: flex;#}
+{#          white-space: nowrap;#}
+{#      }#}
+{##}
+{#      .attrs div {#}
+{#          display: flex;#}
+{#          flex-direction: column;#}
+{#          align-items: center;#}
+{#          padding: 5px;#}
+{#          background-color: var(--input-light);#}
+{#          border-left: 1px solid var(--primary4),#}
+{#      }#}
+{##}
+{#      .attrs .val {#}
+{#          font-weight: bold;#}
+{#      }#}
+{#  </style>#}
+{#{% endblock %}#}
 
 {% block content_wrapper %}
   <div class="header-decorator">
@@ -86,6 +87,11 @@
           {% else %}
             <p>Estrutura curricular por definir.</p>
           {% endif %}
+          <p>
+            Nota: Definir a estrutura curricular de um curso é trabalhoso (+- 3/4 horas para MIEI ou MIEEC) e
+            impossível de fazer de forma garantidamente correta sem colaboração (dado que quer o CLIP como as restantes páginas da UNL tem erros).
+            Se pertences a um dos cursos sem estutura definida e compreendes o funcionamento do curso, agradecemos a tua ajuda, fala connosco!
+          </p>
         </div>
       </div>
     </div>
@@ -94,11 +100,11 @@
         <div class="pane-title bg-grad"><h2>Navegação</h2></div>
         <div class="pane-content">
           <ul class="menu">
-            <li><a class="disabled" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a>
+{#            <li><a class="disabled" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a>#}
             </li>
             <li><a href="{% url 'college:course_students' course.id %}">Alunos</a></li>
-            <li><a class="disabled">Núcleo do curso</a></li>
-            <li><a class="disabled">Concelho pedagógico</a></li>
+            <li><span class="disabled">Núcleo do curso</span></li>
+            <li><span class="disabled">Concelho pedagógico</span></li>
           </ul>
         </div>
       </div>
@@ -119,4 +125,9 @@
       </div>
     </div>
   </div>
+  <script>
+    function showChildren(e){
+        e.querySelector('.indented').style.display = 'block';
+    }
+  </script>
 {% endblock %}
