@@ -12,7 +12,8 @@ body
   grid-template-areas: "hamburger none logo none2 actions user"
   grid-template-columns: 0fr 0fr 0fr 1fr 0fr 0fr
   min-height: $top-height
-  border-bottom: 2px solid var(--primary1-alt)
+  border-bottom: 2px solid var(--nav-border)
+  background-color: var(--nav-bg)
   color: var(--text-alt)
   position: relative
   z-index: 3
@@ -69,9 +70,9 @@ body
   display: grid
   align-items: center
   justify-content: space-between
-  background-color: var(--primary2-alt)
+  background-color: var(--nav-bg-alt)
   grid-template-columns: 42px auto 50px
-  padding-left: 5px
+  padding-left: 10px
   font-weight: bold
 
   &.lowres
@@ -117,7 +118,7 @@ body
   background-origin: content-box
   border: none
   padding: 10px
-  margin-right: 10px
+  margin-right: 5px
   box-shadow: unset
 
 
@@ -217,6 +218,7 @@ body
 
 #nav-column
   grid-area: sidebar
+  background-color: var(--nav-bg)
   color: var(--text-alt-hc)
   display: flex
   flex-direction: column
@@ -286,24 +288,19 @@ body
     transform: rotate(90deg)
 
   li.active
-    background-color: var(--primary0-alt)
+    background-color: var(--selected-menu-bg)
 
     a
       color: var(--text-alt-hc)
 
 #nav-end
-  margin-top: auto
-  display: flex
-  flex-direction: column
-  flex-wrap: nowrap
   padding: 10px
+
+  .tiny-btn-widget:first-child
+    margin-right: 10px
 
 #license-img
   max-width: 100%
-
-.bg-grad
-  background: radial-gradient(ellipse at top left, var(--grad1), var(--grad3)), radial-gradient(ellipse at top right, var(--grad2), var(--grad3))
-  background-attachment: fixed
 
 #content-column
   grid-area: content
@@ -325,9 +322,9 @@ body
 #breadcrumbs
   font-size: 1.0em
   font-weight: bold
-  border-bottom: 2px solid var(--primary1-alt)
+  border-bottom: 2px solid var(--nav-border)
   box-shadow: 0 3px 5px var(--shadow)
-  background-color: var(--primary2-alt)
+  background-color: var(--breadcrumbs-bg)
 
   @media #{$lowmidres}
     display: none
@@ -341,7 +338,7 @@ body
     line-height: 37px
     padding: 0 10px 0 30px
     position: relative
-    background-color: var(--primary2-alt)
+    background-color: var(--breadcrumbs-bg)
 
   a:first-child
     padding-left: 20px
@@ -357,14 +354,14 @@ body
     transform: scale(0.707) rotate(45deg)
     z-index: 1
     border-radius: 0 5px 0 50px
-    background: var(--primary2-alt)
+    background: var(--breadcrumbs-bg)
 
   a:hover
     color: var(--text-link)
-    background-color: var(--primary1-alt)
+    background-color: var(--selected-menu-bg)
 
   a:hover:after
-    background: var(--primary1-alt)
+    background: var(--selected-menu-bg)
 
 .col
   display: flex
@@ -380,7 +377,6 @@ body
 
   &.noshrink
     flex-shrink: 0
-
 
 .flex-pane
   display: grid
@@ -433,7 +429,8 @@ body
   border-top-right-radius: 5px
   color: var(--pane-title)
   background-color: var(--pane-title-bg)
-  text-shadow: 0px -1px 0px var(--primary2-alt), 0px 0px 5px var(--primary2-alt)
+  // v FIXME Needs a separate var. Misc issues.
+  //text-shadow: -1px -1.5px 0 var(--separator)
   display: flex
   justify-content: space-between
 
@@ -502,8 +499,6 @@ body
     display: inline
 
     /* TODO remove */
-
-
     > img
       width: 100px
       height: 100px
@@ -561,9 +556,9 @@ body
   right: 0
   top: 0
   border-bottom-left-radius: 5px
-  border-left: 2px solid var(--primary3)
-  border-bottom: 2px solid var(--primary3)
-  background-color: var(--primary2)
+  border-left: 2px solid var(--nav-border)
+  border-bottom: 2px solid var(--nav-border)
+  background-color: var(--header-options-bg)
   font-weight: bold
 
   a
@@ -577,7 +572,7 @@ body
   li
     display: inline-block
     padding: 5px 10px
-    border-right: 2px solid var(--primary1)
+    border-right: 2px solid var(--nav-border)
 
   li:last-child
     border-right: 0
@@ -613,7 +608,6 @@ body
     //grid-template-columns: 128px auto
     grid-template-rows: 0fr 30px 0fr
     overflow: auto
-
 
   .categories
     grid-area: categories

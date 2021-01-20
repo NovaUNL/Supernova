@@ -58,15 +58,15 @@ input[type=number]
 textarea
   background-color: var(--input-light)
   color: var(--text-hc)
-  border: 1px solid var(--primary1)
+  border: 1px solid var(--input-dark)
   border-radius: 5px
   height: 8em
   padding: 5px
   width: calc( 100% - 10px)
 
 blockquote
-  background: var(--bg2)
-  border-left: 10px solid #ccc
+  background: var(--pane-bg-highlight)
+  border-left: 10px solid var(--highlight)
   margin: 1.5em 10px
   padding: 0.5em 10px
   color: var(--text-hc)
@@ -115,7 +115,7 @@ pre
   background-position: center
   background-repeat: no-repeat
   flex-grow: 1
-  border-radius: 5px
+  border-radius: 7px
   margin: 10px
   width: 220px
   height: 150px
@@ -124,19 +124,22 @@ pre
   font-weight: bold
   font-size: 1.2em
   background-color: white
-  box-shadow: 0 0 5px var(--primary4)
+  box-shadow: 0 0 5px var(--soft-shadow)
   color: white
-  border: 2px solid var(--primary4)
 
 .flex-grid-item-top, .flex-grid-item-bottom
   text-shadow: 0 0 2px #000000
   background-color: #74737f44
+
+.flex-grid-item-top
+  border-radius: 5px 5px 0 0
 
 .flex-grid-item-bottom
   display: flex
   flex-direction: row
   justify-content: space-evenly
   align-items: center
+  border-radius: 0 0 5px 5px
 
   img
     max-height: 18px
@@ -165,10 +168,11 @@ pre
   display: block
   margin: auto
 
-form
-  hr
-    color: var(--primary2)
-    margin: 0
+hr
+  color: var(--separator)
+
+form hr
+  margin: 0
 
 .errorlist
   text-decoration: underline red
@@ -192,7 +196,7 @@ form
 
 table.stylized
   thead
-    background-color: var(--primary2)
+    background-color: var(--table-head)
     font-weight: 700
 
   tbody tr:nth-of-type(odd)
@@ -200,7 +204,6 @@ table.stylized
 
   &.grow
     width: 100%
-
 
 .clearfix
   content: ""

@@ -1,49 +1,75 @@
 \:root, [data-theme="quasar"]
-  // Base colors
-  --primary0: #ffffff
-  --primary1: #efeff0
-  --primary2: #dbdbdd
-  --primary3: #c4c5c9
-  --primary4: #aeaeb4
-  --primary0-alt: #ffffff
-  --primary1-alt: #efeff0
-  --primary2-alt: #dbdbdd
-  --primary3-alt: #c4c5c9
-  --primary4-alt: #aeaeb4
+  // Palette (from https://yeun.github.io/open-color/)
+  // #ffffff
+  // #f8f9fa
+  // #f1f3f5
+  // #e9ecef
+  // #dee2e6
+  // #ced4da
+
+  // Regular text
+  --text: #2e3338
+  // Low contrast text
+  --text-lc: #4c566a
+  // High contrast text
+  --text-hc: #2e3338
+  // Links
+  --text-link: #0067e0
+  // Interface text (outside content)
+  --text-alt: #2e3338
+  --text-alt-hc: #2e3338
+  --pane-title: #2e3338
+  --pane-title-link: #0067e0
+
+  // Page background
+  --bg: #ffffff
+  // Background in the interface (outside content)
+  --nav-bg: #f1f3f5
+  // Alternative background in the interface
+  --nav-bg-alt: #dee2e6
+  // Content background
+  --pane-bg: #ffffff
+  // Background when a block of content is highlighted
+  --pane-bg-highlight: #f1f3f560
+  // Background in the title of the panes
+  --pane-title-bg: #e9ecef
+  // Background in the content headers
+  --header-bg: #dee2e6
+  // Background of the header options menu
+  --header-options-bg: #f1f3f5
+  // Background in the breadcrumbs
+  --breadcrumbs-bg: #e9ecef
+  // TODO, use when highlighting stuff like menu entries
+  --ui-hover-bg: #f8f9fa
+  // Reinforced shade for the current menu selections
+  --selected-menu-bg: #ced4da
+
+  // Some border highlighting something of particular relevance
+  --highlight: #3490ce
+  // Usually for hinting at logical content separations
+  --separator: #f1f3f5
+  // Borders between interface and content
+  --nav-border: #f8f9fa
+  --pane-title-border: #cfcfd2
+  // The head row/col in a table
+  --table-head: #e9ecef
+
+  // Strong shadow to apply on UI elements
+  --shadow: #ced4da
+  // Shadow to apply on content sub-panes
+  --soft-shadow: #dee2e6
+
+  // Typing areas, buttons, ...
+  --input-light: #ffffff
+  // Details, disabled content, ...
+  --input-dark: #dbdbdd
+  // Relative amount of white filter to use in the interface icons
+  --icon-brightness: 0.4
+
+  // Generic colors
   --red: #bf616a
   --green: #a3be8c
   --blue: #81a1c1
-
-  // Layout
-   // Page background
-  --bg: #ffffff
-  /* Pane background */
-  --bg2: #efeff0
-  /* Subpane background */
-  --bg3: #dfdfe1
-  /* Highlights, such as tags.*/
-  --bg4: #e1e8f5
-  --text: #2e3338
-  --text-lc: #4c566a
-  --text-hc: #2e3338
-  --text-alt: #2e3338
-  --text-alt-hc: #2e3338
-  --text-link: #0067e0
-  --highlight: #3490ce
-  --pane-title: #2e3338
-  --pane-title-border: #cfcfd2
-  --pane-title-link: #0067e0
-  --pane-title-bg: transparent
-  --pane-bg: #ffffff
-  --pane-bg-highlight: #e6e6e6
-  --header-bg: #e3e5e8
-  --shadow: #c4c5c9
-  --soft-shadow: #c4c5c9
-  --grad1: #dbdbdd
-  --grad2: #c4c5c9
-  --grad3: #f0f0f2
-  --input-light: #ffffff
-  --input-dark: #dbdbdd
 
   // Misc overrides
   --theoretical-shift: #a3be8c
@@ -64,93 +90,165 @@
   --room-type-7-color: #6d9995
   --room-type-7-shadow: #7fb3ae
 
-  --icon-brightness: 0.4
+
+  /* Grid borders */
+  --fc-border-color: #dddddd77
+  /* Background separation borders (seen on overlaps)? */
+  --fc-page-bg-color: #00000000
+  /* Highlight bellow the current day */
+  --fc-today-bg-color: #d8dee944
+  //--fc-text-color: #000000
+  /* Background in some widgets, such as the list view */
+  --fc-neutral-bg-color: #f4f4f7
 
 [data-theme="tokamak"]
-  // Base colors
-  --primary0: #ffffff
-  --primary1: #efeff0
-  --primary2: #dbdbdd
-  --primary3: #c4c5c9
-  --primary4: #aeaeb4
-  --primary0-alt: #10101d
-  --primary1-alt: #15151b
-  --primary2-alt: #323138
-  --primary3-alt: #53535d
-  --primary4-alt: #74737f
-  --red: #bf616a
-  --green: #a3be8c
-  --blue: #81a1c1
+  // Palette (Copied from the Nord Theme, https://www.nordtheme.com)
+  // #eceff4
+  // #e5e9f0
+  // #d8dee9
+  // #4c566a
+  // #434c5e
+  // #3b4252
+  // #2e3440
 
-  // Layout
-  --bg: #717180
-  --bg2: #e5e9f0
+  // Regular text
   --text: #2e3338
+  // Low contrast text
   --text-lc: #4c566a
+  // High contrast text
   --text-hc: #2e3338
-  --text-alt: #8c8b99
-  --text-alt-hc: #cccccc
+  // Links
   --text-link: #0080ad
-  --highlight: #3490ce
-  --pane-bg: #eceff4
-  --pane-bg-highlight: #f2f4f8
-  --pane-title: #cccccc
-  --pane-title-border: #10101d
-  --pane-title-bg: #53535d
+  // Interface text (outside content)
+  --text-alt: #e5e9f0
+  --text-alt-hc: #eceff4
+  --pane-title: #eceff4
   --pane-title-link: #3e92b3
-  --header-bg: #e3e5e8
-  --shadow: #323138
-  --grad1: #323138
-  --grad2: #53535d
-  --grad3: #4f4e59
-  --input-light: #e5e9f0
-  --input-dark: #74737f
+
+  // Page background
+  --bg: #e5e9f0
+  // Background in the interface (outside content)
+  --nav-bg: #3b4252
+  // Alternative background in the interface
+  --nav-bg-alt: #2e3440
+  // Content background
+  --pane-bg: #eceff4
+  // Background when a block of content is highlighted
+  --pane-bg-highlight: #d8dee9
+  // Background in the title of the panes
+  --pane-title-bg: #4c566a
+  // Background in the content headers
+  --header-bg: #d8dee9
+  // Background of the header options menu
+  --header-options-bg: #e5e9f0
+  // Background in the breadcrumbs
+  --breadcrumbs-bg: #434c5e
+  // TODO, use when highlighting stuff like menu entries
+  --ui-hover-bg: #f8f9fa
+  // Reinforced shade for the current menu selections
+  --selected-menu-bg: #2e3440
+
+  // Some border highlighting something of particular relevance
+  --highlight: #3490ce
+  // Usually for hinting at logical content separations
+  --separator: #d8dee9
+  // Borders between interface and content
+  --nav-border: #2e3440
+  --pane-title-border: #2e3440
+  // The head row/col in a table
+  --table-head: #d8dee9
+
+  // Strong shadow to apply on UI elements
+  --shadow: #434c5e
+  // Shadow to apply on content sub-panes
+  --soft-shadow: #dee2e6
+
+  // Typing areas, buttons, ...
+  --input-light: #ffffff
+  // Details, disabled content, ...
+  --input-dark: #dbdbdd
+  // Relative amount of white filter to use in the interface icons
   --icon-brightness: 0.8
 
 [data-theme="nebula"]
-  // Base colors
-  --primary0: #10101d
-  --primary1: #15151b
-  --primary2:  #323138
-  --primary3: #53535d
-  --primary4: #74737f
-  --primary0-alt: #10101d
-  --primary1-alt: #15151b
-  --primary2-alt:  #323138
-  --primary3-alt: #53535d
-  --primary4-alt: #74737f
-  --red: #99001177
-  --green: #07590077
-  --blue: #192a7677
+  // Palette
+  // #1C1B21
+  // #222228
+  // #282930
+  // #2F3038
+  // #353740
 
-  // Layout
-  --bg: #000
-  --bg2: #323138
-  --bg4: #53535d
+  // Regular text
   --text: #8c8b99
+  // Low contrast text
   --text-lc: #8c8b99
+  // High contrast text
   --text-hc: #cccccc
+  // Links
+  --text-link: #0080ad
+  // Interface text (outside content)
   --text-alt: #8c8b99
   --text-alt-hc: #cccccc
-  --text-link: #0080ad
-  --highlight: #004766
   --pane-title: #8c8b99
-  --pane-title-border: #10101d
   --pane-title-link: #3a7a96
-  --pane-bg: #323138af
-  --pane-bg-highlight: #32313850
-  --header-bg: #3231387f
-  --shadow: #15151b
-  --soft-shadow: #323138
-  --grad1: #323138
-  --grad2: #53535d
-  --grad3: #4f4e59
-  --input-light: #323138
-  --input-dark: #15151b
+
+  // Page background
+  --bg: #1C1B21
+  // Background in the interface (outside content)
+  --nav-bg: #30313a
+  // Alternative background in the interface
+  --nav-bg-alt: #222228
+  // Content background
+  --pane-bg: #222228
+  // Background when a block of content is highlighted
+  --pane-bg-highlight: #282930
+  // Background in the title of the panes
+  --pane-title-bg: #353740
+  // Background in the content headers
+  --header-bg: #353740
+  // Background of the header options menu
+  --header-options-bg: #222228
+  // Background in the breadcrumbs
+  --breadcrumbs-bg: #2F3038
+  // TODO, use when highlighting stuff like menu entries
+  --ui-hover-bg: #222126
+  // Reinforced shade for the current menu selections
+  --selected-menu-bg: #222228
+
+  // Some border highlighting something of particular relevance
+  --highlight: #004766
+  // Usually for hinting at logical content separations
+  --separator: #2F3038
+  // Borders between interface and content
+  --nav-border: #1C1B21
+  --pane-title-border: #1C1B21
+  // The head row/col in a table
+  --table-head: #2F3038
+
+  // Strong shadow to apply on UI elements
+  --shadow: #1C1B21
+  // Shadow to apply on content sub-panes
+  --soft-shadow: #1C1B21
+
+  // Typing areas, buttons, ...
+  --input-light: #353740
+  // Details, disabled content, ...
+  --input-dark: #1C1B21
+  // Relative amount of white filter to use in the interface icons
+  --icon-brightness: 0.8
+
+  // Generic colors
+  --red: #990011
+  --green: #075900
+  --blue: #192a76
 
   // Misc overrides
   --theoretical-shift: #6e805e
   --practical-shift: #996551
   --theoretical-practical-shift: #bfa571
 
-  --icon-brightness: 0.8
+  // FullCalendar overrides
+  --fc-today-bg-color: #32313850
+  --fc-border-color: #333333
+  --fc-neutral-bg-color: #32313850
+  --fc-list-event-hover-bg-color: #32313850

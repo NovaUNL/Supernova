@@ -2,29 +2,6 @@
 
 {% load static %}
 
-{% block head %}
-  <style>
-    .flex-wrapper {
-      align-items: start;
-    }
-
-    .shift-list {
-      margin: 10px;
-      padding: 5px 5px;
-      border-radius: 5px;
-      vertical-align: top;
-      flex-basis: 320px;
-      box-shadow: 0 0 5px #777;
-      text-align: left;
-    }
-
-    .shift-list a {
-      vertical-align: top;
-      color: #333;
-    }
-  </style>
-{% endblock %}
-
 {% block content_wrapper %}
   <div class="col">
   {% include 'college/class_decorator.html' %}
