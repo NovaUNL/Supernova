@@ -74,7 +74,7 @@
           <span class="indented">{{ klass.abbreviation }}</span>
           <h3>Departamento</h3>
           {% if klass.department %}
-            <a class="indented" href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
+            <a class="indented entity" href="{% url 'college:department' klass.department.id %}">Departamento de {{ klass.department.name }}</a>
           {% else %}
             <span class="indented">Departamento desconhecido</span>
           {% endif %}
