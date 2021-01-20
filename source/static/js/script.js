@@ -506,27 +506,34 @@ function showSearch() {
             selectedCategory = key;
         });
     }
-    textInp.on('keyup', (e) => {if (e.key === 'Enter' || e.keyCode === 13) btn.click()});
+    textInp.focus();
+    textInp.on('keyup', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13) btn.click()
+    });
     btn.click(() => {
-        results.css('display', 'block');
-        results.children().remove();
-        const loadSpinner = spinner.clone()
-        results.append(loadSpinner);
-        const query = textInp.val();
-        fetch(`/api/search?q=${query}${selectedCategory ? "&e=" + selectedCategory : ""}`,
-            {credentials: 'include', method: 'GET'})
-            .then((r) => r.json())
-            .then((val) => {
-                loadSpinner.remove();
-                for (const [key, subset] of Object.entries(val.results)) {
-                    if(!selectedCategory && UID === -1)
-                        results.append($(`<b>Utilizadores não autenticados tem visibilidade reduzida.</b>`));
-                    results.append($(`<h3>${searchCols[key].loc.pt}</h3>`));
-                    results.append(searchCols[key].display(subset));
-                }
-            });
-    }
-)
+            results.css('display', 'block');
+            results.children().remove();
+            const loadSpinner = spinner.clone()
+            results.append(loadSpinner);
+            const query = textInp.val();
+            fetch(`/api/search?q=${query}${selectedCategory ? "&e=" + selectedCategory : ""}`,
+                {credentials: 'include', method: 'GET'})
+                .then((r) => r.json())
+                .then((val) => {
+                    loadSpinner.remove();
+                    for (const [key, subset] of Object.entries(val.results)) {
+                        if (!selectedCategory && UID === -1)
+                            results.append($(`<b>Utilizadores não autenticados tem visibilidade reduzida.</b>`));
+                        results.append($(`<h3>${searchCols[key].loc.pt}</h3>`));
+                        results.append(searchCols[key].display(subset));
+                    }
+                })
+                .catch(() => {
+                    loadSpinner.remove();
+                    results.append($(`<b>Erro a realizar a pesquisa.</b>`));
+                });
+        }
+    )
 }
 
 function showFilePreview(elem) {
