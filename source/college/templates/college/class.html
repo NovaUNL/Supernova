@@ -24,8 +24,8 @@
   </div>
   <div class="row padded">
     <div class="col big">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Descrição</h2></div>
         <div class="pane-content">
           {% if klass.description %}
             {{ klass.description_html|safe }}
@@ -34,15 +34,15 @@
           {% endif %}
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Planos curriculares</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Planos curriculares</h2></div>
         <div class="pane-content">
           Planos curriculares incompletos.
         </div>
       </div>
       <div class="row baseline">
-        <div class="flex-pane grow" style="flex-basis: 500px;">
-          <div class="pane-title bg-grad"><h2>Opiniões (várias edições)</h2></div>
+        <div class="pane grow" style="flex-basis: 500px;">
+          <div class="pane-title"><h2>Opiniões (várias edições)</h2></div>
           <div class="pane-content">
             {% include 'feedback/reviews_widget.html' %}
             {% if reviews|length == 0 %}
@@ -50,8 +50,8 @@
             {% endif %}
           </div>
         </div>
-        <div class="flex-pane grow" style="flex-basis: 500px;">
-          <div class="pane-title bg-grad"><h2><a href="{% url 'college:class_questions' klass.id %}">Dúvidas</a></h2>
+        <div class="pane grow" style="flex-basis: 500px;">
+          <div class="pane-title"><h2><a href="{% url 'college:class_questions' klass.id %}">Dúvidas</a></h2>
           </div>
           <div class="pane-content question-list small">
             {% for obj in questions %}
@@ -67,8 +67,8 @@
       </div>
     </div>
     <div class="col nogrow">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Informação</h2></div>
         <div class="pane-content">
           <h3>Abreviação</h3>
           <span class="indented">{{ klass.abbreviation }}</span>
@@ -86,8 +86,8 @@
           <span class="indented">{{ klass.ects }} ECTS</span>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Edições</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Edições</h2></div>
         <div class="pane-content">
           {% if perms.users.student_access %}
             <ul class="menu">
@@ -102,8 +102,8 @@
           {% endif %}
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Docentes <small>(entre edições)</small></h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Docentes <small>(entre edições)</small></h2></div>
         <div class="pane-content">
           <ul class="entity-list">
             {% for teacher in teachers %}

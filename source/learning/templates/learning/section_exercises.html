@@ -20,8 +20,8 @@
       <h1>Exercícios de <a href="{% url 'learning:section' section.id %}">{{ section.title }}</a></h1>
     </div>
     <div class="col padded">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
+      <div class="pane">
+        <div class="pane-title"></div>
         <div class="pane-content">
           {% for exercise in section.exercises.all %}
             {% if not forloop.first %}<hr>{% endif %}

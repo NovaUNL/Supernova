@@ -5,8 +5,8 @@
 {# TODO make the role selectable here (ideally without risking selecting the wrong role)#}
 {% block group_content %}
   {% if not default_role %}
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Aviso!</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Aviso!</h2></div>
       <div class="pane-content">
         Este grupo não tem um cargo a aplicar por defeito.
         É necessário que o administrador do grupo seleccione um na página de definições para proceder à aceitação de
@@ -14,8 +14,8 @@
       </div>
     </div>
   {% endif %}
-  <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Candidatos</h2></div>
+  <div class="pane">
+    <div class="pane-title"><h2>Candidatos</h2></div>
     <div class="pane-content">
       {% if candidates|length == 0 %}
         <p>Sem candidatos de momento.</p>

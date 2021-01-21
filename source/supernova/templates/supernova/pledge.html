@@ -5,8 +5,8 @@
     <h1>Futuro</h1>
   </div>
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad">
+    <div class="pane">
+      <div class="pane-title">
         <h2>Situação</h2>
       </div>
       <div class="pane-content">
@@ -29,8 +29,8 @@
       </div>
     </div>
     {% if not pledge and not request.user.is_anonymous %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2>Peticionar</h2>
         </div>
         <div class="pane-content">
@@ -79,8 +79,8 @@
       </div>
     {% endif %}
     <div class="row baseline">
-      <div class="flex-pane grow">
-        <div class="pane-title bg-grad"><h2>Assínaturas</h2></div>
+      <div class="pane grow">
+        <div class="pane-title"><h2>Assinaturas</h2></div>
         <div class="pane-content">
           <ul class="entity-list">
             {% for pledge in pledges %}
@@ -95,8 +95,8 @@
           </ul>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Resultados</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Resultados</h2></div>
         <div class="pane-content">
           <h3 style="text-align: center">{{ pledge_count }} assinaturas</h3>
           <table class="stylized grow">

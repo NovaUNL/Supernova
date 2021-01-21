@@ -2,8 +2,8 @@
 
 {% block group_content %}
   {% if not announcements.exists %}
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Anúncios</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Anúncios</h2></div>
       <div class="pane-content">
         Este grupo nunca anunciou nada.<br>
         Talvez sejam tímidos, talvez não tenham presença no Supernova. :(
@@ -11,8 +11,8 @@
     </div>
   {% endif %}
   {% for announcement in announcements %}
-    <div class="flex-pane">
-      <div class="pane-title bg-grad">
+    <div class="pane">
+      <div class="pane-title">
         <h2><a href="{% url 'groups:announcement' group.abbreviation announcement.id %}">{{ announcement.title }}</a></h2>
       </div>
       <div class="pane-content">

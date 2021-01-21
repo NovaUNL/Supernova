@@ -4,8 +4,8 @@
 
 {% block content_wrapper %}
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"></div>
+    <div class="pane">
+      <div class="pane-title"></div>
       <div class="pane-content col">
         <div class="preview"></div>
         <div style="align-self: end">
@@ -16,8 +16,8 @@
     </div>
     <div class="row">
       <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Nomes conhecidos</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Nomes conhecidos</h2></div>
           <div class="pane-content">
             {% if class_files|length == 0 %}
               <span class="indented">Ficheiro sem nomes conhecidos.</span>
@@ -30,8 +30,8 @@
             {% endif %}
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Unidades curriculares</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Unidades curriculares</h2></div>
           <div class="pane-content">
             {% if class_files|length == 0 %}
               <span class="indented">Ficheiro sem unidades curriculares.</span>

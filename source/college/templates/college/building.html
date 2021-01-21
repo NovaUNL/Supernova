@@ -38,12 +38,12 @@
     <div class="row padded nowrap">
       <div class="col">
         <div class="row">
-          <div class="flex-pane grow">
-            <div class="pane-title bg-grad"><h2>Localização</h2></div>
+          <div class="pane grow">
+            <div class="pane-title"><h2>Localização</h2></div>
             <div class="pane-content">{% leaflet_map "campus-map" callback="initBuildingMap" %}</div>
           </div>
-          <div class="flex-pane grow">
-            <div class="pane-title bg-grad"><h2>Planta</h2></div>
+          <div class="pane grow">
+            <div class="pane-title"><h2>Planta</h2></div>
             <div class="pane-content">
               {% if building.map %}
               {% else %}
@@ -53,8 +53,8 @@
           </div>
         </div>
         {% for type in rooms %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>{{ type.0 }}</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>{{ type.0 }}</h2></div>
             <div class="pane-content room-list">
               {% for room in type.1 %}
                 <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
@@ -64,16 +64,16 @@
             </div>
           </div>
         {% endfor %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Ocupação</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Ocupação</h2></div>
           <div class="pane-content">
             {% include 'college/occupation_table.html' %}
           </div>
         </div>
       </div>
       <div class="col nogrow noshrink">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Departamentos</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Departamentos</h2></div>
           <div class="pane-content">
             <ul class="menu">
               {% for department in departments.all %}
@@ -82,8 +82,8 @@
             </ul>
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Núcleos</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Núcleos</h2></div>
           <div class="pane-content">
             <ul>
               <li>TODO</li>

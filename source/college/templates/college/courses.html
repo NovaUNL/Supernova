@@ -10,8 +10,8 @@
   <div class="row padded nowrap">
     <div class="col grow">
       {% for degree, courses in courses_by_degree.items %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>{{ degree }}</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>{{ degree }}</h2></div>
           <div class="pane-content">
             {% for course in courses %}
               <ul class="entity-list">
@@ -26,8 +26,8 @@
       {% endfor %}
     </div>
     <div class="col noshrink nogrow">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Estatística</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Estatística</h2></div>
         <div class="pane-content">
           <h3>Cursos</h3>
           <span class="indented">{{ active_count }} cursos ativos e {{ inactive_count }} cursos inativos{% if not show_all %} (<a href="?all">Ver</a>){% endif %}.</span>

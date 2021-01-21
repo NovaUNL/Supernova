@@ -61,8 +61,8 @@
   </div>
   <div class="row nowrap padded">
     <div class="col">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Descrição</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Descrição</h2></div>
         <div class="pane-content">
           <p>
             {% if course.description %}
@@ -73,8 +73,8 @@
           </p>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Estrutura Curricular</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Estrutura Curricular</h2></div>
         <div class="pane-content curriculum">
           {% if curriculum %}
             {% with level=curriculum.aggregation  %}
@@ -96,8 +96,8 @@
       </div>
     </div>
     <div class="col nogrow noshrink">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Navegação</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Navegação</h2></div>
         <div class="pane-content">
           <ul class="menu">
 {#            <li><a class="disabled" href="{% url 'college:course_curriculum' course.id %}">Programa curricular</a>#}
@@ -108,8 +108,8 @@
           </ul>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Informação</h2></div>
         <div class="pane-content">
           <h3>Total alunos</h3>
           <span class="indented">{{ student_count }}</span>

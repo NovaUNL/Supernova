@@ -15,8 +15,8 @@
   <div class="col padded"
        data-voting-endpoint="{% url 'api:postable_votes' 0 %}"
        data-question-votes-endpoint="{% url 'api:question_votes' question.activity_id %}">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>{{ question.title }}</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>{{ question.title }}</h2></div>
       <div class="pane-content postable question" data-id="{{ question.activity_id }}">
         <div class="postable-main">
           <div class="postable-votes">
@@ -51,8 +51,8 @@
       </div>
     </div>
     {% for answer in question.answers.all %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
+      <div class="pane">
+        <div class="pane-title"></div>
         <div class="pane-content postable answer" data-id="{{ answer.activity_id }}">
           <div class="postable-main">
             <div class="postable-votes">
@@ -82,8 +82,8 @@
       </div>
     {% endfor %}
     {% if perms.learning.add_question %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Responder</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Responder</h2></div>
         <div class="pane-content">
           <form class="col" method="post" action="{% url 'learning:question' question.activity_id %}?submit=answer">
             {% csrf_token %}

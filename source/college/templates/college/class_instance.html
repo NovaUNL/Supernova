@@ -17,8 +17,8 @@
     </div>
     <div class="row nowrap padded">
       <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Informação</h2></div>
           <div class="pane-content">
             {% if instance.information.upstream.description and instance.information.upstream.description.pt %}
               <h3>Descrição</h3>
@@ -54,8 +54,8 @@
             {% endif %}
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
+        <div class="pane">
+          <div class="pane-title">
             <h2><a href="{% url 'college:class_instance_reviews' instance.id %}">Opiniões</a></h2>
           </div>
           <div class="pane-content">
@@ -68,8 +68,8 @@
       </div>
       <div class="col nogrow noshrink">
         {% include 'college/class_navigation.html' %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Informação</h2></div>
           <div class="pane-content">
             <h3>Departamento</h3>
             {% if instance.department %}

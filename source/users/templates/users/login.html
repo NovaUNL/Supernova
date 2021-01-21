@@ -11,8 +11,8 @@
 {% block content_wrapper %}
   <div class="row padded">
     <div class="col nogrow">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Autenticação</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Autenticação</h2></div>
         <div class="pane-content">
           <span style="font-size: 1.2em; font-weight: bold; color: red;">{{ login_form.non_field_errors }}</span>
           <form id="login-form" class="col" method="post" action="{{ request.get_full_path }}">
@@ -33,8 +33,8 @@
       </div>
     </div>
     <div class="col nogrow">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Criar conta</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Criar conta</h2></div>
         <div class="pane-content">
           O registo está aberto a quem disponha de <br>
           credênciais oficialmente emitidas pela FCT<br>
@@ -42,8 +42,8 @@
           </ul>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Esqueci-me da password</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Esqueci-me da password</h2></div>
         <div class="pane-content">
           Pois... isso parece ser um problema.<br>
           Contacta-nos, nós ajudamos-te.

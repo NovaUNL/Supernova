@@ -21,8 +21,8 @@
 {% endblock %}
 
 {% block group_content %}
-  <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Cargos</h2></div>
+  <div class="pane">
+    <div class="pane-title"><h2>Cargos</h2></div>
     <div class="pane-content col">
       <div style="overflow: auto">
         <table class="stylized grow">
@@ -115,8 +115,8 @@
       <a class="ui-btn end" href="{% url 'groups:role' group.abbreviation 0 %}">Criar</a>
     </div>
   </div>
-  <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Afiliações</h2></div>
+  <div class="pane">
+    <div class="pane-title"><h2>Afiliações</h2></div>
     <div class="pane-content">
       <form class="col" method="post" action="{% url 'groups:roles' group.abbreviation %}">
         {% csrf_token %}

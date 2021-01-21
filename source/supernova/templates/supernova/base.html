@@ -32,7 +32,7 @@
 <body>
 <script>loadTheme(false);</script>
 {% analytical_body_top %}
-<nav id="header" class="bg-grad">
+<nav id="header">
   <a id="hamburger" class="lowres action" href="javascript: toggleMenu()"></a>
   <a id="logo" href="/">
     <img class="dark-only" src="{% static 'img/logo.svg' %}">
@@ -76,7 +76,7 @@
     {% endif %}
   </div>
 </nav>
-<nav id="nav-column" class="bg-grad">
+<nav id="nav-column">
   {% include 'supernova/menu.html' %}
 </nav>
 <div id="content-column">

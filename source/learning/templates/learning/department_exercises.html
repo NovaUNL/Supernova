@@ -19,8 +19,8 @@
     {% if other_classes %}
       <div class="row padded nowrap">
         <div class="col">
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Inscrito</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Inscrito</h2></div>
             <div class="pane-content">
               {% if current_classes|length == 0 %}
                 <span class="indented">Não está de momento inscrito a nenhuma unidade curricular deste departamento.</span>
@@ -32,8 +32,8 @@
               {% endif %}
             </div>
           </div>
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Feitas</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Feitas</h2></div>
             <div class="pane-content">
               {% if done_classes|length == 0 %}
                 <span class="indented">Ainda não fez nenhuma unidade curricular deste departamento.</span>
@@ -47,8 +47,8 @@
           </div>
         </div>
         <div class="col">
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Outras no departamento</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Outras no departamento</h2></div>
             <div class="pane-content">
               {% for class in other_classes %}
                 <h3><a href="{% url 'learning:class' class.id %}">{{ class.name }}</a></h3>
@@ -60,8 +60,8 @@
       </div>
     {% else %}
       <div class="col padded">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"></div>
+        <div class="pane">
+          <div class="pane-title"></div>
           <div class="pane-content">
             {% for class in classes %}
               <ul class="menu">

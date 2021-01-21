@@ -18,8 +18,8 @@
     </div>
   </div>
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2></h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2></h2></div>
       <div class="pane-content col">
         <div class="preview"></div>
         <div style="align-self: end">
@@ -31,8 +31,8 @@
       </div>
     </div>
     <div class="row" style="align-items: flex-start;">
-      <div class="flex-pane grow">
-        <div class="pane-title bg-grad"><h2>Atributos de edição</h2></div>
+      <div class="pane grow">
+        <div class="pane-title"><h2>Atributos de edição</h2></div>
         <div class="pane-content col">
           <div class="form-row">
             <div class="form-row-top"><h4>Nome</h4>{{ class_file.name }}</div>
@@ -72,8 +72,8 @@
       </div>
       {% include 'college/file_meta.html' %}
     </div>
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Outras unidades curriculares</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Outras unidades curriculares</h2></div>
       <div class="pane-content">
         {% if other_class_instances|length == 0 %}
           <span class="indented">Sem presença em mais unidades curriculares.</span>

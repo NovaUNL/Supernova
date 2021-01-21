@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block group_content %}
-  <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Anúnciar</h2></div>
+  <div class="pane">
+    <div class="pane-title"><h2>Anúnciar</h2></div>
     <div class="pane-content">
       <form class="col" method="post" action="{% url 'groups:announce' group.abbreviation %}">
         {% csrf_token %}

@@ -31,8 +31,8 @@
     <div class="row padded nowrap">
       <div class="col nogrow noshrink" style="flex-basis: 350px;">
         {% if permissions.info_visibility %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Informação</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Informação</h2></div>
             <div class="pane-content">
               <div class="students">
                 {% for student in primary_students %}
@@ -84,16 +84,16 @@
           </div>
         {% endif %}
         {% if permissions.about_visibility and profile_user.about %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Sobre mim</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Sobre mim</h2></div>
             <div class="pane-content">
               {{ profile_user.about_html | safe }}
             </div>
           </div>
         {% endif %}
         {% if profile_user.awards.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
+          <div class="pane">
+            <div class="pane-title">
               <h2>Prémios</h2>
             </div>
             <div class="pane-content">
@@ -106,8 +106,8 @@
           </div>
         {% endif %}
         {% if permissions.groups_visibility and profile_user.groups_custom.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Grupos</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Grupos</h2></div>
             <div class="pane-content">
               {% for group in profile_user.groups_custom.all %}
                 <a href="{{ group.get_absolute_url }}">
@@ -120,8 +120,8 @@
           </div>
         {% endif %}
         {% if permissions.social_visibility and profile_user.external_pages.exists %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
+          <div class="pane">
+            <div class="pane-title">
               <h2>Páginas externas</h2>
             </div>
             <div class="pane-content">
@@ -138,8 +138,8 @@
         <div class="row">
           <div class="col" style="flex-basis: 500px">
             {% if permissions.schedule_visibility %}
-              <div class="flex-pane">
-                <div class="pane-title bg-grad">
+              <div class="pane">
+                <div class="pane-title">
                   <h2>Horário</h2>
                 </div>
                 <div class="pane-content">
@@ -151,8 +151,8 @@
           </div>
           <div class="col" style="max-width: 500px">
             {% if permissions.enrollments_visibility and current_class_instances.exists %}
-              <div class="flex-pane">
-                <div class="pane-title bg-grad">
+              <div class="pane">
+                <div class="pane-title">
                   <h2>Inscrições atuais</h2>
                 </div>
                 <div class="pane-content">
@@ -165,8 +165,8 @@
               </div>
             {% endif %}
             {% if permissions.enrollments_visibility and past_classes.exists %}
-              <div class="flex-pane">
-                <div class="pane-title bg-grad">
+              <div class="pane">
+                <div class="pane-title">
                   <h2>Inscrições prévias</h2>
                 </div>
                 <div class="pane-content">
@@ -183,8 +183,8 @@
       </div>
     </div>
     {% if request.user.is_staff %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2>Debug</h2>
         </div>
         <div class="pane-content">

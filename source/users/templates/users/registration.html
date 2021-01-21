@@ -4,8 +4,8 @@
 
 {% block content_wrapper %}
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Pressupostos</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Pressupostos</h2></div>
       <div class="pane-content col">
         <p>Este serviço <b style="color: red">NÃO</b> é o CLIP.
           Apesar de fazer muito do que o CLIP faz por ti, estás numa plataforma diferente.<br>
@@ -18,8 +18,8 @@
         <input class="ui-btn end" type="button" value="Prosseguir" onclick="registrationProceed(this)">
       </div>
     </div>
-    <div id="registration-form" class="flex-pane" style="display: none">
-      <div class="pane-title bg-grad"><h2>Criar conta</h2></div>
+    <div id="registration-form" class="pane" style="display: none">
+      <div class="pane-title"><h2>Criar conta</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}

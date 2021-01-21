@@ -15,8 +15,8 @@
     </div>
     <div class="row padded nowrap">
       <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"></div>
+        <div class="pane">
+          <div class="pane-title"></div>
           <div id="milestones" class="pane-content">
             <div class="milestone">
               <div class="circle done" style="background: url('{% static 'img/icons/chick.svg' %}')"></div>
@@ -113,8 +113,8 @@
         </div>
       </div>
       <div class="col nogrow noshrink">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Reputação</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Reputação</h2></div>
           <div class="pane-content">
             <h3 style="text-align: center">{{ profile_user.points }} pontos</h3>
             <table class="info-table stylized grow">
@@ -155,9 +155,9 @@
         </div>
         {% get_flatpages '/points/' as points %}
         {% if points.first %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Como ganho reputação?</h2></div>
-            <div class="pane-content">{{ points.first.content|safe }}</div>
+          <div class="pane">
+            <div class="pane-title"><h2>Como ganho reputação?</h2></div>
+            <div class="pane-content"><b style="color: red">Rascunho provisório</b>{{ points.first.content|safe }}</div>
           </div>
         {% endif %}
       </div>

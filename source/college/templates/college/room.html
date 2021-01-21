@@ -29,16 +29,16 @@
     </div>
     <div class="row nowrap padded">
       <div class="col">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Horário</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Horário</h2></div>
           <div class="pane-content">
             {% include 'college/schedule.html' %}
           </div>
         </div>
       </div>
       <div class="col nogrow noshrink">
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Informação</h2></div>
           <div class="pane-content">
             <div>
               <h3>Piso:</h3>
@@ -64,8 +64,8 @@
             </div>
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Localização</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Localização</h2></div>
           <div class="pane-content">
             <div style="flex-basis: 475px">
               {% if building.map %}
@@ -75,8 +75,8 @@
             </div>
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Considerações</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Considerações</h2></div>
           <div class="pane-content">
             <div style="display: flex; flex-wrap: wrap;">
               {% for feature in room.features.all %}
@@ -88,8 +88,8 @@
             </div>
           </div>
         </div>
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Material</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Material</h2></div>
           <div class="pane-content">
             {{ room.equipment|linebreaks }}
           </div>

@@ -5,8 +5,8 @@
     <h1>{{ teacher.name }}</h1>
   </div>
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Editar professor</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Editar professor</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{% url 'college:teacher_edit' teacher.id %}">
           {% csrf_token %}

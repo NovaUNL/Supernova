@@ -15,8 +15,8 @@
       <h1>Definições de {{ profile_user.nickname }}</h1>
     </div>
     <div class="col padded">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Informação pessoal</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Informação pessoal</h2></div>
         <div class="pane-content">
           <form class="col" action="{% url 'users:settings' profile_user.nickname %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -219,8 +219,8 @@
           </form>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Páginas externas</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Páginas externas</h2></div>
         <div class="pane-content">
           <p>
             Podes adicionar páginas externas ao teu perfil (admitindo o respeito pela lei).
@@ -237,8 +237,8 @@
         </div>
       </div>
       {% if permissions_form %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Permissões</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Permissões</h2></div>
           <div class="pane-content">
             <form id="test" class="col" action="{% url 'users:settings' profile_user.nickname %}?permissions=" method="post">
               {% csrf_token %}

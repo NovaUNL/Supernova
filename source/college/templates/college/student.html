@@ -19,8 +19,8 @@
   </div>
   <div class="row padded nowrap">
     <div class="col" style="flex-basis: 500px">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Horário</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Horário</h2></div>
         <div class="pane-content">
           {% if permissions.enrollments_visibility %}
             <div id="schedule"></div>
@@ -32,8 +32,8 @@
       </div>
       {% if permissions.enrollments_visibility %}
         <div class="row">
-          <div class="flex-pane grow">
-            <div class="pane-title bg-grad"><h2>Inscrições atuais</h2></div>
+          <div class="pane grow">
+            <div class="pane-title"><h2>Inscrições atuais</h2></div>
             <div class="pane-content">
               <ul class="entity-list">
                 {% for instance in current_class_instances %}
@@ -45,8 +45,8 @@
               </ul>
             </div>
           </div>
-          <div class="flex-pane grow">
-            <div class="pane-title bg-grad"><h2>Inscrições prévias</h2></div>
+          <div class="pane grow">
+            <div class="pane-title"><h2>Inscrições prévias</h2></div>
             <div class="pane-content">
               <ul class="entity-list">
                 {% for class in past_classes %}
@@ -57,15 +57,15 @@
           </div>
         </div>
       {% else %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Unidades Curriculares</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Unidades Curriculares</h2></div>
           <div class="pane-content"><p>Este utilizador optou por ocultar o percurso académico.</p></div>
         </div>
       {% endif %}
     </div>
     <div class="col nogrow noshrink" style="flex-basis: 350px;">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Informação</h2></div>
         <div class="pane-content">
           <h3>Abreviação</h3>
           <span class="indented">{{ student.abbreviation }}</span>

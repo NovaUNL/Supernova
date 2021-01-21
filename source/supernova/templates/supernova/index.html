@@ -13,15 +13,15 @@
   <div class="row padded nowrap">
     <div class="col">
       {% if message %}
-        <div class="flex-pane" style="flex-basis: 0">
-          <div class="pane-title bg-grad"><h2>Informação</h2></div>
+        <div class="pane" style="flex-basis: 0">
+          <div class="pane-title"><h2>Informação</h2></div>
           <div class="pane-content">
             {{ message|safe }}
           </div>
         </div>
       {% endif %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2><a href="{% url 'news:index' %}">Notícias</a></h2>
         </div>
         <div class="pane-content news">
@@ -45,8 +45,8 @@
       </div>
       <div class="row grow">
         <div class="col grow noshrink" style="flex-basis: 500px;">
-          <div class="flex-pane grow">
-            <div class="pane-title bg-grad"><h2>Atividade</h2></div>
+          <div class="pane grow">
+            <div class="pane-title"><h2>Atividade</h2></div>
             <div class="pane-content">
               {% for activity in activities %}
                 {% if not forloop.first %}
@@ -68,8 +68,8 @@
               {% endfor %}
             </div>
           </div>
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2><a href="{% url 'learning:questions' %}">Últimas dúvidas</a></h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2><a href="{% url 'learning:questions' %}">Últimas dúvidas</a></h2></div>
             <div class="pane-content question-list small">
               {% for question in recent_questions %}
                 <div class="question">
@@ -99,9 +99,12 @@
           </div>
         </div>
         <div class="col noshrink" style="flex-basis: 500px">
-          <div class="flex-pane">
-            <div class="pane-title bg-grad">
-              <h2><a href="{% url 'college:available_places' %}">Salas <b>talvez</b> vazias</a></h2>
+          <div class="pane">
+            <div class="pane-title">
+              <h2>
+                <a style="text-decoration: line-through;" href="{% url 'college:available_places' %}">Salas disponíveis</a>
+                <b>(Ignorar, pandemia)</b>
+              </h2>
             </div>
             <div class="pane-content room-list">
               {% for room in free_rooms %}
@@ -111,33 +114,36 @@
               {% endfor %}
             </div>
           </div>
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2><a href="{% url 'changelog' %}">Alterações</a></h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Os astros</h2></div>
+            <div class="pane-content">
+              O Supernova tem hoje <big>{{ student_count }}</big> alunos e <big>{{ teacher_count }}</big>
+              professores.<br>
+              <big>{{ allowing_teacher_count }}</big> professores <a href="{% url 'college:teachers_consent' %}">autorizaram</a>
+              que utilizassemos os seus materiais.
+              <hr>
+              <div style="text-align: center">
+                <span>{{ pledge_count }}</span> membros que <a href="{% url 'support' %}">peticionaram</a> a UNL para
+                apoiar o Supernova.<br>
+                <b><a href="{% url 'support' %}">Manifesta o teu apoio!</a></b>
+              </div>
+            </div>
+          </div>
+          <div class="pane">
+            <div class="pane-title"><h2><a href="{% url 'changelog' %}">Alterações</a></h2></div>
             <div class="pane-content">
               <h3>{{ changelog.title }}</h3>
               {{ changelog.content_html | safe }}
-            </div>
-          </div>
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Os astros</h2></div>
-            <div class="pane-content">
-            O Supernova tem hoje <big>{{ student_count }}</big> alunos e <big>{{ teacher_count }}</big> professores.<br>
-            <big>{{ allowing_teacher_count }}</big> professores <a href="{% url 'college:teachers_consent' %}">autorizaram</a> que utilizassemos os seus materiais.
-            <hr>
-            <div style="text-align: center">
-              <span>{{ pledge_count }}</span> membros que <a href="{% url 'support' %}">peticionaram</a> a UNL para apoiar o Supernova.<br>
-              <b><a href="{% url 'support' %}">Manifesta o teu apoio!</a></b>
-            </div>
             </div>
           </div>
         </div>
       </div>
       <img class="main-footer lowres" src="{% static 'img/banner.svg' %}">
     </div>
-    <div class="col medium nogrow">
+    <div class="col nogrow noshrink">
       {% if pinned_news|length > 0 %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad">
+        <div class="pane">
+          <div class="pane-title">
             <h2>Avisos</h2>
           </div>
           <ul style="list-style: square">
@@ -147,14 +153,14 @@
           </ul>
         </div>
       {% endif %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2><a href="{% url 'college:transportation' %}">Transportes</a></h2>
         </div>
         <div id="transportation-widget" class="pane-content" data-endpoint="{% url 'api:transportation_upcoming' %}"></div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2><a href="{% url 'services:service' "cantina" %}">Cantina</a></h2>
         </div>
         <div class="pane-content meals">
@@ -181,8 +187,8 @@
           <span class="credit">Informação obtida de <a href="https://sas.unl.pt/alimentacao/cantina-da-faculdade-de-ciencias-e-tecnologia-fct/">SAS NOVA</a></span>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2>Meteorologia</h2>
         </div>
         <div class="pane-content" id="weather" style="overflow: hidden">
@@ -190,14 +196,14 @@
           <span class="credit">Dados cedidos por <a href="https://www.ipma.pt/pt/index.html">IPMA</a></span>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2>BOINC (<a href="https://www.boincstats.com/stats/-1/team/detail/2068385380/overview">NOVA Lisboa</a>)</h2>
         </div>
         <div id="boinc" class="pane-content" data-endpoint="{% url 'api:boinc' %}"></div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2>Fala connosco</h2>
         </div>
         <div class="pane-content" style="display: flex; justify-content: space-between; filter: grayscale(50%);">

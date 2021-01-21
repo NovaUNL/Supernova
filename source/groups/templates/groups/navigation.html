@@ -4,8 +4,8 @@
 {% url 'groups:members' group.abbreviation  as members_url %}
 {% url 'groups:conversations' group.abbreviation  as conversations_url %}
 
-<div class="flex-pane">
-  <div class="pane-title bg-grad"><h2>Páginas</h2></div>
+<div class="pane">
+  <div class="pane-title"><h2>Páginas</h2></div>
   <div class="pane-content">
     <ul class="menu">
       {% if request.path == main_url %}
@@ -43,8 +43,8 @@
 </div>
 
 {% if is_member %}
-  <div class="flex-pane">
-    <div class="pane-title bg-grad"><h2>Administração</h2></div>
+  <div class="pane">
+    <div class="pane-title"><h2>Administração</h2></div>
     <div class="pane-content">
       <ul class="menu">
         {% if  membership_perms.can_announce %}

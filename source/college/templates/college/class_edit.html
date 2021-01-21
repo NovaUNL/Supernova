@@ -16,8 +16,8 @@
     </div>
   </div>
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Editar unidade curricular</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Editar unidade curricular</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{% url 'college:class_edit' klass.id %}">
           {% csrf_token %}

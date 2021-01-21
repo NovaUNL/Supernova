@@ -27,8 +27,8 @@
   <div class="row padded nowrap">
     <div class="col">
       {% if service.serves_meals %}
-        <div class="flex-pane">
-          <div class="pane-title bg-grad"><h2>Próximas ementas</h2></div>
+        <div class="pane">
+          <div class="pane-title"><h2>Próximas ementas</h2></div>
           <div class="pane-content">
             {% for occasion, meal_items in meal_occasions.items %}
               <h3>{{ occasion.1 }} a {{ occasion.0 }}</h3>
@@ -77,8 +77,8 @@
           </div>
         </div>
       {% endif %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Preçário</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Preçário</h2></div>
         <div class="pane-content">
           {% if products %}
             {% for category, sub_products in products.items %}
@@ -107,8 +107,8 @@
       </div>
     </div>
     <div class="col nogrow noshrink">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Informação</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Informação</h2></div>
         <div class="pane-content">
           <h3>Horário</h3>
           <table class="stylized grow">

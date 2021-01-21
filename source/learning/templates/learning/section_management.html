@@ -14,8 +14,8 @@
 
 {% block content_wrapper %}
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad">
+    <div class="pane">
+      <div class="pane-title">
         <h2>{{ title }}</h2>
       </div>
       <div class="pane-content">
@@ -162,8 +162,8 @@
       </div>
     </div>
     {% if section %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Filhos</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Filhos</h2></div>
         <div class="pane-content col">
           <ul id="sortable-list" data-endpoint="{% url 'api:synopses_section_children' section.id %}"></ul>
           <div class="form-row col">

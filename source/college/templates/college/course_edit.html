@@ -14,8 +14,8 @@
     </div>
   </div>
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Editar curso</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Editar curso</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{% url 'college:course_edit' course.id %}">
           {% csrf_token %}

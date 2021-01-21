@@ -20,8 +20,8 @@
   {% csrf_token %}
   <div class="row padded">
     <div class="col">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Últimos registos</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Últimos registos</h2></div>
         <div class="pane-content">
           <table class="stylized grow">
             <tr>
@@ -55,8 +55,8 @@
           </table>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Atribuições docentes pendentes</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Atribuições docentes pendentes</h2></div>
         <div class="pane-content">
           <table class="stylized grow">
             <tr>
@@ -94,8 +94,8 @@
           </table>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Utilizadores</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Utilizadores</h2></div>
         <div class="pane-content stylized grow">
           <table class="stylized grow">
             <thead>
@@ -119,8 +119,8 @@
       </div>
     </div>
     <div class="col">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Utilizadores suspensos</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Utilizadores suspensos</h2></div>
         <div class="pane-content" data-endpoint="{% url 'api:user_moderation' 0 %}">
           {% if suspended_users|length == 0 %}
             Sem utilizadores suspensos.
@@ -146,8 +146,8 @@
           <input type="button" value="Confirmar" onclick="suspend()">
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Emitir diferencial de pontos</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Emitir diferencial de pontos</h2></div>
         <div class="pane-content">
           <form class="col" method="post" action="{% url 'management:users' %}?reputation_offset=">
             {% csrf_token %}
@@ -156,8 +156,8 @@
           </form>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Atribuir professor</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Atribuir professor</h2></div>
         <div class="pane-content">
           <form class="col" method="post" action="{% url 'management:users' %}?assign_teacher=">
             {% csrf_token %}
@@ -166,8 +166,8 @@
           </form>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Atribuir aluno</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Atribuir aluno</h2></div>
         <div class="pane-content">
           <form class="col" method="post" action="{% url 'management:users' %}?assign_student=">
             {% csrf_token %}
@@ -176,8 +176,8 @@
           </form>
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Alterar password</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Alterar password</h2></div>
         <div class="pane-content">
           <form class="col" method="post" action="{% url 'management:users' %}?password_reset=">
             {% csrf_token %}

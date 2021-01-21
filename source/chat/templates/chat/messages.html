@@ -17,8 +17,8 @@
   <div class="header-decorator"><h1>Mensagens</h1></div>
   <div class="row padded nowrap">
     <div class="col nogrow noshrink" style="flex-basis: 300px">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
+      <div class="pane">
+        <div class="pane-title"></div>
         <div class="pane-content">
           <select id="chat-selector" onchange="selectChat(this);"></select>
           <h3>Últimas mensagens</h3>
@@ -29,8 +29,8 @@
       </div>
     </div>
     <div class="col">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
+      <div class="pane">
+        <div class="pane-title"></div>
         <div id="chat-container" class="pane-content">
           <img class="spinner" style="display: none" src="{% static 'img/spinner.svg' %}">
         </div>

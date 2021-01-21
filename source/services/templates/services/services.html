@@ -4,8 +4,8 @@
 {% block content_wrapper %}
   <div class="col padded">
     {% for services in services_by_type.values %}
-      <div class="flex-pane">
-        <div class="pane-title bg-grad">
+      <div class="pane">
+        <div class="pane-title">
           <h2>{{ services.0.get_type_display }}</h2>
         </div>
         <div class="pane-content">

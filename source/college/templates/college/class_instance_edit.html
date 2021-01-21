@@ -5,8 +5,8 @@
 {% block content_wrapper %}
   {% include 'college/class_decorator.html' %}
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Editar edição</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Editar edição</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{% url 'college:class_instance_edit' instance.id %}">
           {% csrf_token %}

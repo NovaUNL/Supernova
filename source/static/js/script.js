@@ -104,8 +104,8 @@ function setupPopover() {
 function createOverlay() {
     const o = $('<div class="overlay"></div>').appendTo('body');
     let p = $(
-        "<div class='flex-pane'>" +
-        "<div class='pane-title bg-grad'><h2></h2><span class='close'></span></div>" +
+        "<div class='pane'>" +
+        "<div class='pane-title'><h2></h2><span class='close'></span></div>" +
         "<div class='pane-content'></div>" +
         "</div>");
     o.append(p);
@@ -207,8 +207,8 @@ function showThemePicker() {
     const container = $("<div class='theme-picker'></div>");
     for (const [i, theme] of themes.entries()) {
         let themeDiv = $(
-            "<div class='flex-pane'>" +
-            "<div class='pane-title bg-grad'><h2>Escolha o seu tema</h2></div>" +
+            "<div class='pane'>" +
+            "<div class='pane-title'><h2>Escolha o seu tema</h2></div>" +
             "<div class='pane-content'><span>Seleccione o tema que quer utilizar no supernova.</span></div>" +
             "</div>");
         const picker = $("<div class='theme-inputs'></div>");

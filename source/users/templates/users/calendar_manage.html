@@ -5,8 +5,8 @@
   <div class="col">
     <div class="header-decorator"><h1>Agenda</h1></div>
     <div class="col padded">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Agenda pontual</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Agenda pontual</h2></div>
         <div class="pane-content">
           {% if once_entries.exists %}
             <table class="stylized grow">
@@ -30,8 +30,8 @@
           {% endif %}
         </div>
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Agenda recorrente</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Agenda recorrente</h2></div>
         <div class="pane-content">
           {% if periodic_entries.exists %}
             <table class="stylized grow">
@@ -60,8 +60,8 @@
         </div>
       </div>
       <div class="row baseline">
-        <div class="flex-pane grow">
-          <div class="pane-title bg-grad"><h2>Adicionar evento recorrente</h2></div>
+        <div class="pane grow">
+          <div class="pane-title"><h2>Adicionar evento recorrente</h2></div>
           <div class="pane-content">
             <form class="col" method="post" action="{% url 'users:calendar_manage' profile_user.nickname %}?type=periodic">
               {% csrf_token %}
@@ -113,8 +113,8 @@
             </form>
           </div>
         </div>
-        <div class="flex-pane grow">
-          <div class="pane-title bg-grad"><h2>Adicionar evento pontual</h2></div>
+        <div class="pane grow">
+          <div class="pane-title"><h2>Adicionar evento pontual</h2></div>
           <div class="pane-content">
             <form class="col" method="post" action="{% url 'users:calendar_manage' profile_user.nickname %}?type=once">
               {% csrf_token %}

@@ -4,8 +4,8 @@
 
 {% block content_wrapper %}
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Editar ficheiro</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Editar ficheiro</h2></div>
       <div class="pane-content">
         <form class="col" method="post" action="{{ request.get_full_path }}">
           {% csrf_token %}

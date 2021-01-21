@@ -10,8 +10,8 @@
 {% block content_wrapper %}
   <div class="row padded nowrap">
     <div class="col">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Próximas partidas</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Próximas partidas</h2></div>
         <div id="transportation-widget" class="pane-content">
           {% for departure in departures %}
             <div class="pt-line {% if departure.name == "3" %}metro{% else %}bus{% endif %}">
@@ -24,12 +24,12 @@
       </div>
     </div>
     <div class="col nogrow" style="max-width: 500px">
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"><h2>Rede de transportes</h2></div>
+      <div class="pane">
+        <div class="pane-title"><h2>Rede de transportes</h2></div>
         <img src="{% static 'college/map/transportation.minimal.svg' %}" width="100%">
       </div>
-      <div class="flex-pane">
-        <div class="pane-title bg-grad"></div>
+      <div class="pane">
+        <div class="pane-title"></div>
         <div class="pane-content">
           <ul class="caption">
             <li><span class="MTS"></span>MTS</li>

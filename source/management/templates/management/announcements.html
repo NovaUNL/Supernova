@@ -17,8 +17,8 @@
 
 {% block content_wrapper %}
   <div class="col padded">
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Anúnciar alteração</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Anúnciar alteração</h2></div>
       <div class="pane-content">
         <form method="post" action="{% url 'management:announcements' %}?announce=">
           {% csrf_token %}

@@ -1,7 +1,7 @@
 {% spaceless %}
   {% if changes %}
-    <div class="flex-pane">
-      <div class="pane-title bg-grad"><h2>Últimas alterações</h2></div>
+    <div class="pane">
+      <div class="pane-title"><h2>Últimas alterações</h2></div>
       <div class="pane-content diff-list">
         {% for user, timestamp, diff in changes reversed %}
           <p>{{ diff|safe }}</p>

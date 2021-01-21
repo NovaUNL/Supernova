@@ -36,8 +36,8 @@
     <div class="row nowrap padded">
       <div class="col">
         <div class="row baseline">
-          <div class="flex-pane grow" style="flex-basis: 500px;">
-            <div class="pane-title bg-grad"><h2>Ficheiros oficiais</h2></div>
+          <div class="pane grow" style="flex-basis: 500px;">
+            <div class="pane-title"><h2>Ficheiros oficiais</h2></div>
             <div class="pane-content">
               <div class="file-list">
                 {% if official_files|length == 0 %}
@@ -81,8 +81,8 @@
               </div>
             </div>
           </div>
-          <div class="flex-pane grow" style="flex-basis: 400px;">
-            <div class="pane-title bg-grad"><h2>Ficheiros da comunidade</h2></div>
+          <div class="pane grow" style="flex-basis: 400px;">
+            <div class="pane-title"><h2>Ficheiros da comunidade</h2></div>
             <div class="pane-content">
               <div class="file-list">
                 {% if community_files|length == 0 %}
@@ -129,8 +129,8 @@
           </div>
         </div>
         {% if  denied_files|length > 0 %}
-          <div class="flex-pane">
-            <div class="pane-title bg-grad"><h2>Ficheiros restritos</h2></div>
+          <div class="pane">
+            <div class="pane-title"><h2>Ficheiros restritos</h2></div>
             <div class="pane-content">
               <p>Os seguintes ficheiros encontram-se restritos por
                 <a href="{% url 'college:teachers_consent' %}">falta de permissão por parte do docente</a>.</p>
