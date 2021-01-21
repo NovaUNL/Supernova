@@ -29,7 +29,7 @@
       </h1>
     </div>
     <div class="row padded nowrap">
-      <div class="col nogrow" style="flex-shrink: 0">
+      <div class="col nogrow noshrink" style="flex-basis: 350px;">
         {% if permissions.info_visibility %}
           <div class="flex-pane">
             <div class="pane-title bg-grad"><h2>Informação</h2></div>
@@ -44,6 +44,13 @@
                       <a href="{{ course.get_absolute_url }}">{{ student.course.abbreviation }}</a>
                     {% endif %}
                   </div>
+                {% endfor %}
+                {% for teacher in profile_user.teachers.all %}
+                    <div>
+                    <b>{% if teacher.rank %}{{ teacher.rank.name }}{% else %}Cargo desconhecido{% endif %}</b>
+                    <br>
+                      <a href="{{ teacher.get_absolute_url }}">Ver página de docente</a>
+                    </div>
                 {% endfor %}
                 {% for student in secondary_students %}
                   {% if student != primary_student %}
