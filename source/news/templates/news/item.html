@@ -1,26 +1,27 @@
-{% extends 'supernova/content_only_formatted.html' %}
+{% extends 'supernova/base.html' %}
 
 {% load static %}
 
-{% block title %}
-  <h2>{{ news_item.title }}</h2>
-{% endblock %}
-
-{% block content %}
-  {% if news_item.cover_img is None %}
-    <h1><i class="far fa-newspaper"></i> {{ news_item.title }}</h1>
-    <h3>{{ news_item.datetime.date }}</h3>
-  {% endif %}
-  {% if news_item.cover_img %}<img src="{{ news_item.cover_img.url }}">{% endif %}
-  <p>{{ news_item.content_html|safe }}</p>
-  {% if news_item.generated %}
-    <span>Obtida automáticamente(<a
-        href="{{ news_item.source }}">fonte</a>), datada de {{ news_item.datetime.date }}</span>
-    <br>
-  {% else %}
-    <span>Submetida por <a href="{% url 'users:profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}</span><br>
-  {% endif %}
-  {% if news_item.edited %}
-    <span>Última edição por <a href="{% url 'users:profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})</span>
-  {% endif %}
+{% block content_wrapper %}
+  <div class="col padded">
+    <div class="flex-pane" style="max-width: min(100%, 900px)">
+      <div class="pane-title bg-grad">
+        <h2>{{ news_item.title }}</h2>
+      </div>
+      <div class="pane-content">
+        {% if news_item.cover_img %}<img src="{{ news_item.cover_img.url }}">{% endif %}
+        <p>{{ news_item.content_html|safe }}</p>
+        {% if news_item.generated %}
+          <span>Obtida automáticamente(<a
+              href="{{ news_item.source }}">fonte</a>), datada de {{ news_item.datetime.date }}</span>
+          <br>
+        {% else %}
+          <span>Submetida por <a href="{% url 'users:profile' news_item.author.nickname %}">{{ news_item.author.nickname }}</a> em {{ news_item.datetime }}</span><br>
+        {% endif %}
+        {% if news_item.edited %}
+          <span>Última edição por <a href="{% url 'users:profile' news_item.edit_author.nickname %}">{{ news_item.edit_author.nickname }}</a> em {{ news_item.edit_datetime }} (Razão: {{ news_item.edit_note }})</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 {% endblock %}
