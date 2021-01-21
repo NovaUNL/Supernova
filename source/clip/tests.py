@@ -46,7 +46,7 @@ class SyncTest(TestCase):
             {"id": 100, "institution": 97747, "name": "Default"},
             {"id": 101, "institution": 97747, "name": "New"},
         ]
-        sync._upstream_sync_departments(upstream, False)
+        sync._upstream_sync_departments(upstream)
         self.assertEquals(college.Department.objects.count(), 2)
         self.assertTrue(college.Department.objects.get(external_id=101).name, "New")
 
@@ -64,7 +64,7 @@ class SyncTest(TestCase):
             external_id=1002)
         c = college.Class.objects.create(name="Does not belong anymore", department=self.department, external_id=1003)
 
-        sync._upstream_sync_department(upstream, self.department, False)
+        sync._upstream_sync_department(upstream, self.department, sync.Recursivity.NONE)
         a.refresh_from_db()
         b.refresh_from_db()
         c.refresh_from_db()
@@ -84,7 +84,7 @@ class SyncTest(TestCase):
             "name": "New Class"
         }
 
-        sync._upstream_sync_class(upstream, 201, False)
+        sync._upstream_sync_class(upstream, 201, sync.Recursivity.NONE)
 
         new_class = college.Class.objects.get(external_id=201)
 
@@ -115,7 +115,7 @@ class SyncTest(TestCase):
             external_id=1002,
             information=dict())
 
-        sync._upstream_sync_class(upstream, 201, False)
+        sync._upstream_sync_class(upstream, 201, sync.Recursivity.NONE)
         moved.refresh_from_db()
         stays.refresh_from_db()
         deleted.refresh_from_db()
@@ -138,7 +138,7 @@ class SyncTest(TestCase):
             "name": "Newer Class"
         }
 
-        sync._upstream_sync_class(upstream, 201, False)
+        sync._upstream_sync_class(upstream, 201, sync.Recursivity.NONE)
         new_class.refresh_from_db()
         stays.refresh_from_db()
         deleted.refresh_from_db()
@@ -158,6 +158,7 @@ class SyncTest(TestCase):
             "department_id": self.department.external_id,
             "enrollments": [100, 1000, 1001],
             "evaluations": [],
+            "events": [],
             "id": 200,
             "info": {'foo': 'bar'},
             "period": 1,
@@ -165,7 +166,7 @@ class SyncTest(TestCase):
             "working_hours": 10,
             "year": 2020
         }
-        sync._upstream_sync_class_instance(upstream, 200, self.class_, False)
+        sync._upstream_sync_class_instance(upstream, 200, self.class_, sync.Recursivity.NONE)
 
         new_instance = college.ClassInstance.objects.get(external_id=200)
 
@@ -201,7 +202,7 @@ class SyncTest(TestCase):
             class_instance=new_instance,
             external_id=1002)
 
-        sync._upstream_sync_class_instance(upstream, 200, self.class_, False)
+        sync._upstream_sync_class_instance(upstream, 200, self.class_, sync.Recursivity.NONE)
 
         shift_moved.refresh_from_db()
         shift_stays.refresh_from_db()
@@ -227,24 +228,24 @@ class SyncTest(TestCase):
 
         tweaked_upstream = upstream.copy()
         tweaked_upstream["class_id"] = other_class.external_id  # Illegal
-        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, sync.Recursivity.NONE)
         new_instance.refresh_from_db()
         self.assertEquals(new_instance.parent, self.class_)  # Unchanged
         tweaked_upstream["class_id"] = upstream["class_id"]  # Revert
 
         tweaked_upstream["info"] = {'boo': 'far'}  # Legal
-        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, sync.Recursivity.NONE)
         new_instance.refresh_from_db()
         self.assertEquals(new_instance.information, {'upstream': {'boo': 'far'}})  # Changed
 
         tweaked_upstream["period"] = 2  # Illegal
-        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, sync.Recursivity.NONE)
         new_instance.refresh_from_db()
         self.assertEquals(new_instance.period, 1)  # Unchanged
         tweaked_upstream["period"] = upstream["period"]  # Revert
 
         tweaked_upstream["year"] = 2021  # Illegal
-        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, False)
+        sync._upstream_sync_class_instance(tweaked_upstream, 200, self.class_, sync.Recursivity.NONE)
         new_instance.refresh_from_db()
         self.assertEquals(new_instance.year, 2020)  # Unchanged
         tweaked_upstream["year"] = upstream["year"]  # Revert
@@ -263,7 +264,7 @@ class SyncTest(TestCase):
             "type": "t",
         }
 
-        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, False)
+        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, sync.Recursivity.NONE)
         new_shift = college.Shift.objects.get(external_id=200)
         self.assertEquals(new_shift.class_instance, self.class_instance)
         self.assertEquals(new_shift.number, upstream["number"])
@@ -290,7 +291,7 @@ class SyncTest(TestCase):
         upstream["instances"] = [self.shift_instance.external_id, 2000, 2001]
         upstream["students"] = [self.student.external_id, 2000, 2001]
         upstream["teachers"] = [self.teacher.external_id, 2000, 2001]
-        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, False)
+        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, sync.Recursivity.NONE)
         instance_stay.refresh_from_db()
         instance_deleted.refresh_from_db()
 
@@ -306,7 +307,7 @@ class SyncTest(TestCase):
         upstream["instances"] = [self.shift_instance.external_id, 2000]
         upstream["students"] = [self.student.external_id, 2000]
         upstream["teachers"] = [self.teacher.external_id, 2000]
-        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, False)
+        sync._upstream_sync_shift_info(upstream, 200, self.class_instance, sync.Recursivity.NONE)
         instance_stay.refresh_from_db()
         instance_deleted.refresh_from_db()
 
