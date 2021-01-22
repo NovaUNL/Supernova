@@ -86,18 +86,27 @@ def meal_name_to_int(name):
 
 
 known_meat = {'carne', 'porco', 'vaca', 'frango', 'galinha', 'peru', 'aves', 'perna', 'asa', 'peito', 'bacon',
-              'alheira', 'salsicha', 'almôndegas com', 'carbonara'}
+              'alheira', 'salsicha', 'almôndegas com', 'carbonara', 'febras', 'lombinho'}
 known_fish = {'peixe', 'pescada', 'bacalhau', 'filetes', 'atum', 'solha', 'douradinhos', 'marisco', 'fish', 'paloco',
-              'carapau', 'calamares', 'rissóis de camarão'}
+              'carapau', 'calamares', 'rissóis de camarão', 'escamudo'}
 
 
 def meal_item_str_type_to_int(type_str, name):
     name = name.lower()
+    name_parts = name.split(' ')
     if type_str == 'Sopa':
         return 0
     elif type_str == 'Veg.':
         return 3
     elif type_str == 'Prato':
+        # Try to match on a word-by-word basis
+        for item in known_meat:
+            if item in name_parts:
+                return 1
+        for item in known_fish:
+            if item in name_parts:
+                return 2
+        # Try to find on whole string
         for item in known_meat:
             if item in name:
                 return 1
