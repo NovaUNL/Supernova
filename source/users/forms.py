@@ -265,7 +265,7 @@ class AccountSettingsForm(djf.ModelForm):
         widgets = {
             'gender': djf.RadioSelect(),
             'picture': djf.FileInput(),
-            'birth_date': djf.SelectDateWidget(years=range(1950, 2005))
+            'birth_date': NativeDateInput()
         }
 
     def clean_nickname(self):
