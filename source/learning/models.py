@@ -246,7 +246,7 @@ class SectionSource(djm.Model):
     #: Verbose title for this resource
     title = djm.CharField(max_length=256, null=True, blank=True)
     #: Location containing the referenced source
-    url = djm.URLField(blank=True, null=True, verbose_name='endreço')
+    url = djm.URLField(blank=True, null=True, verbose_name='endereço')
 
     class Meta:
         ordering = ('section', 'title', 'url')
@@ -323,7 +323,7 @@ class Exercise(djm.Model):
     #: Origin of this exercise
     source = djm.CharField(null=True, blank=True, max_length=256, verbose_name='origem')
     #: Optional URL of the origin
-    source_url = djm.URLField(null=True, blank=True, verbose_name='endreço')
+    source_url = djm.URLField(null=True, blank=True, verbose_name='endereço')
     #: :py:class:`synopses.models.Section` for which this exercise makes sense (m2m)
     synopses_sections = djm.ManyToManyField(
         Section,

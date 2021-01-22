@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 ('content', models.JSONField()),
                 ('datetime', models.DateTimeField(auto_now_add=True)),
                 ('source', models.CharField(blank=True, max_length=256, null=True, verbose_name='origem')),
-                ('source_url', models.URLField(blank=True, null=True, verbose_name='endreço')),
+                ('source_url', models.URLField(blank=True, null=True, verbose_name='endereço')),
                 ('successes', models.IntegerField(default=0)),
                 ('failures', models.IntegerField(default=0)),
                 ('skips', models.IntegerField(default=0)),
@@ -372,7 +372,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(blank=True, max_length=256, null=True)),
-                ('url', models.URLField(blank=True, null=True, verbose_name='endreço')),
+                ('url', models.URLField(blank=True, null=True, verbose_name='endereço')),
                 ('section',
                  models.ForeignKey(
                      on_delete=django.db.models.deletion.CASCADE,
