@@ -1,4 +1,5 @@
 import logging
+import traceback
 from datetime import datetime, timedelta
 
 import reversion
@@ -817,14 +818,23 @@ class File(Importable):
     def analyse(self):
         if self.external:
             file_path = f"/{settings.EXTERNAL_ROOT}/{self.hash[:2]}/{self.hash[2:]}"
-            data = files.parse(file_path, self.hash)
+            try:
+                data = files.parse(file_path, self.hash)
+            except:
+                print(f"File {file_path} failed to parse.")
+                traceback.print_exc()
+                return
+
             if data:
-                data.pop('images')
+                # data.pop('images')
                 self.links = data.pop('links')
                 self.pages = data.pop('pages')
                 self.meta = data
                 self.process_date = timezone.now()
-
+                try:
+                    self.save()
+                except Exception:
+                    traceback.print_exc()
         else:
             raise NotImplementedError()
 

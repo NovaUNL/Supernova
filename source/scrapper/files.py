@@ -1,5 +1,5 @@
+import hashlib
 import logging
-import datetime
 import traceback
 from io import StringIO
 
@@ -10,42 +10,55 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 from pdfminer.layout import LTFigure, LTImage, LAParams
+import fitz
 import pdfplumber
 from bs4 import UnicodeDammit
 
 logging.getLogger("pdfminer").setLevel(logging.WARNING)
 
-PARSER_VERSION = 0
-
 
 def parse(file_path, file_hash):
-    data = pdfplumber_parse(file_path, file_hash)
-    if data:
-        data['version'] = PARSER_VERSION
+    parser_data = {}
+    data = {
+        'parsers': parser_data
+    }
+    pymu_data = pymu_parse(file_path)
+    parser_data['pymu'] = {
+        'revision': 2020121,
+        'data': pymu_data
+    }
+    if pymu_data:
+        data['pages'] = list(map(lambda p: p['text'], pymu_data['pages']))
+        data['links'] = list(
+            set([link for page_links in map(lambda p: p['links'], pymu_data['pages']) for link in page_links]))
+    else:
+        return None
+    plumber_data = pdfplumber_parse(file_path, file_hash)
+    parser_data['plumber'] = {
+        'revision': 2020121,
+        'data': plumber_data
+    }
+    return data
 
 
 def pdfplumber_parse(file_path, file_hash):
     pages = []
     links = []
-    images = []
-    width = 0
-    height = 0
 
     try:
         with pdfplumber.open(file_path) as pdf:
-            print(f"Processing {file_path}")
             meta = pdf.metadata
             pages_cont = len(pdf.pages)
             if pages_cont > 300:
-                print(f"Skipped {file_hash}")
                 return None
             for i, page in enumerate(pdf.pages):
-                if i == 0:
-                    width = page.width
-                    height = page.height
+                page_links = []
                 try:
                     for link in page.hyperlinks:
                         links.append(link['uri'])
+                        page_links.append(link['uri'])
+                except UnicodeDecodeError:
+                    pass
                 except Exception as e:
                     print(f"Exception in page {i} of {file_hash}: {e}")
                     traceback.print_exc()
@@ -56,9 +69,15 @@ def pdfplumber_parse(file_path, file_hash):
                 #         size=image['srcsize'],
                 #         decoder_name='raw')
                 # page = page.dedupe_chars(tolerance=1)
-                _text = page.extract_text()
-                if _text is not None:
-                    pages.append(_text)
+                text = page.extract_text()
+                if text is None:
+                    text = ''
+
+                pages.append({
+                    'text': text,
+                    'links': page_links,
+                    'width': int(page.width),
+                    'height': int(page.height)})
             print(f"Ended processing {file_path}")
     except pdfparser.PDFSyntaxError:
         raise Exception(f"{file_hash} is not a PDF")  # TODO proper exception
@@ -68,13 +87,9 @@ def pdfplumber_parse(file_path, file_hash):
         raise Exception(f"{file_hash} had exception {e}")  # TODO proper exception
 
     return {
-        'hash': file_hash,
         'pages': pages,
         'links': links,
-        'images': images,
         'meta': meta,
-        'width': width,
-        'height': height,
     }
 
 
@@ -108,9 +123,52 @@ def pdfminer_parse(file_path, file_hash):
         return None
 
     return {
-        'hash': file_hash,
         'text': output_string.getvalue(),
         'meta': flatten_and_unicode(doc.info)
+    }
+
+
+def pymu_parse(file_path):
+    try:
+        doc = fitz.open(file_path)
+    except RuntimeError:
+        return None
+
+    if not doc.isPDF:
+        return
+
+    try:
+        toc = doc.get_toc()
+    except ValueError:
+        return
+    pages = []
+    for page in doc:
+        links = []
+        for link in page.getLinks():
+            uri = link.get('uri')
+            if uri:
+                links.append(uri)
+                continue
+
+            file = link.get('file')
+            if file:
+                links.append('file:' + file)
+                continue
+        pages.append({
+            'text': page.getText('text'),
+            # 'structure': page.getText('dict'),
+            'links': links,
+            # 'annotations': list(page.annots()),
+            'width': int(page.MediaBoxSize.x),
+            'height': int(page.MediaBoxSize.y),
+            'content_hash': hashlib.sha1(page.read_contents()).hexdigest(),
+            'visual_hash': hashlib.sha1(page.getPixmap().samples).hexdigest()})
+
+    return {
+        'pages': pages,
+        'pages_count': doc.pageCount,
+        'meta': doc.metadata,
+        'toc': toc,
     }
 
 
