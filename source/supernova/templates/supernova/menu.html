@@ -52,7 +52,7 @@
             <li {% if pcode == 'u_schedule' %}class="active"{% endif %}><a href="{{ schedule }}">Horário</a></li>
             {% if user.course %}<li><a href="{% url 'college:course' user.course.id %}">Curso</a></li>{% endif %}
             <li {% if pcode == 'u_evaluations' %}class="active"{% endif %}><a href="{{ evaluations }}">Avaliações</a></li>
-            <li {% if pcode == 'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
+            <li {% if pcode|startswith:'u_calendar' %}class="active"{% endif %}><a href="{{ calendar }}">Calendário</a></li>
             <li {% if pcode == 'u_chat' %}class="active"{% endif %}><a href="{{ messages }}">Mensagens</a></li>
             <li {% if pcode == 'u_reputation' %}class="active"{% endif %}><a href="{{ reputation }}">Reputação</a></li>
             <li {% if pcode == 'u_settings' %}class="active"{% endif %}><a href="{{ settings }}">Definições</a></li>
@@ -75,22 +75,23 @@
       {% endif %}
     {% endif %}
 
-    {% url 'intro' as intro %}
+{#    {% url 'intro' as intro %}#}
     {% url 'college:courses' as courses %}
     {% url 'college:departments' as departments %}
     {% url 'college:index' as college %}
     {% url 'college:campus' as campus %}
     {% url 'college:transportation' as transportation %}
     {% url 'college:buildings' as buildings %}
-    {% url 'college:available_places' as places %}
+{#    {% url 'college:available_places' as places %}#}
     {% url 'college:map' as map %}
     {% url 'services:services' as services %}
     {% url 'news:index' as news %}
+    {% url 'feedback:index' as suggestions %}
     {% if pcode|startswith:'c' %}
       <li>
         <label>Faculdade</label>
         <ul>
-          <li><a href="{{ intro }}">Introdução</a></li>
+{#          <li><a href="{{ intro }}">Introdução</a></li>#}
           <li {% if pcode|startswith:'c_course' %}class="active"{% endif %}><a href="{{ courses }}">Cursos</a></li>
           <li {% if pcode|startswith:'c_department' %}class="active"{% endif %}><a href="{{ departments }}">Departamentos</a></li>
           {% if pcode|startswith:'c_campus' %}
@@ -101,10 +102,10 @@
                 <li {% if pcode == 'c_campus_map' %}class="active"{% endif %}><a href="{{ map }}">Mapa</a></li>
                 <li {% if pcode == 'c_campus_tranportation' %}class="active"{% endif %}><a href="{{ transportation }}">Transportes</a></li>
                 <li {% if pcode|startswith:'c_campus_building' %}class="active"{% endif %}><a href="{% url 'college:buildings' %}">Edifícios</a></li>
-                <li {% if pcode == 'c_campus_places' %}class="active"{% endif %}><a href="{{ places }}">Espaços</a></li>
+{#                <li {% if pcode == 'c_campus_places' %}class="active"{% endif %}><a href="{{ places }}">Espaços</a></li>#}
               </ul>
             </li>
-          {% else %}{# Submenu is inactive #}
+            {% else %}{# Submenu is inactive #}
             <li class="collapse">
               <input type="checkbox" id="m21"/><label for="m21">Campus</label>
               <ul>
@@ -112,28 +113,29 @@
                 <li><a href="{{ map }}">Mapa</a></li>
                 <li><a href="{{ transportation }}">Transportes</a></li>
                 <li><a href="{{ buildings }}">Edifícios</a></li>
-                <li><a href="{{ places }}">Espaços</a></li>
+{#                <li><a href="{{ places }}">Espaços</a></li>#}
               </ul>
             </li>
           {% endif %}
           <li {% if pcode|startswith:'c_news' %}class="active"{% endif %}><a href="{{ news }}">Noticias</a></li>
-          <li class="collapse disabled">
-            <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
-            <ul>
-              <li><a href="#">Palestras</a></li>
-              <li><a href="#">Workshops</a></li>
-              <li><a href="#">Festas</a></li>
-              <li><a href="#">Competições</a></li>
-            </ul>
-          </li>
-          <li class="disabled"><a href="#">Perdidos</a></li>
+{#          <li class="collapse disabled">#}
+{#            <input type="checkbox" id="m22"/><label for="m22"><a class="disabled" href="#">Eventos</a></label>#}
+{#            <ul>#}
+{#              <li><a href="#">Palestras</a></li>#}
+{#              <li><a href="#">Workshops</a></li>#}
+{#              <li><a href="#">Festas</a></li>#}
+{#              <li><a href="#">Competições</a></li>#}
+{#            </ul>#}
+{#          </li>#}
+          {# TODO <li class="disabled"><a href="#">Perdidos</a></li>#}
+          <li {% if pcode|startswith:'c_feedback' %}class="active"{% endif %}><a href="{{ suggestions }}">Sugestões</a></li>
         </ul>
       </li>
     {% else %}
       <li class="collapse">
         <input type="checkbox" id="m2"/><label for="m2">Faculdade</label>
         <ul>
-          <li><a href="{{ intro }}">Introdução</a></li>
+{#          <li><a href="{{ intro }}">Introdução</a></li>#}
           <li><a href="{{ courses }}">Cursos</a></li>
           <li><a href="{{ departments }}">Departamentos</a></li>
           <li class="collapse">
@@ -143,20 +145,21 @@
               <li><a href="{{ map }}">Mapa</a></li>
               <li><a href="{{ transportation }}">Transportes</a></li>
               <li><a href="{{ buildings }}">Edifícios</a></li>
-              <li><a href="{{ places }}">Espaços</a></li>
+{#              <li><a href="{{ places }}">Espaços</a></li>#}
             </ul>
           </li>
           <li><a href="{{ news }}">Noticias</a></li>
-          <li class="collapse disabled">
-            <input type="checkbox" id="m22"/><label for="m22"><a href="#">Eventos</a></label>
-            <ul>
-              <li><a href="#">Palestras</a></li>
-              <li><a href="#">Workshops</a></li>
-              <li><a href="#">Festas</a></li>
-              <li><a href="#">Competições</a></li>
-            </ul>
-          </li>
-          <li class="disabled"><a href="#">Perdidos</a></li>
+{#          <li class="collapse disabled">#}
+{#            <input type="checkbox" id="m22"/><label for="m22"><a class="disabled" href="#">Eventos</a></label>#}
+{#            <ul>#}
+{#              <li class="disabled"><a href="#">Palestras</a></li>#}
+{#              <li><a href="#">Workshops</a></li>#}
+{#              <li><a href="#">Festas</a></li>#}
+{#              <li><a href="#">Competições</a></li>#}
+{#            </ul>#}
+{#          </li>#}
+          {# TODO <li class="disabled"><a href="#">Perdidos</a></li>#}
+          <li><a href="{{ suggestions }}">Sugestões</a></li>
         </ul>
       </li>
     {% endif %}
@@ -200,7 +203,7 @@
         <li {% if request.path == terms %}class="active"{% endif %}><a href="{{ terms }}">Termos de utilização</a></li>
         <li {% if request.path == privacy %}class="active"{% endif %}><a href="{{ privacy }}">Politica de privacidade</a></li>
         <li {% if request.path == support %}class="active"{% endif %}><a href="{{ support }}">Apoia-nos!</a></li>
-        <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>
+{#        <li><a href="https://gitlab.com/claudiop/Supernova">Biforca-me</a></li>#}
       </ul>
     </li>
   </ul>
