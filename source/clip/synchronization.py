@@ -1243,7 +1243,7 @@ def request_classes_update():
 
 
 def request_class_instance_update(external_id, update_info=False, update_enrollments=False, update_shifts=False,
-                                  update_events=False, update_files=False):
+                                  update_events=False, update_files=False, update_grades=False):
     """
     :param external_id: The foreign id of the class instance that is being sync'd
     :param update_info: Whether to request CLIPy to update the class info from CLIP before updating Supernova's
@@ -1261,6 +1261,8 @@ def request_class_instance_update(external_id, update_info=False, update_enrollm
         _update(f"http://{settings.CLIPY['host']}/update/shifts/{external_id}")
     if update_events:
         _update(f"http://{settings.CLIPY['host']}/update/events/{external_id}")
+    if update_grades:
+        _update(f"http://{settings.CLIPY['host']}/update/class_grades/{external_id}")
     if update_files:
         _update(f"http://{settings.CLIPY['host']}/update/class_files/{external_id}")
 

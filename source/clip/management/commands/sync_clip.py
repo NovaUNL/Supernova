@@ -111,6 +111,7 @@ class Command(BaseCommand):
                         update_enrollments=update,
                         update_shifts=update,
                         update_events=update,
+                        update_grades=update,
                         update_files=update))
 
             # Synchronize found students
