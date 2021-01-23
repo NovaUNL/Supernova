@@ -20,83 +20,83 @@
         .header-background:after {
             background-image: url("{{ building.picture_cover.url }}");
         }
+        #campus-map {
+            z-index: 1;
+        }
     </style>
   {% endif %}
 {% endblock %}
 
 {% block content_wrapper %}
-  <div class="col">
-    {% if building.picture %}
-      <div class="header-background faded">{% endif %}
-    <div class="header-decorator">
-      {% if perms.college.add_room %}
-        <div class="header-decorator-options">
-          <ul>
-            <li><a href="{% url 'college:room_create' building.id %}">Adicionar sala</a></li>
-          </ul>
+  {% if building.picture %}<div class="header-background faded">{% endif %}
+  <div class="header-decorator">
+    {% if perms.college.add_room %}
+      <div class="header-decorator-options">
+        <ul>
+          <li><a href="{% url 'college:room_create' building.id %}">Adicionar sala</a></li>
+        </ul>
+      </div>
+    {% endif %}
+    <h1>{{ building.name }}</h1>
+  </div>
+  {% if building.picture %}</div>{% endif %}
+  <div class="row padded nowrap">
+    <div class="col">
+      <div class="row">
+        <div class="pane grow">
+          <div class="pane-title"><h2>Localização</h2></div>
+          <div class="pane-content">{% leaflet_map "campus-map" callback="initBuildingMap" %}</div>
         </div>
-      {% endif %}
-      <h1>{{ building.name }}</h1>
-    </div>
-    {% if building.picture %}</div>{% endif %}
-    <div class="row padded nowrap">
-      <div class="col">
-        <div class="row">
-          <div class="pane grow">
-            <div class="pane-title"><h2>Localização</h2></div>
-            <div class="pane-content">{% leaflet_map "campus-map" callback="initBuildingMap" %}</div>
-          </div>
-          <div class="pane grow">
-            <div class="pane-title"><h2>Planta</h2></div>
-            <div class="pane-content">
-              {% if building.map %}
-              {% else %}
-                Sem planta.
-              {% endif %}
-            </div>
-          </div>
-        </div>
-        {% for type in rooms %}
-          <div class="pane">
-            <div class="pane-title"><h2>{{ type.0 }}</h2></div>
-            <div class="pane-content room-list">
-              {% for room in type.1 %}
-                <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
-                  {{ room.name }}
-                </a>
-              {% endfor %}
-            </div>
-          </div>
-        {% endfor %}
-        <div class="pane">
-          <div class="pane-title"><h2>Ocupação</h2></div>
+        <div class="pane grow">
+          <div class="pane-title"><h2>Planta</h2></div>
           <div class="pane-content">
-            <div id="occupation-table"></div>
+            {% if building.map %}
+            {% else %}
+              Sem planta.
+            {% endif %}
           </div>
         </div>
       </div>
-      <div class="col nogrow noshrink">
+      {% for type in rooms %}
         <div class="pane">
-          <div class="pane-title"><h2>Departamentos</h2></div>
+          <div class="pane-title"><h2>{{ type.0 }}</h2></div>
+          <div class="pane-content room-list">
+            {% for room in type.1 %}
+              <a class="room-type-{{ room.type }}" href="{% url 'college:room' room.id %}">
+                {{ room.name }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+      <div class="pane">
+        <div class="pane-title"><h2>Ocupação</h2></div>
+        <div class="pane-content">
+          <div id="occupation-table"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col nogrow noshrink">
+      <div class="pane">
+        <div class="pane-title"><h2>Departamentos</h2></div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for department in departments.all %}
+              <li><a href="{% url 'college:department' department.id %}">{{ department.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% if departments.entities %}
+        <div class="pane">
+          <div class="pane-title"><h2>Entidades</h2></div>
           <div class="pane-content">
-            <ul class="menu">
-              {% for department in departments.all %}
-                <li><a href="{% url 'college:department' department.id %}">{{ department.name }}</a></li>
-              {% endfor %}
+            <ul>
+              {# <li>TODO</li> #}
             </ul>
           </div>
         </div>
-        {% if departments.entities %}
-          <div class="pane">
-            <div class="pane-title"><h2>Entidades</h2></div>
-            <div class="pane-content">
-              <ul>
-                <li>TODO</li>
-              </ul>
-            </div>
-          </div>
-      {% endif %}
-      </div>
+    {% endif %}
     </div>
   </div>
   <script>document.addEventListener('DOMContentLoaded', () => loadOccupation({{ building.id }}));</script>
