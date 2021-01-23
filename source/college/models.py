@@ -306,6 +306,10 @@ class Room(Place, Importable):
     def long_str(self):
         return f'{self.building.name}, {self.get_type_display()} {self.name}'
 
+    @property
+    def short_schedule_str(self):
+        return f'{self.get_type_display()} {self.name}'
+
     def schedule_str(self):
         return f'{self.building.abbreviation}, {self.get_type_display()} {self.name}'
 
@@ -604,6 +608,9 @@ class ShiftInstance(Importable):
     def __str__(self):
         return f"{self.shift}, d{self.weekday}, {self.minutes_to_str(self.start)}"
 
+    def get_absolute_url(self):
+        return reverse('college:class_instance_shift', args=[self.shift_id, self.id])
+
     def intersects(self, shift_instance):
         # Same weekday AND A starts before B ends and B starts before A ends
         return self.weekday == shift_instance.weekday and \
@@ -617,6 +624,10 @@ class ShiftInstance(Importable):
     @property
     def start_str(self):
         return self.minutes_to_str(self.start)
+
+    @property
+    def end(self):
+        return self.start + self.duration
 
     @property
     def end_str(self):
@@ -635,6 +646,15 @@ class ShiftInstance(Importable):
     @property
     def title(self):
         return f"{self.shift.get_shift_type_display()} {self.shift.class_instance.parent.abbreviation}"
+
+    @property
+    def short_title(self):
+        return f"{self.shift.type_abbreviation} {self.shift.class_instance.parent.abbreviation}"
+
+    @property
+    def weekday_as_arr(self):
+        # Meant to aid fullcalendar, weekday shifted
+        return None if self.weekday is None else [(self.weekday + 1) % 7]
 
     @staticmethod
     def minutes_to_str(minutes):

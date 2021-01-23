@@ -1,4 +1,3 @@
-from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -68,7 +67,6 @@ class UserShiftInstances(APIView):
             .filter(shift__student__in=primary_students,
                     shift__class_instance__year=settings.COLLEGE_YEAR,
                     shift__class_instance__period=settings.COLLEGE_PERIOD) \
-            .annotate(end=F('start') - F('duration')) \
             .all()
         serializer = serializers.ScheduleSerializer(shift_instances, many=True)
         return Response(serializer.data)

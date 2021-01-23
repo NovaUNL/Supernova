@@ -1147,7 +1147,6 @@ def buildings_view(request):
 @vary_on_cookie
 @last_modified(changes.singular_modification_for(m.Building))
 def building_view(request, building_id):
-    # TODO This view can probably be optimized
     building = get_object_or_404(
         m.Building.objects.prefetch_related('departments'),
         id=building_id)
@@ -1164,11 +1163,6 @@ def building_view(request, building_id):
     context['rooms'] = sorted(rooms_by_type.items(), key=lambda t: t[0])
     context['services'] = Service.objects.order_by('name').filter(place__building=building)
     context['departments'] = building.departments
-    context['room_occupation'] = schedules.build_building_occupation_table(
-        settings.COLLEGE_PERIOD,
-        settings.COLLEGE_YEAR,
-        datetime.today().weekday(),
-        building)
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},
         {'name': 'Campus', 'url': reverse('college:campus')},

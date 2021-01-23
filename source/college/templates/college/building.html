@@ -11,6 +11,10 @@
           {{ building.location.coords.0|stringformat:"f" }}];
   </script>
   <script src="{% static 'college/map/map.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/main.min.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/locales/pt-br.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'js/lib/fullcalendar/main.min.css' %}"/>
+  <script src="{% static 'js/calendar.js' %}"></script>
   {% if building.picture %}
     <style>
         .header-background:after {
@@ -67,7 +71,7 @@
         <div class="pane">
           <div class="pane-title"><h2>Ocupação</h2></div>
           <div class="pane-content">
-            {% include 'college/occupation_table.html' %}
+            <div id="occupation-table"></div>
           </div>
         </div>
       </div>
@@ -82,15 +86,18 @@
             </ul>
           </div>
         </div>
-        <div class="pane">
-          <div class="pane-title"><h2>Núcleos</h2></div>
-          <div class="pane-content">
-            <ul>
-              <li>TODO</li>
-            </ul>
+        {% if departments.entities %}
+          <div class="pane">
+            <div class="pane-title"><h2>Entidades</h2></div>
+            <div class="pane-content">
+              <ul>
+                <li>TODO</li>
+              </ul>
+            </div>
           </div>
-        </div>
+      {% endif %}
       </div>
     </div>
   </div>
+  <script>document.addEventListener('DOMContentLoaded', () => loadOccupation({{ building.id }}));</script>
 {% endblock %}

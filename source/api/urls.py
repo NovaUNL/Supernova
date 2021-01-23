@@ -9,6 +9,8 @@ urlpatterns = [
     # College
     path('buildings/', views.college.BuildingList.as_view(), name="buildings"),
     path('building/<int:pk>/', views.college.BuildingDetailed.as_view(), name="building"),
+    path('building/<int:pk>/rooms', views.calendar.building_schedule_rooms_view, name="building_schedule_rooms"),
+    path('building/<int:pk>/schedule', views.calendar.building_schedule_shifts_view, name="building_schedule"),
     path('departments/', views.college.DepartmentList.as_view(), name="departments"),
     path('department/<int:pk>/', views.college.DepartmentDetailed.as_view(), name="department"),
     path('course/<int:pk>/', views.college.CourseDetailed.as_view(), name="course"),

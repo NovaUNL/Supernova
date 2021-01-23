@@ -1,4 +1,3 @@
-from django.db.models import F
 from django.conf import settings
 from django.core.cache import cache
 
@@ -10,10 +9,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api import permissions
+from college.choice_types import RoomType
 from users.utils import get_students
 from users import models as users
 from college import models as college
 from groups import models as groups
+from api.serializers import college as college_serializer
 
 
 @api_view(['GET'])
@@ -49,7 +50,6 @@ def user_schedule(request, nickname):
         .filter(shift__student__in=primary_students,
                 shift__class_instance__year=settings.COLLEGE_YEAR,
                 shift__class_instance__period=settings.COLLEGE_PERIOD) \
-        .annotate(end=F('start') - F('duration')) \
         .all()
     for instance in shift_instances:
         schedule_entries.append({
@@ -109,7 +109,6 @@ def user_calendar(_, nickname):
         .filter(shift__student__in=primary_students,
                 shift__class_instance__year=settings.COLLEGE_YEAR,
                 shift__class_instance__period=settings.COLLEGE_PERIOD) \
-        .annotate(end=F('start') - F('duration')) \
         .all()
 
     for instance in shift_instances:
@@ -201,3 +200,37 @@ def group_calendar(_, abbr):
             'end': entry.end_date,
         })
     return Response(schedule_entries)
+
+
+@api_view(['GET'])
+def building_schedule_shifts_view(request, pk):
+    building = get_object_or_404(college.Building, id=pk)
+
+    shift_instances = college.ShiftInstance.objects \
+        .select_related('shift__class_instance__parent') \
+        .filter(room__building=building,
+                shift__class_instance__year=settings.COLLEGE_YEAR,
+                shift__class_instance__period=settings.COLLEGE_PERIOD)\
+        .exclude(weekday=None) \
+        .all()
+    schedule_entries = []
+    for instance in shift_instances:
+        schedule_entries.append({
+            'resourceId': instance.room_id,
+            'title': instance.short_title,
+            'daysOfWeek': instance.weekday_as_arr,
+            'startTime': instance.start_str,
+            'endTime': instance.end_str,
+            'url': instance.shift.get_absolute_url(),
+        })
+    return Response(schedule_entries)
+
+
+@api_view(['GET'])
+def building_schedule_rooms_view(request, pk):
+    building = get_object_or_404(college.Building, id=pk)
+    rooms = college.Room.objects \
+        .filter(building=building, type__in=(RoomType.CLASSROOM, RoomType.AUDITORIUM, RoomType.LABORATORY)) \
+        .exclude()
+    serializer = college_serializer.NestedRoomSerializer(rooms, many=True)
+    return Response(serializer.data)

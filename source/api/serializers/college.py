@@ -22,10 +22,19 @@ class BuildingUsageSerializer(serializers.Serializer):
     relevant = serializers.BooleanField()
 
 
+class NestedRoomSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField(source='short_schedule_str')
+    type = serializers.IntegerField()
+    floor = serializers.IntegerField()
+    door_number = serializers.IntegerField()
+    url = serializers.CharField(source='get_absolute_url')
+
+
 class RoomSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    building = serializers.CharField()
+    building = serializers.IntegerField(source='building_id')
     url = serializers.CharField(source='get_absolute_url')
 
 

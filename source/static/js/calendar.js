@@ -100,6 +100,27 @@ function loadSchedule(nickname, tiny) {
         })
 }
 
+function loadOccupation(building_id) {
+    let calendar = new FullCalendar.Calendar($('#occupation-table')[0], {
+        timeZone: 'UTC',
+        initialView: 'resourceTimelineDay',
+        slotMinTime: "08:00:00",
+        slotMaxTime: "20:00:00",
+        weekends: false,
+        aspectRatio: 1.0,
+        resourceOrder: 'floor,door_number,type,title',
+        nowIndicator: true,
+        contentHeight: 'auto',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        locale: 'pt-br',
+        resourceAreaHeaderContent: 'Espaços',
+        resourceAreaWidth: 200,
+        resources: `/api/building/${building_id}/rooms`,
+        events: `/api/building/${building_id}/schedule`
+    });
+    calendar.render();
+}
+
 function addToCalendarSources(sources, entry) {
     let e = {'title': entry.title};
     if (entry.url) e.url = entry.url;
