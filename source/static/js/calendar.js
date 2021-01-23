@@ -106,17 +106,19 @@ function loadOccupation(building_id) {
         initialView: 'resourceTimelineDay',
         slotMinTime: "08:00:00",
         slotMaxTime: "20:00:00",
-        weekends: false,
-        aspectRatio: 1.0,
         resourceOrder: 'floor,door_number,type,title',
         nowIndicator: true,
         contentHeight: 'auto',
         schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
         locale: 'pt-br',
         resourceAreaHeaderContent: 'Espaços',
-        resourceAreaWidth: 200,
+        resourceAreaWidth: 120,
         resources: `/api/building/${building_id}/rooms`,
-        events: `/api/building/${building_id}/schedule`
+        events: `/api/building/${building_id}/schedule`,
+        resourceLabelDidMount: (info) => {
+          $(info.el).find('.fc-datagrid-cell-main').text(null)
+              .append($(`<a href="${info.resource.extendedProps.url}">${info.resource.title}</a>`));
+        }
     });
     calendar.render();
 }

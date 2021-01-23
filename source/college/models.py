@@ -308,7 +308,7 @@ class Room(Place, Importable):
 
     @property
     def short_schedule_str(self):
-        return f'{self.get_type_display()} {self.name}'
+        return f'{ctypes.RoomType.ABBREVIATIONS[self.type]} {self.name}'
 
     def schedule_str(self):
         return f'{self.building.abbreviation}, {self.get_type_display()} {self.name}'

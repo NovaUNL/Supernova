@@ -80,6 +80,16 @@ class RoomType:
         (MASTERS, 'Sala de mestrados'),
         (CABINET, 'Gabinete'),
     )
+    ABBREVIATIONS = {
+        GENERIC: 'Sala',
+        CLASSROOM: 'Sala',
+        AUDITORIUM: 'Aud.',
+        LABORATORY: 'Lab.',
+        COMPUTER: 'Comp.',
+        MEETING: 'Sala',
+        MASTERS: 'Sala',
+        CABINET: 'Gabin.',
+    }
 
     @staticmethod
     def plural(room_type):
