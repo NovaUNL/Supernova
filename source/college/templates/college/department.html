@@ -11,8 +11,28 @@
     {% endif %}
     <h1>Departamento de {{ department.name }}</h1>
   </div>
-  <div class="row nowrap padded">
-    <div class="col nogrow noshrink">
+  <div class="row padded nowrap">
+    <div class="col">
+      <div class="pane">
+        <div class="pane-title">
+          <h2>Cadeiras</h2>
+        </div>
+        <div class="pane-content">
+          {% if classes|length == 0 %}
+            <span>Sem unidades curriculares associadas.</span>
+          {% endif %}
+          <ul class="menu">
+            {% for class in classes %}
+              <li>
+                <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
+                {% if class.iid %}<sup>{{ class.iid }}</sup>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col nogrow noshrink" style="flex-basis: 400px;">
       <div class="pane">
         <div class="pane-title">
           <h2>Informação</h2>
@@ -26,9 +46,11 @@
               Sem descrição.
             {% endif %}
           </span>
-          <h3>Localização</h3>
-          <a class="indented" href="{% url 'college:building' department.building.id %}">{{ department.building }}</a>
-          {% if department.url %}
+          {% if department.building %}
+            <h3>Localização</h3>
+            <a class="indented entity" href="{{ department.building.get_absolute_url }}">{{ department.building }}</a>
+          {% endif %}
+          {% if department.url %}git s
             <h3>Página oficial</h3>
             <a class="indented" href="{{ department.url }}">Link</a>
           {% endif %}
@@ -49,44 +71,22 @@
           {% endfor %}
         </div>
       </div>
-    </div>
-    <div class="col noshrink">
       <div class="pane">
-        <div class="pane-title">
-          <h2>Cadeiras</h2>
+          <div class="pane-title">
+            <h2>Professores</h2>
+          </div>
+          <div class="pane-content">
+            {% if perms.users.student_access %}
+              <ul class="menu">
+                {% for teacher in teachers %}
+                  <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              A consulta de docentes está restrita a alunos e docentes.
+            {% endif %}
+          </div>
         </div>
-        <div class="pane-content">
-          {% if classes|length == 0 %}
-            <span>Sem unidades curriculares associadas.</span>
-          {% endif %}
-          <ul class="menu">
-            {% for class in classes %}
-              <li>
-                <a href="{% url 'college:class' class.id %}">{{ class.name }} ({{ class.abbreviation }})</a>
-                {% if class.iid %}<sup>{{ class.iid }}</sup>{% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="pane">
-        <div class="pane-title">
-          <h2>Professores</h2>
-        </div>
-        <div class="pane-content">
-          {% if perms.users.student_access %}
-            <ul class="menu">
-              {% for teacher in teachers %}
-                <li><a href="{% url 'college:teacher' teacher.id %}">{{ teacher.name }}</a></li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            A consulta de docentes está restrita a alunos e docentes.
-          {% endif %}
-        </div>
-      </div>
     </div>
   </div>
 {% endblock %}
