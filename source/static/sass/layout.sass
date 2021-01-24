@@ -1,16 +1,20 @@
 @import "variables"
 
-body
+#layout
   display: grid
   grid-template-areas: "header header" "sidebar content"
   grid-template-rows: 0fr 1fr
   grid-template-columns: 0fr 1fr
 
+
+  @media #{$midhighres}
+    height: 100%
+
 #header
   grid-area: header
   display: grid
-  grid-template-areas: "hamburger none logo none2 actions user"
-  grid-template-columns: 0fr 0fr 0fr 1fr 0fr 0fr
+  grid-template-areas: "logo none actions user"
+  grid-template-columns: 0fr 1fr 0fr 0fr
   min-height: $top-height
   border-bottom: 2px solid var(--nav-border)
   background-color: var(--nav-bg)
@@ -124,17 +128,17 @@ body
 
 #hamburger
   align-self: center
-  margin: 10px 20px
-  background-image: url("../img/icons/menu.svg")
+  margin: 10px
+  background-image: url("/static/img/icons/menu.svg")
 
 #search
   grid-area: search
-  background-image: url("../img/icons/search.svg")
+  background-image: url("/static/img/icons/search.svg")
 //background-size: contain
 
 #theme
   grid-area: theme
-  background-image: url("../img/icons/dim.svg")
+  background-image: url("/static/img/icons/dim.svg")
 
 
 #notifications
@@ -309,8 +313,7 @@ body
   flex-flow: column
   flex-grow: 1
 
-  @media #{$lowmidres}
-    height: 100%
+  @media #{$lowres}
     overflow: auto
 
   .main-footer
@@ -688,7 +691,8 @@ body
 
 @media #{$lowres}
   #header
-    grid-template-columns: 0fr 1fr 0fr 1fr 0fr 0fr
+    grid-template-areas: "hamburger none logo none2 actions"
+    grid-template-columns: 0fr 1fr 0fr 1fr 0fr
     min-height: unset
 
   #logo

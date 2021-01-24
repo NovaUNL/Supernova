@@ -30,65 +30,65 @@
   {% analytical_head_bottom %}
 </head>
 <body>
-<script>loadTheme(false);</script>
 {% analytical_body_top %}
-<nav id="header">
-  <a id="hamburger" class="lowres action" href="javascript: toggleMenu()"></a>
-  <a id="logo" href="/">
-    <img class="dark-only" src="{% static 'img/logo.svg' %}">
-    <img class="light-only" src="{% static 'img/logo-alt.svg' %}">
-    <span id="slogan">{{ catchphrase }}</span>
-  </a>
-  <div id="actions">
-    <a id="search" class="action" type="button" href="javascript:showSearch();"></a>
-    <a id="theme" class="action" type="button" href="javascript:showThemePicker();"></a>
-    {% if not request.user.is_anonymous %}
-      <div id="notifications">
-        <a id="notification-btn" class="action" href="{% url 'users:notifications' %}">
-          <span id="notification-count"></span>
-        </a>
-        <div id="notification-list" class="popover" role="tooltip">
+<script>loadTheme(false);</script>
+<div id="layout">
+  <nav id="header">
+    <a id="hamburger" class="lowres action" href="javascript: toggleMenu()"></a>
+    <a id="logo" href="/">
+      <img class="dark-only" src="{% static 'img/logo.svg' %}">
+      <img class="light-only" src="{% static 'img/logo-alt.svg' %}">
+      <span id="slogan">{{ catchphrase }}</span>
+    </a>
+    <div id="actions">
+      <a id="search" class="action" type="button" href="javascript:showSearch();"></a>
+      <a id="theme" class="action" type="button" href="javascript:showThemePicker();"></a>
+      {% if not request.user.is_anonymous %}
+        <div id="notifications">
+          <a id="notification-btn" class="action" href="{% url 'users:notifications' %}">
+            <span id="notification-count"></span>
+          </a>
+          <div id="notification-list" class="popover" role="tooltip">
+          </div>
         </div>
-      </div>
-      <script>
-      </script>
-    {% endif %}
-  </div>
-  <div class="user midhighres">
-    {% if user.is_authenticated %}
-      {% if user.picture %}
-        <span class="pic" style="background-image: url('{{ user.picture_thumbnail.url }}')"></span>
+      {% endif %}
+    </div>
+    <div class="user midhighres">
+      {% if user.is_authenticated %}
+        {% if user.picture %}
+          <span class="pic" style="background-image: url('{{ user.picture_thumbnail.url }}')"></span>
+        {% else %}
+          <span class="pic"></span>
+        {% endif %}
+        <a class="name" href="{% url 'users:profile' user.nickname %}">
+          {{ user.nickname }}
+        </a>
+        <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
+          <img src="{% static 'img/icons/logout.svg' %}">
+        </a>
       {% else %}
         <span class="pic"></span>
+        <a class="name">Não autenticado</a>
+        <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
+          <img src="{% static 'img/icons/login.svg' %}">
+        </a>
       {% endif %}
-      <a class="name" href="{% url 'users:profile' user.nickname %}">
-        {{ user.nickname }}
-      </a>
-      <a class="logout" href="{% url 'logout' %}?next={{ request.get_full_path }}">
-        <img src="{% static 'img/icons/logout.svg' %}">
-      </a>
-    {% else %}
-      <span class="pic"></span>
-      <a class="name">Não autenticado</a>
-      <a class="login" href="{% url 'login' %}?next={{ request.get_full_path }}">
-        <img src="{% static 'img/icons/login.svg' %}">
-      </a>
+    </div>
+  </nav>
+  <nav id="nav-column">
+    {% include 'supernova/menu.html' %}
+  </nav>
+  <div id="content-column">
+    {% if sub_nav is not None %}
+      <nav id="breadcrumbs">
+        {% for element in sub_nav %}
+          <a href="{{ element.url }}">{{ element.name }}</a>
+        {% endfor %}
+      </nav>
     {% endif %}
+    {% block content_wrapper %}
+    {% endblock %}
   </div>
-</nav>
-<nav id="nav-column">
-  {% include 'supernova/menu.html' %}
-</nav>
-<div id="content-column">
-  {% if sub_nav is not None %}
-    <nav id="breadcrumbs">
-      {% for element in sub_nav %}
-        <a href="{{ element.url }}">{{ element.name }}</a>
-      {% endfor %}
-    </nav>
-  {% endif %}
-  {% block content_wrapper %}
-  {% endblock %}
 </div>
 <script async src="{% static 'js/init.js' %}"></script>
 {% analytical_body_bottom %}
