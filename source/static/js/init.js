@@ -20,4 +20,11 @@ const UID = JSON.parse($('#uid').text());
     fetch("/api/stars/github/")
         .then((response) => response.json())
         .then((stars) => $('#github-count').text(stars));
+    const menu_opts = $('.header-decorator-options');
+    if (menu_opts.length) {
+        const el = $('<a class="trigger" href="#hmenu"></a>' +
+            '<div class="lightbox" id="hmenu"><nav><a href="#" class="close"></a></nav></div>');
+        el.find('nav').append(menu_opts.find('ul'));
+        menu_opts.append(el);
+    }
 })();
