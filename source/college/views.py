@@ -1038,7 +1038,6 @@ def course_view(request, course_id):
     context['student_count'] = course.students.count()
     context['curriculum'] = curriculum = course.curriculum
     if curriculum:
-        curriculum.update_aggregation()  # TODO do this when the curriculum is changed, not everytime
         context['curriculum_components'] = \
             {klass.id: klass for klass in m.CurricularComponent.objects.filter(id__in=curriculum.aggregation['_ids'])}
         context['curriculum_classes'] = \
