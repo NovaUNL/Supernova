@@ -257,6 +257,16 @@ function loadTheme(prompt) {
     }
 }
 
+function promptTutorial(force = false) {
+    if(window.innerWidth < 1200 || window.innerHeight < 600)
+        return; // Too small, could have issues
+    if (force || (typeof (Storage) !== "undefined" && !localStorage.getItem("skipTutorial"))) {
+        $('head').append('<link rel="stylesheet" type="text/css" href="/static/js/lib/intro/introjs.min.css">');
+        $.getScript("/static/js/lib/intro/intro.min.js").done(() => {
+            $.getScript("/static/js/tutorial.js");
+        })
+    }
+}
 
 const searchCols = {
     'teacher': {

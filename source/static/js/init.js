@@ -27,4 +27,6 @@ const UID = JSON.parse($('#uid').text());
         el.find('nav').append(menu_opts.find('ul'));
         menu_opts.append(el);
     }
+    if (location.search === '?tutorial')
+        promptTutorial(true);
 })();
