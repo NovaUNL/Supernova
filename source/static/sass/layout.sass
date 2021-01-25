@@ -134,38 +134,28 @@
 #search
   grid-area: search
   background-image: url("/static/img/icons/search.svg")
-//background-size: contain
 
 #theme
   grid-area: theme
   background-image: url("/static/img/icons/dim.svg")
 
-
 #notifications
   grid-area: notifications
-  display: flex
+  display: grid
+  grid-template-rows: 1fr 0fr
+  grid-template-columns: 1fr 0fr
   align-items: center
-
-#notification-btn
   position: relative
 
-  // Needed until backdrop-feature finds its way to the mainstream browsers
-  &:after
-    position: absolute
-    display: inline-block
-    left: 0
-    width: calc(100% - 20px)
-    height: calc(100% - 20px)
-    background: transparent url("../img/icons/bell.svg") no-repeat center
-    background-size: contain
-    content: ''
-    z-index: -1
-    filter: brightness(var(--icon-brightness))
+#notification-bg
+  background-image: url("../img/icons/bell.svg")
 
 #notification-count
   position: absolute
-  bottom: 0
-  right: 0
+  grid-column: 2
+  grid-row: 2
+  bottom: 5px
+  right: 10px
   font-size: 10px
   border-radius: 6px
   min-width: 12px

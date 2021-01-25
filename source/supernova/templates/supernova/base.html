@@ -41,16 +41,20 @@
       <span id="slogan">{{ catchphrase }}</span>
     </a>
     <div id="actions">
-      <a id="search" class="action" type="button" href="javascript:showSearch();"></a>
-      <a id="theme" class="action" type="button" href="javascript:showThemePicker();"></a>
+      <a id="search" class="action" href="javascript:showSearch();"></a>
+      <a id="theme" class="action" href="javascript:showThemePicker();"></a>
       {% if not request.user.is_anonymous %}
-        <div id="notifications">
-          <a id="notification-btn" class="action" href="{% url 'users:notifications' %}">
+        <a id="notifications" href="{% url 'users:notifications' %}">
+            <span id="notification-bg" class="action"></span>
             <span id="notification-count"></span>
-          </a>
-          <div id="notification-list" class="popover" role="tooltip">
-          </div>
-        </div>
+            <div id="notification-list" class="popover" role="tooltip"></div>
+        </a>
+{#        <div id="notifications">#}
+{#          <a id="notification-btn" class="action" href="{% url 'users:notifications' %}">#}
+{#            <span id="notification-count"></span>#}
+{#          </a>#}
+{#          <div id="notification-list" class="popover" role="tooltip"></div>#}
+{#        </div>#}
       {% endif %}
     </div>
     <div class="user midhighres">

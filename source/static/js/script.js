@@ -76,8 +76,8 @@ function clearNotifications() {
 }
 
 function setupPopover() {
-    const b = $('#notification-btn');
-    const p = $('#notifications').find('.popover')[0];
+    const b = $('#notifications');
+    const p = b.find('.popover')[0];
     let popperInstance = null;
 
     b.click(() => {
