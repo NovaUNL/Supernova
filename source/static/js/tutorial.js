@@ -6,14 +6,16 @@
         nextLabel: 'Seguinte',
         doneLabel: 'Prosseguir'
     });
-    console.log(path);
     switch (path) {
         case '/':
             ijs.setOptions({
-                steps: [{
-                    title: 'Bem vindo',
-                    intro: '<img width="300px" src="/static/img/logo-alt.svg"><br>' +
-                        'O Supernova é uma plataforma académica que visa melhorar a vida académica na FCT NOVA.<br>'
+                steps: [
+                    {
+                        title: 'Bem vindo',
+                        intro: '<p style="min-width: min(750px, 90vw)">' +
+                            '<img width="300px" src="/static/img/logo-alt.svg"><br>' +
+                            'O Supernova é uma plataforma académica que visa melhorar a vida académica na FCT NOVA.<br>' +
+                            'Este guia (avançavel com a tecla ➡) faz uma introdução à plataforma.</p>'
                     },
                     {
                         element: document.querySelector('.news-list-item'),
@@ -22,15 +24,15 @@
                     },
                     {
                         element: document.querySelector('#transportation-widget').parentNode,
-                        intro: 'Agregando ainda serviços externos de especial intresse à comunidade.',
+                        intro: 'Agrega serviços externos de especial interesse.',
                         position: 'left'
                     },
                     {
                         element: document.querySelector('.question-list'),
-                        intro: 'A comunidade pode participar no Supernova de muitas formas.<br>' +
+                        intro: 'E promove a participação da comunidade.<br>' +
                             'Questões, resoluções ou partilha de conteúdos, tudo é bem vindo<br>' +
                             '<small>(admitindo o respeito pelos direitos autorais e docentes)</small>',
-                        position: 'right'
+                        position: 'top'
                     },
                     {
                         element: document.querySelector('.user'),
@@ -39,12 +41,14 @@
                         position: 'left'
                     },
                     {
-                        intro: 'Este guia tem uma segunda parte, na qual se demonstram algumas funcionalidades.<br>' +
-                            'Deseja continuar?'
-                    }],
-                doneLabel: 'Sim'
-            }).oncomplete(() => {
-                window.location.href = '/faculdade/cursos/?tutorial';
+                        intro: '<p style="min-width: min(700px, 90vw)">Este guia introduziu o conceito; ' +
+                            'Uma segunda parte demonstra algumas funcionalidades.<br>' +
+                            '<a href="/faculdade/cursos/?tutorial">Carregue aqui para continuar</a> ou proceda para ' +
+                            '<b>fechar</b> o guia.<br>' +
+                            'Para voltar a ver este guia poderá abrir o Supernova em navegação privada.</p>'
+                    }
+                ],
+                doneLabel: 'Fechar'
             }).onexit(() => {
                 localStorage.setItem("skipTutorial", "true");
             }).start();
@@ -64,7 +68,7 @@
                     },
                     {
                         element: document.querySelector('#search'),
-                        intro: 'Todavia é possivel pesquisar pelo desejado.',
+                        intro: 'Todavia é possível pesquisar pelo desejado.',
                         position: 'bottom'
                     },
                     {
@@ -90,7 +94,8 @@
                     {
                         element: panes[0],
                         intro: 'Nos departamentos estão as respetivas unidades curriculares.',
-                        position: 'right'
+                        position: 'right',
+                        scrollTo: "tooltip"
                     },
                     {
                         element: document.querySelector('sup'),
@@ -143,7 +148,7 @@
                     },
                     {
                         element: panes[1],
-                        intro: 'Bem como preçarios.',
+                        intro: 'Bem como preçários.',
                         position: 'top'
                     },
                 ],
@@ -176,8 +181,9 @@
                     {
                         element: panes[panes.length - 2],
                         intro: 'E é possível observar a informação ocupacional, permitindo retirar conclusões como ' +
-                            'salas potêncialmente vazias (e portanto utilizaveis p.ex. para estudo).',
-                        position: 'top'
+                            'salas potencialmente vazias (e portanto utilizáveis p.ex. para estudo).',
+                        position: 'top',
+                        scrollTo: "tooltip"
                     },
                 ],
             }).start().oncomplete(() => {
@@ -203,9 +209,8 @@
             ijs.setOptions({
                 steps: [
                     {
-                        intro: 'Já no portal das sugestões, possiblita-se a colocação de sugestões com o intuito de ' +
-                            'dar voz à comunidade, establecendo assim meios de comunicação construtivos com ' +
-                            'entidades associadas à FCT.',
+                        intro: 'Já no portal das sugestões transmitem-se opiniões com o intuito de ajudar as ' +
+                            'entidades associadas à FCT a saber quais as melhorias desejadas.',
                         position: 'left'
                     },
                 ],
@@ -218,8 +223,7 @@
                 steps: [
                     {
                         title: 'Grupos',
-                        intro: 'São listadas as entidades públicas colectivas da FCT, ' +
-                            'repartidas por quatro categorias.',
+                        intro: 'São listadas as entidades públicas coletivas da FCT, repartidas por quatro categorias:'
                     },
                     {
                         element: document.querySelector('[href="/grupos/AEFCT"]'),
@@ -232,24 +236,25 @@
                         element: document.querySelector('[href="/grupos/NEEC"]'),
                         title: 'Núcleos',
                         intro: 'Os núcleos são grupos de estudantes que são registados pela associação de estudantes ' +
-                            'para realização de atividades no campus.',
+                            'para realização de atividades no Campus.',
                         position: 'bottom'
                     },
                     {
                         element: document.querySelector('[href="/grupos/CPInformática"]'),
                         title: 'Pedagógicos',
-                        intro: 'Grupos de alunos organizados com a finalidade de debater a pedagogia dos cursos.',
+                        intro: 'A categoria de pedagógicos isola os grupos cujo propósito é debater a pedagogia ' +
+                            'dos cursos.',
                         position: 'bottom'
                     },
                     {
                         element: document.querySelector('[href="/grupos/SN"]'),
                         title: 'Comunidades',
-                        intro: 'Comunidades não oficiais dentro da FCT.',
+                        intro: 'E por fim as comunidades identificam grupos não oficiais dentro da FCT.',
                         position: 'bottom'
                     },
                     {
                         element: document.querySelector("#m5").parentNode,
-                        intro: 'Estes grupos são consultaveis por categoria no menu.',
+                        intro: 'Estes grupos são consultáveis por categoria no menu.',
                         position: 'right'
                     },
                 ],
@@ -259,6 +264,7 @@
             break
         case '/grupos/SN':
             ijs.setOptions({
+                scrollTo: "tooltip",
                 steps: [
                     {
                         element: panes[0],
@@ -267,7 +273,7 @@
                     },
                     {
                         element: panes[1],
-                        intro: 'Os utilizadores tem acesso ao historico de atividades...',
+                        intro: 'Os utilizadores tem acesso ao histórico de atividades...',
                         position: 'top'
                     },
                     {
@@ -284,7 +290,8 @@
             ijs.setOptions({
                 steps: [
                     {
-                        intro: 'Acreditamos que existe um vasto catalogo de sinteses que todos os anos cai ' +
+                        title: 'Sínteses',
+                        intro: 'Acreditamos que existe um vasto catalogo de sínteses que todos os anos cai ' +
                             'no esquecimento, e que partilhar conhecimento é uma boa forma não só de o aprender como ' +
                             'de evoluirmos.',
                         position: 'bottom'
@@ -296,7 +303,7 @@
                     },
                     {
                         element: panes[0].querySelector('.flex-grid-item'),
-                        intro: 'Como também por area de estudo.',
+                        intro: 'Como também por área de estudo.',
                         position: 'bottom'
                     },
                 ],
@@ -309,14 +316,14 @@
                 steps: [
                     {
                         title: 'Secções',
-                        intro: 'É establecido um grafo de conhecimento que segue a estrutura ' +
+                        intro: 'É estabelecido um grafo de conhecimento que segue a estrutura ' +
                             'area-subarea-secção-subsecções<br>' +
-                            'As secções detem o conteúdo...',
+                            'As secções detém o conteúdo...',
                         position: 'right'
                     },
                     {
                         element: panes[1],
-                        intro: '... bem como meta-dados, recursos externos, dúvidas e exercicios associados',
+                        intro: '... bem como meta-dados, recursos externos, dúvidas e exercícios associados',
                         position: 'left'
                     },
                 ],
@@ -329,16 +336,18 @@
                 steps: [
                     {
                         title: 'Exercícios',
-                        intro: 'Os útilizadores podem submeter exercicios, idealmente com as respetivas soluções.'
+                        intro: 'Os utilizadores podem submeter exercícios, idealmente com as respetivas soluções.'
                     },
                     {
-                        intro: 'São suportados três tipos de exercício:' +
-                            'Pares questão-resposta, escolhas-múltiplas e grupos com sub-exercícios.'
+                        intro: 'São suportados três tipos de exercício:<br>' +
+                            '<ul style="min-width: 300px"><li>Pares questão-resposta,</li>' +
+                            '<li>Escolhas-múltiplas e</li>' +
+                            '<li>Grupos com sub-exercícios.</li></ul>'
 
                     },
                     {
-                        intro: 'Intenciona-se vir a tornar o processo de estudo mais dinamico, ' +
-                            'com avaliações automáticas e propostas de exercícios ou conteúdos.',
+                        intro: 'Tenciona-se vir a tornar o processo de estudo mais dinâmico, ' +
+                            'com avaliações automáticas e propostas de exercícios por utilizador.',
                     },
                 ],
             }).start().oncomplete(() => {
@@ -351,22 +360,22 @@
                     {
                         element: panes[0],
                         title: 'Questões',
-                        intro: 'Os útilizadores podem colocar questões a respeito de qualquer temática; ' +
-                            'tipicamente associadas a conteúdos, exercícios ou únidades curriculares.',
+                        intro: 'Os utilizadores podem colocar questões a respeito de qualquer temática; ' +
+                            'tipicamente associadas a conteúdos, exercícios ou unidades curriculares.',
                         position: 'bottom'
                     },
                     {
                         element: panes[1],
                         title: 'Respostas',
-                        intro: 'E qualquer um pode responder ás questões colocadas.',
+                        intro: 'E qualquer um pode responder às questões colocadas.',
                         position: 'bottom'
                     },
                     {
                         element: panes[0].querySelector('.user'),
                         title: 'Reputação',
-                        intro: 'A reputação é um mecanismo para previnir o abuso da plataforma.' +
+                        intro: 'A reputação é um mecanismo para prevenir o abuso da plataforma.' +
                             'Ações benéficas, como responder a dúvidas dos outros utilizadores aumentam a reputação. ' +
-                            'Existem mínimos de reputação para editar públicar ou editar conteúdos no Supernova.',
+                            'Existem mínimos de reputação para publicar ou editar conteúdos no Supernova.',
                         position: 'left'
                     },
                 ],
