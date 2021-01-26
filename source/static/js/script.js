@@ -102,7 +102,7 @@ function setupPopover() {
 }
 
 function createOverlay() {
-    const o = $('<div class="overlay"></div>').appendTo('body');
+    const o = $('<div class="overlay"></div>').prependTo('body');
     let p = $(
         "<div class='pane'>" +
         "<div class='pane-title'><h2></h2><span class='close'></span></div>" +
