@@ -832,8 +832,20 @@ class File(Importable):
     def hash_tag(self):
         return self.hash[:8]
 
+    @property
+    def size_str(self):
+        if self.size < 1024:
+            return f"{self.size} B"
+        elif self.size < 1048576:
+            return f"{int(self.size / 1024)} KB"
+        else:
+            return f"{int(self.size / 1048576)} MB"
+
     def get_absolute_url(self):
         return reverse('college:file', args=[self.hash])
+
+    def get_download_url(self):
+        return reverse('college:file_download', args=[self.hash])
 
     def analyse(self):
         if self.external:
@@ -896,6 +908,9 @@ class ClassFile(Importable):
 
     def get_absolute_url(self):
         return reverse('college:class_instance_file', args=[self.class_instance.id, self.id])
+
+    def get_download_url(self):
+        return reverse('college:class_instance_file_download', args=[self.class_instance.id, self.id])
 
     def short_name(self):
         if len(self.name) > 70:

@@ -15,6 +15,7 @@ urlpatterns = [
     path('department/<int:pk>/', views.college.DepartmentDetailed.as_view(), name="department"),
     path('course/<int:pk>/', views.college.CourseDetailed.as_view(), name="course"),
     path('class/<int:pk>/', views.college.ClassDetailed.as_view(), name="class"),
+    path('class/i/<int:instance_id>/files/', views.college.ClassFiles.as_view(), name="class_instance_files"),
     # Chat
     # path('chat/list', views.chat.chat_list, name='chat_list'),
     path('chat/presence', views.chat.chat_presence, name='chat_presence'),

@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from api.serializers.college import StudentSerializer
 from users.models import ExternalPage
 
 
@@ -11,9 +10,10 @@ class ProfileMinimalSerializer(serializers.Serializer):
 
 
 class ProfileDetailedSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     nickname = serializers.CharField()
     name = serializers.CharField()
-    students = StudentSerializer(many=True)
+    # TODO complete
 
 
 class ExternalPageSerializer(serializers.ModelSerializer):

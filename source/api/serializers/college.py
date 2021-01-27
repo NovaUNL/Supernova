@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 import college.models as college
+from api.serializers.users import ProfileMinimalSerializer
 from college.models import Class
 
 
@@ -98,6 +99,7 @@ class StudentSerializer(serializers.Serializer):
 class TeacherSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+    short_name = serializers.CharField()
     abbreviation = serializers.CharField()
     url = serializers.CharField(source='get_absolute_url')
     thumb = serializers.URLField(source='thumbnail_or_default')
@@ -124,3 +126,23 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = college.ShiftInstance
         fields = ('id', 'start', 'end', 'weekday', 'class_name', 'shift_type', 'shift_number')
+
+
+class SimpleFileSerializer(serializers.Serializer):
+    hash = serializers.CharField()
+    size = serializers.IntegerField()
+    mime = serializers.CharField()
+    license = serializers.CharField(source='get_license_display')
+    url = serializers.URLField(source='get_absolute_url')
+
+
+class ClassFileSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    file = SimpleFileSerializer()
+    name = serializers.CharField()
+    official = serializers.BooleanField()
+    category = serializers.IntegerField()
+    upload_datetime = serializers.DateTimeField()
+    uploader = ProfileMinimalSerializer()
+    uploader_teacher = TeacherSerializer()
+    url = serializers.URLField(source='get_absolute_url')

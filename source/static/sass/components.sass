@@ -140,56 +140,151 @@
   [alt=github]
     filter: brightness(var(--icon-brightness))
 
+.lightbox
+  display: none
+
+  a
+    color: var(--text-hc)
+
+  ul
+    list-style: none
+    padding-left: 0
+    margin: 0
+
+  &:target
+    position: fixed
+    left: 0
+    top: 0
+    width: 100%
+    height: 100%
+    display: flex
+    align-items: center
+    justify-content: center
+    z-index: 10000
+
+  ul
+    min-width: 400px
+    position: relative
+    padding: 1.5em
+    background-color: var(--pane-bg)
+    border-radius: 5px
+    display: flex
+    flex-direction: column
+    font-weight: 700
+
+    a
+      display: block
+      padding: 15px 5px
+      color: var(--text-link)
+
+    li
+      border-bottom: 2px solid var(--separator)
+
+    li:last-child
+      border-bottom: 0
+
+  .close
+    position: relative
+    display: block
+
+    &::after
+      right: -1rem
+      top: -1rem
+      width: 2rem
+      height: 2rem
+      position: absolute
+      display: flex
+      z-index: 1
+      align-items: center
+      justify-content: center
+      background-color: var(--red)
+      border-radius: 50%
+      color: var(--tag-text)
+      content: "×"
+      cursor: pointer
+
+    &::before
+      left: 0
+      top: 0
+      width: 100%
+      height: 100%
+      position: fixed
+      background-color: rgba(0, 0, 0, .7)
+      content: ""
+      cursor: default
 
 .file-list
   display: flex
   flex-direction: column
-  align-content: stretch
 
   .file
-    flex-grow: 1
-    display: flex
-    border: 2px solid var(--separator)
-    border-radius: 5px
-    background-color: var(--pane-bg-highlight)
-    justify-content: space-between
-    margin-bottom: 10px
+    display: grid
+    grid-template-columns: 0fr 1fr 180px 50px 0fr 0fr
+    grid-template-areas: "type name author size date options"
+    margin-bottom: 2px
+    border-bottom: 1px solid var(--separator)
 
-    h4
-      display: inline
-
-    span
-      display: inline-block
-
-  .file-body
-    padding: 2px 5px
-    flex-grow: 1
-
-  .actions
-    display: flex
-
-    > a
-      display: flex
-      align-items: center
-      padding: 5px
+    .type
       background-color: var(--input-light)
-      border-left: 2px solid var(--separator)
+      width: 10px
+      border-radius: 3px
+      box-shadow: 1px 1px 3px var(--soft-shadow)
 
-      > span
-        display: block
-        width: 40px
-        height: 40px
-        background-repeat: no-repeat
-        background-position: center
-        background-size: contain
+    .name
+      grid-area: name
+      font-weight: 700
+      padding: 0 5px
+
+    .author
+      grid-area: author
+      align-self: center
+
+    .size
+      grid-area: size
+      font-size: 12px
+      align-self: center
+
+    .date
+      grid-area: date
+      font-size: 12px
+      align-self: center
+
+    .options
+      font-size: 26px
+      font-weight: 700
+      padding: 3px 7px 3px 10px
+
+    @media #{$midres}
+      grid-template-columns: 0fr 1fr 50px 0fr
+      grid-template-areas: "type name date options"
+
+    @media #{$lowres}
+      grid-template-columns: 0fr 1fr 0fr
+      grid-template-areas: "type name options"
+
+      .name
+        font-weight: 500
+        padding: 0 5px
+        word-wrap: break-word
+        overflow: auto
+
+.file-viewer
+  display: grid
+  grid-template-areas: "preview" "download"
+  grid-template-rows: 1fr 0fr
+  overflow: auto
 
   .preview
-    display: flex
-    align-content: stretch
+    max-height: 100%
+    grid-area: preview
+    justify-self: center
 
-    object
-      min-height: 80vh
-      width: 100%
+    &.pdf
+      min-height: calc(100vh - 150px)
+      min-width: calc(100vw - 150px)
+
+  .download
+    grid-area: download
 
 .shift-list
   margin: 10px

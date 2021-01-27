@@ -643,11 +643,11 @@ def class_instance_file_view(request, instance_id, class_file_id):
 
 @login_required
 @permission_required('users.student_access', raise_exception=True)
-def class_instance_file_download(request, instance_id, file_hash):
+def class_instance_file_download(request, instance_id, class_file_id):
     class_file = get_object_or_404(
         m.ClassFile.objects.prefetch_related('file'),
-        class_instance__id=instance_id,
-        file__hash=file_hash)
+        id=class_file_id,
+        class_instance__id=instance_id)
 
     permission = False
 
@@ -674,6 +674,7 @@ def class_instance_file_download(request, instance_id, file_hash):
         return HttpResponseForbidden()
 
     response = HttpResponse()
+    file_hash = class_file.file.hash
     response['Content-Type'] = class_file.file.mime
     response['X-Frame-Options'] = 'SAMEORIGIN'
 

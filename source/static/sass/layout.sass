@@ -577,75 +577,6 @@
     padding-left: 0
     margin: 0
 
-  li:last-child
-    border-right: 0
-
-  .lightbox
-    display: none
-
-    &:target
-      position: fixed
-      left: 0
-      top: 0
-      width: 100%
-      height: 100%
-      display: flex
-      align-items: center
-      justify-content: center
-      z-index: 10000
-
-    ul
-      width: 25rem
-      position: relative
-      padding: 1.5em
-      background-color: var(--pane-bg)
-      border-radius: 5px
-      display: flex
-      flex-direction: column
-
-      a
-        display: block
-        padding: 15px 5px
-        color: var(--text-link)
-
-      li
-        border-bottom: 2px solid var(--separator)
-
-      li:last-child
-        border-bottom: 0
-
-    .close
-      position: relative
-      display: block
-
-      &::after
-        right: -1rem
-        top: -1rem
-        width: 2rem
-        height: 2rem
-        position: absolute
-        display: flex
-        z-index: 1
-        align-items: center
-        justify-content: center
-        background-color: var(--red)
-        border-radius: 50%
-        color: var(--tag-text)
-        content: "×"
-        cursor: pointer
-
-      &::before
-        left: 0
-        top: 0
-        width: 100%
-        height: 100%
-        position: fixed
-        background-color: rgba(0,0,0,.7)
-        content: ""
-        cursor: default
-
-
-
 #particles
   z-index: -1
   left: 0
@@ -665,7 +596,7 @@
     margin-left: auto
     margin-right: auto
     width: max-content
-    max-height: calc(100% - 100px)
+    max-height: calc(100% - 30px)
 
 .search
   max-width: min(1100px, 100%)
@@ -831,3 +762,6 @@
       img
         width: 42px
         height: 42px
+
+  .lightbox ul
+    min-width: unset !important

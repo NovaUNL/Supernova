@@ -241,7 +241,7 @@ function showThemePicker() {
     overlay.css("display", "inherit").append(container);
 }
 
-function loadTheme(prompt) {
+function loadTheme() {
     /**
      * Loads the user theme
      * @param prompt: Prompt for a theme if the user has no explicitly set theme
@@ -258,7 +258,7 @@ function loadTheme(prompt) {
 }
 
 function promptTutorial(force = false) {
-    if(window.innerWidth < 1200 || window.innerHeight < 600)
+    if (window.innerWidth < 1200 || window.innerHeight < 600)
         return; // Too small, could have issues
     if (force || (typeof (Storage) !== "undefined" && !localStorage.getItem("skipTutorial"))) {
         $('head').append('<link rel="stylesheet" type="text/css" href="/static/js/lib/intro/introjs.min.css">');
@@ -328,6 +328,7 @@ const searchCols = {
                 if (entry.thumb)
                     elem.append($(`<img src="${entry.thumb}">`));
                 elem.append($(`<h3><a href="${entry.url}">${entry.name}</a></h3>`));
+                elem.append($(`<span>${entry.building}</span>`));
                 container.append(elem);
             }
             return container;
@@ -546,43 +547,148 @@ function showSearch() {
     )
 }
 
-function showFilePreview(elem) {
+cathegoryCathegoryMappings = [null, null, // First two indexes are unused
+    {'name': 'Slides', 'color': 'red'}, {'name': 'Problemas', 'color': 'green'},
+    {'name': 'Protolos', 'color': 'yellow'}, {'name': 'Seminário', 'color': 'yellow'},
+    {'name': 'Exame', 'color': 'blue'}, {'name': 'Teste', 'color': 'blue'},
+    {'name': 'Suporte', 'color': 'orange'}, {'name': 'Outros', 'color': 'purple'}
+]
+
+function sizeStrFromBytes(bytes) {
+    if (bytes >> 20)
+        return (bytes >> 20) + " MB"
+    if (bytes >> 10)
+        return (bytes >> 10) + " KB"
+    return bytes + " B"
+}
+
+function loadClassFiles(inst_id) {
+    const officialPane = $(".pane .official-files");
+    const communityPane = $(".pane .community-files");
+    const listPaneBase = officialPane.parent();
+    const oSpinner = spinner.clone()
+    const cSpinner = spinner.clone()
+    officialPane.append(oSpinner);
+    communityPane.append(cSpinner);
+    fetch(`/api/class/i/${inst_id}/files`, {credentials: 'include'})
+        .then((r) => {
+            return r.json()
+        })
+        .then((files) => {
+            if (files.official.length > 0) {
+                const listEl = $('<div class="file-list"></div>');
+                _loadClassFiles_aux(listEl, files.official);
+                officialPane.append(listEl)
+            } else {
+                officialPane.append($("<p>Esta unidade curricular não tem ficheiros oficiais públicos.</p>"));
+            }
+            if (files.community.length > 0) {
+                const listEl = $('<div class="file-list"></div>');
+                _loadClassFiles_aux(listEl, files.community);
+                communityPane.append(listEl)
+            } else {
+                communityPane.append($("<p>A comunidade não adicionou ficheiros a esta unidade curricular.</p>"));
+            }
+            if (files.denied.length > 0) {
+                const deniedPane = listPaneBase.clone(true);
+                deniedPane.find('h2').text('Ficheiros restritos');
+                deniedPane.find('p').remove();
+                const listEl = $('<div class="file-list"></div>');
+                _loadClassFiles_aux(listEl, files.denied);
+                deniedPane.find('.pane-content').append(listEl);
+                deniedPane.find('.open').parent().remove();
+                deniedPane.find('.download').parent().remove();
+                listPaneBase.parent().append(deniedPane);
+            }
+            $('.spinner').remove();
+        }).catch(() => {
+            $('.spinner').remove();
+            officialPane.append($("<b>Erro a carregar os ficheiros.</b>"));
+        }
+    );
+}
+
+function _loadClassFiles_aux(listEl, files) {
+    for (let ifile of files) {
+        const category = cathegoryCathegoryMappings[ifile.category];
+        const fileEl = $(
+            '<div class="file">' +
+            '<span class="type" data-balloon-pos="left"></span>' +
+            '<a class="name" href="javascript: void(0)"></a>' +
+            '<a class="author highres"></a>' +
+            `<span class="size highres">${sizeStrFromBytes(ifile.file.size)}</span>` +
+            '<span class="date midhighres">' +
+            new Date(ifile.upload_datetime).toLocaleDateString("pt-PT") +
+            '</span>' +
+            '</div>');
+        fileEl.append(createFileMenu(ifile));
+        fileEl.find('.type').css('background-color', `var(--${category.color})`)
+            .attr('aria-label', category.name);
+        fileEl.find('.name').text(ifile.name).click(() => {
+            showFilePreview(ifile);
+        });
+        const authEl = fileEl.find('.author');
+        if (ifile.uploader)
+            authEl.text(ifile.uploader.nickname).attr('href', ifile.uploader.url);
+        else if (ifile.uploader_teacher)
+            authEl.text(ifile.uploader_teacher.short_name).attr('href', ifile.uploader_teacher.url);
+
+        listEl.append(fileEl)
+    }
+}
+
+function createFileMenu(ifile) {
+    const options = $('<ul class="option-list"></ul>');
+    options.append($('<li></li>')
+        .append($('<a class="open" href="javascript: void(0)">Abrir</a>').click(() => {
+            showFilePreview(ifile)
+        })));
+    options.append($('<li></li>').append($(`<a class="download" href="${ifile.url}/download">Descarregar</a>`)));
+    options.append($('<li></li>').append($(`<a href="${ifile.url}">Propriedades na UC</a>`)));
+    options.append($('<li></li>').append($(`<a href="${ifile.file.url}">Propriedades globais</a>`)));
+
+    const base = $(`<a class="options trigger" href="#${ifile.id}">⋮</a>` +
+        `<div class="lightbox" id="${ifile.id}"><nav><a href="#" class="close"></a></nav></div>`);
+    base.find('nav').append(options);
+    return base;
+}
+
+function showFilePreview(ifile) {
     /**
-     * Shows a preview for a file in a file listing
+     * Shows a preview overlay
      */
-    let fileElem = elem.closest('.file');
-    let dlElem = fileElem.querySelector('.dllink')
-    let previewElem = fileElem.querySelector('.preview')
-    const mime = fileElem.dataset.mime;
-    const src = dlElem.href + "?inline";
-    delChildren(previewElem);
-    let container;
+    const overlay = createOverlay();
+    overlay.find('h2').text(ifile.name);
+    const viewer = overlay.find('.pane-content').addClass('file-viewer');
+
+    const mime = ifile.file.mime;
+    const src = ifile.url + "/download?inline";
+    let preview;
     switch (mime.split('/')[0]) {
         case "text":
-            container = document.createElement("div");
+            preview = document.createElement("div");
             break;
         case "application":
-            if (mime !== "application/pdf") {
-                container = document.createElement("object");
-                container.data = src;
-                container.mime = mime;
-            }
+            if (mime === "application/pdf")
+                preview = $(`<object data="${src}" type="${mime}"/>`).addClass('pdf');
             break;
         case "image":
-            container = document.createElement("img");
-            container.src = src;
+            preview = $(`<img src="${src}"/>`);
             break;
         case "video":
-            container = document.createElement("video");
-            container.src = src;
+            preview = $(`<video src="${src}"/>`);
             break;
         case "audio":
-            container = document.createElement("audio");
-            container.src = src;
+            preview = $(`<audio src="${src}"/>`);
+            break;
+        default:
+            preview = $(`<div></div>`).text("Ficheiro sem pré-visualização");
             break;
     }
-    previewElem.appendChild(container);
-    elem.remove();
+    viewer.append(preview.addClass('preview'));
+    viewer.append($('<input type="button" value="download">').click(() => {
+        window.open(ifile.url + "/download")
+    }));
 }
 
 function setSubscribeButton() {

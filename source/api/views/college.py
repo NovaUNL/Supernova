@@ -70,3 +70,41 @@ class UserShiftInstances(APIView):
             .all()
         serializer = serializers.ScheduleSerializer(shift_instances, many=True)
         return Response(serializer.data)
+
+
+class ClassFiles(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, instance_id):
+
+        instance = get_object_or_404(
+            college.ClassInstance.objects,
+            id=instance_id)
+
+        access_override = request.user.is_superuser or False  # <- TODO Verify if the user is the author
+        is_enrolled = instance.enrollments.filter(student__user=request.user).exists()
+        class_files = list(instance.files \
+                           .select_related('file', 'uploader_teacher') \
+                           .order_by('upload_datetime') \
+                           .reverse())
+        official_files = []
+        community_files = []
+        denied_files = []
+        for class_file in class_files:
+            if not access_override:
+                if class_file.visibility == college.ctypes.FileVisibility.NOBODY:
+                    denied_files.append(class_file)
+                    continue
+                elif class_file.visibility == college.ctypes.FileVisibility.ENROLLED and not is_enrolled:
+                    denied_files.append(class_file)
+                    continue
+            if class_file.official:
+                official_files.append(class_file)
+            else:
+                community_files.append(class_file)
+        return Response({
+            'official': serializers.ClassFileSerializer(official_files, many=True).data,
+            'community': serializers.ClassFileSerializer(community_files, many=True).data,
+            'denied': serializers.ClassFileSerializer(denied_files, many=True).data,
+        })
