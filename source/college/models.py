@@ -525,6 +525,10 @@ class Enrollment(Importable):
     special_grade = djm.IntegerField(null=True, blank=True)
     #: The date on which the special season grade has been assigned
     special_grade_date = djm.DateField(null=True, blank=True)
+    #: The grade that this enrollment obtained on an auto-proposed improvement
+    improvement_grade = djm.IntegerField(null=True, blank=True)
+    #: The date on which the improved grade has been assigned
+    improvement_grade_date = djm.DateField(null=True, blank=True)
     # Cached fields
     #: Whether this enrollment lead to an approval
     approved = djm.BooleanField(null=True, blank=True)

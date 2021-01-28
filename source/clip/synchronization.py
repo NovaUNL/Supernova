@@ -686,6 +686,12 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
     special_grade_date = upstream['special_grade_date']
     if special_grade_date:
         make_aware(datetime.fromisoformat(special_grade_date), is_dst=True)
+    improvement_grade = upstream['improvement_grade']
+    if improvement_grade:
+        grade = max(grade, improvement_grade)
+    improvement_grade_date = upstream['improvement_grade_date']
+    if improvement_grade_date:
+        make_aware(datetime.fromisoformat(improvement_grade_date), is_dst=True)
 
     approved = grade >= 10
     if approved != upstream['approved']:
@@ -695,14 +701,15 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
         obj = m.Enrollment.objects.get(external_id=external_id)
         changed = False
         with reversion.create_revision():
-            for attr in ('normal_grade_date', 'recourse_grade_date', 'special_grade_date', 'attendance', 'approved'):
+            for attr in ('normal_grade_date', 'recourse_grade_date', 'special_grade_date',
+                         'improvement_grade_date', 'attendance', 'approved'):
                 current = getattr(obj, attr)
                 new = locals()[attr]
                 if current != new:
                     setattr(obj, attr, new)
                     changed = True
             grades_changed = False
-            for attr in ('normal_grade', 'recourse_grade', 'special_grade', 'grade'):
+            for attr in ('normal_grade', 'recourse_grade', 'special_grade', 'improvement_grade', 'grade'):
                 current = getattr(obj, attr)
                 new = locals()[attr]
 
@@ -733,6 +740,8 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
                 recourse_grade_date=recourse_grade_date,
                 special_grade=special_grade,
                 special_grade_date=special_grade_date,
+                improvement_grade=improvement_grade,
+                improvement_grade_date=improvement_grade_date,
                 approved=approved,
                 grade=grade,
                 external_id=external_id,
