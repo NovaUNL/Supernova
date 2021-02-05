@@ -7,7 +7,6 @@ channels-redis>=3.0,<4.0
 djangorestframework>=3.0,<4.0
 django-analytical>=3.0,<4.1
 django-autocomplete-light==3.5.0            # 3.8 has breaking changes
-django-ckeditor                             # Deprecated
 django-debug-toolbar
 django-elasticsearch-dsl>=7.0.0,<8.0.0
 django-elasticsearch-dsl-drf==0.20.9

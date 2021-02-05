@@ -20,5 +20,4 @@ log/
 conf/
 .idea
 database
-ckeditor
 docker*.yml

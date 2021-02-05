@@ -13,7 +13,6 @@ from polymorphic.models import PolymorphicModel
 from functools import reduce
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
-from ckeditor_uploader.fields import RichTextUploadingField
 
 from users import models as users
 from college import models as college

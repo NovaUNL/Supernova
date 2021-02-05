@@ -1,6 +1,5 @@
 from django import forms as djf
 from dal import autocomplete
-from ckeditor.widgets import CKEditorWidget
 from django.db import transaction
 from django.db.models import Max
 
@@ -204,17 +203,6 @@ class ExerciseForm(djf.ModelForm):
             raise djf.ValidationError(f"Enunciado demasiado curto. ({l} caráteres)")
 
         return True
-
-
-class AnswerForm(djf.Form):
-    """
-    Generic rich text answer
-    """
-    answer = djf.CharField(widget=CKEditorWidget(), label="Resposta:")
-
-
-#: A formset which will be used to return 1..n answers at once
-AnswerFormSet = djf.formset_factory(AnswerForm, extra=1)
 
 
 class QuestionForm(djf.ModelForm):

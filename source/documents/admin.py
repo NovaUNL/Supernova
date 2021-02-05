@@ -1,12 +1,12 @@
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.contrib import admin
+from markdownx.widgets import MarkdownxWidget
 
 from documents.models import Document
 
 
 class DocumentAdminForm(forms.ModelForm):
-    content = forms.CharField(widget=CKEditorUploadingWidget())
+    content = forms.CharField(widget=MarkdownxWidget())
 
     class Meta:
         fields = '__all__'

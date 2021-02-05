@@ -1,4 +1,3 @@
-import ckeditor_uploader.fields
 from django.conf import settings
 from django.db import migrations, models
 from django.db import migrations
@@ -99,7 +98,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=256)),
                 ('content_md', markdownx.models.MarkdownxField(blank=True, null=True)),
-                ('content_ck', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
+                ('content_ck', models.TextField(blank=True, null=True)),
                 ('validated', models.BooleanField(default=False)),
                 ('type',
                  models.IntegerField(
