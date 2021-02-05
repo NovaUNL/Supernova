@@ -15,7 +15,7 @@
                         intro: '<p style="min-width: min(750px, 90vw)">' +
                             '<img width="300px" src="/static/img/logo-alt.svg"><br>' +
                             'O Supernova é uma plataforma académica que visa melhorar a vida académica na FCT NOVA.<br>' +
-                            'Este guia (avançavel com a tecla ➡) faz uma introdução à plataforma.</p>'
+                            'Este guia faz uma introdução à plataforma. (A tecla ➡ avança)</p>'
                     },
                     {
                         element: document.querySelector('.news-list-item'),
