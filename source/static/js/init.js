@@ -26,6 +26,8 @@ const UID = JSON.parse($('#uid').text());
             '<div class="lightbox" id="hmenu"><nav><a href="#" class="close"></a></nav></div>');
         el.find('nav').append(menu_opts.find('ul'));
         menu_opts.append(el);
+        if (!el.find('li').length)
+            menu_opts.remove();
     }
     if (location.search === '?tutorial')
         promptTutorial(true);
