@@ -51,8 +51,31 @@
           <div class="pane-title">
           </div>
           <div class="pane-content">
-            {% if  section.content %}
-              {{ section.content|safe }}
+            {% if section.content %}
+              {% if section.validation_status == 0 %}
+                <div class="pane-content-warn">
+                  Este conteúdo nunca foi revisto por docentes e como tal não deve de ser utilizado por si só
+                  enquanto material de estudo.
+                </div>
+{#                TODO#}
+{#                <div class="pane-content-err">#}
+{#                  Este conteúdo nunca foi revisto por docentes nem cita fontes.#}
+{#                  É provavel que tenha erros graves e como tal não deve de ser utilizado enquanto material de estudo.#}
+{#                </div>#}
+{#                <div class="pane-content-warn">#}
+{#                  Um docente reveu este conteúdo, todavia foi desde então alterado.<br>#}
+{#                  <a>Ver a última edição revista</a> (12/12/2020).#}
+{#                </div>#}
+              {% elif section.validation_status == 1 %}
+                <div class="pane-content-err">
+                  Este conteúdo é um rascunho. Nada deve de se apurar a partir do mesmo.
+                </div>
+              {% elif section.validation_status == 2 %}
+                <div class="pane-content-err">
+                  Este conteudo foi marcado como errado. Nada deve de se apurar a partir do mesmo.
+                </div>
+              {% endif %}
+              {{ section.content_html|safe }}
             {% else %}
               Esta secção não tem conteúdo.
             {% endif %}

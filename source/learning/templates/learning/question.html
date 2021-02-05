@@ -62,6 +62,15 @@
               <a class="answer-btn big {% if question.user == user %} for-author{% elif user.is_teacher %} for-teacher{% endif %}{% if answer == question.decided_answer %} set{% endif %}{% if answer == question.teacher_decided_answer %} teacher-set{% endif %}"{% if question.user == user or user.is_teacher %} onclick="castVote(event)"{% endif %} aria-label="Resposta certa" data-balloon-pos="right"></a>
             </div>
             <div class="postable-content">
+              {% if answer.validation_status == 0 %}
+                <div class="pane-content-warn">Esta resposta não foi verificada por um docente.</div>
+              {% elif answer.validation_status == 2 %}
+                <div class="pane-content-err">
+                  Esta resposta está errada.
+{#                  TODO #}
+{#                  Comentário por docente: Algo errado não está certo.#}
+                </div>
+              {% endif %}
               {{ answer.content_html|safe }}
             </div>
           </div>
