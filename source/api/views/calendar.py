@@ -98,6 +98,11 @@ def user_calendar(_, nickname):
     :param nickname: User nickname
     :return: Response with the events that compose the user calendar.
     """
+    cache_key = f'user_{nickname}_calendar'
+    user_calendar = cache.get(cache_key)
+    if user_calendar is not None:
+        Response(user_calendar)
+
     user = get_object_or_404(users.User.objects.prefetch_related('students', 'memberships'), nickname=nickname)
     user_groups = user.groups_custom.all()
     primary_students, _ = get_students(user)
@@ -169,6 +174,7 @@ def user_calendar(_, nickname):
             'duration': event.duration if event.duration else 0,
         })
 
+    cache.set(cache_key, schedule_entries, timeout=60 * 60)
     return Response(schedule_entries)
 
 
