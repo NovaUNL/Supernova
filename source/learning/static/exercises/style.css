@@ -1,0 +1,31 @@
+.exercise {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.exercise-delete {
+    border: 1px solid black;
+    border-radius: 5px;
+    align-self: flex-end;
+    padding: 3px 10px;
+}
+
+.exercise-delete:after {
+    content: "X";
+}
+
+.subexercises {
+    border: 3px dashed black;
+    flex-grow: 1;
+    min-height: 50px;
+}
+
+.subexercises-options {
+    display: flex;
+    justify-content: center;
+}
+
+.subexercises-options input {
+    margin: 5px;
+}
