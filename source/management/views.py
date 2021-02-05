@@ -81,7 +81,7 @@ def announcements_view(request):
             if changelog_form.cleaned_data['broadcast_notification']:
                 for receiver in users.User.objects.all():
                     # This cannot be bulk created as it has multiple inheritance
-                    m.ChangelogNotification(receiver=receiver, entry=entry)
+                    m.ChangelogNotification.objects.create(receiver=receiver, entry=entry)
             cache.set('changelog_last', entry, timeout=60 * 60)
             return redirect('changelog')
     else:
