@@ -10,7 +10,7 @@ class SectionDocument(Document):
 
     def prepare_content(self, instance):
         # TODO remove markdown
-        return str(instance.content_md)
+        return str(instance.content)
 
     class Index:
         name = 'sections'

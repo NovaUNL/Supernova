@@ -16,7 +16,7 @@ class SectionSourceSerializer(serializers.Serializer):
 class SectionSerializer(serializers.Serializer):
     id = serializers.IntegerField(source='activity_id')
     title = serializers.CharField()
-    content = serializers.CharField(source='content_md')
+    content = serializers.CharField()
     sources = SectionSourceSerializer(many=True)
     requirements = SectionReferenceSerializer(many=True)
     url = serializers.CharField(source='get_absolute_url')
@@ -25,7 +25,7 @@ class SectionSerializer(serializers.Serializer):
 class SectionPreviewSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     title = serializers.CharField()
-    content = serializers.CharField(source='content_md')
+    content = serializers.CharField()
     url = serializers.CharField(source='get_absolute_url')
 
 

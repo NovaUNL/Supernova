@@ -85,7 +85,7 @@ class LearningTest(TestCase):
         #     reverse('learning:subarea_section_create', args=[self.subarea.id]),
         #     data={
         #         'title': 'Testing section creation 1',
-        #         'content_md': 'Lorem ipsum',
+        #         'content': 'Lorem ipsum',
         #         'subarea': self.subarea.id,
         #         'requirements': []})
         # self.assertRedirects(response, reverse('login'))
@@ -94,7 +94,7 @@ class LearningTest(TestCase):
         #     reverse('learning:subsection_create', args=[self.section.id]),
         #     data={
         #         'title': 'Testing section creation 2',
-        #         'content_md': 'Lorem ipsum',
+        #         'content': 'Lorem ipsum',
         #         'requirements': []})
         # self.assertRedirects(response, reverse('login'))
         # self.assertEqual(section_count, m.Section.objects.count())
@@ -105,7 +105,7 @@ class LearningTest(TestCase):
             reverse('learning:subarea_section_create', args=[self.subarea.id]),
             data={
                 'title': 'Testing section creation 1',
-                'content_md': 'Lorem ipsum',
+                'content': 'Lorem ipsum',
                 'requirements': []})
         self.assertEqual(403, response.status_code)
         self.assertEqual(response.resolver_match.func, v.section_create_view)
@@ -114,7 +114,7 @@ class LearningTest(TestCase):
             reverse('learning:subsection_create', args=[self.section.id]),
             data={
                 'title': 'Testing section creation 2',
-                'content_md': 'Lorem ipsum',
+                'content': 'Lorem ipsum',
                 'requirements': []})
         self.assertEqual(403, response.status_code)
         self.assertEqual(response.resolver_match.func, v.section_create_view)
@@ -126,7 +126,7 @@ class LearningTest(TestCase):
             reverse('learning:subarea_section_create', args=[self.subarea.id]),
             data={
                 'title': 'Testing section creation 3',
-                'content_md': 'Lorem ipsum',
+                'content': 'Lorem ipsum',
                 'requirements': [],
                 **no_formsets_data
             })
@@ -134,7 +134,7 @@ class LearningTest(TestCase):
         self.assertEqual(response.resolver_match.func, v.section_create_view)
         self.assertEqual(initial_section_count + 1, m.Section.objects.count())
         section = m.Section.objects.get(title='Testing section creation 3')
-        self.assertEqual(section.content_md, 'Lorem ipsum')
+        self.assertEqual(section.content, 'Lorem ipsum')
         self.assertEqual(section.subarea, self.subarea)
         self.assertEqual(section.sources.count(), 0)
         self.assertEqual(section.resources.count(), 0)
@@ -142,7 +142,7 @@ class LearningTest(TestCase):
             reverse('learning:subsection_create', args=[self.section.id]),
             data={
                 'title': 'Testing section creation 4',
-                'content_md': 'Lorem ipsum',
+                'content': 'Lorem ipsum',
                 'requirements': [],
                 **no_formsets_data
             })
@@ -160,7 +160,7 @@ class LearningTest(TestCase):
             reverse('learning:subarea_section_create', args=[self.subarea.id]),
             data={
                 'title': 'Testing section creation 5',
-                'content_md': 'Lorem ipsum',
+                'content': 'Lorem ipsum',
                 'requirements': [],
                 **some_formset_data
             })
@@ -177,7 +177,7 @@ class LearningTest(TestCase):
             reverse('learning:subsection_create', args=[self.section.id]),
             data={
                 'title': 'Testing section creation 6',
-                'content_md': 'Lorem ipsum',
+                'content': 'Lorem ipsum',
                 'requirements': [],
                 **some_formset_data
             })

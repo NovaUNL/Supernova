@@ -90,6 +90,20 @@ class Subarea(djm.Model):
         return self.title
 
 
+class ContributionStatus:
+    UNVERIFIED = 0
+    DRAFT = 1
+    WRONG = 2
+    CORRECT = 3
+
+    CHOICES = (
+        (UNVERIFIED, 'Não verificado'),
+        (DRAFT, 'Rascunho'),
+        (WRONG, 'Incorrecto'),
+        (CORRECT, 'Correcto')
+    )
+
+
 @reversion.register()
 class Section(djm.Model):
     """
@@ -99,9 +113,7 @@ class Section(djm.Model):
     #: The title of the section
     title = djm.CharField(max_length=256)
     #: The markdown content
-    content_md = MarkdownxField(null=True, blank=True)
-    #: The CKEditor-written content (legacy format)
-    content_ck = RichTextUploadingField(null=True, blank=True, config_name='complex')
+    content = MarkdownxField(null=True, blank=True)
     #: Subareas where this section directly fits in
     subarea = djm.ForeignKey(
         Subarea,
@@ -125,13 +137,29 @@ class Section(djm.Model):
         related_name='required_by',
         verbose_name='requisitos',
         symmetrical=False)
+    #: Sections that reference this section as a requirement (dependants)
+    related = djm.ManyToManyField(
+        'self',
+        blank=True,
+        related_name='related_to',
+        verbose_name='relacionados',
+        symmetrical=False)
     classes = djm.ManyToManyField(
         college.Class,
         blank=True,
         through='ClassSection',
         related_name='synopsis_sections')
     #: Whether this section has been validated as correct by a teacher
-    validated = djm.BooleanField(default=False)
+    validation_status = djm.IntegerField(choices=ContributionStatus.CHOICES)
+    #: Who validated this section
+    validator = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=djm.SET_NULL,
+        related_name='validated_sections')
+    #: A public note left by the validator
+    validator_note = djm.TextField(blank=True, null=True)
 
     #: Section type
     TOPIC = 0
@@ -156,20 +184,16 @@ class Section(djm.Model):
         return reverse('learning:section', args=[self.id])
 
     @property
-    def content(self):
-        if self.content_md:
-            return markdownify(self.content_md)
-        return self.content_ck
+    def content_html(self):
+        return markdownify(self.content)
 
     def content_reduce(self):
         """
         Detects the absence of content and nullifies the field in that case.
         """
         # TODO, do this properly
-        if self.content_md is not None and len(self.content_md) < 10:
-            self.content_md = None
-        if self.content_ck is not None and len(self.content_ck) < 10:
-            self.content_ck = None
+        if self.content and len(self.content) < 10:
+            self.content = None
 
     def most_recent_edit(self, editor):
         return SectionLog.objects.get(section=self, author=editor).order_by('timestamp')
@@ -560,7 +584,18 @@ class Answer(users.Activity, Postable):
     """
     #: :py:class:`Question` to which this answer refers
     to = djm.ForeignKey(Question, on_delete=djm.PROTECT, related_name='answers')
-
+    #: Whether this answer has been validated as correct by a teacher
+    validation_status = djm.IntegerField(choices=ContributionStatus.CHOICES)
+    #: Who validated this answer
+    validator = djm.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=djm.SET_NULL,
+        related_name='validated_questions')
+    #: A public note left by the validator
+    validator_note = djm.TextField(blank=True, null=True, default=None)
+    #: Votes for this answer
     votes = GenericRelation('feedback.Vote', related_query_name='answer')
 
     def __str__(self):
