@@ -150,7 +150,7 @@
             {% endif %}
           </div>
           <div class="col" style="max-width: 500px">
-            {% if permissions.enrollments_visibility and current_class_instances.exists %}
+            {% if permissions.enrollments_visibility and current_class_instances %}
               <div class="pane">
                 <div class="pane-title">
                   <h2>Inscrições atuais</h2>
@@ -164,7 +164,7 @@
                 </div>
               </div>
             {% endif %}
-            {% if permissions.enrollments_visibility and past_classes.exists %}
+            {% if permissions.enrollments_visibility and past_classes %}
               <div class="pane">
                 <div class="pane-title">
                   <h2>Inscrições prévias</h2>
@@ -199,6 +199,71 @@
           </ul>
           <h3>Attributes</h3>
           <span class="indented"><b>Points</b> {{ profile_user.points }}</span>
+          <h3>Students</h3>
+          <table>
+            <thead>
+            <tr>
+              <th>Abbr</th>
+              <th>EID</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for student in primary_students %}
+                <tr><td>{{ student.abbreviation }}</td><td>{{ student.external_id}}</td></tr>
+              {% endfor %}
+              {% for student in secondary_students %}
+                <tr><td>{{ student.abbreviation }}</td><td>{{ student.external_id}}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <h3>Teachers</h3>
+          <table>
+            <thead>
+            <tr>
+              <th>EID</th>
+              <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for teacher in profile_user.teachers.all %}
+                <tr>
+                  <td>{{ teacher.external_id}}</td>
+                  <td>{{ teacher.name }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <h3>Enrollments</h3>
+          <table class="stylized grow">
+            <thead>
+            <tr>
+              <th>Enr ID</th>
+              <th>Enr EID</th>
+              <th>Enr Del</th>
+              <th>CI ID</th>
+              <th>CI EID</th>
+              <th>CI Del</th>
+              <th>C ID</th>
+              <th>C Name</th>
+              <th>C Del</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for enrollment in enrollments_debug %}
+                <tr>
+                  <td>{{ enrollment.id }}</td>
+                  <td>{{ enrollment.external_id }}</td>
+                  <td>{{ enrollment.disappeared }}</td>
+                  <td>{{ enrollment.class_instance.id }}</td>
+                  <td>{{ enrollment.class_instance.external_id }}</td>
+                  <td>{{ enrollment.class_instance.disappeared }}</td>
+                  <td>{{ enrollment.class_instance.parent.id }}</td>
+                  <td>{{ enrollment.class_instance.parent.name }}</td>
+                  <td>{{ enrollment.class_instance.parent.disappeared }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     {% endif %}

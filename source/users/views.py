@@ -186,18 +186,29 @@ def profile_view(request, nickname):
     if permissions['enrollments_visibility']:
         primary_students, context['secondary_students'] = get_students(profile_user)
         context['primary_students'] = primary_students
-        context['current_class_instances'] = current_class_instances = college.ClassInstance.objects \
-            .select_related('parent') \
-            .order_by('parent__name') \
-            .filter(student__in=primary_students,
-                    year=settings.COLLEGE_YEAR,
-                    period=settings.COLLEGE_PERIOD)
+        enrollments = college.Enrollment.objects \
+            .select_related('class_instance__parent') \
+            .filter(student__in=primary_students)\
+            .exclude(disappeared=True) \
+            .exclude(class_instance__disappeared=True) \
+            .exclude(class_instance__parent__disappeared=True) \
+            .all()
 
-        context['past_classes'] = college.Class.objects \
-            .filter(instances__enrollments__student__in=primary_students) \
-            .exclude(instances__in=current_class_instances) \
-            .order_by('name') \
-            .distinct('name')
+        past_enrollments, current_enrollments = [], []
+        for e in enrollments:
+            if e.class_instance.year == settings.COLLEGE_YEAR and e.class_instance.period == settings.COLLEGE_PERIOD:
+                current_enrollments.append(e)
+            else:
+                past_enrollments.append(e)
+
+        context['current_class_instances'] = a= list(map(lambda e: e.class_instance, current_enrollments))
+        context['past_classes'] = b = list(map(lambda e: e.class_instance.parent, past_enrollments))
+
+        if request.user.is_staff:
+            context['enrollments_debug'] = college.Enrollment.objects \
+                .select_related('class_instance__parent') \
+                .filter(student__in=primary_students) \
+                .all()
 
     context['sub_nav'] = [{'name': page_name, 'url': reverse('users:profile', args=[nickname])}]
 
