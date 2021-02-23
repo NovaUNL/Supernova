@@ -113,7 +113,7 @@ class ClassInstanceSerializer(serializers.Serializer):
     period = serializers.IntegerField()
     period_display = serializers.CharField(source='get_period_display')
     year = serializers.IntegerField()
-    information = serializers.CharField()
+    information = serializers.JSONField()
     department = DepartmentMinimalSerializer()
     avg_grade = serializers.IntegerField()
     url = serializers.CharField(source='get_absolute_url')

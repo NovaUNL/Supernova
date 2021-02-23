@@ -17,21 +17,22 @@ class BuildingList(APIView):
 
 
 class BuildingDetailed(APIView):
-    def get(self, request, pk):
-        serializer = serializers.BuildingSerializer(college.Building.objects.get(pk=pk))
+    def get(self, request, building_id):
+        building = get_object_or_404(college.Building, id=building_id)
+        serializer = serializers.BuildingSerializer(building)
         return Response(serializer.data)
 
 
 class DepartmentList(APIView):
     def get(self, request):
-        serializer = serializers.DepartmentMinimalSerializer(
-            college.Department.objects.all(), many=True)
+        serializer = serializers.DepartmentMinimalSerializer(college.Department.objects.all(), many=True)
         return Response(serializer.data)
 
 
 class DepartmentDetailed(APIView):
-    def get(self, request, pk):
-        serializer = serializers.DepartmentSerializer(college.Department.objects.get(id=pk))
+    def get(self, request, department_id):
+        department = get_object_or_404(college.Department, id=department_id)
+        serializer = serializers.DepartmentSerializer(department)
         return Response(serializer.data)
 
 
@@ -82,6 +83,14 @@ class ClassInstance(APIView):
     def get(self, request, instance_id):
         instance = get_object_or_404(college.ClassInstance.objects, id=instance_id)
         serializer = serializers.ClassInstanceSerializer(instance)
+        return Response(serializer.data)
+
+class ClassInstanceShifts(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, instance_id):
+        instance = get_object_or_404(college.ClassInstance.objects.prefetch_related('shifts'), id=instance_id)
+        serializer = serializers.ShiftSerializer(instance.shifts, many=True)
         return Response(serializer.data)
 
 

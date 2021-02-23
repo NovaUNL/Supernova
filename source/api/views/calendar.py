@@ -205,8 +205,8 @@ def group_calendar(_, abbr):
 
 
 @api_view(['GET'])
-def building_schedule_shifts_view(request, pk):
-    building = get_object_or_404(college.Building, id=pk)
+def building_schedule_shifts_view(request, building_id):
+    building = get_object_or_404(college.Building, id=building_id)
 
     shift_instances = college.ShiftInstance.objects \
         .select_related('shift__class_instance__parent') \
@@ -229,8 +229,8 @@ def building_schedule_shifts_view(request, pk):
 
 
 @api_view(['GET'])
-def building_schedule_rooms_view(request, pk):
-    building = get_object_or_404(college.Building, id=pk)
+def building_schedule_rooms_view(request, building_id):
+    building = get_object_or_404(college.Building, id=building_id)
     rooms = college.Room.objects \
         .filter(building=building, type__in=(RoomType.CLASSROOM, RoomType.AUDITORIUM, RoomType.LABORATORY)) \
         .exclude()
