@@ -35,19 +35,26 @@ class DepartmentDetailed(APIView):
         return Response(serializer.data)
 
 
+class Courses(APIView):
+    def get(self, request):
+        courses = college.Course.objects.exclude(disappeared=True).all()
+        data = serializers.CourseMinimalSerializer(courses, many=True).data
+        return Response(data)
+
+
 class CourseDetailed(APIView):
-    def get(self, request, pk):
-        course = college.Course.objects.get(id=pk)
+    def get(self, request, course_id):
+        course = get_object_or_404(college.Course, id=course_id)
         data = serializers.CourseSerializer(course).data
-        data['degree'] = course.degree.name
         return Response(data)
 
 
 class ClassDetailed(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, pk):
-        serializer = serializers.CourseSerializer(college.Class.objects.get(id=pk))
+    def get(self, request, class_id):
+        klass = get_object_or_404(college.Class, id=class_id)
+        serializer = serializers.ClassSerializer(klass)
         return Response(serializer.data)
 
 
@@ -66,6 +73,15 @@ class UserShiftInstances(APIView):
                     shift__class_instance__period=settings.COLLEGE_PERIOD) \
             .all()
         serializer = serializers.ScheduleSerializer(shift_instances, many=True)
+        return Response(serializer.data)
+
+
+class ClassInstance(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, instance_id):
+        instance = get_object_or_404(college.ClassInstance.objects, id=instance_id)
+        serializer = serializers.ClassInstanceSerializer(instance)
         return Response(serializer.data)
 
 

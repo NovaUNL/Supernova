@@ -13,8 +13,10 @@ urlpatterns = [
     path('building/<int:pk>/schedule', views.calendar.building_schedule_shifts_view, name="building_schedule"),
     path('departments/', views.college.DepartmentList.as_view(), name="departments"),
     path('department/<int:pk>/', views.college.DepartmentDetailed.as_view(), name="department"),
-    path('course/<int:pk>/', views.college.CourseDetailed.as_view(), name="course"),
+    path('courses/', views.college.Courses.as_view(), name="courses"),
+    path('course/<int:course_id>/', views.college.CourseDetailed.as_view(), name="course"),
     path('class/<int:pk>/', views.college.ClassDetailed.as_view(), name="class"),
+    path('class/i/<int:instance_id>/', views.college.ClassInstance.as_view(), name="class_instance"),
     path('class/i/<int:instance_id>/files/', views.college.ClassFiles.as_view(), name="class_instance_files"),
     # Chat
     # path('chat/list', views.chat.chat_list, name='chat_list'),

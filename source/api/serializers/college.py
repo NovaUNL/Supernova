@@ -49,12 +49,31 @@ class CourseMinimalSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     abbreviation = serializers.CharField()
-    # degree = DegreeSerializer()
+    degree = serializers.IntegerField()
+    degree_display = serializers.CharField(source='get_degree_display')
 
 
 class DepartmentMinimalSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+
+
+class MinimalCourseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    abbreviation = serializers.CharField()
+    department = DepartmentMinimalSerializer()
+    degree = serializers.IntegerField()
+    degree_display = serializers.CharField(source='get_degree_display')
+    external_url = serializers.CharField(source='url')
+    url = serializers.CharField(source='get_absolute_url')
+
+
+class CurriculumMinimalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    aggregation = serializers.JSONField(source='simple_aggregation')
+    from_year = serializers.IntegerField()
+    to_year = serializers.IntegerField()
 
 
 class CourseSerializer(serializers.Serializer):
@@ -63,7 +82,9 @@ class CourseSerializer(serializers.Serializer):
     abbreviation = serializers.CharField()
     description = serializers.CharField()
     department = DepartmentMinimalSerializer()
-    degree = DegreeSerializer()
+    degree = serializers.IntegerField()
+    degree_display = serializers.CharField(source='get_degree_display')
+    current_curriculum = CurriculumMinimalSerializer(source='curriculum')
     external_url = serializers.CharField(source='url')
     url = serializers.CharField(source='get_absolute_url')
 
@@ -78,12 +99,33 @@ class DepartmentSerializer(serializers.Serializer):
     url = serializers.CharField(source='get_absolute_url')
 
 
+class ClassInstanceMinimalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    period = serializers.IntegerField()
+    period_display = serializers.CharField(source='get_period_display')
+    year = serializers.IntegerField()
+    url = serializers.CharField(source='get_absolute_url')
+
+
+class ClassInstanceSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    parent = serializers.IntegerField(source='parent_id')
+    period = serializers.IntegerField()
+    period_display = serializers.CharField(source='get_period_display')
+    year = serializers.IntegerField()
+    information = serializers.CharField()
+    department = DepartmentMinimalSerializer()
+    avg_grade = serializers.IntegerField()
+    url = serializers.CharField(source='get_absolute_url')
+
+
 class ClassSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     abbreviation = serializers.CharField()
     credits = serializers.IntegerField()
     department = DepartmentMinimalSerializer()
+    instances = ClassInstanceMinimalSerializer(many=True)
     url = serializers.CharField(source='get_absolute_url')
 
 

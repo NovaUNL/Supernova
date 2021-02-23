@@ -1186,6 +1186,10 @@ class Curriculum(djm.Model):
     def __str__(self):
         return f'{self.course} ({self.from_year} - {self.to_year})'
 
+    @property
+    def simple_aggregation(self):
+        return self.aggregation.get('children')
+
     def calc_aggregation(self):
         aggregation = self.root.aggregation
         while Curriculum.__clean_aggregation(aggregation):
