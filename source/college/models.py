@@ -57,6 +57,21 @@ class CachedEntity(djm.Model):
         abstract = True
 
 
+class PeriodInstance(djm.Model):
+    """An instance of time where class occurs"""
+    #: The type of period
+    type = djm.IntegerField(choices=ctypes.Period.CHOICES)
+    #: Academic year
+    year = djm.IntegerField()
+    #: Date on which the period started
+    date_from = djm.DateField(null=True, blank=True)
+    #: Date on which the period ended
+    date_to = djm.DateField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('type', 'year')
+
+
 @reversion.register()
 class Student(Importable, CachedEntity):
     """
@@ -411,6 +426,12 @@ class ClassInstance(Importable, CachedEntity):
     department = djm.ForeignKey(Department, null=True, on_delete=djm.PROTECT, related_name='class_instances')
     #: Period this happened on (enumeration)
     period = djm.IntegerField(choices=ctypes.Period.CHOICES)
+    #: Period this happened on (concrete instance)
+    period_instance = djm.ForeignKey(PeriodInstance, null=True, blank=True, on_delete=djm.SET_NULL)
+    #: Date on which the instance started (overrides the period)
+    date_from = djm.DateField(null=True, blank=True)
+    #: Date on which the instance ended (overrides the period)
+    date_to = djm.DateField(null=True, blank=True)
     #: Year of lecturing
     year = djm.IntegerField()
     #: Enrolled students
