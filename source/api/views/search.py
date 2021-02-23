@@ -1,6 +1,5 @@
 from elasticsearch_dsl import Q
-from rest_framework import authentication
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from college import documents as college_search
 from learning import documents as learning_search
@@ -92,7 +91,6 @@ mapping = {
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def search_view(request):
     q = request.GET.get('q')
     e = request.GET.get('e')

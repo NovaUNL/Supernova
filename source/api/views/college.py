@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,7 +44,6 @@ class CourseDetailed(APIView):
 
 
 class ClassDetailed(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk):
@@ -54,7 +52,6 @@ class ClassDetailed(APIView):
 
 
 class UserShiftInstances(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, nickname):
@@ -73,7 +70,6 @@ class UserShiftInstances(APIView):
 
 
 class ClassFiles(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, instance_id):

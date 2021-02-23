@@ -17,7 +17,6 @@ class GroupList(APIView):
 
 
 class GroupSubscription(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, abbr):
@@ -42,7 +41,6 @@ class GroupSubscription(APIView):
 
 
 class GroupMembershipRequest(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, abbr):

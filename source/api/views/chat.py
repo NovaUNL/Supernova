@@ -1,6 +1,5 @@
 from django.db.models import Count
-from rest_framework import authentication
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -14,7 +13,6 @@ LIVE_CONVERSATIONS = (chat.DMChat, chat.PublicRoom, chat.PrivateRoom)
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_info(request, chat_id):
     conversation = get_object_or_404(chat.Conversation.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
     if not conversation.has_access(request.user):
@@ -24,7 +22,6 @@ def chat_info(request, chat_id):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_presence(request):
     conversations = chat.Conversation.objects \
         .instance_of(*LIVE_CONVERSATIONS) \
@@ -38,7 +35,6 @@ def chat_presence(request):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_history(request, chat_id):
     conversation = get_object_or_404(chat.Conversation.objects.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
     if not conversation.has_access(request.user):
@@ -68,7 +64,6 @@ def chat_history(request, chat_id):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_query(request):
     if 'q' not in request.GET:
         return Response({"results": []})
@@ -131,7 +126,6 @@ def chat_query(request):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def dm_request(request, user_id):
     user = get_object_or_404(users.User, id=user_id)
     conversation = get_or_create_dm_chat(request.user, user)
@@ -140,7 +134,6 @@ def dm_request(request, user_id):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def chat_join_request(request, reference):
     try:
         conversation_id = int(reference)

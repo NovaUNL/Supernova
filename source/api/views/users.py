@@ -3,8 +3,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.core.cache import cache
 
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -13,12 +12,10 @@ from rest_framework.generics import get_object_or_404
 
 from api.serializers import users as serializers
 from api import permissions
-from users.utils import get_network_identifier
 from users import models as users
 
 
 class ProfileDetailed(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (permissions.SelfOnly,)
 
     def get(self, request, nickname):  # TODO authentication
@@ -28,7 +25,6 @@ class ProfileDetailed(APIView):
 
 
 class UserExternalPages(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (permissions.SelfOnly,)
 
     def get(self, request, nickname):  # TODO restrict to privacy level
@@ -55,7 +51,6 @@ class UserExternalPages(APIView):
 
 
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def notification_count_view(request):
     notification_count = cache.get('%s_notification_count' % request.user.id)
@@ -67,7 +62,6 @@ def notification_count_view(request):
 
 
 class UserNotificationList(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
 
     def get(self, request):
         timestamp = int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
@@ -94,7 +88,6 @@ class UserNotificationList(APIView):
 
 
 class UserModeration(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAdminUser,)
 
     def get(self, request, user_id, format=None):

@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.core.cache import cache
 
-from rest_framework import authentication
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -18,7 +17,6 @@ from api.serializers import college as college_serializer
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 @permission_classes((IsAuthenticated,))
 def user_schedule(request, nickname):
     """
@@ -90,7 +88,6 @@ def user_schedule(request, nickname):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 @permission_classes((permissions.SelfOnly,))
 def user_calendar(_, nickname):
     """
@@ -179,7 +176,6 @@ def user_calendar(_, nickname):
 
 
 @api_view(['GET'])
-@authentication_classes((authentication.SessionAuthentication, authentication.BasicAuthentication))
 def group_calendar(_, abbr):
     group = get_object_or_404(groups.Group, abbreviation=abbr)
 

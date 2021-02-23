@@ -2,7 +2,6 @@ import logging
 
 from django.db import transaction, IntegrityError
 from django.db.models import F, Max
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -42,7 +41,6 @@ class Section(APIView):
 
 
 class SectionChildren(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk, format=None):
@@ -128,7 +126,6 @@ class SectionChildren(APIView):
 
 
 class ClassSections(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, pk, format=None):
