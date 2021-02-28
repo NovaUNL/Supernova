@@ -99,6 +99,26 @@ class DepartmentSerializer(serializers.Serializer):
     url = serializers.CharField(source='get_absolute_url')
 
 
+class ShiftInstanceSerializer(serializers.Serializer):
+    # id = serializers.IntegerField()
+    weekday = serializers.IntegerField()
+    start = serializers.IntegerField()
+    # start_str = serializers.CharField()
+    duration = serializers.IntegerField()
+    # end_str = serializers.CharField()
+    room = serializers.IntegerField(source='room_id')
+
+
+class ShiftSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    number = serializers.IntegerField()
+    type = serializers.IntegerField(source='shift_type')
+    type_display = serializers.CharField(source='get_shift_type_display')
+    teachers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    instances = ShiftInstanceSerializer(many=True)
+    url = serializers.CharField(source='get_absolute_url')
+
+
 class ClassInstanceMinimalSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     period = serializers.IntegerField()
