@@ -30,6 +30,7 @@ class Command(BaseCommand):
         parser.add_argument('--rooms', action='store_true', help='Synchronize rooms')
         parser.add_argument('--departments', action='store_true', help='Synchronize departments')
         parser.add_argument('--courses', action='store_true', help='Synchronize courses')
+        parser.add_argument('--force_class_info', action='store_true', help='Enforces that the class info is sync\'d')
 
     def handle(self, *args, **options):
         sync_type = options['type'][0]
@@ -42,6 +43,7 @@ class Command(BaseCommand):
         room_sync = options['rooms']
         department_sync = options['departments']
         course_sync = options['courses']
+        force_class_info = options['force_class_info']
 
         # Very fast
         if assert_buildings:
@@ -67,7 +69,9 @@ class Command(BaseCommand):
                 .select_related('parent') \
                 .annotate(enrollment_count=Count('enrollments')) \
                 .annotate(shift_count=Count('shifts')) \
-                .filter(Q(enrollment_count__gt=0) | Q(shift_count__gt=0), year=settings.COLLEGE_YEAR) \
+                .filter(Q(enrollment_count__gt=0) | Q(shift_count__gt=0),
+                        year=settings.COLLEGE_YEAR,
+                        external_update__lt=timezone.now() - timedelta(hours=4)) \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .all()
             if update:
@@ -75,9 +79,10 @@ class Command(BaseCommand):
                     class_instances,
                     lambda i: sync.request_class_instance_update(
                         external_id=i.external_id,
-                        update_enrollments=update,
-                        update_shifts=update,
-                        update_files=update))
+                        update_info=force_class_info,
+                        update_enrollments=True,
+                        update_shifts=True,
+                        update_files=True))
             # Synchronize them
             parallel_run(class_instances, fast_instance_update)
 
@@ -108,11 +113,12 @@ class Command(BaseCommand):
                     class_instances,
                     lambda i: sync.request_class_instance_update(
                         external_id=i.external_id,
-                        update_enrollments=update,
-                        update_shifts=update,
-                        update_events=update,
-                        update_grades=update,
-                        update_files=update))
+                        update_info=force_class_info,
+                        update_enrollments=True,
+                        update_shifts=True,
+                        update_events=True,
+                        update_grades=True,
+                        update_files=True))
 
             # Synchronize found students
             log.info("Syncing students")
@@ -165,11 +171,12 @@ class Command(BaseCommand):
                     previous_class_instances,
                     lambda i: sync.request_class_instance_update(
                         external_id=i.external_id,
-                        update_info=update,
-                        update_enrollments=update,
-                        update_shifts=update,
-                        update_events=update,
-                        update_files=update))
+                        update_info=True,
+                        update_enrollments=True,
+                        update_shifts=True,
+                        update_events=True,
+                        update_grades=True,
+                        update_files=True))
 
             # Synchronize leftover students
             log.info("Syncing students")
@@ -234,11 +241,13 @@ class ParallelQueueProcessor(Thread):
         failures = 0
         while True:
             self.lock.acquire()
-            if not self.queue.empty():
+            remaining = self.queue.qsize()
+            if remaining:
                 object = self.queue.get()
                 self.lock.release()
                 try:
                     log.debug(f'Synchronizing {object}')
+                    print(f"{remaining} objects remaining")
                     self.function(object)
                 except Exception:
                     log.error(f'Failed to sync {object}')
