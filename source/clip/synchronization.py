@@ -678,25 +678,25 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
         grade = normal_grade
     normal_grade_date = upstream['continuous_grade_date']
     if normal_grade_date:
-        make_aware(datetime.fromisoformat(normal_grade_date), is_dst=True)
+        normal_grade_date = make_aware(datetime.fromisoformat(normal_grade_date), is_dst=True)
     recourse_grade = upstream['exam_grade']
     if recourse_grade:
         grade = max(grade, recourse_grade)
     recourse_grade_date = upstream['exam_grade_date']
     if recourse_grade_date:
-        make_aware(datetime.fromisoformat(recourse_grade_date), is_dst=True)
+        recourse_grade_date = make_aware(datetime.fromisoformat(recourse_grade_date), is_dst=True)
     special_grade = upstream['special_grade']
     if special_grade:
         grade = max(grade, special_grade)
     special_grade_date = upstream['special_grade_date']
     if special_grade_date:
-        make_aware(datetime.fromisoformat(special_grade_date), is_dst=True)
+        special_grade_date = make_aware(datetime.fromisoformat(special_grade_date), is_dst=True)
     improvement_grade = upstream['improvement_grade']
     if improvement_grade:
         grade = max(grade, improvement_grade)
     improvement_grade_date = upstream['improvement_grade_date']
     if improvement_grade_date:
-        make_aware(datetime.fromisoformat(improvement_grade_date), is_dst=True)
+        improvement_grade_date = make_aware(datetime.fromisoformat(improvement_grade_date), is_dst=True)
 
     approved = grade >= 10
     if approved != upstream['approved']:
