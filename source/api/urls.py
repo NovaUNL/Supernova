@@ -21,7 +21,7 @@ urlpatterns = [
     path('class/i/<int:instance_id>/files/', views.college.ClassFiles.as_view(), name="class_instance_files"),
     # Aux (Views that help someone but are redundant)
     path('department/<int:department_id>/classes/',
-         views.college.DepartmentClassInstances.as_view(),
+         views.college.DepartmentClasses.as_view(),
          name="department_classes"),
     path('department/<int:department_id>/class_instances/',
          views.college.DepartmentClassInstances.as_view(),

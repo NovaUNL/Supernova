@@ -39,9 +39,11 @@ class DepartmentDetailed(APIView):
 class DepartmentClasses(APIView):
     def get(self, request, department_id):
         department = get_object_or_404(college.Department, id=department_id)
-        serializer = serializers.ClassMinimalSerializer(
-            college.ClassInstance.objects.filter(department=department),
-            many=True)
+        year_filter = request.GET.get('year')
+        classes = college.Class.objects.filter(department=department).exclude(disappeared=True)
+        if year_filter:
+            classes = classes.filter(instances__year=year_filter).exclude(instances__disappeared=True).distinct()
+        serializer = serializers.ClassMinimalSerializer(classes, many=True)
         return Response(serializer.data)
 
 
@@ -49,10 +51,9 @@ class DepartmentClassInstances(APIView):
     def get(self, request, department_id):
         year_filter = request.GET.get('year')
         department = get_object_or_404(college.Department, id=department_id)
+        class_instances = college.ClassInstance.objects.filter(department=department).exclude(disappeared=True)
         if year_filter:
-            class_instances = college.ClassInstance.objects.filter(department=department)
-        else:
-            class_instances = college.ClassInstance.objects.filter(department=department, year=year_filter)
+            class_instances = class_instances.filter(year=year_filter)
         serializer = serializers.ClassInstanceMinimalSerializer(class_instances, many=True)
         return Response(serializer.data)
 
