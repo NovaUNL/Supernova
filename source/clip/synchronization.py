@@ -420,10 +420,15 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
                     obj.save()
     except ObjectDoesNotExist:
         with reversion.create_revision():
+            try:
+                period_inst = m.PeriodInstance.objects.get(year=upstream['year'], type=upstream['period'])
+            except m.PeriodInstance.DoesNotExist:
+                period_inst = m.PeriodInstance.objects.create(year=upstream['year'], type=upstream['period'])
             obj = m.ClassInstance.objects.create(
                 parent=klass,
                 year=upstream['year'],
                 period=upstream['period'],
+                period_instance=period_inst,
                 department=department,
                 external_id=external_id,
                 information={'upstream': upstream['info']},
