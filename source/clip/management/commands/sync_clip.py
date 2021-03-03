@@ -25,7 +25,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('type', nargs='+', type=str)
-        parser.add_argument('--no_update', help='Do not request CLIPy to update itself when prompting for data')
+        parser.add_argument('--no_update', action='store_true',
+                            help='Do not request CLIPy to update itself when prompting for data')
+        parser.add_argument('--no_optimize', action='store_true',
+                            help='Do not attempt to skip redundant work or updates to recently updated entities.')
         parser.add_argument('--assert_buildings', action='store_true', help='Assert buildings are inserted')
         parser.add_argument('--rooms', action='store_true', help='Synchronize rooms')
         parser.add_argument('--departments', action='store_true', help='Synchronize departments')
@@ -39,6 +42,7 @@ class Command(BaseCommand):
             exit(-1)
 
         update = not options['no_update']
+        optimize = not options['no_optimize']
         assert_buildings = options['assert_buildings']
         room_sync = options['rooms']
         department_sync = options['departments']
@@ -71,7 +75,7 @@ class Command(BaseCommand):
                 .annotate(shift_count=Count('shifts')) \
                 .filter(Q(enrollment_count__gt=0) | Q(shift_count__gt=0),
                         year=settings.COLLEGE_YEAR,
-                        external_update__lt=timezone.now() - timedelta(hours=4)) \
+                        external_update__lt=timezone.now() - timedelta(hours=4 if optimize else 0)) \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .all()
             if update:
@@ -96,7 +100,9 @@ class Command(BaseCommand):
 
             # Sync classes with recursive creation
             log.info("Synchronizing classes")
-            for klass in m.Class.objects.exclude(Q(disappeared=True) | Q(external_id=None)):
+            for klass in m.Class.objects \
+                    .exclude(Q(disappeared=True) | Q(external_id=None),
+                             external_update__lt=timezone.now() - timedelta(days=1 if optimize else 0)):
                 sync.sync_class(klass.external_id, recurse=sync.Recursivity.CREATION)
 
             # Update class instances upstream data and synchronize
@@ -104,7 +110,7 @@ class Command(BaseCommand):
             class_instances = m.ClassInstance.objects \
                 .select_related('parent') \
                 .filter(year__gte=settings.COLLEGE_YEAR - settings.CLIPY_RECENT_YEAR_MARGIN,
-                        external_update__lt=timezone.now() - timedelta(days=1)) \
+                        external_update__lt=timezone.now() - timedelta(days=1 if optimize else 0)) \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .all()
             if update:
@@ -152,7 +158,7 @@ class Command(BaseCommand):
             # Sync classes with recursive creation
             parallel_run(
                 m.Class.objects.exclude(Q(disappeared=True) | Q(external_id=None) | Q(
-                    external_update__gt=timezone.now() - timedelta(days=5))),
+                    external_update__gt=timezone.now() - timedelta(days=5 if optimize else 0))),
                 lambda klass: sync.sync_class(klass.external_id, recurse=sync.Recursivity.CREATION))
 
             # Propagate disappearances here to ensure that disappeared class derivatives are synchronized
