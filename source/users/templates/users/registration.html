@@ -44,7 +44,8 @@
               </div>
               {{ creation_form.username.errors }}
               <div class="form-row-description">
-                A credencial utilizada para aceder à conta.
+                A credencial utilizada para aceder à conta<br>
+                Pode conter carateres alfanuméricos não acentuados, pontos(<code>.</code>), hífenes(<code>-</code>) ou sublinhados (<code>_</code>).
               </div>
             </div>
             <hr>
@@ -57,8 +58,9 @@
               <div class="form-row-description">
                 Uma alcunha que será exibida aos restantes enquanto referência ao perfil.<br>
                 A sua página de perfil será em https://supernova.nunl.pt/u/[alcunha]<br>
-                Caso opte por não providênciar uma alcunha, o nome de utilizador será utilizado como alcunha.<br>
-                A alcunha pode ser alterada posteriormente (até uma vez por semestre).
+                Caso opte por não providenciar uma alcunha, o nome de utilizador será utilizado como alcunha.<br>
+                A alcunha pode ser alterada posteriormente (até uma vez por semestre).<br>
+                Tem as mesmas restrições de carateres que o nome de utilizador.
               </div>
             </div>
             <hr>
@@ -131,8 +133,15 @@
     </div>
   </div>
   <script>
+      const params = new URLSearchParams(location.search);
       function registrationProceed(e) {
+          params.set("cnt", "v");
+          window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
           e.closest('.pane').remove();
+          $('#registration-form').css('display', 'block');
+      }
+      if (params.get("cnt")) {
+          $('.pane').first().remove();
           $('#registration-form').css('display', 'block');
       }
   </script>
