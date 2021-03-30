@@ -19,6 +19,8 @@ urlpatterns = [
     path('class/i/<int:instance_id>/', views.college.ClassInstance.as_view(), name="class_instance"),
     path('class/i/<int:instance_id>/shifts/', views.college.ClassInstanceShifts.as_view(), name="class_instance_shifts"),
     path('class/i/<int:instance_id>/files/', views.college.ClassFiles.as_view(), name="class_instance_files"),
+    path('class/i/<int:instance_id>/schedule', views.calendar.class_instance_schedule, name="class_instance_schedule"),
+    path('teacher/<int:teacher_id>/schedule', views.calendar.teacher_schedule, name="teacher_schedule"),
     # Aux (Views that help someone but are redundant)
     path('department/<int:department_id>/classes/',
          views.college.DepartmentClasses.as_view(),

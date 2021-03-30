@@ -2,6 +2,13 @@
 
 {% load static %}
 
+{% block head %}
+  <script src="{% static 'js/lib/fullcalendar/main.min.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/locales/pt-br.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'js/lib/fullcalendar/main.min.css' %}"/>
+  <script src="{% static 'js/calendar.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="header-decorator">
     <div class="header-decorator-options">
@@ -18,32 +25,7 @@
       <h1><img class="highres" src="{% static 'img/user.svg' %}">{{ teacher.name }}</h1>
     {% endif %}
   </div>
-  <div class="row padded">
-    <div class="col">
-      <div class="pane">
-        <div class="pane-title"><h2>Horario</h2></div>
-        <div class="pane-content">
-          <div style="overflow-x: auto;">
-            {% include 'college/schedule.html' %}
-          </div>
-          <b style="color: #850000"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
-            Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.
-          </b>
-        </div>
-      </div>
-      <div class="pane">
-        <div class="pane-title"><h2>Unidades Curriculares</h2></div>
-        <div class="pane-content">
-          <ul class="menu">
-            {% for instance in class_instances %}
-              <li>
-                <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-    </div>
+  <div class="row padded nowrap">
     <div class="col nogrow noshrink" style="flex-basis: 350px;">
       <div class="pane">
         <div class="pane-title"><h2>Informação</h2></div>
@@ -92,6 +74,30 @@
           {% if reviews|length == 0 %}
             Sem opiniões. <a href="{% url 'college:teacher_review_create' teacher.id %}">Adiciona a tua</a>.
           {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="pane">
+        <div class="pane-title"><h2>Horario</h2></div>
+        <div class="pane-content">
+          <div id="schedule"></div>
+          <script>loadTeacherSchedule("{{ teacher.id }}")</script>
+          <b style="color: var(--text-hc)"><sup>*</sup> O horário baseia-se nos turnos atribuídos.<br>
+            Pode não coincidir (e provavelmente não coincide) com a presença ou disponibilidade do professor.
+          </b>
+        </div>
+      </div>
+      <div class="pane">
+        <div class="pane-title"><h2>Unidades Curriculares</h2></div>
+        <div class="pane-content">
+          <ul class="menu">
+            {% for instance in class_instances %}
+              <li>
+                <a href="{% url 'college:class_instance' instance.id %}">{{ instance.parent.name }} ({{ instance.short_occasion }})</a>
+              </li>
+            {% endfor %}
+          </ul>
         </div>
       </div>
     </div>

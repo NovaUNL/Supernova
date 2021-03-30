@@ -2,6 +2,13 @@
 
 {% load static %}
 
+{% block head %}
+  <script src="{% static 'js/lib/fullcalendar/main.min.js' %}"></script>
+  <script src="{% static 'js/lib/fullcalendar/locales/pt-br.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'js/lib/fullcalendar/main.min.css' %}"/>
+  <script src="{% static 'js/calendar.js' %}"></script>
+{% endblock %}
+
 {% block content_wrapper %}
   <div class="col">
   {% include 'college/class_decorator.html' %}
@@ -9,7 +16,7 @@
       <div class="col">
         <div class="pane">
           <div class="pane-title"><h2>Turnos</h2></div>
-          <div class="pane-content flex-wrapper">
+          <div class="pane-content flex-wrapper" style="align-items: flex-start">
             {% for shift in shifts %}
               <div class="shift-list shift-{{ shift.type_abbreviation|lower }}">
                 <a style="font-weight: bold; font-size: 3em;margin-right: 20px" href="{{ shift.get_absolute_url }}">
@@ -32,8 +39,9 @@
         </div>
         <div class="pane">
           <div class="pane-title"><h2>Horário</h2></div>
-          <div class="pane-content" style="overflow-x: auto;">
-            {% include 'college/schedule.html' %}
+          <div class="pane-content">
+            <div id="schedule"></div>
+            <script>loadClassSchedule("{{ instance.id }}")</script>
           </div>
         </div>
       </div>

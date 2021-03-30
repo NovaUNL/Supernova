@@ -1,4 +1,5 @@
-from django.conf import settings
+import datetime
+
 from django.core.cache import cache
 
 from rest_framework.decorators import api_view, permission_classes
@@ -42,12 +43,13 @@ def user_schedule(request, nickname):
     user_groups = user.groups_custom.all()
     schedule_entries = []
 
+    today = datetime.date.today()
+    period_instances = college.PeriodInstance.objects.filter(date_from__lte=today, date_to__gte=today)
     shift_instances = college.ShiftInstance.objects \
         .select_related('shift__class_instance__parent') \
         .prefetch_related('room__building') \
         .filter(shift__student__in=primary_students,
-                shift__class_instance__year=settings.COLLEGE_YEAR,
-                shift__class_instance__period=settings.COLLEGE_PERIOD) \
+                shift__class_instance__period_instance__in=period_instances) \
         .all()
     for instance in shift_instances:
         schedule_entries.append({
@@ -88,6 +90,70 @@ def user_schedule(request, nickname):
 
 
 @api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def class_instance_schedule(request, instance_id):
+    cache_key = f'class_instance_{instance_id}_schedule'
+    instance_schedule = cache.get(cache_key)
+
+    if instance_schedule:
+        return Response(instance_schedule)
+
+    instance = get_object_or_404(college.ClassInstance, id=instance_id)
+
+    schedule_entries = []
+    shift_instances = college.ShiftInstance.objects \
+        .select_related('shift__class_instance') \
+        .filter(shift__class_instance=instance) \
+        .all()
+
+    for instance in shift_instances:
+        schedule_entries.append({
+            'type': instance.shift.type_abbreviation,
+            'title': f"{instance.shift.long_abbreviation}",
+            'weekday': instance.weekday,
+            'time': instance.start_str,
+            'duration': instance.duration,
+            'url': instance.shift.get_absolute_url(),
+        })
+
+    cache.set(cache_key, schedule_entries, timeout=60 * 60)
+    return Response(schedule_entries)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def teacher_schedule(request, teacher_id):
+    cache_key = f'teacher_{teacher_id}_schedule'
+    teacher_schedule = cache.get(cache_key)
+
+    if teacher_schedule:
+        return Response(teacher_schedule)
+
+    teacher = get_object_or_404(college.Teacher, id=teacher_id)
+
+    today = datetime.date.today()
+    period_instances = college.PeriodInstance.objects.filter(date_from__lte=today, date_to__gte=today)
+    schedule_entries = []
+    shift_instances = teacher.shifts\
+        .select_related('class_instance__parent')\
+        .filter(class_instance__period_instance__in=period_instances)\
+        .all()
+
+    for instance in shift_instances:
+        schedule_entries.append({
+            'type': instance.shift.type_abbreviation,
+            'title': instance.title,
+            'weekday': instance.weekday,
+            'time': instance.start_str,
+            'duration': instance.duration,
+            'url': instance.shift.get_absolute_url(),
+        })
+
+    cache.set(cache_key, schedule_entries, timeout=60 * 60)
+    return Response(schedule_entries)
+
+
+@api_view(['GET'])
 @permission_classes((permissions.SelfOnly,))
 def user_calendar(_, nickname):
     """
@@ -105,12 +171,13 @@ def user_calendar(_, nickname):
     primary_students, _ = get_students(user)
     schedule_entries = []
 
+    today = datetime.date.today()
+    period_instances = college.PeriodInstance.objects.filter(date_from__lte=today, date_to__gte=today)
     shift_instances = college.ShiftInstance.objects \
         .select_related('shift__class_instance__parent') \
         .prefetch_related('room__building') \
         .filter(shift__student__in=primary_students,
-                shift__class_instance__year=settings.COLLEGE_YEAR,
-                shift__class_instance__period=settings.COLLEGE_PERIOD) \
+                shift__class_instance__period_instance__in=period_instances) \
         .all()
 
     for instance in shift_instances:
@@ -207,12 +274,12 @@ def group_calendar(_, abbr):
 @api_view(['GET'])
 def building_schedule_shifts_view(request, building_id):
     building = get_object_or_404(college.Building, id=building_id)
-
+    today = datetime.date.today()
+    period_instances = college.PeriodInstance.objects.filter(date_from__lte=today, date_to__gte=today)
     shift_instances = college.ShiftInstance.objects \
         .select_related('shift__class_instance__parent') \
         .filter(room__building=building,
-                shift__class_instance__year=settings.COLLEGE_YEAR,
-                shift__class_instance__period=settings.COLLEGE_PERIOD)\
+                shift__class_instance__period_instance__in=period_instances) \
         .exclude(weekday=None) \
         .all()
     schedule_entries = []

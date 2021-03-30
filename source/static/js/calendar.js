@@ -1,7 +1,10 @@
 const sources = {
     'T': {'events': [], color: "#a3be8caa"},
+    'TO': {'events': [], color: "#a3be8caa"},
     'P': {'events': [], color: "#bf616aaa"},
+    'PO': {'events': [], color: "#bf616aaa"},
     'TP': {'events': [], color: "#d08770aa"},
+    'OP': {'events': [], color: "#d08770aa"},
     'CE': {'events': [], color: "#8fbcbbaa"},
     'G': {'events': [], color: "#b48eadaa"},
     'U': {'events': [], color: "#5e81acaa"},
@@ -100,6 +103,76 @@ function loadSchedule(nickname, tiny) {
         })
 }
 
+function loadClassSchedule(kclass) {
+    let calendarEl = document.getElementById('schedule');
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        slotMinTime: "08:00:00",
+        slotMaxTime: "20:00:00",
+        allDaySlot: false,
+        dayHeaderFormat: {
+            weekday: 'short'
+        },
+        slotLabelFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            omitZeroMinute: true,
+            meridiem: false
+        },
+        weekends: false,
+        headerToolbar: false,
+        nowIndicator: true,
+        contentHeight: 'auto',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        locale: 'pt-br'
+    });
+    calendar.render();
+    fetch(`/api/class/i/${kclass}/schedule`, {credentials: 'include'})
+        .then((r) => {
+            return r.json();
+        })
+        .then((entries) => {
+            entries.forEach(e => addToCalendarSources(sources, e));
+            Object.entries(sources).forEach(es => calendar.addEventSource(es[1]));
+            calendar.render();
+        })
+}
+
+function loadTeacherSchedule(teacher) {
+    let calendarEl = document.getElementById('schedule');
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        slotMinTime: "08:00:00",
+        slotMaxTime: "20:00:00",
+        allDaySlot: true,
+        dayHeaderFormat: {
+            weekday: 'short'
+        },
+        slotLabelFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            omitZeroMinute: true,
+            meridiem: false
+        },
+        weekends: false,
+        headerToolbar: false,
+        nowIndicator: true,
+        contentHeight: 'auto',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        locale: 'pt-br'
+    });
+    calendar.render();
+    fetch(`/api/teacher/${teacher}/schedule`, {credentials: 'include'})
+        .then((r) => {
+            return r.json();
+        })
+        .then((entries) => {
+            entries.forEach(e => addToCalendarSources(sources, e));
+            Object.entries(sources).forEach(es => calendar.addEventSource(es[1]));
+            calendar.render();
+        })
+}
+
 function loadOccupation(building_id) {
     let calendar = new FullCalendar.Calendar($('#occupation-table')[0], {
         timeZone: 'UTC',
@@ -116,8 +189,8 @@ function loadOccupation(building_id) {
         resources: `/api/building/${building_id}/rooms`,
         events: `/api/building/${building_id}/schedule`,
         resourceLabelDidMount: (info) => {
-          $(info.el).find('.fc-datagrid-cell-main').text(null)
-              .append($(`<a href="${info.resource.extendedProps.url}">${info.resource.title}</a>`));
+            $(info.el).find('.fc-datagrid-cell-main').text(null)
+                .append($(`<a href="${info.resource.extendedProps.url}">${info.resource.title}</a>`));
         }
     });
     calendar.render();
@@ -135,6 +208,7 @@ function addToCalendarSources(sources, entry) {
         e.end = new Date(new Date(entry.datetime).addMinutes(entry.duration));
     }
     if (entry.type in sources) sources[entry.type].events.push(e);
+    else console.error(`Unknown source type ${entry.type}.`)
 }
 
 function addMinutesToTime(time, minutes) {
