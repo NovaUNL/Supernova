@@ -27,38 +27,74 @@ def index(request):
 
     context['title'] = "De universitários para universitários"
     context['news'] = news.NewsItem.objects.order_by('datetime').reverse()[0:6]
-    context['changelog'] = m.Changelog.objects.order_by('date').reverse().first()
-    context['meal_items'], context['meal_date'], time = get_next_meal_items()
-    context['meal_name'] = 'Almoço' if time == 2 else 'Jantar'
-    free_rooms = college.Room.objects \
-        .annotate(shift_instances__end=F('shift_instances__start') + F('shift_instances__duration')) \
-        .filter(unlocked=True) \
-        .select_related('building') \
-        .order_by('building__abbreviation', 'name') \
-        .exclude(Q(shift_instances__start__lt=minutes) & Q(shift_instances__end__gt=minutes)) \
-        .distinct('building__abbreviation', 'name')
-    context['free_rooms'] = random.sample(set(free_rooms), min(10, len(free_rooms))) if len(free_rooms) > 0 else []
-    context['student_count'] = college.Student.objects.exclude(user=None).count()
-    context['teacher_count'] = college.Teacher.objects.exclude(user=None).count()
-    context['allowing_teacher_count'] = college.Teacher.objects \
-        .exclude(file_consent=None) \
-        .exclude(file_consent=college.ctypes.FileVisibility.NOBODY) \
-        .count()
-    context['pledge_count'] = m.SupportPledge.objects.filter(pledge_towards__gt=m.SupportPledge.INDEPENDENT).count()
 
-    context['activities'] = \
-        groups.Activity.objects \
-            .select_related('group') \
-            .order_by('datetime') \
-            .reverse()[:5]
-    context['recent_questions'] = \
-        learning.Question.objects \
-            .select_related('user') \
-            .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
-            .annotate(answer_count=Count('answers')) \
-            .order_by('timestamp') \
-            .reverse()[:5]
-    context['pinned_news'] = news.PinnedNewsItem.objects.filter(active=True).order_by('title').all()
+    changelog_last = cache.get(f'changelog_last')
+    if changelog_last is None:
+        changelog_last = m.Changelog.objects.order_by('date').reverse().first()
+        cache.set('changelog_last', changelog_last, timeout=60 * 60)
+    context['changelog'] = changelog_last
+
+    context['meal_items'], context['meal_date'], time = get_next_meal_items()
+
+    next_meal_items = cache.get(f'next_meal_items')
+    if next_meal_items is None:
+        next_meal_items = get_next_meal_items()
+        cache.set('next_meal_items', next_meal_items, timeout=60 * 10)
+    context['meal_items'], context['meal_date'], time = next_meal_items
+    context['meal_name'] = 'Almoço' if time == 2 else 'Jantar'
+
+    free_rooms = cache.get('free_rooms')
+    if free_rooms is None:
+        free_rooms = college.Room.objects \
+            .annotate(shift_instances__end=F('shift_instances__start') + F('shift_instances__duration')) \
+            .filter(unlocked=True) \
+            .select_related('building') \
+            .order_by('building__abbreviation', 'name') \
+            .exclude(Q(shift_instances__start__lt=minutes + 5) & Q(shift_instances__end__gt=minutes)) \
+            .distinct('building__abbreviation', 'name')
+        cache.set('free_rooms', free_rooms, timeout=60)
+    context['free_rooms'] = random.sample(set(free_rooms), min(10, len(free_rooms))) if len(free_rooms) > 0 else []
+
+    metrics = cache.get('usage_metrics')
+    if metrics is None:
+        metrics = {
+            'student_count': college.Student.objects.exclude(user=None).count(),
+            'teacher_count': college.Teacher.objects.exclude(user=None).count(),
+            'allowing_teacher_count': college.Teacher.objects \
+                .exclude(file_consent=None) \
+                .exclude(file_consent=college.ctypes.FileVisibility.NOBODY) \
+                .count(),
+            'pledge_count': m.SupportPledge.objects.filter(pledge_towards__gt=m.SupportPledge.INDEPENDENT).count()
+        }
+        cache.set('usage_metrics', metrics, timeout=60 * 5)
+    context.update(metrics)
+
+    group_activities = cache.get('group_activities')
+    if group_activities is None:
+        group_activities = groups.Activity.objects \
+                               .select_related('group') \
+                               .order_by('datetime') \
+                               .reverse()[:5]
+        cache.set('group_activities', group_activities, timeout=60 * 5)
+    context['activities'] = group_activities
+
+    recent_questions = cache.get('recent_questions')
+    if recent_questions is None:
+        recent_questions = learning.Question.objects \
+                               .select_related('user') \
+                               .prefetch_related('linked_classes', 'linked_exercises', 'linked_sections') \
+                               .annotate(answer_count=Count('answers')) \
+                               .order_by('timestamp') \
+                               .reverse()[:5]
+        cache.set('recent_questions', recent_questions, timeout=60 * 5)
+    context['recent_questions'] = recent_questions
+
+    pinned_news = cache.get('pinned_news')
+    if pinned_news is None:
+        pinned_news = news.PinnedNewsItem.objects.filter(active=True).order_by('title').all()
+        cache.set('pinned_news', pinned_news, timeout=60 * 5)
+    context['pinned_news'] = pinned_news
+
     context['message'] = settings.INDEX_MESSAGE
     context['matrix_url'] = settings.MATRIX_URL
     context['mastodon_url'] = settings.MASTODON_URL
