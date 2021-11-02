@@ -37,6 +37,7 @@
     }
   },
   "MATRIX_URL": "https://app.element.io/#/room/exampleroom:matrixserver.com",
+  "SIGNAL_URL": "https://signal.group/#example",
   "MASTODON_URL": "https://masto.pt/@example",
   "GITLAB_URL": "https://gitlab.com/example",
   "TELEGRAM_URL": "https://t.me/exampletelegram"

@@ -97,6 +97,7 @@ def index(request):
 
     context['message'] = settings.INDEX_MESSAGE
     context['matrix_url'] = settings.MATRIX_URL
+    context['signal_url'] = settings.SIGNAL_URL
     context['mastodon_url'] = settings.MASTODON_URL
     context['telegram_url'] = settings.TELEGRAM_URL
     context['gitlab_url'] = settings.GITLAB_URL

@@ -312,10 +312,11 @@ INDEX_MESSAGE = None
 
 GENERAL_CHAT = 'geral'
 
-MATRIX_URL = "https://app.element.io/#/room/#room:matrix.example.com"
-MASTODON_URL = "https://example.com/@supernova"
-GITLAB_URL = "https://gitlab.com/claudiop/Supernova/issues"
-TELEGRAM_URL = "https://t.me/example"
+MATRIX_URL = None
+MASTODON_URL = None
+SIGNAL_URL = None
+GITLAB_URL = None
+TELEGRAM_URL = None
 
 REWARDS = {
     'add_section': 200,
