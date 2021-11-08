@@ -635,8 +635,9 @@ def sync_enrollment(external_id, class_inst=None):
     """
     upstream = _request_enrollment(external_id)
     if upstream is None:
-        logger.critical("Deleted enrollment attempted to sync")
+        logger.critical(f"Deleted enrollment (id:{external_id}) attempted to sync")
         return
+
     _upstream_sync_enrollment(upstream, external_id, class_inst)
 
 
@@ -891,6 +892,7 @@ def _upstream_sync_event(upstream, external_id, class_inst):
         with reversion.create_revision():
             if from_time is not None and (class_event.time is None or class_event.time != from_time):
                 logger.info(f"Event {class_event} time changed")
+
                 class_event.time = from_time
                 if to_time is not None:
                     class_event.duration = duration
@@ -1105,7 +1107,7 @@ def _upstream_sync_student(upstream, student=None):
         try:
             upstream_course = m.Course.objects.get(external_id=upstream_course_id)
         except m.Course.DoesNotExist:
-            logger.error(f'Course {upstream_course} does not exist')
+            logger.error(f'Upstream course {upstream_course_id} is not imported')
 
     if student:
         changed = False
@@ -1184,7 +1186,6 @@ def _upstream_sync_teachers(upstream_list):
                     if obj.name != upstream_name:
                         if obj.name is not None:
                             logger.warning(f"Teacher {obj} name changed from {obj.name} to {upstream_name}")
-
                         obj.name = upstream_name
                         changed = True
 
