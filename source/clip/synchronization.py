@@ -4,7 +4,7 @@ from functools import reduce
 from itertools import chain
 import logging
 
-from django.db.models import Q
+from django.db.models import Q, Max, Min, Sum
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from django.core.exceptions import ObjectDoesNotExist
@@ -1220,25 +1220,21 @@ def _upstream_sync_teachers(upstream_list):
 
 def calculate_active_classes():
     today = date.today()
-    current_year = today.year + today.month % 8
+    current_year = today.year + (today.month > 8)
     for klass in m.Class.objects.all():
-        first_year = 9999
-        last_year = 0
-        max_enrollments = 0
-        changed = False
-        for instance in klass.instances.all():
-            if instance.year < first_year:
-                first_year = instance.year
-                changed = True
-            if instance.year > last_year:
-                last_year = instance.year
-                changed = True
-            # enrollments = instance.enrollments.count()
-            # if enrollments > max_enrollments:
-            #     max_enrollments = enrollments
-        if changed:
-            klass.extinguished = last_year < current_year - 1  # or max_enrollments < 5  # TODO get rid of magic number
-            klass.save()
+        class_meta = klass.instances.aggregate(max_year=Max('year'))  # , max_date=Max('period_instance__date_to'))
+        last_year = class_meta['max_year']
+        # TODO get rid of magic number
+        has_recent_enrollments = klass.instances \
+            .filter(year__gte=current_year - 2) \
+            .order_by('year') \
+            .annotate(enrollment_count=Sum('enrollments')) \
+            .exclude(enrollment_count=0) \
+            .exists()
+        extinguished = not (last_year == current_year or has_recent_enrollments)
+        if extinguished != klass.extinguished:
+            klass.extinguished = extinguished
+            klass.save(update_fields=['extinguished'])
 
 
 def request_courses_update():
