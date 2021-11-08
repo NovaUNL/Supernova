@@ -357,10 +357,10 @@ def _upstream_sync_class(upstream, external_id, recurse):
 
     if recurse == Recursivity.CREATION:
         for ext_id in new:
-            sync_class_instance(ext_id, recurse=True, klass=obj)
+            sync_class_instance(ext_id, recurse=recurse, klass=obj)
     elif recurse == Recursivity.FULL:
         for ext_id in chain(new, mirrored):
-            sync_class_instance(ext_id, recurse=True, klass=obj)
+            sync_class_instance(ext_id, recurse=recurse, klass=obj)
 
 
 def sync_class_instance(external_id, klass=None, recurse=Recursivity.NONE):
@@ -463,10 +463,10 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
 
     if recurse == Recursivity.CREATION:
         for ext_id in new:
-            sync_shift(ext_id, recurse=True, class_inst=obj)
+            sync_shift(ext_id, recurse=recurse, class_inst=obj)
     elif recurse == Recursivity.FULL:
         for ext_id in chain(new, mirrored):
-            sync_shift(ext_id, recurse=True, class_inst=obj)
+            sync_shift(ext_id, recurse=recurse, class_inst=obj)
 
     # ---------  Related Events ---------
     events = obj.events.exclude(external_id=None).all()
