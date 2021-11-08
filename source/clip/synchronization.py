@@ -673,7 +673,7 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
     attendance = upstream['attendance']
     attendance_date = upstream['attendance_date']
     if attendance_date:
-        make_aware(datetime.fromisoformat(attendance_date), is_dst=True)
+        attendance_date = make_aware(datetime.fromisoformat(attendance_date), is_dst=True)
     normal_grade = upstream['continuous_grade']
     if normal_grade:
         grade = normal_grade
@@ -870,12 +870,16 @@ def _upstream_sync_event(upstream, external_id, class_inst):
 
     to_time = upstream['to_time']
     from_time = upstream['from_time']
+
+    if to_time is not None and from_time is None:
+        logger.error(f"Consistency error syncing event id {external_id}. End time is set but start is not.")
+        return
+
+    if from_time is not None:
+        from_time = datetime.strptime(from_time, "%H:%M")
+
     if to_time is not None:
         to_time = datetime.strptime(to_time, "%H:%M")
-        if from_time is None:
-            logger.error(f"Consistency error syncing event id {external_id}. End time is set but start is not.")
-            return
-        from_time = datetime.strptime(from_time, "%H:%M")
         duration = (to_time - from_time).seconds // 60
         from_time = from_time.time()  # Was a datetime
 
