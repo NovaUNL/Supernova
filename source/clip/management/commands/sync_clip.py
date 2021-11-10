@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 from queue import Queue
 from threading import Lock, Thread
 from time import sleep
@@ -52,29 +52,32 @@ class Command(BaseCommand):
         # Very fast
         if assert_buildings:
             sync.assert_buildings_inserted()
-        if room_sync:
+        if room_sync or sync_type == "full":
             if update:
                 sync.request_rooms_update()
             log.info("Syncing rooms")
             sync.sync_rooms()
-        if course_sync:
+        if course_sync or sync_type == "full":
             if update:
                 sync.request_courses_update()
             log.info("Syncing courses")
             sync.sync_courses()
-        if department_sync:
+        if department_sync or sync_type == "full":
             log.info("Syncing departments")
             sync.sync_departments()
+
+        today = datetime.today()
 
         if sync_type == "fast":
             # Update (upstream) particularly relevant class instances
             logging.info("Syncing class instances")
+            period_instances = m.PeriodInstance.objects.filter(date_from__lte=today, date_to__gte=today)
             class_instances = m.ClassInstance.objects \
                 .select_related('parent') \
                 .annotate(enrollment_count=Count('enrollments')) \
                 .annotate(shift_count=Count('shifts')) \
                 .filter(Q(enrollment_count__gt=0) | Q(shift_count__gt=0),
-                        year=settings.COLLEGE_YEAR,
+                        period_instance__in=period_instances,
                         external_update__lt=timezone.now() - timedelta(hours=4 if optimize else 0)) \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .all()
@@ -97,6 +100,15 @@ class Command(BaseCommand):
             if update:
                 log.info("Updating upstream classes")
                 sync.request_classes_update()
+                log.info("Requesting teachers update")
+
+                parallel_run(
+                    m.Department.objects.values_list('external_id', flat=True)[3:],
+                    lambda d: sync.request_teachers_update(d))
+                for department in m.Department.objects.values_list('external_id', flat=True):
+                    sync.request_teachers_update(department)
+
+            sync.sync_classes(sync.Recursivity.CREATION)
 
             # Sync classes with recursive creation
             log.info("Synchronizing classes")
@@ -113,6 +125,7 @@ class Command(BaseCommand):
                         external_update__lt=timezone.now() - timedelta(days=1 if optimize else 0)) \
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .all()
+
             if update:
                 log.info("Updating class instances")
                 parallel_run(
@@ -134,20 +147,23 @@ class Command(BaseCommand):
             parallel_run(class_instances, slow_instance_update)
             propagate_disappearances()
 
-            # By now every shift is known
-            log.info("Syncing teachers")
-            if update:
-                sync.request_teachers_update()
-            sync.sync_teachers()
+            if update or not optimize:
+                log.info("Syncing teachers")
+                sync.sync_teachers()
 
         elif sync_type == "full":
             if update:
                 # Update the National access contest, no dependencies
                 log.info("Updating upstream admission data")
                 sync.request_admissions_update()
+
                 # Update upstream class data, will create related data but it wont update existing data
                 log.info("Updating upstream classes")
                 sync.request_classes_update()
+
+                log.info("Requesting teachers update")
+                for department in m.Department.objects.values_list('external_id', flat=True):
+                    sync.request_teachers_update(department)
 
             # Store the current class instance data to request eventual update after the classes are updated
             # (to avoid duplicated updates)
@@ -155,6 +171,10 @@ class Command(BaseCommand):
                 .exclude(Q(disappeared=True) | Q(external_id=None)) \
                 .values_list('id', flat=True)
 
+            log.info("Synchronizing classes")
+            sync.sync_classes(sync.Recursivity.FULL)
+
+            log.info("Synchronizing leftover class instances")
             # Sync classes with recursive creation
             parallel_run(
                 m.Class.objects.exclude(Q(disappeared=True) | Q(external_id=None) | Q(
@@ -196,7 +216,8 @@ class Command(BaseCommand):
             # By now every shift is known
             log.info("Syncing teachers")
             if update:
-                sync.request_teachers_update()
+                for department in m.Department.objects.values_list('external_id', flat=True):
+                    sync.request_teachers_update(department)
             sync.sync_teachers()
         else:
             raise Exception("Invalid option")
@@ -218,15 +239,6 @@ def fast_instance_update(instance):
         instance.external_id,
         klass=instance.parent,
         recurse=sync.Recursivity.CREATION)
-    instance.refresh_from_db()
-    for shift in instance.shifts.exclude(Q(disappeared=True) | Q(external_id=None)).all():
-        sync.sync_shift(shift.external_id, class_inst=shift.class_instance, recurse=True)
-        shift.refresh_from_db()
-        for shift_instance in shift.instances.exclude(Q(disappeared=True) | Q(external_id=None)).all():
-            sync.sync_shift_instance(shift_instance.external_id, shift=shift)
-        sync.sync_class_instance_files(instance.external_id, class_inst=instance)
-    for enrollment in instance.enrollments.exclude(disappeared=True, external_id=None).all():
-        sync.sync_enrollment(enrollment.external_id, class_inst=instance)
 
 
 def slow_instance_update(instance):
@@ -255,7 +267,7 @@ class ParallelQueueProcessor(Thread):
                     log.debug(f'Synchronizing {object}')
                     print(f"{remaining} objects remaining")
                     self.function(object)
-                except Exception:
+                except sync.NetworkException:
                     log.error(f'Failed to sync {object}')
                     failures += 1
                     if failures > 5:
@@ -270,9 +282,7 @@ def propagate_disappearances():
     m.ClassInstance.objects.filter(disappeared=False, parent__disappeared=True).update(disappeared=True)
     m.Shift.objects.filter(disappeared=False, class_instance__disappeared=True).update(disappeared=True)
     m.ShiftInstance.objects.filter(disappeared=False, shift__disappeared=True).update(disappeared=True)
-    m.Enrollment.objects \
-        .filter(Q(class_instance__disappeared=True) | Q(class_instance__disappeared=True)) \
-        .update(disappeared=True)
+    m.Enrollment.objects.filter(disappeared=False, class_instance__disappeared=True).update(disappeared=True)
     m.ClassFile.objects.filter(disappeared=False, class_instance__disappeared=True).update(disappeared=True)
 
 

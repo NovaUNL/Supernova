@@ -4,7 +4,8 @@ from functools import reduce
 from itertools import chain
 import logging
 
-from django.db.models import Q, Max, Min, Sum
+from django.db import IntegrityError
+from django.db.models import Q, Max, Sum
 from django.utils import timezone
 from django.utils.timezone import make_aware
 from django.core.exceptions import ObjectDoesNotExist
@@ -17,6 +18,10 @@ from college import models as m, choice_types as ctypes
 from supernova.utils import correlation
 
 logger = logging.getLogger(__name__)
+
+
+class NetworkException(Exception):
+    pass
 
 
 class Recursivity:
@@ -279,7 +284,9 @@ def _upstream_sync_classes(upstream, recurse):
     for klass in disappeared_classes.all():
         logger.warning(f"Class {klass.name} disappeared")
     disappeared_classes.update(disappeared=True, external_update=make_aware(datetime.now()))
-    m.Class.objects.filter(external_id__in=mirrored).update(external_update=make_aware(datetime.now()))
+    m.Class.objects \
+        .filter(external_id__in=mirrored) \
+        .update(external_update=make_aware(datetime.now()), disappeared=False)
 
     for clip_class in upstream:
         if clip_class['id'] not in disappeared:
@@ -304,22 +311,34 @@ def _request_class(external_id):
 
 
 def _upstream_sync_class(upstream, external_id, recurse):
+    if not all(
+            k in upstream
+            for k in ('id', 'name', 'abbr', 'ects', 'instances')):
+        logger.error(f"Invalid class instance data: {upstream}")
+        return
+
+    upstream_id = upstream['id']
+    upstream_name = upstream['name']
+    upstream_abbr = upstream['abbr']
+    upstream_ects = upstream['ects']
+    upstream_instances = upstream['instances']
+
     try:
         obj = m.Class.objects.get(external_id=external_id)
         if not obj.frozen:
             with reversion.create_revision():
                 changed = False
-                if upstream['name'] != obj.name:
-                    logger.warning(f"Class {obj} name changed from {obj.name} to {upstream['name']}")
-                    obj.name = upstream['name']
+                if upstream_name != obj.name:
+                    logger.warning(f"Class {obj} name changed from {obj.name} to {upstream_name}")
+                    obj.name = upstream_name
                     changed = True
-                if upstream['abbr'] != obj.abbreviation:
-                    logger.warning(f"Class {obj} abbreviation changed from {obj.abbreviation} to {upstream['abbr']}")
-                    obj.abbreviation = upstream['abbr']
+                if upstream_abbr != obj.abbreviation:
+                    logger.warning(f"Class {obj} abbreviation changed from {obj.abbreviation} to {upstream_abbr}")
+                    obj.abbreviation = upstream_abbr
                     changed = True
-                if upstream['ects'] != obj.credits:
-                    logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream['ects']}")
-                    obj.credits = upstream['ects']
+                if upstream_ects != obj.credits:
+                    logger.warning(f"Class {obj} credits changed from {obj.credits} to {upstream_ects}")
+                    obj.credits = upstream_ects
                     changed = True
                 if obj.external_data != upstream:
                     obj.external_data = upstream
@@ -329,10 +348,10 @@ def _upstream_sync_class(upstream, external_id, recurse):
     except ObjectDoesNotExist:
         with reversion.create_revision():
             obj = m.Class.objects.create(
-                name=upstream['name'],
-                abbreviation=upstream['abbr'],
-                credits=upstream['ects'],
-                iid=upstream['id'],
+                name=upstream_name,
+                abbreviation=upstream_abbr,
+                credits=upstream_ects,
+                iid=upstream_id,
                 external_id=external_id,
                 frozen=False,
                 external_update=make_aware(datetime.now()),
@@ -342,7 +361,7 @@ def _upstream_sync_class(upstream, external_id, recurse):
     # ---------  Related Instances ---------
     instances = obj.instances.exclude(external_id=None).all()
 
-    new, disappeared, mirrored = _upstream_diff(set(instances), set(upstream['instances']))
+    new, disappeared, mirrored = _upstream_diff(set(instances), set(upstream_instances))
 
     # Class instances do not simply move to another class
     if m.ClassInstance.objects.filter(external_id__in=new).exists():
@@ -377,17 +396,38 @@ def sync_class_instance(external_id, klass=None, recurse=Recursivity.NONE):
 def _request_class_instance(external_id):
     r = requests.get(f"http://{settings.CLIPY['host']}/class_inst/{external_id}")
     if r.status_code != 200:
-        raise Exception(f"Unable to fetch class instance {external_id}")
+        raise NetworkException(f"Unable to fetch class instance {external_id}")
     return r.json()
 
 
 def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
+    if not all(
+            k in upstream
+            for k in ('department_id', 'enrollments', 'events', 'files', 'shifts', 'info', 'period', 'year')):
+        logger.error(f"Invalid class instance data: {upstream}")
+        return
+
+    upstream_department = upstream['department_id']
+    upstream_enrollments = upstream['enrollments']
+    upstream_events = upstream['events']
+    upstream_files = upstream['files']
+    upstream_shifts = upstream['shifts']
+    upstream_info = upstream['info']
+    upstream_period = upstream['period']
+    upstream_year = upstream['year']
+
     if klass is None:
         klass = m.Class.objects.get(external_id=upstream['class_id'])
 
-    try:
-        department = m.Department.objects.get(external_id=upstream['department_id'])
-    except m.Department.DoesNotExist:
+    if upstream_department:
+        try:
+            department = m.Department.objects.get(external_id=upstream['department_id'])
+        except m.Department.DoesNotExist:
+            department = sync_department(department=upstream_department)
+            if department is None:
+                logger.error(f"Unable to retrieve department {department} (found in CI {external_id})")
+
+    else:
         department = None
 
     try:
@@ -395,43 +435,43 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
         if not obj.frozen:
             with reversion.create_revision():
                 changed = False
-                if upstream['year'] != obj.year:
-                    logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream['year']}")
-                    # obj.year = upstream['year']
+                if upstream_year != obj.year:
+                    logger.error(f"Instance {obj} year remotely changed from {obj.year} to {upstream_year}")
+                    # obj.year = upstream_year
                     # changed = True
 
-                if upstream['period'] != obj.period:
-                    logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream['period']}")
-                    # obj.period = upstream['period']
+                if upstream_period != obj.period:
+                    logger.error(f"Instance {obj} period remotely changed from {obj.period} to {upstream_period}")
+                    # obj.period = upstream_period
                     # changed = True
 
                 if obj.information is None:
-                    obj.information = {'upstream': upstream['info']}
+                    obj.information = {'upstream': upstream_info}
                     changed = True
 
                 if obj.external_data != upstream:
                     obj.external_data = upstream
                     changed = True
 
-                elif 'upstream' not in obj.information or obj.information['upstream'] != upstream['info']:
-                    obj.information['upstream'] = upstream['info']
+                elif 'upstream' not in obj.information or obj.information['upstream'] != upstream_info:
+                    obj.information['upstream'] = upstream_info
                     changed = True
                 if changed:
                     obj.save()
     except ObjectDoesNotExist:
         with reversion.create_revision():
             try:
-                period_inst = m.PeriodInstance.objects.get(year=upstream['year'], type=upstream['period'])
+                period_inst = m.PeriodInstance.objects.get(year=upstream_year, type=upstream_period)
             except m.PeriodInstance.DoesNotExist:
-                period_inst = m.PeriodInstance.objects.create(year=upstream['year'], type=upstream['period'])
+                period_inst = m.PeriodInstance.objects.create(year=upstream_year, type=upstream_period)
             obj = m.ClassInstance.objects.create(
                 parent=klass,
-                year=upstream['year'],
-                period=upstream['period'],
+                year=upstream_year,
+                period=upstream_period,
                 period_instance=period_inst,
                 department=department,
                 external_id=external_id,
-                information={'upstream': upstream['info']},
+                information={'upstream': upstream_info},
                 frozen=False,
                 external_update=timezone.now(),
                 external_data={'upstream': upstream})
@@ -447,8 +487,8 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
 
     # ---------  Related shifts ---------
     shifts = obj.shifts.exclude(external_id=None).all()
-
-    new, disappeared, mirrored = _upstream_diff(set(shifts), set(upstream['shifts']))
+    upstream_shifts = {shift['id']: shift for shift in upstream_shifts}
+    new, disappeared, mirrored = _upstream_diff(set(shifts), set(upstream_shifts))
 
     if m.Shift.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some shifts of class instance {obj} belong to another instance: {new}")
@@ -463,15 +503,20 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
 
     if recurse == Recursivity.CREATION:
         for ext_id in new:
-            sync_shift(ext_id, recurse=recurse, class_inst=obj)
+            upstream_data = upstream_shifts[ext_id]
+            _upstream_sync_shift_info(upstream_data, ext_id, recurse=recurse, class_inst=obj)
     elif recurse == Recursivity.FULL:
         for ext_id in chain(new, mirrored):
-            sync_shift(ext_id, recurse=recurse, class_inst=obj)
+            upstream_data = upstream_shifts[ext_id]
+            _upstream_sync_shift_info(upstream_data, ext_id, recurse=recurse, class_inst=obj)
 
     # ---------  Related Events ---------
     events = obj.events.exclude(external_id=None).all()
-    upstream_events = {event['id']: event for event in upstream['events']}
+    upstream_events = {event['id']: event for event in upstream_events}
     new, disappeared, mirrored = _upstream_diff(set(events), set(upstream_events.keys()))
+
+    if m.ClassInstanceEvent.objects.filter(external_id__in=new).exists():
+        logger.critical(f"Some event of class instance {obj} belongs to another instance: {new}")
 
     m.ClassInstanceEvent.objects.filter(external_id__in=mirrored). \
         update(disappeared=False, external_update=make_aware(datetime.now()))
@@ -491,8 +536,8 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
 
     # ---------  Related enrollments ---------
     enrollments = obj.enrollments.exclude(external_id=None).all()
-
-    new, disappeared, mirrored = _upstream_diff(set(enrollments), set(upstream['enrollments']))
+    upstream_enrollments = {enrollment['id']: enrollment for enrollment in upstream_enrollments}
+    new, disappeared, mirrored = _upstream_diff(set(enrollments), set(upstream_enrollments))
 
     if m.Enrollment.objects.filter(external_id__in=new).exists():
         logger.critical(f"Some enrollments of class instance {obj} belong to another instance: {new}")
@@ -506,18 +551,16 @@ def _upstream_sync_class_instance(upstream, external_id, klass, recurse):
 
     if recurse == Recursivity.CREATION:
         for ext_id in new:
-            sync_enrollment(ext_id, class_inst=obj)
+            upstream_data = upstream_enrollments[ext_id]
+            _upstream_sync_enrollment(upstream_data, ext_id, class_inst=obj)
     elif recurse == Recursivity.FULL:
         for ext_id in chain(new, mirrored):
-            sync_enrollment(ext_id, class_inst=obj)
+            upstream_data = upstream_enrollments[ext_id]
+            _upstream_sync_enrollment(upstream_data, ext_id, class_inst=obj)
 
-    # ---------  OTHER TODO ---------
-    # if recurse:
-    #     # Must happen after the shift sync to have the teachers known
-    #     sync_class_instance_files(external_id, class_inst=obj)
-    # TODO
-    # evaluations = obj.enrollments.exclude(external_id=None).all()
-    # _related(evaluations, upstream['evaluations'], sync_evaluation, m.ClassEvaluation, recurse, class_inst=obj)
+    # ---------  Related files ---------
+    if recurse in (Recursivity.CREATION, Recursivity.FULL):
+        _upstream_sync_class_instance_files(upstream_files, external_id, class_inst=obj)
 
 
 def sync_class_instance_files(external_id, class_inst):
@@ -533,15 +576,31 @@ def sync_class_instance_files(external_id, class_inst):
 def _request_class_instance_files(external_id):
     r = requests.get(f"http://{settings.CLIPY['host']}/files/{external_id}")
     if r.status_code != 200:
-        raise Exception("Unable to fetch class instance files")
+        raise NetworkException("Unable to fetch class instance files")
     return r.json()
 
 
 def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
+    invalid = not all(
+        k in upstream_entry
+        for upstream_entry in upstream
+        for k in ('id', 'hash', 'mime', 'name', 'size', 'type', 'upload_datetime', 'uploader'))
+    if invalid:
+        logger.error(f"Invalid files in class instance id {external_id}: {upstream}")
+        return
+
     if class_inst is None:
         class_inst = m.ClassInstance.objects.prefetch_related('files__file').get(external_id=external_id)
 
-    upstream = {entry['hash']: entry for entry in upstream}
+    upstream_count = len(upstream)
+    upstream = {
+        entry['hash']: entry
+        for entry in filter(lambda entry: 'hash' in entry and entry['hash'], upstream)
+    }
+    downloaded_upstream_count = len(upstream)
+    if upstream_missing_count := (upstream_count - downloaded_upstream_count):
+        logger.warning(f"Class instance id {external_id} has {upstream_missing_count} undownloaded files")
+
     upstream_ids = set(upstream.keys())
     downstream_files = {ifile.file.hash: ifile
                         for ifile in class_inst.files.select_related('file').exclude(external_id=None).all()}
@@ -557,6 +616,10 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
         if not downstream_file.frozen:
             changed = False
             with reversion.create_revision():
+                if downstream_file.disappeared:
+                    downstream_file.disappeared = False
+                    changed = True
+
                 known_upsteam_name = None
                 if downstream_file.external_data and 'upstream' in downstream_file.external_data:
                     known_upsteam_name = downstream_file.external_data['upstream']['name']
@@ -586,6 +649,7 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
                     changed = True
 
                 if changed:
+                    downstream_file.external_update = make_aware(datetime.now())
                     downstream_file.save()
 
     for ifile in class_inst.files.filter(file__hash__in=removed):
@@ -601,17 +665,21 @@ def _upstream_sync_class_instance_files(upstream, external_id, class_inst):
         try:
             file = m.File.objects.get(hash=upsteam_info['hash'])
         except ObjectDoesNotExist:
-            with reversion.create_revision():
-                file = m.File.objects.create(
-                    size=upsteam_info['size'],
-                    hash=upsteam_info['hash'],
-                    mime=upsteam_info['mime'],
-                    external_id=upsteam_info['id'],
-                    # Obs: Files are being identified by hash, so there might be ignored IDs
-                    iid=upsteam_info['id'],
-                    external=True,
-                    external_data={'upstream': upsteam_info})
-                logger.info(f"File {file} created")
+            try:
+                with reversion.create_revision():
+                    file = m.File.objects.create(
+                        size=upsteam_info['size'],
+                        hash=upsteam_info['hash'],
+                        mime=upsteam_info['mime'],
+                        external_id=upsteam_info['id'],
+                        # Obs: Files are being identified by hash, so there might be ignored IDs
+                        iid=upsteam_info['id'],
+                        external=True,
+                        external_data={'upstream': upsteam_info})
+            except IntegrityError as e:
+                logger.error(f"Failed to sync the files of class instance {class_inst}")
+                raise e
+            logger.info(f"File {file} created")
 
         if not m.ClassFile.objects.filter(file=file, class_instance=class_inst).exists():
             with reversion.create_revision():
@@ -644,20 +712,48 @@ def sync_enrollment(external_id, class_inst=None):
 def _request_enrollment(external_id):
     r = requests.get(f"http://{settings.CLIPY['host']}/enrollment/{external_id}")
     if r.status_code != 200:
-        raise Exception(f"Unable to fetch enrollment {external_id}")
+        raise NetworkException(f"Unable to fetch enrollment {external_id}")
     return r.json()
 
 
 def _upstream_sync_enrollment(upstream, external_id, class_inst):
     if class_inst is None:
         class_inst = m.ClassInstance.objects.get(external_id=upstream['class_instance_id'])
-    invalid = not all(
-        k in upstream
-        for k in ('id', 'student', 'class_instance', 'attempt', 'student_year', 'statutes',
-                  'attendance', 'attendance_date', 'improvement_grade', 'improvement_grade_date',
-                  'continuous_grade', 'continuous_grade_date', 'recourse_grade', 'recourse_grade_date',
-                  'special_grade', 'special_grade_date', 'approved'))
+    if not all(
+            k in upstream
+            for k in ('id',
+                      'approved', 'attempt',
+                      'attendance', 'attendance_date',
+                      'continuous_grade', 'continuous_grade_date',
+                      'exam_grade', 'exam_grade_date',
+                      'improvement_grade', 'improvement_grade_date',
+                      'special_grade', 'special_grade_date',
+                      'statutes', 'student', 'student_year')):
+        logger.error(f"Invalid upstream enrollment data: {upstream}")
+        return
+
     student_ext_id = upstream['student']
+    attendance = upstream['attendance']
+    attendance_date = upstream['attendance_date']
+    normal_grade = upstream['continuous_grade']
+    normal_grade_date = upstream['continuous_grade_date']
+    recourse_grade = upstream['exam_grade']
+    recourse_grade_date = upstream['exam_grade_date']
+    special_grade = upstream['special_grade']
+    special_grade_date = upstream['special_grade_date']
+    improvement_grade = upstream['improvement_grade']
+    improvement_grade_date = upstream['improvement_grade_date']
+
+    if not (
+            (isinstance(student_ext_id, int) or student_ext_id is None)
+            and (isinstance(normal_grade, int) or normal_grade is None)
+            and (isinstance(attendance, int) or attendance is None)
+            and (isinstance(recourse_grade, int) or recourse_grade is None)
+            and (isinstance(improvement_grade, int) or improvement_grade is None)
+            and (isinstance(special_grade, int) or special_grade is None)):
+        logger.error(f"Invalid upstream enrollment data: {upstream}")
+        return
+
     try:
         student = m.Student.objects.get(external_id=student_ext_id)
     except ObjectDoesNotExist:
@@ -670,32 +766,22 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
             student.save(update_fields=['year'])
 
     grade = 0
-    attendance = upstream['attendance']
-    attendance_date = upstream['attendance_date']
     if attendance_date:
         attendance_date = make_aware(datetime.fromisoformat(attendance_date), is_dst=True)
-    normal_grade = upstream['continuous_grade']
     if normal_grade:
         grade = normal_grade
-    normal_grade_date = upstream['continuous_grade_date']
     if normal_grade_date:
         normal_grade_date = make_aware(datetime.fromisoformat(normal_grade_date), is_dst=True)
-    recourse_grade = upstream['exam_grade']
     if recourse_grade:
         grade = max(grade, recourse_grade)
-    recourse_grade_date = upstream['exam_grade_date']
     if recourse_grade_date:
         recourse_grade_date = make_aware(datetime.fromisoformat(recourse_grade_date), is_dst=True)
-    special_grade = upstream['special_grade']
     if special_grade:
         grade = max(grade, special_grade)
-    special_grade_date = upstream['special_grade_date']
     if special_grade_date:
         special_grade_date = make_aware(datetime.fromisoformat(special_grade_date), is_dst=True)
-    improvement_grade = upstream['improvement_grade']
     if improvement_grade:
         grade = max(grade, improvement_grade)
-    improvement_grade_date = upstream['improvement_grade_date']
     if improvement_grade_date:
         improvement_grade_date = make_aware(datetime.fromisoformat(improvement_grade_date), is_dst=True)
 
@@ -704,6 +790,13 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
         logger.debug(f'Upstream enrollment approval does not match the calculated one (enrollment {external_id}).')
 
     try:
+        # Necessary against enrollments which changed twice upstream between syncs
+        # (eg. enroll (id A) - sync - un-enroll - enroll (id B) - sync)
+        m.Enrollment.objects \
+            .filter(student=student, class_instance=class_inst) \
+            .exclude(external_id=external_id) \
+            .update(external_id=external_id, disappeared=False)
+
         obj = m.Enrollment.objects.get(external_id=external_id)
         changed = False
         with reversion.create_revision():
@@ -720,11 +813,9 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
                 new = locals()[attr]
 
                 if current != new:
-                    grades_changed = True
+                    logger.warning(f"{attr} from {current} to {new} in {obj}.")
                     setattr(obj, attr, new)
                     changed = True
-            if grades_changed:
-                logger.warning(f"Grade changed from {current} to {new} in {obj}.")
 
             if obj.external_data != upstream:
                 obj.external_data = upstream
@@ -734,27 +825,31 @@ def _upstream_sync_enrollment(upstream, external_id, class_inst):
                 obj.save()
 
     except m.Enrollment.DoesNotExist:
-        with reversion.create_revision():
-            obj = m.Enrollment.objects.create(
-                student=student,
-                class_instance=class_inst,
-                attendance=attendance,
-                attendance_date=attendance_date,
-                normal_grade=normal_grade,
-                normal_grade_date=normal_grade_date,
-                recourse_grade=recourse_grade,
-                recourse_grade_date=recourse_grade_date,
-                special_grade=special_grade,
-                special_grade_date=special_grade_date,
-                improvement_grade=improvement_grade,
-                improvement_grade_date=improvement_grade_date,
-                approved=approved,
-                grade=grade,
-                external_id=external_id,
-                frozen=False,
-                external_update=make_aware(datetime.now()),
-                external_data={'upstream': upstream})
-            logger.info(f"Inserted new enrollment {obj}")
+        try:
+            with reversion.create_revision():
+                obj = m.Enrollment.objects.create(
+                    student=student,
+                    class_instance=class_inst,
+                    attendance=attendance,
+                    attendance_date=attendance_date,
+                    normal_grade=normal_grade,
+                    normal_grade_date=normal_grade_date,
+                    recourse_grade=recourse_grade,
+                    recourse_grade_date=recourse_grade_date,
+                    special_grade=special_grade,
+                    special_grade_date=special_grade_date,
+                    improvement_grade=improvement_grade,
+                    improvement_grade_date=improvement_grade_date,
+                    approved=approved,
+                    grade=grade,
+                    external_id=external_id,
+                    frozen=False,
+                    external_update=make_aware(datetime.now()),
+                    external_data={'upstream': upstream})
+        except IntegrityError as e:
+            logger.error(f"Failed to sync the enrollments of class instance {class_inst}")
+            raise e
+        logger.info(f"Inserted new enrollment {obj}")
 
 
 def sync_shift(external_id, class_inst=None, recurse=Recursivity.NONE):
@@ -772,14 +867,17 @@ def sync_shift(external_id, class_inst=None, recurse=Recursivity.NONE):
 def _request_shift_info(external_id):
     r = requests.get(f"http://{settings.CLIPY['host']}/shift/{external_id}")
     if r.status_code != 200:
-        raise Exception(f"Unable to fetch shift {external_id}")
+        raise NetworkException(f"Unable to fetch shift {external_id}")
     return r.json()
 
 
 def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
     invalid = not all(
         k in upstream
-        for k in ('type', 'number', 'class_instance_id', 'restrictions', 'state', 'instances', 'students', 'teachers'))
+        for k in (
+            'type', 'number', 'class_instance_id',
+            'restrictions', 'state', 'instances',
+            'students', 'teachers'))
     if invalid:
         logger.error(f"Invalid upstream shift instance data: {upstream}")
         return
@@ -788,15 +886,9 @@ def _upstream_sync_shift_info(upstream, external_id, class_inst, recurse):
         logger.critical("Consistency error. Shift upstream parent is not the local parent")
         return
 
-    type_abbr = upstream['type'].upper() if 'type' in upstream else None
-    shift_type = None
-    for i, abbr in ctypes.ShiftType.ABBREVIATIONS.items():
-        if type_abbr == abbr:
-            shift_type = i
-            break
-    if shift_type is None:
-        logger.error("Unknown shift type: %s" % type_abbr)
-        return
+    shift_type = upstream['type']
+    if not (isinstance(shift_type, int) or shift_type < ctypes.ShiftType.min() or shift_type > ctypes.ShiftType.max()):
+        logger.error("Unknown shift type: %s" % shift_type)
 
     upstream_details = {'state': upstream['state'], 'restrictions': upstream['restrictions']}
     try:
@@ -915,7 +1007,7 @@ def _upstream_sync_event(upstream, external_id, class_inst):
 
             if class_event.type != upstream['season']:
                 logger.info(f"Event {class_event} season changed")
-                class_event.type = upstream['season']
+                class_event.season = upstream['season']
                 changed = True
 
             if class_event.external_data != upstream:
@@ -958,7 +1050,7 @@ def sync_shift_instance(external_id, shift):
 def _request_shift_instance(external_id):
     r = requests.get(f"http://{settings.CLIPY['host']}/shift_inst/{external_id}")
     if r.status_code != 200:
-        raise Exception(f"Unable to fetch shift instance {external_id}")
+        raise NetworkException(f"Unable to fetch shift instance {external_id}")
     return r.json()
 
 
@@ -972,11 +1064,16 @@ def _upstream_sync_shift_instance(upstream, external_id, shift):
         return
 
     upstream_room = None
-    if upstream['room'] is not None:
+    online = False
+    if (upstream_room_id := upstream['room']) is not None:
         try:
-            upstream_room = m.Room.objects.get(external_id=upstream['room'])
+            upstream_room = m.Room.objects.get(external_id=upstream_room_id)
         except m.Room.DoesNotExist:
-            logger.warning(f"Room {upstream['room']} is missing (shift instance {external_id})")
+            if int(upstream_room_id) in (1665, 1666):
+                # TODO use "online" & rm ^ this ^ awful hardcoding
+                online = True
+            else:
+                logger.warning(f"Room {upstream['room']} is missing (shift instance {external_id})")
 
     upstream_start = upstream['start']
     upstream_end = upstream['end']
@@ -1075,7 +1172,7 @@ def sync_students():
 def _request_students():
     r = requests.get("http://%s/students/" % settings.CLIPY['host'])
     if r.status_code != 200:
-        raise Exception("Unable to fetch students")
+        raise NetworkException("Unable to fetch students")
     return r.json()
 
 
@@ -1101,7 +1198,7 @@ def sync_student(external_id):
 def _request_student(external_id):
     r = requests.get(f"http://{settings.CLIPY['host']}/student/{external_id}")
     if r.status_code != 200:
-        raise Exception("Unable to fetch students")
+        raise NetworkException("Unable to fetch students")
     return r.json()
 
 
@@ -1167,11 +1264,16 @@ def sync_teachers():
 def _request_teachers():
     r = requests.get("http://%s/teachers/" % settings.CLIPY['host'])
     if r.status_code != 200:
-        raise Exception("Unable to fetch teachers")
+        raise NetworkException("Unable to fetch teachers")
     return r.json()
 
 
 def _upstream_sync_teachers(upstream_list):
+    for entry in upstream_list:
+        if not all(k in entry for k in ('id', 'name', 'first_year', 'last_year', 'depts')):
+            logger.error(f"Invalid upstream teacher data: {entry}")
+            return
+
     existing = {teacher.external_id: teacher for teacher in m.Teacher.objects.exclude(external_id=None).all()}
     departments = {
         department.external_id: department
@@ -1249,8 +1351,8 @@ def request_admissions_update():
     _update(f"http://{settings.CLIPY['host']}/update/admissions/")
 
 
-def request_teachers_update():
-    _update(f"http://{settings.CLIPY['host']}/update/teachers/")
+def request_teachers_update(department):
+    _update(f"http://{settings.CLIPY['host']}/update/teachers/{department}")
 
 
 def request_classes_update():
