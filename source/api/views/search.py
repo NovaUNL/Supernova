@@ -35,7 +35,7 @@ mapping = {
     },
     'room': {
         'class': college_search.RoomDocument,
-        'serializer': serializers.college.RoomSerializer,
+        'serializer': serializers.college.SimpleRoomSerializer,
         'fields': ['name', ],
         'private': False
     },
