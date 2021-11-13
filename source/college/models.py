@@ -70,6 +70,10 @@ class PeriodInstance(djm.Model):
 
     class Meta:
         unique_together = ('type', 'year')
+        ordering = ('year', 'type')
+
+    def __str__(self):
+        return f"{self.get_type_display()} - {self.year-1}/{self.year} ({self.date_from} - {self.date_to})"
 
 
 @reversion.register()
@@ -388,7 +392,7 @@ class Class(Importable, CachedEntity):
     extinguished = djm.BooleanField(default=False)
     #: Department that currently lectures this class (Cached attribute)
     department = djm.ForeignKey(Department, on_delete=djm.PROTECT, null=True, related_name='classes')
-    #: URL to this classe's official page
+    #: URL to this class's official page
     url = djm.URLField(max_length=256, null=True, blank=True)
     # Cached
     #: The average grade in this instance
@@ -468,7 +472,10 @@ class ClassInstance(Importable, CachedEntity):
 
     @property
     def short_occasion(self):
-        return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
+        if self.year > 2000:
+            return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 2001}/{self.year - 2000}'
+        else:
+            return f'{ctypes.Period.SHORT_CHOICES[self.period - 1]} {self.year - 1901}/{self.year - 1900}'
 
     def get_absolute_url(self):
         return reverse('college:class_instance', args=[self.id])
