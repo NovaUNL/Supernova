@@ -1,10 +1,12 @@
 from datetime import datetime
 
+from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 from django.core.cache import cache
+from rest_framework.authtoken.models import Token
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied
+from rest_framework.exceptions import ParseError, ValidationError, PermissionDenied, AuthenticationFailed
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +15,48 @@ from rest_framework.generics import get_object_or_404
 from api.serializers import users as serializers
 from api import permissions
 from users import models as users
+
+
+@api_view(['GET'])
+def chat_info(request, chat_id):
+    conversation = get_object_or_404(chat.Conversation.instance_of(*LIVE_CONVERSATIONS), id=chat_id)
+    if not conversation.has_access(request.user):
+        raise PermissionDenied()
+    serialized = serializers.ConversationSerializer(conversation)
+    return Response(serialized.data)
+
+
+class Login(APIView):
+
+    def post(self, request):
+        if not ('username' in request.data
+                and isinstance(request.data['username'], str)
+                and 'password' in request.data
+                and isinstance(request.data['password'], str)):
+            raise ParseError()
+
+        target_user = get_object_or_404(users.User.objects, username=request.data['username'])
+        if target_user.check_password(request.data['password']):
+            token = Token.objects.create(user=target_user)
+            return Response({'token': token.key})
+        else:
+            raise AuthenticationFailed()
+
+class Logout(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request):
+        request.auth.delete()
+        return Response("Success")
+
+
+
+class ValidateToken(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        # DRF does everything by default
+        return Response("Success")
 
 
 class ProfileDetailed(APIView):
