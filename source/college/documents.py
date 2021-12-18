@@ -125,6 +125,8 @@ class FileDocument(Document):
     names = TextField()
 
     def prepare_names(self, instance):
+        if instance.meta is None:
+            instance.analyse()
         names = set(filter(lambda n: n, instance.class_files.values_list('name', flat=True)))
         if len(names):
             return " ".join(names)

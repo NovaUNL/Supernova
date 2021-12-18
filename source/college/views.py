@@ -91,10 +91,10 @@ def department_view(request, department_id):
     # FIXME this could be a single query instead of 5-6
     degrees = map(
         lambda degree: degree[0],
-        m.Course.objects.filter(department=department).order_by('degree').values_list('degree').distinct())
+        m.Course.objects.filter(department=department, active=True).order_by('degree').values_list('degree').distinct())
     courses_by_degree = list(
         map(lambda degree:
-            (Degree.name(degree), m.Course.objects.filter(department=department, degree=degree).all()),
+            (Degree.name(degree), m.Course.objects.filter(department=department, degree=degree, active=True).all()),
             degrees))
 
     context = build_base_context(request)
@@ -102,7 +102,7 @@ def department_view(request, department_id):
     context['title'] = f'Departamento de {department.name}'
     context['department'] = department
     context['courses'] = courses_by_degree
-    context['classes'] = department.classes.filter(extinguished=False).order_by('name').all()
+    context['classes'] = department.classes.exclude(extinguished=True).order_by('name').all()
     # FIXME
     context['teachers'] = department.teachers \
         .filter(shifts__class_instance__year__gt=2015) \
@@ -169,22 +169,34 @@ def student_view(request, student_id):
     else:
         permissions = user.profile_permissions_for(request.user)
     context['profile_user'] = user
-
     context['student'] = student
-
     context['permissions'] = permissions
     if permissions['enrollments_visibility']:
-        context['current_class_instances'] = current_class_instances = m.ClassInstance.objects \
+        today = datetime.today()
+        current_periods = m.PeriodInstance.objects.filter(date_from__lte=today, date_to__gte=today)
+        current_enrollments = m.Enrollment.objects \
+            .filter(student=student, class_instance__period_instance__in=current_periods) \
+            .exclude(disappeared=True)
+        context['current_class_instances'] = m.ClassInstance.objects \
             .select_related('parent') \
             .order_by('parent__name', '-parent__period') \
-            .filter(student=student,
-                    year=settings.COLLEGE_YEAR,
-                    period__gte=settings.COLLEGE_PERIOD)
-        context['past_classes'] = m.Class.objects \
-            .filter(instances__enrollments__student=student) \
-            .exclude(instances__in=current_class_instances) \
+            .filter(enrollments__in=current_enrollments) \
+            .exclude(disappeared=True)
+
+        past_periods = m.PeriodInstance.objects.filter(Q(year__lt=settings.COLLEGE_YEAR) | Q(date_to__lt=today))
+        past_enrollments = m.Enrollment.objects \
+            .filter(student=student, class_instance__period_instance__in=past_periods) \
+            .exclude(disappeared=True)
+        approved_enrollments = past_enrollments.filter(approved=True)
+        context['approved_classes'] = approved_classes = m.Class.objects \
+            .filter(instances__enrollments__in=approved_enrollments) \
+            .exclude(disappeared=True) \
+            .order_by('name')
+        context['unknown_approval_classes'] = m.Class.objects \
+            .filter(instances__enrollments__in=past_enrollments) \
+            .exclude(disappeared=True) \
             .order_by('name') \
-            .distinct('name')
+            .difference(approved_classes)
 
     context['sub_nav'] = [
         {'name': 'Faculdade', 'url': reverse('college:index')},

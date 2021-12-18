@@ -59,6 +59,14 @@ class ShiftType:
             return ShiftType.ABBREVIATIONS[shift_type]
         return ""
 
+    @staticmethod
+    def min():
+        return ShiftType.THEORETICAL
+
+    @staticmethod
+    def max():
+        return ShiftType.PRACTICAL_THEORETICAL_ONLINE
+
 
 class RoomType:
     GENERIC = 1
@@ -116,6 +124,7 @@ class EventSeason:
         (EXAM, 'Epoca de exame'),
         (SPECIAL, 'Epoca especial'),
     )
+
 
 class EventType:
     TEST = 1
@@ -175,6 +184,8 @@ class FileLicense:
     BSD = 4
     CC_BY = 5
     CC_BY_SA = 6
+    CC_BY_NC = 7
+    CC_BY_SA_NC = 8
     GENERIC_PERMISSIVE = 100
 
     CHOICES = (
@@ -185,8 +196,11 @@ class FileLicense:
         (BSD, 'BSD'),
         (CC_BY, 'Creative Commons BY'),
         (CC_BY_SA, 'Creative Commons BY-SA'),
-        (GENERIC_PERMISSIVE, 'Teste'),
+        (CC_BY_NC, 'Creative Commons BY-NC'),
+        (CC_BY_SA_NC, 'Creative Commons BY-SA-NC'),
+        (GENERIC_PERMISSIVE, 'Permissiva genérica'),
     )
+
 
 class FileVisibility:
     PUBLIC = 0

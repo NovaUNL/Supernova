@@ -14,7 +14,8 @@
     <img class="highres avatar" src="{% static 'img/user.svg' %}">
     <div>
       <h1>{{ student.name }}</h1>
-      <h3>{{ student.abbreviation }}, {{ student.number }}{% if student.course %}<a href="{{ student.course.get_absolute_url }}">, {{ student.course.abbreviation }}</a>{% endif %}</h3>
+      <h3>{{ student.abbreviation }}, {{ student.number }}{% if student.course %}
+        <a href="{{ student.course.get_absolute_url }}">, {{ student.course.abbreviation }}</a>{% endif %}</h3>
     </div>
   </div>
   <div class="row padded nowrap">
@@ -31,31 +32,43 @@
         </div>
       </div>
       {% if permissions.enrollments_visibility %}
-        <div class="row">
-          <div class="pane grow">
-            <div class="pane-title"><h2>Inscrições atuais</h2></div>
-            <div class="pane-content">
-              <ul class="entity-list">
-                {% for instance in current_class_instances %}
-                  <li class="entity">
-                    <a href="{{ instance.get_absolute_url }}">{{ instance.parent.name }}</a>
-                    ({{ instance.occasion }})
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
+        <div class="pane grow">
+          <div class="pane-title"><h2>Unidades Curriculares Atuais</h2></div>
+          <div class="pane-content">
+            <ul class="entity-list">
+              {% for instance in current_class_instances %}
+                <li class="entity"><a href="{{ instance.get_absolute_url }}">{{ instance.parent.name }}</a></li>
+              {% endfor %}
+            </ul>
+            {% if not current_class_instances %}
+              <p>Atualmente sem inscrições.</p>
+            {% endif %}
           </div>
+        </div>
+        {% if approved_classes %}
           <div class="pane grow">
-            <div class="pane-title"><h2>Inscrições prévias</h2></div>
+            <div class="pane-title"><h2>Unidades Curriculares Concluídas</h2></div>
             <div class="pane-content">
               <ul class="entity-list">
-                {% for class in past_classes %}
+                {% for class in approved_classes %}
                   <li class="entity"><a href="{{ class.get_absolute_url }}">{{ class.name }}</a></li>
                 {% endfor %}
               </ul>
             </div>
           </div>
-        </div>
+        {% endif %}
+        {% if unknown_approval_classes %}
+          <div class="pane grow">
+            <div class="pane-title"><h2>Unidades Curriculares Assistidas</h2></div>
+            <div class="pane-content">
+              <ul class="entity-list">
+                {% for class in unknown_approval_classes %}
+                  <li class="entity"><a href="{{ class.get_absolute_url }}">{{ class.name }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
       {% else %}
         <div class="pane">
           <div class="pane-title"><h2>Unidades Curriculares</h2></div>
