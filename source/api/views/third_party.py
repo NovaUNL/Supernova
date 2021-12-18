@@ -11,6 +11,12 @@ from scrapper.boinc import boincstats
 
 
 @api_view(['GET'])
+def transportation_day(request):
+    departures = get_transportation_departures(use_cache_alone=True)
+    return Response(departures)
+
+
+@api_view(['GET'])
 def transportation_upcoming(request):
     departures = get_transportation_departures(use_cache_alone=True)
     now = datetime.now()

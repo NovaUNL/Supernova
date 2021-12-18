@@ -50,6 +50,7 @@ urlpatterns = [
     # Services
     path('services/', views.services.ServiceList.as_view(), name="services"),
     path('bars/', views.services.BarList.as_view(), name="services_bars"),
+    path('transportation/day', views.third_party.transportation_day, name="transportation_day"),
     path('transportation/next', views.third_party.transportation_upcoming, name="transportation_upcoming"),
     path('weather/', views.third_party.weather, name="weather"),
     path('weather/chart/', views.third_party.weather_chart, name="weather_chart"),
