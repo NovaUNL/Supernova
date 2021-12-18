@@ -45,20 +45,24 @@ class CanteenSpider(scrapy.Spider):
                         calories = cols[5].text
                         try:
                             sugars = int(float(sugars) * 10)
-                        except ValueError:
+                        except (ValueError, TypeError):
                             sugars = None
 
                         try:
                             fats = int(float(fats) * 10)
-                        except ValueError:
+                        except (ValueError, TypeError):
                             fats = None
 
                         try:
                             proteins = int(float(proteins) * 10)
-                        except ValueError:
+                        except (ValueError, TypeError):
                             proteins = None
 
-                        calories = int(float(calories) * 10)
+                        try:
+                            calories = int(float(calories) * 10)
+                        except (ValueError, TypeError):
+                            calories = None
+
                         cleaned_meal_item_name = re.sub('\(\d{1,2}\)', '', meal_item_name)
                         meal_item_type = meal_item_str_type_to_int(meal_item_type, cleaned_meal_item_name)
 

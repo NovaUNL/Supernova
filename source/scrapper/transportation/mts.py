@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def get_departure_times(timeout=20):
     departure_times = cache.get('mts_departures')
     if departure_times is not None:
-        return departure_times
+        return departure_times, True
     try:
         response = requests.post(
             "https://intranet.mts.pt/api/search",
