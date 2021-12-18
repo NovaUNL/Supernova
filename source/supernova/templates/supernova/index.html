@@ -3,8 +3,6 @@
 {% load misc %}
 
 {% block head %}
-  <script src="{% static 'js/lib/particles.min.js' %}"></script>
-  <script async>particlesJS.load('particles', "{% static 'particles.json' %}");</script>
   <script src="{% static 'js/lib/d3.min.js' %}"></script>
 {% endblock %}
 
@@ -212,7 +210,7 @@
               <img src="{% static 'img/icons/chat.svg' %}" alt="chat" width="64px" height="64px">
             </a>
           {% endif %}
-          {% if signal_url %}
+          {% if matrix_url %}
             <a href="{{ matrix_url }}">
               <img src="{% static 'img/third-party/element.svg' %}" alt="matrix" width="64px" height="64px">
             </a>
@@ -244,9 +242,8 @@
   <img class="main-footer highres" src="{% static 'img/banner.svg' %}">
   <script async src="{% static "services/weather.js" %}"></script>
   <script async>
-      window.addEventListener("load", () => {
-          loadTransportation();
-          loadBOINC();
-      });
+      promptTutorial();
+      loadTransportation();
+      loadBOINC();
   </script>
 {% endblock %}

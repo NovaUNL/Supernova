@@ -10,6 +10,7 @@
   <title>Supernova - {{ title }}</title>
   <script src="{% static 'js/lib/jquery.min.js' %}"></script>
   <script src="{% static 'js/lib/js.cookie.min.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/balloon.min.css' %}"/>
   {% if request.user.is_anonymous %}
     {{ -1 |json_script:"uid" }}
   {% else %}
@@ -25,6 +26,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
   <script src="{% static 'js/script.js' %}"></script>
   {% progressive_web_app_meta %}
+  <link rel="icon" href="{% static 'img/pwa/icon-96.png' %}" type="image/x-icon"/>
   {% block head %}
   {% endblock %}
   {% analytical_head_bottom %}
