@@ -188,7 +188,7 @@ class Enrollment(APIView):
 
     def get(self, request, enrollment_id):
         enrollment = get_object_or_404(college.Enrollment.objects, id=enrollment_id)
-        serializer = serializers.Enrollment(enrollment)
+        serializer = serializers.EnrollmentSerializer(enrollment)
         return Response(serializer.data)
 
 

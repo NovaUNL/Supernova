@@ -107,15 +107,33 @@ class ShiftSerializer(serializers.Serializer):
     url = serializers.CharField(source='get_absolute_url')
 
 
+class EnrollmentSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    class_instance = serializers.PrimaryKeyRelatedField(read_only=True)
+    student = serializers.PrimaryKeyRelatedField(read_only=True)
+    attendance = serializers.BooleanField()
+    attendance_date = serializers.DateField()
+    normal_grade = serializers.IntegerField()
+    normal_grade_date = serializers.DateField()
+    recourse_grade = serializers.IntegerField()
+    recourse_grade_date = serializers.DateField()
+    special_grade = serializers.IntegerField()
+    special_grade_date = serializers.DateField()
+    improvement_grade = serializers.IntegerField()
+    improvement_grade_date = serializers.DateField()
+    approved = serializers.BooleanField()
+    grade = serializers.IntegerField()
+
+
 class ClassInstanceSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     parent = serializers.IntegerField(source='parent_id')
     period = serializers.IntegerField()
-    # period_display = serializers.CharField(source='get_period_display')
     year = serializers.IntegerField()
     information = serializers.JSONField()
     department = serializers.IntegerField(source='department_id')
     shifts = ShiftSerializer(many=True)
+    enrollments = EnrollmentSerializer(many=True)
     avg_grade = serializers.IntegerField()
     url = serializers.CharField(source='get_absolute_url')
 
@@ -142,30 +160,12 @@ class DepartmentSerializer(serializers.Serializer):
     external_id = serializers.IntegerField()
 
 
-class Enrollment(serializers.Serializer):
-    id = serializers.IntegerField()
-    class_instance = serializers.PrimaryKeyRelatedField(read_only=True)
-    student = serializers.PrimaryKeyRelatedField(read_only=True)
-    attendance = serializers.BooleanField()
-    attendance_date = serializers.DateField()
-    normal_grade = serializers.IntegerField()
-    normal_grade_date = serializers.DateField()
-    recourse_grade = serializers.IntegerField()
-    recourse_grade_date = serializers.DateField()
-    special_grade = serializers.IntegerField()
-    special_grade_date = serializers.DateField()
-    improvement_grade = serializers.IntegerField()
-    improvement_grade_date = serializers.DateField()
-    approved = serializers.BooleanField()
-    grade = serializers.IntegerField()
-
-
 class StudentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     abbreviation = serializers.CharField()
     number = serializers.IntegerField()
-    enrollments = Enrollment(many=True)
+    enrollments = EnrollmentSerializer(many=True)
     shifts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     first_year = serializers.IntegerField()
     last_year = serializers.IntegerField()
