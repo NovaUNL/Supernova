@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,7 +12,9 @@ from scrapper.boinc import boincstats
 
 @api_view(['GET'])
 def transportation_upcoming(request):
-    departures = get_transportation_departures()
+    departures = get_transportation_departures(use_cache_alone=True)
+    now = datetime.now()
+    departures = list(filter(lambda departure: departure['datetime'] > now, departures))
     if len(departures) > 5:
         departures = departures[:5]
     return Response(departures)
