@@ -1,5 +1,5 @@
 from django.db import IntegrityError
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -12,7 +12,13 @@ from users import models as users
 
 class GroupList(APIView):
     def get(self, request, format=None):
-        serializer = serializers.GroupTypeSerializer(m.Group.objects.all(), many=True)
+        serializer = serializers.GroupSerializer(m.Group.objects.all(), many=True)
+        return Response(serializer.data)
+
+
+class Group(APIView):
+    def get(self, request, group_id=None):
+        serializer = serializers.RelatedGroupSerializer(m.Group.objects.get(id=group_id))
         return Response(serializer.data)
 
 

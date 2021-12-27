@@ -23,7 +23,7 @@ mapping = {
     },
     'group': {
         'class': groups_search.GroupDocument,
-        'serializer': serializers.groups.GroupMinimalSerializer,
+        'serializer': serializers.groups.GroupSerializer,
         'fields': ['title', 'abbreviation', 'content'],
         'private': False
     },

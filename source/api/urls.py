@@ -41,6 +41,7 @@ urlpatterns = [
     path('chat/<int:user_id>/dmrequest', views.chat.dm_request, name='chat_dm_request'),
     # Groups
     path('groups/', views.groups.GroupList.as_view(), name="groups"),
+    path('group/<int:group_id>/', views.groups.Group.as_view(), name="group_activities"),
     path('group/<str:abbr>/calendar', views.calendar.group_calendar, name='group_calendar'),
     path('group/<str:abbr>/subscribe', views.groups.GroupSubscription.as_view(), name='group_subscription'),
     path('group/<str:abbr>/membership', views.groups.GroupMembershipRequest.as_view(), name='group_membership_request'),

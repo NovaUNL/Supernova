@@ -16,6 +16,7 @@ django-leaflet==0.27
 django-markdownx>=3.0.0,<3.1.0
 django-pwa==1.0.10
 django-polymorphic>=3.0.0,<3.1.0
+django-rest-polymorphic>=0.1.9,<0.2.0
 django-redis>=5.0,<6.0
 django-reversion==4.0.0                    # Major changes in minors? Does not follow semver
 django-simple-captcha==0.5.14             # Breaking updates
