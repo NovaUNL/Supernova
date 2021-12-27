@@ -1,3 +1,4 @@
+from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -5,10 +6,9 @@ from api import serializers
 from news import models as news
 
 
-class NewsList(APIView):
-    def get(self, request, format=None):
-        serializer = serializers.news.NewsMinimalSerializer(news.NewsItem.objects.all(), many=True)
-        return Response(serializer.data)
+class NewsList(generics.ListAPIView):
+    queryset = news.NewsItem.objects.all()
+    serializer_class = serializers.news.NewsSerializer
 
 
 class News(APIView):
